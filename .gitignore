@@ -119,3 +119,13 @@ company_research/*.json
 
 # Brainstorm mockups (superpowers visual companion) - never ship
 .superpowers/
+
+# AI Job Search CN (this fork). Imported JD text, the local job store and its
+# SQLite databases are personal search history; logs/ holds test runs and
+# model-call logs that quote them. De-identified sample JDs for tests belong
+# under tests/fixtures/, never here.
+/data/
+/logs/
+*.db
+*.sqlite
+*.sqlite3

@@ -1,3 +1,5 @@
+> **AI Job Search CN（私有二次开发）**：本仓库基于上游 [MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search) 开发面向中国互联网招聘市场的多 Agent 求职系统。中文文档入口：[docs/cn/README.md](docs/cn/README.md)。以下为上游原始 README。
+
 <p align="center">
   <img src="assets/mascot/pip_flight_loop.gif" alt="Pip, the courier bird" width="200">
 </p>
