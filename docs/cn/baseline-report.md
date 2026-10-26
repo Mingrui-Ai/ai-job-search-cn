@@ -82,7 +82,9 @@
 | `python3` 指向微软商店占位程序（执行后退出码 49、无输出） | 上游工作流说明统一写 `python3 tools/...`，并附 Windows 提示改用 `python` | 本机一律用 `python`（conda 环境）。也可在"设置 → 应用 → 应用执行别名"中关闭 `python3.exe` 别名 |
 | 默认 `python` 是 Anaconda base 3.9.13 | 低于 3.10，上游部分工具无法运行 | 先 `conda activate ai-job-search-cn`；Claude Code / Codex 继承启动它们的终端的 PATH，所以要从已激活的终端启动 |
 | winget 安装 Bun 后只有新终端能找到 `bun` | 旧终端报 `bun: command not found` | 重开终端 |
-| 中文 Windows 控制台默认 cp936（GBK） | Python 打印中文到管道时乱码，cp1252 环境下直接 `UnicodeEncodeError` | CN CLI 强制 UTF-8 输出（`jobsearch_cn/__main__.py`，由测试守护）；也可在用户环境变量中设置 `PYTHONUTF8=1` |
+| 中文 Windows 控制台默认 cp936（GBK） | Python 打印中文到管道时乱码，cp1252 环境下直接 `UnicodeEncodeError` | CN CLI 强制 UTF-8 输出（`jobsearch_cn/cli.py`，由测试守护）；也可在用户环境变量中设置 `PYTHONUTF8=1` |
+| Windows PowerShell 5.1 向外部程序传管道默认用 US-ASCII（2026-10-26 实测：`'广州' \| python` 收到 `b'??'`） | 用管道把中文 JD 或 JSON 传给工具时，中文悄悄变成 `?` | 优先传文件路径；必须用管道时先执行 `$OutputEncoding = [System.Text.UTF8Encoding]::new()`。Git Bash、PowerShell 7 不受影响 |
+| 中文 Windows 上把 Python 的 stdout 重定向到文件，得到 GBK 编码的文件 | 生成的 JSON 不是 UTF-8，CN CLI 会拒绝（退出码 2） | 写文件时显式指定 `encoding="utf-8"`，或设置 `PYTHONUTF8=1` |
 | 创建符号链接需要特权 | 2 个测试跳过 | 预期行为，无需处理 |
 | `core.autocrlf=true` | 未观察到问题 | 不加 `.gitattributes`，避免全仓库换行重写 |
 
