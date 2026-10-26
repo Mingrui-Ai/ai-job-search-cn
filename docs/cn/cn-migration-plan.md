@@ -107,17 +107,19 @@ Codex 能读取这些 Markdown 并按步骤执行，但上述机制不会自动�
 
 ```text
 ai-job-search-cn/
-├── jobsearch_cn/            # CN 核心包（已建骨架）：仅标准库、离线
+├── jobsearch_cn/            # CN 核心包：仅标准库、离线
 │   ├── __init__.py          #   边界约定 + 版本号
-│   └── __main__.py          #   CLI 入口 python -m jobsearch_cn（强制 UTF-8 输出）
-├── tests/test_cn_*.py       # CN 测试（已有 test_cn_package.py 边界守卫）
+│   ├── __main__.py          #   python -m jobsearch_cn 的入口
+│   ├── cli.py               #   命令行：输出 JSON，强制 UTF-8（已有 jd validate）
+│   └── schema.py            #   Job Schema v1 与校验（字段见 job-schema.md）
+├── tests/test_cn_*.py       # CN 测试：边界守卫、Schema 与 CLI
 ├── tests/fixtures/          # 计划：脱敏样例 JD（D6）
 ├── docs/cn/                 # CN 文档（本目录）
 ├── data/  logs/             # 本地数据（含个人档案 data/profile/）与日志：gitignored，按需创建
 └── ……                       # 上游原有结构不变
 ```
 
-第一周计划新增的模块（命名在实现时可调整）：`schema.py`（D2）、`jd_parser.py` 与 CLI 的 `jd` 子命令（D3）、`store.py`（D4）、两个 Agent 的入口（D5）。
+第一周接下来新增的模块（命名在实现时可调整）：`jd_parser.py` 与 `jd parse` 命令（D3）、`store.py`（D4）、两个 Agent 的入口（D5）。
 
 ## 4. 第一周任务（据审计结果细化）
 

@@ -10,6 +10,7 @@
 | --- | --- |
 | [worklog.md](worklog.md) | 工作记录：每一步做了什么、验证结果、遗留问题（按时间倒序） |
 | [cn-migration-plan.md](cn-migration-plan.md) | D1 审计结论、架构决策（ADR）、第一周任务、待决事项、上游同步流程 |
+| [job-schema.md](job-schema.md) | 岗位记录格式（Job Schema v1）：字段说明、出处规则、与上游字段的对应 |
 | [baseline-report.md](baseline-report.md) | Day 0 环境、测试基线、已知问题与 Windows 兼容性记录 |
 | [plan/kickoff-guide-v0.1.md](plan/kickoff-guide-v0.1.md) | 原始文件《AI_Job_Search_CN_项目启动指导_v0.1.md》（存档） |
 | [plan/initial-guidelines.md](plan/initial-guidelines.md) | 原始文件《初步guidelines.md》（存档） |
@@ -41,6 +42,7 @@ python -m unittest discover -s tests -t . -p "test_cn_*.py" -v
 
 # CN CLI
 python -m jobsearch_cn --version
+python -m jobsearch_cn jd validate job.json   # 按 job-schema.md 校验一条岗位记录
 ```
 
 ## 仓库与分支约定
