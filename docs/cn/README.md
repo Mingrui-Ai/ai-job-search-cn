@@ -2,6 +2,8 @@
 
 面向中国互联网招聘市场的多 Agent 求职系统，基于上游 [MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search) 增量开发。MVP 闭环为：**导入中文 JD → 结构化提取 → 个人档案匹配 → 中文简历生成与审核 → 岗位状态保存**。
 
+本项目是本地工具：不托管服务、不提供模型 API，用户使用自己的 Codex 或 Claude Code（自带订阅或 API Key）；工具同时兼容这两个 Agent；个人档案只存在本地。
+
 ## 文档索引
 
 | 文档 | 内容 |
@@ -45,5 +47,6 @@ python -m jobsearch_cn --version
 - `origin` = 私有仓库 `Mingrui-Ai/ai-job-search-cn`；`upstream` = 上游，只拉取（push 已禁用）。
 - `gh` 的默认仓库已固定为私有仓库，`gh issue/pr create` 不会误发到上游公开仓库。
 - 功能开发在 `feat/cn-*` 分支进行，合并回 `master`。提交信息沿用上游的 Conventional Commits，例如 `feat(cn): add Chinese JD import`。
-- 推送 `master` 和开 PR 都会触发 CI（每次约 26 分钟 Actions 额度，见基线报告 §4.3）。
-- 个人数据（`data/`、`logs/`、`documents/` 下的个人文件、求职记录）已被 `.gitignore` 忽略，提交前用 `git status` 确认。
+- 推送 `master` 和开 PR 都会触发 CI。
+- 个人数据已被 `.gitignore` 忽略：`data/`（含个人档案 `data/profile/`）、`logs/`、`documents/` 下的个人文件、求职记录。提交前用 `git status` 确认。
+- 上游 `/setup` 会把个人信息写进被 git 跟踪的 `CLAUDE.md` 等文件，CN 档案方案落地前先不要用它。

@@ -1,7 +1,7 @@
 # CN 迁移方案（D1 审计与架构决策）
 
-> 版本：v0.1（2026-10-26）　｜　输入：[项目启动指导 v0.1](plan/kickoff-guide-v0.1.md)、[初步开发方案](plan/initial-guidelines.md)、上游 `master@e16acee` 代码审计
-> 本文档回答三个问题：上游哪些能力可以直接复用、CN 代码放在哪里、第一周按什么顺序做。凡是与原计划不同的地方都写明了原因。
+> 版本：v0.2（2026-10-26，补记运行时、模型 API、个人档案三项决定）　｜　输入：[项目启动指导 v0.1](plan/kickoff-guide-v0.1.md)、[初步开发方案](plan/initial-guidelines.md)、上游 `master@e16acee` 代码审计
+> 本文档回答三个问题：上游哪些能力可以直接复用、CN 代码放在哪里、第一周按什么顺序做。凡是与原计划不同的地方都写明了原因。项目还在初期，本文档随开发持续修订。
 
 ## 1. 上游审计结论
 
@@ -9,11 +9,11 @@
 
 | 上游部分 | 作用 | CN 处理 |
 | --- | --- | --- |
-| `CLAUDE.md` + `.claude/skills/job-application-assistant/01–09` | 候选人档案与求职方法论（`/setup` 填充，**被 git 跟踪**） | 第 2 周改为中国高校求职者档案；方法论文件带 `framework_version`，改动后用 `check_upstream_updates.py` 跟踪上游 |
+| `CLAUDE.md` + `.claude/skills/job-application-assistant/01–09` | 候选人档案与求职方法论（`/setup` 填充，**被 git 跟踪**） | 第 2 周设计 CN 档案，只存本地 `data/profile/`（ADR-6）；方法论文件带 `framework_version`，改动后用 `check_upstream_updates.py` 跟踪上游 |
 | `.claude/commands/*.md`（12 个） | `/setup` `/scrape` `/rank` `/apply` `/interview` `/outcome` 等工作流 | 保留；按周逐步本地化（见 §1.3） |
 | `.claude/agents/*.md`（3 个） | posting-fetcher、posting-scorer、application-reviewer，只读权限 | 保留，复用 Drafter–Reviewer 结构 |
 | `.claude/settings.json` | allow / ask / deny 三级权限，`git push` 在 ask 列表 | 保留；新增授权必须同时改 `tools/security_guards.py` |
-| `.agents/skills/*-search/` | 6 个门户 CLI（Bun/TS，5 个丹麦 + LinkedIn） | 第 3 周新增合规国内来源时按 `/add-portal` 契约另建；丹麦门户可保留或设 `enabled: false` |
+| `.agents/skills/*-search/` | 6 个门户 CLI（Bun/TS）：4 个丹麦门户（上游默认 `enabled: false`）、LinkedIn、freehire（全球） | 第 3 周新增合规国内来源时按 `/add-portal` 契约另建；丹麦门户保持原样（5 个上游测试按名字引用它们） |
 | `tools/*.py` | 标准库脚本：去重键、状态、防注入闸门、robots 检查、PDF 校验 | 直接复用；CN 侧通过导入或子进程调用，不复制 |
 | `tests/` + `.github/workflows/ci.yml` | 836 个 Python 测试、Python 3.10–3.14 + Windows 矩阵、安全守卫、LaTeX 编译 | 原样保留；CN 测试放 `tests/test_cn_*.py` 自动纳入 |
 | `.github/workflows/upstream-watch.yml` | 每周报告上游新提交（只报告，不合并） | 已在本仓库生效 |
@@ -27,7 +27,7 @@
 
 Codex 能读取这些 Markdown 并按步骤执行，但上述机制不会自动生效，具体等价物需要在 Codex 中实测后再定。上游维护者明确表示不会接受其他运行时的命令移植（`CONTRIBUTING.md`），因此跨运行时的部分只能在本 fork 维护。
 
-**建议**：确定性逻辑全部写成 Python CLI（任何 Agent 都能调用），Agent 层只做薄封装。这样 Codex 和 Claude Code 都能用，运行时可以以后再定（见 §5 待决事项）。
+**已决定**（ADR-7）：工具同时兼容 Codex 和 Claude Code。确定性逻辑全部写成 Python CLI，任何 Agent 都能调用，Agent 层只做薄入口。
 
 ### 1.3 审计中发现的本地化缺口（均已实测）
 
@@ -65,7 +65,26 @@ Codex 能读取这些 Markdown 并按步骤执行，但上述机制不会自动�
 
 **ADR-5　事实与推断分离。** Job Schema 每个结构化字段要能追溯到原文：字段值、原文证据片段、来源类型（原文抽取 / 规则推导 / 模型推断）。未知用 `null`，并保留原始 JD 全文。
 
-**ADR-6　数据本地化。** 导入的 JD、岗位库、SQLite 数据库放在 `data/`，日志放在 `logs/`，两者都已加入 `.gitignore`。测试用的脱敏样例 JD 放在 `tests/fixtures/`。
+**ADR-6　数据本地化，个人档案不入库。** 导入的 JD、岗位库、SQLite 数据库和个人档案（`data/profile/`）都放在 `data/`，日志放在 `logs/`，两者都已加入 `.gitignore`。测试用的脱敏样例 JD 放在 `tests/fixtures/`。
+
+这与上游 `/setup` 有冲突：它会把个人信息写进被 git 跟踪的 `CLAUDE.md`、`job-application-assistant/` 下的档案文件和 `cv/main_example.tex`。第 2 周的 CN 档案方案要改为写入 `data/profile/`。在那之前不要运行 `/setup`，运行过也不要提交这些改动。届时可以加一条 CN 测试，检查这些模板文件仍保留占位符；上游的同类检查只在上游仓库运行，在本 fork 会被跳过。
+
+**ADR-7　同时兼容 Codex 和 Claude Code。**
+
+- 确定性逻辑全部放进 `python -m jobsearch_cn` 子命令并输出 JSON，两个 Agent 用同一套命令。
+- 每个运行时只加薄入口：Claude Code 用 `.claude/skills/cn-*/SKILL.md`，Codex 读 `AGENTS.md`。CN 工作流说明只写一份，另一端引用它，不复制（沿用上游的 thin pointer 做法）。
+- 工作流说明尽量不依赖只有一个运行时才有的能力，例如子 Agent 并行、`AskUserQuestion`；用到时写明另一端的降级做法。
+- 需要实测的点：
+  - Claude Code 是否会读取 `AGENTS.md` 中的 CN 规则——它默认加载的根目录 `CLAUDE.md` 是上游的求职顾问模板；
+  - Codex 能否发现 `.agents/skills/` 以外的技能。如果不能，可评估在 `.agents/skills/` 放一个 `enabled: false` 的薄入口（`/scrape` 会跳过它，只在汇总里列为"已禁用"）。
+
+  D5 接入时在两个 Agent 中各跑一遍。
+
+**ADR-8　不提供模型 API，用户自带。** 本项目是本地工具，不托管服务，也不提供模型 API 或密钥；用户使用自己的 Codex / Claude 订阅或 API Key，模型调用都由用户自己的 Agent 完成。
+
+- Python 工具不直接调用模型 API，也不读取或保存任何密钥（`.env` 已被上游规则忽略）。
+- 将来确需在工具里直接调用模型时，密钥只从用户的环境变量读取，并同时放宽 ADR-4 的离线守卫。
+- 第 3 周的 Token 与耗时记录以各运行时自己的用量数据为来源，具体方式届时再定。
 
 ## 3. 目录结构
 
@@ -77,11 +96,11 @@ ai-job-search-cn/
 ├── tests/test_cn_*.py       # CN 测试（已有 test_cn_package.py 边界守卫）
 ├── tests/fixtures/          # 计划：脱敏样例 JD（D6）
 ├── docs/cn/                 # CN 文档（本目录）
-├── data/  logs/             # 本地数据与日志（gitignored，按需创建）
+├── data/  logs/             # 本地数据（含个人档案 data/profile/）与日志：gitignored，按需创建
 └── ……                       # 上游原有结构不变
 ```
 
-第一周计划新增的模块（命名在实现时可调整）：`schema.py`（D2）、`jd_parser.py` 与 CLI 的 `jd` 子命令（D3）、`store.py`（D4）、`.claude/skills/cn-jd-import/SKILL.md`（D5）。
+第一周计划新增的模块（命名在实现时可调整）：`schema.py`（D2）、`jd_parser.py` 与 CLI 的 `jd` 子命令（D3）、`store.py`（D4）、两个 Agent 的入口（D5）。
 
 ## 4. 第一周任务（据审计结果细化）
 
@@ -90,7 +109,7 @@ ai-job-search-cn/
 | D0–1 | 基线 + 审计 | 私有仓库、[基线报告](baseline-report.md)、本文档、`jobsearch_cn` 骨架 | ✅ 已完成 |
 | D2 | Job Schema | `jobsearch_cn/schema.py` + `docs/cn/job-schema.md`；字段含来源、企业、岗位、城市、薪资、技能、毕业届别、每周天数、实习时长、可转正、发布日期、原始 JD、状态，以及每个字段的证据与来源类型；写明与上游 `seen_jobs.json` 字段的映射 | 用 schema 校验手写样例；未知字段为 `null` |
 | D3 | 离线 JD 导入 | `python -m jobsearch_cn jd import/parse/validate <file.txt>` → JSON；导入前先过 `posting_guard` 并补上中文注入句式（G1） | 下表典型写法全部有测试 |
-| D4–5 | 存储、去重与 Agent 入口 | `data/` 中先存 JSON、再接 SQLite；按"可信岗位 ID > 来源 URL > 规范化内容指纹"去重（G2）；新建 Claude Code 技能并登记权限，在 `AGENTS.md` 中写 Codex 调用说明 | 重复导入不产生重复记录；能按公司/岗位查询 |
+| D4–5 | 存储、去重与 Agent 入口 | `data/` 中先存 JSON、再接 SQLite；按"可信岗位 ID > 来源 URL > 规范化内容指纹"去重（G2）；接入两个 Agent：Claude Code 技能（登记权限）与 `AGENTS.md` 中的 Codex 调用说明 | 重复导入不产生重复记录；Codex 和 Claude Code 都能完成导入与查询 |
 | D6–7 | 测试与发布 | 覆盖中文薪资、实习条件、缺失字段、异常输入（空文件、GBK 编码、超长文本）、重复记录、中文注入；更新文档；打 tag `v0.1.0` | 5 份脱敏 JD 能解析、保存、重复查询；上游测试无新增失败 |
 
 D2/D3 需要覆盖的典型写法（作为测试用例种子）：
@@ -107,13 +126,13 @@ D2/D3 需要覆盖的典型写法（作为测试用例种子）：
 | 学历 | `本科及以上`、`硕士优先` | 最低学历 + 优先学历 |
 | 地点 | `北京/上海`、`base 杭州`、`可远程` | 城市列表 + 远程标记 |
 
-## 5. 待决事项（需要你拍板）
+## 5. 待决事项
 
-1. **求职工作流的运行时**：上游完整工作流（`/setup` → `/apply`）只在 Claude Code 中原生可用；原计划写的是 Codex。建议先把确定性工具写成运行时无关的 CLI，第 3 周多 Agent 编排前再定。
-2. **个人档案放在哪里**：上游把档案写进被 git 跟踪的 `CLAUDE.md` 和技能文件，在私有仓库中可以接受（上游 SETUP.md §8 的建议）；原计划要求"默认本地保存、不推送"。第 2 周开始前决定：沿用上游方式提交到私有仓库，或者把 CN 档案移到 gitignored 的 `data/profile/`。
-3. **中文简历格式**：LaTeX 需要 CJK 支持（ctex/xeCJK 与中文字体），国内校招和实习通常是一页简历；也可以按原计划加 DOCX 导出。第 2 周决定。
-4. **Bun 1.4.4 导致的 CI 红灯**：见 [基线报告 §4.1](baseline-report.md#41-bun-144-导致-4-个门户-cli-类型检查失败上游问题)。
-5. **G1 的修复位置**：一是在 CN 侧封装补充中文句式（不改上游文件，推荐先做）；二是直接扩展 `posting_guard.py` 的 `INSTRUCTION_PATTERNS`。多语言注入检测属于通用健壮性改进，第二种也可以尝试回馈上游。
+10-26 已决定：同时兼容两个 Agent（ADR-7）、用户自带模型 API（ADR-8）、个人档案只存本地（ADR-6）；GitHub Actions 额度暂不考虑。仍待决定：
+
+1. **中文简历格式**：LaTeX 需要 CJK 支持（ctex/xeCJK 与中文字体），国内校招和实习通常是一页简历；也可以按原计划加 DOCX 导出。第 2 周决定。
+2. **Bun 1.4.4 导致的 CI 红灯**：见 [基线报告 §4.1](baseline-report.md#41-bun-144-导致-4-个门户-cli-类型检查失败上游问题)。
+3. **G1 的修复位置**：一是在 CN 侧封装补充中文句式（不改上游文件，推荐先做）；二是直接扩展 `posting_guard.py` 的 `INSTRUCTION_PATTERNS`。多语言注入检测属于通用健壮性改进，第二种也可以尝试回馈上游。
 
 ## 6. 上游同步流程
 
