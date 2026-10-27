@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-10-27 · M1-5：Codex 端实测（第二轮，JD 补全与样例建档通过，PR #15）
+
+**完成与决策**
+
+- 在独立工作树 `D:\06_Projects\ai-job-search-cn-codex`、分支 `codex/m1-5-round2` 执行。会话最初仍绑定原目录；文件系统授权生效后，所有实测命令和写入均显式指定独立工作树。通过 `AGENTS.md` 找到共用的 `jd-import.md`、`profile-setup.md`，使用 `conda run --no-capture-output -n ai-job-search-cn python ...`（Python 3.12.15）。
+- 用 `--data-dir data/m1-5` 导入 `tests/fixtures/cn/jd/shixiseng_intern.txt`，平台为 `shixiseng`：首次 `created`，岗位 ID 为 `job_d3e712c997b0`，`guard.verdict` 为 `clean`，无警告。
+- 完成 `jd-import.md` 第 3 步：先 `jd show`，将规则留空的 `requirements.education` 补为 `{"min":"bachelor","preferred":null}`，出处为 `{"text":"上海 | 本科","method":"agent"}`；原文片段逐字存在于 `raw_text`。整条记录写到 `data/m1-5/inbox/job_d3e712c997b0.json`，`jd validate` 通过，`jd save --data-dir data/m1-5` 返回 `updated`；`id`、`source`、`status`、`guard`、`raw_text` 均保持不变。
+- 再次解析并保存同一 JD 返回 `unchanged`，`jd show` 的记录与补全后的记录完全一致，`jd list` 和本地岗位文件均为 1 条。岗位为上海的数据分析实习生，150–200 元/天、2027 届、每周 5 天、至少 3 个月、本科、可转正；公司、远程条件、发布日期和来源链接仍未知。
+- 将 `tests/fixtures/cn/profile/tech/sources/resume.txt` 原样复制到 `data/m1-5/profile/sources/resume.txt`，按该材料提取 `profile.json` 并写 `notes.md`；没有复制示例 `profile.json` 中额外的偏好。档案包含 2 段教育、1 段实习、1 个项目、6 项技能，以及奖项、证书、语言各 1 条；所有条目的 `source` 都为 `resume.txt`，成果照录原文，技能等级只采用明确的“熟练 / 熟悉 / 了解”。
+- 本轮按用户指定的脱敏样例及继续执行授权建立测试档案。毕业年月取硕士教育结束年月；材料未写的到岗安排、城市、远程与异地意愿、求职方向、薪资和排除项保留 `null` / `[]`，未写成 `source: user`。Docker、PyTorch 没有具体经历依据，`used_in` 留空；项目角色和证书日期也留空。
+
+**验证**
+
+- `python -m jobsearch_cn profile validate --data-dir data/m1-5`：`{"valid":true,"errors":[],"warnings":[]}`；`profile show --data-dir data/m1-5` 的非空联系方式全部为 `***`；复制后的简历与夹具逐字节一致。
+- 初次业务操作基于 `eec5123`；检查前将测试分支快进到 `origin/master@ee3a0ec`（合入 M2-2），在该版本重新校验已保存的 JD、档案，均通过。
+- `python tools/lint_skills.py`：通过（11 skills、12 commands）；`python tools/security_guards.py`：通过；按 `CONTRIBUTING.md` 补跑 `python tools/check_framework_version.py`，通过。
+- `python -m unittest discover -s tests -t .`：共 1005 项，996 项通过、9 项按预期跳过，0 失败、0 错误，耗时 100.573 秒。
+- `git check-ignore -v` 确认岗位、补全 JSON、档案、笔记、简历原件及日志都位于已忽略的 `data/`、`logs/` 下。本 PR 只提交 CN 工作记录和路线图；详细 CLI 输出、检查结果和运行元数据留在本机 `logs/m1-5-round2/`。
+
+**ADR-7 的两个问题**
+
+1. Codex 能否通过 `AGENTS.md` 找到工作流：**能**。本轮从同一入口完成了 JD 补全、保存、去重及样例建档、校验，两个工作流共用原有文档，无需新增门户技能。
+2. Claude Code 是否读取 `AGENTS.md`：沿用[第一轮执行者记录（PR #13）](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/13)的观察：当时的 Claude Code 会话未自动读取，需主动打开；其业务入口为 `cn-jd-import`、`cn-setup` 两个薄技能。本轮核对了薄技能指向共用文档，**没有重新启动 Claude Code 验证其自动加载行为**。
+
+**遗留与下一步**
+
+- M1-5 的第二轮样例业务验收通过，路线图标记完成。本轮没有验证真实个人档案的逐节确认和偏好问答，不能替代 M2-1 的真实简历自用验收。
+- M1-6 仍由用户导入至少 5 份真实 JD 后验收；M1-7 的发布 tag 等其通过后再处理。第一轮历史记录仍见 PR #13。
+
+---
+
 ## 2026-10-27 · Codex CI 复验：本地全量与远端检查通过
 
 **完成与决策**
