@@ -4,6 +4,41 @@
 
 ---
 
+## 2026-10-27 · 第 2 步：规则解析 `jd parse` 与中文防注入（G1）
+
+**完成**
+
+- `jobsearch_cn/jd_parser.py`：按规则从中文 JD 抽取 Job Schema 记录，覆盖薪资（日薪/月薪/K·N薪/万/年薪/时薪/面议）、届别及强弱、每周天数、实习时长、学历、转正、远程、城市、岗位类型、标题、公司、发布/截止日期、技能词表。每个值都带出处，`method` 为 `rule`；读不准就留空。
+- `jobsearch_cn/guard.py`：先复用上游 `tools/posting_guard.py`（隐藏内容、不可见字符、英文注入句式），再补充收窄后的中文注入句式（G1）。只警告不拦截；记录里只存结论和计数，摘录只出现在 `warnings`。
+- `python -m jobsearch_cn jd parse [文件] [--site …] [--url …]`：一行 `===` 分隔多份 JD；退出码 0/1/2；编码支持 UTF-8（含 BOM）、UTF-16 BOM，其他按 GB18030 解码并警告；输入几乎全是 `?` 时拒绝（PowerShell 5.1 ASCII 管道问题）。
+- `tests/fixtures/cn/jd/`：5 份脱敏样例 JD（BOSS 实习、实习僧、牛客校招、公司官网、社招）。
+- `docs/cn/jd-parse.md`：用法、编码、各字段能识别和刻意不识别的写法、补全流程、防注入说明。
+- `tests/test_cn_package.py`：允许导入的上游工具改为显式白名单（目前只有 `posting_guard`），并沿导入链检查这些脚本同样不联网。
+
+**决策**
+
+- G1 采用待决事项中的方案一：在 CN 侧封装，不改上游文件；稳定后再考虑回馈上游。
+- 记录 `id` 由规范化后的 JD 内容决定（忽略空白和换行差异），为第 3 步去重准备。
+- `raw_text` 存清理后的文本；"优先"类学历不算最低要求；不猜年份、不把经历要求读成实习时长。
+
+**验证**
+
+- 本地（conda 环境 `ai-job-search-cn`，Python 3.12.15）：914 个测试全部通过（跳过 9 个），其中 CN 78 个（第 1 步 49 + 第 2 步 29）；`security_guards`、`lint_skills` 通过。
+- 冒烟：`jd parse tests/fixtures/cn/jd/boss_intern.txt --site boss` 输出的记录能通过 `jd validate`。
+
+**发现的问题**
+
+- 默认 PATH 上的 `python` 是 Anaconda base 的 3.9.13，项目要求 3.10+，在那里跑测试会大面积误报失败。本地一律用 `conda activate ai-job-search-cn`；项目用 `unittest`，不需要 pytest。
+
+**遗留问题**
+
+- 城市只认固定列表；实习僧标题行里单独的"本科"等需要 Agent 或用户补全。
+- 4 个丹麦门户的 CI 红灯仍在等上游修复。
+
+**下一步**：第 3 步，本地存储与去重（G2）及两个 Agent 的入口（D4–5），见 [路线图](roadmap.md)。
+
+---
+
 ## 2026-10-26 · 第 1 步：Job Schema 与校验（[PR #1](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/1)）
 
 **完成**
