@@ -10,7 +10,7 @@
 </p>
 
 > [!NOTE]
-> 本仓库基于开源项目 [ai-job-search-dev/ai-job-search](https://github.com/ai-job-search-dev/ai-job-search)（MIT 许可）做中国招聘市场的二次开发，目前处于 **v0.1 开发阶段**（`0.1.0.dev0`），可用的功能还很少，见[当前进度](#当前进度)。上游的英文 README 原样保留在[文末](#上游原版-readme)。
+> 本仓库基于开源项目 [ai-job-search-dev/ai-job-search](https://github.com/ai-job-search-dev/ai-job-search)（MIT 许可）做中国招聘市场的二次开发，目前 v0.1（中文 JD 入库）已实现、v0.2（个人档案与匹配）开发中，见[当前进度](#当前进度)。上游的英文 README 原样保留在[文末](#上游原版-readme)。
 
 ## 这是什么
 
@@ -44,15 +44,17 @@
 
 | 里程碑 | 内容 | 状态 |
 | --- | --- | --- |
-| **v0.1 中文 JD 入库** | 岗位记录格式（Job Schema v1）与 `jd validate` | ✅ [PR #1](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/1) |
-| | `jd parse` 规则抽取、中文防注入、5 份脱敏样例 JD | ✅ [PR #2](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/2) |
-| | 本地存储与去重，Codex / Claude Code 入口 | ⏳ 下一步 |
-| | 测试补强，发布 `v0.1.0` | 待开始 |
-| **v0.2 档案、匹配与简历** | 本地个人档案、硬性条件过滤、可解释评分、一页中文简历、打招呼语 | 计划中 |
-| **v0.3 编排与数据源** | 多 Agent 编排、耗时与 Token 记录、单链接读取、合规的公司官网和招聘系统 | 计划中 |
-| **v0.4 看板与发布** | 求职看板、投递跟进、脱敏演示、技术文档 | 计划中 |
+| **M1 · v0.1 中文 JD 入库** | Job Schema 与出处校验、规则解析、中文防注入、本地岗位库与去重、两个 Agent 的入口、验收测试；Codex 端实测通过 | ✅ 已实现（PR #1–#5、#13、#15），自用验收后发布 `v0.1.0` |
+| **M2 · v0.2 个人档案与可解释匹配** | 本地个人档案与建档流程、硬性条件过滤 | ✅ 已完成（PR #8、#11、#12、#17） |
+| | 技能词表外置、按求职方向分组；可解释评分 | ⏳ 进行中 |
+| **M3 · v0.3** | 中文简历与打招呼语 | 计划中 |
+| **M4 · v0.4** | 投递记录、跟进与看板 | 计划中 |
+| **M5 · v0.5** | 面试准备 | 计划中 |
+| **M6 · v0.6** | 岗位发现：单链接与合规来源 | 计划中 |
+| **M7 · v0.7** | 一键编排与可观测 | 计划中 |
+| **M8 · v1.0** | 开源发布 | 计划中 |
 
-测试：914 个通过（其中 CN 78 个），CI 覆盖 Python 3.10–3.14 和 Windows。完整计划见[路线图](docs/cn/roadmap.md)，每一步的过程和验证结果见[工作记录](docs/cn/worklog.md)。
+测试：1009 个（跳过 9 个）全部通过，CI 覆盖 Python 3.10–3.14 和 Windows。目标和每个里程碑的完成标准见[总体规划](docs/cn/master-plan.md)。完整计划见[路线图](docs/cn/roadmap.md)，每一步的过程和验证结果见[工作记录](docs/cn/worklog.md)。
 
 ## 现在能用什么
 
@@ -160,7 +162,7 @@ python -m jobsearch_cn --version
 python -m jobsearch_cn jd parse tests/fixtures/cn/jd/boss_intern.txt --site boss
 ```
 
-想解析自己的 JD：把 JD 文本存成一个 `.txt` 文件（多份用一行 `===` 隔开），把文件路径传给 `jd parse`。也可以直接在 Codex 或 Claude Code 里让它运行这条命令；专门的导入入口会在 v0.1 的第 3 步提供。
+想解析自己的 JD：把 JD 文本存成一个 `.txt` 文件（多份用一行 `===` 隔开），把文件路径传给 `jd parse`。更方便的做法是直接把 JD 粘贴给 Agent：Claude Code 用 `cn-jd-import` 技能，Codex 按 `AGENTS.md` 找到同一份[导入流程](docs/cn/jd-import.md)，会帮你解析、补全、校验并保存到本地岗位库（`jd list`、`jd show` 查询）。
 
 **Windows 用户注意**：
 
@@ -169,7 +171,7 @@ python -m jobsearch_cn jd parse tests/fixtures/cn/jd/boss_intern.txt --site boss
 - 用 conda 时，先激活环境再启动 Codex / Claude Code，它们会继承终端的 Python。
 
 > [!WARNING]
-> **暂时不要运行上游的 `/setup`。** 它会把你的姓名、联系方式、工作经历写进 `CLAUDE.md` 等**被 git 跟踪**的文件。CN 版个人档案会存放在 `data/profile/`（不入库），在 v0.2 提供。
+> **暂时不要运行上游的 `/setup`。** 它会把你的姓名、联系方式、工作经历写进 `CLAUDE.md` 等**被 git 跟踪**的文件。请改用 CN 版建档：Claude Code 用 `cn-setup` 技能，Codex 按 `AGENTS.md` 找到[建档流程](docs/cn/profile-setup.md)，档案只存在本地的 `data/profile/`（不入库）。建好后可以用 `python -m jobsearch_cn match filter <岗位id>` 按硬性条件过滤岗位（[说明](docs/cn/match.md)）。
 
 ## 数据来源与合规
 
