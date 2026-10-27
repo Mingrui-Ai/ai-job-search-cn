@@ -48,10 +48,10 @@
     - 字段先全部保留，因为都是可选的；
     - 技能分四档可以；
     - 排除关键词只匹配标题和公司名，匹配正文容易误伤，例如正文里出现"不是销售岗"也会被排除。
-  - **D6 联系方式的存放**：设计稿把 `contact` 放在 `profile.json` 里，只在命令输出时隐去。问题是 Agent 匹配和起草时会整份读取 `profile.json`，联系方式就进了模型请求。规划者建议改为单独的 `data/profile/contact.json`：Agent 的工作流不读它，只在本地生成简历文件时填入。开源后，这对其他同学也是更安全的默认做法。**需要用户决定。**
+  - **D6 联系方式的存放**：✅ 2026-10-27 用户决定按设计稿，`contact` 留在 `profile.json` 里。保留设计稿已有的防护：命令输出默认隐去 `contact`，日志、报告和 Agent 的汇总都不复制它。
   - **D4 SQLite 何时接入**：规划者倾向 M2 继续用 JSON 文件，匹配结果按岗位存一份；到 M4 投递记录需要跨表查询时再接。
 - [ ] **M2-1** `执行` 档案格式与校验（进行中，`feat/cn-profile`）
-  - `jobsearch_cn/profile.py`、`profile validate`；字段按设计稿，D6 决定后调整 `contact`；
+  - `jobsearch_cn/profile.py`、`profile validate`；字段按设计稿；
   - 沿用 Job Schema 的约定：所有字段必须出现、不认识的字段报错、文档示例由测试校验；
   - 补上设计稿里没有的一项：在 `tests/fixtures/cn/profile/` 放 2 份脱敏示例档案，一份技术方向、一份非技术方向。后面 M2-4、M2-5 的测试都要用。
   - 设计稿 §7 的两条隐私测试：上游模板仍然是占位符；`data/profile/` 被 git 忽略。
