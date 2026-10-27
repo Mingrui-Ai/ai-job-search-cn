@@ -42,7 +42,7 @@ Codex 能读取这些 Markdown 并按步骤执行，但上述机制不会自动�
 
 ## 2. 架构决策
 
-**ADR-1　增量改造，边界清晰。** 上游文件尽量不动，CN 代码集中在新目录：`jobsearch_cn/`、`tests/test_cn_*.py`、`docs/cn/`。目前只改了三个上游文件，都是末尾或顶部的追加：`AGENTS.md`（CN 规则段落）、`README.md`（顶部一行说明）、`.gitignore`（CN 数据目录）。
+**ADR-1　增量改造，边界清晰。** 上游文件尽量不动，CN 代码集中在新目录：`jobsearch_cn/`、`tests/test_cn_*.py`、`docs/cn/`。目前只改了三个上游文件，都是末尾或顶部的追加：`AGENTS.md`（CN 规则段落）、`README.md`（顶部的中文项目介绍；上游原文一字不改，整体收进末尾的 `<details>` 折叠块，上游的 README 测试照常通过、同步上游时不易冲突）、`.gitignore`（CN 数据目录）。
 
 **ADR-2　Python 负责解析/规则/存储，TS/Bun 只用于数据源适配。** 这与《项目启动指导》一致，但与《初步开发方案》中 `cn-jd-import/cli/src/*.ts` 的设想不同。理由：
 
