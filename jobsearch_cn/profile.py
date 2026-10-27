@@ -35,7 +35,7 @@ AVAILABILITY_KEYS = ("start_date", "days_per_week", "months", "cities", "remote_
 TARGET_KEYS = ("employment_types", "roles", "industries", "salary_min")
 SALARY_MIN_KEYS = ("amount", "unit")
 SKILL_KEYS = ("name", "level", "used_in", "source")
-EXPERIENCE_KEYS = ("id", "type", "org", "role", "start", "end", "bullets", "source")
+EXPERIENCE_KEYS = ("id", "type", "name", "org", "role", "start", "end", "bullets", "source")
 AWARD_KEYS = ("name", "date", "source")
 CERTIFICATE_KEYS = ("name", "detail", "date", "source")
 LANGUAGE_KEYS = ("name", "level", "source")
@@ -117,8 +117,9 @@ def validate(profile, sources=None) -> list[str]:
         else:
             experience_ids.add(item_id)
         _check_enum(item.get("type"), EXPERIENCE_TYPES, f"{where}.type", errors, nullable=False)
-        _check_text(item.get("org"), f"{where}.org", errors)
-        _check_text(item.get("role"), f"{where}.role", errors)
+        # name: the project, contest or topic; org: where; role: the candidate's position.
+        for key in ("name", "org", "role"):
+            _check_text(item.get(key), f"{where}.{key}", errors)
         check.period(item, where)
         check.texts(item.get("bullets"), f"{where}.bullets", max_length=MAX_BULLET)
         check.source(item, where)
