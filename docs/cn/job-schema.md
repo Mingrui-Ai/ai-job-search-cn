@@ -106,7 +106,7 @@ python -m jobsearch_cn jd validate job.json
 | `guard` | 对象或 null | 防注入检查的结果，未检查时为 null |
 | `guard.verdict` | 枚举 | `clean` 未发现问题，`warn` 有需要人工查看的发现 |
 | `guard.counts` | 对象 | 各类发现的数量；只存数量，不存原文摘录 |
-| `raw_text` | 字符串 | JD 原文，最长 50000 字；一条记录只放一份 JD |
+| `raw_text` | 字符串 | JD 原文，最长 50000 字；一条记录只放一份 JD。由 `jd parse` 生成时，是经过防注入检查清理后的文本（去掉隐藏和不可见字符、合并多余空白） |
 
 文本字段和列表中的每一项最长 200 字；列表中不能有重复项（比较时忽略大小写和全角/半角差异）。
 

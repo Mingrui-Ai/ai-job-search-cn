@@ -111,23 +111,25 @@ ai-job-search-cn/
 │   ├── __init__.py          #   边界约定 + 版本号
 │   ├── __main__.py          #   python -m jobsearch_cn 的入口
 │   ├── cli.py               #   命令行：输出 JSON，强制 UTF-8（已有 jd validate）
-│   └── schema.py            #   Job Schema v1 与校验（字段见 job-schema.md）
+│   ├── schema.py            #   Job Schema v1 与校验（字段见 job-schema.md）
+│   ├── jd_parser.py         #   规则抽取（jd parse，见 jd-parse.md）
+│   └── guard.py             #   防注入：上游 posting_guard + 中文句式（G1）
 ├── tests/test_cn_*.py       # CN 测试：边界守卫、Schema 与 CLI
-├── tests/fixtures/          # 计划：脱敏样例 JD（D6）
+├── tests/fixtures/cn/jd/    # 5 份脱敏样例 JD
 ├── docs/cn/                 # CN 文档（本目录）
 ├── data/  logs/             # 本地数据（含个人档案 data/profile/）与日志：gitignored，按需创建
 └── ……                       # 上游原有结构不变
 ```
 
-第一周接下来新增的模块（命名在实现时可调整）：`jd_parser.py` 与 `jd parse` 命令（D3）、`store.py`（D4）、两个 Agent 的入口（D5）。
+第一周接下来新增的模块（命名在实现时可调整）：`store.py`（D4）、两个 Agent 的入口（D5）。完整计划见 [路线图](roadmap.md)。
 
 ## 4. 第一周任务（据审计结果细化）
 
 | 日 | 任务 | 交付物 | 验收 |
 | --- | --- | --- | --- |
 | D0–1 | 基线 + 审计 | 私有仓库、[基线报告](baseline-report.md)、本文档、`jobsearch_cn` 骨架 | ✅ 已完成 |
-| D2 | Job Schema | `jobsearch_cn/schema.py`、`jd validate` 命令、`docs/cn/job-schema.md`；字段含来源、企业、岗位、城市、薪资、技能、毕业届别、每周天数、实习时长、可转正、发布日期、原始 JD、状态，以及每个字段的出处与获取方式；写明与上游 `seen_jobs.json` 字段的映射 | 文档示例通过校验；没有出处、或出处不在原文中的值被拒收 |
-| D3 | 离线 JD 解析 | `python -m jobsearch_cn jd parse <文件或标准输入>` → JSON，支持一次粘贴多份 JD；解析前先过 `posting_guard`，并补上中文注入句式（G1） | 下表典型写法全部有测试 |
+| D2 | Job Schema | `jobsearch_cn/schema.py`、`jd validate` 命令、`docs/cn/job-schema.md`；字段含来源、企业、岗位、城市、薪资、技能、毕业届别、每周天数、实习时长、可转正、发布日期、原始 JD、状态，以及每个字段的出处与获取方式；写明与上游 `seen_jobs.json` 字段的映射 | 文档示例通过校验；没有出处、或出处不在原文中的值被拒收；✅ 已完成（PR #1） |
+| D3 | 离线 JD 解析 | `python -m jobsearch_cn jd parse <文件或标准输入>` → JSON，支持一次粘贴多份 JD；解析前先过 `posting_guard`，并补上中文注入句式（G1） | 下表典型写法全部有测试；✅ 已完成（PR #2） |
 | D4–5 | 存储、去重与 Agent 入口 | `data/` 中先存 JSON、再接 SQLite；按"可信岗位 ID > 来源 URL > 规范化内容指纹"去重（G2）；接入两个 Agent：Claude Code 技能（登记权限）与 `AGENTS.md` 中的 Codex 调用说明 | 重复导入不产生重复记录；Codex 和 Claude Code 都能完成导入与查询 |
 | D6–7 | 测试与发布 | 覆盖中文薪资、实习条件、缺失字段、异常输入（空文件、GBK 编码、超长文本）、重复记录、中文注入；更新文档；打 tag `v0.1.0` | 5 份脱敏 JD 能解析、保存、重复查询；上游测试无新增失败 |
 
@@ -151,7 +153,7 @@ D2/D3 需要覆盖的典型写法（作为测试用例种子）：
 
 1. **中文简历格式**：LaTeX 需要 CJK 支持（ctex/xeCJK 与中文字体），国内校招和实习通常是一页简历；也可以按原计划加 DOCX 导出。第 2 周决定。
 2. **Bun 1.4.4 导致的 CI 红灯**：见 [基线报告 §4.1](baseline-report.md#41-bun-144-导致-4-个门户-cli-类型检查失败上游问题)。
-3. **G1 的修复位置**：一是在 CN 侧封装补充中文句式（不改上游文件，推荐先做）；二是直接扩展 `posting_guard.py` 的 `INSTRUCTION_PATTERNS`。多语言注入检测属于通用健壮性改进，第二种也可以尝试回馈上游。
+3. ~~**G1 的修复位置**~~（10-27 已定：先在 CN 侧封装，见 `jobsearch_cn/guard.py`）：一是在 CN 侧封装补充中文句式（不改上游文件，推荐先做）；二是直接扩展 `posting_guard.py` 的 `INSTRUCTION_PATTERNS`。多语言注入检测属于通用健壮性改进，第二种也可以尝试回馈上游。
 
 ## 6. 上游同步流程
 

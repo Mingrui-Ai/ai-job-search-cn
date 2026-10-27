@@ -43,6 +43,11 @@ NETWORK_MODULES = (
     "webbrowser",
 )
 
+# Upstream tools/ scripts the package may import. They are stdlib-only by the
+# upstream convention, so reusing one adds code, not a dependency. Name each
+# one: a new entry is a reviewed decision, like everything else in this file.
+UPSTREAM_TOOLS = {"posting_guard"}
+
 
 def package_imports():
     """Yield (relative path, line, dotted module) for every import in the package."""
@@ -69,13 +74,31 @@ class PackageImports(unittest.TestCase):
         self.assertTrue((PACKAGE / "__init__.py").is_file(), "sanity: the package moved")
 
     def test_standard_library_only(self):
-        allowed = set(sys.stdlib_module_names) | {"jobsearch_cn"}
+        allowed = set(sys.stdlib_module_names) | {"jobsearch_cn"} | UPSTREAM_TOOLS
         offenders = [
             f"{rel}:{line} imports {name}"
             for rel, line, name in package_imports()
             if name.split(".")[0] not in allowed
         ]
         self.assertEqual(offenders, [], "jobsearch_cn must stay standard-library only")
+
+    def test_allowed_upstream_tools_exist_and_stay_offline(self):
+        # Follow imports between tools/ scripts (posting_guard imports page_decode),
+        # so the whole chain the package pulls in is held to the same rule.
+        pending, checked = sorted(UPSTREAM_TOOLS), set()
+        while pending:
+            name = pending.pop()
+            if name in checked:
+                continue
+            checked.add(name)
+            path = REPO / "tools" / f"{name}.py"
+            self.assertTrue(path.is_file(), f"tools/{name}.py moved or was removed upstream")
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            imported = [alias.name for node in ast.walk(tree) if isinstance(node, ast.Import) for alias in node.names]
+            imported += [node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom) and node.module]
+            self.assertEqual([m for m in imported if is_network_module(m)], [], f"tools/{name}.py went online")
+            pending += [m for m in imported if (REPO / "tools" / f"{m}.py").is_file()]
+        self.assertIn("page_decode", checked, "sanity: the walk follows imports between tools/ scripts")
 
     def test_no_network_modules(self):
         offenders = [
