@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 
-from jobsearch_cn import __version__, jd_parser, profile, schema, store
+from jobsearch_cn import __version__, jd_parser, match, profile, schema, store
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -233,6 +233,26 @@ def cmd_profile_show(args) -> int:
     return 0
 
 
+def cmd_match_filter(args) -> int:
+    job_store = _store(args)
+    try:
+        job = job_store.get(args.id)
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
+    if job is None:
+        _emit({"error": f"no stored job {args.id}"}, sys.stderr)
+        return 1
+    path = Path(args.profile) if args.profile else store.data_dir(args.data_dir) / "profile" / "profile.json"
+    data = _load_profile(path)
+    # Structure only: whether the source files are still there does not change a filter result.
+    errors = profile.validate(data)
+    if errors:
+        _emit({"error": "the profile is invalid; run profile validate", "errors": errors}, sys.stderr)
+        return 1
+    _emit(match.filter_job(job, data))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m jobsearch_cn",
@@ -309,6 +329,17 @@ def build_parser() -> argparse.ArgumentParser:
     prof_show.add_argument("file", nargs="?", help="档案文件；默认为 <数据目录>/profile/profile.json")
     prof_show.add_argument("--contact", action="store_true", help="显示联系方式（只在写简历时需要）")
     prof_show.set_defaults(handler=cmd_profile_show)
+
+    match_parser = commands.add_parser("match", help="岗位与个人档案的匹配", description="岗位与个人档案的匹配")
+    match_parser.set_defaults(help_parser=match_parser)
+    match_commands = match_parser.add_subparsers(dest="match_command", metavar="<match-command>")
+    match_filter = match_commands.add_parser(
+        "filter", parents=[stored], help="硬性条件过滤：逐项给出符合 / 冲突 / 未知",
+        description="按 docs/cn/match.md 用个人档案过滤一个已保存的岗位，输出每项条件的结论和依据。结果不保存。",
+    )
+    match_filter.add_argument("id", help="岗位 id，例如 job_9f4694691d57")
+    match_filter.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    match_filter.set_defaults(handler=cmd_match_filter)
     return parser
 
 
