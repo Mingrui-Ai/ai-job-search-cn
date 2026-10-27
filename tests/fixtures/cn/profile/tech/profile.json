@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contact": {"name": "李明", "phone": "13900000001", "email": "liming@example.com", "github": "github.com/example-liming", "website": null},
+  "contact": {"name": "李明", "phone": "13800000000", "email": "liming@example.com", "github": "github.com/example", "website": null},
   "graduation": {"year": 2027, "month": 6},
   "education": [
     {"level": "master", "school": "示例理工大学", "major": "计算机科学与技术", "start": "2025-09", "end": "2027-06",

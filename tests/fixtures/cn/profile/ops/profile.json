@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contact": {"name": "王芳", "phone": "13900000002", "email": "wangfang@example.com", "github": null, "website": null},
+  "contact": {"name": "王芳", "phone": "13800000000", "email": "wangfang@example.com", "github": null, "website": null},
   "graduation": {"year": 2027, "month": 6},
   "education": [
     {"level": "bachelor", "school": "示例财经大学", "major": "市场营销", "start": "2023-09", "end": "2027-06",

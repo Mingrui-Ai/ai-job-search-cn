@@ -203,6 +203,25 @@ class Fixtures(unittest.TestCase):
                 self.assertEqual(proc.returncode, 0, proc.stdout.decode("utf-8"))
                 self.assertEqual(json.loads(proc.stdout)["warnings"], [])
 
+    def test_contact_details_are_obviously_fake(self):
+        for directory in sorted(FIXTURES.iterdir()):
+            contact = json.loads((directory / "profile.json").read_text(encoding="utf-8"))["contact"]
+            with self.subTest(profile=directory.name):
+                self.assertEqual(contact["phone"], "13800000000")
+                self.assertTrue(contact["email"].endswith("@example.com"), contact["email"])
+
+    def test_profile_show_hides_their_contact_details(self):
+        for directory in sorted(FIXTURES.iterdir()):
+            contact = json.loads((directory / "profile.json").read_text(encoding="utf-8"))["contact"]
+            with self.subTest(profile=directory.name), tempfile.TemporaryDirectory() as tmp:
+                shutil.copytree(directory, Path(tmp) / "profile")
+                shown = run_cli("profile", "show", data_dir=tmp).stdout.decode("utf-8")
+                for value in contact.values():
+                    if value is not None:
+                        self.assertNotIn(value, shown)
+                self.assertIn(contact["phone"], run_cli("profile", "show", "--contact", data_dir=tmp)
+                              .stdout.decode("utf-8"))
+
     def test_every_fact_from_the_resume_is_in_the_resume(self):
         # The fixtures model the cn-setup rule: nothing beyond the source.
         for directory in sorted(FIXTURES.iterdir()):
