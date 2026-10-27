@@ -4,6 +4,45 @@
 
 ---
 
+## 2026-10-27 · 第 3 步：本地岗位库、去重（G2）与两个 Agent 的入口
+
+**完成**
+
+- `jobsearch_cn/store.py`：每条记录一个 `data/jobs/<id>.json`，原子写入；`--data-dir` 或环境变量 `JOBSEARCH_CN_DATA_DIR` 可换位置。
+- 去重：先比内容指纹（`id`），再比规范化后的来源链接（忽略 http/https、大小写、默认端口、末尾斜杠、`utm_*`/`ka`/`spm` 等跟踪参数和参数顺序）。
+- 合并规则：同一份 JD 逐字段合并，新值覆盖、空值不抹掉旧值，用户填写的值只被用户值覆盖；同一链接的 JD 改过文字时用新内容替换，保留原 `id`、状态和首次导入时间；状态只由 `jd status` 修改。
+- CLI：`jd save`（接受单条记录或 `jd parse` 的输出，任何一条无效就一条都不存）、`jd list [--status]`、`jd show`、`jd status`；`jd parse --save` 一步完成解析和保存，避开 PowerShell 5.1 管道问题。
+- `docs/cn/jd-import.md`：两个 Agent 共用的唯一工作流（解析、补全、校验、保存、查询、去重说明）。
+- Claude Code：`.claude/skills/cn-jd-import/SKILL.md`，只是指向该文档的薄入口；授权 `Bash(python -m jobsearch_cn jd:*)`，同时登记在 `.claude/settings.json`、`ALLOWED_PERMISSIONS` 和 `ALLOWED_SKILL_TOOLS`。
+- Codex：`AGENTS.md` CN 段落加一行指向同一文档；顺带删掉"posting_guard 只识别英文"这条已过时的提醒。
+- `tests/test_cn_store.py`（去重、合并、链接规范化、文件安全、CLI）和 `tests/test_cn_agent_entry.py`（两端入口指向同一文档、文档里的每条命令都存在、授权在三处一致）。
+
+**决策**
+
+- 去重顺序与原计划不同：原计划是"可信岗位 ID > URL > 内容指纹"。Schema v1 没有门户岗位 ID 字段，这一级等 v0.3 再加；内容指纹排在 URL 前，因为它表示原文完全相同，合并最安全。
+- SQLite 推迟到 v0.2：JSON 文件对现在的规模足够，也方便用户直接查看；等匹配筛选需要查询时再接到同一套接口后面。
+- 只授权 `jd` 命令组，不授权整个 `python -m jobsearch_cn`。
+
+**验证**
+
+- 本地 Python 3.12：941 个测试全部通过（跳过 9 个），其中 CN 105 个；`security_guards`、`lint_skills` 通过。
+- 变异测试：分别关掉"用户值不被覆盖""按链接去重""空值不抹掉旧值"，每次都有测试失败。
+- 端到端（Claude Code 按 jd-import.md 实际执行）：解析并保存实习僧样例 → Agent 补全学历（出处"上海 | 本科"）→ `validate` 通过、`save` 得到 `updated` → 重新解析得到 `unchanged`，补全仍在 → 改用原文没有的出处"本科及以上"时被 `validate` 拒绝。
+
+**发现的问题**
+
+- Git Bash 的 `/tmp/...` 路径 Windows 版 Python 读不到；Agent 在 Windows 上调用 CLI 时应使用 Windows 路径或仓库内的相对路径（工作流已统一用 `data/inbox/`）。
+- 本步进行中，工作区的 `README.md` 出现了与本步无关的未提交改动（中文首页），没有放进本 PR。
+
+**遗留问题**
+
+- ADR-7 的 Codex 端还没实测：Codex 能否按 `AGENTS.md` 找到并完成这个工作流。
+- Claude Code 是否会读 `AGENTS.md` 已不影响本工作流（它走技能入口），但仍待确认。
+
+**下一步**：第 4 步，测试补强与 `v0.1.0`，先做 Codex 端实测。
+
+---
+
 ## 2026-10-27 · 第 2 步：规则解析 `jd parse` 与中文防注入（G1）
 
 **完成**

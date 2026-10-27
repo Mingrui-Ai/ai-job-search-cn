@@ -42,7 +42,7 @@ Codex 能读取这些 Markdown 并按步骤执行，但上述机制不会自动�
 
 ## 2. 架构决策
 
-**ADR-1　增量改造，边界清晰。** 上游文件尽量不动，CN 代码集中在新目录：`jobsearch_cn/`、`tests/test_cn_*.py`、`docs/cn/`。目前只改了三个上游文件，都是末尾或顶部的追加：`AGENTS.md`（CN 规则段落）、`README.md`（顶部一行说明）、`.gitignore`（CN 数据目录）。
+**ADR-1　增量改造，边界清晰。** 上游文件尽量不动，CN 代码集中在新目录：`jobsearch_cn/`、`tests/test_cn_*.py`、`docs/cn/`。目前只改了三个上游文件，都是末尾或顶部的追加：`AGENTS.md`（CN 规则段落）、`README.md`（顶部的中文项目介绍；上游原文一字不改，整体收进末尾的 `<details>` 折叠块，上游的 README 测试照常通过、同步上游时不易冲突）、`.gitignore`（CN 数据目录）。
 
 **ADR-2　Python 负责解析/规则/存储，TS/Bun 只用于数据源适配。** 这与《项目启动指导》一致，但与《初步开发方案》中 `cn-jd-import/cli/src/*.ts` 的设想不同。理由：
 
@@ -113,6 +113,7 @@ ai-job-search-cn/
 │   ├── cli.py               #   命令行：输出 JSON，强制 UTF-8（已有 jd validate）
 │   ├── schema.py            #   Job Schema v1 与校验（字段见 job-schema.md）
 │   ├── jd_parser.py         #   规则抽取（jd parse，见 jd-parse.md）
+│   ├── store.py             #   本地岗位库与去重（jd save/list/show/status，见 jd-import.md）
 │   └── guard.py             #   防注入：上游 posting_guard + 中文句式（G1）
 ├── tests/test_cn_*.py       # CN 测试：边界守卫、Schema 与 CLI
 ├── tests/fixtures/cn/jd/    # 5 份脱敏样例 JD
@@ -121,7 +122,7 @@ ai-job-search-cn/
 └── ……                       # 上游原有结构不变
 ```
 
-第一周接下来新增的模块（命名在实现时可调整）：`store.py`（D4）、两个 Agent 的入口（D5）。完整计划见 [路线图](roadmap.md)。
+两个 Agent 的入口：`.claude/skills/cn-jd-import/SKILL.md`（Claude Code）和 `AGENTS.md` 的 CN 段落（Codex），都指向 [jd-import.md](jd-import.md)。完整计划见 [路线图](roadmap.md)。
 
 ## 4. 第一周任务（据审计结果细化）
 
@@ -130,7 +131,7 @@ ai-job-search-cn/
 | D0–1 | 基线 + 审计 | 私有仓库、[基线报告](baseline-report.md)、本文档、`jobsearch_cn` 骨架 | ✅ 已完成 |
 | D2 | Job Schema | `jobsearch_cn/schema.py`、`jd validate` 命令、`docs/cn/job-schema.md`；字段含来源、企业、岗位、城市、薪资、技能、毕业届别、每周天数、实习时长、可转正、发布日期、原始 JD、状态，以及每个字段的出处与获取方式；写明与上游 `seen_jobs.json` 字段的映射 | 文档示例通过校验；没有出处、或出处不在原文中的值被拒收；✅ 已完成（PR #1） |
 | D3 | 离线 JD 解析 | `python -m jobsearch_cn jd parse <文件或标准输入>` → JSON，支持一次粘贴多份 JD；解析前先过 `posting_guard`，并补上中文注入句式（G1） | 下表典型写法全部有测试；✅ 已完成（PR #2） |
-| D4–5 | 存储、去重与 Agent 入口 | `data/` 中先存 JSON、再接 SQLite；按"可信岗位 ID > 来源 URL > 规范化内容指纹"去重（G2）；接入两个 Agent：Claude Code 技能（登记权限）与 `AGENTS.md` 中的 Codex 调用说明 | 重复导入不产生重复记录；Codex 和 Claude Code 都能完成导入与查询 |
+| D4–5 | 存储、去重与 Agent 入口 | `data/` 中先存 JSON、再接 SQLite；按"可信岗位 ID > 来源 URL > 规范化内容指纹"去重（G2）；接入两个 Agent：Claude Code 技能（登记权限）与 `AGENTS.md` 中的 Codex 调用说明 | 重复导入不产生重复记录；Codex 和 Claude Code 都能完成导入与查询；✅ 已实现（PR #3），SQLite 推迟到 v0.2，Codex 待实测 |
 | D6–7 | 测试与发布 | 覆盖中文薪资、实习条件、缺失字段、异常输入（空文件、GBK 编码、超长文本）、重复记录、中文注入；更新文档；打 tag `v0.1.0` | 5 份脱敏 JD 能解析、保存、重复查询；上游测试无新增失败 |
 
 D2/D3 需要覆盖的典型写法（作为测试用例种子）：

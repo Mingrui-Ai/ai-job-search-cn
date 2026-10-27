@@ -89,6 +89,10 @@ ALLOWED_PERMISSIONS = {
     # Reads a file or stdin, writes only to an explicit --out, never fetches.
     "Bash(python tools/posting_guard.py:*)",
     "Bash(python3 tools/posting_guard.py:*)",
+    # CN fork: the offline jobsearch_cn JD commands (docs/cn/jd-import.md).
+    # Scoped to the `jd` group; they read input files and write JSON records
+    # to the job store (data/ by default). No network, no other commands.
+    "Bash(python -m jobsearch_cn jd:*)",
 }
 
 # Rules that must stay in .claude/settings.json permissions.ask. An ask rule
@@ -246,6 +250,7 @@ ALLOWED_SKILL_TOOLS = {
     "Bash(python3 tools/job_key.py:*)",
     "Bash(python tools/scrape_state.py:*)",
     "Bash(python3 tools/scrape_state.py:*)",
+    "Bash(python -m jobsearch_cn jd:*)",  # CN fork: .claude/skills/cn-jd-import
 }
 
 # The tools a shipped .claude/agents/*.md may list. These agents read untrusted
