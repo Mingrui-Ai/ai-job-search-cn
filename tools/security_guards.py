@@ -93,6 +93,8 @@ ALLOWED_PERMISSIONS = {
     # Scoped to the `jd` group; they read input files and write JSON records
     # to the job store (data/ by default). No network, no other commands.
     "Bash(python -m jobsearch_cn jd:*)",
+    # CN fork: profile validate/show read data/profile/ (docs/cn/profile-setup.md).
+    "Bash(python -m jobsearch_cn profile:*)",
 }
 
 # Rules that must stay in .claude/settings.json permissions.ask. An ask rule
@@ -251,6 +253,7 @@ ALLOWED_SKILL_TOOLS = {
     "Bash(python tools/scrape_state.py:*)",
     "Bash(python3 tools/scrape_state.py:*)",
     "Bash(python -m jobsearch_cn jd:*)",  # CN fork: .claude/skills/cn-jd-import
+    "Bash(python -m jobsearch_cn profile:*)",  # CN fork: .claude/skills/cn-setup
 }
 
 # The tools a shipped .claude/agents/*.md may list. These agents read untrusted

@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-10-27 · v0.2 第 1 项：个人档案（Profile v1）与 cn-setup
+
+**完成**
+
+- 设计稿 `docs/cn/profile.md`，与用户确认三个方向：JSON + Markdown 两个文件；独立的 CN 建档流程、不用上游 `/setup`；从简历文件抽取再问答补全。字段按设计稿实现，使用中再调整。
+- `jobsearch_cn/profile.py`：Profile v1 校验。沿用 Job Schema 的约定（所有键必须出现、未知键报错），学历、岗位类型、薪资单位与 JD 记录共用取值；每条事实必须带 `source`（`sources/` 下的文件名或 `user`），`used_in` 必须指向存在的经历，经历 `id` 不能重复，技能名比较时忽略大小写和全角/半角。
+- CLI：`profile validate`（同时检查来源文件是否存在、`notes.md` 是否为 UTF-8）和 `profile show`（默认隐去联系方式，`--contact` 才显示）。
+- `docs/cn/profile-setup.md`：共用的建档工作流；Claude Code 入口 `.claude/skills/cn-setup`，Codex 入口在 `AGENTS.md`；授权 `Bash(python -m jobsearch_cn profile:*)` 同样登记三处。
+- 隐私护栏：`tests/test_cn_profile.py` 检查上游 `/setup` 会改写的 5 个模板文件仍保留占位符（上游 CI 的同类检查只在上游仓库运行），并检查 `data/profile/` 被 git 忽略。
+- `tests/test_cn_agent_entry.py` 改为同时覆盖两个工作流。
+
+**决策**
+
+- `exclusions.keywords` 暂定只匹配标题，在硬性过滤中实现。
+- 档案的来源规则比 JD 宽：用户本人是权威来源，所以只要求标明出处、来源文件存在，不要求逐字匹配原文。
+
+**验证**
+
+- 本地 Python 3.12：967 个测试全部通过（跳过 9 个），其中 CN 131 个；`security_guards`、`lint_skills` 通过。
+- 变异测试：关掉"来源文件必须存在""used_in 必须指向存在的经历""隐去联系方式"，每次都有测试失败。
+- 校验器在第一次运行时就发现了设计稿示例里的错误（`used_in` 指向不存在的 `proj-1`），已修正文档。
+
+**遗留问题**
+
+- cn-setup 还没用真实简历实际走过一遍。
+- Codex 端（两个工作流）待实测。
+
+**下一步**：v0.2 第 2 项，硬性条件过滤（`match` 命令，按 profile.md §6 的对照表），JD 字段为 null 时判为"未知"。
+
+---
+
 ## 2026-10-27 · 第 4 步：v0.1 验收测试与发布准备
 
 **完成**

@@ -15,6 +15,8 @@
 | [cn-migration-plan.md](cn-migration-plan.md) | D1 审计结论、架构决策（ADR）、第一周任务、待决事项、上游同步流程 |
 | [job-schema.md](job-schema.md) | 岗位记录格式（Job Schema v1）：字段说明、出处规则、与上游字段的对应 |
 | [jd-import.md](jd-import.md) | JD 导入工作流（Codex 与 Claude Code 共用）：解析、补全、校验、保存、去重、查询 |
+| [profile.md](profile.md) | 个人档案格式（Profile v1）：字段、来源规则、与 JD 硬性条件的对照 |
+| [profile-setup.md](profile-setup.md) | 建档工作流 cn-setup（Codex 与 Claude Code 共用） |
 | [jd-parse.md](jd-parse.md) | `jd parse`：用法、编码处理、各字段能识别的写法、补全流程、防注入检查 |
 | [baseline-report.md](baseline-report.md) | Day 0 环境、测试基线、已知问题与 Windows 兼容性记录 |
 | [plan/kickoff-guide-v0.1.md](plan/kickoff-guide-v0.1.md) | 原始文件《AI_Job_Search_CN_项目启动指导_v0.1.md》（存档） |
@@ -51,6 +53,7 @@ python -m jobsearch_cn jd parse jd.txt --site boss   # 从 JD 文本抽取岗位
 python -m jobsearch_cn jd validate job.json          # 按 job-schema.md 校验一条岗位记录
 python -m jobsearch_cn jd parse jd.txt --save        # 解析并保存到本地岗位库 data/jobs/（自动去重）
 python -m jobsearch_cn jd list                       # 列出岗位库；jd show <id>、jd status <id> <状态>
+python -m jobsearch_cn profile validate              # 校验 data/profile/ 下的个人档案；profile show 查看（隐去联系方式）
 ```
 
 ## 仓库与分支约定
