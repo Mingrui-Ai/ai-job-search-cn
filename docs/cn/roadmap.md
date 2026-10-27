@@ -50,7 +50,7 @@
 
 ### v0.2：档案、匹配与中文简历（第 2 周）
 
-- **个人档案** ✅（PR #6）：`data/profile/profile.json` + `notes.md` + `sources/`，[Profile v1](profile.md)；独立的 [cn-setup](profile-setup.md) 建档流程，不用上游 `/setup`；测试守护上游模板仍是占位符（ADR-6）。
+- **个人档案** ✅（PR #8）：`data/profile/profile.json` + `notes.md` + `sources/`，[Profile v1](profile.md)；独立的 [cn-setup](profile-setup.md) 建档流程，不用上游 `/setup`；测试守护上游模板仍是占位符（ADR-6）。
 - **硬性条件过滤**：届别、学历、城市/远程、每周天数、实习时长。不符合的列出原因；字段为 null 时标为"未知"，不判为不符合。
 - **可解释评分**：技能命中、方向匹配、薪资、转正等，每一项都给分值和依据，复用上游 `/rank` 的打分思路。
 - **中文简历**：先决定格式（待决事项 1）。倾向 LaTeX + ctex/xeCJK 输出一页简历，另评估 DOCX 导出。沿用上游"起草 + 审核"的双 Agent 流程和核验清单，事实不得超出档案。
