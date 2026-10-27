@@ -141,7 +141,7 @@ python -m jobsearch_cn jd validate job.json
 | `source.site` | `portal` | 上游记录的是门户技能名，例如 `linkedin-search` |
 | — | `fit`、`source`、`rank_*` 等 | 由上游 `/scrape`、`/rank` 写入；上游的 `source` 是 cli/websearch，与这里的 `source.type` 含义不同 |
 
-上游的去重键（`tools/job_key.py`）遇到纯中文的公司名和岗位名只能生成哈希键（见迁移方案 G2），CN 侧的去重在第 3 步设计。
+上游的去重键（`tools/job_key.py`）遇到纯中文的公司名和岗位名只能生成哈希键（见迁移方案 G2），CN 侧按内容指纹和规范化链接去重，见 [jd-import.md](jd-import.md#去重与合并)。
 
 ## 版本记录
 
