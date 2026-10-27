@@ -10,7 +10,7 @@
 </p>
 
 > [!NOTE]
-> 本仓库基于开源项目 [MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search)（MIT 许可）做中国招聘市场的二次开发，目前处于 **v0.1 开发阶段**（`0.1.0.dev0`），可用的功能还很少，见[当前进度](#当前进度)。上游的英文 README 原样保留在[文末](#上游原版-readme)。
+> 本仓库基于开源项目 [ai-job-search-dev/ai-job-search](https://github.com/ai-job-search-dev/ai-job-search)（MIT 许可）做中国招聘市场的二次开发，目前处于 **v0.1 开发阶段**（`0.1.0.dev0`），可用的功能还很少，见[当前进度](#当前进度)。上游的英文 README 原样保留在[文末](#上游原版-readme)。
 
 ## 这是什么
 
@@ -233,7 +233,7 @@ python -m unittest discover -s tests -t . -p "test_cn_*.py" -v  # 只跑 CN 测�
 
 ## 致谢与许可
 
-- 上游项目 [ai-job-search](https://github.com/MadsLorentzen/ai-job-search)，作者 Mads Lorentzen，MIT 许可。
+- 上游项目 [ai-job-search](https://github.com/ai-job-search-dev/ai-job-search)（原作者 Mads Lorentzen），MIT 许可。
 - 本项目是独立的个人项目，与 Anthropic、OpenAI 没有关联；提到 Claude Code 和 Codex 只是为了说明所用的工具。
 - 许可证：[MIT](LICENSE)。
 
@@ -244,7 +244,7 @@ python -m unittest discover -s tests -t . -p "test_cn_*.py" -v  # 只跑 CN 测�
 <details>
 <summary>展开查看（英文）</summary>
 
-以下为上游 [MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search) 的英文 README，原样保留以便同步上游更新。其中的 Quick start 说的是上游的使用方式（fork 上游仓库、运行 `/setup`），不适用于本仓库。
+以下为上游 [ai-job-search-dev/ai-job-search](https://github.com/ai-job-search-dev/ai-job-search) 的英文 README，原样保留以便同步上游更新。其中的 Quick start 说的是上游的使用方式（fork 上游仓库、运行 `/setup`），不适用于本仓库。
 
 
 <p align="center">

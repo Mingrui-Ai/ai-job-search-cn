@@ -20,7 +20,7 @@ To prevent duplication and configuration drift across different AI agent framewo
 
 ## AI Job Search CN（本仓库的中国本地化扩展）
 
-本仓库是 [MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search) 的**私有**二次开发版本，面向中国互联网招聘市场。上游文件尽量保持原样以便同步；开发前先读 [docs/cn/README.md](docs/cn/README.md) 和 [docs/cn/cn-migration-plan.md](docs/cn/cn-migration-plan.md)。
+本仓库是 [ai-job-search-dev/ai-job-search](https://github.com/ai-job-search-dev/ai-job-search) 的**私有**二次开发版本，面向中国互联网招聘市场。上游文件尽量保持原样以便同步；开发前先读 [docs/cn/README.md](docs/cn/README.md) 和 [docs/cn/cn-migration-plan.md](docs/cn/cn-migration-plan.md)。
 
 **开发约定**
 
