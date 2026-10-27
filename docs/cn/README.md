@@ -8,12 +8,11 @@
 
 | 文档 | 内容 |
 | --- | --- |
-| [master-plan.md](master-plan.md) | 总体规划：最终目的、设计原则、系统全貌、M1–M8 里程碑、待决事项、协作方式 |
-| [tasks.md](tasks.md) | 计划清单：按里程碑拆分的任务、负责人和验收，逐项勾选 |
+| [roadmap.md](roadmap.md) | 路线图：唯一的任务清单和进度表，按里程碑拆分的任务、负责人、验收标准，随每个 PR 更新 |
+| [master-plan.md](master-plan.md) | 总体规划：最终目的、设计原则、系统全貌、M1–M8 的目标与完成标准、待决事项、分工 |
 | [worklog.md](worklog.md) | 工作记录：每一步做了什么、验证结果、遗留问题（按时间倒序） |
 | [CHANGELOG.md](CHANGELOG.md) | 版本更新记录（CN） |
-| [roadmap.md](roadmap.md) | 完整计划书：目标、阶段与里程碑、每步交付与验收、风险 |
-| [cn-migration-plan.md](cn-migration-plan.md) | D1 审计结论、架构决策（ADR）、第一周任务、待决事项、上游同步流程 |
+| [cn-migration-plan.md](cn-migration-plan.md) | 上游审计结论、架构决策（ADR-1 至 ADR-9）、目录结构、上游同步流程 |
 | [job-schema.md](job-schema.md) | 岗位记录格式（Job Schema v1）：字段说明、出处规则、与上游字段的对应 |
 | [jd-import.md](jd-import.md) | JD 导入工作流（Codex 与 Claude Code 共用）：解析、补全、校验、保存、去重、查询 |
 | [profile.md](profile.md) | 个人档案格式（Profile v1）：字段、来源规则、与 JD 硬性条件的对照 |
@@ -23,7 +22,7 @@
 | [plan/kickoff-guide-v0.1.md](plan/kickoff-guide-v0.1.md) | 原始文件《AI_Job_Search_CN_项目启动指导_v0.1.md》（存档） |
 | [plan/initial-guidelines.md](plan/initial-guidelines.md) | 原始文件《初步guidelines.md》（存档） |
 
-两份计划文档原样存档、不再修改；之后的计划调整写进 `cn-migration-plan.md`。
+`plan/` 下的两份原始计划原样存档、不再修改。之后的计划分两层：目的、里程碑和待决事项写在 `master-plan.md`，任务和进度写在 `roadmap.md`；架构决策写在 `cn-migration-plan.md`。
 
 ## 开发环境（Windows）
 
