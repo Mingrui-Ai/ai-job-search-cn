@@ -8,7 +8,7 @@
 | 项目 | 值 |
 | --- | --- |
 | 私有仓库（origin） | https://github.com/Mingrui-Ai/ai-job-search-cn （PRIVATE，默认分支 `master`） |
-| 上游（upstream） | https://github.com/MadsLorentzen/ai-job-search （MIT 许可） |
+| 上游（upstream） | https://github.com/ai-job-search-dev/ai-job-search （MIT 许可） |
 | 基线提交 | 上游 `master` @ `e16acee`（= 发布版 `v1.7.3` 之后 50 个提交） |
 | 本地路径 | `D:\06_Projects\ai-job-search-cn` |
 
@@ -57,6 +57,8 @@
 
 ### 4.1 Bun 1.4.4 导致 4 个门户 CLI 类型检查失败（上游问题）
 
+> **已解决（2026-10-27）**：上游 `4b109c2`（#768）在这 4 个 CLI 中固定了 `@types/node`，已随 H5 同步合并进本仓库。下文保留为排查记录。
+
 **现象**：`bun run typecheck` 报 `Property 'status' does not exist on type 'Response'`、`'URL' refers to a value, but is being used as a type` 等，均为 fetch 相关全局类型缺失。
 
 **根因**（已复现确认）：
@@ -69,7 +71,7 @@
 
 **影响**：只影响丹麦门户 CLI 的类型检查，运行时测试全部通过；不影响 CN 开发。这 4 个门户在上游默认就是 `enabled: false`，`/scrape` 不会调用它们；但有 5 个上游测试按名字引用它们，直接删除会牵连上游测试，因此不建议删除。
 
-**处理选项**（尚未执行，待决定）：
+**当时的处理选项**（最终采用第一项，等上游修复）：
 
 - 等上游修复后合并（最省事，CI 暂时保持这 4 个红灯）；
 - 向上游报告（会以你的 GitHub 身份公开发 issue，需要你确认）；
