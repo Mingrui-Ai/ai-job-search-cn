@@ -4,6 +4,30 @@
 
 ---
 
+## 2026-10-27 · Codex CI 复验：本地全量与远端检查通过
+
+**完成与决策**
+
+- 环境权限恢复后，确认系统临时目录可正常创建、写入和清理，并在 conda 环境 `ai-job-search-cn`（Python 3.12.15）重跑三项提交前检查。
+- 测试从 `eec5123` 开始，结束时 HEAD 为 `3a274af`。已核对两者只修改了 `docs/cn/roadmap.md`、`docs/cn/worklog.md`，代码、测试和 CI 配置均未变化；另行核实最新提交的远端 CI。
+
+**验证**
+
+- `python tools/lint_skills.py`：通过（11 skills、12 commands）。
+- `python tools/security_guards.py`：通过。
+- `python -m unittest discover -s tests -t . -v`：973 项，964 项通过、9 项按预期跳过，0 失败、0 错误；测试耗时约 96.5 秒。
+- 最新提交 `3a274aff2e57819048c9cef8e783e1102756d292` 的 [GitHub CI（run 40476465895）](https://github.com/Mingrui-Ai/ai-job-search-cn/actions/runs/40476465895)：`completed / success`。
+- 完整本地日志和运行元数据位于已忽略的 `logs/ci-codex-2026-10-27/full-access/`。
+
+**执行者核对**：`gh run view 40476465895` 为 `success`，对应提交 `3a274af`（分支 `docs/cn-m1-5`）；`logs/ci-codex-2026-10-27/full-access/python-tests.log` 结尾为 `Ran 973 tests … OK (skipped=9)`。第一轮记录中"全量测试受沙箱阻断"的问题已解决。本条由 Codex 在原工作目录写入、未提交，执行者核对后提交；之后 Codex 改用独立的 worktree `ai-job-search-cn-codex`。
+
+**遗留与下一步**
+
+- 本次 CI 验证已完成，保持待合并状态。
+- M1-5 的第二轮业务验收（JD 字段补全、建档流程）仍按下一条记录单独跟进，不能由 CI 通过代替。
+
+---
+
 ## 2026-10-27 · M1-5：Codex 端实测（第一轮，部分完成）
 
 **Codex 的记录**（由 Codex 写入，执行者整理）
