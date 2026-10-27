@@ -14,4 +14,4 @@ explains each one; tests/test_cn_package.py enforces the first two):
   is marked as inferred and never presented as fact.
 """
 
-__version__ = "0.1.0.dev0"
+__version__ = "0.1.0"

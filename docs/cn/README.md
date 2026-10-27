@@ -9,6 +9,7 @@
 | 文档 | 内容 |
 | --- | --- |
 | [worklog.md](worklog.md) | 工作记录：每一步做了什么、验证结果、遗留问题（按时间倒序） |
+| [CHANGELOG.md](CHANGELOG.md) | 版本更新记录（CN） |
 | [roadmap.md](roadmap.md) | 完整计划书：目标、阶段与里程碑、每步交付与验收、风险 |
 | [cn-migration-plan.md](cn-migration-plan.md) | D1 审计结论、架构决策（ADR）、第一周任务、待决事项、上游同步流程 |
 | [job-schema.md](job-schema.md) | 岗位记录格式（Job Schema v1）：字段说明、出处规则、与上游字段的对应 |
