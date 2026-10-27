@@ -1,0 +1,116 @@
+{
+  "base_commit": "34d254d72bc70795590918af3ae15db25b93c0dd",
+  "verified_at_utc": "2026-10-27T10:10:41.331166+00:00",
+  "commands": {
+    "lint_skills": {
+      "argv": [
+        "python",
+        "tools/lint_skills.py"
+      ],
+      "started_at_utc": "2026-10-27T10:07:45.618784+00:00",
+      "duration_seconds": 0.14,
+      "exit_code": 0,
+      "summary": [
+        "lint_skills: OK (11 skills, 12 commands, settings.json)"
+      ]
+    },
+    "security_guards": {
+      "argv": [
+        "python",
+        "tools/security_guards.py"
+      ],
+      "started_at_utc": "2026-10-27T10:07:45.618784+00:00",
+      "duration_seconds": 0.156,
+      "exit_code": 0,
+      "summary": [
+        "security_guards: OK (permissions allowlist, hooks allowlist, gitignore rules, package manifests, no tracked node_modules, skill/command allowed-tools, agent tools)"
+      ]
+    },
+    "framework_version": {
+      "argv": [
+        "python",
+        "tools/check_framework_version.py"
+      ],
+      "started_at_utc": "2026-10-27T10:07:45.619884+00:00",
+      "duration_seconds": 0.484,
+      "exit_code": 0,
+      "summary": [
+        "Comparing HEAD against base commit: HEAD",
+        "Framework Version Check: OK"
+      ]
+    },
+    "unittest": {
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-t",
+        ".",
+        "-v"
+      ],
+      "started_at_utc": "2026-10-27T10:07:45.619884+00:00",
+      "duration_seconds": 101.687,
+      "exit_code": 0,
+      "summary": [
+        "Ran 1009 tests in 98.462s",
+        "OK (skipped=9)"
+      ]
+    },
+    "python_version": "3.12.15",
+    "base_commit": "34d254d72bc70795590918af3ae15db25b93c0dd",
+    "execution_location": "D:\\06_Projects\\ai-job-search-cn-codex"
+  },
+  "field_comparison": {
+    "一致": 62,
+    "规则漏读": 7,
+    "规则误读": 1
+  },
+  "parsed_match_verdicts_agree": {
+    "matched": 10,
+    "total": 10
+  },
+  "parsed_match_check_states_agree": {
+    "matched": 68,
+    "total": 70
+  },
+  "oracle_replay_check_states_agree": {
+    "matched": 70,
+    "total": 70
+  },
+  "oracle_jobs_schema_valid": 5,
+  "verbatim_evidence_fragments": 59,
+  "frozen_file_hashes_unchanged": 10,
+  "oracle_frozen_base_commit": "a3986d3d6d75d9dceec0110ace82f75017b4c192",
+  "final_contract_and_profile_sha256": {
+    "docs/cn/job-schema.md": "dcc3a1753a38aabfd19ef79a44c7f022cf3ac2bbb0430aa9ba52cb0b8dcba877",
+    "docs/cn/match.md": "6d6ec0a3417ebaf4012b0e5cb38969d9216a679b714b7aa4851824d5d95fa5ca",
+    "tests/fixtures/cn/profile/tech/profile.json": "cd06c39d2041586ec52ecc11566a55b884ed93ed11c6485afba83807e0f4897e",
+    "tests/fixtures/cn/profile/ops/profile.json": "fe6fc3de8c9dc00ce8cf302175593cce2ead112de765dbe09db16e0ad92cb1d7"
+  },
+  "matching_profile_values_unchanged_since_freeze": true,
+  "encoding_policy": "UTF-8 without BOM; LF only; no Unicode Cc/Cf except LF",
+  "scope": "Only tests/fixtures/cn/jd-m2-3/** and a prepended docs/cn/worklog.md entry",
+  "delivery_files_checked": [
+    "tests/fixtures/cn/jd-m2-3/actual/ats_ui_design_intern.json",
+    "tests/fixtures/cn/jd-m2-3/actual/boss_ai_product_intern.json",
+    "tests/fixtures/cn/jd-m2-3/actual/nowcoder_test_dev_intern.json",
+    "tests/fixtures/cn/jd-m2-3/actual/official_marketing_campus.json",
+    "tests/fixtures/cn/jd-m2-3/actual/shixiseng_content_ops_intern.json",
+    "tests/fixtures/cn/jd-m2-3/ats_ui_design_intern.expected.json",
+    "tests/fixtures/cn/jd-m2-3/ats_ui_design_intern.txt",
+    "tests/fixtures/cn/jd-m2-3/boss_ai_product_intern.expected.json",
+    "tests/fixtures/cn/jd-m2-3/boss_ai_product_intern.txt",
+    "tests/fixtures/cn/jd-m2-3/nowcoder_test_dev_intern.expected.json",
+    "tests/fixtures/cn/jd-m2-3/nowcoder_test_dev_intern.txt",
+    "tests/fixtures/cn/jd-m2-3/official_marketing_campus.expected.json",
+    "tests/fixtures/cn/jd-m2-3/official_marketing_campus.txt",
+    "tests/fixtures/cn/jd-m2-3/oracle-manifest.json",
+    "tests/fixtures/cn/jd-m2-3/README.md",
+    "tests/fixtures/cn/jd-m2-3/shixiseng_content_ops_intern.expected.json",
+    "tests/fixtures/cn/jd-m2-3/shixiseng_content_ops_intern.txt",
+    "tests/fixtures/cn/jd-m2-3/verification.json"
+  ]
+}

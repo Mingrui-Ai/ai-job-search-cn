@@ -1,0 +1,211 @@
+{
+  "fixture": "nowcoder_test_dev_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "nowcoder",
+  "method": "agent",
+  "basis": "独立人工语义阅读；在首次执行 jd parse 和 match filter 之前写定。字段路径来自 Job Schema v1，匹配口径来自 docs/cn/match.md，不使用规则源码或既有 JD 样例。",
+  "fields": {
+    "title": {
+      "value": "测试开发实习生（Web自动化）",
+      "evidence": [
+        "测试开发实习生（Web自动化）"
+      ]
+    },
+    "company": {
+      "value": "示例澄石软件有限公司",
+      "evidence": [
+        "示例澄石软件有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "深圳"
+      ],
+      "evidence": [
+        "工作地点：深圳南山区"
+      ],
+      "note": "同一行中的北京是面试地点，不是第二工作城市。"
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "办公要求：不支持远程。"
+      ]
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "测试开发实习生（Web自动化）"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 25,
+        "max": 35,
+        "unit": "CNY/hour",
+        "months": null,
+        "negotiable": false
+      },
+      "evidence": [
+        "25～35元/小时"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅限2027届"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": 4,
+      "evidence": [
+        "到岗要求：每周4-5天"
+      ],
+      "note": "范围下限为4；星期四、五开会不另设到岗要求。"
+    },
+    "requirements.min_months": {
+      "value": 4,
+      "evidence": [
+        "连续实习至少4个月"
+      ]
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "本科及以上在读"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "TypeScript",
+        "Playwright",
+        "Postman",
+        "Git",
+        "接口测试",
+        "自动化测试"
+      ],
+      "evidence": [
+        "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试。"
+      ]
+    },
+    "return_offer": {
+      "value": false,
+      "evidence": [
+        "本岗位不提供转正机会。"
+      ]
+    },
+    "published_at": {
+      "value": null,
+      "evidence": [],
+      "note": "原文未写发布日期。"
+    },
+    "deadline": {
+      "value": "2026-12-15",
+      "evidence": [
+        "截止日期：2026-12-15"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "每周4-5天",
+      "interpretation": "最少到岗4天，不能取上限5。"
+    },
+    {
+      "text": "每周四、五各安排一次缺陷复盘。",
+      "interpretation": "列举会议星期，不是最少到岗天数。"
+    },
+    {
+      "text": "3-5个工作日内回复",
+      "interpretation": "不是每周到岗要求。"
+    },
+    {
+      "text": "工作地点：深圳南山区；面试地点：北京。",
+      "interpretation": "同一行有两种地点，工作城市只取深圳。"
+    },
+    {
+      "text": "非外包",
+      "interpretation": "不能触发tech的“外包”排除词。"
+    },
+    {
+      "text": "25～35元/小时",
+      "interpretation": "波浪号范围，单位为小时，不换算日薪。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "tech为2027届，满足仅限2027届。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "tech硕士达到本科最低要求。"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "4-5天的最低要求为4天，tech每周可4天。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "tech可6个月，达到至少4个月。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "深圳在tech可接受城市中；北京只是面试地点。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习在tech目标类型中。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题没有“外包”“销售”；正文“非外包”不触发排除。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "ops为2027届，满足要求。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "ops本科达到最低要求。"
+        },
+        "days_per_week": {
+          "result": "conflict",
+          "reason": "ops每周可3天，低于范围下限4天。"
+        },
+        "min_months": {
+          "result": "conflict",
+          "reason": "ops可3个月，少于至少4个月。"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "深圳不在ops的上海范围内，ops不搬家、不接受远程，JD也不支持远程。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习在ops目标类型中。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题没有“电话销售”；公司、城市无排除项。"
+        }
+      }
+    }
+  }
+}

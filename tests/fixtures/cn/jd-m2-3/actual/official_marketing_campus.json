@@ -1,0 +1,1034 @@
+{
+  "base_commit": "34d254d72bc70795590918af3ae15db25b93c0dd",
+  "oracle_frozen_base_commit": "a3986d3d6d75d9dceec0110ace82f75017b4c192",
+  "started_at_utc": "2026-10-27T10:07:48.517639+00:00",
+  "oracle_sha256": "a01f582cb8d6dea3adf6cfa32c2f5807d4e8d61ced15e02199d015b0e1813561",
+  "parse": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "tests/fixtures/cn/jd-m2-3/official_marketing_campus.txt",
+      "--site",
+      "official",
+      "--save",
+      "--data-dir",
+      "data/v2-m2-3/comparison-34d254d/parsed"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_4118f5955414",
+          "source": {
+            "type": "file",
+            "site": "official",
+            "url": null,
+            "imported_at": "2026-10-27T18:07:48+08:00"
+          },
+          "title": null,
+          "company": "示例远帆品牌管理有限公司",
+          "cities": [
+            "上海"
+          ],
+          "remote": false,
+          "employment_type": "campus",
+          "salary": {
+            "min": 8000,
+            "max": 10000,
+            "unit": "CNY/month",
+            "months": null,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": true
+            },
+            "days_per_week": null,
+            "min_months": null,
+            "education": {
+              "min": "bachelor",
+              "preferred": null
+            },
+            "skills": []
+          },
+          "return_offer": null,
+          "published_at": "2026-10-27",
+          "deadline": "2026-11-20",
+          "status": "new",
+          "evidence": {
+            "company": {
+              "text": "示例远帆品牌管理有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作地点：上海",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "市场管培生",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "8-10K/月",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "招聘类别：2027届校园招聘",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "本科及以上",
+              "method": "rule"
+            },
+            "published_at": {
+              "text": "发布时间：2026-10-27",
+              "method": "rule"
+            },
+            "deadline": {
+              "text": "截止：2026-11-20",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "市场管培生\n校园招聘 / 市场与品牌\n示例远帆品牌管理有限公司\n\n招聘类别：2027届校园招聘\n工作地点：上海\n薪酬：8-10K/月，全年13薪\n\n岗位职责\n参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度。\n定期整理活动表现，形成阶段复盘材料。\n\n基本条件\n1. 仅招2027届毕业生，本科及以上学历，专业不限。\n2. 掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力。\n\n培养机制：入职试用期3个月，通过考核后进入轮岗培养。\n沟通安排：每周五例会；面试结果3-5个工作日内回复。\n办公方式：不支持远程。\n用工说明：非外包；本岗位不承担销售指标。\n发布时间：2026-10-27\n申请截止：2026-11-20"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_4118f5955414",
+          "title": null,
+          "company": "示例远帆品牌管理有限公司",
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ]
+    },
+    "stderr": ""
+  },
+  "field_comparison": {
+    "title": {
+      "expected": "市场管培生",
+      "actual": null,
+      "conclusion": "规则漏读"
+    },
+    "company": {
+      "expected": "示例远帆品牌管理有限公司",
+      "actual": "示例远帆品牌管理有限公司",
+      "conclusion": "一致"
+    },
+    "cities": {
+      "expected": [
+        "上海"
+      ],
+      "actual": [
+        "上海"
+      ],
+      "conclusion": "一致"
+    },
+    "remote": {
+      "expected": false,
+      "actual": false,
+      "conclusion": "一致"
+    },
+    "employment_type": {
+      "expected": "campus",
+      "actual": "campus",
+      "conclusion": "一致"
+    },
+    "salary": {
+      "expected": {
+        "min": 8000,
+        "max": 10000,
+        "unit": "CNY/month",
+        "months": 13,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 8000,
+        "max": 10000,
+        "unit": "CNY/month",
+        "months": null,
+        "negotiable": false
+      },
+      "conclusion": "规则漏读"
+    },
+    "requirements.graduation": {
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "conclusion": "一致"
+    },
+    "requirements.days_per_week": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    },
+    "requirements.min_months": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    },
+    "requirements.education": {
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "conclusion": "一致"
+    },
+    "requirements.skills": {
+      "expected": [
+        "Excel",
+        "PowerPoint",
+        "市场调研",
+        "活动策划",
+        "商务沟通"
+      ],
+      "actual": [],
+      "conclusion": "规则漏读"
+    },
+    "return_offer": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    },
+    "published_at": {
+      "expected": "2026-10-27",
+      "actual": "2026-10-27",
+      "conclusion": "一致"
+    },
+    "deadline": {
+      "expected": "2026-11-20",
+      "actual": "2026-11-20",
+      "conclusion": "一致"
+    }
+  },
+  "parsed_match": {
+    "tech": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_4118f5955414",
+        "--profile",
+        "tests/fixtures/cn/profile/tech/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/parsed"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_4118f5955414",
+        "title": null,
+        "company": "示例远帆品牌管理有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "招聘类别：2027届校园招聘"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 或档案没写每周到岗",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 或档案没写实习时长",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "conflict",
+            "reason": "这是校招岗位，你找的是实习",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": "市场管培生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "unknown",
+            "reason": "JD 没写标题，无法核对排除项",
+            "jd": {
+              "title": {
+                "value": null,
+                "evidence": null
+              },
+              "company": {
+                "value": "示例远帆品牌管理有限公司",
+                "evidence": "示例远帆品牌管理有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    "ops": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_4118f5955414",
+        "--profile",
+        "tests/fixtures/cn/profile/ops/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/parsed"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_4118f5955414",
+        "title": null,
+        "company": "示例远帆品牌管理有限公司",
+        "verdict": "needs_check",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "招聘类别：2027届校园招聘"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 或档案没写每周到岗",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 或档案没写实习时长",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "校招岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": "市场管培生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "unknown",
+            "reason": "JD 没写标题，无法核对排除项",
+            "jd": {
+              "title": {
+                "value": null,
+                "evidence": null
+              },
+              "company": {
+                "value": "示例远帆品牌管理有限公司",
+                "evidence": "示例远帆品牌管理有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    }
+  },
+  "oracle_validate": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "validate",
+      "data/v2-m2-3/comparison-34d254d/oracle-inbox/official_marketing_campus.json"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "valid": true,
+      "errors": []
+    },
+    "stderr": ""
+  },
+  "oracle_save": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "save",
+      "data/v2-m2-3/comparison-34d254d/oracle-inbox/official_marketing_campus.json",
+      "--data-dir",
+      "data/v2-m2-3/comparison-34d254d/oracle"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_4118f5955414",
+          "title": "市场管培生",
+          "company": "示例远帆品牌管理有限公司",
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    },
+    "stderr": ""
+  },
+  "oracle_match": {
+    "tech": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_4118f5955414",
+        "--profile",
+        "tests/fixtures/cn/profile/tech/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/oracle"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_4118f5955414",
+        "title": "市场管培生",
+        "company": "示例远帆品牌管理有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2027届毕业生"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上学历"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 或档案没写每周到岗",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 或档案没写实习时长",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "办公方式：不支持远程。"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "conflict",
+            "reason": "这是校招岗位，你找的是实习",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "招聘类别：2027届校园招聘"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "市场管培生",
+                "evidence": [
+                  "市场管培生"
+                ]
+              },
+              "company": {
+                "value": "示例远帆品牌管理有限公司",
+                "evidence": [
+                  "示例远帆品牌管理有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    "ops": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_4118f5955414",
+        "--profile",
+        "tests/fixtures/cn/profile/ops/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/oracle"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_4118f5955414",
+        "title": "市场管培生",
+        "company": "示例远帆品牌管理有限公司",
+        "verdict": "needs_check",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2027届毕业生"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上学历"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 或档案没写每周到岗",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 或档案没写实习时长",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "办公方式：不支持远程。"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "校招岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "招聘类别：2027届校园招聘"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "市场管培生",
+                "evidence": [
+                  "市场管培生"
+                ]
+              },
+              "company": {
+                "value": "示例远帆品牌管理有限公司",
+                "evidence": [
+                  "示例远帆品牌管理有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    }
+  },
+  "finished_at_utc": "2026-10-27T10:07:49.564175+00:00"
+}

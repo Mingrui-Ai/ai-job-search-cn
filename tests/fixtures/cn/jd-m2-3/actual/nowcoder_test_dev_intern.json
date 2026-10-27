@@ -1,0 +1,1072 @@
+{
+  "base_commit": "34d254d72bc70795590918af3ae15db25b93c0dd",
+  "oracle_frozen_base_commit": "a3986d3d6d75d9dceec0110ace82f75017b4c192",
+  "started_at_utc": "2026-10-27T10:07:47.542124+00:00",
+  "oracle_sha256": "e5299ebd927ff3a8ac5313f744f316082c1307d08c2dd389873c2de1eed06180",
+  "parse": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "tests/fixtures/cn/jd-m2-3/nowcoder_test_dev_intern.txt",
+      "--site",
+      "nowcoder",
+      "--save",
+      "--data-dir",
+      "data/v2-m2-3/comparison-34d254d/parsed"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_38aca14ece91",
+          "source": {
+            "type": "file",
+            "site": "nowcoder",
+            "url": null,
+            "imported_at": "2026-10-27T18:07:47+08:00"
+          },
+          "title": "测试开发实习生（Web自动化）",
+          "company": "示例澄石软件有限公司",
+          "cities": [
+            "深圳",
+            "北京"
+          ],
+          "remote": false,
+          "employment_type": "internship",
+          "salary": {
+            "min": 25,
+            "max": 35,
+            "unit": "CNY/hour",
+            "months": null,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": true
+            },
+            "days_per_week": 4,
+            "min_months": 4,
+            "education": {
+              "min": "bachelor",
+              "preferred": null
+            },
+            "skills": [
+              "TypeScript",
+              "Git"
+            ]
+          },
+          "return_offer": false,
+          "published_at": null,
+          "deadline": "2026-12-15",
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "测试开发实习生（Web自动化）",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例澄石软件有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作地点：深圳南山区；面试地点：北京。",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "测试开发实习生（Web自动化）",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "25～35元/小时",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "仅限2027届",
+              "method": "rule"
+            },
+            "requirements.days_per_week": {
+              "text": "每周4-5天",
+              "method": "rule"
+            },
+            "requirements.min_months": {
+              "text": "实习至少4个月",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "本科及以上",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": "能使用 TypeScript、Playwright、Postman 和 Git",
+              "method": "rule"
+            },
+            "return_offer": {
+              "text": "不提供转正",
+              "method": "rule"
+            },
+            "deadline": {
+              "text": "截止日期：2026-12-15",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "测试开发实习生（Web自动化）\n日常实习 / 技术 / 内推信息\n示例澄石软件有限公司\n深圳 | 测试开发 | 25～35元/小时\n\n岗位职责\n围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调。\n\n任职要求\n仅限2027届，本科及以上在读。\n能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试。\n到岗要求：每周4-5天，连续实习至少4个月。\n\n工作地点：深圳南山区；面试地点：北京。\n办公要求：不支持远程。\n例会：每周四、五各安排一次缺陷复盘。\n反馈时效：3-5个工作日内回复。\n岗位性质：非外包。\n本岗位不提供转正机会。\n截止日期：2026-12-15"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_38aca14ece91",
+          "title": "测试开发实习生（Web自动化）",
+          "company": "示例澄石软件有限公司",
+          "cities": [
+            "深圳",
+            "北京"
+          ],
+          "status": "new"
+        }
+      ]
+    },
+    "stderr": ""
+  },
+  "field_comparison": {
+    "title": {
+      "expected": "测试开发实习生（Web自动化）",
+      "actual": "测试开发实习生（Web自动化）",
+      "conclusion": "一致"
+    },
+    "company": {
+      "expected": "示例澄石软件有限公司",
+      "actual": "示例澄石软件有限公司",
+      "conclusion": "一致"
+    },
+    "cities": {
+      "expected": [
+        "深圳"
+      ],
+      "actual": [
+        "深圳",
+        "北京"
+      ],
+      "conclusion": "规则误读"
+    },
+    "remote": {
+      "expected": false,
+      "actual": false,
+      "conclusion": "一致"
+    },
+    "employment_type": {
+      "expected": "internship",
+      "actual": "internship",
+      "conclusion": "一致"
+    },
+    "salary": {
+      "expected": {
+        "min": 25,
+        "max": 35,
+        "unit": "CNY/hour",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 25,
+        "max": 35,
+        "unit": "CNY/hour",
+        "months": null,
+        "negotiable": false
+      },
+      "conclusion": "一致"
+    },
+    "requirements.graduation": {
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "conclusion": "一致"
+    },
+    "requirements.days_per_week": {
+      "expected": 4,
+      "actual": 4,
+      "conclusion": "一致"
+    },
+    "requirements.min_months": {
+      "expected": 4,
+      "actual": 4,
+      "conclusion": "一致"
+    },
+    "requirements.education": {
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "conclusion": "一致"
+    },
+    "requirements.skills": {
+      "expected": [
+        "TypeScript",
+        "Playwright",
+        "Postman",
+        "Git",
+        "接口测试",
+        "自动化测试"
+      ],
+      "actual": [
+        "TypeScript",
+        "Git"
+      ],
+      "conclusion": "规则漏读"
+    },
+    "return_offer": {
+      "expected": false,
+      "actual": false,
+      "conclusion": "一致"
+    },
+    "published_at": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    },
+    "deadline": {
+      "expected": "2026-12-15",
+      "actual": "2026-12-15",
+      "conclusion": "一致"
+    }
+  },
+  "parsed_match": {
+    "tech": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_38aca14ece91",
+        "--profile",
+        "tests/fixtures/cn/profile/tech/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/parsed"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_38aca14ece91",
+        "title": "测试开发实习生（Web自动化）",
+        "company": "示例澄石软件有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅限2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 4,
+                "evidence": "每周4-5天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 4 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 4,
+                "evidence": "实习至少4个月"
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市深圳在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "深圳",
+                  "北京"
+                ],
+                "evidence": "工作地点：深圳南山区；面试地点：北京。"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "测试开发实习生（Web自动化）"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "测试开发实习生（Web自动化）",
+                "evidence": "测试开发实习生（Web自动化）"
+              },
+              "company": {
+                "value": "示例澄石软件有限公司",
+                "evidence": "示例澄石软件有限公司"
+              },
+              "cities": {
+                "value": [
+                  "深圳",
+                  "北京"
+                ],
+                "evidence": "工作地点：深圳南山区；面试地点：北京。"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    "ops": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_38aca14ece91",
+        "--profile",
+        "tests/fixtures/cn/profile/ops/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/parsed"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_38aca14ece91",
+        "title": "测试开发实习生（Web自动化）",
+        "company": "示例澄石软件有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅限2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "conflict",
+            "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 4,
+                "evidence": "每周4-5天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "conflict",
+            "reason": "JD 要求实习时长 4 个月，你只能 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 4,
+                "evidence": "实习至少4个月"
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "深圳、北京不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "深圳",
+                  "北京"
+                ],
+                "evidence": "工作地点：深圳南山区；面试地点：北京。"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "测试开发实习生（Web自动化）"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "测试开发实习生（Web自动化）",
+                "evidence": "测试开发实习生（Web自动化）"
+              },
+              "company": {
+                "value": "示例澄石软件有限公司",
+                "evidence": "示例澄石软件有限公司"
+              },
+              "cities": {
+                "value": [
+                  "深圳",
+                  "北京"
+                ],
+                "evidence": "工作地点：深圳南山区；面试地点：北京。"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    }
+  },
+  "oracle_validate": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "validate",
+      "data/v2-m2-3/comparison-34d254d/oracle-inbox/nowcoder_test_dev_intern.json"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "valid": true,
+      "errors": []
+    },
+    "stderr": ""
+  },
+  "oracle_save": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "save",
+      "data/v2-m2-3/comparison-34d254d/oracle-inbox/nowcoder_test_dev_intern.json",
+      "--data-dir",
+      "data/v2-m2-3/comparison-34d254d/oracle"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_38aca14ece91",
+          "title": "测试开发实习生（Web自动化）",
+          "company": "示例澄石软件有限公司",
+          "cities": [
+            "深圳"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    },
+    "stderr": ""
+  },
+  "oracle_match": {
+    "tech": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_38aca14ece91",
+        "--profile",
+        "tests/fixtures/cn/profile/tech/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/oracle"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_38aca14ece91",
+        "title": "测试开发实习生（Web自动化）",
+        "company": "示例澄石软件有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅限2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上在读"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 4,
+                "evidence": [
+                  "到岗要求：每周4-5天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 4 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 4,
+                "evidence": [
+                  "连续实习至少4个月"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市深圳在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": [
+                  "工作地点：深圳南山区"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "办公要求：不支持远程。"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "测试开发实习生（Web自动化）"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "测试开发实习生（Web自动化）",
+                "evidence": [
+                  "测试开发实习生（Web自动化）"
+                ]
+              },
+              "company": {
+                "value": "示例澄石软件有限公司",
+                "evidence": [
+                  "示例澄石软件有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": [
+                  "工作地点：深圳南山区"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    "ops": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_38aca14ece91",
+        "--profile",
+        "tests/fixtures/cn/profile/ops/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/oracle"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_38aca14ece91",
+        "title": "测试开发实习生（Web自动化）",
+        "company": "示例澄石软件有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅限2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上在读"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "conflict",
+            "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 4,
+                "evidence": [
+                  "到岗要求：每周4-5天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "conflict",
+            "reason": "JD 要求实习时长 4 个月，你只能 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 4,
+                "evidence": [
+                  "连续实习至少4个月"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "深圳不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": [
+                  "工作地点：深圳南山区"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "办公要求：不支持远程。"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "测试开发实习生（Web自动化）"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "测试开发实习生（Web自动化）",
+                "evidence": [
+                  "测试开发实习生（Web自动化）"
+                ]
+              },
+              "company": {
+                "value": "示例澄石软件有限公司",
+                "evidence": [
+                  "示例澄石软件有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": [
+                  "工作地点：深圳南山区"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    }
+  },
+  "finished_at_utc": "2026-10-27T10:07:48.515116+00:00"
+}
