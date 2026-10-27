@@ -4,6 +4,33 @@
 
 ---
 
+## 2026-10-27 · M2-3（代码部分）：技能词表外置、按方向分组
+
+**完成**
+
+- `jobsearch_cn/skills.json`：内置词表，分 `tech`（技术）、`data`（数据）、`product`（产品）、`ops`（运营）、`design`（设计）五组。原 `jd_parser.SKILLS` 的词条按方向分入技术和数据两组；另新增 Excel、Tableau、Power BI、PRD、Axure、公众号、小红书、内容运营、秀米、剪映、Figma、Photoshop、UI设计等非技术方向的常用词。
+- `jobsearch_cn/vocab.py`：加载、校验词表，提供 `group_of(term)`（给 M2-4 评分判断技能所属方向）。用户在 `<数据目录>/config/skills.json` 追加词条或新分组；只能追加，写了已有的词会被忽略；格式错误时报错，不会只读一半。
+- `jd_parser.parse_text` 新增 `vocabulary` 参数，默认用内置词表；`jd parse` 从数据目录读取用户词表，词表有误时退出码 2。
+- `docs/cn/jd-parse.md` 新增"技能词表"一节（分组、匹配方式、如何追加）。
+- 测试：`tests/test_cn_vocab.py`（五个分组及中文名、跨组无重复、每个词条都能被解析器单独读出、用户追加与新分组、不能删改内置词、9 种格式错误、带 BOM 的文件、CLI 读取数据目录词表）；`test_cn_jd_parser.py` 新增 6 条非技术方向的种子用例，其中 1 条防误读（Excellent 不是 Excel，Sketchy 不是 Sketch）。
+
+**决策**
+
+- 原有 5 份样例只有实习僧样例的结果变了：从标题"数据分析实习生"多读出"数据分析"。这份 JD 就是做数据分析的，判为正确，期望值已更新。
+- 词表是数据，不是代码：放成 JSON 文件，`jobsearch_cn` 仍只用标准库、离线。
+
+**验证**
+
+- 本地全量测试、`security_guards`、`lint_skills` 通过；变异测试：忽略用户词表（14 个测试失败）、用户重复写内置词时不忽略（1 个失败）。
+
+**遗留**
+
+- M2-3 的样例部分：V2 合并后，把 `tests/fixtures/cn/jd-m2-3/` 的 5 份样例并进 `tests/fixtures/cn/jd/` 并接入测试，届时按 V2 记录的识别差距调整词表。
+
+**下一步**：等 V2；M2-4 的任务单由规划者编写。
+
+---
+
 ## 2026-10-27 · Codex CI 复验：本地全量与远端检查通过
 
 **完成与决策**

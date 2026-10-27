@@ -115,6 +115,7 @@ ai-job-search-cn/
 │   ├── jd_parser.py         #   规则抽取（jd parse，见 jd-parse.md）
 │   ├── match.py             #   硬性条件过滤（match filter，见 match.md）
 │   ├── profile.py           #   个人档案 v1 与校验（profile validate/show，见 profile.md）
+│   ├── skills.json          #   内置技能词表（按方向分组，见 jd-parse.md）
 │   ├── store.py             #   本地岗位库与去重（jd save/list/show/status，见 jd-import.md）
 │   └── guard.py             #   防注入：上游 posting_guard + 中文句式（G1）
 ├── tests/test_cn_*.py       # CN 测试：边界守卫、Schema 与 CLI
