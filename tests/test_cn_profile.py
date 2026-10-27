@@ -10,6 +10,7 @@ import copy
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -18,6 +19,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 DOC = REPO / "docs" / "cn" / "profile.md"
+FIXTURES = REPO / "tests" / "fixtures" / "cn" / "profile"
 
 sys.path.insert(0, str(REPO))
 from jobsearch_cn import profile, schema, store  # noqa: E402
@@ -185,6 +187,57 @@ class Commands(unittest.TestCase):
         other.write_text(json.dumps(documented_example(), ensure_ascii=False), encoding="utf-8")
         proc = run_cli("profile", "validate", str(other), data_dir=self.data)
         self.assertEqual(proc.returncode, 0, proc.stdout.decode("utf-8"))
+
+
+class Fixtures(unittest.TestCase):
+    """The sample profiles later matching tests use: one technical, one not."""
+
+    def test_there_is_a_technical_and_a_non_technical_profile(self):
+        self.assertEqual(sorted(p.name for p in FIXTURES.iterdir() if p.is_dir()), ["ops", "tech"])
+
+    def test_each_passes_profile_validate(self):
+        for directory in sorted(FIXTURES.iterdir()):
+            with self.subTest(profile=directory.name), tempfile.TemporaryDirectory() as tmp:
+                shutil.copytree(directory, Path(tmp) / "profile")
+                proc = run_cli("profile", "validate", data_dir=tmp)
+                self.assertEqual(proc.returncode, 0, proc.stdout.decode("utf-8"))
+                self.assertEqual(json.loads(proc.stdout)["warnings"], [])
+
+    def test_contact_details_are_obviously_fake(self):
+        for directory in sorted(FIXTURES.iterdir()):
+            contact = json.loads((directory / "profile.json").read_text(encoding="utf-8"))["contact"]
+            with self.subTest(profile=directory.name):
+                self.assertEqual(contact["phone"], "13800000000")
+                self.assertTrue(contact["email"].endswith("@example.com"), contact["email"])
+
+    def test_profile_show_hides_their_contact_details(self):
+        for directory in sorted(FIXTURES.iterdir()):
+            contact = json.loads((directory / "profile.json").read_text(encoding="utf-8"))["contact"]
+            with self.subTest(profile=directory.name), tempfile.TemporaryDirectory() as tmp:
+                shutil.copytree(directory, Path(tmp) / "profile")
+                shown = run_cli("profile", "show", data_dir=tmp).stdout.decode("utf-8")
+                for value in contact.values():
+                    if value is not None:
+                        self.assertNotIn(value, shown)
+                self.assertIn(contact["phone"], run_cli("profile", "show", "--contact", data_dir=tmp)
+                              .stdout.decode("utf-8"))
+
+    def test_every_fact_from_the_resume_is_in_the_resume(self):
+        # The fixtures model the cn-setup rule: nothing beyond the source.
+        for directory in sorted(FIXTURES.iterdir()):
+            data = json.loads((directory / "profile.json").read_text(encoding="utf-8"))
+            resume = schema.normalize_for_match((directory / "sources" / "resume.txt").read_text(encoding="utf-8"))
+            facts = []
+            for item in data["experience"]:
+                facts += [(item["source"], bullet) for bullet in item["bullets"]]
+                facts += [(item["source"], item["org"])] if item["org"] else []
+            for key, field in (("skills", "name"), ("education", "school"), ("awards", "name"),
+                               ("certificates", "name")):
+                facts += [(item["source"], item[field]) for item in data[key]]
+            for source, fact in facts:
+                if source == "resume.txt":
+                    with self.subTest(profile=directory.name, fact=fact):
+                        self.assertIn(schema.normalize_for_match(fact), resume)
 
 
 # The sentinels upstream CI checks (ci.yml "Placeholder integrity"). Upstream
