@@ -113,6 +113,7 @@ ai-job-search-cn/
 │   ├── cli.py               #   命令行：输出 JSON，强制 UTF-8（已有 jd validate）
 │   ├── schema.py            #   Job Schema v1 与校验（字段见 job-schema.md）
 │   ├── jd_parser.py         #   规则抽取（jd parse，见 jd-parse.md）
+│   ├── match.py             #   硬性条件过滤（match filter，见 match.md）
 │   ├── profile.py           #   个人档案 v1 与校验（profile validate/show，见 profile.md）
 │   ├── store.py             #   本地岗位库与去重（jd save/list/show/status，见 jd-import.md）
 │   └── guard.py             #   防注入：上游 posting_guard + 中文句式（G1）
