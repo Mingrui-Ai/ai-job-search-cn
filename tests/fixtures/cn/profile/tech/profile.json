@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "contact": {"name": "李明", "phone": "13900000001", "email": "liming@example.com", "github": "github.com/example-liming", "website": null},
+  "graduation": {"year": 2027, "month": 6},
+  "education": [
+    {"level": "master", "school": "示例理工大学", "major": "计算机科学与技术", "start": "2025-09", "end": "2027-06",
+     "gpa": "3.6/4.0", "rank": "专业前15%", "courses": ["机器学习", "分布式系统", "数据库系统"], "source": "resume.txt"},
+    {"level": "bachelor", "school": "示例师范大学", "major": "软件工程", "start": "2021-09", "end": "2025-06",
+     "gpa": null, "rank": null, "courses": [], "source": "resume.txt"}
+  ],
+  "availability": {"start_date": "2026-11-15", "days_per_week": 4, "months": 6,
+                   "cities": ["深圳", "广州"], "remote_ok": true, "relocate": false},
+  "target": {"employment_types": ["internship"], "roles": ["后端开发", "大模型应用开发"], "industries": ["互联网"],
+             "salary_min": {"amount": 150, "unit": "CNY/day"}},
+  "skills": [
+    {"name": "Python", "level": "proficient", "used_in": ["exp-1"], "source": "resume.txt"},
+    {"name": "Go", "level": "proficient", "used_in": ["exp-1"], "source": "resume.txt"},
+    {"name": "MySQL", "level": "working", "used_in": ["proj-1"], "source": "resume.txt"},
+    {"name": "LangChain", "level": "working", "used_in": ["proj-1"], "source": "resume.txt"},
+    {"name": "RAG", "level": null, "used_in": ["exp-1", "proj-1"], "source": "resume.txt"},
+    {"name": "Docker", "level": "working", "used_in": [], "source": "resume.txt"},
+    {"name": "PyTorch", "level": "familiar", "used_in": [], "source": "resume.txt"}
+  ],
+  "experience": [
+    {"id": "exp-1", "type": "internship", "org": "示例网络科技有限公司", "role": "后端开发实习生",
+     "start": "2026-03", "end": "2026-08",
+     "bullets": ["使用 Go 重构订单查询接口，P99 延迟从 120ms 降至 45ms",
+                 "为内部 RAG 问答服务编写检索评测脚本（Python），覆盖 300 条测试问题"],
+     "source": "resume.txt"},
+    {"id": "proj-1", "type": "project", "org": null, "role": "个人项目：课程助手问答系统",
+     "start": "2025-10", "end": "2026-01",
+     "bullets": ["基于 LangChain 和 MySQL 搭建课程资料问答，支持 20 门课程的资料检索"],
+     "source": "resume.txt"}
+  ],
+  "awards": [{"name": "全国大学生数学建模竞赛 省级一等奖", "date": "2024-10", "source": "resume.txt"}],
+  "certificates": [{"name": "CET-6", "detail": "552", "date": null, "source": "resume.txt"}],
+  "languages": [{"name": "英语", "level": "CET-6 552", "source": "resume.txt"}],
+  "exclusions": {"cities": [], "companies": [], "keywords": ["外包", "销售"]}
+}
