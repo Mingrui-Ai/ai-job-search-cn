@@ -4,6 +4,39 @@
 
 ---
 
+## 2026-10-27 · M1-5：Codex 端实测（第一轮，部分完成）
+
+**Codex 的记录**（由 Codex 写入，执行者整理）
+
+- Codex 读取了 `AGENTS.md`、CN 开发说明和共用的 `jd-import.md`，使用 conda 环境 `ai-job-search-cn`（Python 3.12.15）。
+- 用脱敏样例 `shixiseng_intern.txt` 实际执行解析、保存、查询、校验和重复导入：首次 `created`，重复导入 `unchanged`，岗位库仍为 1 条，校验通过。数据在已忽略的 `data/ci-codex-2026-10-27/`。
+- `lint_skills`、`security_guards` 通过；`tests.test_cn_agent_entry`、`tests.test_cn_package` 共 11 项通过。
+- 全量测试在 Codex 沙箱中因临时目录 `PermissionError` / `WinError 5` 无法运行（把 `TEMP`/`TMP` 改到仓库内仍然如此），日志在已忽略的 `logs/ci-codex-2026-10-27/`。GitHub CLI 受代理限制，Codex 无法查看远端 CI。
+
+**执行者核对**
+
+- `data/ci-codex-2026-10-27/jobs/job_d3e712c997b0.json` 用 `jd validate` 复核有效，`id` 与 Claude Code 实测同一样例时一致（同一份 JD 得到同一指纹）。
+- 记录中没有任何 `method: agent` 的出处，学历仍为 null：Codex **没有执行第 3 步"补全"**。
+- 建档工作流（`profile-setup.md`）本轮没有测试。
+- 全量测试受阻是 Codex 沙箱的限制，不是代码问题：同期 GitHub Actions 上 PR #9、#11、#12 的全量测试（Python 3.10–3.14、Windows）均通过；执行者本地全量测试也通过。
+
+**ADR-7 的两个问题**
+
+1. Codex 能否通过 `AGENTS.md` 找到工作流：**能**。它从 `AGENTS.md` 找到并按 `jd-import.md` 执行了导入。
+2. Claude Code 是否读取 `AGENTS.md`：**不会自动读取**。Claude Code 会话开始时只自动加载根目录的 `CLAUDE.md`（上游的求职顾问模板），本会话中 `AGENTS.md` 的内容是靠手动打开才看到的。因此 Claude Code 端依赖技能入口（`cn-jd-import`、`cn-setup`），这正是 ADR-7 的设计；开发约定写在 `AGENTS.md` 里，Claude Code 不会自动遵守，要靠开发会话主动读取。
+
+**发现的问题**
+
+- **两个 Agent 共用一个工作目录会互相干扰。** Codex 测试期间，Claude Code 在同一目录里切换分支、提交，Codex 的验证结果因此对应不上最终提交；Codex 写的工作记录也落在了别的功能分支的工作区里，未提交（已由执行者移到本条）。以后并行工作时，每个 Agent 各用一个 `git worktree`，或一个跑的时候另一个不动仓库。
+- Codex 沙箱里跑不了用到临时目录的测试，Codex 端只能跑不依赖临时目录的子集；全量结果以 GitHub Actions 为准。
+
+**遗留**（M1-5 尚未完成）
+
+- 第二轮 Codex 实测：JD 导入要走完第 3 步补全（期望学历补全为本科，出处"上海 | 本科"）；建档流程用 `tests/fixtures/cn/profile/tech/sources/resume.txt` 走一遍，`profile validate` 通过。
+- 建议第二轮在独立的 worktree 中进行。
+
+---
+
 ## 2026-10-27 · v0.2 第 1 项：个人档案（Profile v1）与 cn-setup
 
 **完成**
