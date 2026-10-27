@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-10-27 · M2-2：硬性条件过滤（`match filter`）；H6
+
+**完成**
+
+- H6（PR #11）：两份示例档案的联系方式改为假数据（13800000000、@example.com），测试固定这一点，并确认 `profile show` 默认不输出任何联系方式；CHANGELOG 中 SQLite 改为"按需接入（总体规划 D4）"。
+- `jobsearch_cn/match.py`：按 profile.md §6 的 7 项条件（届别、学历、每周天数、实习月数、地点、岗位类型、排除项）逐项给出 `match` / `conflict` / `unknown`，每项附 JD 的值和出处原文、所用的档案字段；总结论 `ineligible` / `needs_check` / `eligible`。
+- `python -m jobsearch_cn match filter <岗位id> [--profile] [--data-dir]`：从岗位库读岗位、从 `data/profile/` 读档案，结果只输出、不保存，不含联系方式。
+- `docs/cn/match.md`：过滤规则表（每项三种结论的条件）和输出格式。
+- 授权 `Bash(python -m jobsearch_cn match:*)` 登记在 `settings.json`、`ALLOWED_PERMISSIONS`、`ALLOWED_SKILL_TOOLS` 三处。
+
+**决策（实现细节，待规划者确认）**
+
+- 届别 `strict: false` 不符时结论为 `match`，附 `note` 提示，不影响总结论。
+- 地点：任务单之外，沿用 profile.md §6 的"愿意搬家"：没有交集但 `relocate: true` 时为 `match`（附 `note`）。判 `conflict` 要求三件事都确定：没有交集、不能远程（JD 写了不支持，或档案不接受）、不搬家；其中任何一项没写都判 `unknown`。比较城市时"上海"与"上海市"视为相同。
+- 排除项：关键词只匹配标题；另外按 §6 检查排除的公司（公司名包含即命中）和排除的城市（JD 的工作城市全部在排除名单中才算）。
+- 档案只做结构校验，来源文件是否存在不影响过滤结果。
+
+**验证**
+
+- 每项条件的三种结论都有单元测试；5 份样例 JD × 2 份示例档案的 10 组结果写成期望表（`tests/test_cn_match.py` 的 `SAMPLE_TABLE`），逐组对照 JD 原文人工核对，理由写在表上方的注释里。
+- 变异测试：把每个"没写判未知"的分支分别改成判冲突（共 9 处），以及去掉 `strict` 判断，10 次都有测试失败。
+- 本地全量测试、`security_guards`、`lint_skills` 通过。
+
+**发现的问题**
+
+- 样例里只有一份 JD 写明了远程与否，地点项常是 `unknown`；实习僧样例标题行的"本科"规则不读，学历项为 `unknown`。这正是"宁可未知、不误判"的预期，但说明 Agent 补全（jd-import 第 3 步）对过滤结果影响很大。
+
+**下一步**：路线图勾掉 M2-2（等 #10 合并后进行）；之后 M2-3 词表外置或 M2-4 评分，按规划者安排。
+
+---
+
 ## 2026-10-27 · v0.2 第 1 项：个人档案（Profile v1）与 cn-setup
 
 **完成**
