@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 
-from jobsearch_cn import __version__, jd_parser, schema, store
+from jobsearch_cn import __version__, jd_parser, profile, schema, store
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -193,6 +193,46 @@ def cmd_jd_status(args) -> int:
     return 0
 
 
+def _profile_paths(args):
+    root = store.data_dir(args.data_dir) / "profile"
+    return (Path(args.file) if args.file else root / "profile.json"), root
+
+
+def _load_profile(path: Path) -> dict:
+    if not path.is_file():
+        raise InputError(f"no profile at {path}; build one with the cn-setup workflow (docs/cn/profile-setup.md)")
+    try:
+        return json.loads(_read_json_text(str(path)))
+    except json.JSONDecodeError as exc:
+        raise InputError(f"{path} is not valid JSON: {exc}") from None
+
+
+def cmd_profile_validate(args) -> int:
+    path, root = _profile_paths(args)
+    data = _load_profile(path)
+    sources_dir = root / "sources"
+    sources = {p.name for p in sources_dir.iterdir() if p.is_file()} if sources_dir.is_dir() else set()
+    errors = profile.validate(data, sources=sources)
+    warnings = []
+    notes = root / "notes.md"
+    if not notes.is_file():
+        warnings.append("notes.md is missing; CVs and greetings will have no free-text material")
+    else:
+        try:
+            notes.read_bytes().decode("utf-8-sig")
+        except UnicodeDecodeError:
+            errors.append("notes.md: not UTF-8 text; save it as UTF-8")
+    _emit({"valid": not errors, "errors": errors, "warnings": warnings})
+    return 1 if errors else 0
+
+
+def cmd_profile_show(args) -> int:
+    path, _ = _profile_paths(args)
+    data = _load_profile(path)
+    _emit(data if args.contact else profile.redacted(data))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m jobsearch_cn",
@@ -251,6 +291,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     validate.add_argument("file", nargs="?", default="-", help="JSON 文件路径；省略或为 - 时读取标准输入")
     validate.set_defaults(handler=cmd_jd_validate)
+
+    prof = commands.add_parser("profile", help="个人档案相关命令", description="个人档案相关命令（data/profile/）")
+    prof.set_defaults(help_parser=prof)
+    prof_commands = prof.add_subparsers(dest="profile_command", metavar="<profile-command>")
+
+    prof_validate = prof_commands.add_parser(
+        "validate", parents=[stored], help="按 docs/cn/profile.md 校验个人档案",
+        description="校验 data/profile/profile.json，并检查来源文件和 notes.md，"
+                    "输出 {\"valid\": ..., \"errors\": [...], \"warnings\": [...]}。",
+    )
+    prof_validate.add_argument("file", nargs="?", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    prof_validate.set_defaults(handler=cmd_profile_validate)
+
+    prof_show = prof_commands.add_parser("show", parents=[stored], help="输出个人档案（默认隐去联系方式）",
+                                         description="输出个人档案。联系方式默认隐去，加 --contact 才显示。")
+    prof_show.add_argument("file", nargs="?", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    prof_show.add_argument("--contact", action="store_true", help="显示联系方式（只在写简历时需要）")
+    prof_show.set_defaults(handler=cmd_profile_show)
     return parser
 
 

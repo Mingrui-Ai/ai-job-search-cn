@@ -1,6 +1,6 @@
 # 个人档案（Profile v1）设计稿
 
-> 状态：**设计稿，待确认**。确认后实现为 `jobsearch_cn/profile.py` 和 `profile validate` 命令（v0.2 第 1 项）。
+> 状态：**v1 已实现**（2026-10-27）：`jobsearch_cn/profile.py`、`profile validate` / `profile show`，建档流程见 [profile-setup.md](profile-setup.md)。字段先按本稿实现，使用中再调整。
 
 ## 1. 已定的方向（2026-10-27）
 
@@ -45,7 +45,7 @@ data/profile/
     "salary_min": {"amount": 150, "unit": "CNY/day"}
   },
   "skills": [
-    {"name": "Python", "level": "proficient", "used_in": ["exp-1", "proj-1"], "source": "resume.pdf"}
+    {"name": "Python", "level": "proficient", "used_in": ["exp-1"], "source": "resume.pdf"}
   ],
   "experience": [
     {"id": "exp-1", "type": "internship", "org": "某科技公司", "role": "后端开发实习生",
@@ -120,8 +120,7 @@ JD 字段为 `null` 时结论是"未知"，不判为不符合。
 - 新增测试，检查 `data/profile/` 被 git 忽略；
 - CN 命令输出档案时默认隐去 `contact`，需要时显式加参数。
 
-## 8. 待确认
+## 8. 已定与待定
 
-1. 字段是否够用、是否多余（例如 `rank`、`courses`、`website`）；
-2. 技能等级用四档（了解/熟悉/熟练/精通）是否合适；
-3. `exclusions.keywords` 是只匹配标题，还是也匹配正文（匹配正文更严格，但容易误伤）。
+- 字段与四档技能等级按本稿实现，使用中再调整（2026-10-27）。
+- `exclusions.keywords` 暂定只匹配岗位标题（正文容易误伤，例如"非外包岗位"），在 v0.2 硬性过滤中实现，可再讨论。

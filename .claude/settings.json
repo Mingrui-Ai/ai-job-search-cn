@@ -27,7 +27,8 @@
       "Bash(python3 tools/fetch_page.py:*)",
       "Bash(python tools/posting_guard.py:*)",
       "Bash(python3 tools/posting_guard.py:*)",
-      "Bash(python -m jobsearch_cn jd:*)"
+      "Bash(python -m jobsearch_cn jd:*)",
+      "Bash(python -m jobsearch_cn profile:*)"
     ],
     "ask": [
       "Edit(.claude/settings.json)",
