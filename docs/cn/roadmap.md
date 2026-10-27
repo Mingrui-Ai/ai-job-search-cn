@@ -18,7 +18,7 @@
 | 第 1 步（D2） | Job Schema v1、`jd validate` | ✅ PR #1 |
 | 第 2 步（D3） | `jd parse` 规则抽取、多份导入、编码处理、中文防注入（G1）、5 份脱敏样例 | ✅ PR #2 |
 | 第 3 步（D4–5） | 本地岗位库、去重（G2）、两个 Agent 的入口 | ✅ PR #3（Codex 端待实测） |
-| 第 4 步（D6–7） | 测试补强、文档、`v0.1.0` | ✅ PR #4（tag 待 Codex 实测后打） |
+| 第 4 步（D6–7） | 测试补强、文档、`v0.1.0` | ✅ PR #5（tag 待 Codex 实测后打） |
 
 测试：947 个通过（CN 111 个）。本地环境：conda `ai-job-search-cn`（Python 3.12）。
 
