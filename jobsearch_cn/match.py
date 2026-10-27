@@ -137,10 +137,11 @@ def _location(job, profile):
     if relocate is True:
         return _item("location", MATCH, f"{where}不在意向城市内，但你愿意去其他城市", job, *fields, profile,
                      note="需要搬到其他城市")
-    # Remote could still save it if either side has not said.
-    if relocate is None or (remote is True and remote_ok is None) or (remote is None and remote_ok is True):
-        return _item("location", UNKNOWN, f"{where}不在意向城市内，是否可远程或愿意搬家未知", job, *fields, profile)
-    return _item("location", CONFLICT, f"{where}不在意向城市内，且不能远程、不搬家", job, *fields, profile)
+    # A conflict needs both ways out closed on the record: no move, and remote
+    # ruled out by one side. Remote unstated on both sides is still a way out.
+    if relocate is False and (remote is False or remote_ok is False):
+        return _item("location", CONFLICT, f"{where}不在意向城市内，且不能远程、不搬家", job, *fields, profile)
+    return _item("location", UNKNOWN, f"{where}不在意向城市内，是否可远程或愿意搬家未知", job, *fields, profile)
 
 
 _TYPE_NAMES = {"internship": "实习", "campus": "校招", "experienced": "社招"}

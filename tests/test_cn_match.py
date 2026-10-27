@@ -143,8 +143,12 @@ class Location(CheckCase):
         self.assertIn("note", item)
 
     def test_no_shared_city_no_remote_no_move_is_a_conflict(self):
+        # Remote ruled out by either side, and no move.
         self.assert_result(CONFLICT, job=self.place(["北京"], False), profile=self.wants(["深圳"], False, False))
         self.assert_result(CONFLICT, job=self.place(["北京"], None), profile=self.wants(["深圳"], False, False))
+        self.assert_result(CONFLICT, job=self.place(["北京"], False), profile=self.wants(["深圳"], None, False))
+        self.assert_result(CONFLICT, job=self.place(["北京"], False), profile=self.wants(["深圳"], True, False))
+        self.assert_result(CONFLICT, job=self.place(["北京"], True), profile=self.wants(["深圳"], False, False))
 
     def test_unknown_when_a_way_out_is_unstated(self):
         cases = [
@@ -153,6 +157,7 @@ class Location(CheckCase):
             (self.place(["北京"], False), self.wants(["深圳"], False, None)),   # relocation unknown
             (self.place(["北京"], None), self.wants(["深圳"], True, False)),    # JD remote unknown
             (self.place(["北京"], True), self.wants(["深圳"], None, False)),    # profile remote unknown
+            (self.place(["北京"], None), self.wants(["深圳"], None, False)),    # remote unstated on both sides
         ]
         for job, profile in cases:
             with self.subTest(job=job["cities"], profile=profile["availability"]):

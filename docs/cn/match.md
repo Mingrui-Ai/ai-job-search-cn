@@ -50,7 +50,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 | `education` | `requirements.education.min` | `education[]` 中最高的 `level` | 最高学历不低于最低要求 | 低于最低要求 | JD 没写最低学历（只写"优先"也算没写），或档案没写学历 |
 | `days_per_week` | `requirements.days_per_week` | `availability.days_per_week` | 要求天数 ≤ 你能到岗的天数 | 要求天数更多 | 任一方没写 |
 | `min_months` | `requirements.min_months` | `availability.months` | 要求月数 ≤ 你能实习的月数 | 要求月数更多 | 任一方没写 |
-| `location` | `cities`、`remote` | `availability.cities`、`remote_ok`、`relocate` | 城市有交集（"上海"与"上海市"视为相同）；或 JD 可远程且你接受远程；或你愿意搬家（附 `note`） | 没有交集，且确定不能远程（JD 不支持或你不接受），你也不搬家 | JD 或档案没写城市；或没有交集，但"能否远程""是否搬家"中有一方没写 |
+| `location` | `cities`、`remote` | `availability.cities`、`remote_ok`、`relocate` | 城市有交集（"上海"与"上海市"视为相同）；或 JD 可远程且你接受远程；或你愿意搬家（附 `note`） | 没有交集，你明确不搬家（`relocate: false`），并且 JD 写明不支持远程或你明确不接受远程 | JD 或档案没写城市；或没有交集，但是否搬家没写，或能否远程两边都没有否定（包括两边都没写） |
 | `employment_type` | `employment_type` | `target.employment_types` | 岗位类型在你的求职方向中 | 不在其中 | 任一方没写 |
 | `exclusions` | `title`、`company`、`cities` | `exclusions` | 没命中排除项 | 标题含排除关键词；公司名含排除的公司；工作城市全部在排除城市中 | 设了排除关键词或公司，但 JD 没写标题或公司 |
 
