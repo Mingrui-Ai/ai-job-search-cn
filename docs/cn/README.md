@@ -63,4 +63,24 @@ python -m jobsearch_cn profile validate              # 校验 data/profile/ 下�
 - 功能开发在 `feat/cn-*` 分支进行，合并回 `master`。提交信息沿用上游的 Conventional Commits，例如 `feat(cn): add Chinese JD import`。
 - 推送 `master` 和开 PR 都会触发 CI。
 - 个人数据已被 `.gitignore` 忽略：`data/`（含个人档案 `data/profile/`）、`logs/`、`documents/` 下的个人文件、求职记录。提交前用 `git status` 确认。
-- 上游 `/setup` 会把个人信息写进被 git 跟踪的 `CLAUDE.md` 等文件，CN 档案方案落地前先不要用它。
+- 上游 `/setup` 会把个人信息写进被 git 跟踪的 `CLAUDE.md` 等文件，不要用它；CN 建档用 [profile-setup.md](profile-setup.md)。
+
+### 多个 Agent 并行工作
+
+两个 Agent 在同一个目录里工作会互相干扰：一方切换分支或提交，另一方的文件和验证结果随之改变（M1-5 实测中发生过）。所以每个 Agent 用自己的 `git worktree`：同一个仓库、共享提交历史，但各有一个工作目录。
+
+| 目录 | 使用者 |
+| --- | --- |
+| `D:_Projectsi-job-search-cn` | Claude Code（执行：功能开发） |
+| `D:_Projectsi-job-search-cn-codex` | Codex（实测、验证） |
+| `D:_Projectsi-job-search-cn-plan` | 规划 |
+
+```powershell
+git worktree list                                                    # 查看所有工作目录
+git worktree add -b <新分支> ..i-job-search-cn-<名字> origin/master  # 新建
+git worktree remove ..i-job-search-cn-<名字>                       # 删除（目录里不能有未提交的改动）
+```
+
+- 一个分支同一时间只能在一个目录里签出。要查看别人正在用的分支，用 `git switch --detach origin/<分支>`。
+- 各目录的 `data/`、`logs/` 是分开的（都被 git 忽略）。要用同一份数据，设置环境变量 `JOBSEARCH_CN_DATA_DIR` 或加 `--data-dir`。
+- conda 环境 `ai-job-search-cn` 各目录共用。
