@@ -140,5 +140,38 @@ class CliEntryPoint(unittest.TestCase):
                 self.assertIn("离线", proc.stdout.decode("utf-8"))
 
 
+
+class NoControlCharacters(unittest.TestCase):
+    """No C0 control characters in CN text files.
+
+    They are invisible in an editor and on GitHub, so they slip through
+    review. The usual source is a backslash eaten by a string escape while a
+    file is generated: "D:\06_Projects" written through a non-raw Python
+    string becomes "D:" + chr(6) + "_Projects". Tab, newline and carriage
+    return are fine.
+    """
+
+    ALLOWED = {chr(9), chr(10), chr(13)}  # tab, newline, carriage return
+
+    def files(self):
+        yield REPO / "AGENTS.md"
+        yield from sorted((REPO / "docs" / "cn").rglob("*.md"))
+        yield from sorted(PACKAGE.rglob("*.py"))
+
+    def test_none_in_docs_agents_or_package(self):
+        found = []
+        for path in self.files():
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                bad = sorted({f"0x{ord(c):02x}" for c in line if (ord(c) < 0x20 or ord(c) == 0x7F)
+                              and c not in self.ALLOWED})
+                if bad:
+                    found.append(f"{path.relative_to(REPO)}:{number}: {', '.join(bad)}")
+        self.assertEqual(found, [], "control characters, probably a backslash lost to a string escape")
+
+    def test_the_check_sees_them(self):
+        line = "D:" + chr(6) + "_Projects" + chr(7) + "i-job-search-cn"
+        self.assertTrue(any(ord(c) < 0x20 and c not in self.ALLOWED for c in line))
+        self.assertTrue(list(self.files()), "sanity: no files to check")
+
 if __name__ == "__main__":
     unittest.main()

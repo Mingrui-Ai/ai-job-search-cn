@@ -71,14 +71,14 @@ python -m jobsearch_cn profile validate              # 校验 data/profile/ 下�
 
 | 目录 | 使用者 |
 | --- | --- |
-| `D:_Projectsi-job-search-cn` | Claude Code（执行：功能开发） |
-| `D:_Projectsi-job-search-cn-codex` | Codex（实测、验证） |
-| `D:_Projectsi-job-search-cn-plan` | 规划 |
+| `D:\06_Projects\ai-job-search-cn` | Claude Code（执行：功能开发） |
+| `D:\06_Projects\ai-job-search-cn-codex` | Codex（实测、验证） |
+| `D:\06_Projects\ai-job-search-cn-plan` | 规划 |
 
 ```powershell
 git worktree list                                                    # 查看所有工作目录
-git worktree add -b <新分支> ..i-job-search-cn-<名字> origin/master  # 新建
-git worktree remove ..i-job-search-cn-<名字>                       # 删除（目录里不能有未提交的改动）
+git worktree add -b <新分支> ../ai-job-search-cn-<名字> origin/master  # 新建
+git worktree remove ../ai-job-search-cn-<名字>                       # 删除（目录里不能有未提交的改动）
 ```
 
 - 一个分支同一时间只能在一个目录里签出。要查看别人正在用的分支，用 `git switch --detach origin/<分支>`。
