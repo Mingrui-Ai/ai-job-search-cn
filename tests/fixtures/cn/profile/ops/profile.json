@@ -1,33 +1,127 @@
 {
   "schema_version": 1,
-  "contact": {"name": "王芳", "phone": "13800000000", "email": "wangfang@example.com", "github": null, "website": null},
-  "graduation": {"year": 2027, "month": 6},
+  "contact": {
+    "name": "王芳",
+    "phone": "13800000000",
+    "email": "wangfang@example.com",
+    "github": null,
+    "website": null
+  },
+  "graduation": {
+    "year": 2027,
+    "month": 6
+  },
   "education": [
-    {"level": "bachelor", "school": "示例财经大学", "major": "市场营销", "start": "2023-09", "end": "2027-06",
-     "gpa": null, "rank": null, "courses": [], "source": "resume.txt"}
+    {
+      "level": "bachelor",
+      "school": "示例财经大学",
+      "major": "市场营销",
+      "start": "2023-09",
+      "end": "2027-06",
+      "gpa": null,
+      "rank": null,
+      "courses": [],
+      "source": "resume.txt"
+    }
   ],
-  "availability": {"start_date": "2026-12-01", "days_per_week": 3, "months": 3,
-                   "cities": ["上海"], "remote_ok": false, "relocate": false},
-  "target": {"employment_types": ["internship", "campus"], "roles": ["新媒体运营", "内容运营"], "industries": [],
-             "salary_min": null},
+  "availability": {
+    "start_date": "2026-12-01",
+    "days_per_week": 3,
+    "months": 3,
+    "cities": [
+      "上海"
+    ],
+    "remote_ok": false,
+    "relocate": false
+  },
+  "target": {
+    "employment_types": [
+      "internship",
+      "campus"
+    ],
+    "roles": [
+      "新媒体运营",
+      "内容运营"
+    ],
+    "industries": [],
+    "salary_min": null
+  },
   "skills": [
-    {"name": "Excel", "level": "proficient", "used_in": [], "source": "resume.txt"},
-    {"name": "秀米", "level": "proficient", "used_in": ["exp-1"], "source": "resume.txt"},
-    {"name": "剪映", "level": "working", "used_in": ["campus-1"], "source": "resume.txt"},
-    {"name": "Photoshop", "level": "working", "used_in": ["campus-1"], "source": "resume.txt"}
+    {
+      "name": "Excel",
+      "level": "proficient",
+      "used_in": [],
+      "source": "resume.txt"
+    },
+    {
+      "name": "秀米",
+      "level": "proficient",
+      "used_in": [
+        "exp-1"
+      ],
+      "source": "resume.txt"
+    },
+    {
+      "name": "剪映",
+      "level": "working",
+      "used_in": [
+        "campus-1"
+      ],
+      "source": "resume.txt"
+    },
+    {
+      "name": "Photoshop",
+      "level": "working",
+      "used_in": [
+        "campus-1"
+      ],
+      "source": "resume.txt"
+    }
   ],
   "experience": [
-    {"id": "exp-1", "type": "internship", "org": "示例文化传媒有限公司", "role": "新媒体运营实习生",
-     "start": "2025-07", "end": "2025-10",
-     "bullets": ["负责公众号日常推文，3 个月内粉丝从 8000 增至 1.2 万", "策划 2 场线上抽奖活动，单场参与 1500 人"],
-     "source": "resume.txt"},
-    {"id": "campus-1", "type": "campus", "org": "校学生会宣传部", "role": "副部长",
-     "start": "2024-09", "end": "2025-06",
-     "bullets": ["组织校园歌手大赛宣传，制作海报和短视频"],
-     "source": "resume.txt"}
+    {
+      "id": "exp-1",
+      "type": "internship",
+      "name": null,
+      "org": "示例文化传媒有限公司",
+      "role": "新媒体运营实习生",
+      "start": "2025-07",
+      "end": "2025-10",
+      "bullets": [
+        "负责公众号日常推文，3 个月内粉丝从 8000 增至 1.2 万",
+        "策划 2 场线上抽奖活动，单场参与 1500 人"
+      ],
+      "source": "resume.txt"
+    },
+    {
+      "id": "campus-1",
+      "type": "campus",
+      "name": null,
+      "org": "校学生会宣传部",
+      "role": "副部长",
+      "start": "2024-09",
+      "end": "2025-06",
+      "bullets": [
+        "组织校园歌手大赛宣传，制作海报和短视频"
+      ],
+      "source": "resume.txt"
+    }
   ],
   "awards": [],
-  "certificates": [{"name": "普通话二级甲等", "detail": null, "date": null, "source": "resume.txt"}],
+  "certificates": [
+    {
+      "name": "普通话二级甲等",
+      "detail": null,
+      "date": null,
+      "source": "resume.txt"
+    }
+  ],
   "languages": [],
-  "exclusions": {"cities": [], "companies": [], "keywords": ["电话销售"]}
+  "exclusions": {
+    "cities": [],
+    "companies": [],
+    "keywords": [
+      "电话销售"
+    ]
+  }
 }
