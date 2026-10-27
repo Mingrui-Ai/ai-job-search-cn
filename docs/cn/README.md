@@ -9,6 +9,7 @@
 | 文档 | 内容 |
 | --- | --- |
 | [master-plan.md](master-plan.md) | 总体规划：最终目的、设计原则、系统全貌、M1–M8 里程碑、待决事项、协作方式 |
+| [tasks.md](tasks.md) | 计划清单：按里程碑拆分的任务、负责人和验收，逐项勾选 |
 | [worklog.md](worklog.md) | 工作记录：每一步做了什么、验证结果、遗留问题（按时间倒序） |
 | [CHANGELOG.md](CHANGELOG.md) | 版本更新记录（CN） |
 | [roadmap.md](roadmap.md) | 完整计划书：目标、阶段与里程碑、每步交付与验收、风险 |
