@@ -4,6 +4,106 @@
 
 ---
 
+## 2026-10-27 · v0.2 第 1 项：个人档案（Profile v1）与 cn-setup
+
+**完成**
+
+- 设计稿 `docs/cn/profile.md`，与用户确认三个方向：JSON + Markdown 两个文件；独立的 CN 建档流程、不用上游 `/setup`；从简历文件抽取再问答补全。字段按设计稿实现，使用中再调整。
+- `jobsearch_cn/profile.py`：Profile v1 校验。沿用 Job Schema 的约定（所有键必须出现、未知键报错），学历、岗位类型、薪资单位与 JD 记录共用取值；每条事实必须带 `source`（`sources/` 下的文件名或 `user`），`used_in` 必须指向存在的经历，经历 `id` 不能重复，技能名比较时忽略大小写和全角/半角。
+- CLI：`profile validate`（同时检查来源文件是否存在、`notes.md` 是否为 UTF-8）和 `profile show`（默认隐去联系方式，`--contact` 才显示）。
+- `docs/cn/profile-setup.md`：共用的建档工作流；Claude Code 入口 `.claude/skills/cn-setup`，Codex 入口在 `AGENTS.md`；授权 `Bash(python -m jobsearch_cn profile:*)` 同样登记三处。
+- 隐私护栏：`tests/test_cn_profile.py` 检查上游 `/setup` 会改写的 5 个模板文件仍保留占位符（上游 CI 的同类检查只在上游仓库运行），并检查 `data/profile/` 被 git 忽略。
+- `tests/test_cn_agent_entry.py` 改为同时覆盖两个工作流。
+
+**决策**
+
+- `exclusions.keywords` 暂定只匹配标题，在硬性过滤中实现。
+- 档案的来源规则比 JD 宽：用户本人是权威来源，所以只要求标明出处、来源文件存在，不要求逐字匹配原文。
+
+**验证**
+
+- 本地 Python 3.12：967 个测试全部通过（跳过 9 个），其中 CN 131 个；`security_guards`、`lint_skills` 通过。
+- 变异测试：关掉"来源文件必须存在""used_in 必须指向存在的经历""隐去联系方式"，每次都有测试失败。
+- 校验器在第一次运行时就发现了设计稿示例里的错误（`used_in` 指向不存在的 `proj-1`），已修正文档。
+
+**遗留问题**
+
+- cn-setup 还没用真实简历实际走过一遍。
+- Codex 端（两个工作流）待实测。
+
+**下一步**：v0.2 第 2 项，硬性条件过滤（`match` 命令，按 profile.md §6 的对照表），JD 字段为 null 时判为"未知"。
+
+---
+
+## 2026-10-27 · 第 4 步：v0.1 验收测试与发布准备
+
+**完成**
+
+- `tests/test_cn_acceptance.py`：通过真实 CLI 逐条对应 v0.1 验收清单：
+  - 5 份脱敏样例一次粘贴，解析、保存得到 5 个 `created`；倒序再导入全部 `unchanged`；`list`、`show`、`validate` 都对得上；
+  - 混合粘贴（正常 JD + 空段 + 超长 JD）只保留正常的那份，超长的给出 `too_long` 警告；只有超长 JD 时退出码 1 且不保存；
+  - 几乎什么都没写的 JD 仍生成有效记录（所有字段为 null 或 `[]`），可以保存；
+  - 带中文注入句式的 JD：`warnings` 给出摘录，记录里 `guard.verdict` 为 `warn` 且只有计数；除 `raw_text` 外，记录中任何地方都不出现注入内容；
+  - `jd save` 收到非 JSON、空 `jobs` 或非记录内容时拒绝，不写入任何东西。
+- 版本号改为 `0.1.0`；新增 `docs/cn/CHANGELOG.md`。
+
+**决策**
+
+- `v0.1.0` 的 tag 等 PR #3、#5 合并且 Codex 端实测之后再打，保证 tag 对应的版本满足"两个 Agent 都能完成导入与查询"。
+- 注入内容保留在 `raw_text` 中：它是原文的一部分，已被标记；去掉它会让出处校验和去重失真。
+
+**验证**
+
+- 本地 Python 3.12：947 个测试全部通过（跳过 9 个），其中 CN 111 个；`security_guards`、`lint_skills` 通过。
+
+**遗留问题**
+
+- Codex 端实测（用户稍后进行）。
+- 工作区 `README.md` 的中文首页改动仍未提交，其中版本写的是 `0.1.0.dev0`，发布时需要同步。
+
+**下一步**：Codex 实测 → 合并 PR #3、#5 → 打 `v0.1.0` → 进入 v0.2（个人档案、硬性条件过滤、可解释评分、中文简历）。
+
+---
+
+## 2026-10-27 · 第 3 步：本地岗位库、去重（G2）与两个 Agent 的入口
+
+**完成**
+
+- `jobsearch_cn/store.py`：每条记录一个 `data/jobs/<id>.json`，原子写入；`--data-dir` 或环境变量 `JOBSEARCH_CN_DATA_DIR` 可换位置。
+- 去重：先比内容指纹（`id`），再比规范化后的来源链接（忽略 http/https、大小写、默认端口、末尾斜杠、`utm_*`/`ka`/`spm` 等跟踪参数和参数顺序）。
+- 合并规则：同一份 JD 逐字段合并，新值覆盖、空值不抹掉旧值，用户填写的值只被用户值覆盖；同一链接的 JD 改过文字时用新内容替换，保留原 `id`、状态和首次导入时间；状态只由 `jd status` 修改。
+- CLI：`jd save`（接受单条记录或 `jd parse` 的输出，任何一条无效就一条都不存）、`jd list [--status]`、`jd show`、`jd status`；`jd parse --save` 一步完成解析和保存，避开 PowerShell 5.1 管道问题。
+- `docs/cn/jd-import.md`：两个 Agent 共用的唯一工作流（解析、补全、校验、保存、查询、去重说明）。
+- Claude Code：`.claude/skills/cn-jd-import/SKILL.md`，只是指向该文档的薄入口；授权 `Bash(python -m jobsearch_cn jd:*)`，同时登记在 `.claude/settings.json`、`ALLOWED_PERMISSIONS` 和 `ALLOWED_SKILL_TOOLS`。
+- Codex：`AGENTS.md` CN 段落加一行指向同一文档；顺带删掉"posting_guard 只识别英文"这条已过时的提醒。
+- `tests/test_cn_store.py`（去重、合并、链接规范化、文件安全、CLI）和 `tests/test_cn_agent_entry.py`（两端入口指向同一文档、文档里的每条命令都存在、授权在三处一致）。
+
+**决策**
+
+- 去重顺序与原计划不同：原计划是"可信岗位 ID > URL > 内容指纹"。Schema v1 没有门户岗位 ID 字段，这一级等 v0.3 再加；内容指纹排在 URL 前，因为它表示原文完全相同，合并最安全。
+- SQLite 推迟到 v0.2：JSON 文件对现在的规模足够，也方便用户直接查看；等匹配筛选需要查询时再接到同一套接口后面。
+- 只授权 `jd` 命令组，不授权整个 `python -m jobsearch_cn`。
+
+**验证**
+
+- 本地 Python 3.12：941 个测试全部通过（跳过 9 个），其中 CN 105 个；`security_guards`、`lint_skills` 通过。
+- 变异测试：分别关掉"用户值不被覆盖""按链接去重""空值不抹掉旧值"，每次都有测试失败。
+- 端到端（Claude Code 按 jd-import.md 实际执行）：解析并保存实习僧样例 → Agent 补全学历（出处"上海 | 本科"）→ `validate` 通过、`save` 得到 `updated` → 重新解析得到 `unchanged`，补全仍在 → 改用原文没有的出处"本科及以上"时被 `validate` 拒绝。
+
+**发现的问题**
+
+- Git Bash 的 `/tmp/...` 路径 Windows 版 Python 读不到；Agent 在 Windows 上调用 CLI 时应使用 Windows 路径或仓库内的相对路径（工作流已统一用 `data/inbox/`）。
+- 本步进行中，工作区的 `README.md` 出现了与本步无关的未提交改动（中文首页），没有放进本 PR。
+
+**遗留问题**
+
+- ADR-7 的 Codex 端还没实测：Codex 能否按 `AGENTS.md` 找到并完成这个工作流。
+- Claude Code 是否会读 `AGENTS.md` 已不影响本工作流（它走技能入口），但仍待确认。
+
+**下一步**：第 4 步，测试补强与 `v0.1.0`，先做 Codex 端实测。
+
+---
+
 ## 2026-10-27 · 第 2 步：规则解析 `jd parse` 与中文防注入（G1）
 
 **完成**

@@ -1,0 +1,36 @@
+# 建档工作流 cn-setup（Codex 与 Claude Code 共用）
+
+这是建立和更新个人档案的唯一说明。Claude Code 的 `.claude/skills/cn-setup/SKILL.md` 和 Codex 读取的 `AGENTS.md` 都只指向本文（ADR-7）。字段定义见 [profile.md](profile.md)。
+
+**不要运行上游的 `/setup`**：它会把个人信息写进被 git 跟踪的文件。CN 档案只写 `data/profile/`（已被 git 忽略）。
+
+## 规则
+
+- **只写有来源的事实。** 每条教育、经历、技能、奖项、证书、语言都带 `source`：取自 `data/profile/sources/` 下的哪个文件，或用户口述时写 `user`。材料里没有、用户也没说过的，不写；不美化数字，不把"参与"写成"负责"。
+- **用户确认后才保存。** 起草的内容逐节展示，用户确认或修改后再写入。
+- **不覆盖已确认的内容。** 再次运行时只提出新增或有变化的条目，并说明依据。
+- **联系方式只用于简历。** 汇报、日志里不要复述手机号和邮箱；查看档案用 `profile show`，它默认隐去联系方式。
+
+## 步骤
+
+1. **收集材料。** 请用户把简历（PDF、DOCX、TXT 均可）、成绩单、获奖证明等放进 `data/profile/sources/`。没有材料也可以，全程问答即可，此时 `source` 都写 `user`。
+2. **起草。** 读取 `sources/` 中的材料（已有档案时先读 `data/profile/profile.json` 和 `notes.md`），按 [profile.md §3](profile.md#3-profilejson-字段) 起草：
+   - 经历的 `id` 用 `exp-1`、`proj-1` 这类短名，技能的 `used_in` 指向这些 `id`；
+   - 技能等级只在材料或用户明确说明时填写，否则留 `null`；
+   - 日期写成 `YYYY-MM`。
+3. **逐节确认。** 依次展示：教育 → 经历 → 技能 → 奖项、证书、语言 → 联系方式。每节等用户确认后再进入下一节。
+4. **补问材料里通常没有的信息**（来源写 `user`）：
+   - 毕业年月；
+   - 最早到岗日期、每周能到岗几天、能实习几个月；
+   - 意向城市、是否接受远程、是否愿意去其他城市；
+   - 求职类型（实习 / 校招 / 社招）、方向、行业、最低薪资；
+   - 排除项：不去的城市、不考虑的公司、看到就排除的标题关键词（例如"销售""外包"）。
+5. **写 notes.md。** 按 [profile.md §4](profile.md#4-notesmd) 的小节起草，请用户修改确认。其中的成果都应能在 `profile.json` 的经历里找到。
+6. **保存并校验。** 写入 `data/profile/profile.json` 和 `data/profile/notes.md`，然后：
+
+   ```text
+   python -m jobsearch_cn profile validate
+   ```
+
+   有错误就按提示修改后重新校验。`source` 报"文件不存在"时，核对 `sources/` 下的文件名，不要改成 `user` 来绕过。
+7. **汇报。** 用 `python -m jobsearch_cn profile show` 查看结果，向用户简要汇报档案内容和仍为空的字段。

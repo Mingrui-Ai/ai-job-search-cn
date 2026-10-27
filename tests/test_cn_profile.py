@@ -1,0 +1,221 @@
+"""Tests for jobsearch_cn/profile.py, `profile validate / show`, and the privacy guard.
+
+The profile is the user's own data, so these pin three things: the validator
+enforces docs/cn/profile.md (shared enums with job records, sources on every
+fact, references that resolve), the commands keep contact details out of
+ordinary output, and - because the upstream /setup writes personal data into
+tracked files - that those files still hold their placeholders in this fork.
+"""
+import copy
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+DOC = REPO / "docs" / "cn" / "profile.md"
+
+sys.path.insert(0, str(REPO))
+from jobsearch_cn import profile, schema, store  # noqa: E402
+
+
+def documented_example() -> dict:
+    text = DOC.read_text(encoding="utf-8")
+    block = re.search(r"```json\n(.*?)```", text, re.S).group(1)
+    return json.loads(block)
+
+
+def with_value(data: dict, path: str, value) -> dict:
+    data = copy.deepcopy(data)
+    target = data
+    *parents, leaf = path.split(".")
+    for part in parents:
+        target = target[int(part)] if isinstance(target, list) else target[part]
+    if isinstance(target, list):
+        target[int(leaf)] = value
+    else:
+        target[leaf] = value
+    return data
+
+
+class Validate(unittest.TestCase):
+    def setUp(self):
+        self.example = documented_example()
+
+    def assert_error(self, data, fragment, sources=None):
+        errors = profile.validate(data, sources=sources)
+        self.assertTrue(any(fragment in e for e in errors), f"{fragment!r} not in {errors}")
+
+    def test_the_documented_example_is_valid(self):
+        self.assertEqual(profile.validate(self.example, sources={"resume.pdf"}), [])
+
+    def test_every_documented_key_is_in_the_doc(self):
+        text = DOC.read_text(encoding="utf-8")
+        names = set(profile.TOP_LEVEL_KEYS) | set(profile.SKILL_LEVELS) | set(profile.EXPERIENCE_TYPES)
+        missing = sorted(n for n in names if n not in text)
+        self.assertEqual(missing, [], "docs/cn/profile.md is out of step with jobsearch_cn/profile.py")
+
+    def test_an_empty_profile_is_valid(self):
+        empty = {
+            "schema_version": 1,
+            "contact": dict.fromkeys(profile.CONTACT_KEYS),
+            "graduation": None,
+            "education": [],
+            "availability": {"start_date": None, "days_per_week": None, "months": None,
+                             "cities": [], "remote_ok": None, "relocate": None},
+            "target": {"employment_types": [], "roles": [], "industries": [], "salary_min": None},
+            "skills": [], "experience": [], "awards": [], "certificates": [], "languages": [],
+            "exclusions": {"cities": [], "companies": [], "keywords": []},
+        }
+        self.assertEqual(profile.validate(empty), [])
+
+    def test_missing_and_unknown_keys(self):
+        data = copy.deepcopy(self.example)
+        del data["exclusions"]
+        data["hobbies"] = []
+        self.assert_error(data, "exclusions: missing")
+        self.assert_error(data, "hobbies: unknown field")
+
+    def test_enums_are_shared_with_job_records(self):
+        self.assert_error(with_value(self.example, "education.0.level", "本科"), "education[0].level: must be one of")
+        self.assert_error(with_value(self.example, "target.employment_types", ["实习"]), "target.employment_types[0]")
+        self.assert_error(with_value(self.example, "target.salary_min.unit", "元/天"), "target.salary_min.unit")
+        self.assertEqual(profile.validate(with_value(self.example, "education.0.level", "phd")), [])
+
+    def test_ranges_and_dates(self):
+        cases = {
+            "availability.days_per_week": (8, "availability.days_per_week"),
+            "availability.months": (0, "availability.months"),
+            "graduation.year": (27, "graduation.year"),
+            "graduation.month": (13, "graduation.month"),
+            "availability.start_date": ("2026-11", "availability.start_date"),
+            "experience.0.start": ("2026/03", "experience[0].start"),
+            "awards.0.date": ("2025-13", "awards[0].date"),
+        }
+        for path, (value, fragment) in cases.items():
+            with self.subTest(path=path):
+                self.assert_error(with_value(self.example, path, value), fragment)
+
+    def test_start_after_end(self):
+        self.assert_error(with_value(self.example, "experience.0.start", "2026-09"), "experience[0]: start is after end")
+
+    def test_every_fact_names_a_source(self):
+        self.assert_error(with_value(self.example, "skills.0.source", None), "skills[0].source")
+        self.assert_error(with_value(self.example, "experience.0.source", "../secret.pdf"), "not a path")
+        self.assert_error(self.example, "no file 'resume.pdf' in sources/", sources={"cv.pdf"})
+        self.assertEqual(profile.validate(with_value(self.example, "awards.0.source", "user"),
+                                          sources={"resume.pdf"}), [])
+
+    def test_references_and_ids(self):
+        self.assert_error(with_value(self.example, "skills.0.used_in", ["exp-9"]), "no experience with id 'exp-9'")
+        data = copy.deepcopy(self.example)
+        data["experience"].append(copy.deepcopy(data["experience"][0]))
+        self.assert_error(data, "duplicate id 'exp-1'")
+        self.assert_error(with_value(self.example, "experience.0.id", "Exp 1"), "experience[0].id")
+
+    def test_duplicate_skills_fold_case_and_width(self):
+        data = copy.deepcopy(self.example)
+        data["skills"].append(dict(data["skills"][0], name="ｐｙｔｈｏｎ"))
+        self.assert_error(data, "skills[1].name: duplicate")
+
+    def test_redaction_masks_contact_only(self):
+        shown = profile.redacted(self.example)
+        self.assertEqual(shown["contact"]["phone"], "***")
+        self.assertIsNone(shown["contact"]["github"])
+        self.assertEqual(shown["skills"], self.example["skills"])
+        self.assertEqual(self.example["contact"]["name"], "张三", "redaction must not touch the original")
+
+
+def run_cli(*args, data_dir):
+    env = dict(os.environ, PYTHONIOENCODING="utf-8", **{store.DATA_DIR_ENV: str(data_dir)})
+    return subprocess.run([sys.executable, "-m", "jobsearch_cn", *args], cwd=REPO, env=env, capture_output=True)
+
+
+class Commands(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.data = Path(directory.name)
+        self.root = self.data / "profile"
+        (self.root / "sources").mkdir(parents=True)
+        (self.root / "sources" / "resume.pdf").write_bytes(b"%PDF-1.4 sample")
+        (self.root / "notes.md").write_text("# 自我介绍\n", encoding="utf-8")
+        self.write(documented_example())
+
+    def write(self, data):
+        (self.root / "profile.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+
+    def test_validate_a_complete_profile(self):
+        proc = run_cli("profile", "validate", data_dir=self.data)
+        self.assertEqual(proc.returncode, 0, proc.stdout.decode("utf-8"))
+        self.assertEqual(json.loads(proc.stdout), {"valid": True, "errors": [], "warnings": []})
+
+    def test_a_source_file_that_is_not_there_fails(self):
+        (self.root / "sources" / "resume.pdf").unlink()
+        proc = run_cli("profile", "validate", data_dir=self.data)
+        self.assertEqual(proc.returncode, 1)
+        self.assertTrue(any("resume.pdf" in e for e in json.loads(proc.stdout)["errors"]))
+
+    def test_missing_notes_is_a_warning_and_gbk_notes_an_error(self):
+        (self.root / "notes.md").unlink()
+        out = json.loads(run_cli("profile", "validate", data_dir=self.data).stdout)
+        self.assertTrue(out["valid"])
+        self.assertEqual(len(out["warnings"]), 1)
+        (self.root / "notes.md").write_bytes("自我介绍".encode("gbk"))
+        self.assertEqual(run_cli("profile", "validate", data_dir=self.data).returncode, 1)
+
+    def test_no_profile_is_an_input_error_pointing_at_cn_setup(self):
+        (self.root / "profile.json").unlink()
+        proc = run_cli("profile", "validate", data_dir=self.data)
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("profile-setup.md", proc.stderr.decode("utf-8"))
+
+    def test_show_hides_contact_unless_asked(self):
+        hidden = run_cli("profile", "show", data_dir=self.data).stdout.decode("utf-8")
+        self.assertNotIn("13800000000", hidden)
+        self.assertNotIn("a@example.com", hidden)
+        self.assertIn("13800000000", run_cli("profile", "show", "--contact", data_dir=self.data).stdout.decode("utf-8"))
+
+    def test_an_explicit_file(self):
+        other = self.data / "draft.json"
+        other.write_text(json.dumps(documented_example(), ensure_ascii=False), encoding="utf-8")
+        proc = run_cli("profile", "validate", str(other), data_dir=self.data)
+        self.assertEqual(proc.returncode, 0, proc.stdout.decode("utf-8"))
+
+
+# The sentinels upstream CI checks (ci.yml "Placeholder integrity"). Upstream
+# runs that job only on its own repository, so a fork that ran /setup and
+# committed would never be told. This fork keeps the templates pristine
+# (ADR-6): personal data lives in data/profile/.
+TEMPLATE_SENTINELS = {
+    "CLAUDE.md": "[YOUR_NAME]",
+    "cv/main_example.tex": "\\name{[First]}{[Last]}",
+    "cover_letters/cover_example.tex": "[YOUR NAME]",
+    ".claude/skills/job-application-assistant/01-candidate-profile.md": "[YOUR_EMAIL]",
+    ".claude/skills/job-application-assistant/04-job-evaluation.md": "[YOUR_PRIMARY_SKILLS]",
+}
+
+
+class Privacy(unittest.TestCase):
+    def test_upstream_profile_templates_keep_their_placeholders(self):
+        for rel, sentinel in TEMPLATE_SENTINELS.items():
+            with self.subTest(file=rel):
+                self.assertIn(sentinel, (REPO / rel).read_text(encoding="utf-8"),
+                              f"{rel} lost its placeholder: was the upstream /setup run? Use cn-setup instead.")
+
+    def test_profile_data_is_gitignored(self):
+        proc = subprocess.run(["git", "check-ignore", "-q", "data/profile/profile.json"], cwd=REPO)
+        self.assertEqual(proc.returncode, 0, "data/profile/ must be ignored by git")
+
+    def test_the_default_profile_location_is_under_data(self):
+        self.assertEqual(store.DEFAULT_DATA_DIR / "profile", REPO / "data" / "profile")
+        self.assertEqual(profile.SKILL_LEVELS, ("familiar", "working", "proficient", "expert"))
+        self.assertTrue(set(schema.EDUCATION_LEVELS) >= {"bachelor", "master"})
+
+
+if __name__ == "__main__":
+    unittest.main()

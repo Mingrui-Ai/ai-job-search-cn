@@ -7,6 +7,7 @@
 ```powershell
 python -m jobsearch_cn jd parse jd.txt --site boss
 python -m jobsearch_cn jd parse jd.txt --url https://example.com/job/123   # --url 只能用于单份 JD
+python -m jobsearch_cn jd parse jd.txt --save                              # 解析后直接保存到本地岗位库
 ```
 
 - 省略文件名时从标准输入读取。在 Windows PowerShell 5.1 中请直接传文件路径，原因见下面的"编码"。
@@ -68,7 +69,7 @@ Windows 文件的 CRLF 换行可以正常处理。
 2. 补全规则留空的字段，常见的有 `company`、`requirements.education` 和更多技能。
    - Agent 补全时 `method` 写 `agent`，出处片段必须来自原文；
    - 用户手动补全时 `method` 写 `user`，可以不给出处片段。
-3. 用 `jd validate` 校验，通过后再保存（保存在第 3 步实现）。
+3. 用 `jd validate` 校验，再用 `jd save` 保存。完整流程见 [jd-import.md](jd-import.md)。
 
 ## 防注入检查
 
@@ -94,4 +95,4 @@ Windows 文件的 CRLF 换行可以正常处理。
 
 - 规则是保守的。例如实习僧标题行里单独的"本科"不会被读成学历要求，需要 Agent 或用户补全。
 - 城市只认一份常见城市的固定列表。
-- 记录的 `id` 由 JD 内容决定（忽略空白和换行的差异），同一份 JD 重复导入会得到同一个 `id`，为第 3 步去重做准备。
+- 记录的 `id` 由 JD 内容决定（忽略空白和换行的差异），同一份 JD 重复导入会得到同一个 `id`，这是本地岗位库去重的第一依据（见 [jd-import.md](jd-import.md#去重与合并)）。
