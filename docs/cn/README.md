@@ -10,7 +10,7 @@
 | --- | --- |
 | [roadmap.md](roadmap.md) | 路线图：唯一的任务清单和进度表，按里程碑拆分的任务、负责人、验收标准，随每个 PR 更新 |
 | [master-plan.md](master-plan.md) | 总体规划：最终目的、设计原则、系统全貌、M1–M8 的目标与完成标准、待决事项、分工 |
-| [worklog.md](worklog.md) | 工作记录：每一步做了什么、验证结果、遗留问题（按时间倒序） |
+| [worklog.md](worklog.md) | 工作记录：每一步做了什么、验证结果、遗留问题。2026-10-28 起每条一个文件，放在 [worklog/](worklog/) |
 | [CHANGELOG.md](CHANGELOG.md) | 版本更新记录（CN） |
 | [cn-migration-plan.md](cn-migration-plan.md) | 上游审计结论、架构决策（ADR-1 至 ADR-9）、目录结构、上游同步流程 |
 | [job-schema.md](job-schema.md) | 岗位记录格式（Job Schema v1）：字段说明、出处规则、与上游字段的对应 |
