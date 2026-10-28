@@ -1,0 +1,201 @@
+{
+  "fixture": "boss_data_analysis_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "boss",
+  "method": "agent",
+  "basis": "本批首次运行 jd parse / match filter 前按原创文本语义写定；字段采用 Job Schema v1，过滤采用 match.md 已实现的七项硬性条件契约，不套用 M2-4 设计稿的未来扩展。",
+  "fields": {
+    "title": {
+      "value": "Tableau数据分析实习生",
+      "evidence": [
+        "Tableau数据分析实习生"
+      ]
+    },
+    "company": {
+      "value": "示例澄星数据咨询有限公司",
+      "evidence": [
+        "公司名称：示例澄星数据咨询有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "深圳"
+      ],
+      "evidence": [
+        "base 深圳"
+      ]
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "不支持远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "Tableau数据分析实习生"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 180,
+        "max": 220,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪资：180-220元/天"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅面向2027届"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": 4,
+      "evidence": [
+        "每周到岗4天"
+      ]
+    },
+    "requirements.min_months": {
+      "value": 6,
+      "evidence": [
+        "实习至少6个月"
+      ]
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "本科及以上学历"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "SQL",
+        "Excel",
+        "PowerBI",
+        "数据清洗"
+      ],
+      "evidence": [
+        "熟悉 SQL、Excel、PowerBI，能完成数据清洗。"
+      ],
+      "note": "保留正文写法 PowerBI；Tableau 仅在标题，Python 被明确否定，公众号仅为页脚订阅平台，均不作为正向技能。"
+    },
+    "return_offer": {
+      "value": false,
+      "evidence": [
+        "不提供转正"
+      ]
+    },
+    "published_at": {
+      "value": "2026-10-20",
+      "evidence": [
+        "发布时间：2026-10-20"
+      ]
+    },
+    "deadline": {
+      "value": "2026-11-30",
+      "evidence": [
+        "投递截止：2026-11-30"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "Tableau数据分析实习生",
+      "interpretation": "Tableau 只在标题出现；标题照录，技能列表不加入 Tableau。"
+    },
+    {
+      "text": "无需 Python 基础，本岗位不安排程序开发。",
+      "interpretation": "Python 是明确不要求的技能，不能当作正向技能。"
+    },
+    {
+      "text": "页脚：欢迎关注我们的公众号，订阅招聘信息。",
+      "interpretation": "公众号是招聘信息入口，不是岗位运营技能。"
+    },
+    {
+      "text": "base 深圳",
+      "interpretation": "base 引出的深圳是工作城市，不是公司所在地推断。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "tech为2027届，符合仅面向2027届。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "tech最高学历硕士，达到本科及以上。"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "tech每周可4天，达到4天。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "tech可实习6个月，达到至少6个月。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "深圳在tech意向的深圳、广州中；不支持远程不改变城市交集。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于tech目标类型。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题不含外包或销售，公司和城市无排除项。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "ops为2027届，符合限定届别。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "ops本科学历达到最低要求。"
+        },
+        "days_per_week": {
+          "result": "conflict",
+          "reason": "ops每周仅3天，少于4天。"
+        },
+        "min_months": {
+          "result": "conflict",
+          "reason": "ops仅可3个月，少于6个月。"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "深圳不在ops意向上海中；ops不搬家且不接受远程，JD也否定远程。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于ops目标类型。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题不含电话销售，公司和城市无排除项。"
+        }
+      }
+    }
+  }
+}

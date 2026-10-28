@@ -338,7 +338,9 @@ def _cities(text: str, lines: list):
         if interview:
             rest = rest[:interview.start()]
             snippet = text[match.start():match.start("rest") + interview.start()].strip().rstrip("，,；;、/（( ")
-        found = [city for city in _CITY.findall(rest) if city not in cities]
+        # An address can repeat its city (district, then full postal address).
+        # Deduplicate this match as well as cities from earlier location labels.
+        found = [city for city in dict.fromkeys(_CITY.findall(rest)) if city not in cities]
         if found:
             cities += found
             snippets.append(snippet)

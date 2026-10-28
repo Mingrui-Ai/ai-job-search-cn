@@ -1,0 +1,64 @@
+{
+  "base_commit": "143c48265c2db870c307e29cff71caaf92ddbb67",
+  "branch": "codex/v4-holdout",
+  "frozen_at_utc": "2026-10-28T07:32:53.063721+00:00",
+  "policy": "本批5份原创虚构JD、5份人工字段期望及10组匹配判断在首次运行本批 jd parse / match filter 前冻结；冻结后只写报告和actual输出，不按结果修改任何期望。执行者收尾PR开出并由规划者通知前，不推送或开PR。",
+  "independence": {
+    "current_task": "本轮未查阅解析/匹配源码、现有JD测试或执行者收尾分支；参考任务单、Job Schema、match.md、tech/ops档案及V2产物的文件结构。",
+    "prior_context": "同一对话此前的M1-6任务中已看过解析器及其测试，不能声称完全没有源码先验。此次5份JD和期望均新编，且没有看到本批运行结果才写期望；未读取执行者M2-3收尾分支。",
+    "format_reference": "V2 README/manifest和一份expected.json的结构用于格式兼容，未复用V2的JD或人工判断。"
+  },
+  "comparison_policy": {
+    "field_groups": [
+      "title",
+      "company",
+      "cities",
+      "remote",
+      "employment_type",
+      "salary",
+      "requirements.graduation",
+      "requirements.days_per_week",
+      "requirements.min_months",
+      "requirements.education",
+      "requirements.skills",
+      "return_offer",
+      "published_at",
+      "deadline"
+    ],
+    "skills": "只收正文的正向技能；排除标题单独提及、明确否定、公司介绍/页脚渠道。值使用原文拼写，比较时NFKC、忽略大小写及所有空格，按集合比较；不读取词表，不合并PPT/PowerPoint、K8s/Kubernetes等非空格同义词。",
+    "alternatives": "任选其一的每个正向技能都保存在扁平列表；不据此主张所有技能同时必需。当前Schema不能表达OR关系，此局限记录在note中。",
+    "cities": "原文保持首次列出的顺序；比较工作城市时按集合，避免展示顺序造成伪差异。",
+    "other_fields": "标量、薪资和学历对象逐值比较；毕业年份列表按集合比较，strict仍精确比较。",
+    "match": "总判断和七项检查状态分别对照人工期望，同时保留CLI中的值/出处用于审查。只用已实现的过滤契约，校招缺实习条件为unknown；不套用M2-4设计稿。",
+    "difference_types": "match=相同；missing=仅缺失期望信息；extra=仅增加原文不支持的值；wrong=值错误或同时存在漏读和多读。"
+  },
+  "oracle_files_sha256": {
+    "ats_backend_intern.txt": "ae8d86e8472a81f8350c65ff7d52131932475c6cf9b95ce230dc812358ee0bc2",
+    "boss_business_development_intern.txt": "7e7edd08dd7df2a6c1fe553554a869f7205f4ee82ab17f910c66a92700a39c52",
+    "boss_data_analysis_intern.txt": "a63a98f91313c1aaa7075212cf4d9038e80290854070c22de8ec8563fd821796",
+    "official_finance_campus.txt": "6da83211484df67f3536da1efbe6fe173019ea692d02636b8fda2f1a1133a457",
+    "shixiseng_hr_intern.txt": "4d19e92994a5142abb9ed812cc8fe5ec41a8558e2e5b9ec06440e0fe7c7ba539",
+    "ats_backend_intern.expected.json": "7b4fbfdf8b22dd3a2bf8d4a58fcf8d22ea22eb1fe1c34a1e2580a859185ac26c",
+    "boss_business_development_intern.expected.json": "e38722a54a4ba4368ee251fcb44d0f95097b3eb6d56e9eca1bc8941225cd419f",
+    "boss_data_analysis_intern.expected.json": "4a21a0577c046ef7e6bb102765d4bc42e4cc25ea3a2073d860f5c9c62ab88d43",
+    "official_finance_campus.expected.json": "61c4583fd2bb767d20dda125407772230a4e84d9481f4d5f4c4eb0a27459f535",
+    "shixiseng_hr_intern.expected.json": "0008e87385a64af60ebd8cdb7116a3ddb398b61ef02d78f2874ee886b0a1184f"
+  },
+  "contract_and_profile_sha256": {
+    "docs/cn/job-schema.md": "dcc3a1753a38aabfd19ef79a44c7f022cf3ac2bbb0430aa9ba52cb0b8dcba877",
+    "docs/cn/match.md": "33e015520755d43dc36470cb76a3ab93303de5f9e5c27de1e3393a4b04732564",
+    "tests/fixtures/cn/profile/tech/profile.json": "cd06c39d2041586ec52ecc11566a55b884ed93ed11c6485afba83807e0f4897e",
+    "tests/fixtures/cn/profile/ops/profile.json": "fe6fc3de8c9dc00ce8cf302175593cce2ead112de765dbe09db16e0ad92cb1d7"
+  },
+  "pre_execution_audit": {
+    "jd_count": 5,
+    "nontechnical_count": 3,
+    "field_groups": 70,
+    "human_matches": 10,
+    "check_states": 70,
+    "verbatim_evidence_snippets": 63,
+    "all_evidence_found": true,
+    "encoding": "UTF-8 without BOM, LF",
+    "application_rules_executed": false
+  }
+}

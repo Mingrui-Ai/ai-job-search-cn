@@ -126,6 +126,21 @@ class Fixtures(unittest.TestCase):
         self.assertTrue(set(example["requirements"]["skills"]) <= set(record["requirements"]["skills"]))
 
 
+class RepeatedLocation(unittest.TestCase):
+    def test_repeated_city_in_one_address_does_not_abort_parsing(self):
+        text = "后端开发实习生\n工作地址：杭州西湖区示例大厦，浙江省杭州市西湖区示例路1号"
+        record = parse_one(text)
+        self.assertEqual(record["cities"], ["杭州"])
+        self.assertEqual(schema.validate(record), [])
+        self.assertIn("浙江省杭州市", record["evidence"]["cities"]["text"])
+
+    def test_repeated_cities_across_locations_keep_first_seen_order(self):
+        text = "后端开发实习生\n工作地点：上海/上海/北京\n办公地点：北京/深圳/深圳"
+        record = parse_one(text)
+        self.assertEqual(record["cities"], ["上海", "北京", "深圳"])
+        self.assertEqual(schema.validate(record), [])
+
+
 # (JD text, field path, expected value). Negative rows pin what a rule must leave alone.
 SEED_CASES = (
     ("薪资：200-300元/天", "salary", salary(200, 300, "CNY/day")),
