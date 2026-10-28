@@ -19,12 +19,13 @@
 - 新增真实 xpdf-only 环境测试后，提取/包边界 26 项：25 通过、1 跳过。启用 Git xpdf 路径后全量 1052 项通过（1037 通过、15 跳过，142.654 秒），lint_skills、security_guards 通过。
 
 - 向 PATH 前置 mingw64/bin 影响了上游 Bash 定位，使 5 项原本可运行的 Bash 测试额外跳过；已恢复常规 PATH 补跑 reset 两模块，16 项中 14 通过、2 项缺少符号链接权限跳过，补齐该覆盖。旧记录的“没有 pdftotext”指初轮 PATH，磁盘上实际存在 Git xpdf。
+- 合并 master `ff76f45`（含 H9、V6）后，以常规 PATH 再跑全量：1058 项，1047 通过、11 跳过（137.004 秒）；lint_skills、security_guards 均通过。PR #35 的代码 head `f54a2ec` 在 Windows Python 3.14 及 Linux Python 3.10–3.14 CI 全部通过。
 
 ## 遗留
 
 - 中文文本语义无法仅靠字符统计完全判断；已明确阻止已知 xpdf 回退，并拒绝可量化的大量损坏。
-- PR #35 等规划者复核及 Windows CI。
+- PR #35 等规划者复核；Windows CI 已通过。
 
 ## 下一步
 
-- 检查后推送 #35；然后只读官方源码和文档完成 A1 调研，不安装/运行 dsh，不使用 API Key。
+- 修复已推送 #35；接着只读官方源码和文档完成 A1 调研，不安装/运行 dsh，不使用 API Key，然后按用户安排实现 H12。
