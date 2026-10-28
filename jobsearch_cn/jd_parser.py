@@ -4,12 +4,14 @@ parse_text() splits pasted text into JDs, runs each one through the posting
 gate (jobsearch_cn/guard.py) and extracts the fields whose wording is regular
 enough for rules: salary, graduation year, days per week, internship length,
 education, return offer, employment type, cities, remote work, dates, a
-labelled or headline title and company, and skills from a fixed vocabulary.
-Every value cites the snippet it came from (method "rule"). What the rules
-cannot read with confidence stays null for an agent or the user to fill in
-and cite; nothing is guessed - a date without a year is left alone, and a
-city named only in passing prose is not taken as the work location. Each
-record is validated against the schema before it is returned.
+labelled or headline title and company, and skills from the vocabulary - read
+from the body only, since the title names the job rather than asking for a
+skill. Every value cites the snippet it came from (method "rule"). What the
+rules cannot read with confidence stays null for an agent or the user to fill
+in and cite; nothing is guessed - a date without a year is left alone, and a
+city named only in passing prose, or as where the interview is, is not taken
+as the work location. Each record is validated against the schema before it
+is returned.
 """
 
 import hashlib
@@ -58,6 +60,8 @@ _SALARY = (
     (re.compile(rf"月薪\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
 )
 _NEGOTIABLE = re.compile(r"(?:薪资|薪酬|待遇|工资)?\s*面议")
+# "全年13薪" written apart from a monthly salary; a range ("13-15薪") is left alone.
+_PAY_MONTHS = re.compile(r"(?:全年\s*)?(?<![\d.\-~～－—–至到])(?P<months>\d{2})\s*薪(?![资酬水])")
 
 _YEAR = r"(?:20)?\d{2}"
 _GRADUATION = re.compile(
@@ -101,9 +105,12 @@ _EXPERIENCED = re.compile(r"社会招聘|社招")
 
 _CITY = re.compile("|".join(sorted(CITIES, key=len, reverse=True)))
 _LOCATION_LABEL = re.compile(
-    r"(?<!面试)(?:(?:工作地点|工作城市|办公地点|工作地址|上班地点|地点|城市)\s*[:：]|base\s*[:：]?)\s*(?P<rest>[^\n]{1,60})",
+    r"(?<!面试)(?<!笔试)(?:(?:工作地点|工作城市|办公地点|工作地址|上班地点|地点|城市)\s*[:：]|base\s*[:：]?)"
+    r"\s*(?P<rest>[^\n]{1,60})",
     re.I,
 )
+# Where the rest of a location line turns to the interview: "工作地点：深圳；面试地点：北京".
+_INTERVIEW = re.compile(r"面试|笔试")
 _CITY_HEADLINE = re.compile(rf"^(?P<city>{_CITY.pattern})(?:[·・\-|丨/\s]|$)")
 _NO_REMOTE = re.compile(r"不(?:支持|可|能|接受)\s*远程")
 _REMOTE = re.compile(r"(?:可|支持|接受)\s*远程(?:办公|工作|实习)?|远程(?:办公|工作|实习)|居家办公|\bremote\b", re.I)
@@ -116,10 +123,16 @@ _DEADLINE_BEFORE = re.compile(rf"{_YMD}\s*前?\s*截止")
 _TITLE_LABEL = re.compile(r"(?m)^\s*(?:职位名称|岗位名称|招聘职位|招聘岗位|职位|岗位)\s*[:：]\s*(?P<v>[^\n，,。；;]{2,40})")
 _JOB_WORD = re.compile(
     r"实习|工程师|开发|算法|研究员|研发|产品|运营|设计|分析|经理|专员|助理|顾问|测试|架构师|科学家"
+    r"|管培生|培训生|储备干部|销售|编辑|策划|主管|总监"
     r"|intern|engineer|developer|scientist|manager|analyst|designer",
     re.I,
 )
 _NOT_TITLE = re.compile(r"职责|要求|描述|介绍|福利|地点|薪资|待遇|公司|任职|职位信息|岗位信息|[:：]")
+# A headline is a job name, not a sentence: a clause break or a requirement word
+# outside brackets marks prose ("后端开发实习生（日常实习，可转正）" is still a title).
+# Skills are not read from the title, so prose taken for one would lose its skills.
+_PROSE = re.compile(r"[，,。；;！!？?]|负责|熟悉|熟练|掌握|了解|精通|具备|经验|能力")
+_BRACKETED = re.compile(r"（[^（）]*）|\([^()]*\)|【[^【】]*】|\[[^\[\]]*\]")
 _COMPANY_LABEL = re.compile(r"(?m)^\s*(?:公司名称|企业名称|招聘单位|公司|企业)\s*[:：]\s*(?P<v>[^\n，,。；;]{2,40})")
 # A legal-entity name that is the whole line, or is followed only by a separator
 # and a place ("示例科技有限公司 · 广州"). A sentence that runs on after the name
@@ -210,7 +223,8 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
         return value
 
     lines = [line.strip() for line in text.splitlines() if line.strip()]
-    title = cite("title", _title(text, lines))
+    found_title, title_span = _title(text, lines)
+    title = cite("title", found_title)
     record = {
         "schema_version": schema.SCHEMA_VERSION,
         "id": job_id(text),
@@ -226,7 +240,8 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
             "days_per_week": cite("requirements.days_per_week", _days_per_week(text)),
             "min_months": cite("requirements.min_months", _min_months(text)),
             "education": cite("requirements.education", _education(text)),
-            "skills": cite("requirements.skills", _skills(text, skill_patterns or _builtin_patterns())) or [],
+            "skills": cite("requirements.skills",
+                           _skills(text, skill_patterns or _builtin_patterns(), skip=title_span)) or [],
         },
         "return_offer": cite("return_offer", _return_offer(text)),
         "published_at": cite("published_at", _dated(text, (_PUBLISHED,))),
@@ -284,18 +299,21 @@ def _earliest(patterns, text: str):
 
 
 def _title(text: str, lines: list):
+    """The title with its citation, and the span of text it takes up (no skills are read there)."""
     match = _TITLE_LABEL.search(text)
     if match:
         value = match["v"].strip()
-        return value, [value]
+        return (value, [value]), (match.start("v"), match.start("v") + len(value))
     if lines:
         headline = lines[0]
         salary = _earliest((pattern for pattern, _, _ in _SALARY), headline)
         if salary and salary.start() > 0:
             headline = headline[:salary.start()].strip()
-        if len(headline) <= 40 and _JOB_WORD.search(headline) and not _NOT_TITLE.search(headline):
-            return headline, [headline]
-    return _NOTHING
+        if (len(headline) <= 40 and _JOB_WORD.search(headline) and not _NOT_TITLE.search(headline)
+                and not _PROSE.search(_BRACKETED.sub("", headline))):
+            start = text.find(headline)
+            return (headline, [headline]), (start, start + len(headline))
+    return _NOTHING, None
 
 
 def _company(text: str, lines: list):
@@ -315,10 +333,15 @@ def _company(text: str, lines: list):
 def _cities(text: str, lines: list):
     cities, snippets = [], []
     for match in _LOCATION_LABEL.finditer(text):
-        found = [city for city in _CITY.findall(match["rest"]) if city not in cities]
+        rest, snippet = match["rest"], match.group(0).strip()
+        interview = _INTERVIEW.search(rest)
+        if interview:
+            rest = rest[:interview.start()]
+            snippet = text[match.start():match.start("rest") + interview.start()].strip().rstrip("，,；;、/（( ")
+        found = [city for city in _CITY.findall(rest) if city not in cities]
         if found:
             cities += found
-            snippets.append(match.group(0).strip())
+            snippets.append(snippet)
     if not cities:
         for line in lines[:6]:
             match = _CITY_HEADLINE.match(line)
@@ -363,14 +386,35 @@ def _salary(text: str):
         match, unit, scale, low, high = best
         months = match.groupdict().get("months")
         months = int(months) if months and 12 <= int(months) <= 24 else None
+        snippets = [match.group(0).strip()]
+        if months is None and unit == "CNY/month":
+            paid = _pay_months(text, match)
+            if paid:
+                months = int(paid["months"])
+                snippets.append(paid.group(0).strip())
         value = {"min": _amount(low * scale), "max": _amount(high * scale), "unit": unit,
                  "months": months, "negotiable": False}
-        return value, [match.group(0).strip()]
+        return value, snippets
     match = _NEGOTIABLE.search(text)
     if match:
         value = {"min": None, "max": None, "unit": None, "months": None, "negotiable": True}
         return value, [match.group(0).strip()]
     return _NOTHING
+
+
+def _pay_months(text: str, salary):
+    """The "全年13薪" on the monthly salary's own line, unless it follows a 转正 (another offer's pay).
+
+    On another line it may belong to another offer too, so it is left for an agent.
+    """
+    start = text.rfind("\n", 0, salary.start()) + 1
+    end = text.find("\n", salary.end())
+    for match in _PAY_MONTHS.finditer(text, start, len(text) if end < 0 else end):
+        if "转正" in text[salary.end():match.start()]:
+            return None
+        if 12 <= int(match["months"]) <= 24:
+            return match
+    return None
 
 
 def _graduation(text: str):
@@ -447,8 +491,9 @@ def _dated(text: str, patterns):
     return _NOTHING
 
 
-def _skills(text: str, patterns):
-    claimed, first_seen = [], {}
+def _skills(text: str, patterns, skip=None):
+    """Vocabulary terms in order of first appearance, none inside the span skip (the title)."""
+    claimed, first_seen = ([skip] if skip else []), {}
     for term, pattern in patterns:
         for match in pattern.finditer(text):
             if any(match.start() < end and start < match.end() for start, end in claimed):

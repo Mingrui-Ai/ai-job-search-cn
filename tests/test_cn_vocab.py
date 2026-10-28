@@ -19,19 +19,22 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from jobsearch_cn import jd_parser, schema, store, vocab  # noqa: E402
 
-GROUPS = ("tech", "data", "product", "ops", "design")
+GROUPS = ("tech", "data", "product", "ops", "design", "market", "general")
 
 
 class Builtin(unittest.TestCase):
     def setUp(self):
         self.vocabulary = vocab.load()
 
-    def test_the_five_directions_with_chinese_labels(self):
+    def test_the_groups_with_chinese_labels(self):
         self.assertEqual(tuple(self.vocabulary.groups), GROUPS)
         labels = [g["label"] for g in self.vocabulary.groups.values()]
-        self.assertEqual(labels, ["技术", "数据", "产品", "运营", "设计"])
-        for key in GROUPS:
+        self.assertEqual(labels, ["技术", "数据", "产品", "运营", "设计", "市场", "通用"])
+        for key in GROUPS[:5]:
             self.assertGreaterEqual(len(self.vocabulary.groups[key]["terms"]), 5, key)
+        # market and general (office software every direction uses) start small.
+        self.assertEqual(self.vocabulary.groups["general"]["terms"], ["Excel", "PowerPoint"])
+        self.assertIn("市场调研", self.vocabulary.groups["market"]["terms"])
 
     def test_no_term_is_listed_twice_even_across_groups(self):
         folded = [schema.normalize_for_match(t) for t in self.vocabulary.terms]
@@ -47,11 +50,19 @@ class Builtin(unittest.TestCase):
 
     def test_group_of(self):
         self.assertEqual(self.vocabulary.group_of("python"), "tech")
-        self.assertEqual(self.vocabulary.group_of("Ｅｘｃｅｌ"), "data")
+        self.assertEqual(self.vocabulary.group_of("Ｅｘｃｅｌ"), "general")
         self.assertEqual(self.vocabulary.group_of("公众号"), "ops")
         self.assertEqual(self.vocabulary.group_of("Figma"), "design")
         self.assertEqual(self.vocabulary.group_of("PRD"), "product")
+        self.assertEqual(self.vocabulary.group_of("商务沟通"), "market")
         self.assertIsNone(self.vocabulary.group_of("打篮球"))
+
+    def test_content_forms_are_not_skills_on_their_own(self):
+        # A skill is written in full, as a JD asks for it: 文案写作, 短视频运营.
+        for term in ("文案", "短视频", "直播"):
+            self.assertIsNone(self.vocabulary.group_of(term), term)
+        for term in ("文案写作", "短视频运营", "直播运营"):
+            self.assertEqual(self.vocabulary.group_of(term), "ops", term)
 
 
 class UserFile(unittest.TestCase):
@@ -135,7 +146,8 @@ class Command(unittest.TestCase):
             encoding="utf-8")
         proc = run_cli("jd", "parse", str(self.jd), data_dir=self.data)
         self.assertEqual(proc.returncode, 0, proc.stderr.decode("utf-8"))
-        self.assertEqual(json.loads(proc.stdout)["jobs"][0]["requirements"]["skills"], ["新媒体运营", "私域运营"])
+        # 新媒体运营 is only in the title, and skills are read from the body.
+        self.assertEqual(json.loads(proc.stdout)["jobs"][0]["requirements"]["skills"], ["私域运营"])
 
     def test_a_broken_vocabulary_is_an_input_error(self):
         (self.data / "config" / "skills.json").write_text("{oops", encoding="utf-8")

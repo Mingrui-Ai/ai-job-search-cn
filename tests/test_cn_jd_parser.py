@@ -69,7 +69,7 @@ class Fixtures(unittest.TestCase):
             "salary": salary(150, 200, "CNY/day"), "cities": ["上海"],
             "requirements.graduation": {"years": [2027], "strict": True},
             "requirements.days_per_week": 5, "requirements.min_months": 3, "requirements.education": None,
-            "requirements.skills": ["数据分析", "SQL", "Python", "Pandas", "机器学习"], "return_offer": True,
+            "requirements.skills": ["SQL", "Python", "Pandas", "机器学习"], "return_offer": True,
             "deadline": "2026-11-15",
         },
         "nowcoder_campus.txt": {
@@ -209,6 +209,46 @@ SEED_CASES = (
     ("能独立撰写PRD，熟悉Axure原型设计", "requirements.skills", ["PRD", "Axure", "原型设计"]),
     ("有A/B测试经验", "requirements.skills", ["A/B测试"]),
     ("Excellent communication, a Sketchy draft", "requirements.skills", []),
+    # Skills come from the body only: the title names the job (M2-3).
+    ("Java开发实习生\n熟悉Python和MySQL", "requirements.skills", ["Python", "MySQL"]),
+    ("职位名称：Java开发工程师\n熟悉Java、Spring Boot", "requirements.skills", ["Java", "Spring Boot"]),
+    ("数据分析实习生", "requirements.skills", []),
+    # A first line that reads as a sentence is body, not a title, and keeps its skills.
+    ("负责公众号运营，会用秀米\n每周到岗3天", "title", None),
+    ("负责公众号运营，会用秀米\n每周到岗3天", "requirements.skills", ["公众号", "秀米"]),
+    ("有3年以上Java开发经验", "title", None),
+    ("后端开发实习生（日常实习，可转正）\n熟悉Go", "title", "后端开发实习生（日常实习，可转正）"),
+    # A job name on a line of its own.
+    ("市场管培生\n示例品牌管理有限公司", "title", "市场管培生"),
+    ("管理培训生（2027届）", "title", "管理培训生（2027届）"),
+    ("储备干部", "title", "储备干部"),
+    ("新媒体编辑", "title", "新媒体编辑"),
+    ("品牌策划", "title", "品牌策划"),
+    ("销售代表", "title", "销售代表"),
+    ("技术总监", "title", "技术总监"),
+    ("校园招聘 / 市场与品牌", "title", None),
+    # Terms added in M2-3, as JDs write them; content forms alone are not skills.
+    ("熟悉 Playwright、Postman，有接口测试和自动化测试经验", "requirements.skills",
+     ["Playwright", "Postman", "接口测试", "自动化测试"]),
+    ("熟练使用 Excel、PowerPoint，具备市场调研和商务沟通能力", "requirements.skills",
+     ["Excel", "PowerPoint", "市场调研", "商务沟通"]),
+    ("具备内容策划、文案写作和数据复盘能力", "requirements.skills", ["内容策划", "文案写作", "数据复盘"]),
+    ("有用户访谈经验，能整理设计规范", "requirements.skills", ["用户访谈", "设计规范"]),
+    ("负责抖音短视频运营和直播运营", "requirements.skills", ["抖音", "短视频运营", "直播运营"]),
+    ("负责公众号文案，协助短视频拍摄和直播活动", "requirements.skills", ["公众号"]),
+    ("整理访谈记录，参与Web自动化回归", "requirements.skills", []),
+    # The interview or written-test city on a location line is not a work city.
+    ("工作地点：深圳南山区；面试地点：北京。", "cities", ["深圳"]),
+    ("base 北京/上海，面试可在杭州", "cities", ["北京", "上海"]),
+    ("工作城市：上海（笔试在北京）", "cities", ["上海"]),
+    ("笔试地点：北京", "cities", []),
+    # Pay months written apart from a monthly salary, on its line.
+    ("薪酬：8-10K/月，全年13薪", "salary", salary(8000, 10000, "CNY/month", 13)),
+    ("月薪8000-10000元，13薪", "salary", salary(8000, 10000, "CNY/month", 13)),
+    ("200-300元/天，转正后15薪", "salary", salary(200, 300, "CNY/day")),
+    ("4-6K/月，转正后15薪", "salary", salary(4000, 6000, "CNY/month")),
+    ("8-10K/月\n福利：13薪", "salary", salary(8000, 10000, "CNY/month")),
+    ("8-10K/月，13-15薪", "salary", salary(8000, 10000, "CNY/month")),
 )
 
 
