@@ -146,9 +146,19 @@ _HEAD_LINES = 30
 # is a tag itself (shixiseng's "150-200/天 | 上海 | …" starts with the salary); a bare
 # "N个月" cell is the internship length, read only here.
 _TAG_SEP = re.compile(r"\s*[｜|]\s*")
+_PIPE = re.compile(r"[｜|]")
 _DAYS_TAG = re.compile(rf"^{_DAY}(?:{_TO}{_DAY})?\s*(?:天|日)\s*/\s*周$")
 _MONTHS_TAG = re.compile(rf"^(?P<n>{_MONTH_COUNT})\s*个?\s*月$")
 _NOT_COMPANY = re.compile(r"^(?:\d|不限|经验|学历|大专|专科|本科|硕士|研究生|博士|实习|全职|兼职|校招|社招|远程)")
+# A whole-page copy lays the same tags out with spaces, "杭州 5天/周 6个月 本科". Such a
+# line counts only when every cell is a tag word, so a sentence that mentions "5天/周" or
+# "3个月" ("可以 5天/周 到岗 3个月 内入职") is not one. It names no company.
+_TAG_WORD = re.compile(
+    rf"(?:{_CITY.pattern})(?:[·・\-][{_HAN}A-Za-z0-9]{{1,8}})*|[{_HAN}]{{1,6}}(?:区|县)"
+    rf"|{_DAY}(?:{_TO}{_DAY})?\s*(?:天|日)\s*/\s*周|(?:{_MONTH_COUNT})\s*个?\s*月(?:及?以上)?"
+    r"|(?:大专|专科|本科|硕士|研究生|博士)(?:及以上)?|学历不限|经验不限|在校/应届|应届生?"
+    r"|\d{1,2}(?:-\d{1,2})?年(?:以上|以内)?|(?:20)?\d{2}届|日常实习|暑期实习|实习|全职|兼职|校招|社招|可?远程|可转正"
+)
 # A skill a clause rules out is not asked for: "无需 SQL 基础", "不要求 Rust 或 C++", "也不负责公众号运营".
 _NEGATION = re.compile(r"不要求|无需|无须|不需要|不需|不必|不用|不负责|不涉及|不承担|非必须|不是必须|不作要求|不做要求")
 # A platform name is a skill when the JD asks for it, not when it points the reader at the
@@ -255,13 +265,13 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
     found_title, title_span = _title(text, lines)
     title = cite("title", found_title)
     headline = _line_at(text, title_span[0]) if title_span else (lines[0] if lines else "")
-    tag = _tag_cells(lines)
+    tag, piped = _tag_cells(lines)
     record = {
         "schema_version": schema.SCHEMA_VERSION,
         "id": job_id(text),
         "source": {"type": source_type, "site": site, "url": url, "imported_at": imported_at},
         "title": title,
-        "company": cite("company", _company(text, lines, tag)),
+        "company": cite("company", _company(text, lines, tag if piped else [])),
         "cities": cite("cities", _cities(text, lines)) or [],
         "remote": cite("remote", _remote(text)),
         "employment_type": cite("employment_type", _employment_type(text, headline)),
@@ -376,13 +386,20 @@ def _title(text: str, lines: list):
     return _NOTHING, None
 
 
-def _tag_cells(lines: list) -> list:
-    """The cells of a BOSS直聘 tag line near the top, or []."""
+def _tag_cells(lines: list):
+    """The cells of a tag line near the top and whether they were split on ｜; ([], False) if none."""
     for line in lines[:_HEAD_LINES]:
-        cells = _TAG_SEP.split(line)
-        if len(cells) >= 3 and any(_DAYS_TAG.match(cell) for cell in cells):
-            return cells
-    return []
+        piped = bool(_PIPE.search(line))
+        cells = _TAG_SEP.split(line) if piped else line.split()
+        if len(cells) < 3 or not any(_DAYS_TAG.match(cell) for cell in cells):
+            continue
+        if piped or all(_TAG_WORD.fullmatch(cell) or _is_salary(cell) for cell in cells):
+            return cells, piped
+    return [], False
+
+
+def _is_salary(cell: str) -> bool:
+    return any(pattern.fullmatch(cell) for pattern, _, _ in _SALARY)
 
 
 def _company(text: str, lines: list, tag: list):

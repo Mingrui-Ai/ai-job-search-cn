@@ -301,6 +301,13 @@ SEED_CASES = (
     ("数据分析实习生\n北京｜本科｜4天/周", "company", None),
     ("Java开发实习生\n3个月", "requirements.min_months", None),
     ("Java开发实习生\n示例云帆科技｜北京｜3个月｜本科", "requirements.min_months", None),
+    # A whole-page copy lays the tags out with spaces; a line of nothing but tag words is a tag line.
+    ("首页\njava开发实习生 130-150元/天\n杭州 5天/周 6个月 本科\n职位描述", "requirements.min_months", 6),
+    ("数据分析实习生\n杭州·西湖区 4-5天/周 3个月 本科及以上", "requirements.min_months", 3),
+    ("数据分析实习生\n西湖区 5天/周 6个月 本科", "company", None),
+    # A sentence that mentions "N天/周" and "N个月" is not a tag line.
+    ("到岗要求：每周 4天/周，入职 3个月 后可转正", "requirements.min_months", None),
+    ("可以 5天/周 到岗 3个月 内入职", "requirements.min_months", None),
     # A whole-page copy: navigation first, then the title beside its salary.
     ("首页\n职位\n公司\njava开发实习生 130-150元/天\n北京 3天/周", "title", "java开发实习生"),
     ("首页\n职位\n薪资：130-150元/天", "title", None),
