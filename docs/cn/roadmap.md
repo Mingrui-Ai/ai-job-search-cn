@@ -171,6 +171,7 @@
   - 用户有空时做一次试用：安装 dsh（`npx @deepseek-ai/dsh web`），在 Settings → Models 填上自己的 DeepSeek API Key，选这个仓库作为工作区，按规划者给的清单请它导入一份 JD，看它能不能找到工作流、命令能不能跑起来。API Key 只在 dsh 里配置，不交给其他 Agent，也不写进仓库。
 - [ ] **A2** `执行` dsh 入口：按 A1 的结论，在 dsh 认的位置加薄入口，指向现有的 `jd-import.md`、`profile-setup.md`、`match.md`；`test_cn_agent_entry.py` 覆盖 dsh 的入口；README 加上"用 DeepSeek 上手"的说明（安装、填 Key、选工作区、固定版本）。排在 M2 完成之后、M3 开工之前。
 - [ ] **A3** `用户` + `验证` 在 dsh 上实测 JD 导入、建档、匹配三个工作流：用户用自己的 Key 操作 dsh，验证者准备检查清单和期望结果，并核对记录（dsh 只给用户用，不参与开发）。过程和问题写进工作记录，不通过的地方由规划者转成任务。完成后，M3 及以后的工作流都按三个 Agent 设计和验收。
+  - `验证` 已准备 [实测检查清单](dsh-trial-checklist.md)：逐步话术、合成 JD/简历、预期结果与记录表。仅完成清单准备和本地 CLI 文档核对，未安装/运行 dsh、未使用 Key；A2 和完整匹配流程就绪后由用户实测，本项保持未勾选。
 - [x] **H11** `验证` 建档支持 Word 和 PDF 简历（D1；PR #35）：
   - 新增 `python -m jobsearch_cn profile extract <文件>`，把 `data/profile/sources/` 里的简历转成纯文本，交给 Agent 起草档案。三个 Agent 都能用，不依赖某个 Agent 自己能不能读文件。
   - `.docx` 用 zipfile + XML 按顺序读取段落和表格；PDF 通过同环境的 Python 子进程复用 `tools/verify_pdf.py` 的 pypdf 提取及 pdftotext 调用，不要求 pdfinfo，CN 包仍只用标准库。缺少后端时非零退出并给出直接读取/安装提示；`.doc` 和其他格式拒绝并提示另存为 `.docx`。
