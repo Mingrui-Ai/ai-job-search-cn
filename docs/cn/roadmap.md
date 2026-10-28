@@ -36,7 +36,7 @@
 | **进行中** | `执行` | M2-4a 契约补充（H9 已在 #34 合并）；之后按顺序做 M2-4b → M2-4c。tag `v0.1.0` 已推送 |
 | **等你操作** | `用户` | 暂时没有。档案已补上"接受远程、暂不考虑异地"（2026-10-28）；M2-4 完成后，用真实岗位试一下评分（M2-5）。有空时可以做 A1 的试用：装好 DeepSeek Harness，填上你的 DeepSeek API Key，按规划者给的清单试一次 |
 | **下一步** | `规划` | 审核 H9（用 V6 检验）、H11、M2-4 的三个 PR（M2-4a 用 V7 检验）；M2-4b 合并后审核并合并 #29（V5）；A1 调研：把 dsh 的文档读透，写出试用清单 |
-| **进行中** | `验证` | H11：建档支持 Word 和 PDF 简历。V6、V7 都已冻结并跑完基线，分别等 H9、M2-4a 的 PR 开出后跑对照 |
+| **待审核** | `验证` | H11（PR #35）：建档支持 Word 和 PDF 简历，已实现并通过本地检查。V6、V7 都已冻结并跑完基线，分别等 H9、M2-4a 的 PR 开出后跑对照 |
 | **之后** | `验证` | V5（PR #29）已冻结，M2-4b 合并后再合并，M2-4c 用它验收；V3：M2-4c 完成后实测匹配工作流；A3：准备 dsh 实测的检查清单，核对结果 |
 
 ## 2. 收尾与维护
@@ -170,10 +170,10 @@
   - 用户有空时做一次试用：安装 dsh（`npx @deepseek-ai/dsh web`），在 Settings → Models 填上自己的 DeepSeek API Key，选这个仓库作为工作区，按规划者给的清单请它导入一份 JD，看它能不能找到工作流、命令能不能跑起来。API Key 只在 dsh 里配置，不交给其他 Agent，也不写进仓库。
 - [ ] **A2** `执行` dsh 入口：按 A1 的结论，在 dsh 认的位置加薄入口，指向现有的 `jd-import.md`、`profile-setup.md`、`match.md`；`test_cn_agent_entry.py` 覆盖 dsh 的入口；README 加上"用 DeepSeek 上手"的说明（安装、填 Key、选工作区、固定版本）。排在 M2 完成之后、M3 开工之前。
 - [ ] **A3** `用户` + `验证` 在 dsh 上实测 JD 导入、建档、匹配三个工作流：用户用自己的 Key 操作 dsh，验证者准备检查清单和期望结果，并核对记录（dsh 只给用户用，不参与开发）。过程和问题写进工作记录，不通过的地方由规划者转成任务。完成后，M3 及以后的工作流都按三个 Agent 设计和验收。
-- [ ] **H11** `验证` 建档支持 Word 和 PDF 简历（D1）：
+- [x] **H11** `验证` 建档支持 Word 和 PDF 简历（D1；PR #35）：
   - 新增 `python -m jobsearch_cn profile extract <文件>`，把 `data/profile/sources/` 里的简历转成纯文本，交给 Agent 起草档案。三个 Agent 都能用，不依赖某个 Agent 自己能不能读文件。
-  - `.docx` 用标准库解析（zip 里的 XML）。PDF 优先复用上游 `tools/verify_pdf.py` 的文本提取（pypdf，或者 pdftotext），两样都没有时，提示 Agent 自己读 PDF。旧版 `.doc` 提示用户另存为 `.docx`。
-  - `profile-setup.md` 写明这一步；用合成的 `.docx`、`.pdf` 简历测试（脱敏，不用真实简历）。
+  - `.docx` 用 zipfile + XML 按顺序读取段落和表格；PDF 通过同环境的 Python 子进程复用 `tools/verify_pdf.py` 的 pypdf 提取及 pdftotext 调用，不要求 pdfinfo，CN 包仍只用标准库。缺少后端时非零退出并给出直接读取/安装提示；`.doc` 和其他格式拒绝并提示另存为 `.docx`。
+  - 输出 UTF-8 JSON，`text` 保存纯文本、`source` 保存原文件名；不写提取文件或日志。`profile-setup.md` 只改读取材料一步；测试使用现场合成的 DOCX/PDF，覆盖中文、段落、表格、无后端、无文件及只读行为。
   - 排在 V7 之后。只改建档读取材料的部分；M2-4a 改的是建档问答，两者分开。
 
 ## 3. M1 · v0.1 中文 JD 入库
