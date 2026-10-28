@@ -26,6 +26,7 @@ from jobsearch_cn import schema
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 DATA_DIR_ENV = "JOBSEARCH_CN_DATA_DIR"
+_EVIDENCE_PRIORITY = {"rule": 0, "agent": 1, "user": 2}
 
 # Query parameters that track the click, not the posting. Dropped before URLs
 # are compared, so a link shared twice still matches itself.
@@ -104,7 +105,14 @@ class Store:
             merged = merge_same_text(existing, record)
         else:
             existing = self.find_by_url(record["source"]["url"])
-            merged = replace_edited(existing, record) if existing is not None else record
+            if existing is None:
+                merged = record
+            elif existing["raw_text"] == record["raw_text"]:
+                # An earlier URL update kept the original id. The next import
+                # of that edited text must still protect completed fields.
+                merged = merge_same_text(existing, record)
+            else:
+                merged = replace_edited(existing, record)
         if existing is not None and merged == existing:
             return "unchanged", existing
         errors = schema.validate(merged)
@@ -148,11 +156,10 @@ def _set_field(record: dict, path: str, value) -> None:
 def merge_same_text(old: dict, new: dict) -> dict:
     """Merge a re-import of the same JD text into the stored record.
 
-    Field by field: a value the new record holds replaces the stored one, so an
-    agent's completion lands; a field the new record leaves empty keeps the
-    stored value, so re-running the rules never erases what an agent or the
-    user filled in. A value the user typed in is only replaced by another
-    user value. Status and first import time are the store's, not the import's.
+    Fill empty fields, but never erase a value with an empty import. When both
+    values exist, only equal or higher evidence priority can replace the old
+    value: user > agent > rule. Evidence follows the winning value, even when
+    the two values are equal. Status and first import time stay unchanged.
     """
     merged = json.loads(json.dumps(old))
     for path in schema.EVIDENCE_FIELDS:
@@ -161,8 +168,11 @@ def merge_same_text(old: dict, new: dict) -> dict:
             continue
         new_evidence = new["evidence"].get(path)
         old_evidence = old["evidence"].get(path)
-        if old_evidence and old_evidence.get("method") == "user" and (new_evidence or {}).get("method") != "user":
-            continue
+        if schema._has_value(schema._field(old, path)):
+            old_priority = _EVIDENCE_PRIORITY.get((old_evidence or {}).get("method"), 0)
+            new_priority = _EVIDENCE_PRIORITY.get((new_evidence or {}).get("method"), 0)
+            if new_priority < old_priority:
+                continue
         _set_field(merged, path, value)
         merged["evidence"][path] = new_evidence
     source = merged["source"]
