@@ -1,0 +1,1256 @@
+{
+  "fixture": "official_finance_campus.txt",
+  "site_argument": "official",
+  "parse": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_bd57d5f89437",
+          "source": {
+            "type": "file",
+            "site": "official",
+            "url": null,
+            "imported_at": "2026-10-28T15:36:04+08:00"
+          },
+          "title": "财务分析专员（校招）",
+          "company": "示例衡泉商贸有限公司",
+          "cities": [
+            "上海",
+            "广州"
+          ],
+          "remote": false,
+          "employment_type": "campus",
+          "salary": {
+            "min": 15000,
+            "max": 25000,
+            "unit": "CNY/month",
+            "months": 14,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2026
+              ],
+              "strict": false
+            },
+            "days_per_week": null,
+            "min_months": null,
+            "education": {
+              "min": "bachelor",
+              "preferred": null
+            },
+            "skills": [
+              "Excel",
+              "Power BI",
+              "SQL",
+              "Python"
+            ]
+          },
+          "return_offer": null,
+          "published_at": "2026-10-21",
+          "deadline": "2026-11-25",
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "财务分析专员（校招）",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例衡泉商贸有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作城市：上海、广州",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不接受远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "财务分析专员（校招）",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "15-25K·14薪",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "2026届优先",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "本科及以上",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": [
+                "能够使用 Excel 和 Power BI 复核预算",
+                "无需编写 SQL",
+                "也不要求 Python"
+              ],
+              "method": "rule"
+            },
+            "published_at": {
+              "text": "发布日期：2026-10-21",
+              "method": "rule"
+            },
+            "deadline": {
+              "text": "网申截止：2026-11-25",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "财务分析专员（校招）\n公司名称：示例衡泉商贸有限公司\n工作城市：上海、广州\n薪资：15-25K·14薪\n\n岗位职责：\n跟进预算执行，整理差异原因，并向业务团队说明核对结果。\n\n任职要求：\n2026届优先，其他届别亦可申请；本科及以上学历。\n熟悉财务分析，能够使用 Excel 和 Power BI 复核预算，并用 PowerPoint 汇报。\n无需编写 SQL，也不要求 Python；这些不是筛选条件。\n不接受远程办公。\n\n入职安排：试用期3个月；每周五核对报销凭证；面试通知通常在3-5个工作日内发出。\n发布日期：2026-10-21\n网申截止：2026-11-25\n说明：本文为原创虚构的离线验收样例，不对应真实公司或招聘活动。"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_bd57d5f89437",
+          "title": "财务分析专员（校招）",
+          "company": "示例衡泉商贸有限公司",
+          "cities": [
+            "上海",
+            "广州"
+          ],
+          "status": "new"
+        }
+      ]
+    }
+  },
+  "validate_parsed": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "field_comparison": [
+    {
+      "field": "title",
+      "expected": "财务分析专员（校招）",
+      "actual": "财务分析专员（校招）",
+      "kind": "match"
+    },
+    {
+      "field": "company",
+      "expected": "示例衡泉商贸有限公司",
+      "actual": "示例衡泉商贸有限公司",
+      "kind": "match"
+    },
+    {
+      "field": "cities",
+      "expected": [
+        "上海",
+        "广州"
+      ],
+      "actual": [
+        "上海",
+        "广州"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "remote",
+      "expected": false,
+      "actual": false,
+      "kind": "match"
+    },
+    {
+      "field": "employment_type",
+      "expected": "campus",
+      "actual": "campus",
+      "kind": "match"
+    },
+    {
+      "field": "salary",
+      "expected": {
+        "min": 15000,
+        "max": 25000,
+        "unit": "CNY/month",
+        "months": 14,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 15000,
+        "max": 25000,
+        "unit": "CNY/month",
+        "months": 14,
+        "negotiable": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.graduation",
+      "expected": {
+        "years": [
+          2026
+        ],
+        "strict": false
+      },
+      "actual": {
+        "years": [
+          2026
+        ],
+        "strict": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.days_per_week",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.min_months",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.education",
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.skills",
+      "expected": [
+        "财务分析",
+        "Excel",
+        "Power BI",
+        "PowerPoint"
+      ],
+      "actual": [
+        "Excel",
+        "Power BI",
+        "SQL",
+        "Python"
+      ],
+      "kind": "wrong"
+    },
+    {
+      "field": "return_offer",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "published_at",
+      "expected": "2026-10-21",
+      "actual": "2026-10-21",
+      "kind": "match"
+    },
+    {
+      "field": "deadline",
+      "expected": "2026-11-25",
+      "actual": "2026-11-25",
+      "kind": "match"
+    }
+  ],
+  "skill_comparison": {
+    "matched": [
+      "Excel",
+      "Power BI"
+    ],
+    "missing": [
+      "财务分析",
+      "PowerPoint"
+    ],
+    "extra": [
+      "SQL",
+      "Python"
+    ]
+  },
+  "validate_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "save_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_bd57d5f89437",
+          "title": "财务分析专员（校招）",
+          "company": "示例衡泉商贸有限公司",
+          "cities": [
+            "上海",
+            "广州"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  "matches": {
+    "tech": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_bd57d5f89437",
+          "title": "财务分析专员（校招）",
+          "company": "示例衡泉商贸有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "JD 优先 2026 届，不是硬性要求",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2026
+                    ],
+                    "strict": false
+                  },
+                  "evidence": "2026届优先"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              },
+              "note": "你是 2027 届，不在优先届别内"
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "unknown",
+              "reason": "JD 或档案没写每周到岗",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市广州在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海",
+                    "广州"
+                  ],
+                  "evidence": "工作城市：上海、广州"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不接受远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "conflict",
+              "reason": "这是校招岗位，你找的是实习",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "财务分析专员（校招）"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "财务分析专员（校招）",
+                  "evidence": "财务分析专员（校招）"
+                },
+                "company": {
+                  "value": "示例衡泉商贸有限公司",
+                  "evidence": "示例衡泉商贸有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "上海",
+                    "广州"
+                  ],
+                  "evidence": "工作城市：上海、广州"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech为2027届；虽不在2026届偏好内，但优先不是硬门槛，应附提示而非冲突。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech硕士达到本科最低要求。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "JD未写每周实习天数；依当前已实现契约为unknown，不使用M2-4设计稿的not_applicable。"
+          },
+          {
+            "check": "min_months",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "JD未写实习月数；试用期不作为实习月数，当前契约为unknown。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "工作城市包含广州，与tech意向有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "校招不在tech仅实习的目标类型中。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题不含外包或销售，公司和城市无排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_bd57d5f89437",
+          "title": "财务分析专员（校招）",
+          "company": "示例衡泉商贸有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "JD 优先 2026 届，不是硬性要求",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2026
+                    ],
+                    "strict": false
+                  },
+                  "evidence": [
+                    "2026届优先，其他届别亦可申请"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              },
+              "note": "你是 2027 届，不在优先届别内"
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "本科及以上学历"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "unknown",
+              "reason": "JD 或档案没写每周到岗",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市广州在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海",
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作城市：上海、广州"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不接受远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "conflict",
+              "reason": "这是校招岗位，你找的是实习",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "财务分析专员（校招）"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "财务分析专员（校招）",
+                  "evidence": [
+                    "财务分析专员（校招）"
+                  ]
+                },
+                "company": {
+                  "value": "示例衡泉商贸有限公司",
+                  "evidence": [
+                    "公司名称：示例衡泉商贸有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "上海",
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作城市：上海、广州"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech为2027届；虽不在2026届偏好内，但优先不是硬门槛，应附提示而非冲突。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech硕士达到本科最低要求。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "JD未写每周实习天数；依当前已实现契约为unknown，不使用M2-4设计稿的not_applicable。"
+          },
+          {
+            "check": "min_months",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "JD未写实习月数；试用期不作为实习月数，当前契约为unknown。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "工作城市包含广州，与tech意向有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "校招不在tech仅实习的目标类型中。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题不含外包或销售，公司和城市无排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    },
+    "ops": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_bd57d5f89437",
+          "title": "财务分析专员（校招）",
+          "company": "示例衡泉商贸有限公司",
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "JD 优先 2026 届，不是硬性要求",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2026
+                    ],
+                    "strict": false
+                  },
+                  "evidence": "2026届优先"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              },
+              "note": "你是 2027 届，不在优先届别内"
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "unknown",
+              "reason": "JD 或档案没写每周到岗",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海",
+                    "广州"
+                  ],
+                  "evidence": "工作城市：上海、广州"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不接受远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "校招岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "财务分析专员（校招）"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "财务分析专员（校招）",
+                  "evidence": "财务分析专员（校招）"
+                },
+                "company": {
+                  "value": "示例衡泉商贸有限公司",
+                  "evidence": "示例衡泉商贸有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "上海",
+                    "广州"
+                  ],
+                  "evidence": "工作城市：上海、广州"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "needs_check",
+        "actual_verdict": "needs_check",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops为2027届；2026届只是优先，应提示偏好不符但不淘汰。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops本科达到要求。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "JD未写每周实习天数，周五不能解读为5天。"
+          },
+          {
+            "check": "min_months",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "JD未写实习月数，试用期3个月不能填入此条件。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "工作城市包含上海，与ops意向有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "校招属于ops目标类型。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题不含电话销售，公司和城市无排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_bd57d5f89437",
+          "title": "财务分析专员（校招）",
+          "company": "示例衡泉商贸有限公司",
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "JD 优先 2026 届，不是硬性要求",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2026
+                    ],
+                    "strict": false
+                  },
+                  "evidence": [
+                    "2026届优先，其他届别亦可申请"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              },
+              "note": "你是 2027 届，不在优先届别内"
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "本科及以上学历"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "unknown",
+              "reason": "JD 或档案没写每周到岗",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海",
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作城市：上海、广州"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不接受远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "校招岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "财务分析专员（校招）"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "财务分析专员（校招）",
+                  "evidence": [
+                    "财务分析专员（校招）"
+                  ]
+                },
+                "company": {
+                  "value": "示例衡泉商贸有限公司",
+                  "evidence": [
+                    "公司名称：示例衡泉商贸有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "上海",
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作城市：上海、广州"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "needs_check",
+        "actual_verdict": "needs_check",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops为2027届；2026届只是优先，应提示偏好不符但不淘汰。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops本科达到要求。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "JD未写每周实习天数，周五不能解读为5天。"
+          },
+          {
+            "check": "min_months",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "JD未写实习月数，试用期3个月不能填入此条件。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "工作城市包含上海，与ops意向有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "校招属于ops目标类型。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题不含电话销售，公司和城市无排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    }
+  }
+}

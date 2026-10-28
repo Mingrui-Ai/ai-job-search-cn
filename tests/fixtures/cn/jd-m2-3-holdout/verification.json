@@ -1,0 +1,36 @@
+{
+  "verified_at_utc": "2026-10-28T07:44:41.442281+00:00",
+  "base_commit": "143c48265c2db870c307e29cff71caaf92ddbb67",
+  "oracle_freeze_commit": "900828f3485b4a38e1227dfdc11784e6675200e4",
+  "oracle_manifest_sha256": "0f3b7a606a82c005f72624b5a09197fd6c3036bca58dc7555a1fb3fbce49db62",
+  "oracle_file_count": 10,
+  "oracle_hashes_unchanged_and_match_freeze_commit": true,
+  "contract_and_profile_hashes_unchanged": true,
+  "verbatim_evidence_snippets": 63,
+  "all_evidence_found": true,
+  "all_cli_calls_successful": true,
+  "all_parsed_and_oracle_records_valid": true,
+  "independent_recount_equals_saved_summary": true,
+  "all_fixture_txt_json_utf8_without_bom_lf": true,
+  "application_code_and_legacy_worklog_unchanged": true,
+  "checks": {
+    "python tools/lint_skills.py": "OK (11 skills, 12 commands, settings.json)",
+    "python tools/security_guards.py": "OK",
+    "python -m unittest discover -s tests -t .": {
+      "result": "OK",
+      "tests_run": 1021,
+      "skipped": 9,
+      "elapsed_seconds": 105.765,
+      "local_log_sha256": "92ab7ebd18a5f9fffc0a75c3a4edec6af31ed912d19b53d5984bb7ef271860c7"
+    }
+  },
+  "baseline_outputs_sha256": {
+    "ats_backend_intern.json": "61d878bb68f7bf91135838228fd7f154a8a17756bb9a8ef8cb2d0b05cb9f9f63",
+    "boss_business_development_intern.json": "3fc59ceb8d0d34d46edf834c171691ebd57ed28e7bbce81cd92302d6edd183f2",
+    "boss_data_analysis_intern.json": "5c76042ce238b3d0ecff5de0337365e7b4006401637060e0213982d40e1fc6dc",
+    "official_finance_campus.json": "7d463e11b12cbc2668a7696801c6c7a24a0af3e75fe0e5e6ae448521ca05b2be",
+    "shixiseng_hr_intern.json": "ed03405f88ed8a4120a1e8a861805c7475556a83e9920a087f62c86558d54552",
+    "summary.json": "9b988d62a0256110db790d58d1cbcb65d37368be31c2df4a6f3529e53d7b4ebc"
+  },
+  "phase": "master baseline complete; wrapup comparison pending planner notification"
+}
