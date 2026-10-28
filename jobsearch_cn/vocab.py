@@ -1,9 +1,11 @@
 """Skill vocabulary: the terms jd parse recognises as skills, grouped by direction.
 
 The built-in vocabulary ships as jobsearch_cn/skills.json, grouped by job
-direction (tech, data, product, ops, design), so a non-technical JD is read as
-well as a technical one and matching can tell which direction a skill belongs
-to. A user extends it in <data dir>/config/skills.json with the same shape:
+direction (tech, data, product, ops, design, market) plus general, the office
+software every direction uses, so a non-technical JD is read as well as a
+technical one and matching can tell which direction a skill belongs to. A
+term is the skill as a JD asks for it (文案写作, not 文案). A user extends it
+in <data dir>/config/skills.json with the same shape:
 terms add to an existing group, and a new group key adds a group. Nothing a
 user writes can remove a built-in term.
 
