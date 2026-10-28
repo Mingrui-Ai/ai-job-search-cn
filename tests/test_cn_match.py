@@ -239,7 +239,7 @@ G, E, D, M, L, T, X = match.CHECKS
 #   tech  nowcoder   校招 vs 实习 -> conflict; 北京/杭州, JD silent on remote, no relocation -> unknown
 #   tech  experienced 社招 -> conflict; 上海 and "不支持远程办公", no relocation -> conflict
 #   tech  shixiseng  "每周到岗5天" > 4 -> conflict; 上海, JD silent on remote -> unknown;
-#                    the headline "本科" is not read as a minimum -> unknown
+#                    H12 reads "本科" from the tag row -> both profiles meet the minimum
 #   tech  official   杭州 but "支持远程实习" and remote_ok -> match; no 届别 in the JD -> unknown
 #   ops   boss       4天 > 3, 6个月 > 3, 深圳 with no remote or move -> three conflicts
 #   ops   nowcoder   硕士 > 本科, 北京/杭州 -> conflicts; 校招 is in ops's target
@@ -248,27 +248,27 @@ G, E, D, M, L, T, X = match.CHECKS
 #   ops   official   硕士, 6个月, 杭州 (remote offered, ops refuses remote) -> conflicts
 #   tech  boss_paste_backend  "5天/周" > 4 -> conflict; 北京, JD silent on remote, no relocation -> unknown
 #   tech  boss_paste_ops      上海, JD silent on remote -> unknown; 4天 = 4 and 3个月 < 6 match
-#   tech  boss_fullpage       no work city read (the address sits under a bare "工作地址" heading) -> unknown
+#   tech  boss_fullpage       H12 reads 广州 from the tag row -> city and all other checks match
 #   ops   boss_paste_backend  5天 > 3, 4个月 > 3, 北京 with no remote or move -> three conflicts
 #   ops   boss_paste_ops      4天 > 3 -> conflict; 3个月 = 3 and 上海 match
-#   ops   boss_fullpage       4天 > 3, 6个月 > 3 -> conflicts; no work city -> unknown
+#   ops   boss_fullpage       4天 > 3, 6个月 > 3, 广州 vs 上海 with no remote/move -> conflicts
 SAMPLE_TABLE = {
     ("boss_intern.txt", "tech"): ("eligible", {}),
     ("nowcoder_campus.txt", "tech"): ("ineligible", {D: UNKNOWN, M: UNKNOWN, L: UNKNOWN, T: CONFLICT}),
     ("experienced_hire.txt", "tech"): ("ineligible", {G: UNKNOWN, D: UNKNOWN, M: UNKNOWN, L: CONFLICT, T: CONFLICT}),
-    ("shixiseng_intern.txt", "tech"): ("ineligible", {E: UNKNOWN, D: CONFLICT, L: UNKNOWN}),
+    ("shixiseng_intern.txt", "tech"): ("ineligible", {D: CONFLICT, L: UNKNOWN}),
     ("official_site.txt", "tech"): ("needs_check", {G: UNKNOWN}),
     ("boss_intern.txt", "ops"): ("ineligible", {D: CONFLICT, M: CONFLICT, L: CONFLICT}),
     ("nowcoder_campus.txt", "ops"): ("ineligible", {E: CONFLICT, D: UNKNOWN, M: UNKNOWN, L: CONFLICT}),
     ("experienced_hire.txt", "ops"): ("ineligible", {G: UNKNOWN, D: UNKNOWN, M: UNKNOWN, T: CONFLICT}),
-    ("shixiseng_intern.txt", "ops"): ("ineligible", {E: UNKNOWN, D: CONFLICT}),
+    ("shixiseng_intern.txt", "ops"): ("ineligible", {D: CONFLICT}),
     ("official_site.txt", "ops"): ("ineligible", {G: UNKNOWN, E: CONFLICT, M: CONFLICT, L: CONFLICT}),
     ("boss_paste_backend_intern.txt", "tech"): ("ineligible", {D: CONFLICT, L: UNKNOWN}),
     ("boss_paste_ops_intern.txt", "tech"): ("needs_check", {L: UNKNOWN}),
-    ("boss_fullpage_data_intern.txt", "tech"): ("needs_check", {L: UNKNOWN}),
+    ("boss_fullpage_data_intern.txt", "tech"): ("eligible", {}),
     ("boss_paste_backend_intern.txt", "ops"): ("ineligible", {D: CONFLICT, M: CONFLICT, L: CONFLICT}),
     ("boss_paste_ops_intern.txt", "ops"): ("ineligible", {D: CONFLICT}),
-    ("boss_fullpage_data_intern.txt", "ops"): ("ineligible", {D: CONFLICT, M: CONFLICT, L: UNKNOWN}),
+    ("boss_fullpage_data_intern.txt", "ops"): ("ineligible", {D: CONFLICT, M: CONFLICT, L: CONFLICT}),
 }
 
 
