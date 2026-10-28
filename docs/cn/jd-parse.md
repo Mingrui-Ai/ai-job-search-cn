@@ -76,6 +76,7 @@ Windows 文件的 CRLF 换行可以正常处理。
 每份 JD 都先经过 `jobsearch_cn/guard.py`：
 
 - **复用上游 `tools/posting_guard.py`**：去掉隐藏内容和不可见字符，并检查英文注入句式、混用字形等；
+- 上游解码的 tag 字符和 variation selector 隐藏文本也检查中文注入句式；解码内容只用于检查和警告，不混入 JD 字段提取或 `raw_text`。`guard.counts.invisible_text` 记录解码文本数量，即使没有命中已知指令句式，也保留上游告警；
 - **补充中文注入句式**（迁移方案中的 G1），例如：
   - "忽略之前的所有指令"
   - "你现在是一个AI助手，"
