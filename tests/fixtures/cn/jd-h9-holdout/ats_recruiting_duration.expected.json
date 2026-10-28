@@ -1,0 +1,282 @@
+{
+  "fixture": "ats_recruiting_duration.txt",
+  "job_schema_version": 1,
+  "site_argument": "ats",
+  "method": "agent",
+  "basis": "V6首次规则执行前按原创文本人工写定；采用Job Schema v1和现行match.md，未采用M2-4设计稿新取值。",
+  "fields": {
+    "title": {
+      "value": "招聘协调实习生",
+      "evidence": [
+        "职位名称：招聘协调实习生"
+      ]
+    },
+    "company": {
+      "value": "示例澄芽人才服务有限公司",
+      "evidence": [
+        "公司名称：示例澄芽人才服务有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "上海"
+      ],
+      "evidence": [
+        "工作地点：上海"
+      ]
+    },
+    "remote": {
+      "value": true,
+      "evidence": [
+        "支持全程远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "招聘协调实习生"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": null,
+        "max": null,
+        "unit": null,
+        "months": null,
+        "negotiable": true
+      },
+      "evidence": [
+        "薪酬：面议"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2026
+        ],
+        "strict": false
+      },
+      "evidence": [
+        "2026届优先，其他届别亦可申请"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": 3,
+      "evidence": [
+        "每周至少3天"
+      ]
+    },
+    "requirements.min_months": {
+      "value": 4,
+      "evidence": [
+        "连续实习4个月以上"
+      ],
+      "note": "人工真实要求为4个月；平台3个月属背景说明，规则应留空。"
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": "master"
+      },
+      "evidence": [
+        "本科及以上学历，硕士优先"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "Excel",
+        "PowerPoint",
+        "招聘流程"
+      ],
+      "evidence": [
+        "岗位技能：掌握 Excel、PowerPoint，了解招聘流程"
+      ],
+      "note": "不把否定的SQL/Python/剪映、公司介绍和页脚平台纳入。"
+    },
+    "return_offer": {
+      "value": false,
+      "evidence": [
+        "本岗位不提供转正机会"
+      ]
+    },
+    "published_at": {
+      "value": "2026-10-24",
+      "evidence": [
+        "发布时间：2026-10-24"
+      ]
+    },
+    "deadline": {
+      "value": null,
+      "evidence": [
+        "截止日期尚未公布"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "平台栏目介绍的常见安排为实习3个月及以上，并非本岗位的到岗约定。",
+      "interpretation": "人工应采用岗位4个月；H9规则遇不同时长须留空。"
+    },
+    {
+      "text": "无需 SQL 基础；不要求 Python 经验；不需要剪映技能。",
+      "interpretation": "否定词不应变成技能要求。"
+    },
+    {
+      "text": "公司的小红书和抖音账号用于展示团队活动，维护这些渠道不属于本岗位工作。",
+      "interpretation": "公司介绍渠道不计技能。"
+    },
+    {
+      "text": "页脚：欢迎关注我们的公众号。",
+      "interpretation": "页脚平台不计技能。"
+    },
+    {
+      "text": "2026届优先，其他届别亦可申请。",
+      "interpretation": "tech与ops都是2027届，不符偏好但不判冲突。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届不符2026偏好，但strict=false，符合并提示"
+        },
+        "education": {
+          "result": "match",
+          "reason": "硕士达到本科且符合偏好"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "4天达到3天"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "6个月达到岗位真实要求4个月"
+        },
+        "location": {
+          "result": "match",
+          "reason": "JD可远程且tech接受远程"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于目标"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题未命中外包或销售"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届不符软偏好，不淘汰"
+        },
+        "education": {
+          "result": "match",
+          "reason": "本科达到最低要求，硕士只是偏好"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "3天达到要求"
+        },
+        "min_months": {
+          "result": "conflict",
+          "reason": "只能3个月，低于岗位真实要求4个月"
+        },
+        "location": {
+          "result": "match",
+          "reason": "上海直接命中"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于目标"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题未命中电话销售"
+        }
+      }
+    }
+  },
+  "rule_expectations": {
+    "requirements.min_months": {
+      "value": null,
+      "classification": "policy_blank",
+      "label": "按口径留空",
+      "human_truth": 4,
+      "reason": "同一JD有平台3个月及岗位4个月两种实习时长；H9要求规则留空，人工真值仍为4。"
+    }
+  },
+  "policy_blank_match": {
+    "tech": {
+      "verdict": "needs_check",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "不符软届别偏好仍判符合"
+        },
+        "education": {
+          "result": "match",
+          "reason": "硕士达到本科"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "4天达到3天"
+        },
+        "min_months": {
+          "result": "unknown",
+          "reason": "规则按H9留空后月数未知"
+        },
+        "location": {
+          "result": "match",
+          "reason": "远程可接受"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于目标"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "未命中排除词"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "needs_check",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "不符软届别偏好仍判符合"
+        },
+        "education": {
+          "result": "match",
+          "reason": "本科达到最低学历"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "3天达到3天"
+        },
+        "min_months": {
+          "result": "unknown",
+          "reason": "规则按H9留空后月数未知，不能按平台3个月判满足"
+        },
+        "location": {
+          "result": "match",
+          "reason": "上海直接命中"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于目标"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "未命中排除词"
+        }
+      }
+    }
+  }
+}

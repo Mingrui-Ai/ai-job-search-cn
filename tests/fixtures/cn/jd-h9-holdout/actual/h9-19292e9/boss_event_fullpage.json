@@ -1,0 +1,1219 @@
+{
+  "fixture": "boss_event_fullpage.txt",
+  "site_argument": "boss",
+  "parse": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_af0271fa2e49",
+          "source": {
+            "type": "file",
+            "site": "boss",
+            "url": null,
+            "imported_at": "2026-10-28T19:07:09+08:00"
+          },
+          "title": "会务协调实习生",
+          "company": null,
+          "cities": [
+            "上海"
+          ],
+          "remote": true,
+          "employment_type": "internship",
+          "salary": {
+            "min": 170,
+            "max": 210,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": true
+            },
+            "days_per_week": 3,
+            "min_months": null,
+            "education": null,
+            "skills": [
+              "Excel",
+              "活动策划",
+              "商务沟通"
+            ]
+          },
+          "return_offer": null,
+          "published_at": "2026-10-25",
+          "deadline": null,
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "会务协调实习生",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作地点：上海",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "远程实习",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "会务协调实习生 170-210元/天",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "170-210元/天",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "仅招2027届在校生",
+              "method": "rule"
+            },
+            "requirements.days_per_week": {
+              "text": "3天/周",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": "掌握 Excel、活动策划和商务沟通",
+              "method": "rule"
+            },
+            "published_at": {
+              "text": "发布时间：2026-10-25",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "岗位链接：https://jobs.example.invalid/job_detail/v6_event_03.html\n采集日期：2026-10-28\n首页\n职位\n消息\n简历\n会务协调实习生 170-210元/天\n收藏职位\n分享职位\n职位详情\n实习岗位\n导师带教\n线上协作\n职责说明\n协助准备线上会场的议程材料。\n核对讲者提交材料的名称和版本。\n按照约定整理讨论记录。\n维护会前事项清单。\n汇总会后待确认问题。\n将重复出现的问题整理成提示卡片。\n与负责同学核对材料交付情况。\n记录议程变更并同步到共享清单。\n任职要求\n仅招2027届在校生。\n掌握 Excel、活动策划和商务沟通。\n能把待确认事项写清楚。\n能按清单逐项核对材料。\n可以主动反馈材料缺项。\n培养与协作\n由固定同学说明工作背景。\n材料确认后再进入演练环节。\n每次活动后整理问题记录。\n工作中使用统一的文件命名约定。\n支持全程远程实习。\n转正安排：暂无说明。\n沟通提示\n沟通时可以询问具体分工。\n材料交付方式由团队说明。\n职位收藏后可在列表中查看。\n公司与岗位标签\n示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科\n企业资料\n团队协助虚构的线上主题活动整理会务材料。\n企业介绍仅用于说明样例背景。\n工作地点：上海\n发布时间：2026-10-25\n常见问题\n申请截止日期尚未公布。\n沟通消息按收到的先后整理。\n请先查看岗位职责与到岗条件。\n职位信息\n材料准备\n协作安排\n问题记录\n页面底部\n返回职位列表\n查看已收藏职位\n虚构样例结束\n公司、岗位和全部内容均为原创虚构。\n链接仅为版式占位，不对应真实招聘页面。"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_af0271fa2e49",
+          "title": "会务协调实习生",
+          "company": null,
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ]
+    }
+  },
+  "validate_parsed": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "field_comparison": [
+    {
+      "field": "title",
+      "expected": "会务协调实习生",
+      "actual": "会务协调实习生",
+      "kind": "match"
+    },
+    {
+      "field": "company",
+      "expected": "示例帆橙会务社",
+      "actual": null,
+      "kind": "missing"
+    },
+    {
+      "field": "cities",
+      "expected": [
+        "上海"
+      ],
+      "actual": [
+        "上海"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "remote",
+      "expected": true,
+      "actual": true,
+      "kind": "match"
+    },
+    {
+      "field": "employment_type",
+      "expected": "internship",
+      "actual": "internship",
+      "kind": "match"
+    },
+    {
+      "field": "salary",
+      "expected": {
+        "min": 170,
+        "max": 210,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 170,
+        "max": 210,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.graduation",
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.days_per_week",
+      "expected": 3,
+      "actual": 3,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.min_months",
+      "expected": 3,
+      "actual": null,
+      "kind": "missing"
+    },
+    {
+      "field": "requirements.education",
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": null,
+      "kind": "missing"
+    },
+    {
+      "field": "requirements.skills",
+      "expected": [
+        "Excel",
+        "活动策划",
+        "商务沟通"
+      ],
+      "actual": [
+        "Excel",
+        "活动策划",
+        "商务沟通"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "return_offer",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "published_at",
+      "expected": "2026-10-25",
+      "actual": "2026-10-25",
+      "kind": "match"
+    },
+    {
+      "field": "deadline",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    }
+  ],
+  "skill_comparison": {
+    "matched": [
+      "Excel",
+      "活动策划",
+      "商务沟通"
+    ],
+    "missing": [],
+    "extra": []
+  },
+  "validate_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "save_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_af0271fa2e49",
+          "title": "会务协调实习生",
+          "company": "示例帆橙会务社",
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  "matches": {
+    "tech": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_af0271fa2e49",
+          "title": "会务协调实习生",
+          "company": null,
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅招2027届在校生"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "unknown",
+              "reason": "JD 没写最低学历（优先学历不作要求）",
+              "jd": {
+                "requirements.education": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": "3天/周"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "JD 可远程，你接受远程",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作地点：上海"
+                },
+                "remote": {
+                  "value": true,
+                  "evidence": "远程实习"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "会务协调实习生 170-210元/天"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "会务协调实习生",
+                  "evidence": "会务协调实习生"
+                },
+                "company": {
+                  "value": null,
+                  "evidence": null
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作地点：上海"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "needs_check",
+        "verdict_equal": false,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "硕士达到本科"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天达到3天"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "6个月达到3个月"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "虽然无上海交集，但JD支持远程且tech接受"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中外包或销售"
+          }
+        ],
+        "check_equal_count": 5
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_af0271fa2e49",
+          "title": "会务协调实习生",
+          "company": "示例帆橙会务社",
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅招2027届在校生"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "JD 可远程，你接受远程",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科",
+                    "工作地点：上海"
+                  ]
+                },
+                "remote": {
+                  "value": true,
+                  "evidence": [
+                    "支持全程远程实习"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "会务协调实习生"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "会务协调实习生",
+                  "evidence": [
+                    "会务协调实习生 170-210元/天"
+                  ]
+                },
+                "company": {
+                  "value": "示例帆橙会务社",
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科",
+                    "工作地点：上海"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "eligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "硕士达到本科"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天达到3天"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "6个月达到3个月"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "虽然无上海交集，但JD支持远程且tech接受"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中外包或销售"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    },
+    "ops": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_af0271fa2e49",
+          "title": "会务协调实习生",
+          "company": null,
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅招2027届在校生"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "unknown",
+              "reason": "JD 没写最低学历（优先学历不作要求）",
+              "jd": {
+                "requirements.education": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": "3天/周"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作地点：上海"
+                },
+                "remote": {
+                  "value": true,
+                  "evidence": "远程实习"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "会务协调实习生 170-210元/天"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "会务协调实习生",
+                  "evidence": "会务协调实习生"
+                },
+                "company": {
+                  "value": null,
+                  "evidence": null
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作地点：上海"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "needs_check",
+        "verdict_equal": false,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "本科达到要求"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "3天达到要求"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "3个月达到要求"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "上海直接命中，不接受远程不影响城市交集"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中电话销售"
+          }
+        ],
+        "check_equal_count": 5
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_af0271fa2e49",
+          "title": "会务协调实习生",
+          "company": "示例帆橙会务社",
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅招2027届在校生"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科",
+                    "工作地点：上海"
+                  ]
+                },
+                "remote": {
+                  "value": true,
+                  "evidence": [
+                    "支持全程远程实习"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "会务协调实习生"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "会务协调实习生",
+                  "evidence": [
+                    "会务协调实习生 170-210元/天"
+                  ]
+                },
+                "company": {
+                  "value": "示例帆橙会务社",
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科",
+                    "工作地点：上海"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "eligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "本科达到要求"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "3天达到要求"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "3个月达到要求"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "上海直接命中，不接受远程不影响城市交集"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中电话销售"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    }
+  }
+}

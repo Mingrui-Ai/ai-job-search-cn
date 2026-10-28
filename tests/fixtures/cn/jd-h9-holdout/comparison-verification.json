@@ -1,0 +1,169 @@
+{
+  "verified_at_utc": "2026-10-28T11:09:55.015782+00:00",
+  "implementation_pr": 34,
+  "code_commit": "19292e9b6642b0fb7761b8772a7b32e30e16122a",
+  "oracle_freeze_commit": "4d5084a52f7c78ff5febd31c9be448b6a3c52ace",
+  "oracle_manifest_sha256": "4f8cdb691d7ded23bbb0bca29695c7751ceaa1611ab9d38971051f7efcc500ab",
+  "oracle_files_equal_to_freeze_git_blobs": true,
+  "raw_cli_recount": {
+    "master": {
+      "field_match": 50,
+      "field_wrong": 4,
+      "match_verdict_equal": 4,
+      "match_check_equal": 46,
+      "oracle_verdict_equal": 10,
+      "oracle_check_equal": 70,
+      "policy_verdict_equal": 1,
+      "policy_check_equal": 24,
+      "field_missing": 16
+    },
+    "h9-19292e9": {
+      "field_match": 61,
+      "field_policy_blank": 2,
+      "match_verdict_equal": 2,
+      "match_check_equal": 54,
+      "oracle_verdict_equal": 10,
+      "oracle_check_equal": 70,
+      "policy_verdict_equal": 4,
+      "policy_check_equal": 28,
+      "field_missing": 7
+    }
+  },
+  "check_changes": [
+    {
+      "fixture": "ats_recruiting_duration",
+      "profile": "tech",
+      "check": "min_months",
+      "before": "match",
+      "after": "unknown",
+      "expected": "match",
+      "policy_blank": true
+    },
+    {
+      "fixture": "ats_recruiting_duration",
+      "profile": "ops",
+      "check": "min_months",
+      "before": "match",
+      "after": "unknown",
+      "expected": "conflict",
+      "policy_blank": true
+    },
+    {
+      "fixture": "boss_event_fullpage",
+      "profile": "tech",
+      "check": "exclusions",
+      "before": "unknown",
+      "after": "match",
+      "expected": "match",
+      "policy_blank": false
+    },
+    {
+      "fixture": "boss_event_fullpage",
+      "profile": "ops",
+      "check": "exclusions",
+      "before": "unknown",
+      "after": "match",
+      "expected": "match",
+      "policy_blank": false
+    },
+    {
+      "fixture": "boss_finance_tags",
+      "profile": "tech",
+      "check": "min_months",
+      "before": "unknown",
+      "after": "match",
+      "expected": "match",
+      "policy_blank": false
+    },
+    {
+      "fixture": "boss_finance_tags",
+      "profile": "tech",
+      "check": "exclusions",
+      "before": "unknown",
+      "after": "match",
+      "expected": "match",
+      "policy_blank": false
+    },
+    {
+      "fixture": "boss_finance_tags",
+      "profile": "ops",
+      "check": "min_months",
+      "before": "unknown",
+      "after": "match",
+      "expected": "match",
+      "policy_blank": false
+    },
+    {
+      "fixture": "boss_finance_tags",
+      "profile": "ops",
+      "check": "exclusions",
+      "before": "unknown",
+      "after": "match",
+      "expected": "match",
+      "policy_blank": false
+    },
+    {
+      "fixture": "boss_frontend_tags",
+      "profile": "tech",
+      "check": "min_months",
+      "before": "unknown",
+      "after": "match",
+      "expected": "match",
+      "policy_blank": false
+    },
+    {
+      "fixture": "boss_frontend_tags",
+      "profile": "tech",
+      "check": "exclusions",
+      "before": "unknown",
+      "after": "match",
+      "expected": "match",
+      "policy_blank": false
+    },
+    {
+      "fixture": "boss_frontend_tags",
+      "profile": "ops",
+      "check": "min_months",
+      "before": "unknown",
+      "after": "conflict",
+      "expected": "conflict",
+      "policy_blank": false
+    },
+    {
+      "fixture": "boss_frontend_tags",
+      "profile": "ops",
+      "check": "exclusions",
+      "before": "unknown",
+      "after": "match",
+      "expected": "match",
+      "policy_blank": false
+    },
+    {
+      "fixture": "official_test_duration",
+      "profile": "tech",
+      "check": "min_months",
+      "before": "match",
+      "after": "unknown",
+      "expected": "match",
+      "policy_blank": true
+    },
+    {
+      "fixture": "official_test_duration",
+      "profile": "ops",
+      "check": "min_months",
+      "before": "match",
+      "after": "unknown",
+      "expected": "conflict",
+      "policy_blank": true
+    }
+  ],
+  "all_parsed_and_manual_records_valid": true,
+  "run_files_sha256": {
+    "ats_recruiting_duration.json": "0e2ca0b319c6cbe8d49922d1bf0bf9176589ff81a6160951555049718f25a0ec",
+    "boss_event_fullpage.json": "9fe5b6586b84ea96b7bdf9e180688edd333b3dde25967f48a707349bb5b72c18",
+    "boss_finance_tags.json": "7c511ec389bd99d19d2bf86d5b417072293d349df87ca89b5b059c57025c6bc4",
+    "boss_frontend_tags.json": "152c6d73e5392af39895f6ae3d1be728e7da0fbef82bea01bdd33d052a34d2d8",
+    "official_test_duration.json": "bd0010524aecc457e572f94de9c136ed984b25b38cf153c52b5eb0abfc473ae0",
+    "summary.json": "5dd5952f41f2a2a177143c18d41ec81e940044651c7a94a3aa28ca46c00e1f84"
+  }
+}

@@ -1,0 +1,1194 @@
+{
+  "fixture": "boss_finance_tags.txt",
+  "site_argument": "boss",
+  "parse": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_c9c55e80ede6",
+          "source": {
+            "type": "file",
+            "site": "boss",
+            "url": null,
+            "imported_at": "2026-10-28T16:55:29+08:00"
+          },
+          "title": null,
+          "company": null,
+          "cities": [],
+          "remote": false,
+          "employment_type": "internship",
+          "salary": {
+            "min": 160,
+            "max": 190,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": false
+            },
+            "days_per_week": 3,
+            "min_months": null,
+            "education": null,
+            "skills": [
+              "Excel"
+            ]
+          },
+          "return_offer": false,
+          "published_at": null,
+          "deadline": "2026-11-28",
+          "status": "new",
+          "evidence": {
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "实习生",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "160-190元/天",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "2027届优先",
+              "method": "rule"
+            },
+            "requirements.days_per_week": {
+              "text": "3天/周",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": "掌握 Excel、PowerPoint",
+              "method": "rule"
+            },
+            "return_offer": {
+              "text": "不提供转正",
+              "method": "rule"
+            },
+            "deadline": {
+              "text": "投递截止：2026-11-28",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "岗位链接：https://jobs.example.invalid/job_detail/v6_finance_02.html\n采集日期：2026-10-28\n\n财务助理实习生（费用核对）-【上海】\n示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科\n\n职位描述\n协助核对费用单据，整理归档编号，汇总待补材料。\n将核对结果整理成便于讨论的周报。\n\n任职资格\n2027届优先，其他届别也可申请。\n掌握 Excel、PowerPoint，具备财务分析基础。\n不支持远程实习。\n本岗位不提供转正机会。\n投递截止：2026-11-28\n\n样例说明：公司、岗位和内容均为原创虚构；链接仅为版式占位，不对应真实招聘页面。"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_c9c55e80ede6",
+          "title": null,
+          "company": null,
+          "cities": [],
+          "status": "new"
+        }
+      ]
+    }
+  },
+  "validate_parsed": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "field_comparison": [
+    {
+      "field": "title",
+      "expected": "财务助理实习生（费用核对）-【上海】",
+      "actual": null,
+      "kind": "missing"
+    },
+    {
+      "field": "company",
+      "expected": "示例杉汀商行",
+      "actual": null,
+      "kind": "missing"
+    },
+    {
+      "field": "cities",
+      "expected": [
+        "上海"
+      ],
+      "actual": [],
+      "kind": "missing"
+    },
+    {
+      "field": "remote",
+      "expected": false,
+      "actual": false,
+      "kind": "match"
+    },
+    {
+      "field": "employment_type",
+      "expected": "internship",
+      "actual": "internship",
+      "kind": "match"
+    },
+    {
+      "field": "salary",
+      "expected": {
+        "min": 160,
+        "max": 190,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 160,
+        "max": 190,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.graduation",
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": false
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.days_per_week",
+      "expected": 3,
+      "actual": 3,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.min_months",
+      "expected": 3,
+      "actual": null,
+      "kind": "missing"
+    },
+    {
+      "field": "requirements.education",
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": null,
+      "kind": "missing"
+    },
+    {
+      "field": "requirements.skills",
+      "expected": [
+        "Excel",
+        "PowerPoint",
+        "财务分析"
+      ],
+      "actual": [
+        "Excel"
+      ],
+      "kind": "missing"
+    },
+    {
+      "field": "return_offer",
+      "expected": false,
+      "actual": false,
+      "kind": "match"
+    },
+    {
+      "field": "published_at",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "deadline",
+      "expected": "2026-11-28",
+      "actual": "2026-11-28",
+      "kind": "match"
+    }
+  ],
+  "skill_comparison": {
+    "matched": [
+      "Excel"
+    ],
+    "missing": [
+      "PowerPoint",
+      "财务分析"
+    ],
+    "extra": []
+  },
+  "validate_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "save_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_c9c55e80ede6",
+          "title": "财务助理实习生（费用核对）-【上海】",
+          "company": "示例杉汀商行",
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  "matches": {
+    "tech": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_c9c55e80ede6",
+          "title": null,
+          "company": null,
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": false
+                  },
+                  "evidence": "2027届优先"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "unknown",
+              "reason": "JD 没写最低学历（优先学历不作要求）",
+              "jd": {
+                "requirements.education": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": "3天/周"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "unknown",
+              "reason": "JD 没写工作城市",
+              "jd": {
+                "cities": {
+                  "value": [],
+                  "evidence": null
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "unknown",
+              "reason": "JD 没写标题，无法核对排除项",
+              "jd": {
+                "title": {
+                  "value": null,
+                  "evidence": null
+                },
+                "company": {
+                  "value": null,
+                  "evidence": null
+                },
+                "cities": {
+                  "value": [],
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "needs_check",
+        "verdict_equal": false,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合软偏好"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "硕士达到本科"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天达到3天"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "6个月达到3个月"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "上海无交集，tech不搬家且JD不支持远程"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "标题未命中外包或销售"
+          }
+        ],
+        "check_equal_count": 3
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_c9c55e80ede6",
+          "title": "财务助理实习生（费用核对）-【上海】",
+          "company": "示例杉汀商行",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": false
+                  },
+                  "evidence": [
+                    "2027届优先，其他届别也可申请"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "上海不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程实习"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "财务助理实习生"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "财务助理实习生（费用核对）-【上海】",
+                  "evidence": [
+                    "财务助理实习生（费用核对）-【上海】"
+                  ]
+                },
+                "company": {
+                  "value": "示例杉汀商行",
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合软偏好"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "硕士达到本科"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天达到3天"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "6个月达到3个月"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "上海无交集，tech不搬家且JD不支持远程"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中外包或销售"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    },
+    "ops": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_c9c55e80ede6",
+          "title": null,
+          "company": null,
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": false
+                  },
+                  "evidence": "2027届优先"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "unknown",
+              "reason": "JD 没写最低学历（优先学历不作要求）",
+              "jd": {
+                "requirements.education": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": "3天/周"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "unknown",
+              "reason": "JD 没写工作城市",
+              "jd": {
+                "cities": {
+                  "value": [],
+                  "evidence": null
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "unknown",
+              "reason": "JD 没写标题，无法核对排除项",
+              "jd": {
+                "title": {
+                  "value": null,
+                  "evidence": null
+                },
+                "company": {
+                  "value": null,
+                  "evidence": null
+                },
+                "cities": {
+                  "value": [],
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "needs_check",
+        "verdict_equal": false,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合软偏好"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "本科达到要求"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "3天达到要求"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "3个月达到要求"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "上海直接命中"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "标题未命中电话销售"
+          }
+        ],
+        "check_equal_count": 3
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_c9c55e80ede6",
+          "title": "财务助理实习生（费用核对）-【上海】",
+          "company": "示例杉汀商行",
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": false
+                  },
+                  "evidence": [
+                    "2027届优先，其他届别也可申请"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程实习"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "财务助理实习生"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "财务助理实习生（费用核对）-【上海】",
+                  "evidence": [
+                    "财务助理实习生（费用核对）-【上海】"
+                  ]
+                },
+                "company": {
+                  "value": "示例杉汀商行",
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "示例杉汀商行｜上海｜160-190元/天｜3天/周｜3个月｜本科"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "eligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合软偏好"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "本科达到要求"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "3天达到要求"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "3个月达到要求"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "上海直接命中"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中电话销售"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    }
+  }
+}
