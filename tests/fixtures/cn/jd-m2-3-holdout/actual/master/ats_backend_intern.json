@@ -1,0 +1,1284 @@
+{
+  "fixture": "ats_backend_intern.txt",
+  "site_argument": "ats",
+  "parse": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_ed1ef7b0d399",
+          "source": {
+            "type": "file",
+            "site": "ats",
+            "url": null,
+            "imported_at": "2026-10-28T15:36:01+08:00"
+          },
+          "title": "Java后端开发实习生",
+          "company": "示例砺川系统科技有限公司",
+          "cities": [
+            "深圳",
+            "广州"
+          ],
+          "remote": false,
+          "employment_type": "internship",
+          "salary": {
+            "min": 250,
+            "max": 350,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2026
+              ],
+              "strict": true
+            },
+            "days_per_week": 4,
+            "min_months": 4,
+            "education": {
+              "min": "master",
+              "preferred": null
+            },
+            "skills": [
+              "Java",
+              "Python",
+              "Go",
+              "Docker",
+              "K8s",
+              "Kubernetes",
+              "Rust",
+              "C++",
+              "公众号"
+            ]
+          },
+          "return_offer": null,
+          "published_at": "2026-10-22",
+          "deadline": "2026-11-20",
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "Java后端开发实习生",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例砺川系统科技有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作地点：深圳 / 广州",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "Java后端开发实习生",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "250-350元/天",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "仅招2026届",
+              "method": "rule"
+            },
+            "requirements.days_per_week": {
+              "text": "每周4天",
+              "method": "rule"
+            },
+            "requirements.min_months": {
+              "text": "至少实习4个月",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "硕士及以上",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": [
+                "Java后端开发实习生",
+                "技能要求：Python、Go 任选其一",
+                "熟悉 Docker",
+                "能够维护 K8s 集群（即 Kubernetes）",
+                "不要求 Rust 或 C++ 经验",
+                "页脚：公司动态见我们的 B站 和公众号"
+              ],
+              "method": "rule"
+            },
+            "published_at": {
+              "text": "发布时间：2026-10-22",
+              "method": "rule"
+            },
+            "deadline": {
+              "text": "投递截止：2026-11-20",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "Java后端开发实习生\n公司名称：示例砺川系统科技有限公司\n工作地点：深圳 / 广州\n薪资：250-350元/天\n\n岗位职责：\n协助维护服务部署环境，记录故障定位过程并跟进修复验证。\n\n任职要求：\n仅招2026届，硕士及以上学历。\n技能要求：Python、Go 任选其一；熟悉 Docker；能够维护 K8s 集群（即 Kubernetes）。\n不要求 Rust 或 C++ 经验。\n每周4天，至少实习4个月；不支持远程办公。\n\n发布时间：2026-10-22\n投递截止：2026-11-20\n页脚：公司动态见我们的 B站 和公众号，欢迎订阅招聘通知。\n说明：本文为原创虚构的离线验收样例，不对应真实公司或招聘活动。"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_ed1ef7b0d399",
+          "title": "Java后端开发实习生",
+          "company": "示例砺川系统科技有限公司",
+          "cities": [
+            "深圳",
+            "广州"
+          ],
+          "status": "new"
+        }
+      ]
+    }
+  },
+  "validate_parsed": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "field_comparison": [
+    {
+      "field": "title",
+      "expected": "Java后端开发实习生",
+      "actual": "Java后端开发实习生",
+      "kind": "match"
+    },
+    {
+      "field": "company",
+      "expected": "示例砺川系统科技有限公司",
+      "actual": "示例砺川系统科技有限公司",
+      "kind": "match"
+    },
+    {
+      "field": "cities",
+      "expected": [
+        "深圳",
+        "广州"
+      ],
+      "actual": [
+        "深圳",
+        "广州"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "remote",
+      "expected": false,
+      "actual": false,
+      "kind": "match"
+    },
+    {
+      "field": "employment_type",
+      "expected": "internship",
+      "actual": "internship",
+      "kind": "match"
+    },
+    {
+      "field": "salary",
+      "expected": {
+        "min": 250,
+        "max": 350,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 250,
+        "max": 350,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.graduation",
+      "expected": {
+        "years": [
+          2026
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2026
+        ],
+        "strict": true
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.days_per_week",
+      "expected": 4,
+      "actual": 4,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.min_months",
+      "expected": 4,
+      "actual": 4,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.education",
+      "expected": {
+        "min": "master",
+        "preferred": null
+      },
+      "actual": {
+        "min": "master",
+        "preferred": null
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.skills",
+      "expected": [
+        "Python",
+        "Go",
+        "Docker",
+        "K8s",
+        "Kubernetes"
+      ],
+      "actual": [
+        "Java",
+        "Python",
+        "Go",
+        "Docker",
+        "K8s",
+        "Kubernetes",
+        "Rust",
+        "C++",
+        "公众号"
+      ],
+      "kind": "extra"
+    },
+    {
+      "field": "return_offer",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "published_at",
+      "expected": "2026-10-22",
+      "actual": "2026-10-22",
+      "kind": "match"
+    },
+    {
+      "field": "deadline",
+      "expected": "2026-11-20",
+      "actual": "2026-11-20",
+      "kind": "match"
+    }
+  ],
+  "skill_comparison": {
+    "matched": [
+      "Python",
+      "Go",
+      "Docker",
+      "K8s",
+      "Kubernetes"
+    ],
+    "missing": [],
+    "extra": [
+      "Java",
+      "Rust",
+      "C++",
+      "公众号"
+    ]
+  },
+  "validate_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "save_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_ed1ef7b0d399",
+          "title": "Java后端开发实习生",
+          "company": "示例砺川系统科技有限公司",
+          "cities": [
+            "深圳",
+            "广州"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  "matches": {
+    "tech": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_ed1ef7b0d399",
+          "title": "Java后端开发实习生",
+          "company": "示例砺川系统科技有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "conflict",
+              "reason": "JD 限 2026 届，你是 2027 届",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2026
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅招2026届"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足硕士及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "master",
+                    "preferred": null
+                  },
+                  "evidence": "硕士及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": "每周4天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 4 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 4,
+                  "evidence": "至少实习4个月"
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市深圳、广州在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "广州"
+                  ],
+                  "evidence": "工作地点：深圳 / 广州"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "Java后端开发实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "Java后端开发实习生",
+                  "evidence": "Java后端开发实习生"
+                },
+                "company": {
+                  "value": "示例砺川系统科技有限公司",
+                  "evidence": "示例砺川系统科技有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "广州"
+                  ],
+                  "evidence": "工作地点：深圳 / 广州"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "tech为2027届，不在仅招2026届范围内。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech硕士达到硕士及以上。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech每周4天，达到要求。"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech可6个月，达到4个月。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "深圳、广州均在tech意向中。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于tech目标类型。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题不含外包或销售，公司和城市无排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_ed1ef7b0d399",
+          "title": "Java后端开发实习生",
+          "company": "示例砺川系统科技有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "conflict",
+              "reason": "JD 限 2026 届，你是 2027 届",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2026
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅招2026届"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足硕士及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "master",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "硕士及以上学历"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": [
+                    "每周4天"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 4 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 4,
+                  "evidence": [
+                    "至少实习4个月"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市深圳、广州在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳 / 广州"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "Java后端开发实习生"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "Java后端开发实习生",
+                  "evidence": [
+                    "Java后端开发实习生"
+                  ]
+                },
+                "company": {
+                  "value": "示例砺川系统科技有限公司",
+                  "evidence": [
+                    "公司名称：示例砺川系统科技有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳 / 广州"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "tech为2027届，不在仅招2026届范围内。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech硕士达到硕士及以上。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech每周4天，达到要求。"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech可6个月，达到4个月。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "深圳、广州均在tech意向中。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于tech目标类型。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题不含外包或销售，公司和城市无排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    },
+    "ops": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_ed1ef7b0d399",
+          "title": "Java后端开发实习生",
+          "company": "示例砺川系统科技有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "conflict",
+              "reason": "JD 限 2026 届，你是 2027 届",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2026
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅招2026届"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "conflict",
+              "reason": "JD 要求硕士及以上，你的最高学历是本科",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "master",
+                    "preferred": null
+                  },
+                  "evidence": "硕士及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "conflict",
+              "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": "每周4天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "conflict",
+              "reason": "JD 要求实习时长 4 个月，你只能 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 4,
+                  "evidence": "至少实习4个月"
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "深圳、广州不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "广州"
+                  ],
+                  "evidence": "工作地点：深圳 / 广州"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "Java后端开发实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "Java后端开发实习生",
+                  "evidence": "Java后端开发实习生"
+                },
+                "company": {
+                  "value": "示例砺川系统科技有限公司",
+                  "evidence": "示例砺川系统科技有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "广州"
+                  ],
+                  "evidence": "工作地点：深圳 / 广州"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "ops为2027届，不在仅招2026届范围内。"
+          },
+          {
+            "check": "education",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "ops本科低于硕士最低要求。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "ops每周3天，少于4天。"
+          },
+          {
+            "check": "min_months",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "ops仅可3个月，少于4个月。"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "深圳、广州与ops的上海无交集；ops不搬家且不接受远程，JD也否定远程。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于ops目标类型。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题不含电话销售，公司和城市无排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_ed1ef7b0d399",
+          "title": "Java后端开发实习生",
+          "company": "示例砺川系统科技有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "conflict",
+              "reason": "JD 限 2026 届，你是 2027 届",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2026
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅招2026届"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "conflict",
+              "reason": "JD 要求硕士及以上，你的最高学历是本科",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "master",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "硕士及以上学历"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "conflict",
+              "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": [
+                    "每周4天"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "conflict",
+              "reason": "JD 要求实习时长 4 个月，你只能 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 4,
+                  "evidence": [
+                    "至少实习4个月"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "深圳、广州不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳 / 广州"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "Java后端开发实习生"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "Java后端开发实习生",
+                  "evidence": [
+                    "Java后端开发实习生"
+                  ]
+                },
+                "company": {
+                  "value": "示例砺川系统科技有限公司",
+                  "evidence": [
+                    "公司名称：示例砺川系统科技有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳 / 广州"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "ops为2027届，不在仅招2026届范围内。"
+          },
+          {
+            "check": "education",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "ops本科低于硕士最低要求。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "ops每周3天，少于4天。"
+          },
+          {
+            "check": "min_months",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "ops仅可3个月，少于4个月。"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "深圳、广州与ops的上海无交集；ops不搬家且不接受远程，JD也否定远程。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于ops目标类型。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题不含电话销售，公司和城市无排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    }
+  }
+}
