@@ -1,8 +1,8 @@
-# 2026-10-28 · 开源前隐私审查（Claude B 会话）
+# 2026-10-28 · M8-3 提前：开源前隐私审查（Claude B 会话，PR #45）
 
 **完成**
 
-- 在独立工作树 `ai-job-search-cn-b`、分支 `chore/oss-privacy` 上做了开源前的隐私审查，报告见 [oss-privacy-review.md](../oss-privacy-review.md)。
+- 在独立工作树 `ai-job-search-cn-b`、分支 `chore/oss-privacy` 上做了开源前的隐私审查（路线图 M8-3，提前到转为公开之前做），报告见 [oss-privacy-review.md](../oss-privacy-review.md)。
 - 扫描范围：
   - GitHub 的完整镜像：41 个分支、12 个 tag、43 个 PR 引用，共 588 个提交、2081 个文件版本；
   - PR 和 issue 的标题、描述、评论、编辑历史；
