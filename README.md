@@ -54,7 +54,7 @@
 | **M7 · v0.7** | 一键编排与可观测 | 计划中 |
 | **M8 · v1.0** | 开源发布 | 计划中 |
 
-测试：1009 个（跳过 9 个）全部通过，CI 覆盖 Python 3.10–3.14 和 Windows。目标和每个里程碑的完成标准见[总体规划](docs/cn/master-plan.md)。完整计划见[路线图](docs/cn/roadmap.md)，每一步的过程和验证结果见[工作记录](docs/cn/worklog.md)。
+测试：1021 个（跳过 9 个）全部通过，CI 覆盖 Python 3.10–3.14 和 Windows。目标和每个里程碑的完成标准见[总体规划](docs/cn/master-plan.md)。完整计划见[路线图](docs/cn/roadmap.md)，每一步的过程和验证结果见[工作记录](docs/cn/worklog.md)。
 
 ## 现在能用什么
 
