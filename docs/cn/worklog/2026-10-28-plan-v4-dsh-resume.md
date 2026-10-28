@@ -16,7 +16,7 @@
 
 **决策**（用户 2026-10-28）
 
-- 加入第三个 Agent：DeepSeek 官方开源的 DeepSeek Harness（`dsh`），接 DeepSeek API，让国内同学更容易用上、也用得起。
+- 加入第三个 Agent：DeepSeek 官方开源的 DeepSeek Harness（`dsh`），接 DeepSeek API，让国内同学更容易用上、也用得起。用户随后明确：dsh 是给国内用户找工作用的运行环境，不参与本项目的开发。
 - 简历的输入和输出都支持常用的 Word（.docx）和 PDF。
 
 **规划者的补充**
