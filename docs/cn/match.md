@@ -67,7 +67,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 
 ## 可解释评分（M2-4 设计稿）
 
-> 状态：设计稿（规划者，2026-10-28）。按[路线图 M2-4](roadmap.md) 分三个 PR 实现：M2-4a 契约补充（PR #38）、M2-4b 规则评分与匹配记录（PR #TBD，`jobsearch_cn/score.py`）已实现，M2-4c Agent 工作流待做。实际做法和本稿不同时，在 PR 里说明，并改写本节。
+> 状态：设计稿（规划者，2026-10-28）。按[路线图 M2-4](roadmap.md) 分三个 PR 实现：M2-4a 契约补充（PR #38）、M2-4b 规则评分与匹配记录（PR #41，`jobsearch_cn/score.py`）已实现，M2-4c Agent 工作流待做。实际做法和本稿不同时，在 PR 里说明，并改写本节。
 
 过滤回答"能不能投"，评分回答"值不值得投、差在哪"。评分分两层：
 
