@@ -274,6 +274,8 @@ class Validate(Case):
 
     def test_the_four_tamperings(self):
         self.assert_refused(setting(self.record, "total.score", 95), "total: does not follow")
+        # The error carries the total the dimensions give, for an agent to copy.
+        self.assert_refused(setting(self.record, "total.score", 95), json.dumps(self.record["total"], ensure_ascii=False))
         self.assert_refused(setting(self.record, "dimensions.experience.evidence.jd", ["精通分布式系统设计"]),
                             "dimensions.experience.evidence.jd[0]: not found in the JD text")
         self.assert_refused(setting(self.record, "dimensions.experience.evidence.profile", ["exp-9"]),
