@@ -25,7 +25,7 @@
 | **M2 · v0.2** 个人档案与可解释匹配 | 进行中：M2-1 个人档案和示例档案（PR #8、#11，真实简历自用验收 2026-10-28 通过）、M2-2 硬性条件过滤（PR #12）、H7 填写约定（PR #17）、M2-3 求职方向配置与词表外置（PR #19、#21、#26）、M2-4a 契约补充（PR #TBD）已完成 |
 | M3–M8 | 未开始 |
 
-本地测试：master（#TBD 合并后）共 __TOTAL__ 项，__PASSED__ 项通过、9 项按预期跳过。CI 覆盖 Python 3.10–3.14 和 Windows。本地环境：conda `ai-job-search-cn`（Python 3.12.15）。
+本地测试：master（#TBD 合并后）共 1055 项，1046 项通过、9 项按预期跳过。CI 覆盖 Python 3.10–3.14 和 Windows。本地环境：conda `ai-job-search-cn`（Python 3.12.15）。
 
 ### 看板：下次工作（2026-10-28 更新）
 
@@ -267,6 +267,9 @@
       - 不适用：只在 JD 没写天数或月数、且岗位类型是校招或社招时判 `not_applicable`，引用 JD 的 `employment_type`；写了照常比较；
       - 学历：写明的最低学历优先于"学历不限"（同一份 JD 两种都有时取写明的）；"专业不限"不算；
       - 原有测试随契约改了期望值：`test_cn_match.py` 样例表里校招、社招样例的 `days_per_week`、`min_months` 从 `unknown` 变为 `not_applicable`（4 组，总结论不变）；"学历不限"种子用例从 null 变为 `none`。V2 的例外共 8 项（字段 1、检查 6、总结论 1），登记在 `test_cn_jd_oracles.py`，每项附理由；例外和冻结值相同或指向不存在的项时测试失败。
+      - 建档：写了意向城市而 `remote_ok` 或 `relocate` 为空时，`profile validate` 在 `warnings` 里逐项提示，档案仍然有效；`profile-setup.md` 写明这两项必问、留空的后果和草稿目录；
+      - 地点的理由：判 `unknown` 时写明两边各说了什么，例如"北京不在意向城市内；JD 没写能否远程；你接受远程、不考虑异地"；
+      - V4（H9 起的回归样例）：PPT 读得出了，删掉 H9 的 PPT 例外；契约变化另登记 5 项例外（财务校招两份档案的 `days_per_week`、`min_months` 变为 `not_applicable`，ops 的总结论变为 `eligible`）。
   - [ ] **M2-4b 规则评分与匹配记录**：
     - `match score / validate / save / show / list`；
     - 技能、方向、薪资三个规则维度，嵌入过滤结论，加权总分、等级、缺口；

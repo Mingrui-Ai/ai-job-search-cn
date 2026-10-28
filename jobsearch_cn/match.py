@@ -152,7 +152,27 @@ def _location(job, profile):
     # ruled out by one side. Remote unstated on both sides is still a way out.
     if relocate is False and (remote is False or remote_ok is False):
         return _item("location", CONFLICT, f"{where}不在意向城市内，且不能远程、不搬家", job, *fields, profile)
-    return _item("location", UNKNOWN, f"{where}不在意向城市内，是否可远程或愿意搬家未知", job, *fields, profile)
+    return _item("location", UNKNOWN, f"{where}不在意向城市内；{_ways_out(remote, remote_ok, relocate)}",
+                 job, *fields, profile)
+
+
+_JD_REMOTE = {None: "JD 没写能否远程", True: "JD 可远程", False: "JD 不支持远程"}
+
+
+def _ways_out(remote, remote_ok, relocate) -> str:
+    """What each side says about remote work and moving: "JD 没写能否远程；你接受远程、不考虑异地"."""
+    said, unsaid = [], []
+    if remote_ok is None:
+        unsaid.append("是否接受远程")
+    else:
+        said.append("接受远程" if remote_ok else "不接受远程")
+    if relocate is None:
+        unsaid.append("是否愿意去其他城市")
+    else:
+        said.append("愿意去其他城市" if relocate else "不考虑异地")
+    profile_side = [part for part in ("你" + "、".join(said) if said else "",
+                                      "档案没写" + "和".join(unsaid) if unsaid else "") if part]
+    return "；".join([_JD_REMOTE[remote]] + profile_side)
 
 
 _TYPE_NAMES = {"internship": "实习", "campus": "校招", "experienced": "社招"}

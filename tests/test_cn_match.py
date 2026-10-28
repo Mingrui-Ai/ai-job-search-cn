@@ -187,6 +187,15 @@ class Location(CheckCase):
             with self.subTest(job=job["cities"], profile=profile["availability"]):
                 self.assert_result(UNKNOWN, job=job, profile=profile)
 
+    def test_an_unknown_says_which_side_is_silent(self):
+        # The case the user hit: the profile answers both questions, the JD neither.
+        item = self.assert_result(UNKNOWN, job=self.place(["北京"], None), profile=self.wants(["深圳"], True, False))
+        self.assertEqual(item["reason"], "北京不在意向城市内；JD 没写能否远程；你接受远程、不考虑异地")
+        item = self.assert_result(UNKNOWN, job=self.place(["北京"], True), profile=self.wants(["深圳"], None, None))
+        self.assertEqual(item["reason"], "北京不在意向城市内；JD 可远程；档案没写是否接受远程和是否愿意去其他城市")
+        item = self.assert_result(UNKNOWN, job=self.place(["北京"], False), profile=self.wants(["深圳"], False, None))
+        self.assertEqual(item["reason"], "北京不在意向城市内；JD 不支持远程；你不接受远程；档案没写是否愿意去其他城市")
+
 
 class EmploymentType(CheckCase):
     check = "employment_type"

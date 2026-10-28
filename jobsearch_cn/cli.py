@@ -222,7 +222,7 @@ def cmd_profile_validate(args) -> int:
     sources_dir = root / "sources"
     sources = {p.name for p in sources_dir.iterdir() if p.is_file()} if sources_dir.is_dir() else set()
     errors = profile.validate(data, sources=sources, groups=groups)
-    warnings = []
+    warnings = profile.warnings(data)
     notes = root / "notes.md"
     if not notes.is_file():
         warnings.append("notes.md is missing; CVs and greetings will have no free-text material")

@@ -57,6 +57,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 说明：
 
 - **不适用**（`not_applicable`）：每周到岗天数和实习时长是实习岗位的条件。校招、社招岗位（`employment_type` 为 `campus`、`experienced`）没写这两项时，`days_per_week`、`min_months` 判 `not_applicable`，引用 JD 的 `employment_type`，和 `match` 一样不影响总结论。写了就照常比较；实习岗位、或岗位类型没写时，没写仍是 `unknown`。
+- 地点判 `unknown` 时，理由写明两边各说了什么、缺了什么，例如"北京不在意向城市内；JD 没写能否远程；你接受远程、不考虑异地"。
 - 排除关键词**只匹配标题**。匹配正文容易误伤，例如正文写"本岗位不是外包"。
 - 薪资不在过滤范围内，由评分（M2-4）处理。
 
@@ -151,3 +152,5 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 - **学历不限**：Job Schema 的 `requirements.education.min` 新增取值 `none`，表示 JD 明确写了"学历不限""不设最低学历门槛"，过滤时判 `match`。`jd parse` 能识别这些写法；"专业不限"不算。
 - **同义词**：词表新增 `same_as`，列出同义的词条：`["Go", "Golang"]`、`["JavaScript", "JS"]`、`["Kubernetes", "K8s"]`、`["自然语言处理", "NLP"]`、`["文案写作", "文案撰写"]`、`["PowerPoint", "PPT"]`（"JS""PPT""文案撰写"是新补的词条）。同一组的词必须都是词表里的词条，并且属于同一个分组。比较技能时同一组视为相同（`vocab.Vocabulary.same`）；解析结果仍保留 JD 原文的写法。用户词表可以追加，和已有的组有相同词条时并成一组。写法见 [jd-parse.md](jd-parse.md#技能词表)。
 - **档案**：`target` 新增 `directions`（词表分组键的列表，例如 `["data", "product"]`；`general` 不算方向）和 `weights`（null，或四个维度的权重，每项不小于 0）。Profile 还没有随版本发布，直接加入 v1，不升版本号。字段说明见 [profile.md](profile.md#3-profilejson-字段)。
+- **建档**：`profile-setup.md` 要求问到"是否接受远程""是否愿意去其他城市"，并说明留空的后果；写了意向城市而这两项为空时，`profile validate` 给出警告。草稿放在 `data/profile/drafts/`。
+- **地点的理由**：判 `unknown` 时写明哪一方没写，见上文"各项条件"的说明。

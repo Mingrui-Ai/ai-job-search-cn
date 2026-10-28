@@ -176,6 +176,17 @@ def validate(profile, sources=None, groups=None) -> list[str]:
     return errors
 
 
+def warnings(profile) -> list[str]:
+    """What a valid profile leaves open that will cost answers later, as "<field path>: <message>"."""
+    availability = profile.get("availability") if isinstance(profile, dict) else None
+    if not isinstance(availability, dict) or not availability.get("cities"):
+        return []
+    # With target cities but no word on remote work or moving, every job elsewhere is
+    # location unknown: the filter cannot rule it in or out.
+    return [f"availability.{key}: null while availability.cities is set; jobs in other cities will all be "
+            "location unknown" for key in ("remote_ok", "relocate") if availability.get(key) is None]
+
+
 def redacted(profile: dict) -> dict:
     """The profile with contact details masked, for output that is not a CV."""
     copy = dict(profile)

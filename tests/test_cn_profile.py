@@ -160,6 +160,17 @@ class Validate(unittest.TestCase):
         self.assert_error(with_value(self.example, "target.weights", [35, 30, 25, 10]),
                           "target.weights: must be an object")
 
+    def test_cities_without_an_answer_on_remote_or_moving_is_a_warning(self):
+        # Valid either way; but every job outside the cities would be location unknown.
+        self.assertEqual(profile.warnings(self.example), [])
+        open_remote = with_value(self.example, "availability.remote_ok", None)
+        self.assertEqual(profile.validate(open_remote), [])
+        [warning] = profile.warnings(open_remote)
+        self.assertTrue(warning.startswith("availability.remote_ok:"), warning)
+        both = with_value(open_remote, "availability.relocate", None)
+        self.assertEqual(len(profile.warnings(both)), 2)
+        self.assertEqual(profile.warnings(with_value(both, "availability.cities", [])), [])
+
     def test_redaction_masks_contact_only(self):
         shown = profile.redacted(self.example)
         self.assertEqual(shown["contact"]["phone"], "***")
@@ -223,6 +234,12 @@ class Commands(unittest.TestCase):
         other.write_text(json.dumps(documented_example(), ensure_ascii=False), encoding="utf-8")
         proc = run_cli("profile", "validate", str(other), data_dir=self.data)
         self.assertEqual(proc.returncode, 0, proc.stdout.decode("utf-8"))
+
+    def test_validate_warns_of_cities_without_an_answer_on_moving(self):
+        self.write(with_value(documented_example(), "availability.relocate", None))
+        out = json.loads(run_cli("profile", "validate", data_dir=self.data).stdout)
+        self.assertTrue(out["valid"])
+        self.assertTrue(any(w.startswith("availability.relocate:") for w in out["warnings"]), out["warnings"])
 
     def test_directions_are_checked_against_the_data_dir_vocabulary(self):
         self.write(with_value(documented_example(), "target.directions", ["game"]))
