@@ -143,7 +143,7 @@ _PROSE = re.compile(r"[，,。；;！!？?]|负责|熟悉|熟练|掌握|了解|�
 _BRACKETED = re.compile(r"（[^（）]*）|\([^()]*\)|【[^【】]*】|\[[^\[\]]*\]")
 # A copy can open with "标签：值" lines above the title: 职位链接：https://…, 采集日期：2026-10-28.
 _LABEL_LINE = re.compile(r"^[^:：，,。；;！!？?\s][^:：，,。；;！!？?]{0,9}[:：]")
-# How far into a copy to look for the title and the tag line: a whole-page copy puts
+# How far into a copy to look for an unlabelled title: a whole-page copy puts
 # navigation first, and the title beside its salary ("java开发实习生 130-150元/天").
 _HEAD_LINES = 30
 # The tag line of a BOSS直聘 copy, "<公司>｜<城市>｜350-400元/天｜5天/周｜3个月｜本科": cells
@@ -154,6 +154,8 @@ _TAG_SEP = re.compile(r"\s*[｜|]\s*")
 _PIPE = re.compile(r"[｜|]")
 _DAYS_TAG = re.compile(rf"^{_DAY}(?:{_TO}{_DAY})?\s*(?:天|日)\s*/\s*周$")
 _MONTHS_TAG = re.compile(rf"^(?P<n>{_MONTH_COUNT})\s*个?\s*月$")
+_CITY_TAG_PART = rf"(?:{_CITY.pattern})(?:[·・\-][{_HAN}A-Za-z0-9]{{1,8}})*"
+_CITY_TAG = re.compile(rf"{_CITY_TAG_PART}(?:\s*[/／、,，]\s*{_CITY_TAG_PART})*")
 _NOT_COMPANY = re.compile(r"^(?:\d|不限|经验|学历|大专|专科|本科|硕士|研究生|博士|实习|全职|兼职|校招|社招|远程)")
 # A whole-page copy lays the same tags out with spaces, "杭州 5天/周 6个月 本科". Such a
 # line counts only when every cell is a tag word, so a sentence that mentions "5天/周" or
@@ -161,7 +163,7 @@ _NOT_COMPANY = re.compile(r"^(?:\d|不限|经验|学历|大专|专科|本科|硕
 _TAG_WORD = re.compile(
     rf"(?:{_CITY.pattern})(?:[·・\-][{_HAN}A-Za-z0-9]{{1,8}})*|[{_HAN}]{{1,6}}(?:区|县)"
     rf"|{_DAY}(?:{_TO}{_DAY})?\s*(?:天|日)\s*/\s*周|(?:{_MONTH_COUNT})\s*个?\s*月(?:及?以上)?"
-    r"|(?:大专|专科|本科|硕士|研究生|博士)(?:及以上)?|学历不限|经验不限|在校/应届|应届生?"
+    r"|(?:大专|专科|本科|学士|硕士|研究生|博士)(?:及以上)?|学历不限|经验不限|在校/应届|应届生?"
     r"|\d{1,2}(?:-\d{1,2})?年(?:以上|以内)?|(?:20)?\d{2}届|日常实习|暑期实习|实习|全职|兼职|校招|社招|可?远程|可转正"
 )
 # A skill a clause rules out is not asked for: "无需 SQL 基础", "不要求 Rust 或 C++", "也不负责公众号运营".
@@ -177,6 +179,8 @@ _SECTION = re.compile(
     r"(?m)^[ \t]*[【\[]?\s*(?:职位描述|职位详情|岗位描述|岗位职责|工作职责|职位职责|工作内容|任职要求|岗位要求|职位要求"
     r"|任职资格|技能要求|工作地点|工作地址|薪资福利|福利待遇|职位福利|岗位福利)\s*[】\]]?\s*(?:[:：]|$)"
 )
+_HEADER_END = re.compile(r"^(?:看过该职位的人还看了|相关职位|推荐职位|热门职位|公司基本信息)\s*[:：]?\s*$")
+_HEADER_PROSE = re.compile(r"^(?:请|可以|需要|需|要求|保证|欢迎|至少)|到岗|入职|连续")
 _COMPANY_LABEL = re.compile(r"(?m)^\s*(?:公司名称|企业名称|招聘单位|公司|企业)\s*[:：]\s*(?P<v>[^\n，,。；;]{2,40})")
 # A legal-entity name that is the whole line, or is followed only by a separator
 # and a place ("示例科技有限公司 · 广州"). A sentence that runs on after the name
@@ -270,14 +274,14 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
     found_title, title_span = _title(text, lines)
     title = cite("title", found_title)
     headline = _line_at(text, title_span[0]) if title_span else (lines[0] if lines else "")
-    tag, piped = _tag_cells(lines)
+    tag, piped = _tag_cells(lines, headline if title_span else None)
     record = {
         "schema_version": schema.SCHEMA_VERSION,
         "id": job_id(text),
         "source": {"type": source_type, "site": site, "url": url, "imported_at": imported_at},
         "title": title,
         "company": cite("company", _company(text, lines, tag if piped else [])),
-        "cities": cite("cities", _cities(text, lines)) or [],
+        "cities": cite("cities", _cities(text, lines, tag)) or [],
         "remote": cite("remote", _remote(text)),
         "employment_type": cite("employment_type", _employment_type(text, headline)),
         "salary": cite("salary", _salary(text)),
@@ -285,13 +289,13 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
             "graduation": cite("requirements.graduation", _graduation(text)),
             "days_per_week": cite("requirements.days_per_week", _days_per_week(text)),
             "min_months": cite("requirements.min_months", _min_months(text, tag)),
-            "education": cite("requirements.education", _education(text)),
+            "education": cite("requirements.education", _education(text, tag)),
             "skills": cite("requirements.skills",
                            _skills(text, skill_patterns or _builtin_patterns(), skip=title_span)) or [],
         },
         "return_offer": cite("return_offer", _return_offer(text)),
         "published_at": cite("published_at", _dated(text, (_PUBLISHED,))),
-        "deadline": cite("deadline", _dated(text, (_DEADLINE_AFTER, _DEADLINE_BEFORE))),
+        "deadline": cite("deadline", _dated(text, (_DEADLINE_AFTER, _DEADLINE_BEFORE), same_line=True)),
         "status": "new",
         "evidence": evidence,
         "guard": guard.summary(findings),
@@ -391,20 +395,53 @@ def _title(text: str, lines: list):
     return _NOTHING, None
 
 
-def _tag_cells(lines: list):
-    """The cells of a tag line near the top and whether they were split on ｜; ([], False) if none."""
-    for line in lines[:_HEAD_LINES]:
-        piped = bool(_PIPE.search(line))
-        cells = _TAG_SEP.split(line) if piped else line.split()
-        if len(cells) < 3 or not any(_DAYS_TAG.match(cell) for cell in cells):
-            continue
-        if piped or all(_TAG_WORD.fullmatch(cell) or _is_salary(cell) for cell in cells):
+def _tag_cells(lines: list, headline=None):
+    """Prefer the title's header, then strictly delimited tags anywhere.
+
+    Navigation may push a tag line past line 30. Anchor to the selected title,
+    not the page's first line; with no title, retain the bounded opening scan.
+    If the header has no row, a full-page copy may put it below the body.
+    Only fullwidth-pipe rows qualify there; whitespace rows stay in the header.
+    """
+    candidates = lines[lines.index(headline) + 1:] if headline else lines[:_HEAD_LINES]
+    for line in candidates:
+        if _SECTION.match(line) or _INTRO.match(line) or _HEADER_END.match(line):
+            break
+        cells, piped = _tag_row(line)
+        if cells:
+            return cells, piped
+        if _PROSE.search(line) or _NEGATION.search(line) or _HEADER_PROSE.search(line):
+            break
+    for line in lines:
+        if "｜" in line and "|" not in line:
+            cells, piped = _tag_row(line)
+            if cells:
+                return cells, piped
+    return [], False
+
+
+def _tag_row(line: str):
+    """Require a weekly-days tag and tag-only cells, except an optional company."""
+    piped = bool(_PIPE.search(line))
+    cells = _TAG_SEP.split(line) if piped else line.split()
+    if len(cells) >= 3 and any(_DAYS_TAG.fullmatch(cell) for cell in cells):
+        tags = cells[1:] if piped and _company_cell(cells[0]) else cells
+        if all(_TAG_WORD.fullmatch(cell) or _CITY_TAG.fullmatch(cell) or _is_salary(cell)
+               or _EDUCATION_MIN.fullmatch(cell) or _EDUCATION_PREFERRED.fullmatch(cell) for cell in tags):
             return cells, piped
     return [], False
 
 
 def _is_salary(cell: str) -> bool:
     return any(pattern.fullmatch(cell) for pattern, _, _ in _SALARY)
+
+
+def _company_cell(cell: str) -> bool:
+    return (2 <= len(cell) <= 40 and not _NOT_COMPANY.match(cell) and not _CITY_HEADLINE.match(cell)
+            and not _PROSE.search(cell) and not _NEGATION.search(cell) and not _LABEL_LINE.match(cell)
+            and not _HEADER_PROSE.search(cell)
+            and not _TAG_WORD.fullmatch(cell) and not _CITY_TAG.fullmatch(cell) and not _is_salary(cell)
+            and not _SECTION.fullmatch(cell) and not _INTRO.fullmatch(cell))
 
 
 def _company(text: str, lines: list, tag: list):
@@ -419,12 +456,12 @@ def _company(text: str, lines: list, tag: list):
         if match:
             return match["v"], [match["v"]]
     # Failing a legal name, the first cell of the tag line, often a short name ("示例云帆科技").
-    if tag and 2 <= len(tag[0]) <= 40 and not _NOT_COMPANY.match(tag[0]) and not _CITY_HEADLINE.match(tag[0]):
+    if tag and _company_cell(tag[0]):
         return tag[0], [tag[0]]
     return _NOTHING
 
 
-def _cities(text: str, lines: list):
+def _cities(text: str, lines: list, tag: list):
     cities, snippets = [], []
     for match in _LOCATION_LABEL.finditer(text):
         rest, snippet = match["rest"], match.group(0).strip()
@@ -438,6 +475,14 @@ def _cities(text: str, lines: list):
         if found:
             cities += found
             snippets.append(snippet)
+    if not cities:
+        for cell in tag:
+            if _CITY_TAG.fullmatch(cell):
+                # Match only the start of each city tag: a district/street can
+                # itself contain another city's name ("广州·南京路").
+                found = [_CITY.match(part.strip()).group(0) for part in re.split(r"[/／、,，]", cell)]
+                cities.extend(city for city in found if city not in cities)
+                snippets.append(cell)
     if not cities:
         for line in lines[:6]:
             match = _CITY_HEADLINE.match(line)
@@ -558,7 +603,7 @@ def _min_months(text: str, tag: list):
     return count, [snippet]
 
 
-def _education(text: str):
+def _education(text: str, tag: list):
     lowest = preferred = None
     snippets = []
     for match in _EDUCATION_MIN.finditer(text):
@@ -572,6 +617,12 @@ def _education(text: str):
         if match:
             lowest = schema.NO_MINIMUM
             snippets.append(match.group(0).strip())
+    if lowest is None:
+        for cell in tag:
+            if cell in _LEVELS:
+                lowest = _LEVELS[cell]
+                snippets.append(cell)
+                break
     match = _EDUCATION_PREFERRED.search(text)
     if match:
         level = _LEVELS[match.group(1)]
@@ -592,9 +643,14 @@ def _return_offer(text: str):
     return (True, [match.group(0)]) if match else _NOTHING
 
 
-def _dated(text: str, patterns):
-    match = _earliest(patterns, text)
-    if match:
+def _dated(text: str, patterns, *, same_line=False):
+    # Deadline patterns allow whitespace around the date. Restrict their
+    # search to one physical line so a publication date cannot borrow the
+    # next line's "截止", including through the date pattern's own whitespace.
+    for part in text.splitlines() if same_line else [text]:
+        match = _earliest(patterns, part)
+        if not match:
+            continue
         try:
             value = date(int(match["y"]), int(match["m"]), int(match["d"])).isoformat()
         except ValueError:
