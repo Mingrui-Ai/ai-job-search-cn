@@ -97,7 +97,11 @@ class HeaderLabels(unittest.TestCase):
 
     def test_unlimited_education_and_unknown_city_are_not_invented(self):
         record = parse("采购助理实习生\n苏州｜4天/周｜5个月｜学历不限")
-        self.assertIsNone(record["requirements"]["education"])
+        self.assertEqual(record["requirements"]["education"], {"min": "none", "preferred": None})
+        # M2-4a's explicit no-minimum statement also outranks a bare tag.
+        record = parse("采购助理实习生\n苏州｜4天/周｜5个月｜本科\n任职要求：学历不限，硕士优先")
+        self.assertEqual(record["requirements"]["education"], {"min": "none", "preferred": "master"})
+        self.assertEqual(record["evidence"]["requirements.education"]["text"], ["学历不限", "硕士优先"])
         record = parse("采购助理实习生\n示例叶舟商贸｜虚构城｜4天/周｜5个月｜本科")
         self.assertEqual(record["cities"], [])
 

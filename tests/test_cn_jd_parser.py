@@ -212,7 +212,15 @@ SEED_CASES = (
     ("大专以上学历", "requirements.education", {"min": "associate", "preferred": None}),
     ("博士优先", "requirements.education", {"min": None, "preferred": "phd"}),
     ("硕士及以上学历优先", "requirements.education", {"min": None, "preferred": "master"}),
-    ("学历不限", "requirements.education", None),
+    ("学历不限", "requirements.education", {"min": "none", "preferred": None}),
+    # "none" (M2-4a): the JD says outright that there is no minimum degree.
+    ("不限学历", "requirements.education", {"min": "none", "preferred": None}),
+    ("学历要求：不限", "requirements.education", {"min": "none", "preferred": None}),
+    ("学历不限，硕士优先", "requirements.education", {"min": "none", "preferred": "master"}),
+    ("硕士及以上学历优先，不设最低学历门槛", "requirements.education", {"min": "none", "preferred": "master"}),
+    ("本科及以上学历，专业不限", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("A岗：本科及以上学历；B岗：学历不限", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("专业不限", "requirements.education", None),
     ("表现优秀者可转正", "return_offer", True),
     ("有转正机会", "return_offer", True),
     ("不提供转正", "return_offer", False),
@@ -280,6 +288,10 @@ SEED_CASES = (
     ("负责抖音短视频运营和直播运营", "requirements.skills", ["抖音", "短视频运营", "直播运营"]),
     ("负责公众号文案，协助短视频拍摄和直播活动", "requirements.skills", ["公众号"]),
     ("整理访谈记录，参与Web自动化回归", "requirements.skills", []),
+    # Synonym spellings (M2-4a) are read as written; matching takes them as one skill.
+    ("熟悉HTML、CSS和JS，用过Node.js和JSON", "requirements.skills", ["JS", "Node.js"]),
+    ("会做PPT，文案撰写能力强", "requirements.skills", ["PPT", "文案撰写"]),
+    ("熟悉K8s和Kubernetes运维", "requirements.skills", ["K8s", "Kubernetes"]),
     # The interview or written-test city on a location line is not a work city.
     ("工作地点：深圳南山区；面试地点：北京。", "cities", ["深圳"]),
     ("base 北京/上海，面试可在杭州", "cities", ["北京", "上海"]),

@@ -11,6 +11,7 @@
         "C++",
         "C#",
         "JavaScript",
+        "JS",
         "TypeScript",
         "Rust",
         "Kotlin",
@@ -138,6 +139,7 @@
         "秀米",
         "剪映",
         "文案写作",
+        "文案撰写",
         "数据复盘"
       ]
     },
@@ -184,8 +186,17 @@
       "label": "通用",
       "terms": [
         "Excel",
-        "PowerPoint"
+        "PowerPoint",
+        "PPT"
       ]
     }
-  }
+  },
+  "same_as": [
+    ["Go", "Golang"],
+    ["JavaScript", "JS"],
+    ["Kubernetes", "K8s"],
+    ["自然语言处理", "NLP"],
+    ["文案写作", "文案撰写"],
+    ["PowerPoint", "PPT"]
+  ]
 }

@@ -122,18 +122,44 @@ class Oracles:
                         self.assertEqual(results[check], result)
 
 
+# M2-4a (roadmap) added contract values the frozen expectations predate; the planner
+# listed what they change. A JD that says outright there is no minimum degree is min
+# "none", which the filter takes as a match; a campus hire states no weekly days or
+# internship length, which are not_applicable to it, so nothing unknown is left for ops.
+NO_MINIMUM = "M2-4a: 不设最低学历门槛 is a stated minimum, none"
+NONE_MATCHES = "M2-4a: a JD with no minimum degree matches any candidate"
+CAMPUS = "M2-4a: a 校招 that states no weekly days or internship length asks none"
+
+
 class V2(Oracles, unittest.TestCase):
     directory = REPO / "tests" / "fixtures" / "cn" / "jd-m2-3"
+    field_exceptions = {
+        ("ats_ui_design_intern.txt", "requirements.education"): ({"min": "none", "preferred": "master"}, NO_MINIMUM),
+    }
+    check_exceptions = {
+        ("ats_ui_design_intern.txt", "tech", "education"): ("match", NONE_MATCHES),
+        ("ats_ui_design_intern.txt", "ops", "education"): ("match", NONE_MATCHES),
+        ("official_marketing_campus.txt", "tech", "days_per_week"): ("not_applicable", CAMPUS),
+        ("official_marketing_campus.txt", "tech", "min_months"): ("not_applicable", CAMPUS),
+        ("official_marketing_campus.txt", "ops", "days_per_week"): ("not_applicable", CAMPUS),
+        ("official_marketing_campus.txt", "ops", "min_months"): ("not_applicable", CAMPUS),
+    }
+    verdict_exceptions = {
+        ("official_marketing_campus.txt", "ops"): ("eligible", CAMPUS + "; nothing is unknown any more"),
+    }
 
 
 class V4(Oracles, unittest.TestCase):
     directory = REPO / "tests" / "fixtures" / "cn" / "jd-m2-3-holdout"
     fold_skills = True
-    field_exceptions = {
-        ("boss_business_development_intern.txt", "requirements.skills"): (
-            ["客户访谈", "CRM", "Excel"],
-            "H9 (ruled in the roadmap): PPT is not a vocabulary term until M2-4a makes it PowerPoint's synonym",
-        ),
+    check_exceptions = {
+        ("official_finance_campus.txt", "tech", "days_per_week"): ("not_applicable", CAMPUS),
+        ("official_finance_campus.txt", "tech", "min_months"): ("not_applicable", CAMPUS),
+        ("official_finance_campus.txt", "ops", "days_per_week"): ("not_applicable", CAMPUS),
+        ("official_finance_campus.txt", "ops", "min_months"): ("not_applicable", CAMPUS),
+    }
+    verdict_exceptions = {
+        ("official_finance_campus.txt", "ops"): ("eligible", CAMPUS + "; nothing is unknown any more"),
     }
 
 

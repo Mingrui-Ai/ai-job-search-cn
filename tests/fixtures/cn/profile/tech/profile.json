@@ -64,7 +64,11 @@
     "salary_min": {
       "amount": 150,
       "unit": "CNY/day"
-    }
+    },
+    "directions": [
+      "tech"
+    ],
+    "weights": null
   },
   "skills": [
     {

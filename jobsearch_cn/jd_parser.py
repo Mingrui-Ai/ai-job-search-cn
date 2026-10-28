@@ -97,6 +97,11 @@ _EDUCATION_MIN = re.compile(
 _EDUCATION_PREFERRED = re.compile(
     rf"{_LEVEL_WORD}(?:研究生)?\s*(?:及以上)?\s*(?:学历)?\s*者?\s*(?:优先|为佳)"
 )
+# "学历不限", "不设最低学历门槛": no minimum, said outright. "专业不限" is about the major.
+_NO_MINIMUM_EDUCATION = re.compile(
+    r"学历\s*(?:要求)?\s*[:：]?\s*(?:不限(?!于)|无要求|没有要求|不作要求|不做要求)|不限学历|(?:无|没有)学历要求"
+    r"|不设\s*(?:最低)?\s*学历\s*(?:门槛|要求)"
+)
 _PREFERENCE = re.compile(r"优先|为佳")
 
 _NO_RETURN_OFFER = re.compile(r"(?:不可|不能|无|不提供|没有)\s*转正")
@@ -595,6 +600,11 @@ def _education(text: str, tag: list):
         snippets.append(match.group(0).strip())
         break
     if lowest is None:
+        match = _NO_MINIMUM_EDUCATION.search(text)
+        if match:
+            lowest = schema.NO_MINIMUM
+            snippets.append(match.group(0).strip())
+    if lowest is None:
         for cell in tag:
             if cell in _LEVELS:
                 lowest = _LEVELS[cell]
@@ -604,7 +614,7 @@ def _education(text: str, tag: list):
     if match:
         level = _LEVELS[match.group(1)]
         order = schema.EDUCATION_LEVELS
-        if lowest is None or order.index(level) >= order.index(lowest):
+        if lowest in (None, schema.NO_MINIMUM) or order.index(level) >= order.index(lowest):
             preferred = level
             snippets.append(match.group(0).strip())
     if lowest is None and preferred is None:

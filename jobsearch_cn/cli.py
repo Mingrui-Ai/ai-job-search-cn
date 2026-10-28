@@ -215,10 +215,14 @@ def _load_profile(path: Path) -> dict:
 def cmd_profile_validate(args) -> int:
     path, root = _profile_paths(args)
     data = _load_profile(path)
+    try:
+        groups = set(vocab.load(store.data_dir(args.data_dir)).groups)
+    except vocab.VocabularyError as exc:
+        raise InputError(str(exc)) from None
     sources_dir = root / "sources"
     sources = {p.name for p in sources_dir.iterdir() if p.is_file()} if sources_dir.is_dir() else set()
-    errors = profile.validate(data, sources=sources)
-    warnings = []
+    errors = profile.validate(data, sources=sources, groups=groups)
+    warnings = profile.warnings(data)
     notes = root / "notes.md"
     if not notes.is_file():
         warnings.append("notes.md is missing; CVs and greetings will have no free-text material")
