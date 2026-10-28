@@ -91,9 +91,9 @@
 **验证**
 
 - `python -m jobsearch_cn profile validate --data-dir data/m1-5`：`{"valid":true,"errors":[],"warnings":[]}`；`profile show --data-dir data/m1-5` 的非空联系方式全部为 `***`；复制后的简历与夹具逐字节一致。
-- 初次业务操作基于 `eec5123`；检查前将测试分支快进到 `origin/master@ee3a0ec`（合入 M2-2），在该版本重新校验已保存的 JD、档案，均通过。
-- `python tools/lint_skills.py`：通过（11 skills、12 commands）；`python tools/security_guards.py`：通过；按 `CONTRIBUTING.md` 补跑 `python tools/check_framework_version.py`，通过。
-- `python -m unittest discover -s tests -t .`：共 1005 项，996 项通过、9 项按预期跳过，0 失败、0 错误，耗时 100.573 秒。
+- 初次业务操作基于 `eec5123`；先快进到 `origin/master@ee3a0ec`（合入 M2-2）复验。PR 创建期间主分支合入第一轮记录和验证者分工（PR #13、#14），再合并 `origin/master@ecaa21b`，保留全部历史记录与新分工，解决工作记录、路线图冲突。两次复验的 JD、档案校验均通过。
+- `python tools/lint_skills.py`：通过（11 skills、12 commands）；`python tools/security_guards.py`：通过。按 `CONTRIBUTING.md` 补跑框架版本检查：合并阶段默认比较旧 `HEAD` 会包含主分支已有的 `AGENTS.md` 改动，改以 `GITHUB_BASE_REF=master` 指定本 PR 的 `origin/master` 基线后通过；未修改版本标记或放宽检查。
+- `python -m unittest discover -s tests -t .`：首次共 1005 项（996 项通过、9 项跳过）；合入主分支新增的两项文本控制字符检查后，最终共 1007 项，998 项通过、9 项按预期跳过，0 失败、0 错误，耗时 100.876 秒。合并后的检查日志在 `logs/m1-5-round2/after-master-merge/`。
 - `git check-ignore -v` 确认岗位、补全 JSON、档案、笔记、简历原件及日志都位于已忽略的 `data/`、`logs/` 下。本 PR 只提交 CN 工作记录和路线图；详细 CLI 输出、检查结果和运行元数据留在本机 `logs/m1-5-round2/`。
 
 **ADR-7 的两个问题**
@@ -103,7 +103,8 @@
 
 **遗留与下一步**
 
-- M1-5 的第二轮样例业务验收通过，路线图标记完成。本轮没有验证真实个人档案的逐节确认和偏好问答，不能替代 M2-1 的真实简历自用验收。
+- M1-5 的第二轮样例业务验收通过，路线图的 M1-5、V1 标记完成。本轮没有验证真实个人档案的逐节确认和偏好问答，不能替代 M2-1 的真实简历自用验收。
+- 规划者在 PR #16 核对 V1 通过，将“项目名称放在 `org` 还是 `role`”以及“经历中出现的技术是否也列入技能”两项填写约定转为 H7；本轮保留实际提取结果，待 H7 统一规则。
 - M1-6 仍由用户导入至少 5 份真实 JD 后验收；M1-7 的发布 tag 等其通过后再处理。第一轮历史记录仍见 PR #13。
 
 ---
