@@ -1,0 +1,1243 @@
+{
+  "fixture": "boss_supplier_intern.txt",
+  "site_argument": "boss",
+  "parse": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_4988c1b38398",
+          "source": {
+            "type": "file",
+            "site": "boss",
+            "url": null,
+            "imported_at": "2026-10-28T20:11:05+08:00"
+          },
+          "title": "供应商协调实习生",
+          "company": "示例青屿商贸有限公司",
+          "cities": [
+            "广州"
+          ],
+          "remote": false,
+          "employment_type": "internship",
+          "salary": {
+            "min": 180,
+            "max": 230,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": true
+            },
+            "days_per_week": 4,
+            "min_months": 3,
+            "education": {
+              "min": "bachelor",
+              "preferred": null
+            },
+            "skills": [
+              "Excel",
+              "PPT",
+              "商务沟通"
+            ]
+          },
+          "return_offer": true,
+          "published_at": null,
+          "deadline": null,
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "供应商协调实习生",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例青屿商贸有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作城市：广州",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "供应商协调实习生",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "180-230元/天",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "仅限2027届在读学生",
+              "method": "rule"
+            },
+            "requirements.days_per_week": {
+              "text": "每周至少到岗4天",
+              "method": "rule"
+            },
+            "requirements.min_months": {
+              "text": "实习3个月",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "本科及以上",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": [
+                "熟悉 Excel",
+                "能使用 PPT 制作进度汇报",
+                "具备商务沟通能力"
+              ],
+              "method": "rule"
+            },
+            "return_offer": {
+              "text": "表现优秀者可转正",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "供应商协调实习生\n公司名称：示例青屿商贸有限公司\n招聘类型：实习\n工作城市：广州\n办公方式：不支持远程办公\n薪资：180-230元/天\n\n岗位职责：\n整理供应商交付台账，核对批次信息，跟进样品寄送状态。\n在导师指导下记录会议结论，并提醒相关人员完成约定事项。\n\n任职要求：\n仅限2027届在读学生，本科及以上，优秀者可放宽。\n熟悉 Excel，能使用 PPT 制作进度汇报，具备商务沟通能力。\n每周至少到岗4天，连续实习3个月以上。\n表现优秀者可转正。"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_4988c1b38398",
+          "title": "供应商协调实习生",
+          "company": "示例青屿商贸有限公司",
+          "cities": [
+            "广州"
+          ],
+          "status": "new"
+        }
+      ]
+    }
+  },
+  "validate_parsed": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "field_comparison": [
+    {
+      "field": "title",
+      "expected": "供应商协调实习生",
+      "actual": "供应商协调实习生",
+      "kind": "match"
+    },
+    {
+      "field": "company",
+      "expected": "示例青屿商贸有限公司",
+      "actual": "示例青屿商贸有限公司",
+      "kind": "match"
+    },
+    {
+      "field": "cities",
+      "expected": [
+        "广州"
+      ],
+      "actual": [
+        "广州"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "remote",
+      "expected": false,
+      "actual": false,
+      "kind": "match"
+    },
+    {
+      "field": "employment_type",
+      "expected": "internship",
+      "actual": "internship",
+      "kind": "match"
+    },
+    {
+      "field": "salary",
+      "expected": {
+        "min": 180,
+        "max": 230,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 180,
+        "max": 230,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.graduation",
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.days_per_week",
+      "expected": 4,
+      "actual": 4,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.min_months",
+      "expected": 3,
+      "actual": 3,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.education",
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.skills",
+      "expected": [
+        "Excel",
+        "PPT",
+        "商务沟通"
+      ],
+      "actual": [
+        "Excel",
+        "PPT",
+        "商务沟通"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "return_offer",
+      "expected": true,
+      "actual": true,
+      "kind": "match"
+    },
+    {
+      "field": "published_at",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "deadline",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    }
+  ],
+  "skill_comparison": {
+    "matched": [
+      "Excel",
+      "PPT",
+      "商务沟通"
+    ],
+    "missing": [],
+    "extra": []
+  },
+  "validate_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "save_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_4988c1b38398",
+          "title": "供应商协调实习生",
+          "company": "示例青屿商贸有限公司",
+          "cities": [
+            "广州"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  "matches": {
+    "tech": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_4988c1b38398",
+          "title": "供应商协调实习生",
+          "company": "示例青屿商贸有限公司",
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅限2027届在读学生"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": "每周至少到岗4天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": "实习3个月"
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市广州在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": "工作城市：广州"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "供应商协调实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "供应商协调实习生",
+                  "evidence": "供应商协调实习生"
+                },
+                "company": {
+                  "value": "示例青屿商贸有限公司",
+                  "evidence": "示例青屿商贸有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": "工作城市：广州"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "eligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "硕士满足本科及以上；优秀者可放宽不改变明确下限。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天满足4天。"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "6个月满足3个月。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "广州与tech意向城市有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech接受实习，职业技能方向不参与硬过滤。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题不含外包或销售，其他排除项也未命中。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_4988c1b38398",
+          "title": "供应商协调实习生",
+          "company": "示例青屿商贸有限公司",
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅限2027届在读学生"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "本科及以上，优秀者可放宽"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": [
+                    "每周至少到岗4天"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": [
+                    "连续实习3个月以上"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市广州在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作城市：广州"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "招聘类型：实习"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "供应商协调实习生",
+                  "evidence": [
+                    "供应商协调实习生"
+                  ]
+                },
+                "company": {
+                  "value": "示例青屿商贸有限公司",
+                  "evidence": [
+                    "公司名称：示例青屿商贸有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作城市：广州"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "eligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "硕士满足本科及以上；优秀者可放宽不改变明确下限。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天满足4天。"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "6个月满足3个月。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "广州与tech意向城市有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech接受实习，职业技能方向不参与硬过滤。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题不含外包或销售，其他排除项也未命中。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    },
+    "ops": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_4988c1b38398",
+          "title": "供应商协调实习生",
+          "company": "示例青屿商贸有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅限2027届在读学生"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "conflict",
+              "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": "每周至少到岗4天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": "实习3个月"
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "广州不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": "工作城市：广州"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "供应商协调实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "供应商协调实习生",
+                  "evidence": "供应商协调实习生"
+                },
+                "company": {
+                  "value": "示例青屿商贸有限公司",
+                  "evidence": "示例青屿商贸有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": "工作城市：广州"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "本科达到明确下限；优秀者可放宽不改写为none。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "只能3天，少于4天。"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "3个月满足3个月。"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "广州不在上海意向中，且双方明确不远程/不搬家。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops接受实习。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中电话销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_4988c1b38398",
+          "title": "供应商协调实习生",
+          "company": "示例青屿商贸有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅限2027届在读学生"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "本科及以上，优秀者可放宽"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "conflict",
+              "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": [
+                    "每周至少到岗4天"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": [
+                    "连续实习3个月以上"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "广州不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作城市：广州"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "招聘类型：实习"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "供应商协调实习生",
+                  "evidence": [
+                    "供应商协调实习生"
+                  ]
+                },
+                "company": {
+                  "value": "示例青屿商贸有限公司",
+                  "evidence": [
+                    "公司名称：示例青屿商贸有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": [
+                    "工作城市：广州"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "本科达到明确下限；优秀者可放宽不改写为none。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "只能3天，少于4天。"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "3个月满足3个月。"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "广州不在上海意向中，且双方明确不远程/不搬家。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops接受实习。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中电话销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    }
+  }
+}

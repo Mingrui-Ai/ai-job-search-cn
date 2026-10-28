@@ -144,7 +144,8 @@
   - 期望按 Job Schema 和现行的 match.md 写。技能只取正文里的正向要求。实习时长写人工读出的真实要求；规则按 H9 的口径留空时，对照里记为"按口径留空"，不算误读。
   - 不看解析源码，也不看 H9 分支。先冻结，用 master 跑基线；**H9 PR 开出之前不推送**。PR 开出后，用它的分支重跑，写对照报告，再开 PR，由规划者审核。
   - 进度：已冻结并完成 master 与 H9 PR #34 head `19292e9` 对照（数据 PR #36），见 [报告](../../tests/fixtures/cn/jd-h9-holdout/comparison.md)；新 head 出现后追加重跑。
-- [ ] **V7** `验证` M2-4a 留出样例：独立编写 5 份原创虚构 JD 和人工期望，放在 `tests/fixtures/cn/jd-m2-4a-holdout/`，格式和 V4 相同
+- [x] **V7** `验证` M2-4a 留出样例：独立编写 5 份原创虚构 JD 和人工期望，放在 `tests/fixtures/cn/jd-m2-4a-holdout/`，格式和 V4 相同
+  - 已对照已合并 M2-4a `a337796`：字段组 68/70、总判断 10/10、七项状态 70/70，见 [报告](../../tests/fixtures/cn/jd-m2-4a-holdout/comparison.md)。冻结期望与原基线未改；剩余截止日期跨行误读及客户沟通漏读已转入 H12 #40。
   - 期望按 [match.md 设计稿](match.md#可解释评分m2-4-设计稿)里"契约补充"的新口径写：
     - "学历不限""不设最低学历门槛"记为 `education.min: "none"`，过滤判"符合"；
     - 校招、社招岗位没写每周天数和实习时长时，这两项判 `not_applicable`，不影响总结论；
