@@ -112,6 +112,12 @@ class Validate(unittest.TestCase):
         self.assertEqual(profile.validate(with_value(self.example, "awards.0.source", "user"),
                                           sources={"resume.pdf"}), [])
 
+    def test_experience_names_its_project_separately(self):
+        data = copy.deepcopy(self.example)
+        del data["experience"][0]["name"]
+        self.assert_error(data, "experience[0].name: missing")
+        self.assert_error(with_value(self.example, "experience.1.name", ""), "experience[1].name")
+
     def test_references_and_ids(self):
         self.assert_error(with_value(self.example, "skills.0.used_in", ["exp-9"]), "no experience with id 'exp-9'")
         data = copy.deepcopy(self.example)
@@ -122,7 +128,7 @@ class Validate(unittest.TestCase):
     def test_duplicate_skills_fold_case_and_width(self):
         data = copy.deepcopy(self.example)
         data["skills"].append(dict(data["skills"][0], name="ｐｙｔｈｏｎ"))
-        self.assert_error(data, "skills[1].name: duplicate")
+        self.assert_error(data, f"skills[{len(data['skills']) - 1}].name: duplicate")
 
     def test_redaction_masks_contact_only(self):
         shown = profile.redacted(self.example)
@@ -203,6 +209,21 @@ class Fixtures(unittest.TestCase):
                 self.assertEqual(proc.returncode, 0, proc.stdout.decode("utf-8"))
                 self.assertEqual(json.loads(proc.stdout)["warnings"], [])
 
+    def test_they_follow_the_filling_conventions(self):
+        # docs/cn/profile.md, "填写约定": a project's name lives in name, never
+        # in org or role; a skill without a level (seen only in an experience)
+        # points at that experience.
+        for directory in sorted(FIXTURES.iterdir()):
+            data = json.loads((directory / "profile.json").read_text(encoding="utf-8"))
+            with self.subTest(profile=directory.name):
+                for item in data["experience"]:
+                    if item["type"] in ("project", "competition", "research"):
+                        self.assertTrue(item["name"], item["id"])
+                    self.assertNotIn(item["role"], ("个人项目", "项目", "课程项目"), item["id"])
+                for skill in data["skills"]:
+                    if skill["level"] is None:
+                        self.assertTrue(skill["used_in"], skill["name"])
+
     def test_contact_details_are_obviously_fake(self):
         for directory in sorted(FIXTURES.iterdir()):
             contact = json.loads((directory / "profile.json").read_text(encoding="utf-8"))["contact"]
@@ -230,7 +251,7 @@ class Fixtures(unittest.TestCase):
             facts = []
             for item in data["experience"]:
                 facts += [(item["source"], bullet) for bullet in item["bullets"]]
-                facts += [(item["source"], item["org"])] if item["org"] else []
+                facts += [(item["source"], item[key]) for key in ("name", "org", "role") if item[key]]
             for key, field in (("skills", "name"), ("education", "school"), ("awards", "name"),
                                ("certificates", "name")):
                 facts += [(item["source"], item[field]) for item in data[key]]

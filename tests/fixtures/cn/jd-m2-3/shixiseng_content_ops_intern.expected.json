@@ -1,0 +1,207 @@
+{
+  "fixture": "shixiseng_content_ops_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "shixiseng",
+  "method": "agent",
+  "basis": "独立人工语义阅读；在首次执行 jd parse 和 match filter 之前写定。字段路径来自 Job Schema v1，匹配口径来自 docs/cn/match.md，不使用规则源码或既有 JD 样例。",
+  "fields": {
+    "title": {
+      "value": "新媒体内容运营实习生",
+      "evidence": [
+        "新媒体内容运营实习生"
+      ]
+    },
+    "company": {
+      "value": "示例青禾文化有限公司",
+      "evidence": [
+        "示例青禾文化有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "上海"
+      ],
+      "evidence": [
+        "工作地点：上海徐汇区"
+      ]
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "现场到岗，不支持远程。"
+      ]
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "新媒体内容运营实习生"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 150,
+        "max": 180,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "evidence": [
+        "150-180元/天"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": false
+      },
+      "evidence": [
+        "2027届优先，其他届别也可投递。"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": 3,
+      "evidence": [
+        "每周至少到岗3天"
+      ]
+    },
+    "requirements.min_months": {
+      "value": 3,
+      "evidence": [
+        "连续实习至少3个月"
+      ]
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "本科及以上在读"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "秀米",
+        "剪映",
+        "Photoshop",
+        "Excel",
+        "内容策划",
+        "文案写作",
+        "数据复盘"
+      ],
+      "evidence": [
+        "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据。",
+        "具备内容策划、文案写作、数据复盘能力。"
+      ]
+    },
+    "return_offer": {
+      "value": false,
+      "evidence": [
+        "本岗位不提供转正机会。"
+      ]
+    },
+    "published_at": {
+      "value": null,
+      "evidence": [],
+      "note": "原文未写发布日期。"
+    },
+    "deadline": {
+      "value": "2026-11-30",
+      "evidence": [
+        "申请截止：2026-11-30"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "2027届优先，其他届别也可投递。",
+      "interpretation": "届别只优先，strict=false。"
+    },
+    {
+      "text": "每周五例会",
+      "interpretation": "不能覆盖明确的每周至少3天。"
+    },
+    {
+      "text": "3-5个工作日内回复",
+      "interpretation": "回复时效，不是每周最少5天。"
+    },
+    {
+      "text": "非外包岗位",
+      "interpretation": "否定外包，且排除关键词只检查标题，不能因正文出现“外包”淘汰。"
+    },
+    {
+      "text": "不提供转正机会",
+      "interpretation": "return_offer=false。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "tech为2027届，满足优先届别。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "tech硕士达到本科最低要求。"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "tech每周可4天，达到至少3天。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "tech可6个月，达到至少3个月。"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "上海不在tech的深圳、广州范围内，tech不搬家，JD不支持远程。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习在tech目标类型中。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题不含“外包”“销售”；正文“非外包”不触发排除。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "ops为2027届，满足优先届别。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "ops本科达到最低要求。"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "ops每周可3天，达到至少3天。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "ops可3个月，达到至少3个月。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "工作城市上海在ops可接受城市中。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习在ops目标类型中。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题没有“电话销售”；公司、城市无排除项。"
+        }
+      }
+    }
+  }
+}

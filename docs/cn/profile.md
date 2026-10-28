@@ -45,11 +45,15 @@ data/profile/
     "salary_min": {"amount": 150, "unit": "CNY/day"}
   },
   "skills": [
-    {"name": "Python", "level": "proficient", "used_in": ["exp-1"], "source": "resume.pdf"}
+    {"name": "Python", "level": "proficient", "used_in": ["exp-1", "proj-1"], "source": "resume.pdf"},
+    {"name": "Go", "level": null, "used_in": ["exp-1"], "source": "resume.pdf"}
   ],
   "experience": [
-    {"id": "exp-1", "type": "internship", "org": "某科技公司", "role": "后端开发实习生",
+    {"id": "exp-1", "type": "internship", "name": null, "org": "某科技公司", "role": "后端开发实习生",
      "start": "2026-03", "end": "2026-08", "bullets": ["用 Go 重写订单服务，P99 延迟从 120ms 降到 40ms"],
+     "source": "resume.pdf"},
+    {"id": "proj-1", "type": "project", "name": "课程问答助手", "org": null, "role": null,
+     "start": "2025-10", "end": "2026-01", "bullets": ["用 Python 搭建课程资料问答，覆盖 20 门课程"],
      "source": "resume.pdf"}
   ],
   "awards": [{"name": "全国大学生数学建模竞赛省一等奖", "date": "2025-10", "source": "resume.pdf"}],
@@ -66,8 +70,20 @@ data/profile/
 | `education[]` | `level` 取值同 Job Schema：`associate` / `bachelor` / `master` / `phd`。最高学历用于和 JD 的 `requirements.education.min` 比较 |
 | `availability` | 可到岗日期、每周天数、可实习月数、意向城市、是否接受远程、是否愿意搬到其他城市。分别对应 JD 的 `days_per_week`、`min_months`、`cities`、`remote` |
 | `target` | 求职方向。`employment_types` 取值同 Job Schema；`salary_min.unit` 取值同 Job Schema 的薪资单位 |
-| `skills[]` | `level`：`familiar`（了解）、`working`（熟悉）、`proficient`（熟练）、`expert`（精通）。`used_in` 指向用到它的经历或项目的 `id`，写简历时据此给出事实依据 |
-| `experience[]` | 实习、项目、科研、竞赛、校园经历都放这里，用 `type` 区分：`internship` / `project` / `research` / `competition` / `campus` / `work` |
+| `skills[]` | `level`：`familiar`（了解）、`working`（熟悉）、`proficient`（熟练）、`expert`（精通）。`used_in` 指向用到它的经历或项目的 `id`，写简历时据此给出事实依据。收录范围见下方"填写约定" |
+| `experience[]` | 实习、项目、科研、竞赛、校园经历都放这里，用 `type` 区分：`internship` / `project` / `research` / `competition` / `campus` / `work`。`name`、`org`、`role` 的分工见下方"填写约定" |
+
+**填写约定**（2026-10-27 起，H7；两个 Agent 对同一份简历必须填得一样）：
+
+- **经历的三个名称字段各管一件事**，材料里没有的留 `null`，不要挪用别的字段：
+  - `name`：项目、竞赛、科研课题本身的名称，例如"课程问答助手""全国大学生数学建模竞赛"。实习和工作通常为 `null`；
+  - `org`：所在单位，例如公司、实验室、学生会部门。个人项目为 `null`；
+  - `role`：你在其中的身份或职位，例如"后端开发实习生""副部长""队长"。材料没写就为 `null`，不要把"个人项目"之类的类别词填进来（类别由 `type` 表示）。
+- **技能两处都收**：
+  - 简历技能栏里的技能，`level` 按原文的"了解 / 熟悉 / 熟练 / 精通"填写；
+  - 只出现在经历描述里的技术（例如只在实习描述中提到的 RAG）也收，`level` 留 `null`，`used_in` 指向出现它的经历；
+  - 同一技能两处都出现时只记一条：`level` 取技能栏的写法，`used_in` 列出所有出现它的经历。
+  - 技能栏里有、但没有任何经历用到的技能，`used_in` 为 `[]`。
 | `awards[]`、`certificates[]`、`languages[]` | 奖项、证书、语言 |
 | `exclusions` | 硬性排除：不去的城市、不考虑的公司、标题或正文中出现即排除的关键词 |
 
@@ -123,4 +139,5 @@ JD 字段为 `null` 时结论是"未知"，不判为不符合。
 ## 8. 已定与待定
 
 - 字段与四档技能等级按本稿实现，使用中再调整（2026-10-27）。
+- `experience[].name` 与上方"填写约定"（H7，2026-10-27）：M1-5 第二轮发现两个 Agent 对同一份简历的填法不同（项目名称一个放 `org`、一个放 `role`；只在经历里出现的技能一个收、一个不收），M3 生成简历前必须统一。新增 `name` 而不是规定"项目名放 `role`"，是为了让每个字段只表达一件事。Profile 尚未随任何版本发布，所以直接加入 v1，不升版本号；已有的本地档案需要为每段经历补上 `"name": null` 或项目名称，`profile validate` 会逐条提示。
 - `exclusions.keywords` 暂定只匹配岗位标题（正文容易误伤，例如"非外包岗位"），在 v0.2 硬性过滤中实现，可再讨论。

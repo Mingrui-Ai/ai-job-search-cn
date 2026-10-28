@@ -1,0 +1,198 @@
+{
+  "fixture": "official_marketing_campus.txt",
+  "job_schema_version": 1,
+  "site_argument": "official",
+  "method": "agent",
+  "basis": "独立人工语义阅读；在首次执行 jd parse 和 match filter 之前写定。字段路径来自 Job Schema v1，匹配口径来自 docs/cn/match.md，不使用规则源码或既有 JD 样例。",
+  "fields": {
+    "title": {
+      "value": "市场管培生",
+      "evidence": [
+        "市场管培生"
+      ]
+    },
+    "company": {
+      "value": "示例远帆品牌管理有限公司",
+      "evidence": [
+        "示例远帆品牌管理有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "上海"
+      ],
+      "evidence": [
+        "工作地点：上海"
+      ]
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "办公方式：不支持远程。"
+      ]
+    },
+    "employment_type": {
+      "value": "campus",
+      "evidence": [
+        "招聘类别：2027届校园招聘"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 8000,
+        "max": 10000,
+        "unit": "CNY/month",
+        "months": 13,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪酬：8-10K/月，全年13薪"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅招2027届毕业生"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": null,
+      "evidence": [],
+      "note": "只写周五例会和反馈时间，没有最低到岗天数。"
+    },
+    "requirements.min_months": {
+      "value": null,
+      "evidence": [],
+      "note": "试用期3个月属于正式入职培养，不是最短实习时长。"
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "本科及以上学历"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "Excel",
+        "PowerPoint",
+        "市场调研",
+        "活动策划",
+        "商务沟通"
+      ],
+      "evidence": [
+        "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力。"
+      ]
+    },
+    "return_offer": {
+      "value": null,
+      "evidence": [],
+      "note": "未写实习转正；校招入职后的试用期考核不是实习转正机会。"
+    },
+    "published_at": {
+      "value": "2026-10-27",
+      "evidence": [
+        "发布时间：2026-10-27"
+      ]
+    },
+    "deadline": {
+      "value": "2026-11-20",
+      "evidence": [
+        "申请截止：2026-11-20"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "试用期3个月",
+      "interpretation": "不能写入requirements.min_months。"
+    },
+    {
+      "text": "每周五例会",
+      "interpretation": "不能推成每周到岗5天。"
+    },
+    {
+      "text": "3-5个工作日内回复",
+      "interpretation": "招聘反馈时效，不是到岗条件。"
+    },
+    {
+      "text": "非外包；本岗位不承担销售指标。",
+      "interpretation": "均为正文否定语句，不应触发tech标题排除词。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "tech为2027届，满足仅招2027届。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "tech硕士达到本科最低要求。"
+        },
+        "days_per_week": {
+          "result": "unknown",
+          "reason": "JD没有最低到岗天数；按现有七项契约，此项unknown。"
+        },
+        "min_months": {
+          "result": "unknown",
+          "reason": "JD没有最短实习时长；试用期3个月不能填入此字段。"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "上海不在tech的深圳、广州范围内，tech不搬家，JD不支持远程。"
+        },
+        "employment_type": {
+          "result": "conflict",
+          "reason": "JD为校招，tech只接受internship。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题“市场管培生”不含“外包”“销售”；正文的否定语句不触发。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "needs_check",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "ops为2027届，满足要求。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "ops本科达到最低要求。"
+        },
+        "days_per_week": {
+          "result": "unknown",
+          "reason": "JD没有最低到岗天数；按match文档仍保留unknown，不凭工作常识补5天。"
+        },
+        "min_months": {
+          "result": "unknown",
+          "reason": "JD为校招，未给最短实习时长；按现有七项契约为unknown，不能拿试用期3个月填充。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "上海在ops可接受城市中。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "campus在ops目标类型中。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题没有“电话销售”；公司、城市无排除项。"
+        }
+      }
+    }
+  }
+}
