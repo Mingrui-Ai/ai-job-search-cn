@@ -95,6 +95,33 @@ class Fixtures(unittest.TestCase):
             "requirements.skills": ["Java", "Spring Boot", "Spring Cloud", "MyBatis", "Kafka", "Elasticsearch",
                                     "分布式", "微服务"],
         },
+        # H9: BOSS直聘 copies - metadata lines, the "公司｜城市｜薪资｜N天/周｜N个月｜学历" tag line,
+        # a negated skill, a footer and a company introduction naming platforms; and a whole-page
+        # copy whose title sits beside its salary below the site's navigation.
+        "boss_paste_backend_intern.txt": {
+            "title": "Java开发实习生（日常实习）-【北京】", "company": "示例云帆科技", "employment_type": "internship",
+            "salary": salary(200, 260, "CNY/day"), "cities": ["北京"], "remote": None,
+            "requirements.graduation": {"years": [2027], "strict": True},
+            "requirements.days_per_week": 5, "requirements.min_months": 4,
+            "requirements.education": {"min": "bachelor", "preferred": None},
+            "requirements.skills": ["Java", "MySQL", "Spring Boot", "Redis"], "return_offer": True,
+        },
+        "boss_paste_ops_intern.txt": {
+            "title": "新媒体运营实习生-【上海】", "company": "示例青柚文化传媒", "employment_type": "internship",
+            "salary": salary(150, 180, "CNY/day"), "cities": ["上海"],
+            "requirements.graduation": {"years": [2026, 2027], "strict": True},
+            "requirements.days_per_week": 4, "requirements.min_months": 3,
+            "requirements.education": {"min": "bachelor", "preferred": None},
+            "requirements.skills": ["公众号", "小红书", "剪映", "数据复盘", "文案写作", "秀米"], "return_offer": None,
+        },
+        "boss_fullpage_data_intern.txt": {
+            "title": "数据分析实习生", "company": "示例星图数据科技有限公司", "employment_type": "internship",
+            "salary": salary(150, 200, "CNY/day"), "cities": [],
+            "requirements.graduation": {"years": [2027], "strict": True},
+            "requirements.days_per_week": 4, "requirements.min_months": 6,
+            "requirements.education": {"min": "bachelor", "preferred": None},
+            "requirements.skills": ["SQL", "Python", "Tableau", "Excel", "Pandas", "数据清洗"],
+        },
     }
 
     def test_every_fixture_is_covered(self):
@@ -264,6 +291,51 @@ SEED_CASES = (
     ("4-6K/月，转正后15薪", "salary", salary(4000, 6000, "CNY/month")),
     ("8-10K/月\n福利：13薪", "salary", salary(8000, 10000, "CNY/month")),
     ("8-10K/月，13-15薪", "salary", salary(8000, 10000, "CNY/month")),
+    # H9: the BOSS直聘 copy - "标签：值" lines above the title, then the tag line.
+    ("职位链接：https://example.com/job/1\n采集日期：2026-10-28\nJava开发实习生（日常实习）-【北京】\n熟悉Java",
+     "title", "Java开发实习生（日常实习）-【北京】"),
+    ("Java开发实习生\n示例云帆科技｜北京｜200-260元/天｜5天/周｜4个月｜本科", "company", "示例云帆科技"),
+    ("Java开发实习生\n示例云帆科技｜北京｜200-260元/天｜5天/周｜4个月｜本科", "requirements.min_months", 4),
+    ("Java开发实习生\n示例云帆科技 | 北京 | 4-5天/周 | 3个月", "requirements.min_months", 3),
+    ("数据分析实习生\n150-200/天 | 上海 | 本科 | 5天/周 | 3个月", "company", None),
+    ("数据分析实习生\n北京｜本科｜4天/周", "company", None),
+    ("Java开发实习生\n3个月", "requirements.min_months", None),
+    ("Java开发实习生\n示例云帆科技｜北京｜3个月｜本科", "requirements.min_months", None),
+    # A whole-page copy lays the tags out with spaces; a line of nothing but tag words is a tag line.
+    ("首页\njava开发实习生 130-150元/天\n杭州 5天/周 6个月 本科\n职位描述", "requirements.min_months", 6),
+    ("数据分析实习生\n杭州·西湖区 4-5天/周 3个月 本科及以上", "requirements.min_months", 3),
+    ("数据分析实习生\n西湖区 5天/周 6个月 本科", "company", None),
+    # A sentence that mentions "N天/周" and "N个月" is not a tag line.
+    ("到岗要求：每周 4天/周，入职 3个月 后可转正", "requirements.min_months", None),
+    ("可以 5天/周 到岗 3个月 内入职", "requirements.min_months", None),
+    # A whole-page copy: navigation first, then the title beside its salary.
+    ("首页\n职位\n公司\njava开发实习生 130-150元/天\n北京 3天/周", "title", "java开发实习生"),
+    ("首页\n职位\n薪资：130-150元/天", "title", None),
+    ("首页\n热门职位\n后端开发实习生\n前端开发实习生", "title", None),  # below the headline, only title + salary
+    # Two different internship lengths are left for an agent; the same one twice is fine.
+    ("平台实习要求3个月及以上\n岗位要求：连续实习4个月以上", "requirements.min_months", None),
+    ("实习3个月以上，至少实习3个月", "requirements.min_months", 3),
+    ("Java开发实习生\n示例云帆科技｜北京｜5天/周｜3个月\n连续实习4个月以上", "requirements.min_months", None),
+    # A skill the clause rules out is not asked for.
+    ("熟悉 SQL、Excel，无需 Python 基础", "requirements.skills", ["SQL", "Excel"]),
+    ("不要求 Rust 或 C++ 经验", "requirements.skills", []),
+    ("无需编写 SQL，也不要求 Python", "requirements.skills", []),
+    ("不要求剪映或 Photoshop，也不负责公众号运营", "requirements.skills", []),
+    ("不仅要求熟悉Python，还要会Go", "requirements.skills", ["Python", "Go"]),
+    # A platform the JD points the reader to, or names in the company introduction, is not a skill.
+    ("欢迎关注我们的公众号，订阅招聘信息", "requirements.skills", []),
+    ("公司动态见我们的 B站 和公众号", "requirements.skills", []),
+    ("更多职位请关注公众号", "requirements.skills", []),
+    ("关注小红书热点，策划选题", "requirements.skills", ["小红书"]),
+    ("负责我们的公众号运营", "requirements.skills", ["公众号"]),
+    ("公司介绍：我们在抖音和小红书运营多个品牌账号\n岗位职责：负责小红书账号运营", "requirements.skills", ["小红书"]),
+    ("公司简介\n我们在抖音有百万粉丝\n任职要求\n熟悉剪映和抖音", "requirements.skills", ["剪映", "抖音"]),
+    # Only platform names leave with the introduction; other terms there are still read (jd-parse.md 局限).
+    ("公司介绍：我们深耕数据分析和小红书营销\n任职要求：熟悉Python", "requirements.skills", ["数据分析", "Python"]),
+    # Terms added from the V4 samples (H9).
+    ("掌握客户访谈、CRM，熟悉财务分析和招聘流程，能完成数据清洗", "requirements.skills",
+     ["客户访谈", "CRM", "财务分析", "招聘流程", "数据清洗"]),
+    ("熟悉SCRM系统", "requirements.skills", []),
 )
 
 
