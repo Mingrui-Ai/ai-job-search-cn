@@ -22,10 +22,10 @@
 | 里程碑 | 状态 |
 | --- | --- |
 | **M1 · v0.1** 中文 JD 入库 | 实现完成（PR #1–#5）；Codex 样例实测和 5 份真实 JD 自用验收都已通过（2026-10-28）；`v0.1.0` 已推送（`659b50d`，2026-10-28），M1 完成 |
-| **M2 · v0.2** 个人档案与可解释匹配 | 进行中：M2-1 个人档案和示例档案（PR #8、#11，真实简历自用验收 2026-10-28 通过）、M2-2 硬性条件过滤（PR #12）、H7 填写约定（PR #17）、M2-3 求职方向配置与词表外置（PR #19、#21、#26）、M2-4a 契约补充（PR #38）、M2-4b 规则评分与匹配记录（PR #41）、M2-4c Agent 评分工作流（PR #TBD）已完成 |
+| **M2 · v0.2** 个人档案与可解释匹配 | 进行中：M2-1 个人档案和示例档案（PR #8、#11，真实简历自用验收 2026-10-28 通过）、M2-2 硬性条件过滤（PR #12）、H7 填写约定（PR #17）、M2-3 求职方向配置与词表外置（PR #19、#21、#26）、M2-4a 契约补充（PR #38）、M2-4b 规则评分与匹配记录（PR #41）、M2-4c Agent 评分工作流（PR #48）已完成 |
 | M3–M8 | 未开始 |
 
-本地测试：master（#TBD 合并后）共 1175 项，1164 项通过、11 项按预期跳过。CI 覆盖 Python 3.10–3.14 和 Windows；2026-10-28 起私有仓库的 Actions 额度用完，CI 暂停，合并以本机检查为准（见[总体规划 §8](master-plan.md#8-协作方式)）。本地环境：conda `ai-job-search-cn`（Python 3.12.15）。
+本地测试：master（#48 合并后）共 1175 项，1164 项通过、11 项按预期跳过。CI 覆盖 Python 3.10–3.14 和 Windows；2026-10-28 起私有仓库的 Actions 额度用完，CI 暂停，合并以本机检查为准（见[总体规划 §8](master-plan.md#8-协作方式)）。本地环境：conda `ai-job-search-cn`（Python 3.12.15）。
 
 ### 看板：下次工作（2026-10-28 晚更新）
 
@@ -312,13 +312,13 @@
       - Agent 的依据：`profile` 写经历的 id；`experience` 至少写一条，Agent 补的 `direction` 可以不写；
       - 期望表：原有 5 份和 V2 的 5 份样例（与 V5 同一批 JD）× 2 份示例档案，写在 `tests/test_cn_score.py`，附人工核对说明；
       - 用户的真实档案在本机试评分（只看汇总、不保存）：5 份岗位都是 `needs_check`、等级都是 moderate（52–53 分）；技能 11–13 分，方向都是 100，薪资都为 null（档案没写最低期望），经历等 Agent 补。
-  - [x] **M2-4c Agent 工作流**（PR #TBD）：
+  - [x] **M2-4c Agent 工作流**（PR #48）：
     - match.md 写两个 Agent 共用的评分工作流：评分 → 补充经历和方向 → 校验 → 保存 → 向用户说明；
     - Claude Code 入口是薄技能 `cn-match`，Codex 入口在 `AGENTS.md` 里；`test_cn_agent_entry.py` 覆盖这个工作流。
     - **验收**：
       - 用两份样例 JD 把工作流完整走一遍，过程写进工作记录；
       - 和 V5 冻结的人工判断对照：每份档案排前 3 的岗位，至少有 2 个和人工排序相同；人工判为 `ineligible` 或 `poor` 的岗位不能排进前 3。
-    - **实际做法**（PR #TBD）：
+    - **实际做法**（PR #48）：
       - 工作流写在 `match.md` 开头的"评分工作流（三个 Agent 共用）"：`match score --draft` → 补经历（规则给不出方向时补方向）→ `match validate` → `match save` → 用中文说明结论、依据、缺口和排序。Claude Code 用薄技能 `.claude/skills/cn-match/`，Codex 读 `AGENTS.md`；DeepSeek Harness 的入口按 A2 做；
       - 为了让 Agent 不必手抄、转存记录，补了两处：`match score --draft` 把记录写成草稿 `<数据目录>/matches/drafts/<岗位id>.json`（UTF-8；`match list` 不列草稿）；`match validate` 报总分不对时给出应填的对象，Agent 照抄，不自己算；
       - 两份样例 JD（后端 Go 实习、大模型算法实习）用 tech 示例档案在本机独立的数据目录走完全程，过程和给用户的说明见工作记录；`tests/test_cn_match_workflow.py` 用 CLI 把同样的步骤跑一遍；
