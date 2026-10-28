@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 
-from jobsearch_cn import __version__, jd_parser, match, profile, schema, store, vocab
+from jobsearch_cn import __version__, jd_parser, match, profile, schema, score, store, vocab
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -242,23 +242,154 @@ def cmd_profile_show(args) -> int:
     return 0
 
 
-def cmd_match_filter(args) -> int:
-    job_store = _store(args)
+def _stored_job(job_store: store.Store, job_id):
     try:
-        job = job_store.get(args.id)
+        return job_store.get(job_id)
     except store.StoreError as exc:
         raise InputError(str(exc)) from None
-    if job is None:
-        _emit({"error": f"no stored job {args.id}"}, sys.stderr)
-        return 1
+
+
+def _match_profile(args):
+    """The profile a match compares against, or None after reporting why it is unusable."""
     path = Path(args.profile) if args.profile else store.data_dir(args.data_dir) / "profile" / "profile.json"
     data = _load_profile(path)
-    # Structure only: whether the source files are still there does not change a filter result.
+    # Structure only: whether the source files are still there does not change a match.
     errors = profile.validate(data)
     if errors:
         _emit({"error": "the profile is invalid; run profile validate", "errors": errors}, sys.stderr)
+        return None
+    return data
+
+
+def _vocabulary(args) -> vocab.Vocabulary:
+    try:
+        return vocab.load(store.data_dir(args.data_dir))
+    except vocab.VocabularyError as exc:
+        raise InputError(str(exc)) from None
+
+
+def _matches(args) -> store.MatchStore:
+    return store.MatchStore(store.data_dir(args.data_dir))
+
+
+def cmd_match_filter(args) -> int:
+    job = _stored_job(_store(args), args.id)
+    if job is None:
+        _emit({"error": f"no stored job {args.id}"}, sys.stderr)
+        return 1
+    data = _match_profile(args)
+    if data is None:
         return 1
     _emit(match.filter_job(job, data))
+    return 0
+
+
+def cmd_match_score(args) -> int:
+    job = _stored_job(_store(args), args.id)
+    if job is None:
+        _emit({"error": f"no stored job {args.id}"}, sys.stderr)
+        return 1
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    matches = _matches(args)
+    record = score.score_job(job, data, _vocabulary(args), previous=_saved_match(matches, args.id))
+    if args.save:
+        matches.save(record)
+    _emit(record)
+    return 0
+
+
+def _saved_match(matches: store.MatchStore, job_id):
+    try:
+        return matches.get(job_id)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return None  # an unreadable record is scored afresh, as if there were none
+
+
+def _checked_match(args):
+    """(record, errors) for a match file against the stored job and the profile; errors None if unusable."""
+    text = _read_json_text(args.file)
+    try:
+        record = json.loads(text)
+    except json.JSONDecodeError as exc:
+        name = "stdin" if args.file == "-" else args.file
+        raise InputError(f"{name} is not valid JSON: {exc}") from None
+    job_id = record.get("job_id") if isinstance(record, dict) else None
+    job = _stored_job(_store(args), job_id) if isinstance(job_id, str) and job_id else None
+    if job is None:
+        return record, [f"job_id: no stored job {job_id!r}"]
+    data = _match_profile(args)
+    if data is None:
+        return record, None
+    return record, score.validate(record, job, data, _vocabulary(args))
+
+
+def cmd_match_validate(args) -> int:
+    _, errors = _checked_match(args)
+    if errors is None:
+        return 1
+    _emit({"valid": not errors, "errors": errors})
+    return 1 if errors else 0
+
+
+def cmd_match_save(args) -> int:
+    record, errors = _checked_match(args)
+    if errors is None:
+        return 1
+    if errors:
+        _emit({"valid": False, "errors": errors})
+        return 1
+    _emit({"saved": _matches(args).save(record), "job_id": record["job_id"]})
+    return 0
+
+
+def cmd_match_show(args) -> int:
+    try:
+        record = _matches(args).get(args.id)
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
+    if record is None:
+        _emit({"error": f"no match record for {args.id}; run match score {args.id} --save"}, sys.stderr)
+        return 1
+    _emit(record)
+    return 0
+
+
+_GRADE_RANK = {grade: rank for rank, grade in enumerate([name for name, _ in score.GRADES] + [score.INELIGIBLE])}
+
+
+def cmd_match_list(args) -> int:
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    digest, job_store = score.profile_hash(data), _store(args)
+    records, warnings = _matches(args).all()
+    rows = []
+    for record in records:
+        if not isinstance(record, dict) or not isinstance(record.get("job_id"), str):
+            warnings.append("a match record without a job_id, skipped")
+            continue
+        try:
+            job = job_store.get(record["job_id"])
+        except store.StoreError:
+            job = None
+        total = record.get("total") if isinstance(record.get("total"), dict) else {}
+        rows.append({
+            "job_id": record["job_id"],
+            "title": job.get("title") if job else None,
+            "company": job.get("company") if job else None,
+            "grade": total.get("grade"),
+            "score": total.get("score"),
+            "complete": total.get("complete"),
+            "verdict": (record.get("filter") or {}).get("verdict"),
+            # Stale: the job or the profile changed since scoring (or the job is gone); score it again.
+            "stale": (job is None or record.get("job_hash") != score.job_hash(job)
+                      or record.get("profile_hash") != digest or record.get("rules_version") != score.RULES_VERSION),
+        })
+    rows.sort(key=lambda row: (_GRADE_RANK.get(row["grade"], len(_GRADE_RANK)),
+                               -row["score"] if isinstance(row["score"], int) else 1, row["job_id"]))
+    _emit({"matches": rows, "warnings": warnings})
     return 0
 
 
@@ -349,6 +480,45 @@ def build_parser() -> argparse.ArgumentParser:
     match_filter.add_argument("id", help="岗位 id，例如 job_9f4694691d57")
     match_filter.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     match_filter.set_defaults(handler=cmd_match_filter)
+
+    match_score = match_commands.add_parser(
+        "score", parents=[stored], help="可解释评分：计算规则部分，输出匹配记录",
+        description="按 docs/cn/match.md 给一个已保存的岗位评分：技能、方向、薪资由规则计算，带上硬性过滤的结论，"
+                    "给出加权总分、等级和缺口；经历由 Agent 补充。输出匹配记录，加 --save 同时保存。",
+    )
+    match_score.add_argument("id", help="岗位 id，例如 job_9f4694691d57")
+    match_score.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    match_score.add_argument("--save", action="store_true", help="同时保存到 <数据目录>/matches/<岗位id>.json")
+    match_score.set_defaults(handler=cmd_match_score)
+
+    match_validate = match_commands.add_parser(
+        "validate", parents=[stored], help="校验 Agent 补充后的匹配记录",
+        description="对照岗位库里的岗位和个人档案校验匹配记录：规则部分不能改，Agent 的依据要引用 JD 原文和档案里的经历，"
+                    "总分要由各维度算得出。输出 {\"valid\": ..., \"errors\": [...]}。",
+    )
+    match_validate.add_argument("file", help="匹配记录文件；- 表示标准输入")
+    match_validate.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    match_validate.set_defaults(handler=cmd_match_validate)
+
+    match_save = match_commands.add_parser(
+        "save", parents=[stored], help="校验通过后保存匹配记录",
+        description="同 match validate，通过后保存到 <数据目录>/matches/<岗位id>.json。",
+    )
+    match_save.add_argument("file", help="匹配记录文件；- 表示标准输入")
+    match_save.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    match_save.set_defaults(handler=cmd_match_save)
+
+    match_show = match_commands.add_parser("show", parents=[stored], help="显示已保存的匹配记录",
+                                           description="输出 <数据目录>/matches/<岗位id>.json。")
+    match_show.add_argument("id", help="岗位 id，例如 job_9f4694691d57")
+    match_show.set_defaults(handler=cmd_match_show)
+
+    match_list = match_commands.add_parser(
+        "list", parents=[stored], help="按等级、总分列出已评分的岗位，标出过期的记录",
+        description="列出已保存的匹配记录，按等级、总分排序。岗位或档案在评分后改过的记录标为 stale，需要重新评分。",
+    )
+    match_list.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    match_list.set_defaults(handler=cmd_match_list)
     return parser
 
 
