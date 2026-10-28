@@ -1,0 +1,559 @@
+{
+  "schema_version": 1,
+  "kind": "manual_score_oracle",
+  "fixture": "tests/fixtures/cn/jd-m2-3/boss_ai_product_intern.txt",
+  "title": "AI产品经理实习生",
+  "inputs": {
+    "skills": [
+      {
+        "name": "Axure",
+        "group": "product"
+      },
+      {
+        "name": "Figma",
+        "group": "design"
+      },
+      {
+        "name": "SQL",
+        "group": "data"
+      },
+      {
+        "name": "需求分析",
+        "group": "product"
+      },
+      {
+        "name": "用户访谈",
+        "group": "product"
+      },
+      {
+        "name": "PRD",
+        "group": "product"
+      }
+    ],
+    "jd_evidence": [
+      "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+      "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+    ],
+    "hard_condition_evidence": [
+      "仅面向2026届-2027届在校生，本科及以上学历",
+      "每周至少到岗4天，连续实习至少3个月",
+      "工作地点：广州天河区",
+      "不支持远程"
+    ],
+    "salary": {
+      "min": 180,
+      "max": 220,
+      "unit": "CNY/day",
+      "evidence": "180-220元/天"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "filter": {
+        "verdict": "eligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届在范围内",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "硕士达到本科，满足偏好",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "days_per_week": {
+            "result": "match",
+            "reason": "4天达到要求",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "min_months": {
+            "result": "match",
+            "reason": "6个月达到3个月",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "location": {
+            "result": "match",
+            "reason": "广州直接命中",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 6,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "Axure",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Figma",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "SQL",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "需求分析",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "用户访谈",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "PRD",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "data": 1,
+            "design": 1,
+            "product": 4
+          },
+          "reason": "不计general后分组{'data': 1, 'design': 1, 'product': 4}；没有技能属于目标tech，记0",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 45,
+          "method": "manual_semantic_judgment",
+          "reason": "RAG 问答应用提供智能助手领域背景，但档案没有访谈、需求梳理或 PRD 工作；技术经验不能冒充产品经验。",
+          "evidence": {
+            "jd": [
+              "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+              "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+            ],
+            "profile": [
+              "exp-1",
+              "proj-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "reason": "JD日薪上限220达到档案最低150元/天",
+          "jd": [
+            "180-220元/天"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 21,
+        "grade": "poor",
+        "score_grade_before_filter": "poor",
+        "complete": true,
+        "missing": [],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "Axure",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Figma",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "SQL",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "需求分析",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "用户访谈",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "PRD",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        }
+      ]
+    },
+    "ops": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届在范围内",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "本科达到最低要求，硕士只是偏好",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "days_per_week": {
+            "result": "conflict",
+            "reason": "3天少于4天",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "min_months": {
+            "result": "match",
+            "reason": "3个月达到要求",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "location": {
+            "result": "conflict",
+            "reason": "广州无交集、不搬家且不接受远程",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "仅面向2026届-2027届在校生，本科及以上学历",
+              "每周至少到岗4天，连续实习至少3个月",
+              "工作地点：广州天河区",
+              "不支持远程"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 6,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "Axure",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Figma",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "SQL",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "需求分析",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "用户访谈",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "PRD",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "data": 1,
+            "design": 1,
+            "product": 4
+          },
+          "reason": "不计general后分组{'data': 1, 'design': 1, 'product': 4}；没有技能属于目标ops，记0",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 45,
+          "method": "manual_semantic_judgment",
+          "reason": "线上活动策划有用户沟通场景，但没有产品访谈、交互原型和 PRD 明示经历，需要证明迁移。",
+          "evidence": {
+            "jd": [
+              "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+              "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+            ],
+            "profile": [
+              "exp-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "档案 salary_min 未填写，未知，不按0分处理",
+          "jd": [
+            "180-220元/天"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 13,
+        "grade": "ineligible",
+        "score_grade_before_filter": "poor",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "Axure",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Figma",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "SQL",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "需求分析",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "用户访谈",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "PRD",
+          "jd": [
+            "能使用 Axure、Figma 制作交互原型，掌握 SQL 基础；具备需求分析、用户访谈和 PRD 编写能力",
+            "参与智能助手的需求梳理，整理访谈记录，协助评审交互原型"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "days_per_week",
+          "state": "conflict",
+          "reason": "3天少于4天",
+          "jd": [
+            "仅面向2026届-2027届在校生，本科及以上学历",
+            "每周至少到岗4天，连续实习至少3个月",
+            "工作地点：广州天河区",
+            "不支持远程"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "conflict",
+          "reason": "广州无交集、不搬家且不接受远程",
+          "jd": [
+            "仅面向2026届-2027届在校生，本科及以上学历",
+            "每周至少到岗4天，连续实习至少3个月",
+            "工作地点：广州天河区",
+            "不支持远程"
+          ]
+        }
+      ]
+    }
+  }
+}

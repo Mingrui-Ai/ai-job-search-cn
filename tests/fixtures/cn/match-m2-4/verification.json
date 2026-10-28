@@ -1,0 +1,22 @@
+{
+  "verified_at_utc": "2026-10-28T08:11:22.065901+00:00",
+  "counts": {
+    "literal_input_quotes": 75,
+    "jobs": 10,
+    "pairs": 20,
+    "hard_checks": 140,
+    "skill_credit_entries": 126,
+    "dimensions": 80,
+    "null_dimensions": 16
+  },
+  "all_literal_evidence_found": true,
+  "all_profile_experience_ids_valid": true,
+  "credits_groups_totals_grades_recounted": true,
+  "all_rankings_have_ten_unique_jobs": true,
+  "recommended_sets_exclude_ineligible_poor": true,
+  "application_scoring_executed": false,
+  "review_items": [
+    "ops only has 2 admissible candidates; fixed top-3 acceptance needs planner decision",
+    "Go/Golang denominator deduplication unspecified; top-3 unaffected"
+  ]
+}

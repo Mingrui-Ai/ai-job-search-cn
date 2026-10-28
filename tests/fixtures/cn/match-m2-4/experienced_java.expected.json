@@ -1,0 +1,702 @@
+{
+  "schema_version": 1,
+  "kind": "manual_score_oracle",
+  "fixture": "tests/fixtures/cn/jd/experienced_hire.txt",
+  "title": "高级Java开发工程师（社招）",
+  "inputs": {
+    "skills": [
+      {
+        "name": "Java",
+        "group": "tech"
+      },
+      {
+        "name": "Spring Boot",
+        "group": "tech"
+      },
+      {
+        "name": "Spring Cloud",
+        "group": "tech"
+      },
+      {
+        "name": "MyBatis",
+        "group": "tech"
+      },
+      {
+        "name": "Kafka",
+        "group": "tech"
+      },
+      {
+        "name": "Elasticsearch",
+        "group": "tech"
+      },
+      {
+        "name": "分布式",
+        "group": "tech"
+      },
+      {
+        "name": "微服务",
+        "group": "tech"
+      }
+    ],
+    "jd_evidence": [
+      "5年以上 Java 后端开发经验",
+      "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+      "有分布式系统、微服务架构设计经验"
+    ],
+    "hard_condition_evidence": [
+      "本科及以上学历",
+      "不支持远程办公",
+      "工作地点：上海浦东新区",
+      "高级Java开发工程师（社招）"
+    ],
+    "salary": {
+      "min": 20000,
+      "max": 30000,
+      "unit": "CNY/month",
+      "evidence": "2-3万/月"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "unknown",
+            "reason": "JD未限定届别",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "硕士达到本科",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "days_per_week": {
+            "result": "not_applicable",
+            "reason": "社招未写实习天数，按M2-4a不适用",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "min_months": {
+            "result": "not_applicable",
+            "reason": "社招未写实习月数，按M2-4a不适用",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "location": {
+            "result": "conflict",
+            "reason": "上海无交集、不搬家且JD不支持远程",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "employment_type": {
+            "result": "conflict",
+            "reason": "社招不属于仅实习的目标",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 8,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "Java",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Spring Boot",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Spring Cloud",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "MyBatis",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Kafka",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Elasticsearch",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "分布式",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "微服务",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        "direction": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "tech": 8
+          },
+          "reason": "不计general后分组{'tech': 8}；tech为最多或并列最多组，目标为tech，记100",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 65,
+          "method": "manual_semantic_judgment",
+          "reason": "Go 后端接口重构可迁移到服务开发，但没有 Java 栈、架构设计或5年经验依据，属于相关而非做过同等级工作。",
+          "evidence": {
+            "jd": [
+              "5年以上 Java 后端开发经验",
+              "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+              "有分布式系统、微服务架构设计经验"
+            ],
+            "profile": [
+              "exp-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "JD单位CNY/month与档案CNY/day不同，不换算",
+          "jd": [
+            "2-3万/月"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 51,
+        "grade": "ineligible",
+        "score_grade_before_filter": "moderate",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "Java",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Spring Boot",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Spring Cloud",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "MyBatis",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Kafka",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Elasticsearch",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "分布式",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "微服务",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "graduation",
+          "state": "unknown",
+          "reason": "JD未限定届别",
+          "jd": [
+            "本科及以上学历",
+            "不支持远程办公",
+            "工作地点：上海浦东新区",
+            "高级Java开发工程师（社招）"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "conflict",
+          "reason": "上海无交集、不搬家且JD不支持远程",
+          "jd": [
+            "本科及以上学历",
+            "不支持远程办公",
+            "工作地点：上海浦东新区",
+            "高级Java开发工程师（社招）"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "employment_type",
+          "state": "conflict",
+          "reason": "社招不属于仅实习的目标",
+          "jd": [
+            "本科及以上学历",
+            "不支持远程办公",
+            "工作地点：上海浦东新区",
+            "高级Java开发工程师（社招）"
+          ]
+        },
+        {
+          "kind": "experience",
+          "item": "5年以上 Java 后端开发经验：档案仅有一段后端实习，没有5年资历依据",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        }
+      ]
+    },
+    "ops": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "unknown",
+            "reason": "JD未限定届别",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "本科达到要求",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "days_per_week": {
+            "result": "not_applicable",
+            "reason": "社招缺实习天数，不适用",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "min_months": {
+            "result": "not_applicable",
+            "reason": "社招缺实习月数，不适用",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "location": {
+            "result": "match",
+            "reason": "上海直接命中",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "employment_type": {
+            "result": "conflict",
+            "reason": "社招不在实习/校招目标中",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "本科及以上学历",
+              "不支持远程办公",
+              "工作地点：上海浦东新区",
+              "高级Java开发工程师（社招）"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 8,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "Java",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Spring Boot",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Spring Cloud",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "MyBatis",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Kafka",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Elasticsearch",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "分布式",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "微服务",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "tech": 8
+          },
+          "reason": "不计general后分组{'tech': 8}；没有技能属于目标ops，记0",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 0,
+          "method": "manual_semantic_judgment",
+          "reason": "现有运营与校园宣传经历不涉及 Java 后端、分布式架构，也没有5年开发经验。",
+          "evidence": {
+            "jd": [
+              "5年以上 Java 后端开发经验",
+              "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+              "有分布式系统、微服务架构设计经验"
+            ],
+            "profile": [
+              "exp-1",
+              "campus-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "档案 salary_min 未填写，未知，不按0分处理",
+          "jd": [
+            "2-3万/月"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 0,
+        "grade": "ineligible",
+        "score_grade_before_filter": "poor",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "Java",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Spring Boot",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Spring Cloud",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "MyBatis",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Kafka",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Elasticsearch",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "分布式",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "微服务",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "graduation",
+          "state": "unknown",
+          "reason": "JD未限定届别",
+          "jd": [
+            "本科及以上学历",
+            "不支持远程办公",
+            "工作地点：上海浦东新区",
+            "高级Java开发工程师（社招）"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "employment_type",
+          "state": "conflict",
+          "reason": "社招不在实习/校招目标中",
+          "jd": [
+            "本科及以上学历",
+            "不支持远程办公",
+            "工作地点：上海浦东新区",
+            "高级Java开发工程师（社招）"
+          ]
+        },
+        {
+          "kind": "experience",
+          "item": "缺少5年以上 Java 后端开发经验",
+          "jd": [
+            "5年以上 Java 后端开发经验",
+            "精通 Spring Boot、Spring Cloud、MyBatis，熟悉 Kafka、Elasticsearch",
+            "有分布式系统、微服务架构设计经验"
+          ]
+        }
+      ]
+    }
+  }
+}
