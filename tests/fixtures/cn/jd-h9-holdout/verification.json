@@ -1,0 +1,26 @@
+{
+  "verified_at_utc": "2026-10-28T08:55:51.217489+00:00",
+  "oracle_manifest_sha256": "4f8cdb691d7ded23bbb0bca29695c7751ceaa1611ab9d38971051f7efcc500ab",
+  "oracle_hashes_unchanged": true,
+  "freeze_commit_bytes_verified": true,
+  "independent_recount_equals_summary": true,
+  "contract_profile_hashes_unchanged": true,
+  "all_cli_calls_successful": true,
+  "all_parsed_and_oracle_records_valid": true,
+  "tests": {
+    "count": 1023,
+    "skipped": 9,
+    "seconds": 215.237,
+    "result": "OK",
+    "lint_skills": "OK",
+    "security_guards": "OK"
+  },
+  "baseline_sha256": {
+    "ats_recruiting_duration.json": "9c783abd66920211fbd661666bb3f1b35ff79bcf93b4244179e5452eaf9a8aa8",
+    "boss_event_fullpage.json": "38be15c53b8c2ec8adb8d8ab146963e67df7a1a67bc15cf86f35aa654900cc87",
+    "boss_finance_tags.json": "a2c22ea7266ee17433c60b0ddddabfcd085c136da96bf8ade5c17ec0044bfa99",
+    "boss_frontend_tags.json": "4d7dfaffe7b91998f0d0abb142ac270253363a15cd680295eeac55220bfc4799",
+    "official_test_duration.json": "475cb4f7c8748417f6b324949ac567e9726bbcd871a948abe62a050f5b2d201a",
+    "summary.json": "11e9f1f4142a1e09d500dca8c1baf700cabdaac8a623c9dcc231dcac84fd097a"
+  }
+}
