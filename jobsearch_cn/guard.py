@@ -115,9 +115,13 @@ def check(raw: str):
     quoted is not quoted twice.
     """
     cleaned, findings = posting_guard.guard(raw, "text")
-    already = [line.strip() for line in cleaned.splitlines()
+    # Upstream decodes tag/variation-selector payloads as findings, never as
+    # job text. Scan their Chinese instructions too, without returning them
+    # as cleaned JD content for field extraction or storage.
+    scan_text = "\n".join([cleaned, *findings.get("invisible_text", [])])
+    already = [line.strip() for line in scan_text.splitlines()
                if any(p.search(line.strip()) for p in posting_guard.INSTRUCTION_PATTERNS)]
-    extra = [line for line in zh_instruction_lines(cleaned)
+    extra = [line for line in zh_instruction_lines(scan_text)
              if not any(line.strip("…") in quoted for quoted in already)]
     if extra:
         findings["instruction_like"] = list(findings["instruction_like"]) + extra
@@ -131,11 +135,12 @@ def summary(findings: dict) -> dict:
         "instruction_like": len(findings.get("instruction_like") or []),
         "invisible_flagged": int(findings.get("invisible_flagged") or 0),
         "tag_chars": int((findings.get("invisible_chars") or {}).get("tag") or 0),
+        "invisible_text": len(findings.get("invisible_text") or []),
         "homoglyph_runs": len(findings.get("homoglyph_runs") or []),
         "hidden_urls": len(findings.get("hidden_urls") or []),
     }
     # The same signals upstream's verdict raises its warning for.
-    alarms = ("instruction_like", "invisible_flagged", "tag_chars", "homoglyph_runs")
+    alarms = ("instruction_like", "invisible_flagged", "tag_chars", "invisible_text", "homoglyph_runs")
     return {
         "verdict": "warn" if any(counts[name] for name in alarms) else "clean",
         "counts": {name: count for name, count in counts.items() if count},

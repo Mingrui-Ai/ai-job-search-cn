@@ -1,0 +1,185 @@
+{
+  "fixture": "official_service_campus.txt",
+  "job_schema_version": 1,
+  "site_argument": "official",
+  "method": "agent",
+  "basis": "首次执行本批解析/匹配规则前，人工按原创正文、Job Schema 和 match.md 的 M2-4a 契约补充写定；none 与 not_applicable 有意采用新契约。",
+  "fields": {
+    "title": {
+      "value": "客户服务管培生（校招）",
+      "evidence": [
+        "客户服务管培生（校招）"
+      ]
+    },
+    "company": {
+      "value": "示例澄禾生活服务有限公司",
+      "evidence": [
+        "公司名称：示例澄禾生活服务有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "上海"
+      ],
+      "evidence": [
+        "工作城市：上海"
+      ]
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "不支持远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "campus",
+      "evidence": [
+        "招聘类型：校园招聘"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 6000,
+        "max": 8000,
+        "unit": "CNY/month",
+        "months": 13,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪资：6-8K·13薪"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅限2027届毕业生"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": null,
+      "evidence": [],
+      "note": "校招没有实习每周天数要求；M2-4a 过滤应为 not_applicable。"
+    },
+    "requirements.min_months": {
+      "value": null,
+      "evidence": [],
+      "note": "2个月是入职后试用期，不是最短实习时长；过滤应为 not_applicable。"
+    },
+    "requirements.education": {
+      "value": {
+        "min": "none",
+        "preferred": null
+      },
+      "evidence": [
+        "学历不限"
+      ],
+      "note": "明确无限制，与未写学历的 null 不同。"
+    },
+    "requirements.skills": {
+      "value": [
+        "Excel",
+        "PPT",
+        "客户沟通"
+      ],
+      "evidence": [
+        "熟悉 Excel，能够使用 PPT 制作汇报，具备客户沟通能力。"
+      ],
+      "note": "PPT 保留正文写法，不替换成 PowerPoint。"
+    },
+    "return_offer": {
+      "value": null,
+      "evidence": [],
+      "note": "试用期转正式员工不是实习转正机会。"
+    },
+    "published_at": {
+      "value": "2026-10-28",
+      "evidence": [
+        "发布日期：2026-10-28"
+      ]
+    },
+    "deadline": {
+      "value": "2026-12-15",
+      "evidence": [
+        "截止日期：2026-12-15"
+      ]
+    }
+  },
+  "human_match": {
+    "tech": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合限定。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "学历不限，按新契约直接符合。"
+        },
+        "days_per_week": {
+          "result": "not_applicable",
+          "reason": "校招未写实习到岗天数，不适用。"
+        },
+        "min_months": {
+          "result": "not_applicable",
+          "reason": "校招未写实习月数，试用期不算，不适用。"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "仅上海且不支持远程；tech仅深圳/广州且不搬家。"
+        },
+        "employment_type": {
+          "result": "conflict",
+          "reason": "tech只找实习，不接受校招。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "公司与城市不在排除项，标题未命中外包或销售。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合限定。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "学历不限，按新契约直接符合。"
+        },
+        "days_per_week": {
+          "result": "not_applicable",
+          "reason": "校招未写实习到岗天数，不适用。"
+        },
+        "min_months": {
+          "result": "not_applicable",
+          "reason": "校招未写实习月数，试用期不算，不适用。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "上海与ops意向城市相同。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "ops接受校招。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "未命中电话销售或其他排除项。"
+        }
+      }
+    }
+  },
+  "traps": [
+    "学历不限要写none，不能当缺失",
+    "校招无实习条件为not_applicable，试用期不算实习",
+    "PPT不能在解析时改名PowerPoint"
+  ]
+}

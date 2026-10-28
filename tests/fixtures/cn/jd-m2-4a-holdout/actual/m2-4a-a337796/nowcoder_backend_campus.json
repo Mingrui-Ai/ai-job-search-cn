@@ -1,0 +1,1235 @@
+{
+  "fixture": "nowcoder_backend_campus.txt",
+  "site_argument": "nowcoder",
+  "parse": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_952d0b290e1d",
+          "source": {
+            "type": "file",
+            "site": "nowcoder",
+            "url": null,
+            "imported_at": "2026-10-28T20:11:07+08:00"
+          },
+          "title": "后端开发工程师（校招）",
+          "company": "示例渡桥软件有限公司",
+          "cities": [
+            "深圳",
+            "上海"
+          ],
+          "remote": false,
+          "employment_type": "campus",
+          "salary": {
+            "min": 12000,
+            "max": 18000,
+            "unit": "CNY/month",
+            "months": 14,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": true
+            },
+            "days_per_week": 3,
+            "min_months": null,
+            "education": null,
+            "skills": [
+              "Golang",
+              "K8s",
+              "Docker"
+            ]
+          },
+          "return_offer": null,
+          "published_at": null,
+          "deadline": null,
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "后端开发工程师（校招）",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例渡桥软件有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作城市：深圳、上海",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "后端开发工程师（校招）",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "12-18K·14薪",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "仅限2027届毕业生",
+              "method": "rule"
+            },
+            "requirements.days_per_week": {
+              "text": "每周实习3天",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": [
+                "熟悉 Golang",
+                "了解 K8s",
+                "能够使用 Docker 完成本地调试"
+              ],
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "后端开发工程师（校招）\n公司名称：示例渡桥软件有限公司\n招聘类型：校园招聘\n工作城市：深圳、上海\n办公方式：不支持远程办公\n薪资：12-18K·14薪\n\n岗位职责：\n负责订单服务内部接口的维护，定位请求失败原因，并补充部署说明。\n参与小组评审，整理上线前的核对清单。\n\n任职要求：\n仅限2027届毕业生，专业不限。\n熟悉 Golang，了解 K8s，能够使用 Docker 完成本地调试。\n入职前需每周实习3天。"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_952d0b290e1d",
+          "title": "后端开发工程师（校招）",
+          "company": "示例渡桥软件有限公司",
+          "cities": [
+            "深圳",
+            "上海"
+          ],
+          "status": "new"
+        }
+      ]
+    }
+  },
+  "validate_parsed": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "field_comparison": [
+    {
+      "field": "title",
+      "expected": "后端开发工程师（校招）",
+      "actual": "后端开发工程师（校招）",
+      "kind": "match"
+    },
+    {
+      "field": "company",
+      "expected": "示例渡桥软件有限公司",
+      "actual": "示例渡桥软件有限公司",
+      "kind": "match"
+    },
+    {
+      "field": "cities",
+      "expected": [
+        "深圳",
+        "上海"
+      ],
+      "actual": [
+        "深圳",
+        "上海"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "remote",
+      "expected": false,
+      "actual": false,
+      "kind": "match"
+    },
+    {
+      "field": "employment_type",
+      "expected": "campus",
+      "actual": "campus",
+      "kind": "match"
+    },
+    {
+      "field": "salary",
+      "expected": {
+        "min": 12000,
+        "max": 18000,
+        "unit": "CNY/month",
+        "months": 14,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 12000,
+        "max": 18000,
+        "unit": "CNY/month",
+        "months": 14,
+        "negotiable": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.graduation",
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.days_per_week",
+      "expected": 3,
+      "actual": 3,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.min_months",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.education",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.skills",
+      "expected": [
+        "Golang",
+        "K8s",
+        "Docker"
+      ],
+      "actual": [
+        "Golang",
+        "K8s",
+        "Docker"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "return_offer",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "published_at",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "deadline",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    }
+  ],
+  "skill_comparison": {
+    "matched": [
+      "Golang",
+      "K8s",
+      "Docker"
+    ],
+    "missing": [],
+    "extra": []
+  },
+  "validate_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "save_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_952d0b290e1d",
+          "title": "后端开发工程师（校招）",
+          "company": "示例渡桥软件有限公司",
+          "cities": [
+            "深圳",
+            "上海"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  "matches": {
+    "tech": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_952d0b290e1d",
+          "title": "后端开发工程师（校招）",
+          "company": "示例渡桥软件有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅限2027届毕业生"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "unknown",
+              "reason": "JD 没写最低学历（优先学历不作要求）",
+              "jd": {
+                "requirements.education": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": "每周实习3天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写实习时长，不适用",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "后端开发工程师（校招）"
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市深圳在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "上海"
+                  ],
+                  "evidence": "工作城市：深圳、上海"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "conflict",
+              "reason": "这是校招岗位，你找的是实习",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "后端开发工程师（校招）"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "后端开发工程师（校招）",
+                  "evidence": "后端开发工程师（校招）"
+                },
+                "company": {
+                  "value": "示例渡桥软件有限公司",
+                  "evidence": "示例渡桥软件有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "上海"
+                  ],
+                  "evidence": "工作城市：深圳、上海"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "专业不限不等于学历不限，JD未写最低学历，未知。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天满足入职前每周实习3天，不能判不适用。"
+          },
+          {
+            "check": "min_months",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习月数，不适用。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "深圳与tech意向城市有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "tech只找实习，而本岗位明确校招。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中外包、销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_952d0b290e1d",
+          "title": "后端开发工程师（校招）",
+          "company": "示例渡桥软件有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅限2027届毕业生"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "unknown",
+              "reason": "JD 没写最低学历（优先学历不作要求）",
+              "jd": {
+                "requirements.education": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": [
+                    "入职前需每周实习3天"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写实习时长，不适用",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "招聘类型：校园招聘"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市深圳在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：深圳、上海"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "conflict",
+              "reason": "这是校招岗位，你找的是实习",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "招聘类型：校园招聘"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "后端开发工程师（校招）",
+                  "evidence": [
+                    "后端开发工程师（校招）"
+                  ]
+                },
+                "company": {
+                  "value": "示例渡桥软件有限公司",
+                  "evidence": [
+                    "公司名称：示例渡桥软件有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：深圳、上海"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "专业不限不等于学历不限，JD未写最低学历，未知。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天满足入职前每周实习3天，不能判不适用。"
+          },
+          {
+            "check": "min_months",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习月数，不适用。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "深圳与tech意向城市有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "tech只找实习，而本岗位明确校招。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中外包、销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    },
+    "ops": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_952d0b290e1d",
+          "title": "后端开发工程师（校招）",
+          "company": "示例渡桥软件有限公司",
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅限2027届毕业生"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "unknown",
+              "reason": "JD 没写最低学历（优先学历不作要求）",
+              "jd": {
+                "requirements.education": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": "每周实习3天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写实习时长，不适用",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "后端开发工程师（校招）"
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "上海"
+                  ],
+                  "evidence": "工作城市：深圳、上海"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "校招岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "后端开发工程师（校招）"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "后端开发工程师（校招）",
+                  "evidence": "后端开发工程师（校招）"
+                },
+                "company": {
+                  "value": "示例渡桥软件有限公司",
+                  "evidence": "示例渡桥软件有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "上海"
+                  ],
+                  "evidence": "工作城市：深圳、上海"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "needs_check",
+        "actual_verdict": "needs_check",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "专业不限不等于学历不限，JD未写最低学历，未知。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "3天恰好满足入职前每周实习3天，不能判不适用。"
+          },
+          {
+            "check": "min_months",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习月数，不适用。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "上海与ops意向城市有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops接受校招；技能方向不参与硬性过滤。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中电话销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_952d0b290e1d",
+          "title": "后端开发工程师（校招）",
+          "company": "示例渡桥软件有限公司",
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅限2027届毕业生"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "unknown",
+              "reason": "JD 没写最低学历（优先学历不作要求）",
+              "jd": {
+                "requirements.education": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": [
+                    "入职前需每周实习3天"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写实习时长，不适用",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "招聘类型：校园招聘"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：深圳、上海"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "校招岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "招聘类型：校园招聘"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "后端开发工程师（校招）",
+                  "evidence": [
+                    "后端开发工程师（校招）"
+                  ]
+                },
+                "company": {
+                  "value": "示例渡桥软件有限公司",
+                  "evidence": [
+                    "公司名称：示例渡桥软件有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "深圳",
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：深圳、上海"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "needs_check",
+        "actual_verdict": "needs_check",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "专业不限不等于学历不限，JD未写最低学历，未知。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "3天恰好满足入职前每周实习3天，不能判不适用。"
+          },
+          {
+            "check": "min_months",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习月数，不适用。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "上海与ops意向城市有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops接受校招；技能方向不参与硬性过滤。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中电话销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    }
+  }
+}

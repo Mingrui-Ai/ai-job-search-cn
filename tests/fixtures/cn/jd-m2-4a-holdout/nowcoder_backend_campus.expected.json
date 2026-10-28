@@ -1,0 +1,182 @@
+{
+  "fixture": "nowcoder_backend_campus.txt",
+  "job_schema_version": 1,
+  "site_argument": "nowcoder",
+  "method": "agent",
+  "basis": "首次执行本批解析/匹配规则前，人工按原创正文、Job Schema 和 match.md 的 M2-4a 契约补充写定；none 与 not_applicable 有意采用新契约。",
+  "fields": {
+    "title": {
+      "value": "后端开发工程师（校招）",
+      "evidence": [
+        "后端开发工程师（校招）"
+      ]
+    },
+    "company": {
+      "value": "示例渡桥软件有限公司",
+      "evidence": [
+        "公司名称：示例渡桥软件有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "深圳",
+        "上海"
+      ],
+      "evidence": [
+        "工作城市：深圳、上海"
+      ]
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "不支持远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "campus",
+      "evidence": [
+        "招聘类型：校园招聘"
+      ],
+      "note": "入职前实习安排不改变正文明确的校园招聘类型。"
+    },
+    "salary": {
+      "value": {
+        "min": 12000,
+        "max": 18000,
+        "unit": "CNY/month",
+        "months": 14,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪资：12-18K·14薪"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅限2027届毕业生"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": 3,
+      "evidence": [
+        "入职前需每周实习3天"
+      ],
+      "note": "虽为校招，显式实习天数仍正常检查。"
+    },
+    "requirements.min_months": {
+      "value": null,
+      "evidence": [],
+      "note": "未写实习时长；校招的这一项为not_applicable，和已写天数分别判断。"
+    },
+    "requirements.education": {
+      "value": null,
+      "evidence": [],
+      "note": "专业不限没有承诺学历不限；最低学历仍未知，不能写none。"
+    },
+    "requirements.skills": {
+      "value": [
+        "Golang",
+        "K8s",
+        "Docker"
+      ],
+      "evidence": [
+        "熟悉 Golang，了解 K8s，能够使用 Docker 完成本地调试。"
+      ],
+      "note": "Golang和K8s必须保留原文，不改成Go或Kubernetes。"
+    },
+    "return_offer": {
+      "value": null,
+      "evidence": [],
+      "note": "未写实习转正。"
+    },
+    "published_at": {
+      "value": null,
+      "evidence": [],
+      "note": "未写发布日期。"
+    },
+    "deadline": {
+      "value": null,
+      "evidence": [],
+      "note": "未写截止日期。"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合限定。"
+        },
+        "education": {
+          "result": "unknown",
+          "reason": "专业不限不等于学历不限，JD未写最低学历，未知。"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "4天满足入职前每周实习3天，不能判不适用。"
+        },
+        "min_months": {
+          "result": "not_applicable",
+          "reason": "校招未写实习月数，不适用。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "深圳与tech意向城市有交集。"
+        },
+        "employment_type": {
+          "result": "conflict",
+          "reason": "tech只找实习，而本岗位明确校招。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "未命中外包、销售或其他排除项。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "needs_check",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合限定。"
+        },
+        "education": {
+          "result": "unknown",
+          "reason": "专业不限不等于学历不限，JD未写最低学历，未知。"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "3天恰好满足入职前每周实习3天，不能判不适用。"
+        },
+        "min_months": {
+          "result": "not_applicable",
+          "reason": "校招未写实习月数，不适用。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "上海与ops意向城市有交集。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "ops接受校招；技能方向不参与硬性过滤。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "未命中电话销售或其他排除项。"
+        }
+      }
+    }
+  },
+  "traps": [
+    "专业不限不能解释为education.min=none",
+    "校招显式每周实习3天要检查，未写月数仍不适用",
+    "Golang/K8s保留原文拼写"
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "fixture": "boss_supplier_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "boss",
+  "method": "agent",
+  "basis": "首次执行本批解析/匹配规则前，人工按原创正文、Job Schema 和 match.md 的 M2-4a 契约补充写定；none 与 not_applicable 有意采用新契约。",
+  "fields": {
+    "title": {
+      "value": "供应商协调实习生",
+      "evidence": [
+        "供应商协调实习生"
+      ]
+    },
+    "company": {
+      "value": "示例青屿商贸有限公司",
+      "evidence": [
+        "公司名称：示例青屿商贸有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "广州"
+      ],
+      "evidence": [
+        "工作城市：广州"
+      ]
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "不支持远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "招聘类型：实习"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 180,
+        "max": 230,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪资：180-230元/天"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅限2027届在读学生"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": 4,
+      "evidence": [
+        "每周至少到岗4天"
+      ]
+    },
+    "requirements.min_months": {
+      "value": 3,
+      "evidence": [
+        "连续实习3个月以上"
+      ]
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "本科及以上，优秀者可放宽"
+      ],
+      "note": "仍以明确本科要求为最低值；可放宽不等于学历不限。"
+    },
+    "requirements.skills": {
+      "value": [
+        "Excel",
+        "PPT",
+        "商务沟通"
+      ],
+      "evidence": [
+        "熟悉 Excel，能使用 PPT 制作进度汇报，具备商务沟通能力。"
+      ],
+      "note": "PPT保留原文拼写。"
+    },
+    "return_offer": {
+      "value": true,
+      "evidence": [
+        "表现优秀者可转正。"
+      ]
+    },
+    "published_at": {
+      "value": null,
+      "evidence": [],
+      "note": "未写发布日期。"
+    },
+    "deadline": {
+      "value": null,
+      "evidence": [],
+      "note": "未写截止日期。"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合限定。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "硕士满足本科及以上；优秀者可放宽不改变明确下限。"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "4天满足4天。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "6个月满足3个月。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "广州与tech意向城市有交集。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "tech接受实习，职业技能方向不参与硬过滤。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题不含外包或销售，其他排除项也未命中。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合限定。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "本科达到明确下限；优秀者可放宽不改写为none。"
+        },
+        "days_per_week": {
+          "result": "conflict",
+          "reason": "只能3天，少于4天。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "3个月满足3个月。"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "广州不在上海意向中，且双方明确不远程/不搬家。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "ops接受实习。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "未命中电话销售或其他排除项。"
+        }
+      }
+    }
+  },
+  "traps": [
+    "本科及以上优秀者可放宽仍bachelor，不是none",
+    "PPT保留原文，不改成PowerPoint",
+    "实习明确天数和时长正常检查"
+  ]
+}

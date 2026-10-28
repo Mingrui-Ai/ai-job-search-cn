@@ -1,0 +1,1235 @@
+{
+  "fixture": "ats_content_intern.txt",
+  "site_argument": "ats",
+  "parse": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_223662bffd8d",
+          "source": {
+            "type": "file",
+            "site": "ats",
+            "url": null,
+            "imported_at": "2026-10-28T17:46:02+08:00"
+          },
+          "title": "内容编辑实习生",
+          "company": "示例折页文化有限公司",
+          "cities": [
+            "上海"
+          ],
+          "remote": true,
+          "employment_type": "internship",
+          "salary": {
+            "min": 120,
+            "max": 160,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": true
+            },
+            "days_per_week": null,
+            "min_months": 3,
+            "education": {
+              "min": "bachelor",
+              "preferred": null
+            },
+            "skills": [
+              "秀米",
+              "Excel",
+              "内容策划"
+            ]
+          },
+          "return_offer": false,
+          "published_at": null,
+          "deadline": null,
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "内容编辑实习生",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例折页文化有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作城市：上海",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "远程办公",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "内容编辑实习生",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "120-160元/天",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "仅限2027届本科及以上在读学生",
+              "method": "rule"
+            },
+            "requirements.min_months": {
+              "text": "实习3个月",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "本科及以上",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": [
+                "能够使用秀米完成排版",
+                "熟悉 Excel",
+                "具备内容策划能力"
+              ],
+              "method": "rule"
+            },
+            "return_offer": {
+              "text": "不提供转正",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "内容编辑实习生\n公司名称：示例折页文化有限公司\n招聘类型：实习\n工作城市：上海\n办公方式：支持全程远程办公\n薪资：120-160元/天\n\n岗位职责：\n按栏目计划整理稿件，核查文字中的日期和名称，并维护选题进度表。\n与指导编辑讨论每期栏目结构，记录反馈和修订结果。\n\n任职要求：\n仅限2027届本科及以上在读学生。\n能够使用秀米完成排版，熟悉 Excel，具备内容策划能力。\n连续实习3个月以上。\n本岗位不提供转正机会。"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_223662bffd8d",
+          "title": "内容编辑实习生",
+          "company": "示例折页文化有限公司",
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ]
+    }
+  },
+  "validate_parsed": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "field_comparison": [
+    {
+      "field": "title",
+      "expected": "内容编辑实习生",
+      "actual": "内容编辑实习生",
+      "kind": "match"
+    },
+    {
+      "field": "company",
+      "expected": "示例折页文化有限公司",
+      "actual": "示例折页文化有限公司",
+      "kind": "match"
+    },
+    {
+      "field": "cities",
+      "expected": [
+        "上海"
+      ],
+      "actual": [
+        "上海"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "remote",
+      "expected": true,
+      "actual": true,
+      "kind": "match"
+    },
+    {
+      "field": "employment_type",
+      "expected": "internship",
+      "actual": "internship",
+      "kind": "match"
+    },
+    {
+      "field": "salary",
+      "expected": {
+        "min": 120,
+        "max": 160,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 120,
+        "max": 160,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.graduation",
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.days_per_week",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.min_months",
+      "expected": 3,
+      "actual": 3,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.education",
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.skills",
+      "expected": [
+        "秀米",
+        "Excel",
+        "内容策划"
+      ],
+      "actual": [
+        "秀米",
+        "Excel",
+        "内容策划"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "return_offer",
+      "expected": false,
+      "actual": false,
+      "kind": "match"
+    },
+    {
+      "field": "published_at",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "deadline",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    }
+  ],
+  "skill_comparison": {
+    "matched": [
+      "秀米",
+      "Excel",
+      "内容策划"
+    ],
+    "missing": [],
+    "extra": []
+  },
+  "validate_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "save_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_223662bffd8d",
+          "title": "内容编辑实习生",
+          "company": "示例折页文化有限公司",
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  "matches": {
+    "tech": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_223662bffd8d",
+          "title": "内容编辑实习生",
+          "company": "示例折页文化有限公司",
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅限2027届本科及以上在读学生"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "unknown",
+              "reason": "JD 或档案没写每周到岗",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": "实习3个月"
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "JD 可远程，你接受远程",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作城市：上海"
+                },
+                "remote": {
+                  "value": true,
+                  "evidence": "远程办公"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "内容编辑实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "内容编辑实习生",
+                  "evidence": "内容编辑实习生"
+                },
+                "company": {
+                  "value": "示例折页文化有限公司",
+                  "evidence": "示例折页文化有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作城市：上海"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "needs_check",
+        "actual_verdict": "needs_check",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "硕士学历不低于本科。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "实习岗位未写每周天数，仍未知。"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "可实习6个月，满足3个月。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech接受远程，JD支持全程远程。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习符合tech类型。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中外包或销售，其他排除项也未命中。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_223662bffd8d",
+          "title": "内容编辑实习生",
+          "company": "示例折页文化有限公司",
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅限2027届本科及以上在读学生。"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "本科及以上"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "unknown",
+              "reason": "JD 或档案没写每周到岗",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": [
+                    "连续实习3个月以上"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "JD 可远程，你接受远程",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：上海"
+                  ]
+                },
+                "remote": {
+                  "value": true,
+                  "evidence": [
+                    "支持全程远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "招聘类型：实习"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "内容编辑实习生",
+                  "evidence": [
+                    "内容编辑实习生"
+                  ]
+                },
+                "company": {
+                  "value": "示例折页文化有限公司",
+                  "evidence": [
+                    "公司名称：示例折页文化有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：上海"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "needs_check",
+        "actual_verdict": "needs_check",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "硕士学历不低于本科。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "实习岗位未写每周天数，仍未知。"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "可实习6个月，满足3个月。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "tech接受远程，JD支持全程远程。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习符合tech类型。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中外包或销售，其他排除项也未命中。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    },
+    "ops": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_223662bffd8d",
+          "title": "内容编辑实习生",
+          "company": "示例折页文化有限公司",
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅限2027届本科及以上在读学生"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "unknown",
+              "reason": "JD 或档案没写每周到岗",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": "实习3个月"
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作城市：上海"
+                },
+                "remote": {
+                  "value": true,
+                  "evidence": "远程办公"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "内容编辑实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "内容编辑实习生",
+                  "evidence": "内容编辑实习生"
+                },
+                "company": {
+                  "value": "示例折页文化有限公司",
+                  "evidence": "示例折页文化有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作城市：上海"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "needs_check",
+        "actual_verdict": "needs_check",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "本科学历达到本科要求。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "实习岗位未写每周天数，仍未知。"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "可实习3个月，满足3个月。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "上海城市有交集，允许远程不意味着必须远程。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops接受实习。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中电话销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_223662bffd8d",
+          "title": "内容编辑实习生",
+          "company": "示例折页文化有限公司",
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅限2027届本科及以上在读学生。"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "本科及以上"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "unknown",
+              "reason": "JD 或档案没写每周到岗",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": [
+                    "连续实习3个月以上"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：上海"
+                  ]
+                },
+                "remote": {
+                  "value": true,
+                  "evidence": [
+                    "支持全程远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "招聘类型：实习"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "内容编辑实习生",
+                  "evidence": [
+                    "内容编辑实习生"
+                  ]
+                },
+                "company": {
+                  "value": "示例折页文化有限公司",
+                  "evidence": [
+                    "公司名称：示例折页文化有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：上海"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "needs_check",
+        "actual_verdict": "needs_check",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "本科学历达到本科要求。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "实习岗位未写每周天数，仍未知。"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "可实习3个月，满足3个月。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "上海城市有交集，允许远程不意味着必须远程。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops接受实习。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中电话销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    }
+  }
+}

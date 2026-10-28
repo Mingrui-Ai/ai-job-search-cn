@@ -1,0 +1,295 @@
+{
+  "verified_at_utc": "2026-10-28T12:14:18.502052+00:00",
+  "code_commit": "a337796d4d7a8bf81b469a768342cb60efede63e",
+  "oracle_freeze_commit": "4e47853f00f530c44a45b3cc5c6641262d50a705",
+  "baseline_artifact_commit": "14c672955e783c49218a27c30f75190be0d89fc7",
+  "oracle_manifest_sha256": "7d468f60aa423108f5c89f0c21a0503c87c21d18d7f029dc3e3b3a147a6ceb85",
+  "oracle_bytes_match_freeze": true,
+  "baseline_artifacts_unchanged": true,
+  "application_tree_equals_code_commit": true,
+  "input_audit": {
+    "code_commit": "a337796d4d7a8bf81b469a768342cb60efede63e",
+    "freeze_commit": "4e47853f00f530c44a45b3cc5c6641262d50a705",
+    "manifest_sha256": "7d468f60aa423108f5c89f0c21a0503c87c21d18d7f029dc3e3b3a147a6ceb85",
+    "inputs": {
+      "ats_content_intern.expected.json": {
+        "sha256": "fec2b69f2ad744d066bb899f1e247bea31a817bc871b05bb4b283dddbec50fbb",
+        "source": "freeze_git_blob"
+      },
+      "ats_content_intern.txt": {
+        "sha256": "ed4d2bfb39b92d295f728eeb05b5d53b1f348dcac66dbc02c152e7783aeb2d01",
+        "source": "freeze_git_blob"
+      },
+      "boss_supplier_intern.expected.json": {
+        "sha256": "a2ba0c251b3104a0afaae35d2384dcf66777a66baf376ef68d367968594973e5",
+        "source": "freeze_git_blob"
+      },
+      "boss_supplier_intern.txt": {
+        "sha256": "adea542de3fee181ef11100437d1abc8fe242ee1dae43a568cf98b7c97174529",
+        "source": "freeze_git_blob"
+      },
+      "liepin_language_engineer.expected.json": {
+        "sha256": "46a19afac3b392c32d7efcb41d3437960430f0640372feea2c24f249347f5195",
+        "source": "freeze_git_blob"
+      },
+      "liepin_language_engineer.txt": {
+        "sha256": "4c1d4c2aec0c6cdbd3f328d86599a686037f1da26a909e214d0e9ad6808a31df",
+        "source": "freeze_git_blob"
+      },
+      "nowcoder_backend_campus.expected.json": {
+        "sha256": "3fa6c4ed6ca2bd19ea85a04cabd36717928f0315e2c2c6010560892eb0d69df6",
+        "source": "freeze_git_blob"
+      },
+      "nowcoder_backend_campus.txt": {
+        "sha256": "3e4fdb3cab82c210dae6da4f380e16537e3e818567a0d8c4085889b6d785bcb5",
+        "source": "freeze_git_blob"
+      },
+      "official_service_campus.expected.json": {
+        "sha256": "80bf272e62445d4fc65d7758c300f77c4d3a5b2bf885d8879d3b2524b7f2d02a",
+        "source": "freeze_git_blob"
+      },
+      "official_service_campus.txt": {
+        "sha256": "01380aaed8a0b76a0d082f1efd3406526f6ffce96a884d93a2f9692d9a79be8a",
+        "source": "freeze_git_blob"
+      },
+      "docs/cn/job-schema.md": {
+        "sha256": "dcc3a1753a38aabfd19ef79a44c7f022cf3ac2bbb0430aa9ba52cb0b8dcba877",
+        "source": "freeze_git_blob",
+        "newline": "CRLF restored from Git LF"
+      },
+      "docs/cn/match.md": {
+        "sha256": "33e015520755d43dc36470cb76a3ab93303de5f9e5c27de1e3393a4b04732564",
+        "source": "freeze_git_blob",
+        "newline": "CRLF restored from Git LF"
+      },
+      "docs/cn/roadmap.md": {
+        "sha256": "b3343ce55529bfc259d9f01208552098052f56d63bc9d5c2d3e03e4b47b10dcd",
+        "source": "freeze_git_blob",
+        "newline": "CRLF restored from Git LF"
+      },
+      "tests/fixtures/cn/profile/tech/profile.json": {
+        "sha256": "cd06c39d2041586ec52ecc11566a55b884ed93ed11c6485afba83807e0f4897e",
+        "source": "freeze_git_blob",
+        "newline": "CRLF restored from Git LF"
+      },
+      "tests/fixtures/cn/profile/ops/profile.json": {
+        "sha256": "fe6fc3de8c9dc00ce8cf302175593cce2ead112de765dbe09db16e0ad92cb1d7",
+        "source": "freeze_git_blob",
+        "newline": "CRLF restored from Git LF"
+      }
+    },
+    "runner_sha256": "3a34d5791cf018f670ee3ee5235501e3bc869e06765aa6d4f17ec566caffe273",
+    "initial_runner_sha256": "ed10977bff98c7b7b9ba4a14133215cdb417b0263f1be3f1f56af1687a9a71f9",
+    "runtime_profiles": {
+      "tech": {
+        "source_commit": "a337796d4d7a8bf81b469a768342cb60efede63e",
+        "source_path": "tests/fixtures/cn/profile/tech/profile.json",
+        "sha256": "735d1da011b41215dd381d1a8eeea42742a3fb247ba8f5557c17c9cf0a35a2d6",
+        "added_target_fields": {
+          "directions": [
+            "tech"
+          ],
+          "weights": null
+        },
+        "all_other_profile_fields_equal_to_freeze": true
+      },
+      "ops": {
+        "source_commit": "a337796d4d7a8bf81b469a768342cb60efede63e",
+        "source_path": "tests/fixtures/cn/profile/ops/profile.json",
+        "sha256": "4b7639b57a666d4adbd0f2b5aed1e7cc28ad150bac9b1e8e675981ffdb2a5f9c",
+        "added_target_fields": {
+          "directions": [
+            "ops"
+          ],
+          "weights": null
+        },
+        "all_other_profile_fields_equal_to_freeze": true
+      }
+    },
+    "initial_attempt": {
+      "completed_fixture_outputs": 0,
+      "reason": "Frozen profiles fail M2-4a validation: target.directions and target.weights are missing",
+      "frozen_inputs_changed": false
+    }
+  },
+  "independent_recount": {
+    "baseline": {
+      "totals": {
+        "field_match": 65,
+        "skills_matched": 12,
+        "skills_missing": 3,
+        "skills_extra": 0,
+        "oracle_records_valid": 3,
+        "match_verdict_equal": 9,
+        "match_check_equal": 56,
+        "oracle_verdict_equal": 6,
+        "oracle_check_equal": 40,
+        "oracle_replay_verdicts": 6,
+        "oracle_replay_checks": 42,
+        "oracle_records_rejected": 2
+      },
+      "field_agreements": {
+        "title": 5,
+        "company": 5,
+        "cities": 5,
+        "remote": 5,
+        "employment_type": 5,
+        "salary": 5,
+        "requirements.graduation": 5,
+        "requirements.days_per_week": 5,
+        "requirements.min_months": 5,
+        "requirements.education": 3,
+        "requirements.skills": 3,
+        "return_offer": 5,
+        "published_at": 5,
+        "deadline": 4
+      },
+      "check_agreements": {
+        "graduation": 10,
+        "education": 6,
+        "days_per_week": 6,
+        "min_months": 4,
+        "location": 10,
+        "employment_type": 10,
+        "exclusions": 10
+      },
+      "field_differences": [
+        {
+          "fixture": "boss_supplier_intern",
+          "field": "requirements.skills",
+          "expected": [
+            "Excel",
+            "PPT",
+            "商务沟通"
+          ],
+          "actual": [
+            "Excel",
+            "商务沟通"
+          ]
+        },
+        {
+          "fixture": "liepin_language_engineer",
+          "field": "requirements.education",
+          "expected": {
+            "min": "none",
+            "preferred": null
+          },
+          "actual": null
+        },
+        {
+          "fixture": "official_service_campus",
+          "field": "requirements.education",
+          "expected": {
+            "min": "none",
+            "preferred": null
+          },
+          "actual": null
+        },
+        {
+          "fixture": "official_service_campus",
+          "field": "requirements.skills",
+          "expected": [
+            "Excel",
+            "PPT",
+            "客户沟通"
+          ],
+          "actual": [
+            "Excel"
+          ]
+        },
+        {
+          "fixture": "official_service_campus",
+          "field": "deadline",
+          "expected": "2026-12-15",
+          "actual": "2026-10-28"
+        }
+      ],
+      "per_fixture_field_agreements": {
+        "ats_content_intern": 14,
+        "boss_supplier_intern": 13,
+        "liepin_language_engineer": 13,
+        "nowcoder_backend_campus": 14,
+        "official_service_campus": 11
+      }
+    },
+    "m2_4a": {
+      "totals": {
+        "field_match": 68,
+        "skills_matched": 14,
+        "skills_missing": 1,
+        "skills_extra": 0,
+        "oracle_records_valid": 5,
+        "match_verdict_equal": 10,
+        "match_check_equal": 70,
+        "oracle_verdict_equal": 10,
+        "oracle_check_equal": 70,
+        "oracle_replay_verdicts": 10,
+        "oracle_replay_checks": 70
+      },
+      "field_agreements": {
+        "title": 5,
+        "company": 5,
+        "cities": 5,
+        "remote": 5,
+        "employment_type": 5,
+        "salary": 5,
+        "requirements.graduation": 5,
+        "requirements.days_per_week": 5,
+        "requirements.min_months": 5,
+        "requirements.education": 5,
+        "requirements.skills": 4,
+        "return_offer": 5,
+        "published_at": 5,
+        "deadline": 4
+      },
+      "check_agreements": {
+        "graduation": 10,
+        "education": 10,
+        "days_per_week": 10,
+        "min_months": 10,
+        "location": 10,
+        "employment_type": 10,
+        "exclusions": 10
+      },
+      "field_differences": [
+        {
+          "fixture": "official_service_campus",
+          "field": "requirements.skills",
+          "expected": [
+            "Excel",
+            "PPT",
+            "客户沟通"
+          ],
+          "actual": [
+            "Excel",
+            "PPT"
+          ]
+        },
+        {
+          "fixture": "official_service_campus",
+          "field": "deadline",
+          "expected": "2026-12-15",
+          "actual": "2026-10-28"
+        }
+      ],
+      "per_fixture_field_agreements": {
+        "ats_content_intern": 14,
+        "boss_supplier_intern": 14,
+        "liepin_language_engineer": 14,
+        "nowcoder_backend_campus": 14,
+        "official_service_campus": 12
+      }
+    }
+  },
+  "counts_match_saved_summaries": true,
+  "raw_output_sha256": {
+    "actual/m2-4a-a337796/ats_content_intern.json": "8f70df8f51d4c1edd60de153d681250400a4b27df449c41a22b52b4013bf35a8",
+    "actual/m2-4a-a337796/boss_supplier_intern.json": "60fd56d4934837ffa62887cd43707af257a47fae198f6e05396ba7cc38fe940c",
+    "actual/m2-4a-a337796/liepin_language_engineer.json": "20ee98bda05a7b2f1e50655ca3ea4d0f10693dca9d64b5310e632177eb258b28",
+    "actual/m2-4a-a337796/nowcoder_backend_campus.json": "5601e0c396570078bd9b264d0d8373dcfa606cd65131ea6367e8d49f287b738b",
+    "actual/m2-4a-a337796/official_service_campus.json": "30119b04c7e4ed51c7eb592282dec47445201aaabbfba53fed0c25639ec4e404",
+    "actual/m2-4a-a337796/summary.json": "d295f14fbc274fef423ccb5eaf5111279ffb2b0d1048ef2d60615b33a5abceba"
+  },
+  "report_sha256": "0e6ce5d7d143a18032bb8698bc2025a0a2330f16455eae1ef4e68467cf91e450",
+  "recount_script_sha256": "776f4191588e4d3a557385797e952ce8d7ec5b17cccba30e26f0613e360cbe14"
+}

@@ -1,0 +1,1110 @@
+{
+  "code_commit": "0e35b4bbb47630f315e5ec89d2635161560bf8b4",
+  "oracle_freeze_commit": "4e47853f00f530c44a45b3cc5c6641262d50a705",
+  "oracle_manifest_sha256": "7d468f60aa423108f5c89f0c21a0503c87c21d18d7f029dc3e3b3a147a6ceb85",
+  "started_at_utc": "2026-10-28T09:46:02.238972+00:00",
+  "finished_at_utc": "2026-10-28T09:46:07.422845+00:00",
+  "python_version": "3.12.15",
+  "all_oracle_hashes_unchanged": true,
+  "all_contract_and_profile_hashes_unchanged": true,
+  "denominators": {
+    "field_groups": 70,
+    "match_verdicts": 10,
+    "match_checks": 70,
+    "skills": 15,
+    "oracle_replay_verdicts": 6,
+    "oracle_replay_checks": 42
+  },
+  "totals": {
+    "field_match": 65,
+    "skills_matched": 12,
+    "skills_missing": 3,
+    "skills_extra": 0,
+    "oracle_records_valid": 3,
+    "match_verdict_equal": 9,
+    "match_check_equal": 56,
+    "oracle_verdict_equal": 6,
+    "oracle_check_equal": 40,
+    "oracle_replay_verdicts": 6,
+    "oracle_replay_checks": 42,
+    "field_missing": 4,
+    "oracle_records_rejected": 2,
+    "field_wrong": 1
+  },
+  "fixtures": [
+    {
+      "fixture": "ats_content_intern.txt",
+      "field_counts": {
+        "match": 14
+      },
+      "field_differences": [],
+      "skills": {
+        "matched": [
+          "秀米",
+          "Excel",
+          "内容策划"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "matches": {
+        "tech": {
+          "expected_verdict": "needs_check",
+          "actual_verdict": "needs_check",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "硕士学历不低于本科。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "unknown",
+              "actual": "unknown",
+              "equal": true,
+              "human_reason": "实习岗位未写每周天数，仍未知。"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "可实习6个月，满足3个月。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "tech接受远程，JD支持全程远程。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "实习符合tech类型。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "标题未命中外包或销售，其他排除项也未命中。"
+            }
+          ],
+          "check_equal_count": 7
+        },
+        "ops": {
+          "expected_verdict": "needs_check",
+          "actual_verdict": "needs_check",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "本科学历达到本科要求。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "unknown",
+              "actual": "unknown",
+              "equal": true,
+              "human_reason": "实习岗位未写每周天数，仍未知。"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "可实习3个月，满足3个月。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "上海城市有交集，允许远程不意味着必须远程。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "ops接受实习。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中电话销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 7
+        }
+      },
+      "oracle_matches": {
+        "tech": {
+          "expected_verdict": "needs_check",
+          "actual_verdict": "needs_check",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "硕士学历不低于本科。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "unknown",
+              "actual": "unknown",
+              "equal": true,
+              "human_reason": "实习岗位未写每周天数，仍未知。"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "可实习6个月，满足3个月。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "tech接受远程，JD支持全程远程。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "实习符合tech类型。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "标题未命中外包或销售，其他排除项也未命中。"
+            }
+          ],
+          "check_equal_count": 7
+        },
+        "ops": {
+          "expected_verdict": "needs_check",
+          "actual_verdict": "needs_check",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "本科学历达到本科要求。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "unknown",
+              "actual": "unknown",
+              "equal": true,
+              "human_reason": "实习岗位未写每周天数，仍未知。"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "可实习3个月，满足3个月。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "上海城市有交集，允许远程不意味着必须远程。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "ops接受实习。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中电话销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 7
+        }
+      }
+    },
+    {
+      "fixture": "boss_supplier_intern.txt",
+      "field_counts": {
+        "match": 13,
+        "missing": 1
+      },
+      "field_differences": [
+        {
+          "field": "requirements.skills",
+          "expected": [
+            "Excel",
+            "PPT",
+            "商务沟通"
+          ],
+          "actual": [
+            "Excel",
+            "商务沟通"
+          ],
+          "kind": "missing"
+        }
+      ],
+      "skills": {
+        "matched": [
+          "Excel",
+          "商务沟通"
+        ],
+        "missing": [
+          "PPT"
+        ],
+        "extra": []
+      },
+      "matches": {
+        "tech": {
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "硕士满足本科及以上；优秀者可放宽不改变明确下限。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "4天满足4天。"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "6个月满足3个月。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "广州与tech意向城市有交集。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "tech接受实习，职业技能方向不参与硬过滤。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "标题不含外包或销售，其他排除项也未命中。"
+            }
+          ],
+          "check_equal_count": 7
+        },
+        "ops": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "本科达到明确下限；优秀者可放宽不改写为none。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "只能3天，少于4天。"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "3个月满足3个月。"
+            },
+            {
+              "check": "location",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "广州不在上海意向中，且双方明确不远程/不搬家。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "ops接受实习。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中电话销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 7
+        }
+      },
+      "oracle_matches": {
+        "tech": {
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "硕士满足本科及以上；优秀者可放宽不改变明确下限。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "4天满足4天。"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "6个月满足3个月。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "广州与tech意向城市有交集。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "tech接受实习，职业技能方向不参与硬过滤。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "标题不含外包或销售，其他排除项也未命中。"
+            }
+          ],
+          "check_equal_count": 7
+        },
+        "ops": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "本科达到明确下限；优秀者可放宽不改写为none。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "只能3天，少于4天。"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "3个月满足3个月。"
+            },
+            {
+              "check": "location",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "广州不在上海意向中，且双方明确不远程/不搬家。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "ops接受实习。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中电话销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 7
+        }
+      }
+    },
+    {
+      "fixture": "liepin_language_engineer.txt",
+      "field_counts": {
+        "match": 13,
+        "missing": 1
+      },
+      "field_differences": [
+        {
+          "field": "requirements.education",
+          "expected": {
+            "min": "none",
+            "preferred": null
+          },
+          "actual": null,
+          "kind": "missing"
+        }
+      ],
+      "skills": {
+        "matched": [
+          "NLP",
+          "Python",
+          "Golang"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "matches": {
+        "tech": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "unknown",
+              "actual": "unknown",
+              "equal": true,
+              "human_reason": "JD没写届别；新契约只扩展天数和月数，届别仍未知。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "不设最低学历门槛，直接符合。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "社招没有实习天数，不适用。"
+            },
+            {
+              "check": "min_months",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "社招没有实习月数，不适用。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "广州与tech意向城市有交集。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "tech只接受实习，不接受社招。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中外包、销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 4
+        },
+        "ops": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "unknown",
+              "actual": "unknown",
+              "equal": true,
+              "human_reason": "JD没写届别；新契约只扩展天数和月数，届别仍未知。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "不设最低学历门槛，直接符合。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "社招没有实习天数，不适用。"
+            },
+            {
+              "check": "min_months",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "社招没有实习月数，不适用。"
+            },
+            {
+              "check": "location",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "仅广州，不支持远程；ops仅上海且不搬家。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "ops接受实习/校招，不接受社招。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中电话销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 4
+        }
+      },
+      "oracle_matches": {
+        "tech": null,
+        "ops": null
+      }
+    },
+    {
+      "fixture": "nowcoder_backend_campus.txt",
+      "field_counts": {
+        "match": 14
+      },
+      "field_differences": [],
+      "skills": {
+        "matched": [
+          "Golang",
+          "K8s",
+          "Docker"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "matches": {
+        "tech": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "unknown",
+              "actual": "unknown",
+              "equal": true,
+              "human_reason": "专业不限不等于学历不限，JD未写最低学历，未知。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "4天满足入职前每周实习3天，不能判不适用。"
+            },
+            {
+              "check": "min_months",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "校招未写实习月数，不适用。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "深圳与tech意向城市有交集。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "tech只找实习，而本岗位明确校招。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中外包、销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 6
+        },
+        "ops": {
+          "expected_verdict": "needs_check",
+          "actual_verdict": "needs_check",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "unknown",
+              "actual": "unknown",
+              "equal": true,
+              "human_reason": "专业不限不等于学历不限，JD未写最低学历，未知。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "3天恰好满足入职前每周实习3天，不能判不适用。"
+            },
+            {
+              "check": "min_months",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "校招未写实习月数，不适用。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "上海与ops意向城市有交集。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "ops接受校招；技能方向不参与硬性过滤。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中电话销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 6
+        }
+      },
+      "oracle_matches": {
+        "tech": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "unknown",
+              "actual": "unknown",
+              "equal": true,
+              "human_reason": "专业不限不等于学历不限，JD未写最低学历，未知。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "4天满足入职前每周实习3天，不能判不适用。"
+            },
+            {
+              "check": "min_months",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "校招未写实习月数，不适用。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "深圳与tech意向城市有交集。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "tech只找实习，而本岗位明确校招。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中外包、销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 6
+        },
+        "ops": {
+          "expected_verdict": "needs_check",
+          "actual_verdict": "needs_check",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "unknown",
+              "actual": "unknown",
+              "equal": true,
+              "human_reason": "专业不限不等于学历不限，JD未写最低学历，未知。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "3天恰好满足入职前每周实习3天，不能判不适用。"
+            },
+            {
+              "check": "min_months",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "校招未写实习月数，不适用。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "上海与ops意向城市有交集。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "ops接受校招；技能方向不参与硬性过滤。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中电话销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 6
+        }
+      }
+    },
+    {
+      "fixture": "official_service_campus.txt",
+      "field_counts": {
+        "match": 11,
+        "missing": 2,
+        "wrong": 1
+      },
+      "field_differences": [
+        {
+          "field": "requirements.education",
+          "expected": {
+            "min": "none",
+            "preferred": null
+          },
+          "actual": null,
+          "kind": "missing"
+        },
+        {
+          "field": "requirements.skills",
+          "expected": [
+            "Excel",
+            "PPT",
+            "客户沟通"
+          ],
+          "actual": [
+            "Excel"
+          ],
+          "kind": "missing"
+        },
+        {
+          "field": "deadline",
+          "expected": "2026-12-15",
+          "actual": "2026-10-28",
+          "kind": "wrong"
+        }
+      ],
+      "skills": {
+        "matched": [
+          "Excel"
+        ],
+        "missing": [
+          "PPT",
+          "客户沟通"
+        ],
+        "extra": []
+      },
+      "matches": {
+        "tech": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "verdict_equal": true,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "学历不限，按新契约直接符合。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "校招未写实习到岗天数，不适用。"
+            },
+            {
+              "check": "min_months",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "校招未写实习月数，试用期不算，不适用。"
+            },
+            {
+              "check": "location",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "仅上海且不支持远程；tech仅深圳/广州且不搬家。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "conflict",
+              "actual": "conflict",
+              "equal": true,
+              "human_reason": "tech只找实习，不接受校招。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "公司与城市不在排除项，标题未命中外包或销售。"
+            }
+          ],
+          "check_equal_count": 4
+        },
+        "ops": {
+          "expected_verdict": "eligible",
+          "actual_verdict": "needs_check",
+          "verdict_equal": false,
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "2027届符合限定。"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "学历不限，按新契约直接符合。"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "校招未写实习到岗天数，不适用。"
+            },
+            {
+              "check": "min_months",
+              "expected": "not_applicable",
+              "actual": "unknown",
+              "equal": false,
+              "human_reason": "校招未写实习月数，试用期不算，不适用。"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "上海与ops意向城市相同。"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "ops接受校招。"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "actual": "match",
+              "equal": true,
+              "human_reason": "未命中电话销售或其他排除项。"
+            }
+          ],
+          "check_equal_count": 4
+        }
+      },
+      "oracle_matches": {
+        "tech": null,
+        "ops": null
+      }
+    }
+  ]
+}
