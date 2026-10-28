@@ -4,6 +4,57 @@
 
 ---
 
+## 2026-10-27 · V2：M2-3 独立 JD 样例与人工匹配对照
+
+**完成与决策**
+
+- 在 `tests/fixtures/cn/jd-m2-3/` 新增 5 份原创虚构 JD、5 份对应人工期望、逐字段 README、完整 CLI 对照输出、冻结清单与验证摘要。覆盖 AI 产品、新媒体内容运营、UI 设计、测试开发实习和市场管培校招；公司均为“示例……有限公司”，每份至少 2 处易错写法。
+- 独立编写期间只依据 Job Schema、匹配契约和 tech/ops 示例档案，不查阅解析/匹配规则源码、既有 JD 测试或执行会话实现。先冻结 JD、逐字出处和 10 组人工匹配判断的 SHA-256，再运行 `jd parse`、`match filter`；实测后没有回填期望值。
+- 人工期望按 14 个 Job Schema 语义字段组组织；未知保留 `null` / `[]`，运行元数据单独保存在实际输出中。学历优先、会议星期、回复时效、面试地点、试用期和项目周期均按语义区分，不靠结果倒推期望。
+- 初期目录权限受限时在临时隔离检出完成冻结；权限恢复后，在指定工作树 `D:/06_Projects/ai-job-search-cn-codex` 从最新 `origin/master@34d254d` 新建 `codex/v2-m2-3-samples`，逐字节复制冻结文件，重跑全部对照与验收。冻结基线为 `a3986d3`；期间示例档案虽有更新，七项过滤所用字段逐项未变。
+- 本次不改代码、现有测试、既有样例或其他 CN 文档；没有将新样例放入 `tests/fixtures/cn/jd/`，也未接入现有自动断言。完整结果见[样例 README](../../tests/fixtures/cn/jd-m2-3/README.md)。
+
+**验证与发现**
+
+- `python tools/lint_skills.py`、`python tools/security_guards.py`、`python tools/check_framework_version.py` 均通过。
+- conda `ai-job-search-cn`、Python 3.12.15：`python -m unittest discover -s tests -t . -v` 共 1009 项，1000 项通过、9 项按预期跳过，0 失败、0 错误；测试框架报告耗时 98.462 秒。旧权限下未完成的测试已停止，不计入通过结果。
+- 18 份交付文件通过 UTF-8、无 BOM 和字符扫描，统一 LF；除必要换行外无 Unicode Cc/Cf 控制或格式字符。59 个字段出处片段逐字存在于对应 JD，城市和技能各项均在各自出处内；10 个冻结文件哈希全部未变。
+- 70 个语义字段组：62 项一致、7 项规则漏读、1 项规则误读。5 份 JD 都漏技能；市场管培标题和“全年13薪”中的薪数漏读；同一行的面试城市北京被误收为工作城市。
+- 10 组未经补全的匹配总判断全部一致，但 70 项硬条件状态仅 68 项一致：市场管培标题缺失使 tech/ops 的 `exclusions` 从人工 `match` 变成实际 `unknown`，总判断恰好没有变化。
+- 另将冻结人工字段写入独立岗位库，5 份记录均通过 `jd validate`；再跑 10 组匹配，70 项检查状态全部符合人工期望。该重放用于区分解析输入与匹配行为，不改变原始实际结果。
+
+**遗留与下一步**
+
+- 交由规划者逐份核对原文、期望与出处，再由 M2-3 扩充 24 个去重后的缺失技能词，并处理管培标题、同一行工作/面试地点区分、“全年13薪”。已正确的否定、优先、未知及范围下限也需保留。
+- 匹配验收不能只核对总判断，还需看各项状态和引用字段/出处。本批为人工编写的虚构样例，不替代 M1-6 的真实 JD 自用验收；校招的实习条件是否应视为“不适用”留待后续契约讨论。
+
+---
+
+## 2026-10-27 · 规划：总体规划、计划整理、分工与审核（规划会话）
+
+**完成**
+
+- 中文首页：根目录 `README.md` 开头改为中文项目介绍，上游英文原文收进折叠块（PR #4）。
+- 总体规划 `master-plan.md`（PR #6、#7、#10、#14）：最终目的 O1–O6、M1–M8 的目标与完成标准、待决事项 D1–D6、分工。计划整理为两层：总体规划管目标，`roadmap.md` 是唯一的任务清单，`tasks.md` 并入路线图后删除。
+- 分工：用户做决定、合并或授权合并、自用验收；规划者维护计划、审核 PR；执行者（Claude Code）实现；验证者（Codex，独立 worktree）实测工作流、独立编写样例和期望结果。
+- 审核并合并 #9、#11、#12、#13、#15、#16、#17。每次审核都在合并到最新 master 的副本上跑全量测试，并独立复核关键结论，结论写在各 PR 的评论里。
+
+**决策**（用户确认）
+
+- 方向：自用优先、兼顾作品集；以后开源给其他同学；岗位方向可配置、不限专业；不赶时间，按里程碑推进。
+- D6：联系方式留在 `profile.json`，命令输出默认隐去。
+
+**审核中发现的问题**
+
+- #12：地点判断在"JD 和档案都没写能否远程"时判成了冲突，违反"没写就判未知"的原则。已修复并补测试。
+- #13：README 的路径被转义成了控制字符 0x06、0x07。已修复，并新增测试，在 CN 文档和代码里禁止出现 C0 控制字符。
+- V1（Codex 第二轮）：和执行者写的示例档案相比，两处填写约定不清（项目名放哪个字段、只在经历里出现的技能算不算），转为 H7，已在 #17 解决。
+- #13、#15、#17 连续在工作记录上和 master 冲突，都由规划者解决（两边条目都保留、按时间倒序）。新增约定：请求审核前先合并最新 master。
+
+**下一步**：见路线图的"看板：下次工作"。
+
+---
+
 ## 2026-10-27 · M2-3（代码部分）：技能词表外置、按方向分组
 
 **完成**
@@ -28,6 +79,59 @@
 - M2-3 的样例部分：V2 合并后，把 `tests/fixtures/cn/jd-m2-3/` 的 5 份样例并进 `tests/fixtures/cn/jd/` 并接入测试，届时按 V2 记录的识别差距调整词表。
 
 **下一步**：等 V2；M2-4 的任务单由规划者编写。
+
+---
+
+## 2026-10-27 · H7：Profile 填写约定（项目名称、技能收录范围）
+
+**完成**
+
+- `experience[]` 新增 `name` 字段：项目、竞赛、科研课题的名称放 `name`，单位放 `org`，身份或职位放 `role`，材料没写的留 `null`，不挪用其他字段。
+- 技能收录范围：技能栏里的按原文写等级；只在经历描述里出现的技术也收，`level` 为 `null`，`used_in` 指向那段经历；同一技能只记一条。
+- `profile.md`（示例、字段说明、"填写约定"、§8 决策记录）、`profile-setup.md`（起草规则）、`jobsearch_cn/profile.py`（校验 `name`）、两份示例档案同步修改。
+- 测试：缺少 `name` 报错；示例档案遵守约定（项目类经历都有 `name`，`role` 里没有"个人项目"之类的类别词，没有等级的技能都指向经历）；来源事实检查覆盖 `name`、`org`、`role`。
+
+**决策**
+
+- 新增 `name`，而不是规定"项目名放 `role`"：每个字段只表达一件事，M3 生成简历时不用猜。
+- Profile 还没随任何版本发布，直接加入 v1，不升版本号。已有的本地档案需要给每段经历补上 `name`，`profile validate` 会逐条提示（已用 Codex 的 `data/m1-5` 档案只读验证过提示内容）。
+
+**验证**
+
+- 本地全量测试、`security_guards`、`lint_skills` 通过；变异测试：去掉 `name` 的必填检查后有 9 个测试失败。
+
+**下一步**：M2-3 词表外置（代码部分）。
+
+---
+
+## 2026-10-27 · M1-5：Codex 端实测（第二轮，JD 补全与样例建档通过，PR #15）
+
+**完成与决策**
+
+- 在独立工作树 `D:\06_Projects\ai-job-search-cn-codex`、分支 `codex/m1-5-round2` 执行。会话最初仍绑定原目录；文件系统授权生效后，所有实测命令和写入均显式指定独立工作树。通过 `AGENTS.md` 找到共用的 `jd-import.md`、`profile-setup.md`，使用 `conda run --no-capture-output -n ai-job-search-cn python ...`（Python 3.12.15）。
+- 用 `--data-dir data/m1-5` 导入 `tests/fixtures/cn/jd/shixiseng_intern.txt`，平台为 `shixiseng`：首次 `created`，岗位 ID 为 `job_d3e712c997b0`，`guard.verdict` 为 `clean`，无警告。
+- 完成 `jd-import.md` 第 3 步：先 `jd show`，将规则留空的 `requirements.education` 补为 `{"min":"bachelor","preferred":null}`，出处为 `{"text":"上海 | 本科","method":"agent"}`；原文片段逐字存在于 `raw_text`。整条记录写到 `data/m1-5/inbox/job_d3e712c997b0.json`，`jd validate` 通过，`jd save --data-dir data/m1-5` 返回 `updated`；`id`、`source`、`status`、`guard`、`raw_text` 均保持不变。
+- 再次解析并保存同一 JD 返回 `unchanged`，`jd show` 的记录与补全后的记录完全一致，`jd list` 和本地岗位文件均为 1 条。岗位为上海的数据分析实习生，150–200 元/天、2027 届、每周 5 天、至少 3 个月、本科、可转正；公司、远程条件、发布日期和来源链接仍未知。
+- 将 `tests/fixtures/cn/profile/tech/sources/resume.txt` 原样复制到 `data/m1-5/profile/sources/resume.txt`，按该材料提取 `profile.json` 并写 `notes.md`；没有复制示例 `profile.json` 中额外的偏好。档案包含 2 段教育、1 段实习、1 个项目、6 项技能，以及奖项、证书、语言各 1 条；所有条目的 `source` 都为 `resume.txt`，成果照录原文，技能等级只采用明确的“熟练 / 熟悉 / 了解”。
+- 本轮按用户指定的脱敏样例及继续执行授权建立测试档案。毕业年月取硕士教育结束年月；材料未写的到岗安排、城市、远程与异地意愿、求职方向、薪资和排除项保留 `null` / `[]`，未写成 `source: user`。Docker、PyTorch 没有具体经历依据，`used_in` 留空；项目角色和证书日期也留空。
+
+**验证**
+
+- `python -m jobsearch_cn profile validate --data-dir data/m1-5`：`{"valid":true,"errors":[],"warnings":[]}`；`profile show --data-dir data/m1-5` 的非空联系方式全部为 `***`；复制后的简历与夹具逐字节一致。
+- 初次业务操作基于 `eec5123`；检查前将测试分支快进到 `origin/master@ee3a0ec`（合入 M2-2），在该版本重新校验已保存的 JD、档案，均通过。
+- `python tools/lint_skills.py`：通过（11 skills、12 commands）；`python tools/security_guards.py`：通过；按 `CONTRIBUTING.md` 补跑 `python tools/check_framework_version.py`，通过。
+- `python -m unittest discover -s tests -t .`：共 1005 项，996 项通过、9 项按预期跳过，0 失败、0 错误，耗时 100.573 秒。
+- `git check-ignore -v` 确认岗位、补全 JSON、档案、笔记、简历原件及日志都位于已忽略的 `data/`、`logs/` 下。本 PR 只提交 CN 工作记录和路线图；详细 CLI 输出、检查结果和运行元数据留在本机 `logs/m1-5-round2/`。
+
+**ADR-7 的两个问题**
+
+1. Codex 能否通过 `AGENTS.md` 找到工作流：**能**。本轮从同一入口完成了 JD 补全、保存、去重及样例建档、校验，两个工作流共用原有文档，无需新增门户技能。
+2. Claude Code 是否读取 `AGENTS.md`：沿用[第一轮执行者记录（PR #13）](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/13)的观察：当时的 Claude Code 会话未自动读取，需主动打开；其业务入口为 `cn-jd-import`、`cn-setup` 两个薄技能。本轮核对了薄技能指向共用文档，**没有重新启动 Claude Code 验证其自动加载行为**。
+
+**遗留与下一步**
+
+- M1-5 的第二轮样例业务验收通过，路线图标记完成。本轮没有验证真实个人档案的逐节确认和偏好问答，不能替代 M2-1 的真实简历自用验收。
+- M1-6 仍由用户导入至少 5 份真实 JD 后验收；M1-7 的发布 tag 等其通过后再处理。第一轮历史记录仍见 PR #13。
 
 ---
 

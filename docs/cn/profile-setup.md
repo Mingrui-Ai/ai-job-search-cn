@@ -16,6 +16,8 @@
 1. **收集材料。** 请用户把简历（PDF、DOCX、TXT 均可）、成绩单、获奖证明等放进 `data/profile/sources/`。没有材料也可以，全程问答即可，此时 `source` 都写 `user`。
 2. **起草。** 读取 `sources/` 中的材料（已有档案时先读 `data/profile/profile.json` 和 `notes.md`），按 [profile.md §3](profile.md#3-profilejson-字段) 起草：
    - 经历的 `id` 用 `exp-1`、`proj-1` 这类短名，技能的 `used_in` 指向这些 `id`；
+   - 经历的 `name`（项目、竞赛、课题的名称）、`org`（单位）、`role`（身份或职位）按 [profile.md 的填写约定](profile.md#3-profilejson-字段) 分开填，材料没写的留 `null`，不要挪用别的字段；
+   - 技能既收技能栏里的，也收只在经历描述里出现的技术：后者 `level` 留 `null`，`used_in` 指向那段经历；同一技能只记一条；
    - 技能等级只在材料或用户明确说明时填写，否则留 `null`；
    - 日期写成 `YYYY-MM`。
 3. **逐节确认。** 依次展示：教育 → 经历 → 技能 → 奖项、证书、语言 → 联系方式。每节等用户确认后再进入下一节。

@@ -1,0 +1,196 @@
+{
+  "fixture": "ats_ui_design_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "ats",
+  "method": "agent",
+  "basis": "独立人工语义阅读；在首次执行 jd parse 和 match filter 之前写定。字段路径来自 Job Schema v1，匹配口径来自 docs/cn/match.md，不使用规则源码或既有 JD 样例。",
+  "fields": {
+    "title": {
+      "value": "UI设计实习生",
+      "evidence": [
+        "UI设计实习生"
+      ]
+    },
+    "company": {
+      "value": "示例映格数字科技有限公司",
+      "evidence": [
+        "示例映格数字科技有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "杭州"
+      ],
+      "evidence": [
+        "工作地点：杭州；支持全程远程实习。"
+      ],
+      "note": "北京只用于面试。"
+    },
+    "remote": {
+      "value": true,
+      "evidence": [
+        "支持全程远程实习"
+      ]
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "UI设计实习生"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": null,
+        "max": null,
+        "unit": null,
+        "months": null,
+        "negotiable": true
+      },
+      "evidence": [
+        "薪酬：面议"
+      ]
+    },
+    "requirements.graduation": {
+      "value": null,
+      "evidence": [],
+      "note": "未写毕业届别；“第十二届设计周”是活动届次。"
+    },
+    "requirements.days_per_week": {
+      "value": null,
+      "evidence": [],
+      "note": "未写每周最低到岗天数；“每周五例会”只说明星期五开会。"
+    },
+    "requirements.min_months": {
+      "value": null,
+      "evidence": [],
+      "note": "项目周期不是最短实习时长，后者写明另行协商。"
+    },
+    "requirements.education": {
+      "value": {
+        "min": null,
+        "preferred": "master"
+      },
+      "evidence": [
+        "学历：硕士及以上学历优先，不设最低学历门槛。"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "Figma",
+        "Sketch",
+        "Photoshop",
+        "交互设计",
+        "视觉设计",
+        "设计规范"
+      ],
+      "evidence": [
+        "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力。"
+      ]
+    },
+    "return_offer": {
+      "value": null,
+      "evidence": [],
+      "note": "未写是否有转正机会。"
+    },
+    "published_at": {
+      "value": null,
+      "evidence": [],
+      "note": "未写发布日期。"
+    },
+    "deadline": {
+      "value": null,
+      "evidence": [],
+      "note": "未写截止日期。"
+    }
+  },
+  "traps": [
+    {
+      "text": "第十二届设计周",
+      "interpretation": "活动届次，不是毕业年。"
+    },
+    {
+      "text": "硕士及以上学历优先，不设最低学历门槛。",
+      "interpretation": "education.min=null，preferred=master。"
+    },
+    {
+      "text": "每周五例会",
+      "interpretation": "没有给出每周最低到岗天数，应保持null。"
+    },
+    {
+      "text": "项目周期6个月，具体实习时长另行协商。",
+      "interpretation": "没有给出最短实习时长，应保持null。"
+    },
+    {
+      "text": "面试地点：北京，也可视频面试。",
+      "interpretation": "工作城市仍只有杭州；远程可用来自办公条款而非视频面试。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "needs_check",
+      "checks": {
+        "graduation": {
+          "result": "unknown",
+          "reason": "JD未写毕业届别；活动的第十二届不提供毕业年。"
+        },
+        "education": {
+          "result": "unknown",
+          "reason": "JD只给硕士优先，没有最低学历；按match文档只看education.min。"
+        },
+        "days_per_week": {
+          "result": "unknown",
+          "reason": "JD未写每周最低到岗天数；周五例会不能推成5天。"
+        },
+        "min_months": {
+          "result": "unknown",
+          "reason": "JD实习时长另行协商；项目6个月不是最短实习期。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "杭州不在tech城市中，但JD支持全程远程且tech接受远程。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习在tech目标类型中。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题没有“外包”“销售”；公司、城市无排除项。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "unknown",
+          "reason": "JD未写毕业届别。"
+        },
+        "education": {
+          "result": "unknown",
+          "reason": "JD只给优先学历，未给最低要求；本科不能被硕士优先淘汰。"
+        },
+        "days_per_week": {
+          "result": "unknown",
+          "reason": "JD未写每周最低到岗天数。"
+        },
+        "min_months": {
+          "result": "unknown",
+          "reason": "JD未写最短实习时长。"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "杭州不在ops的上海范围内；ops明确不搬家且不接受远程，不能因JD支持远程就判符合。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习在ops目标类型中。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题没有“电话销售”；公司、城市无排除项。"
+        }
+      }
+    }
+  }
+}

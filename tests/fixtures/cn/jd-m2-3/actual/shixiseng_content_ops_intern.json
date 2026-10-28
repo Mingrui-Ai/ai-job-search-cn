@@ -1,0 +1,1056 @@
+{
+  "base_commit": "34d254d72bc70795590918af3ae15db25b93c0dd",
+  "oracle_frozen_base_commit": "a3986d3d6d75d9dceec0110ace82f75017b4c192",
+  "started_at_utc": "2026-10-27T10:07:49.566265+00:00",
+  "oracle_sha256": "96610ff4b22ebc045185113a9eac363e426863e8d92307b6ee84ccd4d35930b3",
+  "parse": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "tests/fixtures/cn/jd-m2-3/shixiseng_content_ops_intern.txt",
+      "--site",
+      "shixiseng",
+      "--save",
+      "--data-dir",
+      "data/v2-m2-3/comparison-34d254d/parsed"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_bb04d526d55e",
+          "source": {
+            "type": "file",
+            "site": "shixiseng",
+            "url": null,
+            "imported_at": "2026-10-27T18:07:49+08:00"
+          },
+          "title": "新媒体内容运营实习生",
+          "company": "示例青禾文化有限公司",
+          "cities": [
+            "上海"
+          ],
+          "remote": false,
+          "employment_type": "internship",
+          "salary": {
+            "min": 150,
+            "max": 180,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": false
+            },
+            "days_per_week": 3,
+            "min_months": 3,
+            "education": {
+              "min": "bachelor",
+              "preferred": null
+            },
+            "skills": []
+          },
+          "return_offer": false,
+          "published_at": null,
+          "deadline": "2026-11-30",
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "新媒体内容运营实习生",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例青禾文化有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作地点：上海徐汇区",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "新媒体内容运营实习生",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "150-180元/天",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "2027届优先",
+              "method": "rule"
+            },
+            "requirements.days_per_week": {
+              "text": "每周至少到岗3天",
+              "method": "rule"
+            },
+            "requirements.min_months": {
+              "text": "实习至少3个月",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "本科及以上",
+              "method": "rule"
+            },
+            "return_offer": {
+              "text": "不提供转正",
+              "method": "rule"
+            },
+            "deadline": {
+              "text": "截止：2026-11-30",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "新媒体内容运营实习生\n示例青禾文化有限公司\n150-180元/天 | 上海 | 本科 | 实习\n\n实习福利\n导师带教、选题讨论、作品复盘\n\n职位描述\n负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据。\n任职资格：本科及以上在读；2027届优先，其他届别也可投递。\n会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据。\n具备内容策划、文案写作、数据复盘能力。\n每周至少到岗3天，连续实习至少3个月。\n\n工作地点：上海徐汇区\n现场到岗，不支持远程。\n日常协作：每周五例会复盘选题，会议时段提前通知。\n沟通安排：筛选结果3-5个工作日内回复。\n用工说明：非外包岗位，由本公司直接带教。\n转正说明：本岗位不提供转正机会。\n申请截止：2026-11-30"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_bb04d526d55e",
+          "title": "新媒体内容运营实习生",
+          "company": "示例青禾文化有限公司",
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ]
+    },
+    "stderr": ""
+  },
+  "field_comparison": {
+    "title": {
+      "expected": "新媒体内容运营实习生",
+      "actual": "新媒体内容运营实习生",
+      "conclusion": "一致"
+    },
+    "company": {
+      "expected": "示例青禾文化有限公司",
+      "actual": "示例青禾文化有限公司",
+      "conclusion": "一致"
+    },
+    "cities": {
+      "expected": [
+        "上海"
+      ],
+      "actual": [
+        "上海"
+      ],
+      "conclusion": "一致"
+    },
+    "remote": {
+      "expected": false,
+      "actual": false,
+      "conclusion": "一致"
+    },
+    "employment_type": {
+      "expected": "internship",
+      "actual": "internship",
+      "conclusion": "一致"
+    },
+    "salary": {
+      "expected": {
+        "min": 150,
+        "max": 180,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 150,
+        "max": 180,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "conclusion": "一致"
+    },
+    "requirements.graduation": {
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": false
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": false
+      },
+      "conclusion": "一致"
+    },
+    "requirements.days_per_week": {
+      "expected": 3,
+      "actual": 3,
+      "conclusion": "一致"
+    },
+    "requirements.min_months": {
+      "expected": 3,
+      "actual": 3,
+      "conclusion": "一致"
+    },
+    "requirements.education": {
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "conclusion": "一致"
+    },
+    "requirements.skills": {
+      "expected": [
+        "秀米",
+        "剪映",
+        "Photoshop",
+        "Excel",
+        "内容策划",
+        "文案写作",
+        "数据复盘"
+      ],
+      "actual": [],
+      "conclusion": "规则漏读"
+    },
+    "return_offer": {
+      "expected": false,
+      "actual": false,
+      "conclusion": "一致"
+    },
+    "published_at": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    },
+    "deadline": {
+      "expected": "2026-11-30",
+      "actual": "2026-11-30",
+      "conclusion": "一致"
+    }
+  },
+  "parsed_match": {
+    "tech": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_bb04d526d55e",
+        "--profile",
+        "tests/fixtures/cn/profile/tech/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/parsed"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_bb04d526d55e",
+        "title": "新媒体内容运营实习生",
+        "company": "示例青禾文化有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": false
+                },
+                "evidence": "2027届优先"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": "每周至少到岗3天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": "实习至少3个月"
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海徐汇区"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "新媒体内容运营实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "新媒体内容运营实习生",
+                "evidence": "新媒体内容运营实习生"
+              },
+              "company": {
+                "value": "示例青禾文化有限公司",
+                "evidence": "示例青禾文化有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海徐汇区"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    "ops": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_bb04d526d55e",
+        "--profile",
+        "tests/fixtures/cn/profile/ops/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/parsed"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_bb04d526d55e",
+        "title": "新媒体内容运营实习生",
+        "company": "示例青禾文化有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": false
+                },
+                "evidence": "2027届优先"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": "每周至少到岗3天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": "实习至少3个月"
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海徐汇区"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "新媒体内容运营实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "新媒体内容运营实习生",
+                "evidence": "新媒体内容运营实习生"
+              },
+              "company": {
+                "value": "示例青禾文化有限公司",
+                "evidence": "示例青禾文化有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海徐汇区"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    }
+  },
+  "oracle_validate": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "validate",
+      "data/v2-m2-3/comparison-34d254d/oracle-inbox/shixiseng_content_ops_intern.json"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "valid": true,
+      "errors": []
+    },
+    "stderr": ""
+  },
+  "oracle_save": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "save",
+      "data/v2-m2-3/comparison-34d254d/oracle-inbox/shixiseng_content_ops_intern.json",
+      "--data-dir",
+      "data/v2-m2-3/comparison-34d254d/oracle"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_bb04d526d55e",
+          "title": "新媒体内容运营实习生",
+          "company": "示例青禾文化有限公司",
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    },
+    "stderr": ""
+  },
+  "oracle_match": {
+    "tech": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_bb04d526d55e",
+        "--profile",
+        "tests/fixtures/cn/profile/tech/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/oracle"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_bb04d526d55e",
+        "title": "新媒体内容运营实习生",
+        "company": "示例青禾文化有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": false
+                },
+                "evidence": [
+                  "2027届优先，其他届别也可投递。"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上在读"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": [
+                  "每周至少到岗3天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": [
+                  "连续实习至少3个月"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海徐汇区"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "现场到岗，不支持远程。"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "新媒体内容运营实习生"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "新媒体内容运营实习生",
+                "evidence": [
+                  "新媒体内容运营实习生"
+                ]
+              },
+              "company": {
+                "value": "示例青禾文化有限公司",
+                "evidence": [
+                  "示例青禾文化有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海徐汇区"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    "ops": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_bb04d526d55e",
+        "--profile",
+        "tests/fixtures/cn/profile/ops/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/oracle"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_bb04d526d55e",
+        "title": "新媒体内容运营实习生",
+        "company": "示例青禾文化有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": false
+                },
+                "evidence": [
+                  "2027届优先，其他届别也可投递。"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上在读"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": [
+                  "每周至少到岗3天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": [
+                  "连续实习至少3个月"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海徐汇区"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "现场到岗，不支持远程。"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "新媒体内容运营实习生"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "新媒体内容运营实习生",
+                "evidence": [
+                  "新媒体内容运营实习生"
+                ]
+              },
+              "company": {
+                "value": "示例青禾文化有限公司",
+                "evidence": [
+                  "示例青禾文化有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海徐汇区"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    }
+  },
+  "finished_at_utc": "2026-10-27T10:07:50.534132+00:00"
+}
