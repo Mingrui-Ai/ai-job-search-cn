@@ -17,7 +17,21 @@ from jobsearch_cn import resume_extract
 
 REPO = Path(__file__).resolve().parent.parent
 WORD_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-PDF_AVAILABLE = importlib.util.find_spec("pypdf") is not None or shutil.which("pdftotext") is not None
+POPPLER_AVAILABLE = resume_extract._poppler_available()
+PDF_AVAILABLE = importlib.util.find_spec("pypdf") is not None or POPPLER_AVAILABLE
+
+
+def has_xpdf():
+    if not shutil.which("pdftotext"):
+        return False
+    try:
+        result = subprocess.run(["pdftotext", "-v"], capture_output=True, timeout=10)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return b"glyph & cog" in (result.stdout + result.stderr).lower()
+
+
+XPDF_AVAILABLE = has_xpdf()
 
 
 def make_docx(path, body, namespace=WORD_NS):
@@ -154,7 +168,7 @@ class ResumeExtract(unittest.TestCase):
         make_docx(path, "<w:p/>")
         self.assert_failure(self.cli(path), "没有可提取的文字")
 
-    @unittest.skipUnless(PDF_AVAILABLE, "PDF extraction needs pypdf or pdftotext")
+    @unittest.skipUnless(PDF_AVAILABLE, "PDF extraction needs pypdf or Poppler pdftotext (xpdf is unsupported)")
     def test_synthetic_pdf_chinese_paragraphs_and_table_without_writes(self):
         path = self.sources / "合成 简历.pdf"
         make_pdf(path)
@@ -183,12 +197,21 @@ class ResumeExtract(unittest.TestCase):
         self.assert_failure(proc, "请让 Agent 直接读取 PDF，或者安装 pypdf")
         self.assertEqual(self.snapshot(), before)
 
-    @unittest.skipUnless(shutil.which("pdftotext"), "Poppler fallback requires pdftotext")
+    @unittest.skipUnless(POPPLER_AVAILABLE, "Poppler fallback requires Poppler pdftotext, not xpdf")
     def test_pdf_falls_back_to_pdftotext_when_pypdf_is_absent(self):
         path = self.sources / "fallback.pdf"
         make_pdf(path)
         payload = self.assert_success(self.cli(path, PYTHONPATH=self.block_pypdf()))
         self.assertIn("合成简历", payload["text"])
+
+    @unittest.skipUnless(XPDF_AVAILABLE, "requires an installed xpdf pdftotext")
+    def test_xpdf_only_environment_is_an_actionable_error_not_garbled_text(self):
+        path = self.sources / "xpdf-only.pdf"
+        make_pdf(path)
+        pythonpath = self.block_pypdf()
+        before = self.snapshot()
+        self.assert_failure(self.cli(path, PYTHONPATH=pythonpath), "请让 Agent 直接读取 PDF，或者安装 pypdf")
+        self.assertEqual(self.snapshot(), before)
 
     def test_backend_failure_never_echoes_resume_text_in_diagnostics(self):
         path = self.sources / "error.pdf"
@@ -213,6 +236,62 @@ class ResumeExtract(unittest.TestCase):
         with patch.object(resume_extract.subprocess, "run", side_effect=subprocess.TimeoutExpired("python", 60)):
             with self.assertRaisesRegex(resume_extract.ExtractionError, "请让 Agent 直接读取 PDF"):
                 resume_extract.extract_text(path)
+
+    def test_pdftotext_version_detection_does_not_depend_on_installed_backend(self):
+        versions = [
+            (0, b"pdftotext version 4.00\nCopyright Glyph & Cog, LLC", b"", False),
+            (0, b"", b"pdftotext version 4.00\nCopyright Glyph & Cog, LLC", False),
+            (0, b"", b"pdftotext version 24.02.0\nCopyright The Poppler Developers", True),
+            (0, b"Poppler", b"Glyph & Cog", False),
+            (1, b"Poppler", b"failed", False),
+            (0, b"unknown implementation", b"", False),
+        ]
+        for code, stdout, stderr, usable in versions:
+            with self.subTest(stdout=stdout, stderr=stderr):
+                result = subprocess.CompletedProcess([], code, stdout, stderr)
+                with patch.object(resume_extract.subprocess, "run", return_value=result) as run:
+                    self.assertEqual(resume_extract._poppler_available(), usable)
+                    self.assertEqual(run.call_args.args[0], ["pdftotext", "-v"])
+        with patch.object(resume_extract.subprocess, "run", side_effect=FileNotFoundError):
+            self.assertFalse(resume_extract._poppler_available())
+
+    def test_pdf_bridge_disables_xpdf_and_keeps_pypdf_available(self):
+        path = self.sources / "xpdf.pdf"
+        make_pdf(path)
+        version = subprocess.CompletedProcess([], 0, b"", b"pdftotext version 4.00\nGlyph & Cog")
+        for success in (False, True):
+            with self.subTest(pypdf_success=success):
+                result = subprocess.CompletedProcess([], 0 if success else 1, "合成简历".encode() if success else b"", b"")
+                with patch.object(resume_extract.subprocess, "run", side_effect=[version, result]) as run:
+                    if success:
+                        self.assertEqual(resume_extract.extract_text(path), "合成简历")
+                    else:
+                        with self.assertRaisesRegex(resume_extract.ExtractionError, "请让 Agent 直接读取 PDF，或者安装 pypdf"):
+                            resume_extract.extract_text(path)
+                    self.assertEqual(run.call_args.args[0][-1], "0", "xpdf must never be an enabled fallback")
+
+    def test_pdf_rejects_replacement_and_control_noise_for_either_backend(self):
+        path = self.sources / "damaged.pdf"
+        make_pdf(path)
+        damaged = ["简历\ufffd\ufffd\ufffd", "简历\x00\x01\x02", "A" * 5000 + "\ufffd" * 20,
+                   "中文" * 5000 + "\x7f" * 20]
+        for poppler in (False, True):
+            for text in damaged:
+                with self.subTest(poppler=poppler, text=text[:12]):
+                    result = subprocess.CompletedProcess([], 0, text.encode("utf-8"), b"")
+                    with patch.object(resume_extract, "_poppler_available", return_value=poppler), \
+                            patch.object(resume_extract.subprocess, "run", return_value=result):
+                        with self.assertRaisesRegex(resume_extract.ExtractionError, "大量替换字符或控制字符"):
+                            resume_extract.extract_text(path)
+
+    def test_pdf_allows_layout_whitespace_and_an_isolated_missing_glyph(self):
+        path = self.sources / "layout.pdf"
+        make_pdf(path)
+        text = ("合成简历\t项目经历\r\n示例大学\f" * 10) + "\ufffd"
+        result = subprocess.CompletedProcess([], 0, text.encode("utf-8"), b"")
+        with patch.object(resume_extract, "_poppler_available", return_value=True), \
+                patch.object(resume_extract.subprocess, "run", return_value=result):
+            self.assertEqual(resume_extract.extract_text(path), text)
 
 
 if __name__ == "__main__":
