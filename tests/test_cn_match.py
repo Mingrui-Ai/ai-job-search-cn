@@ -246,6 +246,12 @@ G, E, D, M, L, T, X = match.CHECKS
 #   ops   experienced 社招 -> conflict; 上海 matches
 #   ops   shixiseng  5天 > 3 -> conflict; 3个月 = 3 and 上海 match
 #   ops   official   硕士, 6个月, 杭州 (remote offered, ops refuses remote) -> conflicts
+#   tech  boss_paste_backend  "5天/周" > 4 -> conflict; 北京, JD silent on remote, no relocation -> unknown
+#   tech  boss_paste_ops      上海, JD silent on remote -> unknown; 4天 = 4 and 3个月 < 6 match
+#   tech  boss_fullpage       no work city read (the address sits under a bare "工作地址" heading) -> unknown
+#   ops   boss_paste_backend  5天 > 3, 4个月 > 3, 北京 with no remote or move -> three conflicts
+#   ops   boss_paste_ops      4天 > 3 -> conflict; 3个月 = 3 and 上海 match
+#   ops   boss_fullpage       4天 > 3, 6个月 > 3 -> conflicts; no work city -> unknown
 SAMPLE_TABLE = {
     ("boss_intern.txt", "tech"): ("eligible", {}),
     ("nowcoder_campus.txt", "tech"): ("ineligible", {D: UNKNOWN, M: UNKNOWN, L: UNKNOWN, T: CONFLICT}),
@@ -257,6 +263,12 @@ SAMPLE_TABLE = {
     ("experienced_hire.txt", "ops"): ("ineligible", {G: UNKNOWN, D: UNKNOWN, M: UNKNOWN, T: CONFLICT}),
     ("shixiseng_intern.txt", "ops"): ("ineligible", {E: UNKNOWN, D: CONFLICT}),
     ("official_site.txt", "ops"): ("ineligible", {G: UNKNOWN, E: CONFLICT, M: CONFLICT, L: CONFLICT}),
+    ("boss_paste_backend_intern.txt", "tech"): ("ineligible", {D: CONFLICT, L: UNKNOWN}),
+    ("boss_paste_ops_intern.txt", "tech"): ("needs_check", {L: UNKNOWN}),
+    ("boss_fullpage_data_intern.txt", "tech"): ("needs_check", {L: UNKNOWN}),
+    ("boss_paste_backend_intern.txt", "ops"): ("ineligible", {D: CONFLICT, M: CONFLICT, L: CONFLICT}),
+    ("boss_paste_ops_intern.txt", "ops"): ("ineligible", {D: CONFLICT}),
+    ("boss_fullpage_data_intern.txt", "ops"): ("ineligible", {D: CONFLICT, M: CONFLICT, L: UNKNOWN}),
 }
 
 

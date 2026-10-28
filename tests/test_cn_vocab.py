@@ -19,7 +19,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from jobsearch_cn import jd_parser, schema, store, vocab  # noqa: E402
 
-GROUPS = ("tech", "data", "product", "ops", "design", "market", "general")
+GROUPS = ("tech", "data", "product", "ops", "design", "market", "finance", "hr", "general")
 
 
 class Builtin(unittest.TestCase):
@@ -29,7 +29,7 @@ class Builtin(unittest.TestCase):
     def test_the_groups_with_chinese_labels(self):
         self.assertEqual(tuple(self.vocabulary.groups), GROUPS)
         labels = [g["label"] for g in self.vocabulary.groups.values()]
-        self.assertEqual(labels, ["技术", "数据", "产品", "运营", "设计", "市场", "通用"])
+        self.assertEqual(labels, ["技术", "数据", "产品", "运营", "设计", "市场", "财务", "人力资源", "通用"])
         for key in GROUPS[:5]:
             self.assertGreaterEqual(len(self.vocabulary.groups[key]["terms"]), 5, key)
         # market and general (office software every direction uses) start small.
@@ -55,6 +55,11 @@ class Builtin(unittest.TestCase):
         self.assertEqual(self.vocabulary.group_of("Figma"), "design")
         self.assertEqual(self.vocabulary.group_of("PRD"), "product")
         self.assertEqual(self.vocabulary.group_of("商务沟通"), "market")
+        # From the V4 samples (H9): finance and HR JDs count as their own directions.
+        self.assertEqual(self.vocabulary.group_of("财务分析"), "finance")
+        self.assertEqual(self.vocabulary.group_of("招聘流程"), "hr")
+        self.assertEqual(self.vocabulary.group_of("CRM"), "market")
+        self.assertEqual(self.vocabulary.group_of("数据清洗"), "data")
         self.assertIsNone(self.vocabulary.group_of("打篮球"))
 
     def test_content_forms_are_not_skills_on_their_own(self):
