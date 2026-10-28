@@ -1,0 +1,24 @@
+{
+  "base_commit": "a3986d3d6d75d9dceec0110ace82f75017b4c192",
+  "branch": "codex/v2-m2-3-samples",
+  "frozen_at_utc": "2026-10-27T09:53:08.575979+00:00",
+  "policy": "在首次运行任何样例的 jd parse 或 match filter 之前冻结全部5份JD、5份字段期望及10组人工匹配判断；未查阅解析规则、匹配规则源码或现有JD测试。后续实测只写README和actual子目录，不回填期望值。",
+  "oracle_files_sha256": {
+    "ats_ui_design_intern.txt": "6cd4eeff1f3374a6e345a0ea9bebbcba3ff9db3f302089797937b9d39e32dd59",
+    "boss_ai_product_intern.txt": "72d442027042c88f29d5e614bfc3f1a13284f2a0d9695605e412599387fa483e",
+    "nowcoder_test_dev_intern.txt": "22717a1c11cf8670f5c4117aa65727a04da45751c9921c0c9287e5710c24b7e8",
+    "official_marketing_campus.txt": "db3403da4334ea27ab50e784e218257ccd565cdb3ae5cdcc28b57de948b34964",
+    "shixiseng_content_ops_intern.txt": "55d515034b676fc55aea04dc99666f4f7928bd4e879ff959298670f369843ee3",
+    "ats_ui_design_intern.expected.json": "6a76ab64fa0b054d430954bbefc7b4aba82aef089d3e0e51ccc6e9019974c8f8",
+    "boss_ai_product_intern.expected.json": "47df4bff503321790fcf1c5a5b7808bbf75ea565376193e659831fca4b25fb08",
+    "nowcoder_test_dev_intern.expected.json": "e5299ebd927ff3a8ac5313f744f316082c1307d08c2dd389873c2de1eed06180",
+    "official_marketing_campus.expected.json": "a01f582cb8d6dea3adf6cfa32c2f5807d4e8d61ced15e02199d015b0e1813561",
+    "shixiseng_content_ops_intern.expected.json": "96610ff4b22ebc045185113a9eac363e426863e8d92307b6ee84ccd4d35930b3"
+  },
+  "contract_and_profile_sha256": {
+    "docs/cn/job-schema.md": "dcc3a1753a38aabfd19ef79a44c7f022cf3ac2bbb0430aa9ba52cb0b8dcba877",
+    "docs/cn/match.md": "6d6ec0a3417ebaf4012b0e5cb38969d9216a679b714b7aa4851824d5d95fa5ca",
+    "tests/fixtures/cn/profile/tech/profile.json": "35b51c4add8ed3e908d89cdf8bf09e98fab99f107da3b5d26d03794785fdaa6f",
+    "tests/fixtures/cn/profile/ops/profile.json": "d212b699110b7831a630d63cfbc0e23294e29581770e61688ac537a8b0d87027"
+  }
+}

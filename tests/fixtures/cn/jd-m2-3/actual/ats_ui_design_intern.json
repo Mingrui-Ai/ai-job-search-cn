@@ -1,0 +1,988 @@
+{
+  "base_commit": "34d254d72bc70795590918af3ae15db25b93c0dd",
+  "oracle_frozen_base_commit": "a3986d3d6d75d9dceec0110ace82f75017b4c192",
+  "started_at_utc": "2026-10-27T10:07:45.644200+00:00",
+  "oracle_sha256": "6a76ab64fa0b054d430954bbefc7b4aba82aef089d3e0e51ccc6e9019974c8f8",
+  "parse": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "tests/fixtures/cn/jd-m2-3/ats_ui_design_intern.txt",
+      "--site",
+      "ats",
+      "--save",
+      "--data-dir",
+      "data/v2-m2-3/comparison-34d254d/parsed"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_11779bee8024",
+          "source": {
+            "type": "file",
+            "site": "ats",
+            "url": null,
+            "imported_at": "2026-10-27T18:07:45+08:00"
+          },
+          "title": "UI设计实习生",
+          "company": "示例映格数字科技有限公司",
+          "cities": [
+            "杭州"
+          ],
+          "remote": true,
+          "employment_type": "internship",
+          "salary": {
+            "min": null,
+            "max": null,
+            "unit": null,
+            "months": null,
+            "negotiable": true
+          },
+          "requirements": {
+            "graduation": null,
+            "days_per_week": null,
+            "min_months": null,
+            "education": {
+              "min": null,
+              "preferred": "master"
+            },
+            "skills": []
+          },
+          "return_offer": null,
+          "published_at": null,
+          "deadline": null,
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "UI设计实习生",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例映格数字科技有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作地点：杭州；支持全程远程实习。",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "远程实习",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "UI设计实习生",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "面议",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "硕士及以上学历优先",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "UI设计实习生\n设计 / 日常实习 / 杭州\n示例映格数字科技有限公司\n\n职位描述\n协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查。\n参与第十二届设计周的展示页面制作，整理团队设计档案。\n\n职位要求\n掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力。\n学历：硕士及以上学历优先，不设最低学历门槛。\n薪酬：面议\n\n工作地点：杭州；支持全程远程实习。\n团队日常：每周五例会，参与者可线上接入。\n项目周期6个月，具体实习时长另行协商。\n面试地点：北京，也可视频面试。"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_11779bee8024",
+          "title": "UI设计实习生",
+          "company": "示例映格数字科技有限公司",
+          "cities": [
+            "杭州"
+          ],
+          "status": "new"
+        }
+      ]
+    },
+    "stderr": ""
+  },
+  "field_comparison": {
+    "title": {
+      "expected": "UI设计实习生",
+      "actual": "UI设计实习生",
+      "conclusion": "一致"
+    },
+    "company": {
+      "expected": "示例映格数字科技有限公司",
+      "actual": "示例映格数字科技有限公司",
+      "conclusion": "一致"
+    },
+    "cities": {
+      "expected": [
+        "杭州"
+      ],
+      "actual": [
+        "杭州"
+      ],
+      "conclusion": "一致"
+    },
+    "remote": {
+      "expected": true,
+      "actual": true,
+      "conclusion": "一致"
+    },
+    "employment_type": {
+      "expected": "internship",
+      "actual": "internship",
+      "conclusion": "一致"
+    },
+    "salary": {
+      "expected": {
+        "min": null,
+        "max": null,
+        "unit": null,
+        "months": null,
+        "negotiable": true
+      },
+      "actual": {
+        "min": null,
+        "max": null,
+        "unit": null,
+        "months": null,
+        "negotiable": true
+      },
+      "conclusion": "一致"
+    },
+    "requirements.graduation": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    },
+    "requirements.days_per_week": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    },
+    "requirements.min_months": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    },
+    "requirements.education": {
+      "expected": {
+        "min": null,
+        "preferred": "master"
+      },
+      "actual": {
+        "min": null,
+        "preferred": "master"
+      },
+      "conclusion": "一致"
+    },
+    "requirements.skills": {
+      "expected": [
+        "Figma",
+        "Sketch",
+        "Photoshop",
+        "交互设计",
+        "视觉设计",
+        "设计规范"
+      ],
+      "actual": [],
+      "conclusion": "规则漏读"
+    },
+    "return_offer": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    },
+    "published_at": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    },
+    "deadline": {
+      "expected": null,
+      "actual": null,
+      "conclusion": "一致"
+    }
+  },
+  "parsed_match": {
+    "tech": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_11779bee8024",
+        "--profile",
+        "tests/fixtures/cn/profile/tech/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/parsed"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_11779bee8024",
+        "title": "UI设计实习生",
+        "company": "示例映格数字科技有限公司",
+        "verdict": "needs_check",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "unknown",
+            "reason": "JD 或档案没写届别",
+            "jd": {
+              "requirements.graduation": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "unknown",
+            "reason": "JD 没写最低学历（优先学历不作要求）",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": null,
+                  "preferred": "master"
+                },
+                "evidence": "硕士及以上学历优先"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 或档案没写每周到岗",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 或档案没写实习时长",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "JD 可远程，你接受远程",
+            "jd": {
+              "cities": {
+                "value": [
+                  "杭州"
+                ],
+                "evidence": "工作地点：杭州；支持全程远程实习。"
+              },
+              "remote": {
+                "value": true,
+                "evidence": "远程实习"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "UI设计实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "UI设计实习生",
+                "evidence": "UI设计实习生"
+              },
+              "company": {
+                "value": "示例映格数字科技有限公司",
+                "evidence": "示例映格数字科技有限公司"
+              },
+              "cities": {
+                "value": [
+                  "杭州"
+                ],
+                "evidence": "工作地点：杭州；支持全程远程实习。"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    "ops": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_11779bee8024",
+        "--profile",
+        "tests/fixtures/cn/profile/ops/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/parsed"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_11779bee8024",
+        "title": "UI设计实习生",
+        "company": "示例映格数字科技有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "unknown",
+            "reason": "JD 或档案没写届别",
+            "jd": {
+              "requirements.graduation": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "unknown",
+            "reason": "JD 没写最低学历（优先学历不作要求）",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": null,
+                  "preferred": "master"
+                },
+                "evidence": "硕士及以上学历优先"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 或档案没写每周到岗",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 或档案没写实习时长",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "杭州不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "杭州"
+                ],
+                "evidence": "工作地点：杭州；支持全程远程实习。"
+              },
+              "remote": {
+                "value": true,
+                "evidence": "远程实习"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "UI设计实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "UI设计实习生",
+                "evidence": "UI设计实习生"
+              },
+              "company": {
+                "value": "示例映格数字科技有限公司",
+                "evidence": "示例映格数字科技有限公司"
+              },
+              "cities": {
+                "value": [
+                  "杭州"
+                ],
+                "evidence": "工作地点：杭州；支持全程远程实习。"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    }
+  },
+  "oracle_validate": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "validate",
+      "data/v2-m2-3/comparison-34d254d/oracle-inbox/ats_ui_design_intern.json"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "valid": true,
+      "errors": []
+    },
+    "stderr": ""
+  },
+  "oracle_save": {
+    "argv": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "save",
+      "data/v2-m2-3/comparison-34d254d/oracle-inbox/ats_ui_design_intern.json",
+      "--data-dir",
+      "data/v2-m2-3/comparison-34d254d/oracle"
+    ],
+    "exit_code": 0,
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_11779bee8024",
+          "title": "UI设计实习生",
+          "company": "示例映格数字科技有限公司",
+          "cities": [
+            "杭州"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    },
+    "stderr": ""
+  },
+  "oracle_match": {
+    "tech": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_11779bee8024",
+        "--profile",
+        "tests/fixtures/cn/profile/tech/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/oracle"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_11779bee8024",
+        "title": "UI设计实习生",
+        "company": "示例映格数字科技有限公司",
+        "verdict": "needs_check",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "unknown",
+            "reason": "JD 或档案没写届别",
+            "jd": {
+              "requirements.graduation": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "unknown",
+            "reason": "JD 没写最低学历（优先学历不作要求）",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": null,
+                  "preferred": "master"
+                },
+                "evidence": [
+                  "学历：硕士及以上学历优先，不设最低学历门槛。"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 或档案没写每周到岗",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 或档案没写实习时长",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "JD 可远程，你接受远程",
+            "jd": {
+              "cities": {
+                "value": [
+                  "杭州"
+                ],
+                "evidence": [
+                  "工作地点：杭州；支持全程远程实习。"
+                ]
+              },
+              "remote": {
+                "value": true,
+                "evidence": [
+                  "支持全程远程实习"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "UI设计实习生"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "UI设计实习生",
+                "evidence": [
+                  "UI设计实习生"
+                ]
+              },
+              "company": {
+                "value": "示例映格数字科技有限公司",
+                "evidence": [
+                  "示例映格数字科技有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "杭州"
+                ],
+                "evidence": [
+                  "工作地点：杭州；支持全程远程实习。"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    "ops": {
+      "argv": [
+        "python",
+        "-m",
+        "jobsearch_cn",
+        "match",
+        "filter",
+        "job_11779bee8024",
+        "--profile",
+        "tests/fixtures/cn/profile/ops/profile.json",
+        "--data-dir",
+        "data/v2-m2-3/comparison-34d254d/oracle"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "job_id": "job_11779bee8024",
+        "title": "UI设计实习生",
+        "company": "示例映格数字科技有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "unknown",
+            "reason": "JD 或档案没写届别",
+            "jd": {
+              "requirements.graduation": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "unknown",
+            "reason": "JD 没写最低学历（优先学历不作要求）",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": null,
+                  "preferred": "master"
+                },
+                "evidence": [
+                  "学历：硕士及以上学历优先，不设最低学历门槛。"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 或档案没写每周到岗",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 或档案没写实习时长",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "杭州不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "杭州"
+                ],
+                "evidence": [
+                  "工作地点：杭州；支持全程远程实习。"
+                ]
+              },
+              "remote": {
+                "value": true,
+                "evidence": [
+                  "支持全程远程实习"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "UI设计实习生"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "UI设计实习生",
+                "evidence": [
+                  "UI设计实习生"
+                ]
+              },
+              "company": {
+                "value": "示例映格数字科技有限公司",
+                "evidence": [
+                  "示例映格数字科技有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "杭州"
+                ],
+                "evidence": [
+                  "工作地点：杭州；支持全程远程实习。"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    }
+  },
+  "finished_at_utc": "2026-10-27T10:07:46.586858+00:00"
+}
