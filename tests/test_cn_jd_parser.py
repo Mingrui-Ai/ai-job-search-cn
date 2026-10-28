@@ -68,7 +68,8 @@ class Fixtures(unittest.TestCase):
             "title": "数据分析实习生", "company": None, "employment_type": "internship",
             "salary": salary(150, 200, "CNY/day"), "cities": ["上海"],
             "requirements.graduation": {"years": [2027], "strict": True},
-            "requirements.days_per_week": 5, "requirements.min_months": 3, "requirements.education": None,
+            "requirements.days_per_week": 5, "requirements.min_months": 3,
+            "requirements.education": {"min": "bachelor", "preferred": None},  # H12: bare tag cell
             "requirements.skills": ["SQL", "Python", "Pandas", "机器学习"], "return_offer": True,
             "deadline": "2026-11-15",
         },
@@ -116,7 +117,7 @@ class Fixtures(unittest.TestCase):
         },
         "boss_fullpage_data_intern.txt": {
             "title": "数据分析实习生", "company": "示例星图数据科技有限公司", "employment_type": "internship",
-            "salary": salary(150, 200, "CNY/day"), "cities": [],
+            "salary": salary(150, 200, "CNY/day"), "cities": ["广州"],  # H12: header tag row
             "requirements.graduation": {"years": [2027], "strict": True},
             "requirements.days_per_week": 4, "requirements.min_months": 6,
             "requirements.education": {"min": "bachelor", "preferred": None},
