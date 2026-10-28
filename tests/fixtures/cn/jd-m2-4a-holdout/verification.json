@@ -1,0 +1,79 @@
+{
+  "verified_at_utc": "2026-10-28T09:49:47.159582+00:00",
+  "base_commit": "0e35b4bbb47630f315e5ec89d2635161560bf8b4",
+  "freeze_commit": "4e47853f00f530c44a45b3cc5c6641262d50a705",
+  "freeze_commit_time": "2026-10-28T17:46:02+08:00",
+  "first_execution_started_at_utc": "2026-10-28T09:46:02.238972+00:00",
+  "freeze_committed_before_execution": true,
+  "oracle_manifest_sha256": "7d468f60aa423108f5c89f0c21a0503c87c21d18d7f029dc3e3b3a147a6ceb85",
+  "oracle_worktree_and_freeze_blob_hashes_match": true,
+  "contract_and_profile_hashes_unchanged": true,
+  "application_tree_equal_to_base": true,
+  "independent_recount_from_raw_cli_outputs": {
+    "field_match": 65,
+    "skills_matched": 12,
+    "skills_missing": 3,
+    "skills_extra": 0,
+    "match_verdict_equal": 9,
+    "match_check_equal": 56,
+    "oracle_verdict_equal": 6,
+    "oracle_check_equal": 40
+  },
+  "field_agreements": {
+    "title": 5,
+    "company": 5,
+    "cities": 5,
+    "remote": 5,
+    "employment_type": 5,
+    "salary": 5,
+    "requirements.graduation": 5,
+    "requirements.days_per_week": 5,
+    "requirements.min_months": 5,
+    "requirements.education": 3,
+    "requirements.skills": 3,
+    "return_offer": 5,
+    "published_at": 5,
+    "deadline": 4
+  },
+  "check_agreements": {
+    "graduation": 10,
+    "education": 6,
+    "days_per_week": 6,
+    "min_months": 4,
+    "location": 10,
+    "employment_type": 10,
+    "exclusions": 10
+  },
+  "oracle_validator_rejections": {
+    "liepin_language_engineer": [
+      "requirements.education.min: must be one of associate, bachelor, master, phd or null"
+    ],
+    "official_service_campus": [
+      "requirements.education.min: must be one of associate, bachelor, master, phd or null"
+    ]
+  },
+  "counts_match_saved_summary": true,
+  "cli_output_sha256": {
+    "actual/master/ats_content_intern.json": "4922d9399e47f78e1195e7da35eb6d8a9865d00878890b9124331c68ccae94c6",
+    "actual/master/boss_supplier_intern.json": "be92d8460a306f72556ef7718f74ba83ea1ec60f9e9320662e27ba7e13b848f7",
+    "actual/master/liepin_language_engineer.json": "1bd351909b674e1ff85e31dcef1216cb6a7cca4e7392202729c377969f949009",
+    "actual/master/nowcoder_backend_campus.json": "b236e39ca37870a1e0b2b5c935300ba77a225d8db4e49da7f39b54cf97af7537",
+    "actual/master/official_service_campus.json": "dfa6fc1c3db80a2eae8cce4bac28e1e3f9f786366859ce81ba83d13eb8a8cbcf",
+    "actual/master/summary.json": "6e6b535d9330f7398d0dfa49dc88459b6acace5139d10e3e22b302e84f1284c7"
+  },
+  "report_sha256": "3eaf6e572f77f66c84a7501ab1f1ac177a71527040a2ea217ba3fd5fb7d60b92",
+  "runner_sha256": "336a40d387368d9c766ca645efe4fae67d33ba340431e9a1a3ff9e04f10b9b89",
+  "precommit_checks": {
+    "python": "3.12.15",
+    "lint_skills": "pass",
+    "security_guards": "pass",
+    "full_suite": {
+      "total": 1028,
+      "passed": 1019,
+      "skipped": 9,
+      "duration_seconds": 145.933
+    }
+  },
+  "publication": "local_only_until_M2-4a_PR",
+  "implementation_branch_accessed": false
+}
