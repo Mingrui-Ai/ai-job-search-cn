@@ -1,0 +1,1269 @@
+{
+  "fixture": "official_service_campus.txt",
+  "site_argument": "official",
+  "parse": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_124335b2d477",
+          "source": {
+            "type": "file",
+            "site": "official",
+            "url": null,
+            "imported_at": "2026-10-28T20:11:09+08:00"
+          },
+          "title": "客户服务管培生（校招）",
+          "company": "示例澄禾生活服务有限公司",
+          "cities": [
+            "上海"
+          ],
+          "remote": false,
+          "employment_type": "campus",
+          "salary": {
+            "min": 6000,
+            "max": 8000,
+            "unit": "CNY/month",
+            "months": 13,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": true
+            },
+            "days_per_week": null,
+            "min_months": null,
+            "education": {
+              "min": "none",
+              "preferred": null
+            },
+            "skills": [
+              "Excel",
+              "PPT"
+            ]
+          },
+          "return_offer": null,
+          "published_at": "2026-10-28",
+          "deadline": "2026-10-28",
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "客户服务管培生（校招）",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例澄禾生活服务有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作城市：上海",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "客户服务管培生（校招）",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "6-8K·13薪",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "仅限2027届毕业生",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "学历不限",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": [
+                "熟悉 Excel",
+                "能够使用 PPT 制作汇报"
+              ],
+              "method": "rule"
+            },
+            "published_at": {
+              "text": "发布日期：2026-10-28",
+              "method": "rule"
+            },
+            "deadline": {
+              "text": "2026-10-28\n截止",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "客户服务管培生（校招）\n公司名称：示例澄禾生活服务有限公司\n招聘类型：校园招聘\n工作城市：上海\n办公方式：不支持远程办公\n薪资：6-8K·13薪\n\n岗位职责：\n整理服务咨询记录，梳理未解决事项，并向各门店同步处理进度。\n在带教人的协助下制作月度服务复盘材料。\n\n任职要求：\n仅限2027届毕业生，学历不限。\n熟悉 Excel，能够使用 PPT 制作汇报，具备客户沟通能力。\n\n培养安排：入职后试用期2个月，转为正式员工后轮岗学习。\n发布日期：2026-10-28\n截止日期：2026-12-15"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_124335b2d477",
+          "title": "客户服务管培生（校招）",
+          "company": "示例澄禾生活服务有限公司",
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ]
+    }
+  },
+  "validate_parsed": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "field_comparison": [
+    {
+      "field": "title",
+      "expected": "客户服务管培生（校招）",
+      "actual": "客户服务管培生（校招）",
+      "kind": "match"
+    },
+    {
+      "field": "company",
+      "expected": "示例澄禾生活服务有限公司",
+      "actual": "示例澄禾生活服务有限公司",
+      "kind": "match"
+    },
+    {
+      "field": "cities",
+      "expected": [
+        "上海"
+      ],
+      "actual": [
+        "上海"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "remote",
+      "expected": false,
+      "actual": false,
+      "kind": "match"
+    },
+    {
+      "field": "employment_type",
+      "expected": "campus",
+      "actual": "campus",
+      "kind": "match"
+    },
+    {
+      "field": "salary",
+      "expected": {
+        "min": 6000,
+        "max": 8000,
+        "unit": "CNY/month",
+        "months": 13,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 6000,
+        "max": 8000,
+        "unit": "CNY/month",
+        "months": 13,
+        "negotiable": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.graduation",
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.days_per_week",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.min_months",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.education",
+      "expected": {
+        "min": "none",
+        "preferred": null
+      },
+      "actual": {
+        "min": "none",
+        "preferred": null
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.skills",
+      "expected": [
+        "Excel",
+        "PPT",
+        "客户沟通"
+      ],
+      "actual": [
+        "Excel",
+        "PPT"
+      ],
+      "kind": "missing"
+    },
+    {
+      "field": "return_offer",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "published_at",
+      "expected": "2026-10-28",
+      "actual": "2026-10-28",
+      "kind": "match"
+    },
+    {
+      "field": "deadline",
+      "expected": "2026-12-15",
+      "actual": "2026-10-28",
+      "kind": "wrong"
+    }
+  ],
+  "skill_comparison": {
+    "matched": [
+      "Excel",
+      "PPT"
+    ],
+    "missing": [
+      "客户沟通"
+    ],
+    "extra": []
+  },
+  "validate_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "save_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_124335b2d477",
+          "title": "客户服务管培生（校招）",
+          "company": "示例澄禾生活服务有限公司",
+          "cities": [
+            "上海"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  "matches": {
+    "tech": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_124335b2d477",
+          "title": "客户服务管培生（校招）",
+          "company": "示例澄禾生活服务有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅限2027届毕业生"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "JD 写明学历不限",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "none",
+                    "preferred": null
+                  },
+                  "evidence": "学历不限"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写每周到岗，不适用",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "客户服务管培生（校招）"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写实习时长，不适用",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "客户服务管培生（校招）"
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "上海不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作城市：上海"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "conflict",
+              "reason": "这是校招岗位，你找的是实习",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "客户服务管培生（校招）"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "客户服务管培生（校招）",
+                  "evidence": "客户服务管培生（校招）"
+                },
+                "company": {
+                  "value": "示例澄禾生活服务有限公司",
+                  "evidence": "示例澄禾生活服务有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作城市：上海"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "学历不限，按新契约直接符合。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习到岗天数，不适用。"
+          },
+          {
+            "check": "min_months",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习月数，试用期不算，不适用。"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "仅上海且不支持远程；tech仅深圳/广州且不搬家。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "tech只找实习，不接受校招。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "公司与城市不在排除项，标题未命中外包或销售。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_124335b2d477",
+          "title": "客户服务管培生（校招）",
+          "company": "示例澄禾生活服务有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅限2027届毕业生"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "JD 写明学历不限",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "none",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "学历不限"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写每周到岗，不适用",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "招聘类型：校园招聘"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写实习时长，不适用",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "招聘类型：校园招聘"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "上海不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：上海"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "conflict",
+              "reason": "这是校招岗位，你找的是实习",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "招聘类型：校园招聘"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "客户服务管培生（校招）",
+                  "evidence": [
+                    "客户服务管培生（校招）"
+                  ]
+                },
+                "company": {
+                  "value": "示例澄禾生活服务有限公司",
+                  "evidence": [
+                    "公司名称：示例澄禾生活服务有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：上海"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "学历不限，按新契约直接符合。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习到岗天数，不适用。"
+          },
+          {
+            "check": "min_months",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习月数，试用期不算，不适用。"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "仅上海且不支持远程；tech仅深圳/广州且不搬家。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "tech只找实习，不接受校招。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "公司与城市不在排除项，标题未命中外包或销售。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    },
+    "ops": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_124335b2d477",
+          "title": "客户服务管培生（校招）",
+          "company": "示例澄禾生活服务有限公司",
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅限2027届毕业生"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "JD 写明学历不限",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "none",
+                    "preferred": null
+                  },
+                  "evidence": "学历不限"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写每周到岗，不适用",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "客户服务管培生（校招）"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写实习时长，不适用",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "客户服务管培生（校招）"
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作城市：上海"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "校招岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "客户服务管培生（校招）"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "客户服务管培生（校招）",
+                  "evidence": "客户服务管培生（校招）"
+                },
+                "company": {
+                  "value": "示例澄禾生活服务有限公司",
+                  "evidence": "示例澄禾生活服务有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作城市：上海"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "eligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "学历不限，按新契约直接符合。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习到岗天数，不适用。"
+          },
+          {
+            "check": "min_months",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习月数，试用期不算，不适用。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "上海与ops意向城市相同。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops接受校招。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中电话销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_124335b2d477",
+          "title": "客户服务管培生（校招）",
+          "company": "示例澄禾生活服务有限公司",
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅限2027届毕业生"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "JD 写明学历不限",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "none",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "学历不限"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写每周到岗，不适用",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "招聘类型：校园招聘"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写实习时长，不适用",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "招聘类型：校园招聘"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：上海"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "校招岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": [
+                    "招聘类型：校园招聘"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "客户服务管培生（校招）",
+                  "evidence": [
+                    "客户服务管培生（校招）"
+                  ]
+                },
+                "company": {
+                  "value": "示例澄禾生活服务有限公司",
+                  "evidence": [
+                    "公司名称：示例澄禾生活服务有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": [
+                    "工作城市：上海"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "eligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合限定。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "学历不限，按新契约直接符合。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习到岗天数，不适用。"
+          },
+          {
+            "check": "min_months",
+            "expected": "not_applicable",
+            "actual": "not_applicable",
+            "equal": true,
+            "human_reason": "校招未写实习月数，试用期不算，不适用。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "上海与ops意向城市相同。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "ops接受校招。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中电话销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    }
+  }
+}

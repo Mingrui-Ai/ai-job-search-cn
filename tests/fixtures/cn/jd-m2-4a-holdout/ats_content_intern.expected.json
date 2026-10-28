@@ -1,0 +1,182 @@
+{
+  "fixture": "ats_content_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "ats",
+  "method": "agent",
+  "basis": "首次执行本批解析/匹配规则前，人工按原创正文、Job Schema 和 match.md 的 M2-4a 契约补充写定；none 与 not_applicable 有意采用新契约。",
+  "fields": {
+    "title": {
+      "value": "内容编辑实习生",
+      "evidence": [
+        "内容编辑实习生"
+      ]
+    },
+    "company": {
+      "value": "示例折页文化有限公司",
+      "evidence": [
+        "公司名称：示例折页文化有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "上海"
+      ],
+      "evidence": [
+        "工作城市：上海"
+      ]
+    },
+    "remote": {
+      "value": true,
+      "evidence": [
+        "支持全程远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "招聘类型：实习"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 120,
+        "max": 160,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪资：120-160元/天"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅限2027届本科及以上在读学生。"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": null,
+      "evidence": [],
+      "note": "正文没有天数；实习岗位仍unknown，不能泛化为not_applicable。"
+    },
+    "requirements.min_months": {
+      "value": 3,
+      "evidence": [
+        "连续实习3个月以上"
+      ]
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "本科及以上"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "秀米",
+        "Excel",
+        "内容策划"
+      ],
+      "evidence": [
+        "能够使用秀米完成排版，熟悉 Excel，具备内容策划能力。"
+      ]
+    },
+    "return_offer": {
+      "value": false,
+      "evidence": [
+        "本岗位不提供转正机会。"
+      ]
+    },
+    "published_at": {
+      "value": null,
+      "evidence": [],
+      "note": "未写发布日期。"
+    },
+    "deadline": {
+      "value": null,
+      "evidence": [],
+      "note": "未写截止日期。"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "verdict": "needs_check",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合限定。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "硕士学历不低于本科。"
+        },
+        "days_per_week": {
+          "result": "unknown",
+          "reason": "实习岗位未写每周天数，仍未知。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "可实习6个月，满足3个月。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "tech接受远程，JD支持全程远程。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习符合tech类型。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题未命中外包或销售，其他排除项也未命中。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "needs_check",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合限定。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "本科学历达到本科要求。"
+        },
+        "days_per_week": {
+          "result": "unknown",
+          "reason": "实习岗位未写每周天数，仍未知。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "可实习3个月，满足3个月。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "上海城市有交集，允许远程不意味着必须远程。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "ops接受实习。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "未命中电话销售或其他排除项。"
+        }
+      }
+    }
+  },
+  "traps": [
+    "实习无每周天数仍unknown，不是not_applicable",
+    "明确不提供转正应为false，不能因出现转正二字判true"
+  ]
+}
