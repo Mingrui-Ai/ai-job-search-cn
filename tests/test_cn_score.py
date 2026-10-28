@@ -240,6 +240,9 @@ class Records(Case):
         changed = setting(self.tech, "availability.days_per_week", 5)
         fresh = score.score_job(self.job, changed, VOCABULARY, previous=filled, now=LATER)
         self.assertIsNone(fresh["dimensions"]["experience"]["score"])
+        edited = setting(self.job, "title", "后端开发实习生")
+        fresh = score.score_job(edited, self.tech, VOCABULARY, previous=filled, now=LATER)
+        self.assertIsNone(fresh["dimensions"]["experience"]["score"])
 
 
 def agent_filled(record: dict) -> dict:
@@ -380,7 +383,9 @@ def run_cli(*args, data_dir, input_bytes=None):
 
 
 class Commands(unittest.TestCase):
-    SAMPLES = ("jd/boss_intern.txt", "jd-m2-3/nowcoder_test_dev_intern.txt", "jd-m2-3/boss_ai_product_intern.txt")
+    # The last one scores 65 but the filter rules it out (每周5天 > 4): it lists after a 13-point job.
+    SAMPLES = ("jd/boss_intern.txt", "jd-m2-3/nowcoder_test_dev_intern.txt", "jd-m2-3/boss_ai_product_intern.txt",
+               "jd/shixiseng_intern.txt")
 
     def setUp(self):
         directory = tempfile.TemporaryDirectory()
@@ -405,7 +410,7 @@ class Commands(unittest.TestCase):
         return [(row["job_id"], row["grade"], row["score"], row["stale"]) for row in self.cli("match", "list")["matches"]]
 
     def test_score_save_show_and_list(self):
-        boss, test_dev, product = self.ids
+        boss, test_dev, product, ruled_out = self.ids
         record = self.cli("match", "score", boss)
         self.assertEqual(record["total"]["score"], 73)
         self.assertFalse((self.data / "matches").exists(), "score without --save writes nothing")
@@ -413,23 +418,24 @@ class Commands(unittest.TestCase):
             self.cli("match", "score", job_id, "--save")
         self.assertEqual(dict(self.cli("match", "show", boss), scored_at=None), dict(record, scored_at=None))
         self.assertEqual(self.listed(), [(boss, "good", 73, False), (test_dev, "moderate", 46, False),
-                                         (product, "poor", 13, False)])
+                                         (product, "poor", 13, False), (ruled_out, "ineligible", 65, False)])
         self.cli("match", "show", "job_000000000000", expect=1)
 
     def test_new_weights_reorder_the_list_once_rescored(self):
-        boss, test_dev, product = self.ids
+        boss, test_dev, product, ruled_out = self.ids
         for job_id in self.ids:
             self.cli("match", "score", job_id, "--save")
         before = [row[0] for row in self.listed()]
-        self.assertEqual(before, [boss, test_dev, product])  # 73 good, 46 moderate, 13 poor
+        self.assertEqual(before, [boss, test_dev, product, ruled_out])  # 73 good, 46 moderate, 13 poor, ineligible
         self.write_profile(setting(profile_from("tech"), "target.weights",
                                    {"skills": 10, "direction": 10, "experience": 0, "salary": 80}))
         self.assertTrue(all(row[3] for row in self.listed()), "a changed profile makes every record stale")
         for job_id in self.ids:
             self.cli("match", "score", job_id, "--save")
-        # boss (10*43+10*100+80*100)/100 = 94; product 8000/100 = 80; test_dev has no salary: 1000/20 = 50.
+        # boss (10*43+10*100+80*100)/100 = 94; product 8000/100 = 80; test_dev has no salary: 1000/20 = 50;
+        # the ruled-out job (250+1000+8000)/100 = 92.5 -> 93 still lists last.
         self.assertEqual(self.listed(), [(boss, "strong", 94, False), (product, "strong", 80, False),
-                                         (test_dev, "moderate", 50, False)])
+                                         (test_dev, "moderate", 50, False), (ruled_out, "ineligible", 93, False)])
 
     def test_validate_and_save_an_agents_record(self):
         boss = self.ids[0]
