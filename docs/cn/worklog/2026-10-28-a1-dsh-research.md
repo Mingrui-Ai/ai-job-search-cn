@@ -3,6 +3,7 @@
 ## 完成
 
 - 新增 `docs/cn/dsh-research.md`，回答路线图 A1 六个问题，每项附固定官方提交的出处。
+- 已推送 `docs/cn-dsh-research`，PR #39。
 - 官方源码固定 tag `dsh-v0.2.2-alpha.2` / `f3803c96974ad4a94195fb97e5c637e9c2a3afe3`。只读 clone 放在忽略的 data/ 中，没有安装、构建或运行 dsh，没有使用 API Key。
 
 ## 关键决策
