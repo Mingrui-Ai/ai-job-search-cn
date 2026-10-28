@@ -1,0 +1,1614 @@
+{
+  "generated_at_utc": "2026-10-28T07:54:39.363289+00:00",
+  "baseline_commit": "143c48265c2db870c307e29cff71caaf92ddbb67",
+  "wrapup_commit": "993950275fe10d02a3364bdcda6a05d81b0c7b11",
+  "pull_request": 26,
+  "oracle_manifest_sha256": "0f3b7a606a82c005f72624b5a09197fd6c3036bca58dc7555a1fb3fbce49db62",
+  "all_frozen_input_hashes_unchanged": true,
+  "baseline_totals": {
+    "field_match": 65,
+    "field_extra": 1,
+    "skills_matched": 12,
+    "skills_missing": 8,
+    "skills_extra": 14,
+    "match_verdict_equal": 10,
+    "match_check_equal": 70,
+    "oracle_verdict_equal": 10,
+    "oracle_check_equal": 70,
+    "field_wrong": 4
+  },
+  "wrapup_totals": {
+    "field_match": 65,
+    "field_extra": 1,
+    "skills_matched": 14,
+    "skills_missing": 6,
+    "skills_extra": 11,
+    "match_verdict_equal": 10,
+    "match_check_equal": 70,
+    "oracle_verdict_equal": 10,
+    "oracle_check_equal": 70,
+    "field_wrong": 4
+  },
+  "fixtures": [
+    {
+      "fixture": "ats_backend_intern.txt",
+      "fields": [
+        {
+          "field": "title",
+          "expected": "Java后端开发实习生",
+          "before": "Java后端开发实习生",
+          "after": "Java后端开发实习生",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "company",
+          "expected": "示例砺川系统科技有限公司",
+          "before": "示例砺川系统科技有限公司",
+          "after": "示例砺川系统科技有限公司",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "cities",
+          "expected": [
+            "深圳",
+            "广州"
+          ],
+          "before": [
+            "深圳",
+            "广州"
+          ],
+          "after": [
+            "深圳",
+            "广州"
+          ],
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "remote",
+          "expected": false,
+          "before": false,
+          "after": false,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "employment_type",
+          "expected": "internship",
+          "before": "internship",
+          "after": "internship",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "salary",
+          "expected": {
+            "min": 250,
+            "max": 350,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "before": {
+            "min": 250,
+            "max": 350,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "after": {
+            "min": 250,
+            "max": 350,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.graduation",
+          "expected": {
+            "years": [
+              2026
+            ],
+            "strict": true
+          },
+          "before": {
+            "years": [
+              2026
+            ],
+            "strict": true
+          },
+          "after": {
+            "years": [
+              2026
+            ],
+            "strict": true
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.days_per_week",
+          "expected": 4,
+          "before": 4,
+          "after": 4,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.min_months",
+          "expected": 4,
+          "before": 4,
+          "after": 4,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.education",
+          "expected": {
+            "min": "master",
+            "preferred": null
+          },
+          "before": {
+            "min": "master",
+            "preferred": null
+          },
+          "after": {
+            "min": "master",
+            "preferred": null
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.skills",
+          "expected": [
+            "Python",
+            "Go",
+            "Docker",
+            "K8s",
+            "Kubernetes"
+          ],
+          "before": [
+            "Java",
+            "Python",
+            "Go",
+            "Docker",
+            "K8s",
+            "Kubernetes",
+            "Rust",
+            "C++",
+            "公众号"
+          ],
+          "after": [
+            "Python",
+            "Go",
+            "Docker",
+            "K8s",
+            "Kubernetes",
+            "Rust",
+            "C++",
+            "公众号"
+          ],
+          "before_kind": "extra",
+          "after_kind": "extra"
+        },
+        {
+          "field": "return_offer",
+          "expected": null,
+          "before": null,
+          "after": null,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "published_at",
+          "expected": "2026-10-22",
+          "before": "2026-10-22",
+          "after": "2026-10-22",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "deadline",
+          "expected": "2026-11-20",
+          "before": "2026-11-20",
+          "after": "2026-11-20",
+          "before_kind": "match",
+          "after_kind": "match"
+        }
+      ],
+      "matches": {
+        "tech": {
+          "expected": "ineligible",
+          "before": "ineligible",
+          "after": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            }
+          ]
+        },
+        "ops": {
+          "expected": "ineligible",
+          "before": "ineligible",
+          "after": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            },
+            {
+              "check": "education",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            },
+            {
+              "check": "min_months",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            },
+            {
+              "check": "location",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            }
+          ]
+        }
+      },
+      "skills_before": {
+        "matched": [
+          "Python",
+          "Go",
+          "Docker",
+          "K8s",
+          "Kubernetes"
+        ],
+        "missing": [],
+        "extra": [
+          "Java",
+          "Rust",
+          "C++",
+          "公众号"
+        ]
+      },
+      "skills_after": {
+        "matched": [
+          "Python",
+          "Go",
+          "Docker",
+          "K8s",
+          "Kubernetes"
+        ],
+        "missing": [],
+        "extra": [
+          "Rust",
+          "C++",
+          "公众号"
+        ]
+      }
+    },
+    {
+      "fixture": "boss_business_development_intern.txt",
+      "fields": [
+        {
+          "field": "title",
+          "expected": "销售商务拓展实习生",
+          "before": "销售商务拓展实习生",
+          "after": "销售商务拓展实习生",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "company",
+          "expected": "示例栖桥商务服务有限公司",
+          "before": "示例栖桥商务服务有限公司",
+          "after": "示例栖桥商务服务有限公司",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "cities",
+          "expected": [
+            "广州",
+            "上海"
+          ],
+          "before": [
+            "广州",
+            "上海"
+          ],
+          "after": [
+            "广州",
+            "上海"
+          ],
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "remote",
+          "expected": null,
+          "before": null,
+          "after": null,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "employment_type",
+          "expected": "internship",
+          "before": "internship",
+          "after": "internship",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "salary",
+          "expected": {
+            "min": 200,
+            "max": 200,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "before": {
+            "min": 200,
+            "max": 200,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "after": {
+            "min": 200,
+            "max": 200,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.graduation",
+          "expected": {
+            "years": [
+              2027,
+              2028
+            ],
+            "strict": true
+          },
+          "before": {
+            "years": [
+              2027,
+              2028
+            ],
+            "strict": true
+          },
+          "after": {
+            "years": [
+              2027,
+              2028
+            ],
+            "strict": true
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.days_per_week",
+          "expected": 3,
+          "before": 3,
+          "after": 3,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.min_months",
+          "expected": 3,
+          "before": 3,
+          "after": 3,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.education",
+          "expected": {
+            "min": "bachelor",
+            "preferred": "master"
+          },
+          "before": {
+            "min": "bachelor",
+            "preferred": "master"
+          },
+          "after": {
+            "min": "bachelor",
+            "preferred": "master"
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.skills",
+          "expected": [
+            "客户访谈",
+            "CRM",
+            "Excel",
+            "PPT"
+          ],
+          "before": [
+            "Excel",
+            "SQL"
+          ],
+          "after": [
+            "Excel",
+            "SQL"
+          ],
+          "before_kind": "wrong",
+          "after_kind": "wrong"
+        },
+        {
+          "field": "return_offer",
+          "expected": true,
+          "before": true,
+          "after": true,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "published_at",
+          "expected": null,
+          "before": null,
+          "after": null,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "deadline",
+          "expected": "2026-12-05",
+          "before": "2026-12-05",
+          "after": "2026-12-05",
+          "before_kind": "match",
+          "after_kind": "match"
+        }
+      ],
+      "matches": {
+        "tech": {
+          "expected": "ineligible",
+          "before": "ineligible",
+          "after": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "exclusions",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            }
+          ]
+        },
+        "ops": {
+          "expected": "eligible",
+          "before": "eligible",
+          "after": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            }
+          ]
+        }
+      },
+      "skills_before": {
+        "matched": [
+          "Excel"
+        ],
+        "missing": [
+          "客户访谈",
+          "CRM",
+          "PPT"
+        ],
+        "extra": [
+          "SQL"
+        ]
+      },
+      "skills_after": {
+        "matched": [
+          "Excel"
+        ],
+        "missing": [
+          "客户访谈",
+          "CRM",
+          "PPT"
+        ],
+        "extra": [
+          "SQL"
+        ]
+      }
+    },
+    {
+      "fixture": "boss_data_analysis_intern.txt",
+      "fields": [
+        {
+          "field": "title",
+          "expected": "Tableau数据分析实习生",
+          "before": "Tableau数据分析实习生",
+          "after": "Tableau数据分析实习生",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "company",
+          "expected": "示例澄星数据咨询有限公司",
+          "before": "示例澄星数据咨询有限公司",
+          "after": "示例澄星数据咨询有限公司",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "cities",
+          "expected": [
+            "深圳"
+          ],
+          "before": [
+            "深圳"
+          ],
+          "after": [
+            "深圳"
+          ],
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "remote",
+          "expected": false,
+          "before": false,
+          "after": false,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "employment_type",
+          "expected": "internship",
+          "before": "internship",
+          "after": "internship",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "salary",
+          "expected": {
+            "min": 180,
+            "max": 220,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "before": {
+            "min": 180,
+            "max": 220,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "after": {
+            "min": 180,
+            "max": 220,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.graduation",
+          "expected": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "before": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "after": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.days_per_week",
+          "expected": 4,
+          "before": 4,
+          "after": 4,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.min_months",
+          "expected": 6,
+          "before": 6,
+          "after": 6,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.education",
+          "expected": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "before": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "after": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.skills",
+          "expected": [
+            "SQL",
+            "Excel",
+            "PowerBI",
+            "数据清洗"
+          ],
+          "before": [
+            "Tableau",
+            "数据分析",
+            "SQL",
+            "Excel",
+            "Power BI",
+            "Python",
+            "公众号"
+          ],
+          "after": [
+            "SQL",
+            "Excel",
+            "Power BI",
+            "Python",
+            "公众号"
+          ],
+          "before_kind": "wrong",
+          "after_kind": "wrong"
+        },
+        {
+          "field": "return_offer",
+          "expected": false,
+          "before": false,
+          "after": false,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "published_at",
+          "expected": "2026-10-20",
+          "before": "2026-10-20",
+          "after": "2026-10-20",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "deadline",
+          "expected": "2026-11-30",
+          "before": "2026-11-30",
+          "after": "2026-11-30",
+          "before_kind": "match",
+          "after_kind": "match"
+        }
+      ],
+      "matches": {
+        "tech": {
+          "expected": "eligible",
+          "before": "eligible",
+          "after": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            }
+          ]
+        },
+        "ops": {
+          "expected": "ineligible",
+          "before": "ineligible",
+          "after": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            },
+            {
+              "check": "min_months",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            },
+            {
+              "check": "location",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            }
+          ]
+        }
+      },
+      "skills_before": {
+        "matched": [
+          "SQL",
+          "Excel",
+          "PowerBI"
+        ],
+        "missing": [
+          "数据清洗"
+        ],
+        "extra": [
+          "Tableau",
+          "数据分析",
+          "Python",
+          "公众号"
+        ]
+      },
+      "skills_after": {
+        "matched": [
+          "SQL",
+          "Excel",
+          "PowerBI"
+        ],
+        "missing": [
+          "数据清洗"
+        ],
+        "extra": [
+          "Python",
+          "公众号"
+        ]
+      }
+    },
+    {
+      "fixture": "official_finance_campus.txt",
+      "fields": [
+        {
+          "field": "title",
+          "expected": "财务分析专员（校招）",
+          "before": "财务分析专员（校招）",
+          "after": "财务分析专员（校招）",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "company",
+          "expected": "示例衡泉商贸有限公司",
+          "before": "示例衡泉商贸有限公司",
+          "after": "示例衡泉商贸有限公司",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "cities",
+          "expected": [
+            "上海",
+            "广州"
+          ],
+          "before": [
+            "上海",
+            "广州"
+          ],
+          "after": [
+            "上海",
+            "广州"
+          ],
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "remote",
+          "expected": false,
+          "before": false,
+          "after": false,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "employment_type",
+          "expected": "campus",
+          "before": "campus",
+          "after": "campus",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "salary",
+          "expected": {
+            "min": 15000,
+            "max": 25000,
+            "unit": "CNY/month",
+            "months": 14,
+            "negotiable": false
+          },
+          "before": {
+            "min": 15000,
+            "max": 25000,
+            "unit": "CNY/month",
+            "months": 14,
+            "negotiable": false
+          },
+          "after": {
+            "min": 15000,
+            "max": 25000,
+            "unit": "CNY/month",
+            "months": 14,
+            "negotiable": false
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.graduation",
+          "expected": {
+            "years": [
+              2026
+            ],
+            "strict": false
+          },
+          "before": {
+            "years": [
+              2026
+            ],
+            "strict": false
+          },
+          "after": {
+            "years": [
+              2026
+            ],
+            "strict": false
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.days_per_week",
+          "expected": null,
+          "before": null,
+          "after": null,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.min_months",
+          "expected": null,
+          "before": null,
+          "after": null,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.education",
+          "expected": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "before": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "after": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.skills",
+          "expected": [
+            "财务分析",
+            "Excel",
+            "Power BI",
+            "PowerPoint"
+          ],
+          "before": [
+            "Excel",
+            "Power BI",
+            "SQL",
+            "Python"
+          ],
+          "after": [
+            "Excel",
+            "Power BI",
+            "PowerPoint",
+            "SQL",
+            "Python"
+          ],
+          "before_kind": "wrong",
+          "after_kind": "wrong"
+        },
+        {
+          "field": "return_offer",
+          "expected": null,
+          "before": null,
+          "after": null,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "published_at",
+          "expected": "2026-10-21",
+          "before": "2026-10-21",
+          "after": "2026-10-21",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "deadline",
+          "expected": "2026-11-25",
+          "before": "2026-11-25",
+          "after": "2026-11-25",
+          "before_kind": "match",
+          "after_kind": "match"
+        }
+      ],
+      "matches": {
+        "tech": {
+          "expected": "ineligible",
+          "before": "ineligible",
+          "after": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "unknown",
+              "before": "unknown",
+              "after": "unknown"
+            },
+            {
+              "check": "min_months",
+              "expected": "unknown",
+              "before": "unknown",
+              "after": "unknown"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "employment_type",
+              "expected": "conflict",
+              "before": "conflict",
+              "after": "conflict"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            }
+          ]
+        },
+        "ops": {
+          "expected": "needs_check",
+          "before": "needs_check",
+          "after": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "unknown",
+              "before": "unknown",
+              "after": "unknown"
+            },
+            {
+              "check": "min_months",
+              "expected": "unknown",
+              "before": "unknown",
+              "after": "unknown"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            }
+          ]
+        }
+      },
+      "skills_before": {
+        "matched": [
+          "Excel",
+          "Power BI"
+        ],
+        "missing": [
+          "财务分析",
+          "PowerPoint"
+        ],
+        "extra": [
+          "SQL",
+          "Python"
+        ]
+      },
+      "skills_after": {
+        "matched": [
+          "Excel",
+          "Power BI",
+          "PowerPoint"
+        ],
+        "missing": [
+          "财务分析"
+        ],
+        "extra": [
+          "SQL",
+          "Python"
+        ]
+      }
+    },
+    {
+      "fixture": "shixiseng_hr_intern.txt",
+      "fields": [
+        {
+          "field": "title",
+          "expected": "人力资源实习生（PPT）",
+          "before": "人力资源实习生（PPT）",
+          "after": "人力资源实习生（PPT）",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "company",
+          "expected": "示例禾序人力资源服务有限公司",
+          "before": "示例禾序人力资源服务有限公司",
+          "after": "示例禾序人力资源服务有限公司",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "cities",
+          "expected": [
+            "上海"
+          ],
+          "before": [
+            "上海"
+          ],
+          "after": [
+            "上海"
+          ],
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "remote",
+          "expected": true,
+          "before": true,
+          "after": true,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "employment_type",
+          "expected": "internship",
+          "before": "internship",
+          "after": "internship",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "salary",
+          "expected": {
+            "min": 150,
+            "max": 180,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "before": {
+            "min": 150,
+            "max": 180,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "after": {
+            "min": 150,
+            "max": 180,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.graduation",
+          "expected": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "before": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "after": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.days_per_week",
+          "expected": 3,
+          "before": 3,
+          "after": 3,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.min_months",
+          "expected": 3,
+          "before": 3,
+          "after": 3,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.education",
+          "expected": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "before": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "after": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "requirements.skills",
+          "expected": [
+            "招聘流程",
+            "Excel",
+            "PowerPoint"
+          ],
+          "before": [
+            "Excel",
+            "剪映",
+            "Photoshop",
+            "公众号"
+          ],
+          "after": [
+            "Excel",
+            "PowerPoint",
+            "剪映",
+            "Photoshop",
+            "公众号"
+          ],
+          "before_kind": "wrong",
+          "after_kind": "wrong"
+        },
+        {
+          "field": "return_offer",
+          "expected": true,
+          "before": true,
+          "after": true,
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "published_at",
+          "expected": "2026-10-23",
+          "before": "2026-10-23",
+          "after": "2026-10-23",
+          "before_kind": "match",
+          "after_kind": "match"
+        },
+        {
+          "field": "deadline",
+          "expected": null,
+          "before": null,
+          "after": null,
+          "before_kind": "match",
+          "after_kind": "match"
+        }
+      ],
+      "matches": {
+        "tech": {
+          "expected": "eligible",
+          "before": "eligible",
+          "after": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            }
+          ]
+        },
+        "ops": {
+          "expected": "eligible",
+          "before": "eligible",
+          "after": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "education",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "days_per_week",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "min_months",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "location",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "employment_type",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            },
+            {
+              "check": "exclusions",
+              "expected": "match",
+              "before": "match",
+              "after": "match"
+            }
+          ]
+        }
+      },
+      "skills_before": {
+        "matched": [
+          "Excel"
+        ],
+        "missing": [
+          "招聘流程",
+          "PowerPoint"
+        ],
+        "extra": [
+          "剪映",
+          "Photoshop",
+          "公众号"
+        ]
+      },
+      "skills_after": {
+        "matched": [
+          "Excel",
+          "PowerPoint"
+        ],
+        "missing": [
+          "招聘流程"
+        ],
+        "extra": [
+          "剪映",
+          "Photoshop",
+          "公众号"
+        ]
+      }
+    }
+  ],
+  "snapshot_sha256": {
+    "actual/master/ats_backend_intern.json": "61d878bb68f7bf91135838228fd7f154a8a17756bb9a8ef8cb2d0b05cb9f9f63",
+    "actual/master/boss_business_development_intern.json": "3fc59ceb8d0d34d46edf834c171691ebd57ed28e7bbce81cd92302d6edd183f2",
+    "actual/master/boss_data_analysis_intern.json": "5c76042ce238b3d0ecff5de0337365e7b4006401637060e0213982d40e1fc6dc",
+    "actual/master/official_finance_campus.json": "7d463e11b12cbc2668a7696801c6c7a24a0af3e75fe0e5e6ae448521ca05b2be",
+    "actual/master/shixiseng_hr_intern.json": "ed03405f88ed8a4120a1e8a861805c7475556a83e9920a087f62c86558d54552",
+    "actual/master/summary.json": "9b988d62a0256110db790d58d1cbcb65d37368be31c2df4a6f3529e53d7b4ebc",
+    "actual/wrapup-9939502/ats_backend_intern.json": "ae80a3b78aa9cebd3ca920d6e694e5e1fddbc8a14594c98224e079bdc6a6a37f",
+    "actual/wrapup-9939502/boss_business_development_intern.json": "99f7bcf28902c9a11129696ad20d6e79a9107a2c4ccce420f18ac49ffe3d2b02",
+    "actual/wrapup-9939502/boss_data_analysis_intern.json": "eaca44bdbdbf13fc105c747ae3e1ffa2026f06ddb2cd6132beb692b8824d860e",
+    "actual/wrapup-9939502/official_finance_campus.json": "a889eccae9a2ae16a152ca0da44f28f71596625a0f0c0b433e7317925cd290e2",
+    "actual/wrapup-9939502/shixiseng_hr_intern.json": "5812088ac2b017d5628aaf49d1a253eff2f1b6bfd2802e94d37e8763054e2025",
+    "actual/wrapup-9939502/summary.json": "0b49cfefc65073bf592d5a745253d75b27eba3297150a2f8c76b560c139def1a"
+  }
+}
