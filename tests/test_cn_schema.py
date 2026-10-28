@@ -245,6 +245,15 @@ class Requirements(SchemaCase):
             "requirements.education: use null",
         )
 
+    def test_no_minimum_is_a_stated_minimum_only(self):
+        # "none" says the JD rules out no one by degree; a preferred degree is still a degree.
+        record = self.cited("requirements.education", {"min": "none", "preferred": "master"}, "学历不限，硕士优先")
+        self.assertEqual(schema.validate(record), [])
+        self.assert_error(
+            self.cited("requirements.education", {"min": "bachelor", "preferred": "none"}, "本科及以上"),
+            "requirements.education.preferred: must be one of",
+        )
+
 
 class Evidence(SchemaCase):
     def test_a_value_without_evidence_is_rejected(self):

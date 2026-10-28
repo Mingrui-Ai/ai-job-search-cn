@@ -69,7 +69,8 @@ class Validate(unittest.TestCase):
             "education": [],
             "availability": {"start_date": None, "days_per_week": None, "months": None,
                              "cities": [], "remote_ok": None, "relocate": None},
-            "target": {"employment_types": [], "roles": [], "industries": [], "salary_min": None},
+            "target": {"employment_types": [], "roles": [], "industries": [], "salary_min": None,
+                       "directions": [], "weights": None},
             "skills": [], "experience": [], "awards": [], "certificates": [], "languages": [],
             "exclusions": {"cities": [], "companies": [], "keywords": []},
         }
@@ -84,6 +85,8 @@ class Validate(unittest.TestCase):
 
     def test_enums_are_shared_with_job_records(self):
         self.assert_error(with_value(self.example, "education.0.level", "本科"), "education[0].level: must be one of")
+        # A JD may say there is no minimum ("none"); a candidate always has a level.
+        self.assert_error(with_value(self.example, "education.0.level", "none"), "education[0].level: must be one of")
         self.assert_error(with_value(self.example, "target.employment_types", ["实习"]), "target.employment_types[0]")
         self.assert_error(with_value(self.example, "target.salary_min.unit", "元/天"), "target.salary_min.unit")
         self.assertEqual(profile.validate(with_value(self.example, "education.0.level", "phd")), [])
@@ -129,6 +132,44 @@ class Validate(unittest.TestCase):
         data = copy.deepcopy(self.example)
         data["skills"].append(dict(data["skills"][0], name="ｐｙｔｈｏｎ"))
         self.assert_error(data, f"skills[{len(data['skills']) - 1}].name: duplicate")
+
+    def test_directions_are_vocabulary_groups(self):
+        groups = {"tech", "data", "ops", "general", "game"}
+        self.assertEqual(profile.validate(with_value(self.example, "target.directions", ["data", "game"]),
+                                          groups=groups), [])
+        errors = profile.validate(with_value(self.example, "target.directions", ["技术"]), groups=groups)
+        expected = "'技术' is not a skill vocabulary group (data, game, ops, tech)"
+        self.assertTrue(any(expected in e for e in errors), errors)
+        self.assert_error(with_value(self.example, "target.directions", ["general"]), "not a direction")
+        self.assert_error(with_value(self.example, "target.directions", ["tech", "tech"]), "duplicate")
+        self.assert_error(with_value(self.example, "target.directions", None), "target.directions: must be a list")
+        # Without the vocabulary (match filter checks structure only) any key passes.
+        self.assertEqual(profile.validate(with_value(self.example, "target.directions", ["game"])), [])
+
+    def test_weights_are_null_or_all_four(self):
+        weights = {"skills": 40, "direction": 20, "experience": 30.5, "salary": 0}
+        self.assertEqual(profile.validate(with_value(self.example, "target.weights", weights)), [])
+        self.assert_error(with_value(self.example, "target.weights", {"skills": 100}),
+                          "target.weights.direction: missing")
+        for value in (-1, True, "35", None):
+            with self.subTest(value=value):
+                self.assert_error(with_value(self.example, "target.weights", dict(weights, skills=value)),
+                                  "target.weights.skills: must be a number")
+        self.assert_error(with_value(self.example, "target.weights", dict.fromkeys(profile.WEIGHT_KEYS, 0)),
+                          "at least one weight must be above 0")
+        self.assert_error(with_value(self.example, "target.weights", [35, 30, 25, 10]),
+                          "target.weights: must be an object")
+
+    def test_cities_without_an_answer_on_remote_or_moving_is_a_warning(self):
+        # Valid either way; but every job outside the cities would be location unknown.
+        self.assertEqual(profile.warnings(self.example), [])
+        open_remote = with_value(self.example, "availability.remote_ok", None)
+        self.assertEqual(profile.validate(open_remote), [])
+        [warning] = profile.warnings(open_remote)
+        self.assertTrue(warning.startswith("availability.remote_ok:"), warning)
+        both = with_value(open_remote, "availability.relocate", None)
+        self.assertEqual(len(profile.warnings(both)), 2)
+        self.assertEqual(profile.warnings(with_value(both, "availability.cities", [])), [])
 
     def test_redaction_masks_contact_only(self):
         shown = profile.redacted(self.example)
@@ -194,12 +235,41 @@ class Commands(unittest.TestCase):
         proc = run_cli("profile", "validate", str(other), data_dir=self.data)
         self.assertEqual(proc.returncode, 0, proc.stdout.decode("utf-8"))
 
+    def test_validate_warns_of_cities_without_an_answer_on_moving(self):
+        self.write(with_value(documented_example(), "availability.relocate", None))
+        out = json.loads(run_cli("profile", "validate", data_dir=self.data).stdout)
+        self.assertTrue(out["valid"])
+        self.assertTrue(any(w.startswith("availability.relocate:") for w in out["warnings"]), out["warnings"])
+
+    def test_directions_are_checked_against_the_data_dir_vocabulary(self):
+        self.write(with_value(documented_example(), "target.directions", ["game"]))
+        proc = run_cli("profile", "validate", data_dir=self.data)
+        self.assertEqual(proc.returncode, 1)
+        self.assertTrue(any("'game' is not a skill vocabulary group" in e for e in json.loads(proc.stdout)["errors"]))
+        (self.data / "config").mkdir()
+        vocabulary = self.data / "config" / "skills.json"
+        vocabulary.write_text(json.dumps({"version": 1, "groups": {"game": {"label": "游戏", "terms": ["Unity"]}}}),
+                              encoding="utf-8")
+        proc = run_cli("profile", "validate", data_dir=self.data)
+        self.assertEqual(proc.returncode, 0, proc.stdout.decode("utf-8"))
+        vocabulary.write_text("{oops", encoding="utf-8")
+        proc = run_cli("profile", "validate", data_dir=self.data)
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("skills.json", proc.stderr.decode("utf-8"))
+
 
 class Fixtures(unittest.TestCase):
     """The sample profiles later matching tests use: one technical, one not."""
 
     def test_there_is_a_technical_and_a_non_technical_profile(self):
         self.assertEqual(sorted(p.name for p in FIXTURES.iterdir() if p.is_dir()), ["ops", "tech"])
+
+    def test_each_states_its_direction_and_keeps_the_default_weights(self):
+        for name in ("tech", "ops"):
+            data = json.loads((FIXTURES / name / "profile.json").read_text(encoding="utf-8"))
+            with self.subTest(profile=name):
+                self.assertEqual(data["target"]["directions"], [name])
+                self.assertIsNone(data["target"]["weights"])
 
     def test_each_passes_profile_validate(self):
         for directory in sorted(FIXTURES.iterdir()):

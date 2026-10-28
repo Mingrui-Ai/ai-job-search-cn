@@ -38,7 +38,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 | --- | --- | --- |
 | `ineligible` | 不符合 | 任何一项是 `conflict` |
 | `needs_check` | 待确认 | 没有冲突，但有 `unknown`，需要看原文或问 HR |
-| `eligible` | 符合 | 全部是 `match` |
+| `eligible` | 符合 | 全部是 `match` 或 `not_applicable` |
 
 ### 各项条件
 
@@ -47,15 +47,17 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 | `check` | JD 字段 | 档案字段 | `match` | `conflict` | `unknown` |
 | --- | --- | --- | --- | --- | --- |
 | `graduation` | `requirements.graduation` | `graduation.year` | 你的届别在列表中；或不在列表中但 JD 只是"优先"（附 `note`） | JD 限定届别（`strict: true`）且你不在其中 | 任一方没写 |
-| `education` | `requirements.education.min` | `education[]` 中最高的 `level` | 最高学历不低于最低要求 | 低于最低要求 | JD 没写最低学历（只写"优先"也算没写），或档案没写学历 |
-| `days_per_week` | `requirements.days_per_week` | `availability.days_per_week` | 要求天数 ≤ 你能到岗的天数 | 要求天数更多 | 任一方没写 |
-| `min_months` | `requirements.min_months` | `availability.months` | 要求月数 ≤ 你能实习的月数 | 要求月数更多 | 任一方没写 |
+| `education` | `requirements.education.min` | `education[]` 中最高的 `level` | 最高学历不低于最低要求；或 JD 写明学历不限（`none`），这时不看档案 | 低于最低要求 | JD 没写最低学历（只写"优先"也算没写），或档案没写学历 |
+| `days_per_week` | `requirements.days_per_week` | `availability.days_per_week` | 要求天数 ≤ 你能到岗的天数 | 要求天数更多 | 任一方没写（校招、社招岗位没写时是 `not_applicable`，见下） |
+| `min_months` | `requirements.min_months` | `availability.months` | 要求月数 ≤ 你能实习的月数 | 要求月数更多 | 任一方没写（同上） |
 | `location` | `cities`、`remote` | `availability.cities`、`remote_ok`、`relocate` | 城市有交集（"上海"与"上海市"视为相同）；或 JD 可远程且你接受远程；或你愿意搬家（附 `note`） | 没有交集，你明确不搬家（`relocate: false`），并且 JD 写明不支持远程或你明确不接受远程 | JD 或档案没写城市；或没有交集，但是否搬家没写，或能否远程两边都没有否定（包括两边都没写） |
 | `employment_type` | `employment_type` | `target.employment_types` | 岗位类型在你的求职方向中 | 不在其中 | 任一方没写 |
 | `exclusions` | `title`、`company`、`cities` | `exclusions` | 没命中排除项 | 标题含排除关键词；公司名含排除的公司；工作城市全部在排除城市中 | 设了排除关键词或公司，但 JD 没写标题或公司 |
 
 说明：
 
+- **不适用**（`not_applicable`）：每周到岗天数和实习时长是实习岗位的条件。校招、社招岗位（`employment_type` 为 `campus`、`experienced`）没写这两项时，`days_per_week`、`min_months` 判 `not_applicable`，引用 JD 的 `employment_type`，和 `match` 一样不影响总结论。写了就照常比较；实习岗位、或岗位类型没写时，没写仍是 `unknown`。
+- 地点判 `unknown` 时，理由写明两边各说了什么、缺了什么，例如"北京不在意向城市内；JD 没写能否远程；你接受远程、不考虑异地"。
 - 排除关键词**只匹配标题**。匹配正文容易误伤，例如正文写"本岗位不是外包"。
 - 薪资不在过滤范围内，由评分（M2-4）处理。
 
@@ -144,7 +146,11 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 
 ### 契约补充（M2-4a）
 
-- **不适用**：硬性条件新增结论 `not_applicable`。校招、社招岗位没写每周天数和实习时长时，`days_per_week`、`min_months` 判 `not_applicable`，不影响总结论。
-- **学历不限**：Job Schema 的 `requirements.education.min` 新增取值 `none`，表示 JD 明确写了"学历不限""不设最低学历门槛"，过滤时判 `match`。`jd parse` 要识别这些写法。
-- **同义词**：词表新增 `same_as`，列出同义的词条，例如 `["Kubernetes", "K8s"]`、`["Go", "Golang"]`、`["自然语言处理", "NLP"]`、`["PowerPoint", "PPT"]`。比较技能时同一组视为相同；解析结果仍保留 JD 原文的写法。用户词表可以追加。
-- **档案**：`target` 新增 `directions`（词表分组键的列表，例如 `["data", "product"]`）和 `weights`（null，或四个维度的权重）。Profile 还没有随版本发布，直接加入 v1，不升版本号。
+已实现（PR #38）：
+
+- **不适用**：硬性条件新增结论 `not_applicable`。校招、社招岗位没写每周天数和实习时长时，`days_per_week`、`min_months` 判 `not_applicable`，不影响总结论（见上文"各项条件"）。
+- **学历不限**：Job Schema 的 `requirements.education.min` 新增取值 `none`，表示 JD 明确写了"学历不限""不设最低学历门槛"，过滤时判 `match`。`jd parse` 能识别这些写法；"专业不限"不算。
+- **同义词**：词表新增 `same_as`，列出同义的词条：`["Go", "Golang"]`、`["JavaScript", "JS"]`、`["Kubernetes", "K8s"]`、`["自然语言处理", "NLP"]`、`["文案写作", "文案撰写"]`、`["PowerPoint", "PPT"]`（"JS""PPT""文案撰写"是新补的词条）。同一组的词必须都是词表里的词条，并且属于同一个分组。比较技能时同一组视为相同（`vocab.Vocabulary.same`）；解析结果仍保留 JD 原文的写法。用户词表可以追加，和已有的组有相同词条时并成一组。写法见 [jd-parse.md](jd-parse.md#技能词表)。
+- **档案**：`target` 新增 `directions`（词表分组键的列表，例如 `["data", "product"]`；`general` 不算方向）和 `weights`（null，或四个维度的权重，每项不小于 0）。Profile 还没有随版本发布，直接加入 v1，不升版本号。字段说明见 [profile.md](profile.md#3-profilejson-字段)。
+- **建档**：`profile-setup.md` 要求问到"是否接受远程""是否愿意去其他城市"，并说明留空的后果；写了意向城市而这两项为空时，`profile validate` 给出警告。草稿放在 `data/profile/drafts/`。
+- **地点的理由**：判 `unknown` 时写明哪一方没写，见上文"各项条件"的说明。

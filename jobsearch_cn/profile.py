@@ -15,7 +15,7 @@ compare directly. Every fact names its source: a file under sources/, or
 import re
 from datetime import date
 
-from jobsearch_cn import schema
+from jobsearch_cn import schema, vocab
 from jobsearch_cn.schema import _check_bool, _check_enum, _check_int_range, _check_text, _is_int
 
 PROFILE_VERSION = 1
@@ -32,8 +32,9 @@ CONTACT_KEYS = ("name", "phone", "email", "github", "website")
 GRADUATION_KEYS = ("year", "month")
 EDUCATION_KEYS = ("level", "school", "major", "start", "end", "gpa", "rank", "courses", "source")
 AVAILABILITY_KEYS = ("start_date", "days_per_week", "months", "cities", "remote_ok", "relocate")
-TARGET_KEYS = ("employment_types", "roles", "industries", "salary_min")
+TARGET_KEYS = ("employment_types", "roles", "industries", "salary_min", "directions", "weights")
 SALARY_MIN_KEYS = ("amount", "unit")
+WEIGHT_KEYS = ("skills", "direction", "experience", "salary")  # the scoring dimensions (M2-4)
 SKILL_KEYS = ("name", "level", "used_in", "source")
 EXPERIENCE_KEYS = ("id", "type", "name", "org", "role", "start", "end", "bullets", "source")
 AWARD_KEYS = ("name", "date", "source")
@@ -48,11 +49,13 @@ _DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _EXPERIENCE_ID = re.compile(r"^[a-z][a-z0-9-]{0,39}$")
 
 
-def validate(profile, sources=None) -> list[str]:
+def validate(profile, sources=None, groups=None) -> list[str]:
     """Every problem with a profile as "<field path>: <message>"; [] means valid.
 
     sources is the set of file names under data/profile/sources/; when given,
-    every non-"user" source must be one of them.
+    every non-"user" source must be one of them. groups is the set of skill
+    vocabulary group keys (the user's included); when given, every
+    target.directions entry must be one of them.
     """
     if not isinstance(profile, dict):
         return ["profile: must be a JSON object"]
@@ -105,6 +108,23 @@ def validate(profile, sources=None) -> list[str]:
             if not (schema._is_number(amount) and amount > 0):
                 errors.append("target.salary_min.amount: must be a positive number")
             _check_enum(salary.get("unit"), schema.SALARY_UNITS, "target.salary_min.unit", errors, nullable=False)
+        directions = target.get("directions")
+        check.texts(directions, "target.directions")
+        for index, key in enumerate(directions if isinstance(directions, list) else []):
+            if key == vocab.GENERAL:
+                errors.append(f"target.directions[{index}]: {vocab.GENERAL} holds office software every direction "
+                              "uses; it is not a direction")
+            elif isinstance(key, str) and groups is not None and key not in groups:
+                choices = ", ".join(sorted(set(groups) - {vocab.GENERAL}))
+                errors.append(f"target.directions[{index}]: {key!r} is not a skill vocabulary group ({choices})")
+        weights = target.get("weights")
+        if weights is not None and _obj(target, "weights", WEIGHT_KEYS, errors, path="target.weights"):
+            values = [weights.get(key) for key in WEIGHT_KEYS]
+            for key, value in zip(WEIGHT_KEYS, values):
+                if not (schema._is_number(value) and value >= 0):
+                    errors.append(f"target.weights.{key}: must be a number, 0 or more")
+            if all(schema._is_number(value) and value >= 0 for value in values) and not any(values):
+                errors.append("target.weights: at least one weight must be above 0")
 
     experience_ids = set()
     for index, item in check.items(profile, "experience", EXPERIENCE_KEYS):
@@ -154,6 +174,17 @@ def validate(profile, sources=None) -> list[str]:
         for key in EXCLUSION_KEYS:
             check.texts(profile["exclusions"].get(key), f"exclusions.{key}")
     return errors
+
+
+def warnings(profile) -> list[str]:
+    """What a valid profile leaves open that will cost answers later, as "<field path>: <message>"."""
+    availability = profile.get("availability") if isinstance(profile, dict) else None
+    if not isinstance(availability, dict) or not availability.get("cities"):
+        return []
+    # With target cities but no word on remote work or moving, every job elsewhere is
+    # location unknown: the filter cannot rule it in or out.
+    return [f"availability.{key}: null while availability.cities is set; jobs in other cities will all be "
+            "location unknown" for key in ("remote_ok", "relocate") if availability.get(key) is None]
 
 
 def redacted(profile: dict) -> dict:

@@ -23,7 +23,7 @@ PROFILES = REPO / "tests" / "fixtures" / "cn" / "profile"
 
 sys.path.insert(0, str(REPO))
 from jobsearch_cn import jd_parser, match, store  # noqa: E402
-from jobsearch_cn.match import CONFLICT, MATCH, UNKNOWN  # noqa: E402
+from jobsearch_cn.match import CONFLICT, MATCH, NOT_APPLICABLE, UNKNOWN  # noqa: E402
 
 NOW = datetime(2026, 10, 27, 10, 0, tzinfo=timezone(timedelta(hours=8)))
 
@@ -104,13 +104,20 @@ class Education(CheckCase):
         self.assert_result(UNKNOWN, job=setting(self.job, "requirements.education", None))
         self.assert_result(UNKNOWN, profile=setting(self.profile, "education", []))
 
+    def test_no_minimum_matches_whatever_the_profile_holds(self):
+        job = setting(self.job, "requirements.education", {"min": "none", "preferred": "master"})
+        self.assert_result(MATCH, job=job)
+        self.assert_result(MATCH, job=job, profile=setting(self.profile, "education", []))
+
 
 class DaysAndMonths(CheckCase):
+    LIMITS = (
+        ("days_per_week", "requirements.days_per_week", "availability.days_per_week"),
+        ("min_months", "requirements.min_months", "availability.months"),
+    )
+
     def test_each_limit(self):
-        for check, job_path, profile_path in (
-            ("days_per_week", "requirements.days_per_week", "availability.days_per_week"),
-            ("min_months", "requirements.min_months", "availability.months"),
-        ):
+        for check, job_path, profile_path in self.LIMITS:
             with self.subTest(check=check):
                 self.check = check
                 profile = setting(self.profile, profile_path, 4)
@@ -119,6 +126,23 @@ class DaysAndMonths(CheckCase):
                 self.assert_result(UNKNOWN, job=setting(self.job, job_path, None), profile=profile)
                 self.assert_result(UNKNOWN, job=setting(self.job, job_path, 5),
                                    profile=setting(self.profile, profile_path, None))
+
+    def test_not_applicable_when_a_campus_or_experienced_hire_states_none(self):
+        for check, job_path, profile_path in self.LIMITS:
+            self.check = check
+            profile = setting(self.profile, profile_path, 4)
+            for kind in ("campus", "experienced"):
+                with self.subTest(check=check, kind=kind):
+                    job = setting(setting(self.job, "employment_type", kind), job_path, None)
+                    item = self.assert_result(NOT_APPLICABLE, job=job, profile=profile)
+                    self.assertEqual(item["jd"]["employment_type"]["value"], kind)
+                    self.assert_result(NOT_APPLICABLE, job=job, profile=setting(self.profile, profile_path, None))
+                    # A full-time hire that does state the days or months is compared as usual.
+                    self.assert_result(CONFLICT, job=setting(job, job_path, 5), profile=profile)
+            for kind in ("internship", None):
+                with self.subTest(check=check, kind=kind):
+                    job = setting(setting(self.job, "employment_type", kind), job_path, None)
+                    self.assert_result(UNKNOWN, job=job, profile=profile)
 
 
 class Location(CheckCase):
@@ -162,6 +186,15 @@ class Location(CheckCase):
         for job, profile in cases:
             with self.subTest(job=job["cities"], profile=profile["availability"]):
                 self.assert_result(UNKNOWN, job=job, profile=profile)
+
+    def test_an_unknown_says_which_side_is_silent(self):
+        # The case the user hit: the profile answers both questions, the JD neither.
+        item = self.assert_result(UNKNOWN, job=self.place(["北京"], None), profile=self.wants(["深圳"], True, False))
+        self.assertEqual(item["reason"], "北京不在意向城市内；JD 没写能否远程；你接受远程、不考虑异地")
+        item = self.assert_result(UNKNOWN, job=self.place(["北京"], True), profile=self.wants(["深圳"], None, None))
+        self.assertEqual(item["reason"], "北京不在意向城市内；JD 可远程；档案没写是否接受远程和是否愿意去其他城市")
+        item = self.assert_result(UNKNOWN, job=self.place(["北京"], False), profile=self.wants(["深圳"], False, None))
+        self.assertEqual(item["reason"], "北京不在意向城市内；JD 不支持远程；你不接受远程；档案没写是否愿意去其他城市")
 
 
 class EmploymentType(CheckCase):
@@ -209,6 +242,14 @@ class Verdict(CheckCase):
     def test_all_match_is_eligible(self):
         self.assertEqual(match.filter_job(self.job, self.profile)["verdict"], "eligible")
 
+    def test_not_applicable_counts_like_a_match(self):
+        job = setting(self.job, "employment_type", "campus")
+        job = setting(setting(job, "requirements.days_per_week", None), "requirements.min_months", None)
+        out = match.filter_job(job, setting(self.profile, "target.employment_types", ["campus"]))
+        results = {c["check"]: c["result"] for c in out["checks"]}
+        self.assertEqual((results["days_per_week"], results["min_months"]), (NOT_APPLICABLE, NOT_APPLICABLE))
+        self.assertEqual(out["verdict"], "eligible")
+
     def test_an_empty_job_is_never_ruled_out(self):
         # Everything the parser could not read is unknown: the filter must not
         # cost the user a job over fields nobody filled in.
@@ -234,7 +275,8 @@ class Verdict(CheckCase):
 
 G, E, D, M, L, T, X = match.CHECKS
 
-# (JD fixture, profile) -> verdict and every non-match check. Checked by hand:
+# (JD fixture, profile) -> verdict and every non-match check. Checked by hand (the 校招 and 社招
+# samples state no weekly days or internship length, so both are not_applicable for them):
 #   tech  boss       all match (2026/2027届, 本科及以上, 4天, 6个月, 深圳, 实习)
 #   tech  nowcoder   校招 vs 实习 -> conflict; 北京/杭州, JD silent on remote, no relocation -> unknown
 #   tech  experienced 社招 -> conflict; 上海 and "不支持远程办公", no relocation -> conflict
@@ -254,13 +296,14 @@ G, E, D, M, L, T, X = match.CHECKS
 #   ops   boss_fullpage       4天 > 3, 6个月 > 3 -> conflicts; no work city -> unknown
 SAMPLE_TABLE = {
     ("boss_intern.txt", "tech"): ("eligible", {}),
-    ("nowcoder_campus.txt", "tech"): ("ineligible", {D: UNKNOWN, M: UNKNOWN, L: UNKNOWN, T: CONFLICT}),
-    ("experienced_hire.txt", "tech"): ("ineligible", {G: UNKNOWN, D: UNKNOWN, M: UNKNOWN, L: CONFLICT, T: CONFLICT}),
+    ("nowcoder_campus.txt", "tech"): ("ineligible", {D: NOT_APPLICABLE, M: NOT_APPLICABLE, L: UNKNOWN, T: CONFLICT}),
+    ("experienced_hire.txt", "tech"): ("ineligible", {G: UNKNOWN, D: NOT_APPLICABLE, M: NOT_APPLICABLE,
+                                                      L: CONFLICT, T: CONFLICT}),
     ("shixiseng_intern.txt", "tech"): ("ineligible", {E: UNKNOWN, D: CONFLICT, L: UNKNOWN}),
     ("official_site.txt", "tech"): ("needs_check", {G: UNKNOWN}),
     ("boss_intern.txt", "ops"): ("ineligible", {D: CONFLICT, M: CONFLICT, L: CONFLICT}),
-    ("nowcoder_campus.txt", "ops"): ("ineligible", {E: CONFLICT, D: UNKNOWN, M: UNKNOWN, L: CONFLICT}),
-    ("experienced_hire.txt", "ops"): ("ineligible", {G: UNKNOWN, D: UNKNOWN, M: UNKNOWN, T: CONFLICT}),
+    ("nowcoder_campus.txt", "ops"): ("ineligible", {E: CONFLICT, D: NOT_APPLICABLE, M: NOT_APPLICABLE, L: CONFLICT}),
+    ("experienced_hire.txt", "ops"): ("ineligible", {G: UNKNOWN, D: NOT_APPLICABLE, M: NOT_APPLICABLE, T: CONFLICT}),
     ("shixiseng_intern.txt", "ops"): ("ineligible", {E: UNKNOWN, D: CONFLICT}),
     ("official_site.txt", "ops"): ("ineligible", {G: UNKNOWN, E: CONFLICT, M: CONFLICT, L: CONFLICT}),
     ("boss_paste_backend_intern.txt", "tech"): ("ineligible", {D: CONFLICT, L: UNKNOWN}),
