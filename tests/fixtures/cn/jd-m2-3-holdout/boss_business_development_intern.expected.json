@@ -1,0 +1,207 @@
+{
+  "fixture": "boss_business_development_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "boss",
+  "method": "agent",
+  "basis": "本批首次运行 jd parse / match filter 前按原创文本语义写定；字段采用 Job Schema v1，过滤采用 match.md 已实现的七项硬性条件契约，不套用 M2-4 设计稿的未来扩展。",
+  "fields": {
+    "title": {
+      "value": "销售商务拓展实习生",
+      "evidence": [
+        "销售商务拓展实习生"
+      ]
+    },
+    "company": {
+      "value": "示例栖桥商务服务有限公司",
+      "evidence": [
+        "公司名称：示例栖桥商务服务有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "广州",
+        "上海"
+      ],
+      "evidence": [
+        "工作地点：广州 / 上海（两地任选其一）"
+      ],
+      "note": "工作地任选其一，两座城市都应纳入。"
+    },
+    "remote": {
+      "value": null,
+      "evidence": [],
+      "note": "未说明能否远程；两地任选不是远程办公。"
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "销售商务拓展实习生"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 200,
+        "max": 200,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪资：日薪200元"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027,
+          2028
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅面向2027、2028届"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": 3,
+      "evidence": [
+        "每周3-4天"
+      ],
+      "note": "区间的最低承诺为3天。"
+    },
+    "requirements.min_months": {
+      "value": 3,
+      "evidence": [
+        "至少实习3个月"
+      ]
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": "master"
+      },
+      "evidence": [
+        "本科及以上，硕士优先"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "客户访谈",
+        "CRM",
+        "Excel",
+        "PPT"
+      ],
+      "evidence": [
+        "技能要求：客户访谈、CRM、Excel，能用 PPT 完成方案沟通。"
+      ],
+      "note": "PPT保持正文原写法，不换成PowerPoint；SQL被否定，电话销售是明确不承担的任务，不纳入。"
+    },
+    "return_offer": {
+      "value": true,
+      "evidence": [
+        "表现优秀者有机会转正"
+      ]
+    },
+    "published_at": {
+      "value": null,
+      "evidence": [],
+      "note": "未给发布日期。"
+    },
+    "deadline": {
+      "value": "2026-12-05",
+      "evidence": [
+        "投递截止：2026-12-05"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "销售商务拓展实习生",
+      "interpretation": "标题含销售，命中tech排除词；未含完整的电话销售，不命中ops排除词。"
+    },
+    {
+      "text": "无需 SQL 基础；不承担电话销售任务。",
+      "interpretation": "SQL非正向技能；正文出现电话销售不应用于标题排除。"
+    },
+    {
+      "text": "每周3-4天",
+      "interpretation": "按最低到岗天数3保存，不能拿上限4淘汰ops。"
+    },
+    {
+      "text": "本科及以上，硕士优先",
+      "interpretation": "本科是最低学历；硕士仅为偏好。"
+    },
+    {
+      "text": "工作地点：广州 / 上海（两地任选其一）",
+      "interpretation": "两个城市均是可选工作地点，不推断远程。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "tech为2027届，在2027、2028届范围内。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "tech硕士达到本科最低学历并符合偏好。"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "tech每周4天，达到区间下限3天。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "tech可6个月，达到3个月。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "广州在tech意向中，多城市任选只需交集。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于tech目标类型。"
+        },
+        "exclusions": {
+          "result": "conflict",
+          "reason": "标题含tech明确排除的销售；与正文否定电话销售不矛盾，按标题字面契约判断。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "ops为2027届，在限定范围内。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "ops本科达到最低要求，硕士优先不是硬门槛。"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "ops每周3天，达到区间下限3天。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "ops可3个月，达到要求。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "上海在ops意向中。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于ops目标类型。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "ops只排除电话销售；该词只在正文否定句中，标题没有，不应命中。"
+        }
+      }
+    }
+  }
+}
