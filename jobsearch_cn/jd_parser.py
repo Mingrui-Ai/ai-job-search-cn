@@ -295,7 +295,7 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
         },
         "return_offer": cite("return_offer", _return_offer(text)),
         "published_at": cite("published_at", _dated(text, (_PUBLISHED,))),
-        "deadline": cite("deadline", _dated(text, (_DEADLINE_AFTER, _DEADLINE_BEFORE))),
+        "deadline": cite("deadline", _dated(text, (_DEADLINE_AFTER, _DEADLINE_BEFORE), same_line=True)),
         "status": "new",
         "evidence": evidence,
         "guard": guard.summary(findings),
@@ -630,9 +630,14 @@ def _return_offer(text: str):
     return (True, [match.group(0)]) if match else _NOTHING
 
 
-def _dated(text: str, patterns):
-    match = _earliest(patterns, text)
-    if match:
+def _dated(text: str, patterns, *, same_line=False):
+    # Deadline patterns allow whitespace around the date. Restrict their
+    # search to one physical line so a publication date cannot borrow the
+    # next line's "截止", including through the date pattern's own whitespace.
+    for part in text.splitlines() if same_line else [text]:
+        match = _earliest(patterns, part)
+        if not match:
+            continue
         try:
             value = date(int(match["y"]), int(match["m"]), int(match["d"])).isoformat()
         except ValueError:

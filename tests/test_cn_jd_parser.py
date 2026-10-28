@@ -154,6 +154,28 @@ class Fixtures(unittest.TestCase):
         self.assertTrue(set(example["requirements"]["skills"]) <= set(record["requirements"]["skills"]))
 
 
+class DeadlineLines(unittest.TestCase):
+    def test_publication_date_does_not_borrow_next_lines_deadline_label(self):
+        for newline in ("\n", "\r\n", "\r"):
+            with self.subTest(newline=repr(newline)):
+                record = parse_one("发布日期：2026-10-28" + newline + "截止日期：2026-12-15")
+                self.assertEqual(record["published_at"], "2026-10-28")
+                self.assertEqual(record["deadline"], "2026-12-15")
+                self.assertEqual(record["evidence"]["deadline"],
+                                 {"text": "截止日期：2026-12-15", "method": "rule"})
+
+    def test_deadline_and_date_must_share_a_line_in_either_order(self):
+        for text in ("截止日期：\n2026-12-15", "2026-12-15\n前截止", "2026-12-15\n截止",
+                     "截止日期：2026-\n12-15"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertIsNone(record["deadline"])
+                self.assertNotIn("deadline", record["evidence"])
+        for text in ("截止日期：\t2026-12-15", "2026年12月15日\t前 截止"):
+            with self.subTest(text=text):
+                self.assertEqual(parse_one(text)["deadline"], "2026-12-15")
+
+
 class RepeatedLocation(unittest.TestCase):
     def test_repeated_city_in_one_address_does_not_abort_parsing(self):
         text = "后端开发实习生\n工作地址：杭州西湖区示例大厦，浙江省杭州市西湖区示例路1号"

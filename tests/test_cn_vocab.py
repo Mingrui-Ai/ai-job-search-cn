@@ -55,6 +55,7 @@ class Builtin(unittest.TestCase):
         self.assertEqual(self.vocabulary.group_of("Figma"), "design")
         self.assertEqual(self.vocabulary.group_of("PRD"), "product")
         self.assertEqual(self.vocabulary.group_of("商务沟通"), "market")
+        self.assertEqual(self.vocabulary.group_of("客户沟通"), "market")
         # From the V4 samples (H9): finance and HR JDs count as their own directions.
         self.assertEqual(self.vocabulary.group_of("财务分析"), "finance")
         self.assertEqual(self.vocabulary.group_of("招聘流程"), "hr")
