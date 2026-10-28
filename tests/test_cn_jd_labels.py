@@ -1,4 +1,4 @@
-"""H12 header boundaries, using new synthetic text (not the V6 holdout).
+"""H12 header and strict footer tags, using synthetic text (not V6).
 
 The planner runs V6 and the user's real JDs independently. These cases test
 tag-cell meaning, evidence, and exclusion of body prose and unrelated rows.
@@ -73,12 +73,12 @@ class HeaderLabels(unittest.TestCase):
         self.assertEqual(record["requirements"]["education"], {"min": "bachelor", "preferred": "master"})
         self.assertEqual(record["evidence"]["requirements.education"]["text"], ["本科", "硕士优先"])
 
-    def test_header_scope_rejects_body_intro_and_sentences_with_pipes(self):
-        row = "示例叶舟商贸｜苏州｜4天/周｜5个月｜本科"
+    def test_whitespace_tags_stay_in_header_and_sentences_are_rejected(self):
+        row = "苏州 4天/周 5个月 本科"
         for prefix in ("岗位职责", "任职要求：", "公司介绍", "负责整理文档。", "无需相关经验",
                        "看过该职位的人还看了", "推荐职位", "公司基本信息"):
             with self.subTest(prefix=prefix):
-                record = parse("采购助理实习生\n" + prefix + "\n" + row)
+                record = parse("采购助理实习生\n" + prefix + "\n" + "其他说明\n" * 6 + row)
                 self.assertIsNone(record["company"])
                 self.assertEqual(record["cities"], [])
                 self.assertIsNone(record["requirements"]["education"])
@@ -90,6 +90,42 @@ class HeaderLabels(unittest.TestCase):
                          "可以 4天/周 到岗 5个月 内入职"):
             with self.subTest(sentence=sentence):
                 record = parse("采购助理实习生\n" + sentence)
+                self.assertIsNone(record["company"])
+                self.assertEqual(record["cities"], [])
+                self.assertIsNone(record["requirements"]["education"])
+                self.assertIsNone(record["requirements"]["min_months"])
+
+    def test_strict_pipe_tags_at_page_bottom_and_header_priority(self):
+        row = "示例青禾商贸｜苏州｜180-220元/天｜4天/周｜5个月｜大专"
+        body = ["职位详情", "负责整理采购资料。"] + ["与导师讨论本周任务。"] * 35
+        text = "\n".join(["采购资料实习生 180-220元/天", *body, "公司与岗位标签", row])
+        record = parse(text)
+        self.assertEqual(record["company"], "示例青禾商贸")
+        self.assertEqual(record["cities"], ["苏州"])
+        self.assertEqual(record["requirements"]["min_months"], 5)
+        self.assertEqual(record["requirements"]["education"], {"min": "associate", "preferred": None})
+        for field, snippet in (("company", "示例青禾商贸"), ("cities", "苏州"),
+                               ("requirements.min_months", "5个月"), ("requirements.education", "大专")):
+            self.assertEqual(record["evidence"][field], {"text": snippet, "method": "rule"})
+        self.assertEqual(schema.validate(record), [])
+        # A valid header wins over a different footer row.
+        header = "示例暖禾商贸｜南京｜4天/周｜5个月｜本科"
+        record = parse("采购资料实习生\n" + header + "\n" + text)
+        self.assertEqual(record["company"], "示例暖禾商贸")
+        self.assertEqual(record["cities"], ["南京"])
+        self.assertEqual(record["requirements"]["education"], {"min": "bachelor", "preferred": None})
+
+    def test_footer_fallback_rejects_prose_cells_and_other_separators(self):
+        for row in ("示例青禾商贸｜苏州｜4天/周｜5个月｜本科｜每周与导师讨论任务",
+                    "示例青禾商贸｜可以在苏州到岗｜4天/周｜5个月｜本科",
+                    "负责采购跟单｜苏州｜4天/周｜5个月｜本科",
+                    "苏州 4天/周 5个月 本科",
+                    "示例青禾商贸|苏州|4天/周|5个月|本科",
+                    "示例青禾商贸｜苏州|4天/周｜5个月｜本科",
+                    "示例青禾商贸｜苏州｜5个月｜本科"):
+            with self.subTest(row=row):
+                record = parse("采购资料实习生\n职位详情\n" + "负责整理采购资料。\n" * 8
+                               + "公司与岗位标签\n" + row)
                 self.assertIsNone(record["company"])
                 self.assertEqual(record["cities"], [])
                 self.assertIsNone(record["requirements"]["education"])

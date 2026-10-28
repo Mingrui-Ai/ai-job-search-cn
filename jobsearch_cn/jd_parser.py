@@ -396,26 +396,39 @@ def _title(text: str, lines: list):
 
 
 def _tag_cells(lines: list, headline=None):
-    """Read the title's header block, stopping before body headings or prose.
+    """Prefer the title's header, then strictly delimited tags anywhere.
 
     Navigation may push a tag line past line 30. Anchor to the selected title,
     not the page's first line; with no title, retain the bounded opening scan.
-    Piped rows may start with a company name, but every other cell must be a
-    tag. Merely mentioning days/months in a sentence does not make it a row.
+    If the header has no row, a full-page copy may put it below the body.
+    Only fullwidth-pipe rows qualify there; whitespace rows stay in the header.
     """
     candidates = lines[lines.index(headline) + 1:] if headline else lines[:_HEAD_LINES]
     for line in candidates:
         if _SECTION.match(line) or _INTRO.match(line) or _HEADER_END.match(line):
             break
-        piped = bool(_PIPE.search(line))
-        cells = _TAG_SEP.split(line) if piped else line.split()
-        if len(cells) >= 3 and any(_DAYS_TAG.fullmatch(cell) for cell in cells):
-            tags = cells[1:] if piped and _company_cell(cells[0]) else cells
-            if all(_TAG_WORD.fullmatch(cell) or _CITY_TAG.fullmatch(cell) or _is_salary(cell)
-                   or _EDUCATION_MIN.fullmatch(cell) or _EDUCATION_PREFERRED.fullmatch(cell) for cell in tags):
-                return cells, piped
+        cells, piped = _tag_row(line)
+        if cells:
+            return cells, piped
         if _PROSE.search(line) or _NEGATION.search(line) or _HEADER_PROSE.search(line):
             break
+    for line in lines:
+        if "｜" in line and "|" not in line:
+            cells, piped = _tag_row(line)
+            if cells:
+                return cells, piped
+    return [], False
+
+
+def _tag_row(line: str):
+    """Require a weekly-days tag and tag-only cells, except an optional company."""
+    piped = bool(_PIPE.search(line))
+    cells = _TAG_SEP.split(line) if piped else line.split()
+    if len(cells) >= 3 and any(_DAYS_TAG.fullmatch(cell) for cell in cells):
+        tags = cells[1:] if piped and _company_cell(cells[0]) else cells
+        if all(_TAG_WORD.fullmatch(cell) or _CITY_TAG.fullmatch(cell) or _is_salary(cell)
+               or _EDUCATION_MIN.fullmatch(cell) or _EDUCATION_PREFERRED.fullmatch(cell) for cell in tags):
+            return cells, piped
     return [], False
 
 
