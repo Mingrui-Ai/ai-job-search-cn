@@ -67,7 +67,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 
 ## 可解释评分（M2-4 设计稿）
 
-> 状态：设计稿（规划者，2026-10-28）。按[路线图 M2-4](roadmap.md) 分三个 PR 实现；实际做法和本稿不同时，在 PR 里说明，并改写本节。
+> 状态：设计稿（规划者，2026-10-28）。按[路线图 M2-4](roadmap.md) 分三个 PR 实现：M2-4a 契约补充（PR #38）、M2-4b 规则评分与匹配记录（PR #41，`jobsearch_cn/score.py`）已实现，M2-4c Agent 工作流待做。实际做法和本稿不同时，在 PR 里说明，并改写本节。
 
 过滤回答"能不能投"，评分回答"值不值得投、差在哪"。评分分两层：
 
@@ -131,6 +131,12 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 - `job_hash`、`profile_hash`：评分时岗位记录和档案的摘要，档案的摘要不含 `contact`。岗位或档案改了，`match list` 会把这条标为"过期"，需要重新评分。重新评分时，摘要都没变就保留 Agent 已补的内容，变了就清空 Agent 补充。
 - Agent 补充的维度必须有 `reason` 和 `evidence`：`jd` 是 JD 原文片段，必须逐字出现在岗位的 `raw_text` 里；`profile` 是档案条目的 id，必须存在。
 - `match validate` 检查结构、取值、分值范围和依据，并按上面的规则从各维度重新算出总分和等级，和记录不一致就报错。Agent 不能直接改总分。
+- 实现补充（M2-4b）：
+  - `direction`、`experience` 都带 `evidence`，规则给出时为 null；`experience` 还有 `hints`，列出档案里用到 JD 技能的经历 id，供 Agent 参考；
+  - 缺口里 `filter` 一类另带 `result`、`reason`；JD 没写的项 `jd` 为 null；
+  - 岗位的摘要不含 `status`（改岗位状态不算岗位变了），档案的摘要不含 `contact`；`rules_version` 和现在的不同也算过期；
+  - `match validate` 先核对两个摘要，岗位或档案改过就要求重新评分；再重算规则部分（过滤、技能、薪资、规则给出的方向、权重、缺口），和记录不一致即报错；
+  - 算分全程用分数运算，四舍五入取整（62.5 记 63），同一输入重复运行只有 `scored_at` 不同。
 
 ### 命令
 
@@ -141,6 +147,11 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 | `match save <文件>` | 校验通过后保存 |
 | `match show <岗位id>` | 显示已保存的记录 |
 | `match list` | 按等级、总分列出已评分的岗位，标出过期的记录 |
+
+- `match score` 输出匹配记录；加 `--save` 时同时保存，输出不变。岗位和档案都没变时，重新评分保留已保存记录里 Agent 补的经历和方向。
+- `match validate` 输出 `{"valid": ..., "errors": [...]}`；`match save` 校验通过后输出 `{"saved": "created" | "updated" | "unchanged", "job_id": ...}`。
+- `match list` 输出 `{"matches": [...], "warnings": [...]}`，每行有 `job_id`、`title`、`company`、`grade`、`score`、`complete`、`verdict`、`stale`，按等级（strong → poor → ineligible）、总分从高到低排序。
+- 退出码：0 成功；1 岗位或记录不存在、档案无效、记录没通过校验；2 文件读不了、不是 JSON、词表有误。
 
 输出都不含联系方式。两个 Agent 共用的工作流（评分 → 补充 → 校验 → 保存 → 用中文向用户说明结论、依据和缺口）在 M2-4c 写进本文。
 

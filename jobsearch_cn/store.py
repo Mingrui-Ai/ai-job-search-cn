@@ -1,5 +1,8 @@
 """Local job store: one JSON file per record under <data dir>/jobs/.
 
+Match records sit beside it, one file per job under <data dir>/matches/
+(MatchStore, D4).
+
 Plain files first, so a user can open, diff and back up their jobs with any
 tool; SQLite can sit behind the same functions later (ADR-6: everything stays
 in the gitignored data/ directory).
@@ -132,17 +135,55 @@ class Store:
         return record
 
     def _write(self, record: dict) -> None:
-        """Write atomically, so an interrupted save never leaves half a file."""
-        self.jobs.mkdir(parents=True, exist_ok=True)
-        text = json.dumps(record, ensure_ascii=False, indent=2) + "\n"
-        fd, tmp = tempfile.mkstemp(dir=self.jobs, prefix=".tmp-", suffix=".json")
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-                handle.write(text)
-            os.replace(tmp, self._path(record["id"]))
-        except BaseException:
-            Path(tmp).unlink(missing_ok=True)
-            raise
+        _write_json(self.jobs, self._path(record["id"]), record)
+
+
+class MatchStore:
+    """Match records (docs/cn/match.md), one JSON file per job under <data dir>/matches/ (D4)."""
+
+    def __init__(self, root):
+        self.matches = Path(root) / "matches"
+
+    def _path(self, job_id: str) -> Path:
+        if not schema._ID.match(job_id or ""):
+            raise StoreError(f"not a job id: {job_id!r}")
+        return self.matches / f"{job_id}.json"
+
+    def get(self, job_id: str):
+        path = self._path(job_id)
+        return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
+
+    def all(self):
+        """(records, warnings for files that could not be read)."""
+        records, warnings = [], []
+        for path in sorted(self.matches.glob("job_*.json")) if self.matches.is_dir() else []:
+            try:
+                records.append(json.loads(path.read_text(encoding="utf-8")))
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+                warnings.append(f"{path.name}: unreadable, skipped ({exc})")
+        return records, warnings
+
+    def save(self, record: dict) -> str:
+        """Store a checked record (score.validate); created, updated or unchanged."""
+        existing = self.get(record["job_id"])
+        if existing == record:
+            return "unchanged"
+        _write_json(self.matches, self._path(record["job_id"]), record)
+        return "created" if existing is None else "updated"
+
+
+def _write_json(directory: Path, path: Path, record: dict) -> None:
+    """Write atomically, so an interrupted save never leaves half a file."""
+    directory.mkdir(parents=True, exist_ok=True)
+    text = json.dumps(record, ensure_ascii=False, indent=2) + "\n"
+    fd, tmp = tempfile.mkstemp(dir=directory, prefix=".tmp-", suffix=".json")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        Path(tmp).unlink(missing_ok=True)
+        raise
 
 
 def _set_field(record: dict, path: str, value) -> None:
