@@ -1,0 +1,203 @@
+{
+  "fixture": "boss_event_fullpage.txt",
+  "job_schema_version": 1,
+  "site_argument": "boss",
+  "method": "agent",
+  "basis": "V6首次规则执行前按原创文本人工写定；采用Job Schema v1和现行match.md，未采用M2-4设计稿新取值。",
+  "fields": {
+    "title": {
+      "value": "会务协调实习生",
+      "evidence": [
+        "会务协调实习生 170-210元/天"
+      ],
+      "note": "标题与薪资同一行，title不包含薪资。"
+    },
+    "company": {
+      "value": "示例帆橙会务社",
+      "evidence": [
+        "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+      ],
+      "note": "公司只在整页复制较后面的标签行出现。"
+    },
+    "cities": {
+      "value": [
+        "上海"
+      ],
+      "evidence": [
+        "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科",
+        "工作地点：上海"
+      ]
+    },
+    "remote": {
+      "value": true,
+      "evidence": [
+        "支持全程远程实习"
+      ]
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "会务协调实习生"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 170,
+        "max": 210,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "evidence": [
+        "170-210元/天"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅招2027届在校生"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": 3,
+      "evidence": [
+        "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+      ]
+    },
+    "requirements.min_months": {
+      "value": 3,
+      "evidence": [
+        "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+      ]
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "Excel",
+        "活动策划",
+        "商务沟通"
+      ],
+      "evidence": [
+        "掌握 Excel、活动策划和商务沟通"
+      ]
+    },
+    "return_offer": {
+      "value": null,
+      "evidence": [
+        "转正安排：暂无说明"
+      ],
+      "note": "没有正向或否定转正承诺。"
+    },
+    "published_at": {
+      "value": "2026-10-25",
+      "evidence": [
+        "发布时间：2026-10-25"
+      ]
+    },
+    "deadline": {
+      "value": null,
+      "evidence": [
+        "申请截止日期尚未公布"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "会务协调实习生 170-210元/天",
+      "interpretation": "同一行拆开标题与日薪。"
+    },
+    {
+      "text": "示例帆橙会务社｜上海｜170-210元/天｜3天/周｜3个月｜本科",
+      "interpretation": "后置公司标签行仍是当前岗位信息，不把公司前的导航和材料说明当标题。"
+    },
+    {
+      "text": "采集日期：2026-10-28",
+      "interpretation": "采集日期不覆盖后面明确的发布时间2026-10-25。"
+    },
+    {
+      "text": "转正安排：暂无说明",
+      "interpretation": "未知不是true或false。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合"
+        },
+        "education": {
+          "result": "match",
+          "reason": "硕士达到本科"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "4天达到3天"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "6个月达到3个月"
+        },
+        "location": {
+          "result": "match",
+          "reason": "虽然无上海交集，但JD支持远程且tech接受"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于目标"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题未命中外包或销售"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合"
+        },
+        "education": {
+          "result": "match",
+          "reason": "本科达到要求"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "3天达到要求"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "3个月达到要求"
+        },
+        "location": {
+          "result": "match",
+          "reason": "上海直接命中，不接受远程不影响城市交集"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于目标"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题未命中电话销售"
+        }
+      }
+    }
+  }
+}

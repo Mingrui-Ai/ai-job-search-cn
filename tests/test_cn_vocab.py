@@ -19,7 +19,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from jobsearch_cn import jd_parser, schema, store, vocab  # noqa: E402
 
-GROUPS = ("tech", "data", "product", "ops", "design", "market", "general")
+GROUPS = ("tech", "data", "product", "ops", "design", "market", "finance", "hr", "general")
 
 
 class Builtin(unittest.TestCase):
@@ -29,11 +29,11 @@ class Builtin(unittest.TestCase):
     def test_the_groups_with_chinese_labels(self):
         self.assertEqual(tuple(self.vocabulary.groups), GROUPS)
         labels = [g["label"] for g in self.vocabulary.groups.values()]
-        self.assertEqual(labels, ["技术", "数据", "产品", "运营", "设计", "市场", "通用"])
+        self.assertEqual(labels, ["技术", "数据", "产品", "运营", "设计", "市场", "财务", "人力资源", "通用"])
         for key in GROUPS[:5]:
             self.assertGreaterEqual(len(self.vocabulary.groups[key]["terms"]), 5, key)
         # market and general (office software every direction uses) start small.
-        self.assertEqual(self.vocabulary.groups["general"]["terms"], ["Excel", "PowerPoint"])
+        self.assertEqual(self.vocabulary.groups["general"]["terms"], ["Excel", "PowerPoint", "PPT"])
         self.assertIn("市场调研", self.vocabulary.groups["market"]["terms"])
 
     def test_no_term_is_listed_twice_even_across_groups(self):
@@ -55,6 +55,11 @@ class Builtin(unittest.TestCase):
         self.assertEqual(self.vocabulary.group_of("Figma"), "design")
         self.assertEqual(self.vocabulary.group_of("PRD"), "product")
         self.assertEqual(self.vocabulary.group_of("商务沟通"), "market")
+        # From the V4 samples (H9): finance and HR JDs count as their own directions.
+        self.assertEqual(self.vocabulary.group_of("财务分析"), "finance")
+        self.assertEqual(self.vocabulary.group_of("招聘流程"), "hr")
+        self.assertEqual(self.vocabulary.group_of("CRM"), "market")
+        self.assertEqual(self.vocabulary.group_of("数据清洗"), "data")
         self.assertIsNone(self.vocabulary.group_of("打篮球"))
 
     def test_content_forms_are_not_skills_on_their_own(self):
@@ -63,6 +68,25 @@ class Builtin(unittest.TestCase):
             self.assertIsNone(self.vocabulary.group_of(term), term)
         for term in ("文案写作", "短视频运营", "直播运营"):
             self.assertEqual(self.vocabulary.group_of(term), "ops", term)
+
+    def test_synonyms_are_one_skill_to_matching(self):
+        pairs = (("K8s", "kubernetes"), ("Golang", "Go"), ("NLP", "自然语言处理"), ("JS", "JavaScript"),
+                 ("PPT", "PowerPoint"), ("文案撰写", "文案写作"), ("Ｐｙｔｈｏｎ", "python"))
+        for a, b in pairs:
+            with self.subTest(a=a, b=b):
+                self.assertTrue(self.vocabulary.same(a, b))
+                self.assertEqual(self.vocabulary.key(a), self.vocabulary.key(b))
+        self.assertFalse(self.vocabulary.same("Go", "Java"))
+        self.assertFalse(self.vocabulary.same("大模型", "LLM"))  # close, but not listed as the same skill
+        self.assertEqual(self.vocabulary.key("打篮球"), "打篮球")
+
+    def test_every_synonym_is_a_term_and_shares_its_group(self):
+        self.assertGreaterEqual(len(self.vocabulary.same_as), 6)
+        for entry in self.vocabulary.same_as:
+            with self.subTest(entry=entry):
+                groups = [self.vocabulary.group_of(term) for term in entry]
+                self.assertNotIn(None, groups)
+                self.assertEqual(len(set(groups)), 1)
 
 
 class UserFile(unittest.TestCase):
@@ -105,6 +129,12 @@ class UserFile(unittest.TestCase):
             {"version": 1, "groups": {"ops": {"terms": [""]}}},
             {"version": 1, "groups": {"ops": {"terms": ["x" * 51]}}},
             {"version": 1, "groups": {"ops": {"label": "", "terms": []}}},
+            {"version": 1, "groups": {}, "sameAs": [["K8s", "Kubernetes"]]},
+            {"version": 1, "groups": {}, "same_as": {"K8s": "Kubernetes"}},
+            {"version": 1, "groups": {}, "same_as": [["K8s"]]},
+            {"version": 1, "groups": {}, "same_as": [["K8s", "k8s"]]},
+            {"version": 1, "groups": {}, "same_as": [["K8s", "容器编排"]]},
+            {"version": 1, "groups": {}, "same_as": [["Python", "Excel"]]},
         ]
         for doc in bad:
             with self.subTest(doc=doc):
@@ -116,6 +146,16 @@ class UserFile(unittest.TestCase):
         doc = json.dumps({"version": 1, "groups": {"ops": {"terms": ["私域运营"]}}}, ensure_ascii=False)
         (self.data / "config" / "skills.json").write_bytes(b"\xef\xbb\xbf" + doc.encode("utf-8"))
         self.assertEqual(vocab.load(self.data).group_of("私域运营"), "ops")
+
+    def test_user_synonyms_add_and_join_the_builtin_ones(self):
+        self.write({"version": 1,
+                    "groups": {"ops": {"terms": ["私域运营", "私域流量运营"]}, "tech": {"terms": ["Kube"]}},
+                    "same_as": [["私域运营", "私域流量运营"], ["Kube", "K8s"]]})
+        vocabulary = vocab.load(self.data)
+        self.assertTrue(vocabulary.same("私域流量运营", "私域运营"))
+        self.assertTrue(vocabulary.same("Kube", "Kubernetes"))  # joined the built-in Kubernetes / K8s entry
+        self.assertEqual([entry for entry in vocabulary.same_as if "K8s" in entry], [["Kubernetes", "K8s", "Kube"]])
+        self.assertEqual(len(vocabulary.same_as), len(vocab.load().same_as) + 1)
 
     def test_the_parser_reads_user_terms_and_cites_them(self):
         self.write({"version": 1, "groups": {"ops": {"terms": ["私域运营"]}}})

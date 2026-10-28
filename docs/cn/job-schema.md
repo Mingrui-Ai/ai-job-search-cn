@@ -95,7 +95,7 @@ python -m jobsearch_cn jd validate job.json
 | `requirements.days_per_week` | 整数或 null | 每周最少到岗天数，1–7 |
 | `requirements.min_months` | 整数或 null | 最短实习月数，1–36 |
 | `requirements.education` | 对象或 null | 学历要求；两项都没写时整体填 null |
-| `requirements.education.min` | 枚举或 null | 最低学历：`associate` 大专、`bachelor` 本科、`master` 硕士、`phd` 博士 |
+| `requirements.education.min` | 枚举或 null | 最低学历：`associate` 大专、`bachelor` 本科、`master` 硕士、`phd` 博士；`none` 表示 JD 写明了学历不限（"学历不限""不设最低学历门槛"），和没写（null）不同 |
 | `requirements.education.preferred` | 枚举或 null | 优先学历，不能低于最低学历 |
 | `requirements.skills` | 字符串列表 | 技能关键词 |
 | `return_offer` | 布尔或 null | 是否可转正 |

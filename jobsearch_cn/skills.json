@@ -11,6 +11,7 @@
         "C++",
         "C#",
         "JavaScript",
+        "JS",
         "TypeScript",
         "Rust",
         "Kotlin",
@@ -93,6 +94,7 @@
         "Flink",
         "Hive",
         "数据挖掘",
+        "数据清洗",
         "Tableau",
         "Power BI",
         "SPSS",
@@ -137,6 +139,7 @@
         "秀米",
         "剪映",
         "文案写作",
+        "文案撰写",
         "数据复盘"
       ]
     },
@@ -162,15 +165,38 @@
       "label": "市场",
       "terms": [
         "市场调研",
-        "商务沟通"
+        "商务沟通",
+        "客户访谈",
+        "CRM"
+      ]
+    },
+    "finance": {
+      "label": "财务",
+      "terms": [
+        "财务分析"
+      ]
+    },
+    "hr": {
+      "label": "人力资源",
+      "terms": [
+        "招聘流程"
       ]
     },
     "general": {
       "label": "通用",
       "terms": [
         "Excel",
-        "PowerPoint"
+        "PowerPoint",
+        "PPT"
       ]
     }
-  }
+  },
+  "same_as": [
+    ["Go", "Golang"],
+    ["JavaScript", "JS"],
+    ["Kubernetes", "K8s"],
+    ["自然语言处理", "NLP"],
+    ["文案写作", "文案撰写"],
+    ["PowerPoint", "PPT"]
+  ]
 }

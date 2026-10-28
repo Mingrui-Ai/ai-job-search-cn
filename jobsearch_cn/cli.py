@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 
-from jobsearch_cn import __version__, jd_parser, match, profile, schema, store, vocab
+from jobsearch_cn import __version__, jd_parser, match, profile, resume_extract, schema, store, vocab
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -215,10 +215,14 @@ def _load_profile(path: Path) -> dict:
 def cmd_profile_validate(args) -> int:
     path, root = _profile_paths(args)
     data = _load_profile(path)
+    try:
+        groups = set(vocab.load(store.data_dir(args.data_dir)).groups)
+    except vocab.VocabularyError as exc:
+        raise InputError(str(exc)) from None
     sources_dir = root / "sources"
     sources = {p.name for p in sources_dir.iterdir() if p.is_file()} if sources_dir.is_dir() else set()
-    errors = profile.validate(data, sources=sources)
-    warnings = []
+    errors = profile.validate(data, sources=sources, groups=groups)
+    warnings = profile.warnings(data)
     notes = root / "notes.md"
     if not notes.is_file():
         warnings.append("notes.md is missing; CVs and greetings will have no free-text material")
@@ -235,6 +239,15 @@ def cmd_profile_show(args) -> int:
     path, _ = _profile_paths(args)
     data = _load_profile(path)
     _emit(data if args.contact else profile.redacted(data))
+    return 0
+
+
+def cmd_profile_extract(args) -> int:
+    try:
+        text = resume_extract.extract_text(args.file)
+    except resume_extract.ExtractionError as exc:
+        raise InputError(str(exc)) from None
+    _emit({"source": Path(args.file).name, "text": text})
     return 0
 
 
@@ -320,6 +333,13 @@ def build_parser() -> argparse.ArgumentParser:
     prof = commands.add_parser("profile", help="个人档案相关命令", description="个人档案相关命令（data/profile/）")
     prof.set_defaults(help_parser=prof)
     prof_commands = prof.add_subparsers(dest="profile_command", metavar="<profile-command>")
+
+    prof_extract = prof_commands.add_parser(
+        "extract", help="只读提取 DOCX/PDF 简历的纯文本，不保存文件",
+        description='读取简历，输出 UTF-8 JSON {"source": 文件名, "text": 纯文本}；不写文件或日志。',
+    )
+    prof_extract.add_argument("file", help="简历路径，通常在 data/profile/sources/ 下；支持 .docx、.pdf")
+    prof_extract.set_defaults(handler=cmd_profile_extract)
 
     prof_validate = prof_commands.add_parser(
         "validate", parents=[stored], help="按 docs/cn/profile.md 校验个人档案",
