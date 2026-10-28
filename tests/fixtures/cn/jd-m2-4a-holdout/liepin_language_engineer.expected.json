@@ -1,0 +1,177 @@
+{
+  "fixture": "liepin_language_engineer.txt",
+  "job_schema_version": 1,
+  "site_argument": "liepin",
+  "method": "agent",
+  "basis": "首次执行本批解析/匹配规则前，人工按原创正文、Job Schema 和 match.md 的 M2-4a 契约补充写定；none 与 not_applicable 有意采用新契约。",
+  "fields": {
+    "title": {
+      "value": "语言应用工程师（社招）",
+      "evidence": [
+        "语言应用工程师（社招）"
+      ]
+    },
+    "company": {
+      "value": "示例语舟信息技术有限公司",
+      "evidence": [
+        "公司名称：示例语舟信息技术有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "广州"
+      ],
+      "evidence": [
+        "工作城市：广州"
+      ]
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "不支持远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "experienced",
+      "evidence": [
+        "招聘类型：社会招聘"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": null,
+        "max": null,
+        "unit": null,
+        "months": null,
+        "negotiable": true
+      },
+      "evidence": [
+        "薪资：面议"
+      ]
+    },
+    "requirements.graduation": {
+      "value": null,
+      "evidence": [],
+      "note": "社招未写届别；M2-4a未将毕业届别扩展为不适用，仍unknown。"
+    },
+    "requirements.days_per_week": {
+      "value": null,
+      "evidence": [],
+      "note": "社招未写实习天数，not_applicable。"
+    },
+    "requirements.min_months": {
+      "value": null,
+      "evidence": [],
+      "note": "社招未写实习月数，not_applicable。"
+    },
+    "requirements.education": {
+      "value": {
+        "min": "none",
+        "preferred": null
+      },
+      "evidence": [
+        "不设最低学历门槛"
+      ],
+      "note": "明确不设门槛，不能记为未知。"
+    },
+    "requirements.skills": {
+      "value": [
+        "NLP",
+        "Python",
+        "Golang"
+      ],
+      "evidence": [
+        "了解 NLP，熟悉 Python，能使用 Golang 编写服务接口。"
+      ],
+      "note": "保留NLP/Golang，不改成自然语言处理/Go。"
+    },
+    "return_offer": {
+      "value": null,
+      "evidence": [],
+      "note": "未写实习转正。"
+    },
+    "published_at": {
+      "value": null,
+      "evidence": [],
+      "note": "未写发布日期。"
+    },
+    "deadline": {
+      "value": null,
+      "evidence": [],
+      "note": "未写截止日期。"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "unknown",
+          "reason": "JD没写届别；新契约只扩展天数和月数，届别仍未知。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "不设最低学历门槛，直接符合。"
+        },
+        "days_per_week": {
+          "result": "not_applicable",
+          "reason": "社招没有实习天数，不适用。"
+        },
+        "min_months": {
+          "result": "not_applicable",
+          "reason": "社招没有实习月数，不适用。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "广州与tech意向城市有交集。"
+        },
+        "employment_type": {
+          "result": "conflict",
+          "reason": "tech只接受实习，不接受社招。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "未命中外包、销售或其他排除项。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "unknown",
+          "reason": "JD没写届别；新契约只扩展天数和月数，届别仍未知。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "不设最低学历门槛，直接符合。"
+        },
+        "days_per_week": {
+          "result": "not_applicable",
+          "reason": "社招没有实习天数，不适用。"
+        },
+        "min_months": {
+          "result": "not_applicable",
+          "reason": "社招没有实习月数，不适用。"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "仅广州，不支持远程；ops仅上海且不搬家。"
+        },
+        "employment_type": {
+          "result": "conflict",
+          "reason": "ops接受实习/校招，不接受社招。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "未命中电话销售或其他排除项。"
+        }
+      }
+    }
+  },
+  "traps": [
+    "不设最低学历门槛明确表示none",
+    "社招缺实习条件为not_applicable，但届别缺失仍unknown",
+    "NLP/Golang解析阶段不能换成同义词"
+  ]
+}

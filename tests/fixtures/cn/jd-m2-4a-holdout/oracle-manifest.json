@@ -1,0 +1,65 @@
+{
+  "base_commit": "0e35b4bbb47630f315e5ec89d2635161560bf8b4",
+  "branch": "codex/v7-m2-4a-holdout",
+  "frozen_at_utc": "2026-10-28T09:41:54.919521+00:00",
+  "policy": "5份原创虚构JD、5份人工期望和10组过滤判断在首次运行本批jd parse / match filter前冻结；不按运行结果回填。M2-4a PR开出前不推送。",
+  "independence": {
+    "current_task": "仅读取路线图V7、Job Schema、match.md、tech/ops示例档案和V4产物格式；未读取解析/匹配源码、现有JD测试或执行者H9/M2-4a分支。运行脚本使用本人V4黑盒CLI脚本改写。",
+    "prior_context": "同一对话早期M1-6看过解析器及测试；H10实现看过store.py、存储测试及schema空值方法，不能声称没有任何源码先验。本批JD及人工判断均新编，在运行前写定。",
+    "scope": "M2-4a契约留出验证；不检查评分，不读取词表，技能不在解析阶段做同义词归一化。"
+  },
+  "comparison_policy": {
+    "field_groups": [
+      "title",
+      "company",
+      "cities",
+      "remote",
+      "employment_type",
+      "salary",
+      "requirements.graduation",
+      "requirements.days_per_week",
+      "requirements.min_months",
+      "requirements.education",
+      "requirements.skills",
+      "return_offer",
+      "published_at",
+      "deadline"
+    ],
+    "skills": "正文正向要求，保留原文拼写；比较时NFKC、忽略大小写和所有空白，按集合；不合并PPT/PowerPoint、K8s/Kubernetes、Go/Golang、NLP/自然语言处理。",
+    "other_fields": "城市与毕业年份列表按集合；标量、薪资、学历对象逐值比较。",
+    "match": "采用match.md契约补充的新none/not_applicable；校招/社招的缺失天数与月数逐项判不适用，明确写出的照常检查；实习缺失仍unknown。",
+    "difference_types": "match=相同；missing=仅缺失；extra=仅增加；wrong=值错误或同时漏读和多读。",
+    "oracle_replay": "另行通过CLI校验人工补全记录，成功才保存及过滤；旧master拒绝none时保留校验错误并跳过该份人工记录回放，不改为null、不绕过校验。主基线始终用规则解析出的记录。"
+  },
+  "oracle_files_sha256": {
+    "ats_content_intern.expected.json": "fec2b69f2ad744d066bb899f1e247bea31a817bc871b05bb4b283dddbec50fbb",
+    "ats_content_intern.txt": "ed4d2bfb39b92d295f728eeb05b5d53b1f348dcac66dbc02c152e7783aeb2d01",
+    "boss_supplier_intern.expected.json": "a2ba0c251b3104a0afaae35d2384dcf66777a66baf376ef68d367968594973e5",
+    "boss_supplier_intern.txt": "adea542de3fee181ef11100437d1abc8fe242ee1dae43a568cf98b7c97174529",
+    "liepin_language_engineer.expected.json": "46a19afac3b392c32d7efcb41d3437960430f0640372feea2c24f249347f5195",
+    "liepin_language_engineer.txt": "4c1d4c2aec0c6cdbd3f328d86599a686037f1da26a909e214d0e9ad6808a31df",
+    "nowcoder_backend_campus.expected.json": "3fa6c4ed6ca2bd19ea85a04cabd36717928f0315e2c2c6010560892eb0d69df6",
+    "nowcoder_backend_campus.txt": "3e4fdb3cab82c210dae6da4f380e16537e3e818567a0d8c4085889b6d785bcb5",
+    "official_service_campus.expected.json": "80bf272e62445d4fc65d7758c300f77c4d3a5b2bf885d8879d3b2524b7f2d02a",
+    "official_service_campus.txt": "01380aaed8a0b76a0d082f1efd3406526f6ffce96a884d93a2f9692d9a79be8a"
+  },
+  "contract_and_profile_sha256": {
+    "docs/cn/job-schema.md": "dcc3a1753a38aabfd19ef79a44c7f022cf3ac2bbb0430aa9ba52cb0b8dcba877",
+    "docs/cn/match.md": "33e015520755d43dc36470cb76a3ab93303de5f9e5c27de1e3393a4b04732564",
+    "docs/cn/roadmap.md": "b3343ce55529bfc259d9f01208552098052f56d63bc9d5c2d3e03e4b47b10dcd",
+    "tests/fixtures/cn/profile/tech/profile.json": "cd06c39d2041586ec52ecc11566a55b884ed93ed11c6485afba83807e0f4897e",
+    "tests/fixtures/cn/profile/ops/profile.json": "fe6fc3de8c9dc00ce8cf302175593cce2ead112de765dbe09db16e0ad92cb1d7"
+  },
+  "pre_execution_audit": {
+    "jd_count": 5,
+    "nontechnical_count": 3,
+    "field_groups": 70,
+    "human_matches": 10,
+    "check_states": 70,
+    "skill_terms": 15,
+    "verbatim_evidence_snippets": 51,
+    "all_evidence_found": true,
+    "encoding": "UTF-8 without BOM, LF",
+    "application_rules_executed": false
+  }
+}
