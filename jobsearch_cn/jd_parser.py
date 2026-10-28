@@ -16,7 +16,7 @@ import hashlib
 import re
 from datetime import date, datetime
 
-from jobsearch_cn import guard, schema
+from jobsearch_cn import guard, schema, vocab
 
 # A line of three or more "=" separates JDs pasted together.
 SEPARATOR = re.compile(r"^[ \t]*={3,}[ \t]*$", re.M)
@@ -36,21 +36,11 @@ CITIES = (
     "徐州", "烟台", "潍坊", "洛阳", "香港", "澳门", "台北", "新加坡",
 )
 
-# Canonical spellings. ASCII terms match case-insensitively at word edges, with
-# any internal space optional (SpringBoot finds "Spring Boot"); the schema's
-# evidence check folds case and whitespace the same way.
-SKILLS = (
-    "Python", "Java", "Golang", "Go", "C++", "C#", "JavaScript", "TypeScript", "Rust", "Kotlin",
-    "Swift", "Scala", "PHP", "Shell", "SQL", "MATLAB",
-    "Spring Boot", "Spring Cloud", "Spring", "MyBatis", "Django", "Flask", "FastAPI", "React", "Vue",
-    "Node.js", "PyTorch", "TensorFlow", "Keras", "scikit-learn", "Pandas", "NumPy", "Hugging Face",
-    "LangChain", "LangGraph", "LlamaIndex", "AutoGen", "Dify", "RAG", "LLM", "Agent", "MCP", "Prompt",
-    "vLLM", "CUDA", "Docker", "Kubernetes", "K8s", "Linux", "Git", "MySQL", "PostgreSQL", "Redis",
-    "MongoDB", "Elasticsearch", "Kafka", "RabbitMQ", "Hadoop", "Spark", "Flink", "Hive", "Nginx",
-    "gRPC", "AWS",
-    "大模型", "机器学习", "深度学习", "强化学习", "自然语言处理", "NLP", "计算机视觉", "推荐系统",
-    "知识图谱", "多模态", "向量数据库", "微服务", "分布式", "数据挖掘", "提示词工程", "微调",
-)
+# Skills come from the vocabulary (jobsearch_cn/skills.json plus the user's
+# data/config/skills.json, see vocab.py), written in canonical spellings. ASCII
+# terms match case-insensitively at word edges, with any internal space
+# optional (SpringBoot finds "Spring Boot"); the schema's evidence check folds
+# case and whitespace the same way.
 
 _N = r"\d+(?:\.\d+)?"
 _TO = r"\s*(?:-|~|～|－|—|–|至|到)\s*"
@@ -146,8 +136,19 @@ def _skill_pattern(term: str) -> re.Pattern:
     return re.compile(escaped, re.I)
 
 
-# Longest first, so "Spring Boot" claims its text before "Spring" and "Golang" before "Go".
-_SKILL_PATTERNS = sorted(((term, _skill_pattern(term)) for term in SKILLS), key=lambda item: -len(item[0]))
+def _skill_patterns(vocabulary) -> list:
+    # Longest first, so "Spring Boot" claims its text before "Spring" and "Golang" before "Go".
+    return sorted(((term, _skill_pattern(term)) for term in vocabulary.terms), key=lambda item: -len(item[0]))
+
+
+_BUILTIN_PATTERNS = None
+
+
+def _builtin_patterns() -> list:
+    global _BUILTIN_PATTERNS
+    if _BUILTIN_PATTERNS is None:
+        _BUILTIN_PATTERNS = _skill_patterns(vocab.load())
+    return _BUILTIN_PATTERNS
 
 
 def split_jds(text: str) -> list[str]:
@@ -166,12 +167,13 @@ def job_id(text: str) -> str:
     return f"job_{digest[:12]}"
 
 
-def parse_text(text: str, *, source_type: str = "paste", site=None, url=None, now=None):
+def parse_text(text: str, *, source_type: str = "paste", site=None, url=None, now=None, vocabulary=None):
     """Parse text holding one or more JDs. Returns (records, warnings).
 
     Raises ValueError when url is given for more than one JD: a URL names a
-    single posting.
+    single posting. vocabulary is a vocab.Vocabulary; the built-in one by default.
     """
+    patterns = _skill_patterns(vocabulary) if vocabulary is not None else _builtin_patterns()
     parts = split_jds(text)
     if url is not None and len(parts) > 1:
         raise ValueError(f"--url names one posting, but the input holds {len(parts)} JDs")
@@ -186,7 +188,7 @@ def parse_text(text: str, *, source_type: str = "paste", site=None, url=None, no
                              "message": f"JD {number} is longer than {schema.MAX_RAW_TEXT} characters; skipped"})
             continue
         record = build_record(cleaned, findings, source_type=source_type, site=site, url=url,
-                              imported_at=imported_at)
+                              imported_at=imported_at, skill_patterns=patterns)
         if record["guard"]["verdict"] == "warn":
             warnings.append({"segment": number, "kind": "guard", "message": findings["verdict"],
                              "excerpts": list(findings["instruction_like"])})
@@ -196,7 +198,8 @@ def parse_text(text: str, *, source_type: str = "paste", site=None, url=None, no
     return records, warnings
 
 
-def build_record(text: str, findings: dict, *, source_type: str, site, url, imported_at: str) -> dict:
+def build_record(text: str, findings: dict, *, source_type: str, site, url, imported_at: str,
+                 skill_patterns=None) -> dict:
     """One schema record from one cleaned JD."""
     evidence = {}
 
@@ -223,7 +226,7 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
             "days_per_week": cite("requirements.days_per_week", _days_per_week(text)),
             "min_months": cite("requirements.min_months", _min_months(text)),
             "education": cite("requirements.education", _education(text)),
-            "skills": cite("requirements.skills", _skills(text)) or [],
+            "skills": cite("requirements.skills", _skills(text, skill_patterns or _builtin_patterns())) or [],
         },
         "return_offer": cite("return_offer", _return_offer(text)),
         "published_at": cite("published_at", _dated(text, (_PUBLISHED,))),
@@ -444,9 +447,9 @@ def _dated(text: str, patterns):
     return _NOTHING
 
 
-def _skills(text: str):
+def _skills(text: str, patterns):
     claimed, first_seen = [], {}
-    for term, pattern in _SKILL_PATTERNS:
+    for term, pattern in patterns:
         for match in pattern.finditer(text):
             if any(match.start() < end and start < match.end() for start, end in claimed):
                 continue

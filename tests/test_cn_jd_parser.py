@@ -69,7 +69,7 @@ class Fixtures(unittest.TestCase):
             "salary": salary(150, 200, "CNY/day"), "cities": ["上海"],
             "requirements.graduation": {"years": [2027], "strict": True},
             "requirements.days_per_week": 5, "requirements.min_months": 3, "requirements.education": None,
-            "requirements.skills": ["SQL", "Python", "Pandas", "机器学习"], "return_offer": True,
+            "requirements.skills": ["数据分析", "SQL", "Python", "Pandas", "机器学习"], "return_offer": True,
             "deadline": "2026-11-15",
         },
         "nowcoder_campus.txt": {
@@ -202,6 +202,13 @@ SEED_CASES = (
     ("熟悉SpringBoot", "requirements.skills", ["Spring Boot"]),
     ("熟悉C/C++", "requirements.skills", ["C++"]),
     ("熟悉python", "requirements.skills", ["Python"]),
+    # Non-technical groups (jobsearch_cn/skills.json): data, ops, design, product.
+    ("熟练使用Excel、SQL，会用Tableau或Power BI", "requirements.skills", ["Excel", "SQL", "Tableau", "Power BI"]),
+    ("负责公众号和小红书的内容运营，会用秀米、剪映", "requirements.skills", ["公众号", "小红书", "内容运营", "秀米", "剪映"]),
+    ("熟练使用Figma、Photoshop，有UI设计经验", "requirements.skills", ["Figma", "Photoshop", "UI设计"]),
+    ("能独立撰写PRD，熟悉Axure原型设计", "requirements.skills", ["PRD", "Axure", "原型设计"]),
+    ("有A/B测试经验", "requirements.skills", ["A/B测试"]),
+    ("Excellent communication, a Sketchy draft", "requirements.skills", []),
 )
 
 

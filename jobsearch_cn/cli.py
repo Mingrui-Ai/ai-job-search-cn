@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 
-from jobsearch_cn import __version__, jd_parser, match, profile, schema, store
+from jobsearch_cn import __version__, jd_parser, match, profile, schema, store, vocab
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -110,8 +110,13 @@ def cmd_jd_parse(args) -> int:
         raise InputError("--url must be an http(s) URL")
     text, warnings = _read_jd_text(args.file)
     try:
+        vocabulary = vocab.load(store.data_dir(args.data_dir))
+    except vocab.VocabularyError as exc:
+        raise InputError(str(exc)) from None
+    try:
         jobs, parse_warnings = jd_parser.parse_text(
-            text, source_type="paste" if args.file == "-" else "file", site=args.site, url=args.url
+            text, source_type="paste" if args.file == "-" else "file", site=args.site, url=args.url,
+            vocabulary=vocabulary,
         )
     except ValueError as exc:
         raise InputError(str(exc)) from None

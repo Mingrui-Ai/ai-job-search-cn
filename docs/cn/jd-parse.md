@@ -59,7 +59,7 @@ Windows 文件的 CRLF 换行可以正常处理。
 | `title` | "职位名称：…"；或第一行是像岗位名的短句 | "岗位职责：…"这类段落标题 |
 | `company` | "公司：…"；或开头、结尾单独一行的"…有限公司 / 集团"（可带" · 城市"） | "加入示例科技有限公司，你将…"这类句子 |
 | `published_at`、`deadline` | 发布时间：2026-10-20；截止日期：2026年11月30日；2026年11月30日前截止 | 没有年份的日期（不猜年份） |
-| `requirements.skills` | 固定词表：Python、Java、Go、LangChain、RAG、PyTorch、MySQL、大模型、机器学习等 | Google 里的 Go、JavaScript 里的 Java、MongoDB 里的 Go |
+| `requirements.skills` | [技能词表](#技能词表) 中的词：Python、LangChain、大模型；Excel、Tableau；PRD、Axure；公众号、内容运营；Figma、Photoshop 等 | Google 里的 Go、JavaScript 里的 Java、MongoDB 里的 Go、Excellent 里的 Excel |
 
 每个值都附出处，`method` 为 `rule`。规则只抽取有把握的内容，宁可留空也不猜。
 
@@ -90,6 +90,40 @@ Windows 文件的 CRLF 换行可以正常处理。
 中文句式刻意收窄，招聘广告里的正常说法不会触发，例如"熟悉提示词工程""设计系统提示词""请将简历发送至邮箱""作为AI产品经理""如果你是AI爱好者"。
 
 `raw_text` 保存的是清理后的文本：去掉了隐藏和不可见字符，合并了多余的空白。
+
+## 技能词表
+
+技能只从词表里认，词表按求职方向分组：
+
+| 分组 | 名称 | 例子 |
+| --- | --- | --- |
+| `tech` | 技术 | Python、Go、Spring Boot、LangChain、RAG、大模型、Docker |
+| `data` | 数据 | SQL、Excel、Tableau、Power BI、Pandas、数据分析、A/B测试 |
+| `product` | 产品 | PRD、Axure、墨刀、原型设计、需求分析、竞品分析 |
+| `ops` | 运营 | 新媒体运营、内容运营、活动策划、公众号、小红书、秀米、剪映 |
+| `design` | 设计 | Figma、Photoshop、Illustrator、C4D、UI设计、交互设计 |
+
+内置词表在 `jobsearch_cn/skills.json`。匹配方式：
+
+- 英文词不区分大小写，必须是完整的词（Excellent 里不会读出 Excel），词中间的空格可有可无（SpringBoot 也认作 Spring Boot）；
+- 较长的词优先（"Spring Boot"不会再被读成"Spring"）；
+- 一份 JD 里同一个技能只记一次，按第一次出现的位置排序。
+
+**追加自己的词条**：新建 `data/config/skills.json`（UTF-8），格式和内置词表相同。词条会加进同名分组；写一个新的分组键就是新分组（键只能用小写字母、数字、`-` 和 `_`）。
+
+```json
+{
+  "version": 1,
+  "groups": {
+    "ops": {"terms": ["私域运营", "KOL投放"]},
+    "game": {"label": "游戏", "terms": ["Unity", "关卡设计"]}
+  }
+}
+```
+
+- 只能追加，不能删除或移动内置词条：写了已有的词会被忽略；
+- 文件格式不对时 `jd parse` 报错（退出码 2），不会只读一半；
+- 用 `--data-dir` 或 `JOBSEARCH_CN_DATA_DIR` 换了数据目录时，读的是那个目录下的 `config/skills.json`。
 
 ## 局限
 
