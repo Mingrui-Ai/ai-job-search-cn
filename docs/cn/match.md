@@ -146,7 +146,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 
 ### 契约补充（M2-4a）
 
-已实现（PR #TBD）：
+已实现（PR #38）：
 
 - **不适用**：硬性条件新增结论 `not_applicable`。校招、社招岗位没写每周天数和实习时长时，`days_per_week`、`min_months` 判 `not_applicable`，不影响总结论（见上文"各项条件"）。
 - **学历不限**：Job Schema 的 `requirements.education.min` 新增取值 `none`，表示 JD 明确写了"学历不限""不设最低学历门槛"，过滤时判 `match`。`jd parse` 能识别这些写法；"专业不限"不算。
