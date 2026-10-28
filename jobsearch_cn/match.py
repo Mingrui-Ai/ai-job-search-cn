@@ -2,15 +2,17 @@
 
 Each check compares one job field with one profile field (docs/cn/profile.md
 section 6) and returns match, conflict or unknown, quoting the job's evidence
-and naming the profile field it used. The rule that matters most: a value
-either side leaves unstated is unknown, never a conflict - the parser leaves
-fields empty when it is unsure, and an empty field must not cost the user a
-job. Scoring and salary comparison are not here (M2-4); nothing is stored.
+and naming the profile field it used; a campus or experienced hire that states
+no weekly days or internship length gets not_applicable for those, which counts
+like a match. The rule that matters most: a value either side leaves unstated
+is unknown, never a conflict - the parser leaves fields empty when it is
+unsure, and an empty field must not cost the user a job. Scoring and salary
+comparison are not here (M2-4); nothing is stored.
 """
 
 from jobsearch_cn import schema
 
-MATCH, CONFLICT, UNKNOWN = "match", "conflict", "unknown"
+MATCH, CONFLICT, UNKNOWN, NOT_APPLICABLE = "match", "conflict", "unknown", "not_applicable"
 ELIGIBLE, NEEDS_CHECK, INELIGIBLE = "eligible", "needs_check", "ineligible"
 
 CHECKS = ("graduation", "education", "days_per_week", "min_months", "location", "employment_type", "exclusions")
@@ -89,6 +91,8 @@ def _education(job, profile):
     fields = ("requirements.education",), ("education",)
     required = (job["requirements"]["education"] or {}).get("min")
     levels = [e.get("level") for e in profile.get("education") or [] if e.get("level") in schema.EDUCATION_LEVELS]
+    if required == schema.NO_MINIMUM:
+        return _item("education", MATCH, "JD 写明学历不限", job, *fields, profile)
     if required is None:
         return _item("education", UNKNOWN, "JD 没写最低学历（优先学历不作要求）", job, *fields, profile)
     if not levels:
@@ -101,10 +105,17 @@ def _education(job, profile):
                  job, *fields, profile)
 
 
+_NOT_INTERNSHIP = {"campus": "校招", "experienced": "社招"}
+
+
 def _at_most(job, profile, job_path, profile_path, check, label, unit):
     """The job asks for N; the candidate can give M. Conflict when N > M."""
     fields = (job_path,), (profile_path,)
     needed, available = schema._field(job, job_path), _profile_field(profile, profile_path)
+    if needed is None and job["employment_type"] in _NOT_INTERNSHIP:
+        # Weekly days and an internship length belong to internships; a full-time hire that states none asks none.
+        return _item(check, NOT_APPLICABLE, f"{_NOT_INTERNSHIP[job['employment_type']]}岗位，JD 没写{label}，不适用",
+                     job, (job_path, "employment_type"), (profile_path,), profile)
     if needed is None or available is None:
         return _item(check, UNKNOWN, f"JD 或档案没写{label}", job, *fields, profile)
     if needed <= available:

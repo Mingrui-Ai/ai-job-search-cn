@@ -42,7 +42,9 @@ data/profile/
     "employment_types": ["internship"],
     "roles": ["后端开发", "大模型应用开发"],
     "industries": ["互联网"],
-    "salary_min": {"amount": 150, "unit": "CNY/day"}
+    "salary_min": {"amount": 150, "unit": "CNY/day"},
+    "directions": ["tech"],
+    "weights": null
   },
   "skills": [
     {"name": "Python", "level": "proficient", "used_in": ["exp-1", "proj-1"], "source": "resume.pdf"},
@@ -69,7 +71,7 @@ data/profile/
 | `graduation` | 毕业年月。与 JD 的 `requirements.graduation.years` 比较 |
 | `education[]` | `level` 取值同 Job Schema：`associate` / `bachelor` / `master` / `phd`。最高学历用于和 JD 的 `requirements.education.min` 比较 |
 | `availability` | 可到岗日期、每周天数、可实习月数、意向城市、是否接受远程、是否愿意搬到其他城市。分别对应 JD 的 `days_per_week`、`min_months`、`cities`、`remote` |
-| `target` | 求职方向。`employment_types` 取值同 Job Schema；`salary_min.unit` 取值同 Job Schema 的薪资单位 |
+| `target` | 求职方向。`employment_types` 取值同 Job Schema；`salary_min.unit` 取值同 Job Schema 的薪资单位。`directions` 是想做的方向，取[技能词表](jd-parse.md#技能词表)的分组键，例如 `["data", "product"]`；可以用自己词表里新增的分组，`general`（通用办公软件）不算方向；`profile validate` 会对照词表检查。`weights` 是评分四个维度的权重，为 null 时用默认值（技能 35、方向 30、经历 25、薪资 10）；要改就写全四项，例如 `{"skills": 40, "direction": 20, "experience": 30, "salary": 10}`，每项不小于 0，至少一项大于 0。评分方法见 [match.md](match.md#可解释评分m2-4-设计稿) |
 | `skills[]` | `level`：`familiar`（了解）、`working`（熟悉）、`proficient`（熟练）、`expert`（精通）。`used_in` 指向用到它的经历或项目的 `id`，写简历时据此给出事实依据。收录范围见下方"填写约定" |
 | `experience[]` | 实习、项目、科研、竞赛、校园经历都放这里，用 `type` 区分：`internship` / `project` / `research` / `competition` / `campus` / `work`。`name`、`org`、`role` 的分工见下方"填写约定" |
 
@@ -141,3 +143,4 @@ JD 字段为 `null` 时结论是"未知"，不判为不符合。
 - 字段与四档技能等级按本稿实现，使用中再调整（2026-10-27）。
 - `experience[].name` 与上方"填写约定"（H7，2026-10-27）：M1-5 第二轮发现两个 Agent 对同一份简历的填法不同（项目名称一个放 `org`、一个放 `role`；只在经历里出现的技能一个收、一个不收），M3 生成简历前必须统一。新增 `name` 而不是规定"项目名放 `role`"，是为了让每个字段只表达一件事。Profile 尚未随任何版本发布，所以直接加入 v1，不升版本号；已有的本地档案需要为每段经历补上 `"name": null` 或项目名称，`profile validate` 会逐条提示。
 - `exclusions.keywords` 暂定只匹配岗位标题（正文容易误伤，例如"非外包岗位"），在 v0.2 硬性过滤中实现，可再讨论。
+- `target.directions` 和 `target.weights`（M2-4a，2026-10-28）：供 M2-4 评分的"方向"维度和加权总分使用。和 `experience[].name` 一样直接加入 v1，不升版本号；已有的本地档案需要在 `target` 里补上 `"directions": []`（或自己的方向）和 `"weights": null`，`profile validate` 会提示。
