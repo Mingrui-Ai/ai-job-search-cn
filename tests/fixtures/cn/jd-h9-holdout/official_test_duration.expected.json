@@ -1,0 +1,278 @@
+{
+  "fixture": "official_test_duration.txt",
+  "job_schema_version": 1,
+  "site_argument": "official",
+  "method": "agent",
+  "basis": "V6首次规则执行前按原创文本人工写定；采用Job Schema v1和现行match.md，未采用M2-4设计稿新取值。",
+  "fields": {
+    "title": {
+      "value": "自动化测试实习生",
+      "evidence": [
+        "职位名称：自动化测试实习生"
+      ]
+    },
+    "company": {
+      "value": "示例栖蓝质量科技有限公司",
+      "evidence": [
+        "公司名称：示例栖蓝质量科技有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "深圳"
+      ],
+      "evidence": [
+        "工作地点：深圳"
+      ]
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "不支持远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "自动化测试实习生"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 200,
+        "max": 260,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪资：200-260元/天"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅面向2027届"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": 4,
+      "evidence": [
+        "每周至少4天"
+      ]
+    },
+    "requirements.min_months": {
+      "value": 4,
+      "evidence": [
+        "连续实习4个月以上"
+      ],
+      "note": "人工按岗位要求读4个月，平台介绍的3个月不是本岗位要求；H9规则应留空，另有rule_expectations。"
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "本科及以上学历"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "Python",
+        "Postman",
+        "Git"
+      ],
+      "evidence": [
+        "正向技能要求：掌握 Python，能够使用 Postman 和 Git"
+      ],
+      "note": "仅正文正向要求；标题、否定句、公司介绍及页脚不计。"
+    },
+    "return_offer": {
+      "value": true,
+      "evidence": [
+        "实习表现优秀者可转正"
+      ]
+    },
+    "published_at": {
+      "value": "2026-10-26",
+      "evidence": [
+        "发布时间：2026-10-26"
+      ]
+    },
+    "deadline": {
+      "value": "2026-12-08",
+      "evidence": [
+        "申请截止：2026-12-08"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "同类岗位通常标注实习3个月及以上，该数字仅为栏目介绍。",
+      "interpretation": "与岗位4个月不同；人取岗位要求，规则按H9留空。"
+    },
+    {
+      "text": "无需 Java 基础；不要求 C++ 项目经验；不需要 Photoshop 技能。",
+      "interpretation": "三种否定句中的技能都不纳入。"
+    },
+    {
+      "text": "本公司在小红书发布团队活动，这属于公司宣传渠道，不属于本岗位职责。",
+      "interpretation": "公司介绍平台名不是岗位技能。"
+    },
+    {
+      "text": "页脚：欢迎关注我们的公众号，了解团队动态。",
+      "interpretation": "页脚公众号不是技能。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合"
+        },
+        "education": {
+          "result": "match",
+          "reason": "硕士达到本科"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "4天达到4天"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "6个月达到岗位真实要求4个月"
+        },
+        "location": {
+          "result": "match",
+          "reason": "深圳直接命中"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于目标"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题未命中外包或销售"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合"
+        },
+        "education": {
+          "result": "match",
+          "reason": "本科达到要求"
+        },
+        "days_per_week": {
+          "result": "conflict",
+          "reason": "3天少于4天"
+        },
+        "min_months": {
+          "result": "conflict",
+          "reason": "3个月少于岗位真实要求4个月，不能采用平台3个月"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "深圳无交集，ops不搬家且不接受远程"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于目标"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题未命中电话销售"
+        }
+      }
+    }
+  },
+  "rule_expectations": {
+    "requirements.min_months": {
+      "value": null,
+      "classification": "policy_blank",
+      "label": "按口径留空",
+      "human_truth": 4,
+      "reason": "同一JD有平台3个月及岗位4个月两种实习时长；H9要求规则留空，人工真值仍为4。"
+    }
+  },
+  "policy_blank_match": {
+    "tech": {
+      "verdict": "needs_check",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合"
+        },
+        "education": {
+          "result": "match",
+          "reason": "硕士达到本科"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "4天达到要求"
+        },
+        "min_months": {
+          "result": "unknown",
+          "reason": "H9规则留空后月数unknown，不能推断满足"
+        },
+        "location": {
+          "result": "match",
+          "reason": "深圳直接命中"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于目标"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题未命中排除词"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届符合"
+        },
+        "education": {
+          "result": "match",
+          "reason": "本科达到要求"
+        },
+        "days_per_week": {
+          "result": "conflict",
+          "reason": "3天少于4天"
+        },
+        "min_months": {
+          "result": "unknown",
+          "reason": "H9规则留空后月数unknown，原人工真值冲突不能从空值推出"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "深圳无交集，不搬家且不接受远程"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习属于目标"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题未命中排除词"
+        }
+      }
+    }
+  }
+}
