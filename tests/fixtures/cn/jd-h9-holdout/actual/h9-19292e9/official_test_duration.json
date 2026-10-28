@@ -1,0 +1,1362 @@
+{
+  "fixture": "official_test_duration.txt",
+  "site_argument": "official",
+  "parse": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_88b4176e9608",
+          "source": {
+            "type": "file",
+            "site": "official",
+            "url": null,
+            "imported_at": "2026-10-28T19:07:12+08:00"
+          },
+          "title": "自动化测试实习生",
+          "company": "示例栖蓝质量科技有限公司",
+          "cities": [
+            "深圳"
+          ],
+          "remote": false,
+          "employment_type": "internship",
+          "salary": {
+            "min": 200,
+            "max": 260,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": true
+            },
+            "days_per_week": 4,
+            "min_months": null,
+            "education": {
+              "min": "bachelor",
+              "preferred": null
+            },
+            "skills": [
+              "Python",
+              "Postman",
+              "Git"
+            ]
+          },
+          "return_offer": true,
+          "published_at": "2026-10-26",
+          "deadline": "2026-12-08",
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "自动化测试实习生",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例栖蓝质量科技有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作地点：深圳",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "职位名称：自动化测试实习生",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "200-260元/天",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "仅面向2027届",
+              "method": "rule"
+            },
+            "requirements.days_per_week": {
+              "text": "每周至少4天",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "本科及以上",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": [
+                "正向技能要求：掌握 Python",
+                "能够使用 Postman 和 Git"
+              ],
+              "method": "rule"
+            },
+            "return_offer": {
+              "text": "表现优秀者可转正",
+              "method": "rule"
+            },
+            "published_at": {
+              "text": "发布时间：2026-10-26",
+              "method": "rule"
+            },
+            "deadline": {
+              "text": "截止：2026-12-08",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "职位名称：自动化测试实习生\n公司名称：示例栖蓝质量科技有限公司\n工作地点：深圳\n薪资：200-260元/天\n发布时间：2026-10-26\n\n平台实习介绍\n同类岗位通常标注实习3个月及以上，该数字仅为栏目介绍。\n\n岗位职责\n整理接口检查记录，复核变更后的输出，汇总可复现的问题。\n正向技能要求：掌握 Python，能够使用 Postman 和 Git。\n\n岗位要求\n仅面向2027届，本科及以上学历。\n每周至少4天，连续实习4个月以上。\n无需 Java 基础；不要求 C++ 项目经验；不需要 Photoshop 技能。\n办公方式：不支持远程办公。\n转正说明：实习表现优秀者可转正。\n申请截止：2026-12-08\n\n公司介绍\n本公司在小红书发布团队活动，这属于公司宣传渠道，不属于本岗位职责。\n页脚：欢迎关注我们的公众号，了解团队动态。\n样例说明：公司、岗位和全部内容均为原创虚构。"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_88b4176e9608",
+          "title": "自动化测试实习生",
+          "company": "示例栖蓝质量科技有限公司",
+          "cities": [
+            "深圳"
+          ],
+          "status": "new"
+        }
+      ]
+    }
+  },
+  "validate_parsed": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "field_comparison": [
+    {
+      "field": "title",
+      "expected": "自动化测试实习生",
+      "actual": "自动化测试实习生",
+      "kind": "match"
+    },
+    {
+      "field": "company",
+      "expected": "示例栖蓝质量科技有限公司",
+      "actual": "示例栖蓝质量科技有限公司",
+      "kind": "match"
+    },
+    {
+      "field": "cities",
+      "expected": [
+        "深圳"
+      ],
+      "actual": [
+        "深圳"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "remote",
+      "expected": false,
+      "actual": false,
+      "kind": "match"
+    },
+    {
+      "field": "employment_type",
+      "expected": "internship",
+      "actual": "internship",
+      "kind": "match"
+    },
+    {
+      "field": "salary",
+      "expected": {
+        "min": 200,
+        "max": 260,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 200,
+        "max": 260,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.graduation",
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.days_per_week",
+      "expected": 4,
+      "actual": 4,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.min_months",
+      "expected": 4,
+      "actual": null,
+      "kind": "policy_blank",
+      "rule_expected": null,
+      "rule_policy_followed": true
+    },
+    {
+      "field": "requirements.education",
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.skills",
+      "expected": [
+        "Python",
+        "Postman",
+        "Git"
+      ],
+      "actual": [
+        "Python",
+        "Postman",
+        "Git"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "return_offer",
+      "expected": true,
+      "actual": true,
+      "kind": "match"
+    },
+    {
+      "field": "published_at",
+      "expected": "2026-10-26",
+      "actual": "2026-10-26",
+      "kind": "match"
+    },
+    {
+      "field": "deadline",
+      "expected": "2026-12-08",
+      "actual": "2026-12-08",
+      "kind": "match"
+    }
+  ],
+  "skill_comparison": {
+    "matched": [
+      "Python",
+      "Postman",
+      "Git"
+    ],
+    "missing": [],
+    "extra": []
+  },
+  "validate_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "save_oracle": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_88b4176e9608",
+          "title": "自动化测试实习生",
+          "company": "示例栖蓝质量科技有限公司",
+          "cities": [
+            "深圳"
+          ],
+          "status": "new"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  "matches": {
+    "tech": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_88b4176e9608",
+          "title": "自动化测试实习生",
+          "company": "示例栖蓝质量科技有限公司",
+          "verdict": "needs_check",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅面向2027届"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": "每周至少4天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市深圳在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": "工作地点：深圳"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "职位名称：自动化测试实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "自动化测试实习生",
+                  "evidence": "自动化测试实习生"
+                },
+                "company": {
+                  "value": "示例栖蓝质量科技有限公司",
+                  "evidence": "示例栖蓝质量科技有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": "工作地点：深圳"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "needs_check",
+        "verdict_equal": false,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "硕士达到本科"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天达到4天"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "6个月达到岗位真实要求4个月"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "深圳直接命中"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中外包或销售"
+          }
+        ],
+        "check_equal_count": 6
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_88b4176e9608",
+          "title": "自动化测试实习生",
+          "company": "示例栖蓝质量科技有限公司",
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅面向2027届"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "本科及以上学历"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": [
+                    "每周至少4天"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 4 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 4,
+                  "evidence": [
+                    "连续实习4个月以上"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市深圳在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "自动化测试实习生"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "自动化测试实习生",
+                  "evidence": [
+                    "职位名称：自动化测试实习生"
+                  ]
+                },
+                "company": {
+                  "value": "示例栖蓝质量科技有限公司",
+                  "evidence": [
+                    "公司名称：示例栖蓝质量科技有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "eligible",
+        "actual_verdict": "eligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "硕士达到本科"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天达到4天"
+          },
+          {
+            "check": "min_months",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "6个月达到岗位真实要求4个月"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "深圳直接命中"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中外包或销售"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "policy_blank_comparison": {
+        "expected_verdict": "needs_check",
+        "actual_verdict": "needs_check",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "硕士达到本科"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "4天达到要求"
+          },
+          {
+            "check": "min_months",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "H9规则留空后月数unknown，不能推断满足"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "深圳直接命中"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中排除词"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    },
+    "ops": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_88b4176e9608",
+          "title": "自动化测试实习生",
+          "company": "示例栖蓝质量科技有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅面向2027届"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "conflict",
+              "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": "每周至少4天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "深圳不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": "工作地点：深圳"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "职位名称：自动化测试实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "自动化测试实习生",
+                  "evidence": "自动化测试实习生"
+                },
+                "company": {
+                  "value": "示例栖蓝质量科技有限公司",
+                  "evidence": "示例栖蓝质量科技有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": "工作地点：深圳"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "本科达到要求"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "3天少于4天"
+          },
+          {
+            "check": "min_months",
+            "expected": "conflict",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "3个月少于岗位真实要求4个月，不能采用平台3个月"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "深圳无交集，ops不搬家且不接受远程"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中电话销售"
+          }
+        ],
+        "check_equal_count": 6
+      },
+      "oracle_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_88b4176e9608",
+          "title": "自动化测试实习生",
+          "company": "示例栖蓝质量科技有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅面向2027届"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "本科及以上学历"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "conflict",
+              "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": [
+                    "每周至少4天"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "conflict",
+              "reason": "JD 要求实习时长 4 个月，你只能 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 4,
+                  "evidence": [
+                    "连续实习4个月以上"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "深圳不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "自动化测试实习生"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "自动化测试实习生",
+                  "evidence": [
+                    "职位名称：自动化测试实习生"
+                  ]
+                },
+                "company": {
+                  "value": "示例栖蓝质量科技有限公司",
+                  "evidence": [
+                    "公司名称：示例栖蓝质量科技有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oracle_comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "本科达到要求"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "3天少于4天"
+          },
+          {
+            "check": "min_months",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "3个月少于岗位真实要求4个月，不能采用平台3个月"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "深圳无交集，ops不搬家且不接受远程"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中电话销售"
+          }
+        ],
+        "check_equal_count": 7
+      },
+      "policy_blank_comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "2027届符合"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "本科达到要求"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "3天少于4天"
+          },
+          {
+            "check": "min_months",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "H9规则留空后月数unknown，原人工真值冲突不能从空值推出"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "深圳无交集，不搬家且不接受远程"
+          },
+          {
+            "check": "employment_type",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "实习属于目标"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "标题未命中排除词"
+          }
+        ],
+        "check_equal_count": 7
+      }
+    }
+  }
+}

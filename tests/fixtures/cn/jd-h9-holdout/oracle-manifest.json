@@ -1,0 +1,84 @@
+{
+  "task": "V6",
+  "base_commit": "737c1f00ebb1c50a5fac0bedb977cb4c58ba472a",
+  "branch": "codex/v6-h9-holdout",
+  "frozen_at_utc": "2026-10-28T08:43:14.682709+00:00",
+  "policy": "Before first execution: freeze five original fictional JDs and manual truth. Do not rewrite oracles after results. No push/PR before H9 PR opens. V5 unchanged.",
+  "independence": {
+    "current_task": "Only specifications, example profiles and our V4 format. No parser source, existing parser tests or executor H9 branch read; no vocabulary lookup to constrain manual skills.",
+    "prior_context": "M1-6 earlier in this conversation touched parser/tests; V4 used public CLI. No claim of zero historical implementation exposure."
+  },
+  "comparison_policy": {
+    "field_groups": [
+      "title",
+      "company",
+      "cities",
+      "remote",
+      "employment_type",
+      "salary",
+      "requirements.graduation",
+      "requirements.days_per_week",
+      "requirements.min_months",
+      "requirements.education",
+      "requirements.skills",
+      "return_offer",
+      "published_at",
+      "deadline"
+    ],
+    "skills": "Body positive requirements only; exclude title-only, negation, company description and footer. Keep original spelling. NFKC/casefold/remove whitespace set comparison; no alias merging.",
+    "cities": "Set comparison; expected retains original order.",
+    "other_fields": "Scalar/object exact values, graduation years compared as a set.",
+    "difference_types": {
+      "match": "same as manual truth",
+      "missing": "only missing",
+      "extra": "only extra",
+      "wrong": "wrong scalar or missing and extra together",
+      "policy_blank": "Only the two frozen conflicting-duration fields: null is required H9 abstention; not an extraction error and not a truth match."
+    },
+    "duration_rule": "Keep manual truth 4. Actual null => policy_blank; actual 3 => wrong. Actual 4 => truth match but separately flag expected H9 null was not followed. Count raw truth match, policy blank, accepted groups and policy compliance separately.",
+    "match": "Primary denominator remains 10 verdicts/70 states against manual truth. Report raw parse-to-filter differences, 4 anticipated null-month verdicts/28 states separately, and manual-fields replay. Null month means unknown under current contract; do not treat expected downstream information loss as a matcher bug.",
+    "contract": "Current implemented Job Schema/match only, no M2-4 design extensions."
+  },
+  "oracle_files_sha256": {
+    "ats_recruiting_duration.expected.json": "cb7ab354da620dc0dee04810d47c63330459959bdef270f2d2b6ade080960696",
+    "ats_recruiting_duration.txt": "c5eed4953ce9538a873ec10902edc3c127d65dcf662f4e250d52793d970f2094",
+    "boss_event_fullpage.expected.json": "30ae5dcf1d2fafbb0a54ea1999f49836f577c8d9fa2fb337a502d2a0f66501ab",
+    "boss_event_fullpage.txt": "a9a0c0acfc606a66e20c48df42af3f84f594fad207ad409cb51e9d57e9e27f55",
+    "boss_finance_tags.expected.json": "7c658a7f3a469dd28ab4aaa33564d6bfb718aedc2c0df66b46327aed91cc89a3",
+    "boss_finance_tags.txt": "7eda83c33e726c2b1797784436889a885749d8816c0974664f6295645709d5aa",
+    "boss_frontend_tags.expected.json": "61ea332d8c026342ddf82462a6beea16079b8d1b5ad62e4647d4e588100b057a",
+    "boss_frontend_tags.txt": "23f240f9db9b1448c01aeea736d6c69ff2091e20d57ee6e2c86576b0470f8245",
+    "official_test_duration.expected.json": "f4caaa0688ce9a6e90ce19e2542268d41e88ff919ba42cee61ce54186153f939",
+    "official_test_duration.txt": "bf7cb278f3327e6144408cf279712566e8da21a3e243b2de6bc8e0d3e6de7867"
+  },
+  "contract_and_profile_sha256": {
+    "docs/cn/job-schema.md": "dcc3a1753a38aabfd19ef79a44c7f022cf3ac2bbb0430aa9ba52cb0b8dcba877",
+    "docs/cn/match.md": "33e015520755d43dc36470cb76a3ab93303de5f9e5c27de1e3393a4b04732564",
+    "docs/cn/roadmap.md": "a908f02777caf4294639ae1b53f7bd133cc0cea5a33a56f53fe0a84b6d09fb18",
+    "tests/fixtures/cn/profile/tech/profile.json": "cd06c39d2041586ec52ecc11566a55b884ed93ed11c6485afba83807e0f4897e",
+    "tests/fixtures/cn/profile/ops/profile.json": "fe6fc3de8c9dc00ce8cf302175593cce2ead112de765dbe09db16e0ad92cb1d7"
+  },
+  "h9_pr_metadata_at_freeze": [],
+  "pre_execution_audit": {
+    "jd_count": 5,
+    "boss_layout_count": 3,
+    "nontechnical_count": 3,
+    "field_groups": 70,
+    "human_matches": 10,
+    "check_states": 70,
+    "policy_blank_fields": 2,
+    "policy_blank_matches": 4,
+    "policy_blank_check_states": 28,
+    "verbatim_evidence_snippets": 69,
+    "all_evidence_found": true,
+    "line_counts": {
+      "ats_recruiting_duration.txt": 26,
+      "boss_event_fullpage.txt": 60,
+      "boss_finance_tags.txt": 18,
+      "boss_frontend_tags.txt": 18,
+      "official_test_duration.txt": 25
+    },
+    "encoding": "UTF-8 without BOM, LF",
+    "application_rules_executed": false
+  }
+}
