@@ -315,7 +315,9 @@ def _company(text: str, lines: list):
 def _cities(text: str, lines: list):
     cities, snippets = [], []
     for match in _LOCATION_LABEL.finditer(text):
-        found = [city for city in _CITY.findall(match["rest"]) if city not in cities]
+        # An address can repeat its city (district, then full postal address).
+        # Deduplicate this match as well as cities from earlier location labels.
+        found = [city for city in dict.fromkeys(_CITY.findall(match["rest"])) if city not in cities]
         if found:
             cities += found
             snippets.append(match.group(0).strip())

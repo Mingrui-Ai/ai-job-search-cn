@@ -16,9 +16,14 @@
 - 本地岗位库：`jd save`、`jd list`、`jd show`、`jd status`，`jd parse --save`；按内容指纹和规范化链接去重（G2），重复导入逐字段合并。
 - Agent 入口：Codex（`AGENTS.md`）和 Claude Code（`cn-jd-import` 技能）共用 [JD 导入工作流](jd-import.md)。
 
+**修复与验收（2026-10-28）**
+
+- 修复工作地址内重复出现同一城市时 `jd parse` 因重复列表项而中止的问题，保留首次出现顺序与原文出处。
+- Codex 样例实测和 5 份用户提供的真实 JD 导入、查询、去重验收已通过；真实简历 `cn-setup` 经用户确认后保存并通过校验。真实材料只保存在本机 `data/`。
+
 **已知限制**
 
 - 规则是保守的，城市和技能只认固定词表，很多字段需要 Agent 或用户补全。
 - 只用 JSON 文件存储，SQLite 按需接入（见[总体规划](master-plan.md) D4）。
-- Codex 端的导入工作流尚未实测。
+- 多处实习时长要求、网页元信息及标签等仍可能需要 Agent 按原文核对和补全。
 - 需要 Python 3.10 及以上。
