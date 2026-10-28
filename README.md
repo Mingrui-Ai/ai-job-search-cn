@@ -9,6 +9,9 @@
   面向国内实习与校招 · 同时兼容 Codex 和 Claude Code · 数据只存本地
 </p>
 
+> [!WARNING]
+> 开发中，尚未正式发布（v1.0 见[路线图 M8](docs/cn/roadmap.md#10-m8--v10-开源发布)）。
+
 > [!NOTE]
 > 本仓库基于开源项目 [ai-job-search-dev/ai-job-search](https://github.com/ai-job-search-dev/ai-job-search)（MIT 许可）做中国招聘市场的二次开发，目前 v0.1（中文 JD 入库）已实现、v0.2（个人档案与匹配）开发中，见[当前进度](#当前进度)。上游的英文 README 原样保留在[文末](#上游原版-readme)。
 
