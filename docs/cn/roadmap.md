@@ -25,7 +25,7 @@
 | **M2 · v0.2** 个人档案与可解释匹配 | 进行中：M2-1 个人档案和示例档案（PR #8、#11，真实简历自用验收 2026-10-28 通过）、M2-2 硬性条件过滤（PR #12）、H7 填写约定（PR #17）、M2-3 求职方向配置与词表外置（PR #19、#21、#26）、M2-4a 契约补充（PR #38）、M2-4b 规则评分与匹配记录（PR #41）、M2-4c Agent 评分工作流（PR #TBD）已完成 |
 | M3–M8 | 未开始 |
 
-本地测试：master（#TBD 合并后）共 1111 项，1101 项通过、10 项按预期跳过。CI 覆盖 Python 3.10–3.14 和 Windows。本地环境：conda `ai-job-search-cn`（Python 3.12.15）。
+本地测试：master（#TBD 合并后）共 1175 项，1164 项通过、11 项按预期跳过。CI 覆盖 Python 3.10–3.14 和 Windows。本地环境：conda `ai-job-search-cn`（Python 3.12.15）。
 
 ### 看板：下次工作（2026-10-28 更新）
 
@@ -310,6 +310,7 @@
       - 为了让 Agent 不必手抄、转存记录，补了两处：`match score --draft` 把记录写成草稿 `<数据目录>/matches/drafts/<岗位id>.json`（UTF-8；`match list` 不列草稿）；`match validate` 报总分不对时给出应填的对象，Agent 照抄，不自己算；
       - 两份样例 JD（后端 Go 实习、大模型算法实习）用 tech 示例档案在本机独立的数据目录走完全程，过程和给用户的说明见工作记录；`tests/test_cn_match_workflow.py` 用 CLI 把同样的步骤跑一遍；
       - 为 V5 对照，执行者在看 V5 之前给 10 份样例 × 2 份档案补了经历，存为 `tests/fixtures/cn/match-m2-4c/agent-judgments.json` 并用摘要冻结；按 `match list` 的顺序，tech 前 3 是后端 Go 实习（strong 76）、测试开发实习（moderate 50）、大模型算法实习（moderate 49），ops 前 3 是新媒体内容运营（strong 77）、市场管培（weak 44）、UI 设计（ineligible 15）。ops 只有 2 个岗位没被硬性条件过滤掉，第 3 名只能是 ineligible，这条验收怎么算请规划者裁定。
+      - 一并处理 #41 审核转来的两项：Codex 发现的 P2（`evidence.profile` 里写了对象、数组或数字时 `match validate` 抛 `TypeError`，现在报 `must be an experience id (a string)`，补了回归测试）；`tools/security_guards.py` 里 `match` 授权的注释改成实情（会写 `<数据目录>/matches/`），用户已确认。
   - 存储已定（D4，2026-10-28 用户决定）：匹配记录和岗位库一样，每条一个 JSON 文件；投递记录是否接入 SQLite，到 M4-0 再定。
 - [ ] **M2-5** `用户` + `执行` M2 验收与 `v0.2.0`
   - 10 份脱敏 JD 的过滤和评分结论稳定、可解释；

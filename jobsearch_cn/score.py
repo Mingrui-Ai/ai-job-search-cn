@@ -338,7 +338,10 @@ def _agent_dimension(dimensions, rules, key, fixed, job, profile) -> list:
         errors.append(f"{where}.evidence.profile: name the experience (its id) the score rests on")
     ids = {item.get("id") for item in profile.get("experience") or [] if isinstance(item, dict)}
     for index, ref in enumerate(evidence["profile"]):
-        if ref not in ids:
+        # Check the type first: an object or a list here is an agent's slip, and an error, not a crash.
+        if not (isinstance(ref, str) and ref.strip()):
+            errors.append(f"{where}.evidence.profile[{index}]: must be an experience id (a string)")
+        elif ref not in ids:
             errors.append(f"{where}.evidence.profile[{index}]: no experience with id {ref!r} in the profile")
     return errors
 

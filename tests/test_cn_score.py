@@ -291,6 +291,14 @@ class Validate(Case):
         self.assert_refused(setting(self.record, "dimensions.experience.hints", []), "experience.hints")
         self.assert_refused(dict(self.record, extra=1), "extra: unknown field")
 
+    def test_an_evidence_reference_that_is_not_an_id_is_an_error_not_a_crash(self):
+        # Codex's P2 on #41: an object here once raised TypeError inside validate.
+        for ref in ({}, ["exp-1"], 1, ""):
+            with self.subTest(ref=ref):
+                record = setting(self.record, "dimensions.experience.evidence.profile", [ref])
+                self.assertEqual(self.errors(record),
+                                 ["dimensions.experience.evidence.profile[0]: must be an experience id (a string)"])
+
     def test_an_agent_may_fill_a_direction_the_rules_left_null(self):
         job = with_skills(self.job, ["Excel"])  # nothing grouped: the rules leave the direction to an agent
         record = scored(job, self.tech)
@@ -453,6 +461,19 @@ class Commands(unittest.TestCase):
         out = self.cli("match", "save", "-", expect=1, input_bytes=json.dumps(tampered, ensure_ascii=False).encode())
         self.assertFalse(out["valid"])
         self.assertEqual(self.cli("match", "show", boss)["total"]["score"], record["total"]["score"])
+
+    def test_a_bad_evidence_reference_is_reported_as_json(self):
+        record = agent_filled(self.cli("match", "score", self.ids[0]))
+        path = self.data / "draft.json"
+        for ref in ({}, ["exp-1"], 1):
+            with self.subTest(ref=ref):
+                bad = setting(record, "dimensions.experience.evidence.profile", [ref])
+                path.write_text(json.dumps(bad, ensure_ascii=False), encoding="utf-8")
+                out = self.cli("match", "validate", str(path), expect=1)
+                self.assertEqual(out, {"valid": False, "errors": [
+                    "dimensions.experience.evidence.profile[0]: must be an experience id (a string)"]})
+                self.assertFalse(self.cli("match", "save", str(path), expect=1)["valid"])
+        self.cli("match", "show", self.ids[0], expect=1)  # nothing was saved
 
     def test_errors_and_privacy(self):
         self.cli("match", "score", "job_000000000000", expect=1)
