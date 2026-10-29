@@ -3,6 +3,7 @@
 **完成**
 
 - H16 #59 开出后，将 V8 分支合入最新 `origin/master@a70dbc7`，用 #59 head `89f3849d46d5997cd0091fdc1981d065526a6d30` 的隔离代码副本运行 5 份原创虚构 JD × tech/ops 示例档案。
+- 提交审核前再次合入 `origin/master@6ef2cc3`（规划与协作文档更新），重跑全量测试；被测 H16 head 仍为 `89f3849`。
 - 新增[对照报告](../../../tests/fixtures/cn/jd-h16-holdout/comparison.md)、CLI 快照、可复现脚本；原 master 快照、冻结清单及其列出的 13 个文件不改。路线图只更新 V8 自身进度。
 - 直接解析和按冻结人工字段重放分开，各跑 10 组过滤与规则评分；55 次 CLI 调用均成功。实现类审核交 Codex B，本次不兼做 H16 代码审核。
 
@@ -18,7 +19,7 @@
 - 旧字段 66/70、技能 21/24（漏 3、多 1）、直接过滤 10/10 与检查 69/70，具体差异和原基线相同。人工字段重放校验/保存 5/5、过滤 10/10、检查 70/70。
 - H16 新组语义 8/9、多读 0；两条路径共 20 个规则评分的技能分、项数、缺口及出处均符合各自输入，全部为 rules_version 2。完整人工输入下，10 组技能分和分母均正确。
 - `lint_skills` 通过；`security_guards` 首次发现隔离整仓副本内的根 `.gitignore` 否定规则，删除该临时副本的 `.gitignore` 后通过，未修改守卫或白名单。复现步骤改用仅提取应用和工具目录，避免该环境干扰。
-- conda `ai-job-search-cn`（Python 3.12.15）全量测试：`Ran 1184 tests in 132.977s`，`OK (skipped=12)`；`git diff --check` 通过。
+- conda `ai-job-search-cn`（Python 3.12.15）全量测试：合入 `a70dbc7` 后 1184 项通过（132.977s），合入 `6ef2cc3` 后再次 `Ran 1184 tests in 137.301s`，两次均 `OK (skipped=12)`；`git diff --check`、`check_framework_version` 通过。
 
 **遗留**
 
