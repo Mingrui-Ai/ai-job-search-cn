@@ -1,5 +1,8 @@
 """Local job store: one JSON file per record under <data dir>/jobs/.
 
+Match records sit beside it, one file per job under <data dir>/matches/
+(MatchStore, D4).
+
 Plain files first, so a user can open, diff and back up their jobs with any
 tool; SQLite can sit behind the same functions later (ADR-6: everything stays
 in the gitignored data/ directory).
@@ -26,6 +29,7 @@ from jobsearch_cn import schema
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 DATA_DIR_ENV = "JOBSEARCH_CN_DATA_DIR"
+_EVIDENCE_PRIORITY = {"rule": 0, "agent": 1, "user": 2}
 
 # Query parameters that track the click, not the posting. Dropped before URLs
 # are compared, so a link shared twice still matches itself.
@@ -104,7 +108,14 @@ class Store:
             merged = merge_same_text(existing, record)
         else:
             existing = self.find_by_url(record["source"]["url"])
-            merged = replace_edited(existing, record) if existing is not None else record
+            if existing is None:
+                merged = record
+            elif existing["raw_text"] == record["raw_text"]:
+                # An earlier URL update kept the original id. The next import
+                # of that edited text must still protect completed fields.
+                merged = merge_same_text(existing, record)
+            else:
+                merged = replace_edited(existing, record)
         if existing is not None and merged == existing:
             return "unchanged", existing
         errors = schema.validate(merged)
@@ -124,17 +135,55 @@ class Store:
         return record
 
     def _write(self, record: dict) -> None:
-        """Write atomically, so an interrupted save never leaves half a file."""
-        self.jobs.mkdir(parents=True, exist_ok=True)
-        text = json.dumps(record, ensure_ascii=False, indent=2) + "\n"
-        fd, tmp = tempfile.mkstemp(dir=self.jobs, prefix=".tmp-", suffix=".json")
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-                handle.write(text)
-            os.replace(tmp, self._path(record["id"]))
-        except BaseException:
-            Path(tmp).unlink(missing_ok=True)
-            raise
+        _write_json(self.jobs, self._path(record["id"]), record)
+
+
+class MatchStore:
+    """Match records (docs/cn/match.md), one JSON file per job under <data dir>/matches/ (D4)."""
+
+    def __init__(self, root):
+        self.matches = Path(root) / "matches"
+
+    def _path(self, job_id: str) -> Path:
+        if not schema._ID.match(job_id or ""):
+            raise StoreError(f"not a job id: {job_id!r}")
+        return self.matches / f"{job_id}.json"
+
+    def get(self, job_id: str):
+        path = self._path(job_id)
+        return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
+
+    def all(self):
+        """(records, warnings for files that could not be read)."""
+        records, warnings = [], []
+        for path in sorted(self.matches.glob("job_*.json")) if self.matches.is_dir() else []:
+            try:
+                records.append(json.loads(path.read_text(encoding="utf-8")))
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+                warnings.append(f"{path.name}: unreadable, skipped ({exc})")
+        return records, warnings
+
+    def save(self, record: dict) -> str:
+        """Store a checked record (score.validate); created, updated or unchanged."""
+        existing = self.get(record["job_id"])
+        if existing == record:
+            return "unchanged"
+        _write_json(self.matches, self._path(record["job_id"]), record)
+        return "created" if existing is None else "updated"
+
+
+def _write_json(directory: Path, path: Path, record: dict) -> None:
+    """Write atomically, so an interrupted save never leaves half a file."""
+    directory.mkdir(parents=True, exist_ok=True)
+    text = json.dumps(record, ensure_ascii=False, indent=2) + "\n"
+    fd, tmp = tempfile.mkstemp(dir=directory, prefix=".tmp-", suffix=".json")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        Path(tmp).unlink(missing_ok=True)
+        raise
 
 
 def _set_field(record: dict, path: str, value) -> None:
@@ -148,11 +197,10 @@ def _set_field(record: dict, path: str, value) -> None:
 def merge_same_text(old: dict, new: dict) -> dict:
     """Merge a re-import of the same JD text into the stored record.
 
-    Field by field: a value the new record holds replaces the stored one, so an
-    agent's completion lands; a field the new record leaves empty keeps the
-    stored value, so re-running the rules never erases what an agent or the
-    user filled in. A value the user typed in is only replaced by another
-    user value. Status and first import time are the store's, not the import's.
+    Fill empty fields, but never erase a value with an empty import. When both
+    values exist, only equal or higher evidence priority can replace the old
+    value: user > agent > rule. Evidence follows the winning value, even when
+    the two values are equal. Status and first import time stay unchanged.
     """
     merged = json.loads(json.dumps(old))
     for path in schema.EVIDENCE_FIELDS:
@@ -161,8 +209,11 @@ def merge_same_text(old: dict, new: dict) -> dict:
             continue
         new_evidence = new["evidence"].get(path)
         old_evidence = old["evidence"].get(path)
-        if old_evidence and old_evidence.get("method") == "user" and (new_evidence or {}).get("method") != "user":
-            continue
+        if schema._has_value(schema._field(old, path)):
+            old_priority = _EVIDENCE_PRIORITY.get((old_evidence or {}).get("method"), 0)
+            new_priority = _EVIDENCE_PRIORITY.get((new_evidence or {}).get("method"), 0)
+            if new_priority < old_priority:
+                continue
         _set_field(merged, path, value)
         merged["evidence"][path] = new_evidence
     source = merged["source"]

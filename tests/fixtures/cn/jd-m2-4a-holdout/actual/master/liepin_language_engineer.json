@@ -1,0 +1,686 @@
+{
+  "fixture": "liepin_language_engineer.txt",
+  "site_argument": "liepin",
+  "parse": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_cc8a7e3d1f3e",
+          "source": {
+            "type": "file",
+            "site": "liepin",
+            "url": null,
+            "imported_at": "2026-10-28T17:46:05+08:00"
+          },
+          "title": "语言应用工程师（社招）",
+          "company": "示例语舟信息技术有限公司",
+          "cities": [
+            "广州"
+          ],
+          "remote": false,
+          "employment_type": "experienced",
+          "salary": {
+            "min": null,
+            "max": null,
+            "unit": null,
+            "months": null,
+            "negotiable": true
+          },
+          "requirements": {
+            "graduation": null,
+            "days_per_week": null,
+            "min_months": null,
+            "education": null,
+            "skills": [
+              "NLP",
+              "Python",
+              "Golang"
+            ]
+          },
+          "return_offer": null,
+          "published_at": null,
+          "deadline": null,
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "语言应用工程师（社招）",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例语舟信息技术有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作城市：广州",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "语言应用工程师（社招）",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "面议",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": [
+                "了解 NLP",
+                "熟悉 Python",
+                "能使用 Golang 编写服务接口"
+              ],
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "语言应用工程师（社招）\n公司名称：示例语舟信息技术有限公司\n招聘类型：社会招聘\n工作城市：广州\n办公方式：不支持远程办公\n薪资：面议\n\n岗位职责：\n为服务工单建立语句归类流程，抽查归类结果，并整理错误案例。\n配合产品同事复核试运行反馈，维护上线后的问题记录。\n\n任职要求：\n不设最低学历门槛，以提交的作品和现场讨论为依据。\n了解 NLP，熟悉 Python，能使用 Golang 编写服务接口。"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_cc8a7e3d1f3e",
+          "title": "语言应用工程师（社招）",
+          "company": "示例语舟信息技术有限公司",
+          "cities": [
+            "广州"
+          ],
+          "status": "new"
+        }
+      ]
+    }
+  },
+  "validate_parsed": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  "field_comparison": [
+    {
+      "field": "title",
+      "expected": "语言应用工程师（社招）",
+      "actual": "语言应用工程师（社招）",
+      "kind": "match"
+    },
+    {
+      "field": "company",
+      "expected": "示例语舟信息技术有限公司",
+      "actual": "示例语舟信息技术有限公司",
+      "kind": "match"
+    },
+    {
+      "field": "cities",
+      "expected": [
+        "广州"
+      ],
+      "actual": [
+        "广州"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "remote",
+      "expected": false,
+      "actual": false,
+      "kind": "match"
+    },
+    {
+      "field": "employment_type",
+      "expected": "experienced",
+      "actual": "experienced",
+      "kind": "match"
+    },
+    {
+      "field": "salary",
+      "expected": {
+        "min": null,
+        "max": null,
+        "unit": null,
+        "months": null,
+        "negotiable": true
+      },
+      "actual": {
+        "min": null,
+        "max": null,
+        "unit": null,
+        "months": null,
+        "negotiable": true
+      },
+      "kind": "match"
+    },
+    {
+      "field": "requirements.graduation",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.days_per_week",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.min_months",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "requirements.education",
+      "expected": {
+        "min": "none",
+        "preferred": null
+      },
+      "actual": null,
+      "kind": "missing"
+    },
+    {
+      "field": "requirements.skills",
+      "expected": [
+        "NLP",
+        "Python",
+        "Golang"
+      ],
+      "actual": [
+        "NLP",
+        "Python",
+        "Golang"
+      ],
+      "kind": "match"
+    },
+    {
+      "field": "return_offer",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "published_at",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    },
+    {
+      "field": "deadline",
+      "expected": null,
+      "actual": null,
+      "kind": "match"
+    }
+  ],
+  "skill_comparison": {
+    "matched": [
+      "NLP",
+      "Python",
+      "Golang"
+    ],
+    "missing": [],
+    "extra": []
+  },
+  "validate_oracle": {
+    "returncode": 1,
+    "stderr": "",
+    "stdout": {
+      "valid": false,
+      "errors": [
+        "requirements.education.min: must be one of associate, bachelor, master, phd or null"
+      ]
+    }
+  },
+  "oracle_replay_blocked": "Current public validator rejected frozen manual fields; no substitution or bypass.",
+  "matches": {
+    "tech": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_cc8a7e3d1f3e",
+          "title": "语言应用工程师（社招）",
+          "company": "示例语舟信息技术有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "unknown",
+              "reason": "JD 或档案没写届别",
+              "jd": {
+                "requirements.graduation": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "unknown",
+              "reason": "JD 没写最低学历（优先学历不作要求）",
+              "jd": {
+                "requirements.education": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "unknown",
+              "reason": "JD 或档案没写每周到岗",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市广州在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": "工作城市：广州"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "conflict",
+              "reason": "这是社招岗位，你找的是实习",
+              "jd": {
+                "employment_type": {
+                  "value": "experienced",
+                  "evidence": "语言应用工程师（社招）"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "语言应用工程师（社招）",
+                  "evidence": "语言应用工程师（社招）"
+                },
+                "company": {
+                  "value": "示例语舟信息技术有限公司",
+                  "evidence": "示例语舟信息技术有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": "工作城市：广州"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "JD没写届别；新契约只扩展天数和月数，届别仍未知。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "不设最低学历门槛，直接符合。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "not_applicable",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "社招没有实习天数，不适用。"
+          },
+          {
+            "check": "min_months",
+            "expected": "not_applicable",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "社招没有实习月数，不适用。"
+          },
+          {
+            "check": "location",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "广州与tech意向城市有交集。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "tech只接受实习，不接受社招。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中外包、销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 4
+      },
+      "oracle_job": null,
+      "oracle_comparison": null
+    },
+    "ops": {
+      "parsed_job": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": {
+          "job_id": "job_cc8a7e3d1f3e",
+          "title": "语言应用工程师（社招）",
+          "company": "示例语舟信息技术有限公司",
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "unknown",
+              "reason": "JD 或档案没写届别",
+              "jd": {
+                "requirements.graduation": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "unknown",
+              "reason": "JD 没写最低学历（优先学历不作要求）",
+              "jd": {
+                "requirements.education": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "unknown",
+              "reason": "JD 或档案没写每周到岗",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "unknown",
+              "reason": "JD 或档案没写实习时长",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "广州不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": "工作城市：广州"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "conflict",
+              "reason": "这是社招岗位，你找的是实习、校招",
+              "jd": {
+                "employment_type": {
+                  "value": "experienced",
+                  "evidence": "语言应用工程师（社招）"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "语言应用工程师（社招）",
+                  "evidence": "语言应用工程师（社招）"
+                },
+                "company": {
+                  "value": "示例语舟信息技术有限公司",
+                  "evidence": "示例语舟信息技术有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "广州"
+                  ],
+                  "evidence": "工作城市：广州"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "comparison": {
+        "expected_verdict": "ineligible",
+        "actual_verdict": "ineligible",
+        "verdict_equal": true,
+        "checks": [
+          {
+            "check": "graduation",
+            "expected": "unknown",
+            "actual": "unknown",
+            "equal": true,
+            "human_reason": "JD没写届别；新契约只扩展天数和月数，届别仍未知。"
+          },
+          {
+            "check": "education",
+            "expected": "match",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "不设最低学历门槛，直接符合。"
+          },
+          {
+            "check": "days_per_week",
+            "expected": "not_applicable",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "社招没有实习天数，不适用。"
+          },
+          {
+            "check": "min_months",
+            "expected": "not_applicable",
+            "actual": "unknown",
+            "equal": false,
+            "human_reason": "社招没有实习月数，不适用。"
+          },
+          {
+            "check": "location",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "仅广州，不支持远程；ops仅上海且不搬家。"
+          },
+          {
+            "check": "employment_type",
+            "expected": "conflict",
+            "actual": "conflict",
+            "equal": true,
+            "human_reason": "ops接受实习/校招，不接受社招。"
+          },
+          {
+            "check": "exclusions",
+            "expected": "match",
+            "actual": "match",
+            "equal": true,
+            "human_reason": "未命中电话销售或其他排除项。"
+          }
+        ],
+        "check_equal_count": 4
+      },
+      "oracle_job": null,
+      "oracle_comparison": null
+    }
+  }
+}

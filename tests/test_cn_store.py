@@ -153,6 +153,174 @@ class Merge(StoreCase):
         self.assertEqual(self.store.get(self.base["id"])["status"], "skipped")
 
 
+class MergePriority(StoreCase):
+    def setUp(self):
+        super().setUp()
+        # Fictional text and controlled extracted values: these tests exercise
+        # storage, independently of how the parser resolves ambiguous months.
+        self.text = (
+            "职位名称：资料整理实习生\n"
+            "平台介绍：实习3个月及以上\n"
+            "岗位要求：连续实习4个月以上\n"
+            "技能：Python、Go\n"
+            "办公候选安排：支持远程；不支持远程\n"
+        )
+        self.url = "https://jobs.example.invalid/job/merge-priority"
+
+    def record(self, method, months, *, text=None, now=NOW, url=None):
+        [record], _ = jd_parser.parse_text(
+            self.text if text is None else text, now=now,
+            url=self.url if url is None else url,
+        )
+        record["requirements"]["min_months"] = months
+        record["evidence"]["requirements.min_months"] = {
+            "text": None if method == "user" else
+                    "连续实习4个月以上" if months == 4 else "实习3个月及以上",
+            "method": method,
+        }
+        self.assertEqual(schema.validate(record), [])
+        return record
+
+    def test_all_method_pairs_keep_winning_value_and_evidence(self):
+        cases = [
+            ("rule", "rule", True), ("rule", "agent", True), ("rule", "user", True),
+            ("agent", "rule", False), ("agent", "agent", True), ("agent", "user", True),
+            ("user", "rule", False), ("user", "agent", False), ("user", "user", True),
+        ]
+        for old_method, new_method, new_wins in cases:
+            # Equal values must not allow lower-priority evidence to take over.
+            for new_months in (3, 4):
+                with self.subTest(old=old_method, new=new_method, months=new_months):
+                    case_store = store.Store(self.root / f"{old_method}-{new_method}-{new_months}")
+                    old = self.record(old_method, 4)
+                    new = self.record(new_method, new_months)
+                    case_store.save(old)
+                    action, stored = case_store.save(new)
+                    winner = new if new_wins else old
+                    self.assertEqual(stored["requirements"]["min_months"],
+                                     winner["requirements"]["min_months"])
+                    self.assertEqual(stored["evidence"]["requirements.min_months"],
+                                     winner["evidence"]["requirements.min_months"])
+                    changed = (winner["requirements"]["min_months"] != 4 or
+                               winner["evidence"]["requirements.min_months"] !=
+                               old["evidence"]["requirements.min_months"])
+                    self.assertEqual(action, "updated" if changed else "unchanged")
+                    self.assertEqual(case_store.get(old["id"]), stored)
+
+    def test_rule_reimport_does_not_replace_agent_four_months_with_three(self):
+        first = self.record("rule", 3)
+        self.store.save(first)
+        self.store.set_status(first["id"], "ranked")
+        correction = self.record("agent", 4)
+        self.assertEqual(self.store.save(correction)[0], "updated")
+        action, stored = self.store.save(self.record("rule", 3, now=LATER))
+        self.assertEqual(action, "unchanged")
+        self.assertEqual(stored["requirements"]["min_months"], 4)
+        self.assertEqual(stored["evidence"]["requirements.min_months"],
+                         correction["evidence"]["requirements.min_months"])
+        self.assertEqual(stored["status"], "ranked")
+        self.assertEqual(stored["source"]["imported_at"], first["source"]["imported_at"])
+        self.assertEqual(len(self.store.all()[0]), 1)
+
+    def test_empty_old_values_accept_rules_despite_stale_user_evidence(self):
+        old = self.record("user", None)
+        old["requirements"]["skills"] = []
+        old["remote"] = None
+        for path in ("requirements.skills", "remote"):
+            old["evidence"][path] = {"text": None, "method": "user"}
+        self.store.save(old)
+        new = json.loads(json.dumps(old))
+        new["requirements"]["min_months"] = 3
+        new["requirements"]["skills"] = ["Python"]
+        new["remote"] = False
+        for path, text in (("requirements.min_months", "实习3个月及以上"),
+                           ("requirements.skills", "Python"), ("remote", "不支持远程")):
+            new["evidence"][path] = {"text": text, "method": "rule"}
+        action, stored = self.store.save(new)
+        self.assertEqual(action, "updated")
+        self.assertEqual(stored, new)
+
+    def test_empty_new_user_values_do_not_erase_agent_values_or_evidence(self):
+        old = self.record("agent", 4)
+        old["requirements"]["skills"] = ["Python"]
+        old["evidence"]["requirements.skills"] = {"text": "Python", "method": "agent"}
+        old["remote"] = False
+        old["evidence"]["remote"] = {"text": "不支持远程", "method": "agent"}
+        self.store.save(old)
+        new = json.loads(json.dumps(old))
+        new["requirements"]["min_months"] = None
+        new["requirements"]["skills"] = []
+        new["remote"] = None
+        for path in ("requirements.min_months", "requirements.skills", "remote"):
+            new["evidence"][path] = {"text": None, "method": "user"}
+        action, stored = self.store.save(new)
+        self.assertEqual(action, "unchanged")
+        self.assertEqual(stored, old)
+
+    def test_priorities_are_per_field_and_false_is_a_value(self):
+        old = self.record("agent", 4)
+        old["requirements"]["skills"] = ["Python"]
+        old["evidence"]["requirements.skills"] = {"text": "Python", "method": "rule"}
+        old["remote"] = False
+        old["evidence"]["remote"] = {"text": None, "method": "user"}
+        self.store.save(old)
+        new = self.record("rule", 3)
+        new["requirements"]["skills"] = ["Go"]
+        new["evidence"]["requirements.skills"] = {"text": "Go", "method": "agent"}
+        new["remote"] = True
+        new["evidence"]["remote"] = {"text": "支持远程", "method": "agent"}
+        action, stored = self.store.save(new)
+        self.assertEqual(action, "updated")
+        self.assertEqual(stored["requirements"]["min_months"], 4)
+        self.assertEqual(stored["requirements"]["skills"], ["Go"])
+        self.assertIs(stored["remote"], False)
+        for path, winner in (("requirements.min_months", old),
+                             ("requirements.skills", new), ("remote", old)):
+            self.assertEqual(stored["evidence"][path], winner["evidence"][path])
+
+    def test_changed_text_at_same_url_replaces_even_agent_and_user_values(self):
+        for method in ("agent", "user"):
+            with self.subTest(method=method):
+                case_store = store.Store(self.root / method)
+                old = self.record(method, 4)
+                old["company"] = "示例用户补充公司"
+                old["evidence"]["company"] = {"text": None, "method": "user"}
+                case_store.save(old)
+                case_store.set_status(old["id"], "ranked")
+                edited = self.record("rule", 3, text=self.text + "\n岗位说明：已更新安排",
+                                     now=LATER, url=self.url + "?utm_source=test")
+                edited["company"] = None
+                edited["evidence"].pop("company", None)
+                self.assertNotEqual(edited["id"], old["id"])
+                action, stored = case_store.save(edited)
+                self.assertEqual(action, "updated")
+                self.assertEqual(stored["requirements"]["min_months"], 3)
+                self.assertEqual(stored["evidence"], edited["evidence"])
+                self.assertIsNone(stored["company"])
+                self.assertEqual(stored["raw_text"], edited["raw_text"])
+                self.assertEqual((stored["id"], stored["status"]), (old["id"], "ranked"))
+                self.assertEqual(stored["source"]["imported_at"], old["source"]["imported_at"])
+                self.assertEqual(len(case_store.all()[0]), 1)
+
+    def test_same_edited_text_found_by_url_still_protects_agent_values(self):
+        original = self.record("rule", 3)
+        self.store.save(original)
+        edited = self.record("rule", 3, text=self.text + "\n岗位说明：新增材料核对",
+                             now=LATER)
+        _, stored = self.store.save(edited)
+        self.assertNotEqual(stored["id"], edited["id"])
+        corrected = json.loads(json.dumps(stored))
+        corrected["requirements"]["min_months"] = 4
+        corrected["evidence"]["requirements.min_months"] = {
+            "text": "连续实习4个月以上", "method": "agent",
+        }
+        self.store.save(corrected)
+        action, reimported = self.store.save(edited)
+        self.assertEqual(action, "unchanged")
+        self.assertEqual(reimported, corrected)
+        self.assertEqual(len(self.store.all()[0]), 1)
+
+
 class Files(StoreCase):
     def test_a_corrupt_file_is_reported_not_fatal(self):
         self.store.save(parse("boss_intern.txt"))

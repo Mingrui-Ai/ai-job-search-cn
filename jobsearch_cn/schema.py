@@ -37,6 +37,8 @@ EMPLOYMENT_TYPES = ("internship", "campus", "experienced")
 SALARY_UNITS = ("CNY/hour", "CNY/day", "CNY/month", "CNY/year")
 # Lowest to highest, so a preferred level can be checked against the minimum.
 EDUCATION_LEVELS = ("associate", "bachelor", "master", "phd")
+# requirements.education.min only: the JD says outright there is no minimum (学历不限).
+NO_MINIMUM = "none"
 # The vocabulary /scrape writes to seen_jobs.json, so a CN record can join the
 # upstream job pool without translation.
 STATUSES = ("new", "skipped", "ranked", "expired", "unreachable")
@@ -311,7 +313,8 @@ def _check_education(education, errors: list) -> None:
     _check_keys(education, EDUCATION_KEYS, path, errors)
     for key in EDUCATION_KEYS:
         if key in education:
-            _check_enum(education[key], EDUCATION_LEVELS, f"{path}.{key}", errors)
+            levels = (NO_MINIMUM,) + EDUCATION_LEVELS if key == "min" else EDUCATION_LEVELS
+            _check_enum(education[key], levels, f"{path}.{key}", errors)
     lowest, preferred = education.get("min"), education.get("preferred")
     if lowest is None and preferred is None and all(key in education for key in EDUCATION_KEYS):
         errors.append(f"{path}: use null instead of an object with no level")

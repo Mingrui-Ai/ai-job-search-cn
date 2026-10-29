@@ -1,10 +1,10 @@
 """v0.1 acceptance: the whole offline path, end to end through the real CLI.
 
 Each test is one line of the v0.1 acceptance list in docs/cn/roadmap.md: the
-five de-identified sample JDs parse, save and re-query without duplicates; a
-paste mixing good, empty and oversized JDs keeps the good ones; a JD that
-states almost nothing still makes a valid record; and a JD carrying an
-injection is stored with its verdict but never with the payload.
+de-identified sample JDs (five then, eight since H9) parse, save and re-query
+without duplicates; a paste mixing good, empty and oversized JDs keeps the
+good ones; a JD that states almost nothing still makes a valid record; and a
+JD carrying an injection is stored with its verdict but never with the payload.
 """
 import json
 import os
@@ -41,16 +41,16 @@ class Acceptance(unittest.TestCase):
         path.write_text("\n===\n".join(jds), encoding="utf-8")
         return str(path)
 
-    def test_five_sample_jds_parse_save_and_requery_without_duplicates(self):
+    def test_the_sample_jds_parse_save_and_requery_without_duplicates(self):
         texts = [p.read_text(encoding="utf-8") for p in sorted(FIXTURES.glob("*.txt"))]
-        self.assertEqual(len(texts), 5)
+        self.assertEqual(len(texts), 8)  # the five v0.1 samples and H9's three BOSS直聘 copies
         first = self.cli("jd", "parse", self.paste(*texts), "--save")
-        self.assertEqual([s["action"] for s in first["saved"]], ["created"] * 5)
+        self.assertEqual([s["action"] for s in first["saved"]], ["created"] * len(texts))
         ids = [s["id"] for s in first["saved"]]
-        self.assertEqual(len(set(ids)), 5)
+        self.assertEqual(len(set(ids)), len(texts))
 
         again = self.cli("jd", "parse", self.paste(*reversed(texts)), "--save")
-        self.assertEqual([s["action"] for s in again["saved"]], ["unchanged"] * 5)
+        self.assertEqual([s["action"] for s in again["saved"]], ["unchanged"] * len(texts))
 
         listed = self.cli("jd", "list")
         self.assertEqual(sorted(j["id"] for j in listed["jobs"]), sorted(ids))

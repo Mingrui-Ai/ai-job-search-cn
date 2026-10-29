@@ -479,6 +479,139 @@ per-file diff commands.
   the `texlive/texlive:latest` leg exists to track current TeX Live, and a digest pin without
   automated updates would freeze both legs. The test reads the workflow text with the stdlib, so
   it needs neither zizmor nor PyYAML.
+- **`robots_check.py` matches wildcard rules in linear time** (`tools/robots_check.py` `_match`,
+  `tests/test_robots_check.py`) - every `*` in a robots.txt rule became a regex `.*`, so a rule with
+  repeated wildcard segments that does not match the path (`Disallow: /*a*a*a...*b$`) sent Python's
+  backtracking engine into exponential time: 16 segments took minutes of CPU, on a file the site
+  being checked controls, in the main process where no curl timeout applies. The matcher is now a
+  table walk in `O(len(pattern) * len(path))` with no regex and no backtracking; consecutive `*`
+  match as one, and three tests pin the old matcher's answers for prefix, anchored and
+  slash-spanning rules. Reported privately by @Huge (Martin Vlach), whose linear matcher this is.
+
+- **`robots_check.py` only ever hands http(s) URLs to curl** (`tools/robots_check.py` `gate`,
+  `_fetch`, `tests/test_robots_check.py`) - `gate()` rebuilt the target as
+  `scheme://host/robots.txt` without checking the scheme, so a direct call with `file:`, `gopher:`
+  or `ftp:` passed that scheme to `curl -L`, which was also free to follow a redirect to any
+  protocol it was built with. Reach was small (the response is never printed, and the main fetch
+  path in `fetch_page.py` already allowed only http(s) per hop), but the tool is pre-approved.
+  `gate()` now fails closed with `UNCONFIRMED` on any scheme but http(s) and on a URL without a
+  host, before curl runs, and curl itself gets `--proto =http,https --proto-redir =http,https`.
+  Reported privately by @Huge (Martin Vlach).
+- **`security_guards.py` reads `.gitignore` the way git does and checks every `.gitignore` in the
+  tree** (`tools/security_guards.py` check 2, `tests/test_security_guards.py`) - the guard stripped
+  both ends of each line, but git drops only unescaped trailing whitespace: ` salary_data.json`
+  satisfied the required-rule check while git had stopped ignoring the file (the pattern now named
+  a file beginning with a space). And only the root file was read, though a `.gitignore` in a
+  subdirectory outranks it, so `documents/cv/.gitignore` holding `!personal_cv.pdf` re-included
+  personal data with CI green. Leading whitespace is now part of the pattern, and every
+  `.gitignore` below the root (outside `.git` and `node_modules`) is checked for negations; an
+  intentional one is allowlisted as `<dir>/.gitignore:!pattern`. Both need a change to a tracked
+  `.gitignore` that a reviewer would see, which is why the guard exists. Reported privately by
+  @Huge (Martin Vlach).
+
+- **`security_guards.py` allows only the `settings.json` keys it checks** (`tools/security_guards.py`
+  check 1, `tests/test_security_guards.py`, `SECURITY.md`) - the guard verified `permissions.allow`,
+  `ask`, `deny` and `hooks` and ignored every other key, so a `settings.json` carrying `env`
+  (which reaches every pre-approved `python tools/*.py` run; none uses `-I`), `apiKeyHelper`, a
+  `statusLine` command, `enableAllProjectMcpServers`, `permissions.defaultMode: bypassPermissions`
+  or `permissions.additionalDirectories` passed CI with the lists intact and the prompts gone.
+  Any top-level key outside `ALLOWED_SETTINGS_KEYS` (`permissions`, `hooks`) and any
+  `permissions` key outside `ALLOWED_PERMISSIONS_KEYS` (`allow`, `ask`, `deny`) now fails; a new
+  key is added to the allowlist in the same PR, with its own check. Reported privately by
+  @folovco and @Huge (Martin Vlach).
+
+- **Portal CLI installation never runs a lifecycle script, and refuses `workspaces`,
+  `bunfig.toml` and `.npmrc`** (#718 by @rudycelekli, `tools/install_portal_clis.py`, `tools/security_guards.py`
+  check 3, `tests/test_install_portal_hooks.py`, `tests/test_install_portal_clis.py`) - the
+  installer refused a manifest's own lifecycle scripts and `trustedDependencies`, then ran plain
+  `bun install`, which on Bun 1.3.x still runs the hooks of default-trusted dependencies (esbuild's
+  `postinstall` ran in the reproduction) and of workspace packages: a `workspaces` entry pulled in
+  sub-packages whose scripts the check never read, and a `bunfig.toml` or `.npmrc` beside the
+  manifest reconfigured the install itself (registry, scopes, trusted packages), so every
+  dependency could come from a server the portal's author picked. Every install now passes
+  `--ignore-scripts` (verified against an offline registry serving a hooked package), the
+  installer skips a manifest that declares `workspaces` or has a `bunfig.toml` or `.npmrc` beside
+  it, and the in-tree guard forbids all three. The `.npmrc` case is ours, not the report's. Reported privately by @folovco and @Huge (Martin Vlach).
+
+
+- **The ask list now covers the files the allow list runs, and the guard reads load-time commands**
+  (`.claude/settings.json`, `tools/security_guards.py` checks 4 and 5, `SECURITY.md`,
+  `tests/test_security_guards.py`) - `allow` pre-approves `tools/*.py`, every portal CLI and
+  `salary_lookup.py` by path, and the skills keep `Edit`/`Write` granted, so in the turn that
+  reads a posting an agent could rewrite one of those files and run it under its existing allow
+  rule: the "cannot silently turn that into a wider grant" guarantee covered the files that
+  define permissions but not the ones the permissions name. `Edit(tools/**)`, `Edit(.agents/**)`
+  and `Edit(salary_lookup.py)` join the required ask rules; CV, cover-letter and tracker writes
+  are unaffected. Check 4 now also refuses frontmatter `hooks` and !`command` dynamic-context
+  lines in skills and commands, which run at load with no prompt (SECURITY.md already said the
+  template ships no hooks; only settings.json hooks were checked). Check 5 refuses an agent
+  `permissionMode` that removes prompts and agent `hooks` or `mcpServers`.
+
+- **Pre-approved PDF tooling can no longer write to arbitrary paths** (`tools/verify_pdf.py`,
+  `.claude/settings.json`, `tools/security_guards.py`, `tests/test_verify_pdf.py`) -
+  `settings.json` pre-approves `verify_pdf.py` with any arguments, and `--dump-text` wrote the
+  extracted text layer to whatever path it was given, creating missing parent directories and
+  overwriting an existing file: a prompt-free write anywhere on disk, with content taken from a
+  PDF that can carry posting-derived text. The CLI now writes only a `.txt` file under the repo's
+  `cv/` or `cover_letters/` (the place `apply.md` Step 5d documents) and refuses a symlinked
+  target. `Bash(pdftotext:*)` is dropped from the allowlist for the same reason - Poppler writes
+  to any output path and `pdftotext <file> -` prints any PDF on disk into the session - and
+  `verify_pdf.py` already wraps it. The documented manual `pdftotext` fallback in Step 5d still
+  works; it now asks first.
+
+- **The trust-boundary rule now rides along into every spec that reads third-party content**
+  (`.claude/commands/{add-portal,expand,gmail-sync,interview,notion-sync,outcome,setup}.md`,
+  `.claude/skills/{job-application-assistant,job-scraper,upskill}/SKILL.md`,
+  `tests/test_untrusted_input_rules.py`) - `/apply` and `/rank` state that postings are
+  untrusted third-party data, never instructions, but ten other specs that fetch or read such
+  content did not. `/scrape` ingested portal CLI output and WebSearch results with no rule.
+  `/gmail-sync` classified inbound email - the one input anyone can send - with none.
+  `/setup` Path A read the verbatim archived posting and email-quoting `outcome.md` notes and
+  wrote calibration into `04-job-evaluation.md`, which every later `/apply` and `/rank` loads,
+  so one hostile posting could outlive the run that fetched it. Each spec now points at the
+  Trust boundary section of `09-web-research.md` (one rule, not ten copies); `/gmail-sync`
+  gains Important Rule 10 (no link fetched, no attachment opened, no reply, draft, label or
+  forward), and `/setup` Step A3 takes only the listed facts from the archive and never copies
+  its wording into a skill file. The test derives the set of specs from the tools they call,
+  so a new fetching command without the rule fails CI.
+
+- **Portal CLIs no longer pass text a reader never sees into the agent's context**
+  (`.agents/skills/*/cli/src/helpers.ts` `visibleHtml` and `stripInvisible`, each CLI's
+  `tests/hidden-text.test.ts`, `/add-portal`'s portal-skill contract) - every CLI turned
+  HTML into text with a bare tag strip, so the text of comments, `<style>` and `<script>`
+  blocks and `hidden`/`display:none` elements became visible text in `search` and `detail`
+  output, and Unicode tag characters, bidi controls and zero-width characters passed through
+  untouched, raw from the portal's JSON or decoded from numeric entities. A listing could
+  therefore carry an instruction that renders as nothing on the page but reads as text to
+  the model. jobindex's `visibleHtml` already dropped comments, scripts and styles for one
+  of its two page shapes; that helper now covers hidden elements and runs on every HTML
+  path in every CLI, and each CLI strips invisible characters from its result at the one
+  function every output format reads. Text styled away by CSS alone (off-screen, zero font
+  size) still needs a renderer and is not caught; the trust-boundary rule in
+  `09-web-research.md` remains the defence there.
+
+- **`posting_guard.py` decodes text spelled in invisible characters** (`tools/posting_guard.py`,
+  `tests/test_posting_guard.py`, `/apply` Step 1 item 0) - #702 removes and counts Unicode tag
+  characters (U+E0000-E007F, which shadow ASCII one for one), but what they spelled was thrown
+  away, so an instruction written in them raised only a character count, never a quoted line;
+  and runs of variation selectors (one byte each) passed into the cleaned text untouched. An
+  instruction spelled either way renders as nothing on the page and in the terminal, yet reads
+  as text to the model. What a tag run or a selector run spells is now decoded into a new
+  `invisible_text` finding, scanned like hidden content (so `instruction_like` and
+  `hidden_urls` see it), and raises the verdict's ⚠ (`N strings spelled in invisible
+  characters`) next to #702's tag count. Variation selectors are removed and counted under
+  `invisible_chars.variation`; a lone one, such as the VS16 in ❤️, is counted as encoding noise
+  and never decoded. The three UK subdivision flag emoji are kept and not counted, as before.
+
+- **`posting_guard.py` counts invisible characters inside hidden HTML and cleans the hidden-block
+  excerpts** (`tools/posting_guard.py`, `tests/test_posting_guard.py`) - #702 removed, counted
+  and flagged Unicode tag characters in the visible text, but the hidden text's counts were
+  thrown away and the `hidden_blocks` excerpts came back raw: a tag-spelled instruction inside a
+  `display:none` block got the `clean` verdict with `invisible_chars` empty, and its 28
+  characters travelled on in the findings block that posting-fetcher forwards to the main agent.
+  Invisible characters inside hidden content now count, alarm and decode like visible ones, and
+  each excerpt is cleaned before it is cut to length, so a run of invisible characters at the
+  front of a block no longer leaves an empty excerpt. Reported privately by @balhyo-younjisang.
 
 ## [1.7.3] - 2026-10-19
 

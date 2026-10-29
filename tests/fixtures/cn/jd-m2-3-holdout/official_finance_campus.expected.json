@@ -1,0 +1,205 @@
+{
+  "fixture": "official_finance_campus.txt",
+  "job_schema_version": 1,
+  "site_argument": "official",
+  "method": "agent",
+  "basis": "本批首次运行 jd parse / match filter 前按原创文本语义写定；字段采用 Job Schema v1，过滤采用 match.md 已实现的七项硬性条件契约，不套用 M2-4 设计稿的未来扩展。",
+  "fields": {
+    "title": {
+      "value": "财务分析专员（校招）",
+      "evidence": [
+        "财务分析专员（校招）"
+      ]
+    },
+    "company": {
+      "value": "示例衡泉商贸有限公司",
+      "evidence": [
+        "公司名称：示例衡泉商贸有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "上海",
+        "广州"
+      ],
+      "evidence": [
+        "工作城市：上海、广州"
+      ],
+      "note": "两座城市都明确列为工作城市。"
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "不接受远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "campus",
+      "evidence": [
+        "财务分析专员（校招）"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 15000,
+        "max": 25000,
+        "unit": "CNY/month",
+        "months": 14,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪资：15-25K·14薪"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2026
+        ],
+        "strict": false
+      },
+      "evidence": [
+        "2026届优先，其他届别亦可申请"
+      ],
+      "note": "2026届仅优先，不能淘汰2027届。"
+    },
+    "requirements.days_per_week": {
+      "value": null,
+      "evidence": [],
+      "note": "每周五是例行事项的日期，不是每周至少5天。"
+    },
+    "requirements.min_months": {
+      "value": null,
+      "evidence": [],
+      "note": "试用期3个月不属于实习时长，校招未写实习条件。"
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "本科及以上学历"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "财务分析",
+        "Excel",
+        "Power BI",
+        "PowerPoint"
+      ],
+      "evidence": [
+        "熟悉财务分析，能够使用 Excel 和 Power BI 复核预算，并用 PowerPoint 汇报。"
+      ],
+      "note": "技能名取正文原词；SQL、Python被否定，不纳入。Power BI比较时可忽略空格，不转换为其他词条名。"
+    },
+    "return_offer": {
+      "value": null,
+      "evidence": [],
+      "note": "试用期不能推出实习可转正。"
+    },
+    "published_at": {
+      "value": "2026-10-21",
+      "evidence": [
+        "发布日期：2026-10-21"
+      ]
+    },
+    "deadline": {
+      "value": "2026-11-25",
+      "evidence": [
+        "网申截止：2026-11-25"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "薪资：15-25K·14薪",
+      "interpretation": "金额为每月15000至25000元、全年14薪，不把14薪当成年薪或实习月份。"
+    },
+    {
+      "text": "入职安排：试用期3个月；每周五核对报销凭证；面试通知通常在3-5个工作日内发出。",
+      "interpretation": "试用期、周五和回复用时都不是实习时长或到岗天数。"
+    },
+    {
+      "text": "2026届优先，其他届别亦可申请",
+      "interpretation": "届别是软偏好，strict=false。"
+    },
+    {
+      "text": "无需编写 SQL，也不要求 Python；这些不是筛选条件。",
+      "interpretation": "两个否定技能都应排除。"
+    },
+    {
+      "text": "工作城市：上海、广州",
+      "interpretation": "保留两个实际工作城市。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "tech为2027届；虽不在2026届偏好内，但优先不是硬门槛，应附提示而非冲突。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "tech硕士达到本科最低要求。"
+        },
+        "days_per_week": {
+          "result": "unknown",
+          "reason": "JD未写每周实习天数；依当前已实现契约为unknown，不使用M2-4设计稿的not_applicable。"
+        },
+        "min_months": {
+          "result": "unknown",
+          "reason": "JD未写实习月数；试用期不作为实习月数，当前契约为unknown。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "工作城市包含广州，与tech意向有交集。"
+        },
+        "employment_type": {
+          "result": "conflict",
+          "reason": "校招不在tech仅实习的目标类型中。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题不含外包或销售，公司和城市无排除项。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "needs_check",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "ops为2027届；2026届只是优先，应提示偏好不符但不淘汰。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "ops本科达到要求。"
+        },
+        "days_per_week": {
+          "result": "unknown",
+          "reason": "JD未写每周实习天数，周五不能解读为5天。"
+        },
+        "min_months": {
+          "result": "unknown",
+          "reason": "JD未写实习月数，试用期3个月不能填入此条件。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "工作城市包含上海，与ops意向有交集。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "校招属于ops目标类型。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题不含电话销售，公司和城市无排除项。"
+        }
+      }
+    }
+  }
+}

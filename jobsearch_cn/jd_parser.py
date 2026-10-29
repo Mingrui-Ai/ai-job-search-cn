@@ -4,12 +4,17 @@ parse_text() splits pasted text into JDs, runs each one through the posting
 gate (jobsearch_cn/guard.py) and extracts the fields whose wording is regular
 enough for rules: salary, graduation year, days per week, internship length,
 education, return offer, employment type, cities, remote work, dates, a
-labelled or headline title and company, and skills from a fixed vocabulary.
-Every value cites the snippet it came from (method "rule"). What the rules
-cannot read with confidence stays null for an agent or the user to fill in
-and cite; nothing is guessed - a date without a year is left alone, and a
-city named only in passing prose is not taken as the work location. Each
-record is validated against the schema before it is returned.
+labelled or headline title and company, and skills from the vocabulary - read
+from the body only, since the title names the job rather than asking for a
+skill, and only where the JD asks for them (not "无需 SQL", not "欢迎关注我们的
+公众号"). It reads the copies users actually paste, a BOSS直聘 page with its
+link lines and "公司｜城市｜薪资｜N天/周｜N个月" tag line included. Every value
+cites the snippet it came from (method "rule"). What the rules cannot read
+with confidence stays null for an agent or the user to fill in and cite;
+nothing is guessed - a date without a year is left alone, a JD naming two
+internship lengths gets neither, and a city named only in passing prose, or as
+where the interview is, is not taken as the work location. Each record is
+validated against the schema before it is returned.
 """
 
 import hashlib
@@ -58,6 +63,8 @@ _SALARY = (
     (re.compile(rf"月薪\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
 )
 _NEGOTIABLE = re.compile(r"(?:薪资|薪酬|待遇|工资)?\s*面议")
+# "全年13薪" written apart from a monthly salary; a range ("13-15薪") is left alone.
+_PAY_MONTHS = re.compile(r"(?:全年\s*)?(?<![\d.\-~～－—–至到])(?P<months>\d{2})\s*薪(?![资酬水])")
 
 _YEAR = r"(?:20)?\d{2}"
 _GRADUATION = re.compile(
@@ -90,6 +97,11 @@ _EDUCATION_MIN = re.compile(
 _EDUCATION_PREFERRED = re.compile(
     rf"{_LEVEL_WORD}(?:研究生)?\s*(?:及以上)?\s*(?:学历)?\s*者?\s*(?:优先|为佳)"
 )
+# "学历不限", "不设最低学历门槛": no minimum, said outright. "专业不限" is about the major.
+_NO_MINIMUM_EDUCATION = re.compile(
+    r"学历\s*(?:要求)?\s*[:：]?\s*(?:不限(?!于)|无要求|没有要求|不作要求|不做要求)|不限学历|(?:无|没有)学历要求"
+    r"|不设\s*(?:最低)?\s*学历\s*(?:门槛|要求)"
+)
 _PREFERENCE = re.compile(r"优先|为佳")
 
 _NO_RETURN_OFFER = re.compile(r"(?:不可|不能|无|不提供|没有)\s*转正")
@@ -101,9 +113,12 @@ _EXPERIENCED = re.compile(r"社会招聘|社招")
 
 _CITY = re.compile("|".join(sorted(CITIES, key=len, reverse=True)))
 _LOCATION_LABEL = re.compile(
-    r"(?<!面试)(?:(?:工作地点|工作城市|办公地点|工作地址|上班地点|地点|城市)\s*[:：]|base\s*[:：]?)\s*(?P<rest>[^\n]{1,60})",
+    r"(?<!面试)(?<!笔试)(?:(?:工作地点|工作城市|办公地点|工作地址|上班地点|地点|城市)\s*[:：]|base\s*[:：]?)"
+    r"\s*(?P<rest>[^\n]{1,60})",
     re.I,
 )
+# Where the rest of a location line turns to the interview: "工作地点：深圳；面试地点：北京".
+_INTERVIEW = re.compile(r"面试|笔试")
 _CITY_HEADLINE = re.compile(rf"^(?P<city>{_CITY.pattern})(?:[·・\-|丨/\s]|$)")
 _NO_REMOTE = re.compile(r"不(?:支持|可|能|接受)\s*远程")
 _REMOTE = re.compile(r"(?:可|支持|接受)\s*远程(?:办公|工作|实习)?|远程(?:办公|工作|实习)|居家办公|\bremote\b", re.I)
@@ -116,10 +131,56 @@ _DEADLINE_BEFORE = re.compile(rf"{_YMD}\s*前?\s*截止")
 _TITLE_LABEL = re.compile(r"(?m)^\s*(?:职位名称|岗位名称|招聘职位|招聘岗位|职位|岗位)\s*[:：]\s*(?P<v>[^\n，,。；;]{2,40})")
 _JOB_WORD = re.compile(
     r"实习|工程师|开发|算法|研究员|研发|产品|运营|设计|分析|经理|专员|助理|顾问|测试|架构师|科学家"
+    r"|管培生|培训生|储备干部|销售|编辑|策划|主管|总监"
     r"|intern|engineer|developer|scientist|manager|analyst|designer",
     re.I,
 )
 _NOT_TITLE = re.compile(r"职责|要求|描述|介绍|福利|地点|薪资|待遇|公司|任职|职位信息|岗位信息|[:：]")
+# A headline is a job name, not a sentence: a clause break or a requirement word
+# outside brackets marks prose ("后端开发实习生（日常实习，可转正）" is still a title).
+# Skills are not read from the title, so prose taken for one would lose its skills.
+_PROSE = re.compile(r"[，,。；;！!？?]|负责|熟悉|熟练|掌握|了解|精通|具备|经验|能力")
+_BRACKETED = re.compile(r"（[^（）]*）|\([^()]*\)|【[^【】]*】|\[[^\[\]]*\]")
+# A copy can open with "标签：值" lines above the title: 职位链接：https://…, 采集日期：2026-10-28.
+_LABEL_LINE = re.compile(r"^[^:：，,。；;！!？?\s][^:：，,。；;！!？?]{0,9}[:：]")
+# How far into a copy to look for an unlabelled title: a whole-page copy puts
+# navigation first, and the title beside its salary ("java开发实习生 130-150元/天").
+_HEAD_LINES = 30
+# The tag line of a BOSS直聘 copy, "<公司>｜<城市>｜350-400元/天｜5天/周｜3个月｜本科": cells
+# split on ｜ or |, one of them a weekly-days tag. The first cell is the company unless it
+# is a tag itself (shixiseng's "150-200/天 | 上海 | …" starts with the salary); a bare
+# "N个月" cell is the internship length, read only here.
+_TAG_SEP = re.compile(r"\s*[｜|]\s*")
+_PIPE = re.compile(r"[｜|]")
+_DAYS_TAG = re.compile(rf"^{_DAY}(?:{_TO}{_DAY})?\s*(?:天|日)\s*/\s*周$")
+_MONTHS_TAG = re.compile(rf"^(?P<n>{_MONTH_COUNT})\s*个?\s*月$")
+_CITY_TAG_PART = rf"(?:{_CITY.pattern})(?:[·・\-][{_HAN}A-Za-z0-9]{{1,8}})*"
+_CITY_TAG = re.compile(rf"{_CITY_TAG_PART}(?:\s*[/／、,，]\s*{_CITY_TAG_PART})*")
+_NOT_COMPANY = re.compile(r"^(?:\d|不限|经验|学历|大专|专科|本科|硕士|研究生|博士|实习|全职|兼职|校招|社招|远程)")
+# A whole-page copy lays the same tags out with spaces, "杭州 5天/周 6个月 本科". Such a
+# line counts only when every cell is a tag word, so a sentence that mentions "5天/周" or
+# "3个月" ("可以 5天/周 到岗 3个月 内入职") is not one. It names no company.
+_TAG_WORD = re.compile(
+    rf"(?:{_CITY.pattern})(?:[·・\-][{_HAN}A-Za-z0-9]{{1,8}})*|[{_HAN}]{{1,6}}(?:区|县)"
+    rf"|{_DAY}(?:{_TO}{_DAY})?\s*(?:天|日)\s*/\s*周|(?:{_MONTH_COUNT})\s*个?\s*月(?:及?以上)?"
+    r"|(?:大专|专科|本科|学士|硕士|研究生|博士)(?:及以上)?|学历不限|经验不限|在校/应届|应届生?"
+    r"|\d{1,2}(?:-\d{1,2})?年(?:以上|以内)?|(?:20)?\d{2}届|日常实习|暑期实习|实习|全职|兼职|校招|社招|可?远程|可转正"
+)
+# A skill a clause rules out is not asked for: "无需 SQL 基础", "不要求 Rust 或 C++", "也不负责公众号运营".
+_NEGATION = re.compile(r"不要求|无需|无须|不需要|不需|不必|不用|不负责|不涉及|不承担|非必须|不是必须|不作要求|不做要求")
+# A platform name is a skill when the JD asks for it, not when it points the reader at the
+# company's own channel ("欢迎关注我们的公众号", "动态见我们的 B站") or describes the company
+# in its introduction. A follow verb alone is a duty: "关注小红书热点".
+_PLATFORMS = frozenset(("公众号", "小红书", "抖音", "微博", "视频号", "B站", "知乎", "快手"))
+_FOLLOW = re.compile(r"关注|订阅|扫码|详见|动态见|了解更多")
+_OURS = re.compile(r"我们|本公司|官方|更多|招聘(?:信息|通知|动态)")
+_INTRO = re.compile(r"(?m)^[ \t]*[【\[]?\s*(?:公司介绍|公司简介|企业介绍|企业简介|关于我们|公司概况)\s*[】\]]?\s*(?:[:：]|$)")
+_SECTION = re.compile(
+    r"(?m)^[ \t]*[【\[]?\s*(?:职位描述|职位详情|岗位描述|岗位职责|工作职责|职位职责|工作内容|任职要求|岗位要求|职位要求"
+    r"|任职资格|技能要求|工作地点|工作地址|薪资福利|福利待遇|职位福利|岗位福利)\s*[】\]]?\s*(?:[:：]|$)"
+)
+_HEADER_END = re.compile(r"^(?:看过该职位的人还看了|相关职位|推荐职位|热门职位|公司基本信息)\s*[:：]?\s*$")
+_HEADER_PROSE = re.compile(r"^(?:请|可以|需要|需|要求|保证|欢迎|至少)|到岗|入职|连续")
 _COMPANY_LABEL = re.compile(r"(?m)^\s*(?:公司名称|企业名称|招聘单位|公司|企业)\s*[:：]\s*(?P<v>[^\n，,。；;]{2,40})")
 # A legal-entity name that is the whole line, or is followed only by a separator
 # and a place ("示例科技有限公司 · 广州"). A sentence that runs on after the name
@@ -210,27 +271,31 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
         return value
 
     lines = [line.strip() for line in text.splitlines() if line.strip()]
-    title = cite("title", _title(text, lines))
+    found_title, title_span = _title(text, lines)
+    title = cite("title", found_title)
+    headline = _line_at(text, title_span[0]) if title_span else (lines[0] if lines else "")
+    tag, piped = _tag_cells(lines, headline if title_span else None)
     record = {
         "schema_version": schema.SCHEMA_VERSION,
         "id": job_id(text),
         "source": {"type": source_type, "site": site, "url": url, "imported_at": imported_at},
         "title": title,
-        "company": cite("company", _company(text, lines)),
-        "cities": cite("cities", _cities(text, lines)) or [],
+        "company": cite("company", _company(text, lines, tag if piped else [])),
+        "cities": cite("cities", _cities(text, lines, tag)) or [],
         "remote": cite("remote", _remote(text)),
-        "employment_type": cite("employment_type", _employment_type(text, lines)),
+        "employment_type": cite("employment_type", _employment_type(text, headline)),
         "salary": cite("salary", _salary(text)),
         "requirements": {
             "graduation": cite("requirements.graduation", _graduation(text)),
             "days_per_week": cite("requirements.days_per_week", _days_per_week(text)),
-            "min_months": cite("requirements.min_months", _min_months(text)),
-            "education": cite("requirements.education", _education(text)),
-            "skills": cite("requirements.skills", _skills(text, skill_patterns or _builtin_patterns())) or [],
+            "min_months": cite("requirements.min_months", _min_months(text, tag)),
+            "education": cite("requirements.education", _education(text, tag)),
+            "skills": cite("requirements.skills",
+                           _skills(text, skill_patterns or _builtin_patterns(), skip=title_span)) or [],
         },
         "return_offer": cite("return_offer", _return_offer(text)),
         "published_at": cite("published_at", _dated(text, (_PUBLISHED,))),
-        "deadline": cite("deadline", _dated(text, (_DEADLINE_AFTER, _DEADLINE_BEFORE))),
+        "deadline": cite("deadline", _dated(text, (_DEADLINE_AFTER, _DEADLINE_BEFORE), same_line=True)),
         "status": "new",
         "evidence": evidence,
         "guard": guard.summary(findings),
@@ -261,16 +326,37 @@ def _amount(value: float):
     return int(value) if value.is_integer() else round(value, 2)
 
 
-def _clause(text: str, start: int, end: int) -> str:
-    """The clause around text[start:end], list marker dropped; the match itself if the clause is long."""
+def _clause_bounds(text: str, start: int, end: int):
+    """Where the clause around text[start:end] begins and ends."""
     left = start
     while left > 0 and text[left - 1] not in _CLAUSE_END:
         left -= 1
     right = end
     while right < len(text) and text[right] not in _CLAUSE_END:
         right += 1
+    return left, right
+
+
+def _clause(text: str, start: int, end: int) -> str:
+    """The clause around text[start:end], list marker dropped; the match itself if the clause is long."""
+    left, right = _clause_bounds(text, start, end)
     clause = _LIST_MARK.sub("", text[left:right].strip())
     return clause if len(clause) <= _MAX_SNIPPET else text[start:end].strip()
+
+
+def _offset(text: str, lines: list, index: int) -> int:
+    """Where lines[index] starts in text; lines are text's non-blank lines, stripped, in order."""
+    position, length = 0, 0
+    for line in lines[:index + 1]:
+        position = text.find(line, position + length)
+        length = len(line)
+    return position
+
+
+def _line_at(text: str, position: int) -> str:
+    start = text.rfind("\n", 0, position) + 1
+    end = text.find("\n", position)
+    return text[start:len(text) if end < 0 else end].strip()
 
 
 def _earliest(patterns, text: str):
@@ -284,21 +370,81 @@ def _earliest(patterns, text: str):
 
 
 def _title(text: str, lines: list):
+    """The title with its citation, and the span of text it takes up (no skills are read there).
+
+    A labelled title wins. Otherwise the headline - the first line below any leading
+    "标签：值" lines - or, further down a whole-page copy, a line that is a title followed
+    by its salary.
+    """
     match = _TITLE_LABEL.search(text)
     if match:
         value = match["v"].strip()
-        return value, [value]
-    if lines:
-        headline = lines[0]
-        salary = _earliest((pattern for pattern, _, _ in _SALARY), headline)
-        if salary and salary.start() > 0:
-            headline = headline[:salary.start()].strip()
-        if len(headline) <= 40 and _JOB_WORD.search(headline) and not _NOT_TITLE.search(headline):
-            return headline, [headline]
-    return _NOTHING
+        return (value, [value]), (match.start("v"), match.start("v") + len(value))
+    first = next((i for i, line in enumerate(lines) if not _LABEL_LINE.match(line)), len(lines))
+    for index in range(first, min(len(lines), _HEAD_LINES)):
+        line = lines[index]
+        salary = _earliest((pattern for pattern, _, _ in _SALARY), line)
+        priced = salary is not None and salary.start() > 0
+        if index > first and not priced:
+            continue
+        headline = line[:salary.start()].strip() if priced else line
+        if (len(headline) <= 40 and _JOB_WORD.search(headline) and not _NOT_TITLE.search(headline)
+                and not _PROSE.search(_BRACKETED.sub("", headline))):
+            start = _offset(text, lines, index)
+            return (headline, [headline]), (start, start + len(headline))
+    return _NOTHING, None
 
 
-def _company(text: str, lines: list):
+def _tag_cells(lines: list, headline=None):
+    """Prefer the title's header, then strictly delimited tags anywhere.
+
+    Navigation may push a tag line past line 30. Anchor to the selected title,
+    not the page's first line; with no title, retain the bounded opening scan.
+    If the header has no row, a full-page copy may put it below the body.
+    Only fullwidth-pipe rows qualify there; whitespace rows stay in the header.
+    """
+    candidates = lines[lines.index(headline) + 1:] if headline else lines[:_HEAD_LINES]
+    for line in candidates:
+        if _SECTION.match(line) or _INTRO.match(line) or _HEADER_END.match(line):
+            break
+        cells, piped = _tag_row(line)
+        if cells:
+            return cells, piped
+        if _PROSE.search(line) or _NEGATION.search(line) or _HEADER_PROSE.search(line):
+            break
+    for line in lines:
+        if "｜" in line and "|" not in line:
+            cells, piped = _tag_row(line)
+            if cells:
+                return cells, piped
+    return [], False
+
+
+def _tag_row(line: str):
+    """Require a weekly-days tag and tag-only cells, except an optional company."""
+    piped = bool(_PIPE.search(line))
+    cells = _TAG_SEP.split(line) if piped else line.split()
+    if len(cells) >= 3 and any(_DAYS_TAG.fullmatch(cell) for cell in cells):
+        tags = cells[1:] if piped and _company_cell(cells[0]) else cells
+        if all(_TAG_WORD.fullmatch(cell) or _CITY_TAG.fullmatch(cell) or _is_salary(cell)
+               or _EDUCATION_MIN.fullmatch(cell) or _EDUCATION_PREFERRED.fullmatch(cell) for cell in tags):
+            return cells, piped
+    return [], False
+
+
+def _is_salary(cell: str) -> bool:
+    return any(pattern.fullmatch(cell) for pattern, _, _ in _SALARY)
+
+
+def _company_cell(cell: str) -> bool:
+    return (2 <= len(cell) <= 40 and not _NOT_COMPANY.match(cell) and not _CITY_HEADLINE.match(cell)
+            and not _PROSE.search(cell) and not _NEGATION.search(cell) and not _LABEL_LINE.match(cell)
+            and not _HEADER_PROSE.search(cell)
+            and not _TAG_WORD.fullmatch(cell) and not _CITY_TAG.fullmatch(cell) and not _is_salary(cell)
+            and not _SECTION.fullmatch(cell) and not _INTRO.fullmatch(cell))
+
+
+def _company(text: str, lines: list, tag: list):
     match = _COMPANY_LABEL.search(text)
     if match:
         value = match["v"].strip()
@@ -309,18 +455,34 @@ def _company(text: str, lines: list):
         match = _COMPANY_HEAD.match(line)
         if match:
             return match["v"], [match["v"]]
+    # Failing a legal name, the first cell of the tag line, often a short name ("示例云帆科技").
+    if tag and _company_cell(tag[0]):
+        return tag[0], [tag[0]]
     return _NOTHING
 
 
-def _cities(text: str, lines: list):
+def _cities(text: str, lines: list, tag: list):
     cities, snippets = [], []
     for match in _LOCATION_LABEL.finditer(text):
+        rest, snippet = match["rest"], match.group(0).strip()
+        interview = _INTERVIEW.search(rest)
+        if interview:
+            rest = rest[:interview.start()]
+            snippet = text[match.start():match.start("rest") + interview.start()].strip().rstrip("，,；;、/（( ")
         # An address can repeat its city (district, then full postal address).
         # Deduplicate this match as well as cities from earlier location labels.
-        found = [city for city in dict.fromkeys(_CITY.findall(match["rest"])) if city not in cities]
+        found = [city for city in dict.fromkeys(_CITY.findall(rest)) if city not in cities]
         if found:
             cities += found
-            snippets.append(match.group(0).strip())
+            snippets.append(snippet)
+    if not cities:
+        for cell in tag:
+            if _CITY_TAG.fullmatch(cell):
+                # Match only the start of each city tag: a district/street can
+                # itself contain another city's name ("广州·南京路").
+                found = [_CITY.match(part.strip()).group(0) for part in re.split(r"[/／、,，]", cell)]
+                cities.extend(city for city in found if city not in cities)
+                snippets.append(cell)
     if not cities:
         for line in lines[:6]:
             match = _CITY_HEADLINE.match(line)
@@ -339,8 +501,8 @@ def _remote(text: str):
     return (True, [match.group(0)]) if match else _NOTHING
 
 
-def _employment_type(text: str, lines: list):
-    headline = lines[0] if lines else ""
+def _employment_type(text: str, headline: str):
+    """From the title's own line first ("…实习生", "【校招】…"), then anywhere in the JD."""
     for pattern, kind in ((re.compile("实习"), "internship"), (_CAMPUS, "campus"), (_EXPERIENCED, "experienced")):
         if pattern.search(headline):
             return kind, [headline if len(headline) <= _MAX_SNIPPET else pattern.search(headline).group(0)]
@@ -365,14 +527,35 @@ def _salary(text: str):
         match, unit, scale, low, high = best
         months = match.groupdict().get("months")
         months = int(months) if months and 12 <= int(months) <= 24 else None
+        snippets = [match.group(0).strip()]
+        if months is None and unit == "CNY/month":
+            paid = _pay_months(text, match)
+            if paid:
+                months = int(paid["months"])
+                snippets.append(paid.group(0).strip())
         value = {"min": _amount(low * scale), "max": _amount(high * scale), "unit": unit,
                  "months": months, "negotiable": False}
-        return value, [match.group(0).strip()]
+        return value, snippets
     match = _NEGOTIABLE.search(text)
     if match:
         value = {"min": None, "max": None, "unit": None, "months": None, "negotiable": True}
         return value, [match.group(0).strip()]
     return _NOTHING
+
+
+def _pay_months(text: str, salary):
+    """The "全年13薪" on the monthly salary's own line, unless it follows a 转正 (another offer's pay).
+
+    On another line it may belong to another offer too, so it is left for an agent.
+    """
+    start = text.rfind("\n", 0, salary.start()) + 1
+    end = text.find("\n", salary.end())
+    for match in _PAY_MONTHS.finditer(text, start, len(text) if end < 0 else end):
+        if "转正" in text[salary.end():match.start()]:
+            return None
+        if 12 <= int(match["months"]) <= 24:
+            return match
+    return None
 
 
 def _graduation(text: str):
@@ -397,7 +580,8 @@ def _days_per_week(text: str):
     return _NOTHING
 
 
-def _min_months(text: str):
+def _min_months(text: str, tag: list):
+    found = []
     for match in sorted((m for p in _MONTHS for m in p.finditer(text)), key=lambda m: m.start()):
         if "试用" in text[max(0, match.start() - 5):match.start()]:
             continue
@@ -405,11 +589,21 @@ def _min_months(text: str):
             continue
         count = {"半年": 6, "一年": 12}.get(match["n"]) or _number(match["n"])
         if count and 1 <= count <= 36:
-            return count, [match.group(0).strip()]
-    return _NOTHING
+            found.append((count, match.group(0).strip()))
+    for cell in tag:
+        match = _MONTHS_TAG.match(cell)
+        count = _number(match["n"]) if match else None
+        if count and 1 <= count <= 36:
+            found.append((count, cell))
+    if not found or len({count for count, _ in found}) > 1:
+        # Several lengths - a platform's "3个月及以上" beside the job's "连续实习4个月以上" - are
+        # left for an agent to read the job's own.
+        return _NOTHING
+    count, snippet = found[0]
+    return count, [snippet]
 
 
-def _education(text: str):
+def _education(text: str, tag: list):
     lowest = preferred = None
     snippets = []
     for match in _EDUCATION_MIN.finditer(text):
@@ -418,11 +612,22 @@ def _education(text: str):
         lowest = _LEVELS[match.group(1) or match.group(2)]
         snippets.append(match.group(0).strip())
         break
+    if lowest is None:
+        match = _NO_MINIMUM_EDUCATION.search(text)
+        if match:
+            lowest = schema.NO_MINIMUM
+            snippets.append(match.group(0).strip())
+    if lowest is None:
+        for cell in tag:
+            if cell in _LEVELS:
+                lowest = _LEVELS[cell]
+                snippets.append(cell)
+                break
     match = _EDUCATION_PREFERRED.search(text)
     if match:
         level = _LEVELS[match.group(1)]
         order = schema.EDUCATION_LEVELS
-        if lowest is None or order.index(level) >= order.index(lowest):
+        if lowest in (None, schema.NO_MINIMUM) or order.index(level) >= order.index(lowest):
             preferred = level
             snippets.append(match.group(0).strip())
     if lowest is None and preferred is None:
@@ -438,9 +643,14 @@ def _return_offer(text: str):
     return (True, [match.group(0)]) if match else _NOTHING
 
 
-def _dated(text: str, patterns):
-    match = _earliest(patterns, text)
-    if match:
+def _dated(text: str, patterns, *, same_line=False):
+    # Deadline patterns allow whitespace around the date. Restrict their
+    # search to one physical line so a publication date cannot borrow the
+    # next line's "截止", including through the date pattern's own whitespace.
+    for part in text.splitlines() if same_line else [text]:
+        match = _earliest(patterns, part)
+        if not match:
+            continue
         try:
             value = date(int(match["y"]), int(match["m"]), int(match["d"])).isoformat()
         except ValueError:
@@ -449,14 +659,17 @@ def _dated(text: str, patterns):
     return _NOTHING
 
 
-def _skills(text: str, patterns):
-    claimed, first_seen = [], {}
+def _skills(text: str, patterns, skip=None):
+    """Vocabulary terms in order of first appearance, none inside the span skip (the title)."""
+    claimed, first_seen = ([skip] if skip else []), {}
+    intro = _intro_spans(text)
     for term, pattern in patterns:
         for match in pattern.finditer(text):
             if any(match.start() < end and start < match.end() for start, end in claimed):
                 continue
             claimed.append((match.start(), match.end()))
-            first_seen.setdefault(term, match)
+            if _asked(text, term, match, intro):
+                first_seen.setdefault(term, match)
     if not first_seen:
         return _NOTHING
     ordered = sorted(first_seen.items(), key=lambda item: item[1].start())
@@ -466,3 +679,26 @@ def _skills(text: str, patterns):
         if clause not in snippets:
             snippets.append(clause)
     return [term for term, _ in ordered], snippets
+
+
+def _asked(text: str, term: str, match, intro: list) -> bool:
+    """Whether the JD asks for the skill it names here: not ruled out, not just the company's channel."""
+    left, right = _clause_bounds(text, match.start(), match.end())
+    if _NEGATION.search(text, left, match.start()):
+        return False
+    if term in _PLATFORMS:
+        clause = text[left:right]
+        if _FOLLOW.search(clause) and _OURS.search(clause):
+            return False
+        if any(start <= match.start() < end for start, end in intro):
+            return False
+    return True
+
+
+def _intro_spans(text: str) -> list:
+    """Where a company introduction runs: from its heading to the next section heading."""
+    spans = []
+    for intro in _INTRO.finditer(text):
+        section = _SECTION.search(text, intro.end())
+        spans.append((intro.start(), section.start() if section else len(text)))
+    return spans
