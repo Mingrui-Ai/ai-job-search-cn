@@ -92,11 +92,11 @@ class ReportFromSavedRecords(unittest.TestCase):
 
     def assert_rule_grounds(self, record: dict, job: dict, dims: str):
         """The rule dimensions show the JD text they rest on, taken from the stored job."""
-        skills = record["dimensions"]["skills"]
-        for name in [hit["jd"] for hit in skills["matched"]] + skills["missing"]:
-            quote = score._quote(job, "requirements.skills", name)
-            if quote:
-                self.assertIn(quote, self.row(dims, "skills"))
+        skills, quotes = record["dimensions"]["skills"], score.skill_quotes(job, VOCABULARY)
+        for label in [hit["jd"] for hit in skills["matched"]] + skills["missing"]:
+            quote = quotes[label]
+            for snippet in [quote] if isinstance(quote, str) else quote or []:
+                self.assertIn(snippet, self.row(dims, "skills"))
         salary = score._quote(job, "salary")
         if salary:
             self.assertIn(salary, self.row(dims, "salary"))
@@ -110,6 +110,22 @@ class ReportFromSavedRecords(unittest.TestCase):
         dims = self.section(page, self.ids["jd/boss_intern.txt"])
         self.assertIn("200-250元/天", self.row(dims, "salary"))
 
+    def test_a_choice_counts_once_where_the_score_counted_it(self):
+        # H16: boss_intern's "熟悉 Golang 或 Java" is one requirement; the direction counts it once,
+        # and the report lists exactly what the score counted.
+        _, page, _ = self.generate()
+        job_id = self.ids["jd/boss_intern.txt"]
+        record, job = self.cli("match", "show", job_id), self.cli("jd", "show", job_id)
+        counted = score.direction_skills(job, VOCABULARY)
+        choices = [label for labels in counted.values() for label in labels if " 或 " in label]
+        self.assertEqual(len(choices), 1, counted)
+        self.assertEqual({group: len(labels) for group, labels in counted.items()},
+                         record["dimensions"]["direction"]["jd_groups"])
+        direction = self.row(self.section(page, job_id), "direction")
+        self.assertIn(choices[0], direction)
+        self.assertEqual(direction.count(choices[0]), 1)
+        self.assertIn("熟悉 Golang 或 Java", self.row(self.section(page, job_id), "skills"))
+
     def rescored_with(self, weights: dict, sample="jd/boss_intern.txt") -> tuple:
         changed = copy.deepcopy(self.profile)
         changed["target"]["weights"] = weights
@@ -120,17 +136,20 @@ class ReportFromSavedRecords(unittest.TestCase):
         return record, self.section(page, job_id)
 
     def test_a_total_near_a_half_is_explained_without_rounding_first(self):
-        # Codex B's weights in #65: 71.498575… was shown as 71.50, then "rounded" to 71.
-        record, part = self.rescored_with({"skills": 1.0001, "direction": 1, "experience": 0, "salary": 0})
+        # Codex B's case in #65: skills 43, direction 100, weights 1.0001 and 1 give 71.498575…, which
+        # was shown as 71.50 and then "rounded" to 71. Built by hand so later rule changes cannot move it.
+        dimensions = {key: {"score": None, "method": "rule", "reason": "r"} for key in score.DIMENSIONS}
+        dimensions["skills"]["score"], dimensions["direction"]["score"] = 43, 100
+        weights = {"skills": 1.0001, "direction": 1, "experience": 0, "salary": 0}
+        record = {"job_id": "job_0123456789ab", "filter": {"verdict": "eligible", "checks": []}, "gaps": [],
+                  "dimensions": dimensions, "weights": weights, "total": score.total(dimensions, weights, "eligible")}
+        self.assertEqual(record["total"]["score"], 71)
+        part = report.build([report.entry(record, None, False)], {}, "2026-10-29T09:30:00+08:00", VOCABULARY)
         _, numerator, denominator = report.working(record)
-        exact = numerator / denominator
-        self.assertLess(abs(exact - (record["total"]["score"] + Fraction(1, 2))), Fraction(1, 100),
-                        "the case must sit just below a .5")
-        shown = report._decimal(exact)
-        self.assertTrue(shown.endswith("…"))
-        self.assertIn(f"= {shown}。总分由这个精确值直接四舍五入为 <strong>{record['total']['score']}</strong>", part)
-        self.assertLess(Fraction(shown.rstrip("…")), record["total"]["score"] + Fraction(1, 2))
-        self.assertNotIn(f"{float(exact):.2f}", part)
+        shown = report._decimal(numerator / denominator)
+        self.assertEqual(shown, "71.498575…")
+        self.assertIn(f"= {shown}。总分由这个精确值直接四舍五入为 <strong>71</strong>", part)
+        self.assertNotIn("71.50", part)
 
     def test_scored_dimensions_that_weigh_nothing(self):
         record, part = self.rescored_with({"skills": 0, "direction": 0, "experience": 100, "salary": 0})

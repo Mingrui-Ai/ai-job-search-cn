@@ -351,10 +351,11 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
 def _grounds(key: str, dimension: dict, names: dict, job, vocabulary) -> str:
     """What a dimension rests on: the JD text from the stored job for the rule dimensions, the agent's evidence."""
     parts = []
+    quotes = score.skill_quotes(job, vocabulary) if _has_evidence(job) else {}
 
-    def skill(name):
-        quote = _jd_quote(job, "requirements.skills", name)
-        return _e(name) + (" " + _quotes(quote) if quote else "")
+    def skill(label):  # a requirement as the record names it: "Go", or a choice "Golang 或 Java"
+        quote = quotes.get(label)
+        return _e(label) + (" " + _quotes(quote) if quote else "")
 
     if dimension.get("matched"):
         parts.append("有：" + "；".join(f"{skill(hit['jd'])}（档案：{_e(hit['profile'])}，计 {_e(hit['credit'])}）"
@@ -362,16 +363,16 @@ def _grounds(key: str, dimension: dict, names: dict, job, vocabulary) -> str:
     if dimension.get("missing"):
         parts.append("缺：" + "；".join(skill(name) for name in dimension["missing"]))
     if key == "salary":
-        quote = _jd_quote(job, "salary")
+        quote = score._quote(job, "salary") if _has_evidence(job) else None
         if quote:
             parts.append("JD：" + _quotes(quote))
     if dimension.get("jd_groups"):
-        counted = score.direction_skills(job, vocabulary) if job and job.get("requirements") else {}
+        counted = score.direction_skills(job, vocabulary) if _has_evidence(job) else {}
         for group, count in dimension["jd_groups"].items():
             label = vocabulary.groups.get(group, {}).get("label", group)
             listed = "、".join(counted.get(group) or [])
             parts.append(_e(f"{label}（{group}）{count} 项" + (f"：{listed}" if listed else "")))
-        if job and {group: len(found) for group, found in counted.items()} != dimension["jd_groups"]:
+        if _has_evidence(job) and {group: len(found) for group, found in counted.items()} != dimension["jd_groups"]:
             parts.append("词表或岗位在评分后改过，上面列的技能可能和评分时不同，请先重新评分")
     evidence = dimension.get("evidence")
     if isinstance(evidence, dict):
@@ -385,11 +386,9 @@ def _grounds(key: str, dimension: dict, names: dict, job, vocabulary) -> str:
     return "<br>".join(parts) or "—"
 
 
-def _jd_quote(job, path: str, term: str = None):
-    """The stored job's evidence for a field (and a term in it), as score quotes it for gaps; None if there is none."""
-    if not job or not isinstance(job.get("evidence"), dict):
-        return None
-    return score._quote(job, path, term)
+def _has_evidence(job) -> bool:
+    """A stored job the rule dimensions can be quoted from (a hand-made or damaged one may lack the parts)."""
+    return bool(job) and isinstance(job.get("evidence"), dict) and isinstance(job.get("requirements"), dict)
 
 
 def _decimal(value, places: int = 6) -> str:

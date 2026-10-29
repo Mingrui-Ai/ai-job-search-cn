@@ -24,7 +24,9 @@ SCHEMA_VERSION = 1
 # Bump when a rule's result changes - a check result or verdict, a dimension score, which
 # gaps are listed - or the default weights do. Rewording a reason does not: a saved record
 # keeps the old wording until it is scored again (docs/cn/match.md, 匹配记录).
-RULES_VERSION = 2
+# 2: new same_as synonyms 大模型 / LLM / 大语言模型, 提示词工程 / Prompt, Photoshop / PS (H18).
+# 3: skills the JD offers a choice between count as one requirement (H16).
+RULES_VERSION = 3
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary
 DEFAULT_WEIGHTS = {"skills": 35, "direction": 30, "experience": 25, "salary": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.
@@ -105,7 +107,7 @@ def rule_part(job: dict, profile: dict, vocabulary) -> dict:
             "salary": salary,
         },
         "weights": {key: weights[key] for key in DIMENSIONS},
-        "gaps": _gaps(job, skills, salary, filtered["checks"]),
+        "gaps": _gaps(job, skills, salary, filtered["checks"], vocabulary),
     }
 
 
@@ -120,6 +122,42 @@ def _asked(job: dict, vocabulary) -> list:
     return asked
 
 
+def _requirements(job: dict, vocabulary) -> list:
+    """What the JD asks for, in its order: each a list of skill names, two or more when it offers a choice.
+
+    A skill in a skill_alternatives group counts only there, wherever else the
+    JD names it, and the group counts once, where its first skill appears;
+    groups that share a skill (a same_as spelling included) are one choice.
+    """
+    groups = []  # each {key: name}, the first spelling of each skill
+    asked = _asked(job, vocabulary)
+    asked_keys = {vocabulary.key(name) for name in asked}
+    for group in job["requirements"].get("skill_alternatives") or []:
+        keys = [vocabulary.key(name) for name in group]
+        merged = {}
+        for other in [g for g in groups if g.keys() & set(keys)]:
+            merged.update(other)
+            groups.remove(other)
+        for name, key in zip(group, keys):
+            if key in asked_keys:  # a valid record lists every grouped skill in skills too
+                merged.setdefault(key, name)
+        groups.append(merged)
+    owner = {key: group for group in groups for key in group}
+    items, placed = [], []
+    for name in asked:
+        group = owner.get(vocabulary.key(name))
+        if group is None or len(group) < 2:  # "Go 或 Golang" is one skill
+            items.append([name])
+        elif not any(group is done for done in placed):
+            placed.append(group)
+            items.append(list(group.values()))
+    return items
+
+
+def _label(item: list) -> str:
+    return " 或 ".join(item)
+
+
 def _credit(skill: dict) -> Fraction:
     level = skill.get("level")
     if level in _CREDIT:
@@ -128,8 +166,8 @@ def _credit(skill: dict) -> Fraction:
 
 
 def _skills(job, profile, vocabulary) -> dict:
-    asked = _asked(job, vocabulary)
-    if not asked:
+    items = _requirements(job, vocabulary)
+    if not items:
         return {"score": None, "method": "rule", "reason": "JD 没写技能", "matched": [], "missing": []}
     held = {}
     for skill in profile.get("skills") or []:
@@ -137,29 +175,36 @@ def _skills(job, profile, vocabulary) -> dict:
         if key not in held or credit > held[key][1]:
             held[key] = (skill["name"], credit)
     matched, missing, earned = [], [], Fraction(0)
-    for name in asked:
-        hit = held.get(vocabulary.key(name))
-        if hit:
-            matched.append({"jd": name, "profile": hit[0], "credit": _plain(hit[1])})
-            earned += hit[1]
+    for item in items:
+        best = None  # a choice earns what its best-held skill does
+        for name in item:
+            hit = held.get(vocabulary.key(name))
+            if hit and (best is None or hit[1] > best[1]):
+                best = hit
+        if best:
+            matched.append({"jd": _label(item), "profile": best[0], "credit": _plain(best[1])})
+            earned += best[1]
         else:
-            missing.append(name)
-    return {"score": _round(earned / len(asked) * 100), "method": "rule",
-            "reason": f"JD 要求 {len(asked)} 项技能，你有 {len(matched)} 项", "matched": matched, "missing": missing}
+            missing.append(_label(item))
+    choices = sum(len(item) > 1 for item in items)
+    reason = f"JD 要求 {len(items)} 项技能，你有 {len(matched)} 项" + (f"（其中 {choices} 项任选其一）" if choices else "")
+    return {"score": _round(earned / len(items) * 100), "method": "rule",
+            "reason": reason, "matched": matched, "missing": missing}
 
 
 def direction_skills(job: dict, vocabulary) -> dict:
-    """The JD's skills by direction group, general left out: what the direction dimension counts."""
+    """What the direction dimension counts, by group (general left out): each requirement once for each
+    direction it offers, a choice under its label ("Golang 或 Java")."""
     groups = {}
-    for name in _asked(job, vocabulary):
-        group = vocabulary.group_of(name)
-        if group and group != vocab.GENERAL:
-            groups.setdefault(group, []).append(name)
+    for item in _requirements(job, vocabulary):  # a choice counts once for each direction it offers
+        for group in dict.fromkeys(vocabulary.group_of(name) for name in item):
+            if group and group != vocab.GENERAL:
+                groups.setdefault(group, []).append(_label(item))
     return groups
 
 
 def _direction(job, profile, vocabulary) -> dict:
-    groups = {group: len(names) for group, names in direction_skills(job, vocabulary).items()}
+    groups = {group: len(items) for group, items in direction_skills(job, vocabulary).items()}
     wanted = (profile.get("target") or {}).get("directions") or []
 
     def result(score, reason):
@@ -212,9 +257,12 @@ def _salary(job, profile) -> dict:
     return result(0, f"JD 上限 {_plain(upper)} {unit}，低于你的最低期望 {_plain(amount)} {unit}")
 
 
-def _gaps(job, skills, salary, checks) -> list:
+def _gaps(job, skills, salary, checks, vocabulary) -> list:
     """What stands between you and the job, each with the JD text it rests on (null when the JD is silent)."""
-    gaps = [{"kind": "skill", "item": name, "jd": _quote(job, "requirements.skills", name)} for name in skills["missing"]]
+    gaps = []
+    for item in _requirements(job, vocabulary):
+        if _label(item) in skills["missing"]:
+            gaps.append({"kind": "skill", "item": _label(item), "jd": _skill_quote(job, item, vocabulary)})
     if salary["score"] == 0:
         gaps.append({"kind": "salary", "item": salary["reason"], "jd": _quote(job, "salary")})
     for check in checks:
@@ -225,14 +273,37 @@ def _gaps(job, skills, salary, checks) -> list:
     return gaps
 
 
-def _quote(job: dict, path: str, term: str = None):
+def _skill_quote(job: dict, item: list, vocabulary):
+    """The JD text a requirement rests on: the snippet offering a choice, or the one naming the skill."""
+    return _choice_quote(job, item, vocabulary) if len(item) > 1 else _quote(job, "requirements.skills", item)
+
+
+def skill_quotes(job: dict, vocabulary) -> dict:
+    """Each requirement's label ("Go", "Golang 或 Java") with the JD text it rests on, as the gaps quote it."""
+    return {_label(item): _skill_quote(job, item, vocabulary) for item in _requirements(job, vocabulary)}
+
+
+def _choice_quote(job: dict, item: list, vocabulary):
+    """The snippets that offer a choice: each names two or more of its skills, in any spelling the JD's
+    groups use. A string for one snippet, a list when merged groups were offered apart (H16)."""
+    keys = {vocabulary.key(name) for name in item}
+    names = {schema.normalize_for_match(name) for group in job["requirements"].get("skill_alternatives") or []
+             for name in group if vocabulary.key(name) in keys}
+    entry = job["evidence"].get(schema.ALTERNATIVES) or {}
+    snippets = [entry["text"]] if isinstance(entry.get("text"), str) else entry.get("text") or []
+    offering = [s for s in snippets if sum(name in schema.normalize_for_match(s) for name in names) >= 2]
+    return None if not offering else offering[0] if len(offering) == 1 else offering
+
+
+def _quote(job: dict, path: str, terms: list = None):
+    """The first snippet of a field's evidence, or the first naming every one of terms."""
     entry = job["evidence"].get(path)
     if not entry or not entry.get("text"):
         return None
     snippets = [entry["text"]] if isinstance(entry["text"], str) else entry["text"]
-    if term is not None:
-        folded = schema.normalize_for_match(term)
-        return next((s for s in snippets if folded in schema.normalize_for_match(s)), None)
+    if terms is not None:
+        folded = [schema.normalize_for_match(term) for term in terms]
+        return next((s for s in snippets if all(f in schema.normalize_for_match(s) for f in folded)), None)
     return snippets[0]
 
 
