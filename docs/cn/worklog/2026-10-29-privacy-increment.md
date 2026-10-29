@@ -17,6 +17,7 @@
 - 增量候选：已知邮箱 80 次（仅 48 个提交的元数据）；通用标题 82 次；公司通用提及 1 次；公开身份链接 13 次；路径示例 5 次；占位手机号 6 次及摘要数字误命中 1 次。详细来源、旧对象复扫数与重复类别口径见报告。
 - `lint_skills`、`security_guards` 通过；conda `ai-job-search-cn` 全量 `Ran 1184 tests in 201.963s`，`OK (skipped=12)`。所有原始材料与扫描工具只留在忽略目录。
 - 发布前 master 合入 A2，已同步到 `2e88e0e` 并重新检查：`lint_skills`、`security_guards` 通过；全量 `Ran 1187 tests in 163.480s`，`OK (skipped=12)`。新增文档及 PR 文字再次用内存词表核对，无敏感值命中。
+- 随后 master 合入 H19，已合入 `c6055cc`；全量 `Ran 1191 tests in 145.369s`，`OK (skipped=12)`。扫描范围仍以原镜像/API 快照为准，不把之后的新内容算作已扫。
 
 **遗留**
 
