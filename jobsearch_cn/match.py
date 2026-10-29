@@ -6,8 +6,10 @@ and naming the profile field it used; a campus or experienced hire that states
 no weekly days or internship length gets not_applicable for those, which counts
 like a match. The rule that matters most: a value either side leaves unstated
 is unknown, never a conflict - the parser leaves fields empty when it is
-unsure, and an empty field must not cost the user a job. Scoring and salary
-comparison are not here (M2-4); nothing is stored.
+unsure, and an empty field must not cost the user a job. The reason for an
+unknown names the side that is silent and says what the other side states, so
+the user knows whether to ask about the job or fill in the profile. Scoring
+and salary comparison are not here (M2-4); nothing is stored.
 """
 
 from jobsearch_cn import schema
@@ -24,8 +26,9 @@ def filter_job(job: dict, profile: dict) -> dict:
         _graduation(job, profile),
         _education(job, profile),
         _at_most(job, profile, "requirements.days_per_week", "availability.days_per_week", "days_per_week",
-                 "每周到岗", "天"),
-        _at_most(job, profile, "requirements.min_months", "availability.months", "min_months", "实习时长", "个月"),
+                 "每周到岗", "天", "每周能到岗"),
+        _at_most(job, profile, "requirements.min_months", "availability.months", "min_months",
+                 "实习时长", "个月", "能实习"),
         _location(job, profile),
         _employment_type(job, profile),
         _exclusions(job, profile),
@@ -70,7 +73,10 @@ def _graduation(job, profile):
     wanted = job["requirements"]["graduation"]
     year = _profile_field(profile, "graduation.year")
     if not _known(wanted) or not _known(year):
-        return _item("graduation", UNKNOWN, "JD 或档案没写届别", job, *fields, profile)
+        asked = (f"JD {'要求' if wanted['strict'] else '优先'} {_years(wanted['years'])} 届" if _known(wanted)
+                 else "JD 没写届别")
+        have = f"你是 {year} 届" if _known(year) else "档案没写毕业时间"
+        return _item("graduation", UNKNOWN, f"{asked}；{have}", job, *fields, profile)
     years = wanted["years"]
     if year in years:
         return _item("graduation", MATCH, f"{year} 届在要求范围内", job, *fields, profile)
@@ -108,7 +114,7 @@ def _education(job, profile):
 _NOT_INTERNSHIP = {"campus": "校招", "experienced": "社招"}
 
 
-def _at_most(job, profile, job_path, profile_path, check, label, unit):
+def _at_most(job, profile, job_path, profile_path, check, label, unit, can):
     """The job asks for N; the candidate can give M. Conflict when N > M."""
     fields = (job_path,), (profile_path,)
     needed, available = schema._field(job, job_path), _profile_field(profile, profile_path)
@@ -117,7 +123,9 @@ def _at_most(job, profile, job_path, profile_path, check, label, unit):
         return _item(check, NOT_APPLICABLE, f"{_NOT_INTERNSHIP[job['employment_type']]}岗位，JD 没写{label}，不适用",
                      job, (job_path, "employment_type"), (profile_path,), profile)
     if needed is None or available is None:
-        return _item(check, UNKNOWN, f"JD 或档案没写{label}", job, *fields, profile)
+        asked = f"JD 没写{label}要求" if needed is None else f"JD 要求{label} {needed} {unit}"
+        have = f"档案没写{can}几{unit}" if available is None else f"你{can} {available} {unit}"
+        return _item(check, UNKNOWN, f"{asked}；{have}", job, *fields, profile)
     if needed <= available:
         return _item(check, MATCH, f"JD 要求{label} {needed} {unit}，你可以 {available} {unit}", job, *fields, profile)
     return _item(check, CONFLICT, f"JD 要求{label} {needed} {unit}，你只能 {available} {unit}", job, *fields, profile)
@@ -183,7 +191,9 @@ def _employment_type(job, profile):
     kind = job["employment_type"]
     wanted = _profile_field(profile, "target.employment_types") or []
     if kind is None or not wanted:
-        return _item("employment_type", UNKNOWN, "JD 或档案没写岗位类型", job, *fields, profile)
+        offered = f"这是{_TYPE_NAMES[kind]}岗位" if kind else "JD 没写岗位类型"
+        sought = f"你找的是{'、'.join(_TYPE_NAMES[k] for k in wanted)}" if wanted else "档案没写想找的岗位类型"
+        return _item("employment_type", UNKNOWN, f"{offered}；{sought}", job, *fields, profile)
     if kind in wanted:
         return _item("employment_type", MATCH, f"{_TYPE_NAMES[kind]}岗位在你的求职方向内", job, *fields, profile)
     return _item("employment_type", CONFLICT,
