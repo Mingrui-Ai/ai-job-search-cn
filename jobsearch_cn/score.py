@@ -247,8 +247,8 @@ def _gaps(job, skills, salary, checks, vocabulary) -> list:
     gaps = []
     for item in _requirements(job, vocabulary):
         if _label(item) in skills["missing"]:
-            path = schema.ALTERNATIVES if len(item) > 1 else "requirements.skills"
-            gaps.append({"kind": "skill", "item": _label(item), "jd": _quote(job, path, item)})
+            quote = _choice_quote(job, item, vocabulary) if len(item) > 1 else _quote(job, "requirements.skills", item)
+            gaps.append({"kind": "skill", "item": _label(item), "jd": quote})
     if salary["score"] == 0:
         gaps.append({"kind": "salary", "item": salary["reason"], "jd": _quote(job, "salary")})
     for check in checks:
@@ -257,6 +257,18 @@ def _gaps(job, skills, salary, checks, vocabulary) -> list:
             gaps.append({"kind": "filter", "item": check["check"], "result": check["result"],
                          "reason": check["reason"], "jd": quote})
     return gaps
+
+
+def _choice_quote(job: dict, item: list, vocabulary):
+    """The snippets that offer a choice: each names two or more of its skills, in any spelling the JD's
+    groups use. A string for one snippet, a list when merged groups were offered apart (H16)."""
+    keys = {vocabulary.key(name) for name in item}
+    names = {schema.normalize_for_match(name) for group in job["requirements"].get("skill_alternatives") or []
+             for name in group if vocabulary.key(name) in keys}
+    entry = job["evidence"].get(schema.ALTERNATIVES) or {}
+    snippets = [entry["text"]] if isinstance(entry.get("text"), str) else entry.get("text") or []
+    offering = [s for s in snippets if sum(name in schema.normalize_for_match(s) for name in names) >= 2]
+    return None if not offering else offering[0] if len(offering) == 1 else offering
 
 
 def _quote(job: dict, path: str, terms: list = None):

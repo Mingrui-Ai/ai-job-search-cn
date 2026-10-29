@@ -145,6 +145,24 @@ class Choices(Case):
                                                            [["Rust", "Go"], ["Golang", "Java"]]))
         self.assertEqual(joined["matched"], [{"jd": "Rust 或 Go 或 Java", "profile": "Go", "credit": 1}])
 
+    def test_overlapping_choices_from_the_jd_to_the_gap(self):
+        # Codex B's P2-1 and P2-2 on #59: parsed, merged into one choice, met by Java alone; with
+        # nothing held, one gap citing each clause that offers part of the choice.
+        java = setting(self.tech, "skills", [{"name": "Java", "level": "expert", "used_in": [], "source": "user"}])
+        nothing = setting(self.tech, "skills", [])
+        for text, label, clauses in (
+                ("任职要求：\n熟悉 Python 或 Java；熟悉 Java 或 Go", "Python 或 Java 或 Go",
+                 ["熟悉 Python 或 Java", "熟悉 Java 或 Go"]),                       # partly the same skills
+                ("任职要求：\n熟悉 Rust 或 Go；熟悉 Golang 或 Java", "Rust 或 Go 或 Java",
+                 ["熟悉 Rust 或 Go", "熟悉 Golang 或 Java"])):                      # Go and Golang: one skill
+            with self.subTest(text=text):
+                [job], _ = jd_parser.parse_text(text, now=NOW)
+                met = scored(job, java)["dimensions"]["skills"]
+                self.assertEqual((met["score"], met["missing"]), (100, []))
+                self.assertEqual(met["matched"], [{"jd": label, "profile": "Java", "credit": 1}])
+                gaps = [gap for gap in scored(job, nothing)["gaps"] if gap["kind"] == "skill"]
+                self.assertEqual(gaps, [{"kind": "skill", "item": label, "jd": clauses}])
+
     def test_a_choice_counts_once_for_each_direction_it_offers(self):
         job = with_choices(self.job, ["Python", "Java", "Figma", "SQL"], [["Python", "Java"], ["Figma", "SQL"]])
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"tech": 1, "design": 1, "data": 1})

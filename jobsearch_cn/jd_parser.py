@@ -708,24 +708,37 @@ def _skills(text: str, hits: list):
 
 
 def _alternatives(text: str, hits: list):
-    """Groups of skills the JD offers a choice between, a same_as spelling counted once, no skill in two groups."""
-    groups, taken, snippets = [], set(), []
+    """Groups of skills the JD offers a choice between, each with the clauses that offer it.
+
+    A run counts when it names two skills or more ("Go 或 Golang" is one skill). Choices
+    that share a skill, a same_as spelling included, are one group: "熟悉 Python 或 Java；
+    熟悉 Java 或 Go" is [Python, Java, Go], citing both clauses. A group keeps every
+    spelling the JD used, so each one appears in a clause that is cited.
+    """
+    groups = []  # each [terms, keys, clauses], in the order first offered
     for run in _runs(text, hits):
         if not _offered_as_choice(text, run):
             continue
-        group, keys = [], []
-        for _, term, key in run:
-            if key not in keys:
-                keys.append(key)
-                group.append(term)
-        if len(group) < 2 or taken & set(keys):  # "Go 或 Golang" is one skill; a group named twice counts once
+        terms, keys = list(dict.fromkeys(term for _, term, _ in run)), {key for _, _, key in run}
+        if len(keys) < 2:
             continue
-        taken.update(keys)
-        groups.append(group)
         clause = _clause(text, run[0][0].start(), run[-1][0].end())
-        if clause not in snippets:
-            snippets.append(clause)
-    return (groups, snippets) if groups else _NOTHING
+        joined = [group for group in groups if group[1] & keys]
+        if not joined:
+            groups.append([terms, keys, [clause]])
+            continue
+        first = joined[0]
+        for group in joined[1:] + [[terms, keys, [clause]]]:
+            first[0] += [term for term in group[0] if term not in first[0]]
+            first[1] |= group[1]
+            first[2] += [c for c in group[2] if c not in first[2]]
+        groups = [group for group in groups if not any(group is other for other in joined[1:])]
+    if not groups:
+        return _NOTHING
+    snippets = []
+    for _, _, clauses in groups:
+        snippets += [clause for clause in clauses if clause not in snippets]
+    return [terms for terms, _, _ in groups], snippets
 
 
 def _runs(text: str, hits: list) -> list:

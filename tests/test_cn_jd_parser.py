@@ -394,6 +394,11 @@ SEED_CASES = (
     ("熟练使用Excel、SQL，会用Tableau或Power BI", ALTERNATIVES, [["Tableau", "Power BI"]]),
     ("熟悉 Java 或 Go，会用 Tableau 或 Power BI", ALTERNATIVES, [["Java", "Go"], ["Tableau", "Power BI"]]),
     ("熟悉 Docker、Kubernetes 及至少一种语言 Java、Go", ALTERNATIVES, [["Java", "Go"]]),
+    # Choices that share a skill are one group, every spelling kept (Codex B's P2-1 on #59).
+    ("熟悉 Python 或 Java；熟悉 Java 或 Go", ALTERNATIVES, [["Python", "Java", "Go"]]),
+    ("熟悉 Rust 或 Go；熟悉 Golang 或 Java", ALTERNATIVES, [["Rust", "Go", "Golang", "Java"]]),
+    ("熟悉 Python 或 Java；熟悉 Go 或 Rust；会 Java、Go 任一", ALTERNATIVES, [["Python", "Java", "Go", "Rust"]]),
+    ("熟悉 Go、Golang 或 Java", ALTERNATIVES, [["Go", "Golang", "Java"]]),
     # Not a choice: skills listed with 、 or / are all wanted; 或 between years, majors, levels or
     # cities; a description; ruled-out skills; one skill in two spellings; the same choice twice.
     ("熟悉 Python、SQL、Tableau", ALTERNATIVES, []),
@@ -435,6 +440,11 @@ class SkillAlternatives(unittest.TestCase):
         record = parse_one("熟悉 Python、SQL")
         self.assertEqual(record["requirements"]["skill_alternatives"], [])
         self.assertNotIn(ALTERNATIVES, record["evidence"])
+
+    def test_a_merged_choice_cites_every_clause_that_offers_part_of_it(self):
+        record = parse_one("任职要求：\n1. 熟悉 Rust 或 Go；\n2. 熟悉 Golang 或 Java。")
+        self.assertEqual(record["evidence"][ALTERNATIVES]["text"], ["熟悉 Rust 或 Go", "熟悉 Golang 或 Java"])
+        self.assertEqual(schema.validate(record), [])
 
     def test_a_long_clause_cites_just_the_choice(self):
         record = parse_one("熟悉 Docker 并能在高并发、大流量的复杂业务场景下持续优化性能与稳定性的同时用 Python 或 SQL 做数据分析")

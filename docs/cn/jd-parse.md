@@ -163,5 +163,6 @@ Windows 文件的 CRLF 换行可以正常处理。
     - "任一""之一""至少一门"这类词要在技能前后 15 个字以内，中间不能有"和""及""与""并""是""为"，免得把"熟悉 Docker、K8s 及至少一种语言 Java、Go"里的 Docker、K8s 也算进去；
     - "均可""都可以"不算：它们也常用来说"都要会"；
     - "或"连起来、但其中有"/"的（"Python/SQL 或 Tableau"）整串算一组；
+    - 几处选择有共同的技能时（含同义写法：Go 和 Golang），合成一组，每处的原文都记进出处："熟悉 Python 或 Java；熟悉 Java 或 Go"读成 `["Python", "Java", "Go"]`。组里保留 JD 用过的每种写法（"熟悉 Rust 或 Go；熟悉 Golang 或 Java"读成 `["Rust", "Go", "Golang", "Java"]`），评分时同义写法只算一个技能；
     - 词表里没有的技能读不出，组也就读不出，例如"PS 或 AI"：词表收的是 Photoshop、Illustrator。"PS"作为 Photoshop 的同义写法由 H18 补上；"AI"不收，它在 JD 里多指人工智能，只有设计岗位里才指 Illustrator，单看这个词分不清，这是已知局限。读漏、读错的组由 Agent 按原文补或改。
 - 记录的 `id` 由 JD 内容决定（忽略空白和换行的差异），同一份 JD 重复导入会得到同一个 `id`，这是本地岗位库去重的第一依据（见 [jd-import.md](jd-import.md#去重与合并)）。
