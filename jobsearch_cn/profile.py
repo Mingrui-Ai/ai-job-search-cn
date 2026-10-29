@@ -31,10 +31,11 @@ TOP_LEVEL_KEYS = (
 CONTACT_KEYS = ("name", "phone", "email", "github", "website")
 GRADUATION_KEYS = ("year", "month")
 EDUCATION_KEYS = ("level", "school", "major", "start", "end", "gpa", "rank", "courses", "source")
-AVAILABILITY_KEYS = ("start_date", "days_per_week", "months", "cities", "remote_ok", "relocate")
+AVAILABILITY_KEYS = ("start_date", "days_per_week", "months", "cities", "acceptable_cities", "remote_ok", "relocate")
 TARGET_KEYS = ("employment_types", "roles", "industries", "salary_min", "directions", "weights")
 SALARY_MIN_KEYS = ("amount", "unit")
-WEIGHT_KEYS = ("skills", "direction", "experience", "salary")  # the scoring dimensions (M2-4)
+# The scoring dimensions (M2-4; location since M2-6b).
+WEIGHT_KEYS = ("skills", "direction", "experience", "salary", "location")
 SKILL_KEYS = ("name", "level", "used_in", "source")
 EXPERIENCE_KEYS = ("id", "type", "name", "org", "role", "start", "end", "bullets", "source")
 AWARD_KEYS = ("name", "date", "source")
@@ -91,6 +92,13 @@ def validate(profile, sources=None, groups=None) -> list[str]:
         _check_int_range(availability.get("days_per_week"), 1, 7, "availability.days_per_week", errors)
         _check_int_range(availability.get("months"), 1, 24, "availability.months", errors)
         check.texts(availability.get("cities"), "availability.cities")
+        check.texts(availability.get("acceptable_cities"), "availability.acceptable_cities")
+        preferred = {schema.normalize_for_match(c) for c in availability.get("cities") or [] if isinstance(c, str)}
+        acceptable = availability.get("acceptable_cities")
+        for index, city in enumerate(acceptable if isinstance(acceptable, list) else []):
+            if isinstance(city, str) and schema.normalize_for_match(city) in preferred:
+                errors.append(f"availability.acceptable_cities[{index}]: {city!r} is already a preferred city "
+                              "(availability.cities)")
         for key in ("remote_ok", "relocate"):
             _check_bool(availability.get(key), f"availability.{key}", errors)
 
@@ -179,9 +187,9 @@ def validate(profile, sources=None, groups=None) -> list[str]:
 def warnings(profile) -> list[str]:
     """What a valid profile leaves open that will cost answers later, as "<field path>: <message>"."""
     availability = profile.get("availability") if isinstance(profile, dict) else None
-    if not isinstance(availability, dict) or not availability.get("cities"):
+    if not isinstance(availability, dict) or not (availability.get("cities") or availability.get("acceptable_cities")):
         return []
-    # With target cities but no word on remote work or moving, every job elsewhere is
+    # With cities named but no word on remote work or moving, every job elsewhere is
     # location unknown: the filter cannot rule it in or out.
     return [f"availability.{key}: null while availability.cities is set; jobs in other cities will all be "
             "location unknown" for key in ("remote_ok", "relocate") if availability.get(key) is None]

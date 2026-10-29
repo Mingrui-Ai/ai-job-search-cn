@@ -36,7 +36,7 @@ data/profile/
   ],
   "availability": {
     "start_date": "2026-11-15", "days_per_week": 4, "months": 6,
-    "cities": ["广州", "深圳"], "remote_ok": true, "relocate": false
+    "cities": ["广州", "深圳"], "acceptable_cities": ["佛山"], "remote_ok": true, "relocate": false
   },
   "target": {
     "employment_types": ["internship"],
