@@ -30,6 +30,7 @@
      - `reason` 用一两句中文说明；
      - `evidence.jd` 逐字复制 JD 原文片段；`evidence.profile` 写经历的 id（例如 `exp-1`），至少一个；
      - `method` 保持 `agent`。`hints` 不改，它列出了档案里用到 JD 技能的经历，可以参考。
+     - 规则只认同名或同义的技能（见[维度](#维度)的已知局限）。JD 要的技能档案里没有、但经历里做过相关工作的，例如 JD 要"大模型"，档案的项目用了 RAG、LangChain，在经历的分数和理由里认可。
    - **方向**（`dimensions.direction`）：只在它的 `score` 为 null 时补。
      - 按标题和职责判断岗位方向，再和档案的 `target.directions` 比较：在其中记 100，沾边记 50，不相关记 0；
      - `method` 改成 `agent`，写上 `reason` 和 `evidence`（`evidence.profile` 可以是空列表）；
@@ -53,7 +54,7 @@
 6. **用中文向用户说明**，只讲记录里有的内容，不夸大，也不替用户决定投不投：
    - **结论**：过滤结论（符合 / 待确认 / 不符合）、等级和总分；`complete` 为 false 时，说明缺哪些维度、为什么缺；
    - **依据**：每个维度的分数和理由；经历和方向要引用 JD 原文和对应的经历；
-   - **缺口**：缺的技能（附 JD 原文）、薪资低于期望、过滤里的冲突和未知项。未知项按理由告诉用户怎么确认：JD 没写的看原文或问 HR，档案没写的补上档案（见[未知的理由](#未知的理由)）；
+   - **缺口**：缺的技能（附 JD 原文）、薪资低于期望、过滤里的冲突和未知项。缺的技能如果在第 3 步的经历里认可过相关工作（例如"大模型"列为缺口，RAG 项目已在经历里认可），说明规则只认同名或同义的技能。未知项按理由告诉用户怎么确认：JD 没写的看原文或问 HR，档案没写的补上档案（见[未知的理由](#未知的理由)）；
    - **排序**：评了几个岗位时，用 `python -m jobsearch_cn match list` 按等级、总分排序给出；标为 `stale` 的记录先回到第 2 步重新评分。`ineligible` 的岗位不算推荐；可投的岗位不到 3 个时如实告诉用户，不拿 `ineligible` 的岗位凑数。
 
 **评多个岗位**：可以先对每个岗位运行 `python -m jobsearch_cn match score <岗位id> --save`，只保存规则部分（经历留空），再挑用户关心的岗位按第 2–5 步补上经历。岗位和档案都没变时，重新评分会保留已保存记录里 Agent 补的经历和方向。
@@ -155,6 +156,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 
 - Agent 只能补 `experience`，以及规则给出 null 的 `direction`；不能改 `skills`、`salary` 和规则已经算出的 `direction`。
 - 比较技能名时忽略大小写和全角半角，并把词表 `same_as` 里同一组的词视为相同（见下文"契约补充"）。
+- **已知局限**：技能只认同名或 `same_as` 同一组的写法，不在技能之间推断。档案只写了 RAG、LangChain 时，JD 要的"大模型"仍是缺口；相关的工作由 Agent 在经历维度认可，并在评分工作流第 6 步向用户说明（H18）。M2-5 用户实测后再看要不要处理。
 
 ### 总分、等级和缺口
 
@@ -177,7 +179,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 {
   "schema_version": 1,
   "job_id": "job_9f4694691d57",
-  "rules_version": 2,
+  "rules_version": 3,
   "scored_at": "2026-10-28T15:00:00+08:00",
   "job_hash": "…",
   "profile_hash": "…",
@@ -197,7 +199,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 }
 ```
 
-- `rules_version`：规则给出的结果变了就加 1，包括各项检查和总的结论、维度分数、列出的缺口，默认权重改变时也加 1。只改理由的措辞时不加：之前保存的记录保留旧理由，重新评分后更新；对这种旧记录运行 `match validate`，会报过滤和缺口与规则给出的不一致，重新评分即可。现在是 2（H16 起：任选其一的技能）。加 1 后，旧记录标为过期，重新评分时 Agent 补的内容清空，要重新补。
+- `rules_version`：规则给出的结果变了就加 1，包括各项检查和总的结论、维度分数、列出的缺口，默认权重改变时也加 1。只改理由的措辞时不加：之前保存的记录保留旧理由，重新评分后更新；对这种旧记录运行 `match validate`，会报过滤和缺口与规则给出的不一致，重新评分即可。现在是 3（2：H18 的近义词；3：H16 的任选其一的技能）。加 1 后，旧记录标为过期，重新评分时 Agent 补的内容清空，要重新补。
 - `job_hash`、`profile_hash`：评分时岗位记录和档案的摘要，档案的摘要不含 `contact`。岗位或档案改了，`match list` 会把这条标为"过期"，需要重新评分。重新评分时，摘要都没变就保留 Agent 已补的内容，变了就清空 Agent 补充。
 - Agent 补充的维度必须有 `reason` 和 `evidence`：`jd` 是 JD 原文片段，必须逐字出现在岗位的 `raw_text` 里；`profile` 是档案条目的 id，必须存在。
 - `match validate` 检查结构、取值、分值范围和依据，并按上面的规则从各维度重新算出总分和等级，和记录不一致就报错。Agent 不能直接改总分。
@@ -231,7 +233,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 
 - **不适用**：硬性条件新增结论 `not_applicable`。校招、社招岗位没写每周天数和实习时长时，`days_per_week`、`min_months` 判 `not_applicable`，不影响总结论（见上文"各项条件"）。
 - **学历不限**：Job Schema 的 `requirements.education.min` 新增取值 `none`，表示 JD 明确写了"学历不限""不设最低学历门槛"，过滤时判 `match`。`jd parse` 能识别这些写法；"专业不限"不算。
-- **同义词**：词表新增 `same_as`，列出同义的词条：`["Go", "Golang"]`、`["JavaScript", "JS"]`、`["Kubernetes", "K8s"]`、`["自然语言处理", "NLP"]`、`["文案写作", "文案撰写"]`、`["PowerPoint", "PPT"]`（"JS""PPT""文案撰写"是新补的词条）。同一组的词必须都是词表里的词条，并且属于同一个分组。比较技能时同一组视为相同（`vocab.Vocabulary.same`）；解析结果仍保留 JD 原文的写法。用户词表可以追加，和已有的组有相同词条时并成一组。写法见 [jd-parse.md](jd-parse.md#技能词表)。
+- **同义词**：词表新增 `same_as`，列出同义的词条：`["Go", "Golang"]`、`["JavaScript", "JS"]`、`["Kubernetes", "K8s"]`、`["自然语言处理", "NLP"]`、`["文案写作", "文案撰写"]`、`["PowerPoint", "PPT"]`（"JS""PPT""文案撰写"是新补的词条）。同一组的词必须都是词表里的词条，并且属于同一个分组。比较技能时同一组视为相同（`vocab.Vocabulary.same`）；解析结果仍保留 JD 原文的写法。用户词表可以追加，和已有的组有相同词条时并成一组。写法见 [jd-parse.md](jd-parse.md#技能词表)。H18 又并了三组（大模型 / LLM / 大语言模型、提示词工程 / Prompt、Photoshop / PS），内置的组以 jd-parse.md 为准。
 - **档案**：`target` 新增 `directions`（词表分组键的列表，例如 `["data", "product"]`；`general` 不算方向）和 `weights`（null，或四个维度的权重，每项不小于 0）。Profile 还没有随版本发布，直接加入 v1，不升版本号。字段说明见 [profile.md](profile.md#3-profilejson-字段)。
 - **建档**：`profile-setup.md` 要求问到"是否接受远程""是否愿意去其他城市"，并说明留空的后果；写了意向城市而这两项为空时，`profile validate` 给出警告。草稿放在 `data/profile/drafts/`。
 - **地点的理由**：判 `unknown` 时写明哪一方没写，见上文"[未知的理由](#未知的理由)"。

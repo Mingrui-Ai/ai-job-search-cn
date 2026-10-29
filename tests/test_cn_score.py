@@ -95,6 +95,28 @@ class Skills(Case):
         self.assertEqual(dimension["missing"], ["PYTHON"])
         self.assertEqual(dimension["score"], 40)  # K8s and Kubernetes count once: (0.8 + 0) / 2
 
+    def test_the_h18_spellings_are_one_skill_each(self):
+        # 大模型 / LLM / 大语言模型, 提示词工程 / Prompt, Photoshop / PS (H18).
+        profile = setting(self.tech, "skills", [
+            {"name": "LLM", "level": "working", "used_in": [], "source": "user"},
+            {"name": "提示词工程", "level": "familiar", "used_in": [], "source": "user"},
+            {"name": "Photoshop", "level": "working", "used_in": [], "source": "user"},
+        ])
+        job = with_skills(self.job, ["大模型", "大语言模型", "Prompt", "PS"])
+        dimension = self.dimension("skills", job=job, profile=profile)
+        self.assertEqual(dimension["matched"], [{"jd": "大模型", "profile": "LLM", "credit": 0.8},
+                                                {"jd": "Prompt", "profile": "提示词工程", "credit": 0.5},
+                                                {"jd": "PS", "profile": "Photoshop", "credit": 0.8}])
+        self.assertEqual(dimension["score"], 70)  # 大模型 and 大语言模型 count once: (0.8 + 0.5 + 0.8) / 3
+
+    def test_a_related_skill_is_not_the_skill(self):
+        # H18: tech lists RAG and LangChain, not 大模型. The rules infer nothing from them, so
+        # 大模型 stays a gap; an agent credits the related work under experience instead.
+        job = with_skills(self.job, ["大模型", "RAG", "LangChain"])
+        dimension = self.dimension("skills", job=job)
+        self.assertEqual(dimension["missing"], ["大模型"])
+        self.assertIn({"kind": "skill", "item": "大模型", "jd": None}, scored(job, self.tech)["gaps"])
+
     def test_null_when_the_jd_names_no_skill(self):
         dimension = self.dimension("skills", job=with_skills(self.job, []))
         self.assertIsNone(dimension["score"])
@@ -170,9 +192,9 @@ class Choices(Case):
         job = with_choices(self.job, ["Excel", "SPSS"], [["Excel", "SPSS"]])
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
 
-    def test_rules_version_2_marks_older_records_stale(self):
-        self.assertEqual(score.RULES_VERSION, 2)
-        old = setting(scored(self.job, self.tech), "rules_version", 1)
+    def test_a_new_rules_version_marks_older_records_stale(self):
+        self.assertEqual(score.RULES_VERSION, 3)  # 2: H18's synonyms; 3: H16's choices
+        old = setting(scored(self.job, self.tech), "rules_version", 2)
         errors = score.validate(old, self.job, self.tech, VOCABULARY)
         self.assertTrue(any(e.startswith("rules_version: scored by other rules") for e in errors), errors)
 
