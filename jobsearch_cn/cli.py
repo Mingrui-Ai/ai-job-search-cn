@@ -451,11 +451,12 @@ def cmd_match_report(args) -> int:
         except store.StoreError:
             job = None
         entries.append(report.entry(record, job, score.stale(record, job, digest)))
-    entries = report.order(entries)
+    entries, vocabulary = report.order(entries), _vocabulary(args)
     now = datetime.now().astimezone()
     directory = _report_dir(store.data_dir(args.data_dir), now)
     page, form = directory / "report.html", directory / "feedback.csv"
-    page.write_text(report.build(entries, data, now.isoformat(timespec="seconds")), encoding="utf-8", newline="\n")
+    page.write_text(report.build(entries, data, now.isoformat(timespec="seconds"), vocabulary),
+                    encoding="utf-8", newline="\n")
     # newline="": the form already ends its rows in CRLF, as Excel expects.
     with open(form, "w", encoding="utf-8", newline="") as handle:
         handle.write(report.feedback_csv(entries))

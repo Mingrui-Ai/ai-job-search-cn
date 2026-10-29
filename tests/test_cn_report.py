@@ -23,6 +23,7 @@ import sys
 import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
+from fractions import Fraction
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -33,9 +34,10 @@ SAMPLES = ("jd/boss_intern.txt", "jd/nowcoder_campus.txt", "jd/official_site.txt
 COMPLETED = ("jd/boss_intern.txt", "jd/nowcoder_campus.txt")
 
 sys.path.insert(0, str(REPO))
-from jobsearch_cn import cli, jd_parser, match, report, score  # noqa: E402
+from jobsearch_cn import cli, jd_parser, match, report, score, vocab  # noqa: E402
 
 NOW = datetime(2026, 10, 29, 9, 30, tzinfo=timezone(timedelta(hours=8)))
+VOCABULARY = vocab.load()
 
 
 def run_cli(*args, data_dir):
@@ -83,6 +85,60 @@ class ReportFromSavedRecords(unittest.TestCase):
         start = page.index(f'<section id="{job_id}">')
         return page[start:page.index("</section>", start)]
 
+    @staticmethod
+    def row(dims: str, key: str) -> str:
+        start = dims.index(f"<td>{report.DIMENSIONS[key]}</td>")
+        return html.unescape(dims[start:dims.index("</tr>", start)])
+
+    def assert_rule_grounds(self, record: dict, job: dict, dims: str):
+        """The rule dimensions show the JD text they rest on, taken from the stored job."""
+        skills = record["dimensions"]["skills"]
+        for name in [hit["jd"] for hit in skills["matched"]] + skills["missing"]:
+            quote = score._quote(job, "requirements.skills", name)
+            if quote:
+                self.assertIn(quote, self.row(dims, "skills"))
+        salary = score._quote(job, "salary")
+        if salary:
+            self.assertIn(salary, self.row(dims, "salary"))
+        for group, names in score.direction_skills(job, VOCABULARY).items():
+            self.assertIn(f"{VOCABULARY.groups[group]['label']}（{group}）{len(names)} 项：{'、'.join(names)}",
+                          self.row(dims, "direction"))
+
+    def test_the_salary_quote_of_a_known_job(self):
+        # Codex B's case in #65: the salary row was empty although the stored job quotes it.
+        _, page, _ = self.generate()
+        dims = self.section(page, self.ids["jd/boss_intern.txt"])
+        self.assertIn("200-250元/天", self.row(dims, "salary"))
+
+    def rescored_with(self, weights: dict, sample="jd/boss_intern.txt") -> tuple:
+        changed = copy.deepcopy(self.profile)
+        changed["target"]["weights"] = weights
+        (self.data / "profile" / "profile.json").write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+        job_id = self.ids[sample]
+        record = self.cli("match", "score", job_id, "--save")
+        _, page, _ = self.generate(job_id)
+        return record, self.section(page, job_id)
+
+    def test_a_total_near_a_half_is_explained_without_rounding_first(self):
+        # Codex B's weights in #65: 71.498575… was shown as 71.50, then "rounded" to 71.
+        record, part = self.rescored_with({"skills": 1.0001, "direction": 1, "experience": 0, "salary": 0})
+        _, numerator, denominator = report.working(record)
+        exact = numerator / denominator
+        self.assertLess(abs(exact - (record["total"]["score"] + Fraction(1, 2))), Fraction(1, 100),
+                        "the case must sit just below a .5")
+        shown = report._decimal(exact)
+        self.assertTrue(shown.endswith("…"))
+        self.assertIn(f"= {shown}。总分由这个精确值直接四舍五入为 <strong>{record['total']['score']}</strong>", part)
+        self.assertLess(Fraction(shown.rstrip("…")), record["total"]["score"] + Fraction(1, 2))
+        self.assertNotIn(f"{float(exact):.2f}", part)
+
+    def test_scored_dimensions_that_weigh_nothing(self):
+        record, part = self.rescored_with({"skills": 0, "direction": 0, "experience": 100, "salary": 0})
+        self.assertIsNone(record["total"]["score"])
+        self.assertIn("÷ 已评分维度的权重之和 0：已评分维度的权重之和为 0", part)
+        self.assertIn("权重大于 0 的维度", part)
+        self.assertNotIn("没有一个维度有分数", part)
+
     def test_each_section_matches_match_show(self):
         result, page, _ = self.generate()
         self.assertEqual(result["jobs"], len(SAMPLES))
@@ -114,6 +170,7 @@ class ReportFromSavedRecords(unittest.TestCase):
                         self.assertIn(quote, html.unescape(dims))
                     for ref in evidence.get("profile") or []:
                         self.assertIn(names[ref], html.unescape(dims))
+                self.assert_rule_grounds(record, self.cli("jd", "show", job_id), dims)
                 gaps = html.unescape(part[part.index("<h3>缺口</h3>"):part.index("<h3>待确认</h3>")])
                 for gap in record["gaps"]:
                     self.assertIn(gap["reason"] if gap["kind"] == "filter" else gap["item"], gaps)
@@ -179,6 +236,9 @@ class ReportFromSavedRecords(unittest.TestCase):
         result, page, form = self.generate()
         self.assertEqual(sorted(result["stale"]), sorted(self.ids.values()))
         self.assertIn("条记录已过期", page)
+        for job_id in self.ids.values():
+            # The rule dimensions quote today's job, which may not be what was scored.
+            self.assertIn("依据可能已变，请先重新评分", self.section(page, job_id))
         for row in list(csv.reader(io.StringIO(form.decode("utf-8-sig"))))[1:]:
             self.assertTrue(row[5].startswith("已过期，先重新评分。"))
 
@@ -234,6 +294,14 @@ class FormAndPage(unittest.TestCase):
         record.update(changes)
         return record
 
+    def test_numbers_are_cut_not_rounded(self):
+        cases = {Fraction(5, 2): "2.5", Fraction(35): "35", Fraction(1, 3): "0.333333…",
+                 Fraction(1999999, 4000000): "0.499999…", Fraction("1.0001"): "1.0001", Fraction(2, 3): "0.666666…"}
+        for value, shown in cases.items():
+            with self.subTest(value=value):
+                self.assertEqual(report._decimal(value), shown)
+        self.assertEqual(report._decimal(12.5), "12.5")
+
     def test_commas_quotes_and_line_breaks_round_trip(self):
         job = {"title": '数据分析实习生, "急招"\n可转正', "company": "示例,公司"}
         text = report.feedback_csv([report.entry(self.record(), job, False)])
@@ -273,7 +341,7 @@ class FormAndPage(unittest.TestCase):
 
     def test_jd_text_is_escaped(self):
         job = {"title": "<script>alert(1)</script>", "company": "A&B"}
-        page = report.build([report.entry(self.record(), job, False)], {}, "2026-10-29T09:30:00+08:00")
+        page = report.build([report.entry(self.record(), job, False)], {}, "2026-10-29T09:30:00+08:00", VOCABULARY)
         self.assertNotIn("<script>alert", page)
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
         self.assertIn("A&amp;B", page)

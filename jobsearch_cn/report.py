@@ -221,8 +221,8 @@ def _experience_names(profile: dict) -> dict:
     return names
 
 
-def build(entries: list, profile: dict, generated_at: str) -> str:
-    """The report page for entries already in order()."""
+def build(entries: list, profile: dict, generated_at: str, vocabulary) -> str:
+    """The report page for entries already in order(); the vocabulary names the direction groups."""
     names = _experience_names(profile)
     stale = [item for item in entries if item["stale"]]
     out = [
@@ -257,12 +257,12 @@ def build(entries: list, profile: dict, generated_at: str) -> str:
             f"<td>{'是' if total.get('complete') else '否'}</td>{expired}</tr>")
     out.append("</table>")
     for item in entries:
-        out += _job_section(item, profile, names)
+        out += _job_section(item, profile, names, vocabulary)
     out += ["</body>", "</html>", ""]
     return "\n".join(out)
 
 
-def _job_section(item: dict, profile: dict, names: dict) -> list:
+def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
     record, job = item["record"], item["job"]
     shown = job or {}
     total = record.get("total") or {}
@@ -291,16 +291,22 @@ def _job_section(item: dict, profile: dict, names: dict) -> list:
     out.append("</table>")
 
     weights = record.get("weights") or {}
-    out += ["<h3>各维度</h3>",
-            "<table><tr><th>维度</th><th>分数</th><th>权重</th><th>给出方</th><th>理由</th><th>依据</th></tr>"]
+    out.append("<h3>各维度</h3>")
+    if job is None:
+        out.append('<p class="notice">岗位已删除，规则给出的维度列不出 JD 原文。</p>')
+    elif item["stale"]:
+        out.append('<p class="notice stale">依据栏里技能、薪资、方向的 JD 原文取自现在的岗位库，'
+                   "这条记录已过期，依据可能已变，请先重新评分。</p>")
+    out.append("<table><tr><th>维度</th><th>分数</th><th>权重</th><th>给出方</th><th>理由</th><th>依据</th></tr>")
     for key, dimension in (record.get("dimensions") or {}).items():
         dimension = dimension or {}
         value = dimension.get("score")
         out.append(f"<tr><td>{_e(_label(DIMENSIONS, key))}</td>"
                    f"<td class=\"num\">{_e('—' if value is None else value)}</td>"
-                   f"<td class=\"num\">{_e(score._plain(weights[key]) if key in weights else '—')}</td>"
+                   f"<td class=\"num\">{_e(_decimal(weights[key]) if key in weights else '—')}</td>"
                    f"<td>{_e(_label(METHODS, dimension.get('method')) if value is not None else '—')}</td>"
-                   f"<td>{_e(dimension.get('reason'))}</td><td>{_grounds(key, dimension, names)}</td></tr>")
+                   f"<td>{_e(dimension.get('reason'))}</td>"
+                   f"<td>{_grounds(key, dimension, names, job, vocabulary)}</td></tr>")
     out.append("</table>")
 
     rows, numerator, denominator = working(record)
@@ -310,15 +316,18 @@ def _job_section(item: dict, profile: dict, names: dict) -> list:
     for key, value, weight, product in rows:
         out.append(f"<tr><td>{_e(_label(DIMENSIONS, key))}</td>"
                    f"<td class=\"num\">{_e('—' if value is None else value)}</td>"
-                   f"<td class=\"num\">{_e(score._plain(weight))}</td>"
-                   f"<td class=\"num\">{_e('不计入' if product is None else score._plain(product))}</td></tr>")
+                   f"<td class=\"num\">{_e(_decimal(weight))}</td>"
+                   f"<td class=\"num\">{_e('不计入' if product is None else _decimal(product))}</td></tr>")
     out.append("</table>")
     if denominator:
-        out.append(f"<p>合计 {_e(score._plain(numerator))} ÷ 权重之和 {_e(score._plain(denominator))} = "
-                   f"{float(numerator / denominator):.2f}，四舍五入为 <strong>{_e(total.get('score'))}</strong>，"
-                   f"{_e(grade_text(total.get('grade')))}。</p>")
+        exact = _decimal(numerator / denominator)
+        cut = "；“…”表示后面还有位数，只截断显示、不进位" if exact.endswith("…") else ""
+        out.append(f"<p>合计 {_e(_decimal(numerator))} ÷ 权重之和 {_e(_decimal(denominator))} = {_e(exact)}。"
+                   f"总分由这个精确值直接四舍五入为 <strong>{_e(total.get('score'))}</strong>，"
+                   f"{_e(grade_text(total.get('grade')))}（中途不先取小数{cut}）。</p>")
     else:
-        out.append("<p>没有一个维度有分数，算不出总分。</p>")
+        out.append(f"<p>合计 {_e(_decimal(numerator))} ÷ 已评分维度的权重之和 0：已评分维度的权重之和为 0，算不出总分。"
+                   "请补上权重大于 0 的维度（例如让 Agent 补经历），或在档案里调整权重（target.weights）。</p>")
 
     out.append("<h3>缺口</h3>")
     gaps = record.get("gaps") or []
@@ -339,15 +348,31 @@ def _job_section(item: dict, profile: dict, names: dict) -> list:
     return out
 
 
-def _grounds(key: str, dimension: dict, names: dict) -> str:
+def _grounds(key: str, dimension: dict, names: dict, job, vocabulary) -> str:
+    """What a dimension rests on: the JD text from the stored job for the rule dimensions, the agent's evidence."""
     parts = []
+
+    def skill(name):
+        quote = _jd_quote(job, "requirements.skills", name)
+        return _e(name) + (" " + _quotes(quote) if quote else "")
+
     if dimension.get("matched"):
-        parts.append("有：" + "、".join(
-            _e(f"{hit['jd']}（档案：{hit['profile']}，计 {hit['credit']}）") for hit in dimension["matched"]))
+        parts.append("有：" + "；".join(f"{skill(hit['jd'])}（档案：{_e(hit['profile'])}，计 {_e(hit['credit'])}）"
+                                       for hit in dimension["matched"]))
     if dimension.get("missing"):
-        parts.append("缺：" + _e("、".join(dimension["missing"])))
+        parts.append("缺：" + "；".join(skill(name) for name in dimension["missing"]))
+    if key == "salary":
+        quote = _jd_quote(job, "salary")
+        if quote:
+            parts.append("JD：" + _quotes(quote))
     if dimension.get("jd_groups"):
-        parts.append("JD 技能分组：" + _e("、".join(f"{group} {count}" for group, count in dimension["jd_groups"].items())))
+        counted = score.direction_skills(job, vocabulary) if job and job.get("requirements") else {}
+        for group, count in dimension["jd_groups"].items():
+            label = vocabulary.groups.get(group, {}).get("label", group)
+            listed = "、".join(counted.get(group) or [])
+            parts.append(_e(f"{label}（{group}）{count} 项" + (f"：{listed}" if listed else "")))
+        if job and {group: len(found) for group, found in counted.items()} != dimension["jd_groups"]:
+            parts.append("词表或岗位在评分后改过，上面列的技能可能和评分时不同，请先重新评分")
     evidence = dimension.get("evidence")
     if isinstance(evidence, dict):
         if evidence.get("jd"):
@@ -358,6 +383,25 @@ def _grounds(key: str, dimension: dict, names: dict) -> str:
         parts.append("可参考：" + _e("；".join(
             f"{hint['jd']} → {'、'.join(names.get(ref, ref) for ref in hint['profile'])}" for hint in dimension["hints"])))
     return "<br>".join(parts) or "—"
+
+
+def _jd_quote(job, path: str, term: str = None):
+    """The stored job's evidence for a field (and a term in it), as score quotes it for gaps; None if there is none."""
+    if not job or not isinstance(job.get("evidence"), dict):
+        return None
+    return score._quote(job, path, term)
+
+
+def _decimal(value, places: int = 6) -> str:
+    """A number written out exactly, or cut (never rounded) after `places` decimals and marked …, so the digits
+    shown never cross the .5 that rounding the total depends on: 71.498575… stays below 71.5."""
+    value = value if isinstance(value, Fraction) else Fraction(str(value))
+    sign, value = ("-", -value) if value < 0 else ("", value)
+    cut = value.numerator * 10 ** places // value.denominator
+    whole, decimals = divmod(cut, 10 ** places)
+    digits = f"{decimals:0{places}d}".rstrip("0")
+    exact = cut * value.denominator == value.numerator * 10 ** places
+    return f"{sign}{whole}" + (f".{digits}" if digits else "") + ("" if exact else "…")
 
 
 def _gap(gap: dict) -> str:

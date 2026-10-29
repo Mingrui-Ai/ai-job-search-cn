@@ -148,12 +148,18 @@ def _skills(job, profile, vocabulary) -> dict:
             "reason": f"JD 要求 {len(asked)} 项技能，你有 {len(matched)} 项", "matched": matched, "missing": missing}
 
 
-def _direction(job, profile, vocabulary) -> dict:
+def direction_skills(job: dict, vocabulary) -> dict:
+    """The JD's skills by direction group, general left out: what the direction dimension counts."""
     groups = {}
     for name in _asked(job, vocabulary):
         group = vocabulary.group_of(name)
         if group and group != vocab.GENERAL:
-            groups[group] = groups.get(group, 0) + 1
+            groups.setdefault(group, []).append(name)
+    return groups
+
+
+def _direction(job, profile, vocabulary) -> dict:
+    groups = {group: len(names) for group, names in direction_skills(job, vocabulary).items()}
     wanted = (profile.get("target") or {}).get("directions") or []
 
     def result(score, reason):
