@@ -1,0 +1,663 @@
+{
+  "fixture": "unrelated_online_testing_intern.txt",
+  "parse": {
+    "arguments": [
+      "jd",
+      "parse",
+      "tests\\fixtures\\cn\\jd-m2-6c-holdout\\unrelated_online_testing_intern.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "data\\v9-check\\22a3cafa4aa34a839f5212e7608dca4b\\parsed"
+    ],
+    "exit_code": 0,
+    "output": {
+      "jobs": [
+        {
+          "schema_version": 1,
+          "id": "job_417547055b50",
+          "source": {
+            "type": "file",
+            "site": "other",
+            "url": null,
+            "imported_at": "2026-10-29T16:26:13+08:00"
+          },
+          "title": "质量验证实习生",
+          "company": "示例沐格系统有限公司",
+          "cities": [
+            "深圳"
+          ],
+          "remote": false,
+          "employment_type": "internship",
+          "salary": {
+            "min": 200,
+            "max": 240,
+            "unit": "CNY/day",
+            "months": null,
+            "negotiable": false
+          },
+          "requirements": {
+            "graduation": {
+              "years": [
+                2027
+              ],
+              "strict": true
+            },
+            "days_per_week": 4,
+            "min_months": 3,
+            "education": {
+              "min": "bachelor",
+              "preferred": null
+            },
+            "skills": [
+              "Python",
+              "Docker"
+            ]
+          },
+          "return_offer": false,
+          "published_at": "2026-10-29",
+          "deadline": null,
+          "status": "new",
+          "evidence": {
+            "title": {
+              "text": "质量验证实习生",
+              "method": "rule"
+            },
+            "company": {
+              "text": "示例沐格系统有限公司",
+              "method": "rule"
+            },
+            "cities": {
+              "text": "工作地点：深圳",
+              "method": "rule"
+            },
+            "remote": {
+              "text": "不支持远程",
+              "method": "rule"
+            },
+            "employment_type": {
+              "text": "职位名称：质量验证实习生",
+              "method": "rule"
+            },
+            "salary": {
+              "text": "200-240元/天",
+              "method": "rule"
+            },
+            "requirements.graduation": {
+              "text": "仅面向2027届",
+              "method": "rule"
+            },
+            "requirements.days_per_week": {
+              "text": "每周至少到岗4天",
+              "method": "rule"
+            },
+            "requirements.min_months": {
+              "text": "实习3个月",
+              "method": "rule"
+            },
+            "requirements.education": {
+              "text": "本科及以上",
+              "method": "rule"
+            },
+            "requirements.skills": {
+              "text": "技能要求：熟悉 Python、Docker",
+              "method": "rule"
+            },
+            "return_offer": {
+              "text": "不提供转正",
+              "method": "rule"
+            },
+            "published_at": {
+              "text": "发布日期：2026-10-29",
+              "method": "rule"
+            }
+          },
+          "guard": {
+            "verdict": "clean",
+            "counts": {}
+          },
+          "raw_text": "职位名称：质量验证实习生\n公司名称：示例沐格系统有限公司\n本岗位及公司为原创虚构测试材料。\n工作地点：深圳\n薪资：200-240元/天\n岗位职责：编写回归检查脚本，整理故障记录，核对修复结果。\n技能要求：熟悉 Python、Docker。\n仅面向2027届，本科及以上学历。\n每周至少到岗4天，连续实习3个月以上。\n工作方式：不支持远程办公。\n公司介绍：我们的线上业务包含视频课程和电话客服，这是产品介绍。\n面试安排：另行通知。\n到岗要求：1月10日前到岗。\n不提供转正机会。\n发布日期：2026-10-29"
+        }
+      ],
+      "warnings": [],
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_417547055b50",
+          "title": "质量验证实习生",
+          "company": "示例沐格系统有限公司",
+          "cities": [
+            "深圳"
+          ],
+          "status": "new"
+        }
+      ]
+    },
+    "stderr": ""
+  },
+  "field_comparison": {
+    "title": {
+      "type": "match",
+      "expected": "质量验证实习生",
+      "actual": "质量验证实习生",
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "company": {
+      "type": "match",
+      "expected": "示例沐格系统有限公司",
+      "actual": "示例沐格系统有限公司",
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "cities": {
+      "type": "match",
+      "expected": [
+        "深圳"
+      ],
+      "actual": [
+        "深圳"
+      ],
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "remote": {
+      "type": "match",
+      "expected": false,
+      "actual": false,
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "employment_type": {
+      "type": "match",
+      "expected": "internship",
+      "actual": "internship",
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "salary": {
+      "type": "match",
+      "expected": {
+        "min": 200,
+        "max": 240,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 200,
+        "max": 240,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "requirements.graduation": {
+      "type": "match",
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "requirements.days_per_week": {
+      "type": "match",
+      "expected": 4,
+      "actual": 4,
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "requirements.min_months": {
+      "type": "match",
+      "expected": 3,
+      "actual": 3,
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "requirements.education": {
+      "type": "match",
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "requirements.skills": {
+      "type": "match",
+      "expected": [
+        "Python",
+        "Docker"
+      ],
+      "actual": [
+        "Python",
+        "Docker"
+      ],
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "return_offer": {
+      "type": "match",
+      "expected": false,
+      "actual": false,
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "published_at": {
+      "type": "match",
+      "expected": "2026-10-29",
+      "actual": "2026-10-29",
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "deadline": {
+      "type": "match",
+      "expected": null,
+      "actual": null,
+      "missing_normalized": [],
+      "extra_normalized": []
+    }
+  },
+  "filters": {
+    "tech": {
+      "arguments": [
+        "match",
+        "filter",
+        "job_417547055b50",
+        "--profile",
+        "tests\\fixtures\\cn\\profile\\tech\\profile.json",
+        "--data-dir",
+        "data\\v9-check\\22a3cafa4aa34a839f5212e7608dca4b\\parsed"
+      ],
+      "exit_code": 0,
+      "output": {
+        "job_id": "job_417547055b50",
+        "title": "质量验证实习生",
+        "company": "示例沐格系统有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅面向2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 4,
+                "evidence": "每周至少到岗4天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": "实习3个月"
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市深圳在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": "工作地点：深圳"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "职位名称：质量验证实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "质量验证实习生",
+                "evidence": "质量验证实习生"
+              },
+              "company": {
+                "value": "示例沐格系统有限公司",
+                "evidence": "示例沐格系统有限公司"
+              },
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": "工作地点：深圳"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    "ops": {
+      "arguments": [
+        "match",
+        "filter",
+        "job_417547055b50",
+        "--profile",
+        "tests\\fixtures\\cn\\profile\\ops\\profile.json",
+        "--data-dir",
+        "data\\v9-check\\22a3cafa4aa34a839f5212e7608dca4b\\parsed"
+      ],
+      "exit_code": 0,
+      "output": {
+        "job_id": "job_417547055b50",
+        "title": "质量验证实习生",
+        "company": "示例沐格系统有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅面向2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "conflict",
+            "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 4,
+                "evidence": "每周至少到岗4天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": "实习3个月"
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "深圳不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": "工作地点：深圳"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "职位名称：质量验证实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "质量验证实习生",
+                "evidence": "质量验证实习生"
+              },
+              "company": {
+                "value": "示例沐格系统有限公司",
+                "evidence": "示例沐格系统有限公司"
+              },
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": "工作地点：深圳"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "stderr": ""
+    }
+  },
+  "filter_comparison": {
+    "tech": {
+      "verdict_match": true,
+      "expected_verdict": "eligible",
+      "actual_verdict": "eligible",
+      "check_matches": 7,
+      "check_differences": {}
+    },
+    "ops": {
+      "verdict_match": true,
+      "expected_verdict": "ineligible",
+      "actual_verdict": "ineligible",
+      "check_matches": 7,
+      "check_differences": {}
+    }
+  },
+  "oracle_replay": {
+    "validation": {
+      "arguments": [
+        "jd",
+        "validate",
+        "data\\v9-check\\22a3cafa4aa34a839f5212e7608dca4b\\unrelated_online_testing_intern.replay.json",
+        "--data-dir",
+        "data\\v9-check\\22a3cafa4aa34a839f5212e7608dca4b\\replay"
+      ],
+      "exit_code": 2,
+      "output": {
+        "unparsed_stdout": ""
+      },
+      "stderr": "usage: python -m jobsearch_cn [-h] [--version] <command> ...\npython -m jobsearch_cn: error: unrecognized arguments: --data-dir data\\v9-check\\22a3cafa4aa34a839f5212e7608dca4b\\replay\n"
+    }
+  }
+}

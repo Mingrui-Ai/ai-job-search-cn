@@ -1,0 +1,151 @@
+{
+  "label": "master-a70dbc7",
+  "code_commit": "a70dbc7c43f370af8caf8baa8416ac0ca23cc50f",
+  "fixture_commit_at_run": "bd0e153cf8acbec777209f1b56c32668e2a40fc7",
+  "started_at_utc": "2026-10-29T08:26:10.395223+00:00",
+  "finished_at_utc": "2026-10-29T08:26:13.494175+00:00",
+  "manifest_sha256": "312d55e1a4908a038383e740198cba96b8a93cf6d95a5113ae662cf13b51bf54",
+  "frozen_files_unchanged": true,
+  "counts": {
+    "fields_match": 69,
+    "fields_missing": 1,
+    "skill_expected": 11,
+    "skill_hit": 10,
+    "skill_extra": 0,
+    "parsed_verdict_match": 10,
+    "parsed_check_match": 70
+  },
+  "new_feature_status": {
+    "status": "unsupported_in_baseline_contract",
+    "semantic_groups": 15,
+    "planned_new_check_states": 20,
+    "note": "新字段与检查尚未在master契约中实现，不把缺字段当作原文unknown或计入旧14字段正确率。"
+  },
+  "fixtures": [
+    {
+      "fixture": "mixed_recruiting_intern.txt",
+      "field_matches": 13,
+      "differences": {
+        "requirements.skills": {
+          "type": "missing",
+          "expected": [
+            "Excel",
+            "Word"
+          ],
+          "actual": [
+            "Excel"
+          ],
+          "missing_normalized": [
+            "word"
+          ],
+          "extra_normalized": []
+        }
+      },
+      "parsed_match": {
+        "tech": {
+          "verdict_match": true,
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "check_matches": 7,
+          "check_differences": {}
+        },
+        "ops": {
+          "verdict_match": true,
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "check_matches": 7,
+          "check_differences": {}
+        }
+      },
+      "replay_match": {}
+    },
+    {
+      "fixture": "online_backend_intern.txt",
+      "field_matches": 14,
+      "differences": {},
+      "parsed_match": {
+        "tech": {
+          "verdict_match": true,
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "check_matches": 7,
+          "check_differences": {}
+        },
+        "ops": {
+          "verdict_match": true,
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "check_matches": 7,
+          "check_differences": {}
+        }
+      },
+      "replay_match": {}
+    },
+    {
+      "fixture": "onsite_finance_intern.txt",
+      "field_matches": 14,
+      "differences": {},
+      "parsed_match": {
+        "tech": {
+          "verdict_match": true,
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "check_matches": 7,
+          "check_differences": {}
+        },
+        "ops": {
+          "verdict_match": true,
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "check_matches": 7,
+          "check_differences": {}
+        }
+      },
+      "replay_match": {}
+    },
+    {
+      "fixture": "relative_content_intern.txt",
+      "field_matches": 14,
+      "differences": {},
+      "parsed_match": {
+        "tech": {
+          "verdict_match": true,
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "check_matches": 7,
+          "check_differences": {}
+        },
+        "ops": {
+          "verdict_match": true,
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "check_matches": 7,
+          "check_differences": {}
+        }
+      },
+      "replay_match": {}
+    },
+    {
+      "fixture": "unrelated_online_testing_intern.txt",
+      "field_matches": 14,
+      "differences": {},
+      "parsed_match": {
+        "tech": {
+          "verdict_match": true,
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "check_matches": 7,
+          "check_differences": {}
+        },
+        "ops": {
+          "verdict_match": true,
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "check_matches": 7,
+          "check_differences": {}
+        }
+      },
+      "replay_match": {}
+    }
+  ]
+}
