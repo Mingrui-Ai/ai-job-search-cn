@@ -1,0 +1,133 @@
+{
+  "code_commit": "e42f82889ee2b5a2f8926cea7a2e6b4834a78486",
+  "freeze_manifest_sha256": "be6a17191a51ef055e98626f8b9349cab1825ae9a26476dbe59ae11f41e5cd97",
+  "started_at_utc": "2026-10-29T06:50:02.010144+00:00",
+  "field_groups": {
+    "equal": 66,
+    "total": 70
+  },
+  "filter_verdicts": {
+    "equal": 10,
+    "total": 10
+  },
+  "hard_checks": {
+    "equal": 69,
+    "total": 70
+  },
+  "manual_replay_verdicts": {
+    "equal": 10,
+    "total": 10
+  },
+  "manual_replay_checks": {
+    "equal": 70,
+    "total": 70
+  },
+  "cases": {
+    "backend_choices_intern": {
+      "field_groups_equal": 14,
+      "differences": {},
+      "manual_alternative_groups": 2,
+      "baseline_alternative_group_support": false,
+      "skill_scores": {
+        "tech": 45,
+        "ops": 0
+      }
+    },
+    "content_tools_campus": {
+      "field_groups_equal": 14,
+      "differences": {},
+      "manual_alternative_groups": 1,
+      "baseline_alternative_group_support": false,
+      "skill_scores": {
+        "tech": 0,
+        "ops": 70
+      }
+    },
+    "frontend_tools_intern": {
+      "field_groups_equal": 12,
+      "differences": {
+        "requirements.education": {
+          "expected": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "actual": {
+            "min": "master",
+            "preferred": null
+          }
+        },
+        "requirements.skills": {
+          "expected": [
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "Postman",
+            "Playwright",
+            "Git",
+            "SVN"
+          ],
+          "actual": [
+            "JavaScript",
+            "Postman",
+            "Playwright",
+            "Git"
+          ]
+        }
+      },
+      "manual_alternative_groups": 2,
+      "baseline_alternative_group_support": false,
+      "skill_scores": {
+        "tech": 0,
+        "ops": 0
+      }
+    },
+    "research_tools_intern": {
+      "field_groups_equal": 13,
+      "differences": {
+        "requirements.skills": {
+          "expected": [
+            "Excel",
+            "SPSS",
+            "Tableau",
+            "Power BI"
+          ],
+          "actual": [
+            "统计学",
+            "Excel",
+            "SPSS",
+            "Tableau",
+            "Power BI"
+          ]
+        }
+      },
+      "manual_alternative_groups": 2,
+      "baseline_alternative_group_support": false,
+      "skill_scores": {
+        "tech": 0,
+        "ops": 20
+      }
+    },
+    "visual_tools_intern": {
+      "field_groups_equal": 13,
+      "differences": {
+        "requirements.education": {
+          "expected": {
+            "min": "associate",
+            "preferred": null
+          },
+          "actual": {
+            "min": "bachelor",
+            "preferred": null
+          }
+        }
+      },
+      "manual_alternative_groups": 2,
+      "baseline_alternative_group_support": false,
+      "skill_scores": {
+        "tech": 0,
+        "ops": 20
+      }
+    }
+  },
+  "finished_at_utc": "2026-10-29T06:50:10.518548+00:00"
+}

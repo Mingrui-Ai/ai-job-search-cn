@@ -190,6 +190,8 @@ _MAJOR_BEFORE = re.compile(r"专业\s*[:：]?\s*$")
 _PLATFORMS = frozenset(("公众号", "小红书", "抖音", "微博", "视频号", "B站", "知乎", "快手"))
 _FOLLOW = re.compile(r"关注|订阅|扫码|详见|动态见|了解更多")
 _OURS = re.compile(r"我们|本公司|官方|更多|招聘(?:信息|通知|动态)")
+# "PS：" opening a line starts a postscript ("PS：简历请注明到岗时间"); that PS is not Photoshop.
+_AFTER_POSTSCRIPT = re.compile(r"[ \t]*[:：]")
 _INTRO = re.compile(r"(?m)^[ \t]*[【\[]?\s*(?:公司介绍|公司简介|企业介绍|企业简介|关于我们|公司概况)\s*[】\]]?\s*(?:[:：]|$)")
 _SECTION = re.compile(
     r"(?m)^[ \t]*[【\[]?\s*(?:职位描述|职位详情|岗位描述|岗位职责|工作职责|职位职责|工作内容|任职要求|岗位要求|职位要求"
@@ -708,24 +710,37 @@ def _skills(text: str, hits: list):
 
 
 def _alternatives(text: str, hits: list):
-    """Groups of skills the JD offers a choice between, a same_as spelling counted once, no skill in two groups."""
-    groups, taken, snippets = [], set(), []
+    """Groups of skills the JD offers a choice between, each with the clauses that offer it.
+
+    A run counts when it names two skills or more ("Go 或 Golang" is one skill). Choices
+    that share a skill, a same_as spelling included, are one group: "熟悉 Python 或 Java；
+    熟悉 Java 或 Go" is [Python, Java, Go], citing both clauses. A group keeps every
+    spelling the JD used, so each one appears in a clause that is cited.
+    """
+    groups = []  # each [terms, keys, clauses], in the order first offered
     for run in _runs(text, hits):
         if not _offered_as_choice(text, run):
             continue
-        group, keys = [], []
-        for _, term, key in run:
-            if key not in keys:
-                keys.append(key)
-                group.append(term)
-        if len(group) < 2 or taken & set(keys):  # "Go 或 Golang" is one skill; a group named twice counts once
+        terms, keys = list(dict.fromkeys(term for _, term, _ in run)), {key for _, _, key in run}
+        if len(keys) < 2:
             continue
-        taken.update(keys)
-        groups.append(group)
         clause = _clause(text, run[0][0].start(), run[-1][0].end())
-        if clause not in snippets:
-            snippets.append(clause)
-    return (groups, snippets) if groups else _NOTHING
+        joined = [group for group in groups if group[1] & keys]
+        if not joined:
+            groups.append([terms, keys, [clause]])
+            continue
+        first = joined[0]
+        for group in joined[1:] + [[terms, keys, [clause]]]:
+            first[0] += [term for term in group[0] if term not in first[0]]
+            first[1] |= group[1]
+            first[2] += [c for c in group[2] if c not in first[2]]
+        groups = [group for group in groups if not any(group is other for other in joined[1:])]
+    if not groups:
+        return _NOTHING
+    snippets = []
+    for _, _, clauses in groups:
+        snippets += [clause for clause in clauses if clause not in snippets]
+    return [terms for terms, _, _ in groups], snippets
 
 
 def _runs(text: str, hits: list) -> list:
@@ -764,6 +779,8 @@ def _asked(text: str, term: str, match, intro: list) -> bool:
     left, right = _clause_bounds(text, match.start(), match.end())
     if _NEGATION.search(text, left, match.start()):
         return False
+    if term == "PS" and _postscript(text, match):
+        return False
     if term in _PLATFORMS:
         clause = text[left:right]
         if _FOLLOW.search(clause) and _OURS.search(clause):
@@ -771,6 +788,12 @@ def _asked(text: str, term: str, match, intro: list) -> bool:
         if any(start <= match.start() < end for start, end in intro):
             return False
     return True
+
+
+def _postscript(text: str, match) -> bool:
+    """Whether a PS is the "PS：" that opens a line, a postscript."""
+    line_start = text.rfind("\n", 0, match.start()) + 1
+    return not text[line_start:match.start()].strip() and _AFTER_POSTSCRIPT.match(text, match.end()) is not None
 
 
 def _intro_spans(text: str) -> list:

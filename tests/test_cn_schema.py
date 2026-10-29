@@ -285,14 +285,27 @@ class SkillAlternatives(SchemaCase):
         self.assert_error(self.chosen([["Golang", "Java"], ["Java", "Docker"]], text=self.CLAUSE),
                           "requirements.skill_alternatives[1]: 'Java' is already in an earlier group")
 
-    def test_a_group_needs_evidence_naming_all_of_it_at_once(self):
+    def test_a_group_needs_evidence_offering_it_as_one_choice(self):
         record = self.chosen([["Golang", "Java"]])
         del record["evidence"]["requirements.skill_alternatives"]
         self.assert_error(record, "requirements.skill_alternatives: has a value but no evidence")
-        # Each skill is cited, but not together: the choice is not shown to be the JD's.
+        # Each skill is cited, but not as a choice: the choice is not shown to be the JD's.
         self.assert_error(self.chosen([["Golang", "Docker"]], text=["熟悉 Golang", "了解 Docker"]),
-                          "evidence.requirements.skill_alternatives: no snippet names all of Golang / Docker")
+                          "evidence.requirements.skill_alternatives: no snippets offer Golang / Docker as one choice")
         self.assert_valid(self.chosen([["Golang", "Docker"]], text=self.CLAUSE))
+
+    def test_snippets_that_overlap_offer_a_merged_choice(self):
+        # "熟悉 Python 或 Java；熟悉 Java 或 Go": two snippets, linked by Java (Codex B's P2-2 on #59).
+        text = "熟悉 Python 或 Java；熟悉 Java 或 Go；了解 Docker、Kubernetes"
+        record = self.cited("requirements.skills", ["Python", "Java", "Go", "Docker", "Kubernetes"], text, "agent")
+        record["requirements"]["skill_alternatives"] = [["Python", "Java", "Go"]]
+        record["evidence"]["requirements.skill_alternatives"] = {"text": ["熟悉 Python 或 Java", "熟悉 Java 或 Go"],
+                                                                 "method": "agent"}
+        self.assert_valid(record)
+        # Two choices that share no skill are not one: Docker、Kubernetes is no link to Python, Java, Go.
+        record["requirements"]["skill_alternatives"] = [["Python", "Java", "Docker", "Kubernetes"]]
+        record["evidence"]["requirements.skill_alternatives"]["text"] = ["熟悉 Python 或 Java", "了解 Docker、Kubernetes"]
+        self.assert_error(record, "evidence.requirements.skill_alternatives: no snippets offer")
 
     def test_upgrade_adds_the_field_to_an_older_record(self):
         record = minimal_record()
