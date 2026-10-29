@@ -222,6 +222,11 @@ REQUIRED_IGNORE_RULES = [
     "company_research/*.json",
     # Machine-local Claude Code user configuration and ad-hoc permissions approvals.
     ".claude/settings.local.json",
+    # CN fork (ADR-10): DeepSeek Harness keeps sessions, settings and the API key
+    # under ~/.dsh, but the workspace .dsh/ may only carry skill entries. These
+    # are the excluding halves of the two .dsh negations below.
+    "/.dsh/*",
+    "/.dsh/skills/*/*",
 ]
 
 # Negation (re-include) rules the template legitimately ships. .gitignore is
@@ -236,6 +241,9 @@ ALLOWED_IGNORE_NEGATIONS = {
     "!cv/main_example.tex",
     "!cover_letters/cover_example.tex",
     "!documents/**/.gitkeep",
+    # CN fork (ADR-10): re-include only .dsh/skills/<name>/SKILL.md.
+    "!/.dsh/skills/",
+    "!/.dsh/skills/*/SKILL.md",
 }
 
 # Hook commands the template legitimately ships, as "<Event>:<command>" strings.
