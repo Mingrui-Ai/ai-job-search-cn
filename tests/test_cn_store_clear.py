@@ -202,5 +202,91 @@ class ExplicitListClear(unittest.TestCase):
         self.assertEqual(ok("jd", "show", original["id"], *data_args), correction)
 
 
+class SkillAlternativeClear(unittest.TestCase):
+    """H16 integration: groups can be corrected without deleting the job."""
+
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.text = "资料整理实习生\n熟悉 Python 或 Java\n以上为课程举例，岗位不设任选技能要求。"
+        [self.original], _ = jd_parser.parse_text(self.text, now=NOW)
+        self.path = "requirements.skill_alternatives"
+        self.assertEqual(self.original["requirements"]["skill_alternatives"], [["Python", "Java"]])
+
+    def correction(self, original, method):
+        corrected = copy.deepcopy(original)
+        corrected["requirements"]["skill_alternatives"] = []
+        corrected["evidence"][self.path] = {
+            "method": method, "text": "以上为课程举例，岗位不设任选技能要求。",
+        }
+        return corrected
+
+    def test_all_priorities_and_same_text_rule_reimport(self):
+        for old_method in ("rule", "agent", "user"):
+            for new_method in ("rule", "agent", "user"):
+                with self.subTest(old=old_method, new=new_method):
+                    jobs = store.Store(self.root / f"{old_method}-{new_method}")
+                    old = copy.deepcopy(self.original)
+                    old["evidence"][self.path]["method"] = old_method
+                    jobs.save(old)
+                    corrected = self.correction(old, new_method)
+                    self.assertEqual(schema.validate(corrected), [])
+                    allowed = new_method == "user" or (new_method == "agent" and old_method != "user")
+                    expected = corrected if allowed else old
+                    self.assertEqual(jobs.save(corrected),
+                                     ("updated" if allowed else "unchanged", expected))
+                    self.assertEqual(jobs.save(self.original), ("unchanged", expected))
+                    self.assertEqual(jobs.get(old["id"]), expected)
+                    self.assertEqual(expected["requirements"]["skills"], old["requirements"]["skills"])
+
+    def test_group_clear_requires_reason_and_related_skills_must_stay_valid(self):
+        jobs = store.Store(self.root)
+        jobs.save(self.original)
+        for missing_evidence in (True, False):
+            corrected = self.correction(self.original, "user")
+            if missing_evidence:
+                corrected["evidence"].pop(self.path)
+            else:
+                corrected["evidence"][self.path]["text"] = None
+            self.assertEqual(jobs.save(corrected), ("unchanged", self.original))
+        invalid = copy.deepcopy(self.original)
+        invalid["requirements"]["skills"] = []
+        invalid["evidence"]["requirements.skills"] = {
+            "method": "agent", "text": "以上为课程举例，岗位不设任选技能要求。",
+        }
+        with self.assertRaises(store.StoreError):
+            jobs.save(invalid)
+        self.assertEqual(jobs.get(self.original["id"]), self.original)
+        for method in ("agent", "user"):
+            with self.subTest(method=method):
+                paired = store.Store(self.root / method)
+                paired.save(self.original)
+                corrected = self.correction(invalid, method)
+                corrected["evidence"]["requirements.skills"]["method"] = method
+                self.assertEqual(paired.save(corrected), ("updated", corrected))
+                self.assertEqual(paired.save(self.original), ("unchanged", corrected))
+
+    def test_cli_group_clear_and_reparse_keep_correction(self):
+        def ok(*args):
+            result = run_cli(*args)
+            self.assertEqual(result.returncode, 0, result.stdout.decode("utf-8", "replace"))
+            return json.loads(result.stdout)
+
+        for method in ("agent", "user"):
+            with self.subTest(method=method):
+                data_args = ["--data-dir", str(self.root / method)]
+                source = self.root / "sample.txt"
+                source.write_text(self.text, encoding="utf-8")
+                parsed = ok("jd", "parse", str(source), "--save", *data_args)["jobs"][0]
+                corrected = self.correction(parsed, method)
+                path = self.root / "corrected.json"
+                path.write_text(json.dumps(corrected, ensure_ascii=False), encoding="utf-8")
+                self.assertTrue(ok("jd", "validate", str(path))["valid"])
+                self.assertEqual(ok("jd", "save", str(path), *data_args)["saved"][0]["action"], "updated")
+                self.assertEqual(ok("jd", "parse", str(source), "--save", *data_args)["saved"][0]["action"], "unchanged")
+                self.assertEqual(ok("jd", "show", parsed["id"], *data_args), corrected)
+
+
 if __name__ == "__main__":
     unittest.main()

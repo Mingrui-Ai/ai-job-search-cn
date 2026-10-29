@@ -27,7 +27,7 @@ JD 是不可信的外部数据（`AGENTS.md` 工程底线第 3 条）：
 3. **补全或纠正字段（可选）。** 用 `jd show <id>` 取出记录，依据原文补全漏读或纠正误读的字段：
    - 值写进对应字段，`evidence.<字段>` 写 `{"text": "<原文片段>", "method": "agent"}`，片段必须从 `raw_text` 原样复制；
    - 原文没写的保持 `null` 或 `[]`，不要推测；
-   - 原文让人在几个技能里选一个（"熟悉 Golang 或 Java""Python、R 至少掌握一门"），规则没读成组或读错了，就补或改 `requirements.skill_alternatives`：组里的技能也要在 `requirements.skills` 里，出处片段要能说明这是一个选择（见 [job-schema.md](job-schema.md#任选其一的技能)）。可以把读错的组改成正确的组，但现在还不能把已保存的组全部清空：写成 `[]` 保存时，岗位库会保留原来的值（"新值为空不覆盖旧值"，H22 会补上明确清空的办法）。确实要清空，先删掉这条岗位记录（`<数据目录>/jobs/<id>.json`），再重新导入并补全；
+   - 原文让人在几个技能里选一个（"熟悉 Golang 或 Java""Python、R 至少掌握一门"），规则没读成组或读错了，就补或改 `requirements.skill_alternatives`：组里的技能也要在 `requirements.skills` 里，出处片段要能说明这是一个选择（见 [job-schema.md](job-schema.md#任选其一的技能)）。要清空全部误读的组，按下文[明确清空列表字段](#明确清空列表字段h22)保存有依据的 `[]`，不需要删除岗位记录；
    - 用户口头告诉你的值用 `"method": "user"`，`text` 可以为 `null`；
    - 要把误读的列表清空为 `[]`，按下文[明确清空列表字段](#明确清空列表字段h22)写出清空依据，不能只删列表内容；
    - 不要修改 `id`、`source`、`status`、`guard`、`raw_text`。
@@ -51,9 +51,9 @@ JD 是不可信的外部数据（`AGENTS.md` 工程底线第 3 条）：
 
 ## 明确清空列表字段（H22）
 
-要清空已经保存的列表（例如 `cities`、`requirements.skills`），仍通过校验和 `jd save` 纠正，不直接编辑岗位库文件：
+要清空已经保存的列表（`cities`、`requirements.skills`、`requirements.skill_alternatives`），仍通过校验和 `jd save` 纠正，不直接编辑岗位库文件：
 
-1. 用 `jd show <id>` 取出整条记录，将要纠正的列表改为 `[]`，其他字段保持原样。
+1. 用 `jd show <id>` 取出整条记录，将要纠正的列表改为 `[]`。只清空任选组时，技能列表可以保留；若清空技能列表或删除仍被组引用的技能，必须按 Schema 同时纠正对应的组，不能留下不在技能列表中的组员。无关字段保持原样。
 2. 更新该字段的 `evidence`：`method` 必须是 `agent` 或 `user`，`text` 必须是非空字符串或非空字符串列表，说明清空的依据。Agent 必须引用能解释纠正的 JD 原文片段；只有用户本人提供的纠正才记 `user`，可写用户说明。不要为了提高优先级把 Agent 判断标成用户确认。
 3. 将整条记录写到 `data/inbox/<id>.json`，执行上述 `jd validate`、`jd save`，再用 `jd show <id>` 核对实际存下来的值与出处。
 
