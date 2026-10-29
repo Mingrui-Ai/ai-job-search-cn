@@ -76,6 +76,7 @@ python -m jobsearch_cn profile validate              # 校验 data/profile/ 下�
 | --- | --- |
 | `cn` | Claude A（执行：主线功能开发） |
 | `cn-b` | Claude B（第二执行者） |
+| `cn-c` | Claude C（第三执行者） |
 | `cn-codex` | Codex（实测、验证） |
 | `cn-plan` | 规划 |
 
@@ -88,3 +89,20 @@ git worktree remove ../cn-<名字>                           # 删除（目录�
 - 一个分支同一时间只能在一个目录里签出。要查看别人正在用的分支，用 `git switch --detach origin/<分支>`。
 - 各目录的 `data/`、`logs/` 是分开的（都被 git 忽略）。要用同一份数据，设置环境变量 `JOBSEARCH_CN_DATA_DIR` 或加 `--data-dir`。
 - conda 环境 `ai-job-search-cn` 各目录共用。
+
+### 多会话协作
+
+2026-10-29 起，本仓库同时有一个规划会话和几个工作会话：几个 Claude Code 执行者，加上 Codex 验证者。分工见[总体规划 §8](master-plan.md#8-协作方式)，任务和进度见[路线图](roadmap.md)。
+
+- **派活**：规划者先把任务单写进路线图，再直接通知各会话。Claude Code 会话之间用 SendMessage。Codex 的任务写在规划者维护的本机收件箱文件里（在仓库外，不入 git），再用 `codex queue` 通知它。用户不必转贴任务。
+- **回报**：Claude Code 会话在开 PR、推送新提交或需要裁定时，发消息给规划者；Codex 写在 PR 评论里。规划者用一个监视脚本跟踪 PR 的事件和 Codex 每一轮的结束。
+- **裁定只有一个出口**：验证者的复核意见写在 PR 评论里，由规划者裁定，再通知作者要改什么。工作会话之间不互相派活。
+- **交给 Codex 的事**：需要第二个模型的工作，即留出样例、规则改动的独立复核、Codex 入口的实测、真实数据验收。实现交给 Claude Code 会话。
+- **留出样例**：要检验的 PR 开出之前不推送。执行者在那之前不看验证者的工作树和分支。
+- **公开仓库**：提交、PR 文字和评论推送后立即公开。不写真实岗位、档案内容、本机用户名和密钥；用户的真实数据只在本机的 `data/` 下。
+- **操作约定**：
+  - `git push` 单独执行，看完整输出；
+  - 改 `tools/security_guards.py`（哪怕只是注释）之前，先征得用户本人同意；
+  - 改代码用编辑工具，不用脚本绕过确认；
+  - 请求审核前合入最新 master，跑全量测试、`security_guards`、`lint_skills`；
+  - 路线图只改自己那一项（见路线图的"更新规则"）。

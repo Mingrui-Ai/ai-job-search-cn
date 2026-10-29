@@ -2,9 +2,10 @@
 
 The filter may only rule a job out on facts both sides state, so these pin,
 for every check, all three outcomes - match, conflict and unknown - and above
-all that a value either side leaves empty is unknown, never a conflict. The
-sample table runs the five sample JDs against the two sample profiles; each
-row was checked by hand against the JD text (see the reasons in the table).
+all that a value either side leaves empty is unknown, never a conflict, with a
+reason that says which side left it empty. The sample table runs the five
+sample JDs against the two sample profiles; each row was checked by hand
+against the JD text (see the reasons in the table).
 """
 import copy
 import json
@@ -64,6 +65,12 @@ class CheckCase(unittest.TestCase):
         self.assertEqual(item["result"], expected, item["reason"])
         return item
 
+    def assert_unknown_reasons(self, *cases):
+        """Each (job, profile, reason): the check is unknown, and its reason is exactly that."""
+        for job, profile, reason in cases:
+            with self.subTest(check=self.check, reason=reason):
+                self.assertEqual(self.assert_result(UNKNOWN, job=job, profile=profile)["reason"], reason)
+
 
 class Graduation(CheckCase):
     check = "graduation"
@@ -83,6 +90,18 @@ class Graduation(CheckCase):
     def test_unknown_either_side(self):
         self.assert_result(UNKNOWN, job=setting(self.job, "requirements.graduation", None))
         self.assert_result(UNKNOWN, profile=setting(self.profile, "graduation", None))
+
+    def test_an_unknown_says_which_side_is_silent(self):
+        silent_job = setting(self.job, "requirements.graduation", None)
+        silent_profile = setting(self.profile, "graduation", None)
+        self.assert_unknown_reasons(
+            (silent_job, self.profile, "JD 没写届别；你是 2027 届"),
+            (setting(self.job, "requirements.graduation", {"years": [2026], "strict": True}), silent_profile,
+             "JD 要求 2026 届；档案没写毕业时间"),
+            (setting(self.job, "requirements.graduation", {"years": [2026, 2027], "strict": False}), silent_profile,
+             "JD 优先 2026/2027 届；档案没写毕业时间"),
+            (silent_job, silent_profile, "JD 没写届别；档案没写毕业时间"),
+        )
 
 
 class Education(CheckCase):
@@ -126,6 +145,23 @@ class DaysAndMonths(CheckCase):
                 self.assert_result(UNKNOWN, job=setting(self.job, job_path, None), profile=profile)
                 self.assert_result(UNKNOWN, job=setting(self.job, job_path, 5),
                                    profile=setting(self.profile, profile_path, None))
+
+    def test_an_unknown_says_which_side_is_silent(self):
+        reasons = {  # only the JD silent, only the profile silent, both silent
+            "days_per_week": ("JD 没写每周到岗要求；你每周能到岗 4 天", "JD 要求每周到岗 5 天；档案没写每周能到岗几天",
+                              "JD 没写每周到岗要求；档案没写每周能到岗几天"),
+            "min_months": ("JD 没写实习时长要求；你能实习 4 个月", "JD 要求实习时长 5 个月；档案没写能实习几个月",
+                           "JD 没写实习时长要求；档案没写能实习几个月"),
+        }
+        for check, job_path, profile_path in self.LIMITS:
+            self.check = check
+            only_jd, only_profile, both = reasons[check]
+            silent_job, silent_profile = setting(self.job, job_path, None), setting(self.profile, profile_path, None)
+            self.assert_unknown_reasons(
+                (silent_job, setting(self.profile, profile_path, 4), only_jd),
+                (setting(self.job, job_path, 5), silent_profile, only_profile),
+                (silent_job, silent_profile, both),
+            )
 
     def test_not_applicable_when_a_campus_or_experienced_hire_states_none(self):
         for check, job_path, profile_path in self.LIMITS:
@@ -205,6 +241,16 @@ class EmploymentType(CheckCase):
         self.assert_result(CONFLICT, job=setting(self.job, "employment_type", "experienced"))
         self.assert_result(UNKNOWN, job=setting(self.job, "employment_type", None))
         self.assert_result(UNKNOWN, profile=setting(self.profile, "target.employment_types", []))
+
+    def test_an_unknown_says_which_side_is_silent(self):
+        silent_job = setting(self.job, "employment_type", None)
+        silent_profile = setting(self.profile, "target.employment_types", [])
+        self.assert_unknown_reasons(
+            (silent_job, setting(self.profile, "target.employment_types", ["internship", "campus"]),
+             "JD 没写岗位类型；你找的是实习、校招"),
+            (setting(self.job, "employment_type", "campus"), silent_profile, "这是校招岗位；档案没写想找的岗位类型"),
+            (silent_job, silent_profile, "JD 没写岗位类型；档案没写想找的岗位类型"),
+        )
 
 
 class Exclusions(CheckCase):

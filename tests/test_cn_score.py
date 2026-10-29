@@ -266,7 +266,7 @@ class Gaps(Case):
         del job["evidence"]["requirements.graduation"]  # as a JD that never names its 届别 is parsed
         gaps = scored(job, self.tech)["gaps"]
         self.assertIn({"kind": "filter", "item": "graduation", "result": "unknown",
-                       "reason": "JD 或档案没写届别", "jd": None}, gaps)
+                       "reason": "JD 没写届别；你是 2027 届", "jd": None}, gaps)
 
 
 class Records(Case):
