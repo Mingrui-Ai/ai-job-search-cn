@@ -321,6 +321,41 @@ class MergePriority(StoreCase):
         self.assertEqual(len(self.store.all()[0]), 1)
 
 
+class SkillAlternatives(StoreCase):
+    """H16 added requirements.skill_alternatives to records users had already stored."""
+
+    def stored_before_h16(self) -> dict:
+        record = parse("boss_intern.txt")
+        self.store.save(record)
+        old = json.loads(json.dumps(record))
+        del old["requirements"]["skill_alternatives"]
+        del old["evidence"]["requirements.skill_alternatives"]
+        (self.root / "jobs" / f"{record['id']}.json").write_text(json.dumps(old, ensure_ascii=False), encoding="utf-8")
+        return record
+
+    def test_an_older_record_reads_back_with_the_field_and_takes_a_reimport(self):
+        record = self.stored_before_h16()
+        self.assertEqual(self.store.get(record["id"])["requirements"]["skill_alternatives"], [])
+        self.assertEqual(self.store.all()[0][0]["requirements"]["skill_alternatives"], [])
+        self.assertEqual(schema.validate(self.store.get(record["id"])), [])
+        action, stored = self.store.save(parse("boss_intern.txt", now=LATER))
+        self.assertEqual(action, "updated")
+        self.assertEqual(stored["requirements"]["skill_alternatives"], [["Golang", "Java"]])
+
+    def test_groups_follow_the_skills_when_the_merge_would_split_them(self):
+        # An agent dropped Java from the skills; a re-parse offers "Golang 或 Java" again. The
+        # agent's skills win, so the re-parse's group, naming Java, cannot come with them.
+        record = self.stored_before_h16()
+        agent = self.store.get(record["id"])
+        agent["requirements"]["skills"] = ["Go", "MySQL", "Redis", "Golang", "Docker", "Kubernetes"]
+        agent["evidence"]["requirements.skills"]["method"] = "agent"
+        self.assertEqual(self.store.save(agent)[0], "updated")
+        action, stored = self.store.save(parse("boss_intern.txt", now=LATER))
+        self.assertEqual(action, "unchanged")
+        self.assertEqual(stored["requirements"]["skill_alternatives"], [])
+        self.assertNotIn("requirements.skill_alternatives", stored["evidence"])
+
+
 class Files(StoreCase):
     def test_a_corrupt_file_is_reported_not_fatal(self):
         self.store.save(parse("boss_intern.txt"))

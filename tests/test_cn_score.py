@@ -100,6 +100,65 @@ class Skills(Case):
         self.assertIsNone(dimension["score"])
 
 
+def with_choices(job: dict, skills: list, groups: list) -> dict:
+    """A job asking for skills, some of them as a choice (requirements.skill_alternatives, H16)."""
+    return setting(with_skills(job, skills), "requirements.skill_alternatives", groups)
+
+
+class Choices(Case):
+    """H16: a group the JD offers a choice between is one requirement, earning its best-held skill."""
+
+    def test_a_choice_counts_once_and_earns_its_best_skill(self):
+        # tech holds Go (proficient, 1) and MySQL (working, 0.8), not Java.
+        dimension = self.dimension("skills", job=with_choices(self.job, ["Java", "Go", "Docker"], [["Java", "Go"]]))
+        self.assertEqual(dimension["matched"], [{"jd": "Java 或 Go", "profile": "Go", "credit": 1},
+                                                {"jd": "Docker", "profile": "Docker", "credit": 0.8}])
+        self.assertEqual(dimension["score"], 90)  # (1 + 0.8) / 2, not (0 + 1 + 0.8) / 3
+        self.assertEqual(dimension["reason"], "JD 要求 2 项技能，你有 2 项（其中 1 项任选其一）")
+        both = self.dimension("skills", job=with_choices(self.job, ["MySQL", "Go"], [["MySQL", "Go"]]))
+        self.assertEqual(both["matched"], [{"jd": "MySQL 或 Go", "profile": "Go", "credit": 1}])
+
+    def test_a_choice_with_nothing_held_is_one_gap_citing_the_choice(self):
+        job = job_from("jd/boss_intern.txt")
+        profile = setting(self.tech, "skills", [{"name": "Python", "level": "expert", "used_in": [], "source": "user"}])
+        record = scored(job, profile)
+        self.assertIn("Golang 或 Java", record["dimensions"]["skills"]["missing"])
+        self.assertIn({"kind": "skill", "item": "Golang 或 Java", "jd": "熟悉 Golang 或 Java"}, record["gaps"])
+        self.assertNotIn("Go", record["dimensions"]["skills"]["missing"])
+        self.assertNotIn("Java", record["dimensions"]["skills"]["missing"])
+        # The quote is the clause that offers the choice, not a snippet that happens to hold the skills.
+        del job["evidence"]["requirements.skills"]
+        self.assertIn({"kind": "skill", "item": "Golang 或 Java", "jd": "熟悉 Golang 或 Java"}, scored(job, profile)["gaps"])
+
+    def test_a_grouped_skill_named_elsewhere_counts_only_in_its_group(self):
+        # boss_intern: 职责 says "使用 Go 语言", 要求 says "熟悉 Golang 或 Java"; Go is Golang (same_as).
+        dimension = self.dimension("skills")
+        self.assertEqual(dimension["matched"][0], {"jd": "Golang 或 Java", "profile": "Go", "credit": 1})
+        self.assertEqual(dimension["reason"], "JD 要求 5 项技能，你有 3 项（其中 1 项任选其一）")
+        self.assertEqual(dimension["missing"], ["Redis", "Kubernetes"])
+
+    def test_synonyms_and_overlapping_groups(self):
+        # One skill in two spellings is no choice; two groups sharing a skill are one choice.
+        same = self.dimension("skills", job=with_choices(self.job, ["Go", "Golang", "Rust"], [["Go", "Golang"]]))
+        self.assertEqual((same["score"], same["missing"]), (50, ["Rust"]))
+        joined = self.dimension("skills", job=with_choices(self.job, ["Rust", "Go", "Golang", "Java"],
+                                                           [["Rust", "Go"], ["Golang", "Java"]]))
+        self.assertEqual(joined["matched"], [{"jd": "Rust 或 Go 或 Java", "profile": "Go", "credit": 1}])
+
+    def test_a_choice_counts_once_for_each_direction_it_offers(self):
+        job = with_choices(self.job, ["Python", "Java", "Figma", "SQL"], [["Python", "Java"], ["Figma", "SQL"]])
+        self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"tech": 1, "design": 1, "data": 1})
+        # Office software stays out of directions: "Excel 或 SPSS" counts for data alone.
+        job = with_choices(self.job, ["Excel", "SPSS"], [["Excel", "SPSS"]])
+        self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
+
+    def test_rules_version_2_marks_older_records_stale(self):
+        self.assertEqual(score.RULES_VERSION, 2)
+        old = setting(scored(self.job, self.tech), "rules_version", 1)
+        errors = score.validate(old, self.job, self.tech, VOCABULARY)
+        self.assertTrue(any(e.startswith("rules_version: scored by other rules") for e in errors), errors)
+
+
 class Direction(Case):
     def test_the_leading_group_decides(self):
         cases = (
@@ -189,7 +248,7 @@ class Total(Case):
         weights = {"skills": 10, "direction": 10, "experience": 0, "salary": 80}
         record = scored(self.job, setting(self.tech, "target.weights", weights))
         self.assertEqual(record["weights"], weights)
-        self.assertEqual(record["total"]["score"], 94)  # (10*43 + 10*100 + 80*100) / 100
+        self.assertEqual(record["total"]["score"], 95)  # (10*52 + 10*100 + 80*100) / 100 = 95.2
 
 
 class Gaps(Case):
@@ -270,7 +329,7 @@ class Validate(Case):
     def test_a_rule_record_and_an_agent_completed_one_are_valid(self):
         self.assertEqual(self.errors(scored(self.job, self.tech)), [])
         self.assertEqual(self.errors(), [])
-        self.assertEqual(self.record["total"]["score"], 75)  # (35*43 + 30*100 + 25*80 + 10*100) / 100 = 75.05
+        self.assertEqual(self.record["total"]["score"], 78)  # (35*52 + 30*100 + 25*80 + 10*100) / 100 = 78.2
 
     def test_the_four_tamperings(self):
         self.assert_refused(setting(self.record, "total.score", 95), "total: does not follow")
@@ -322,8 +381,10 @@ class Validate(Case):
 #         directions [tech]; salary_min 150 元/天.  ops: Excel 1, 秀米 1, 剪映 0.8, Photoshop 0.8;
 #         directions [ops]; no salary_min (so salary is null for every ops row).
 # Checked by hand:
-#   boss_intern       tech  Go=Golang counted once, 6 skills: Go 1 + MySQL 0.8 + Docker 0.8 = 2.6/6 -> 43;
-#                           all tech -> 100; 250 >= 150 -> 100; (35*43+30*100+10*100)/75 = 73.4 -> 73 good
+#   boss_intern       tech  "熟悉 Golang 或 Java" is one choice (H16), and the Go of 职责 is the same skill, so it
+#                           counts there: 5 skills, Go|Java 1 (Go held) + MySQL 0.8 + Redis 0 + Docker 0.8 +
+#                           Kubernetes 0 = 2.6/5 -> 52 (43 before H16: Go, Java apart, 2.6/6);
+#                           all tech -> 100; 250 >= 150 -> 100; (35*52+30*100+10*100)/75 = 77.6 -> 78 strong
 #                     ops   no skill held -> 0; tech only, no ops skill -> 0; total 0; filter conflicts -> ineligible
 #   shixiseng_intern  tech  4 skills, Python 1 -> 25; data 2 = tech 2, a tie both lead -> 100; 200 >= 150 -> 100;
 #                           (875+3000+1000)/75 = 65; the filter rules it out (每周5天 > 4) -> ineligible
@@ -346,7 +407,7 @@ class Validate(Case):
 #   Every other ops row: no skill held, no ops skill -> 0 and 0, ruled out by the filter -> ineligible.
 EXPECTED = {
     # (sample, profile): (skills, direction, salary, total, grade)
-    ("jd/boss_intern.txt", "tech"): (43, 100, 100, 73, "good"),
+    ("jd/boss_intern.txt", "tech"): (52, 100, 100, 78, "strong"),
     ("jd/shixiseng_intern.txt", "tech"): (25, 100, 100, 65, "ineligible"),
     ("jd/nowcoder_campus.txt", "tech"): (39, 100, None, 67, "ineligible"),
     ("jd/official_site.txt", "tech"): (8, 100, None, 50, "moderate"),
@@ -422,12 +483,12 @@ class Commands(unittest.TestCase):
     def test_score_save_show_and_list(self):
         boss, test_dev, product, ruled_out = self.ids
         record = self.cli("match", "score", boss)
-        self.assertEqual(record["total"]["score"], 73)
+        self.assertEqual(record["total"]["score"], 78)
         self.assertFalse((self.data / "matches").exists(), "score without --save writes nothing")
         for job_id in self.ids:
             self.cli("match", "score", job_id, "--save")
         self.assertEqual(dict(self.cli("match", "show", boss), scored_at=None), dict(record, scored_at=None))
-        self.assertEqual(self.listed(), [(boss, "good", 73, False), (test_dev, "moderate", 46, False),
+        self.assertEqual(self.listed(), [(boss, "strong", 78, False), (test_dev, "moderate", 46, False),
                                          (product, "poor", 13, False), (ruled_out, "ineligible", 65, False)])
         self.cli("match", "show", "job_000000000000", expect=1)
 
@@ -436,15 +497,15 @@ class Commands(unittest.TestCase):
         for job_id in self.ids:
             self.cli("match", "score", job_id, "--save")
         before = [row[0] for row in self.listed()]
-        self.assertEqual(before, [boss, test_dev, product, ruled_out])  # 73 good, 46 moderate, 13 poor, ineligible
+        self.assertEqual(before, [boss, test_dev, product, ruled_out])  # 78 strong, 46 moderate, 13 poor, ineligible
         self.write_profile(setting(profile_from("tech"), "target.weights",
                                    {"skills": 10, "direction": 10, "experience": 0, "salary": 80}))
         self.assertTrue(all(row[3] for row in self.listed()), "a changed profile makes every record stale")
         for job_id in self.ids:
             self.cli("match", "score", job_id, "--save")
-        # boss (10*43+10*100+80*100)/100 = 94; product 8000/100 = 80; test_dev has no salary: 1000/20 = 50;
+        # boss (10*52+10*100+80*100)/100 = 95.2 -> 95; product 8000/100 = 80; test_dev has no salary: 1000/20 = 50;
         # the ruled-out job (250+1000+8000)/100 = 92.5 -> 93 still lists last.
-        self.assertEqual(self.listed(), [(boss, "strong", 94, False), (product, "strong", 80, False),
+        self.assertEqual(self.listed(), [(boss, "strong", 95, False), (product, "strong", 80, False),
                                          (test_dev, "moderate", 50, False), (ruled_out, "ineligible", 93, False)])
 
     def test_validate_and_save_an_agents_record(self):

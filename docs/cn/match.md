@@ -134,8 +134,8 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 
 | 维度 | 方法 | 怎么算（0–100） | 为 null（未知）的情形 |
 | --- | --- | --- | --- |
-| `skills` 技能 | 规则 | JD 的每个技能在档案 `skills[]` 里找同名或同义的技能，按掌握程度记分：精通、熟练记 1，熟悉记 0.8，了解记 0.5；没写程度的，有经历用到（`used_in` 不为空）记 0.8，没有记 0.5；档案里没有记 0。分数 = 得分之和 ÷ JD 技能数 × 100 | JD 没有技能 |
-| `direction` 方向 | 规则，Agent 可补 | 把 JD 的技能按词表分组计数（`general` 组不计），数量最多的组（并列都算）就是岗位方向。岗位方向在档案 `target.directions` 里记 100；不在，但有 JD 技能属于你的方向记 50；都不属于记 0 | 档案没写 `target.directions`；JD 没有技能，或技能都在 `general` 组（这时由 Agent 根据标题和职责判断） |
+| `skills` 技能 | 规则 | JD 的每个技能在档案 `skills[]` 里找同名或同义的技能，按掌握程度记分：精通、熟练记 1，熟悉记 0.8，了解记 0.5；没写程度的，有经历用到（`used_in` 不为空）记 0.8，没有记 0.5；档案里没有记 0。JD 让你几个里选一个的技能（`requirements.skill_alternatives` 的一组，例如"Golang 或 Java"）算一项，取组里得分最高的那个。分数 = 得分之和 ÷ JD 技能项数 × 100 | JD 没有技能 |
+| `direction` 方向 | 规则，Agent 可补 | 把 JD 的技能按词表分组计数（`general` 组不计；任选其一的一组，按组里技能所属的分组各计 1 次），数量最多的组（并列都算）就是岗位方向。岗位方向在档案 `target.directions` 里记 100；不在，但有 JD 技能属于你的方向记 50；都不属于记 0 | 档案没写 `target.directions`；JD 没有技能，或技能都在 `general` 组（这时由 Agent 根据标题和职责判断） |
 | `experience` 经历 | Agent | 对照 JD 的职责和要求，看档案 `experience[]`：80–100 做过同类工作；60–79 相关，能迁移；40–59 沾边，需要自己说明；0–39 无关。规则会列出有经历依据的 JD 技能（`used_in`）作为提示 | Agent 还没补 |
 | `salary` 薪资 | 规则 | 单位相同时比较：JD 薪资上限达到你的最低期望（`target.salary_min`）记 100，达不到记 0 | 面议；单位不同（不换算）；任一方没写 |
 
@@ -149,7 +149,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 - **等级**沿用上游 `04-job-evaluation.md`：`strong` ≥ 75，`good` 60–74，`moderate` 45–59，`weak` 30–44，`poor` < 30。
 - 过滤结论为 `ineligible` 时，等级记为 `ineligible`，各维度的分值照常给出，供参考。为 `needs_check` 时等级照常，同时列出待确认的项。
 - **缺口**（`gaps`）包括：
-  - JD 要求、档案里没有的技能；
+  - JD 要求、档案里没有的技能；任选其一的一组，一个都没有时才算缺口，记成一条，例如"Golang 或 Java"；
   - 薪资低于期望；
   - 过滤结果里的 `conflict` 和 `unknown` 项。
 
@@ -163,7 +163,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 {
   "schema_version": 1,
   "job_id": "job_9f4694691d57",
-  "rules_version": 1,
+  "rules_version": 2,
   "scored_at": "2026-10-28T15:00:00+08:00",
   "job_hash": "…",
   "profile_hash": "…",
@@ -183,7 +183,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 }
 ```
 
-- `rules_version`：规则或默认权重改变时加 1。
+- `rules_version`：规则给出的结果（结论、维度分数、缺口）或默认权重改变时加 1，只改理由的措辞不加。现在是 2（H16 起：任选其一的技能）。加 1 后，旧记录标为过期，重新评分时 Agent 补的内容清空，要重新补。
 - `job_hash`、`profile_hash`：评分时岗位记录和档案的摘要，档案的摘要不含 `contact`。岗位或档案改了，`match list` 会把这条标为"过期"，需要重新评分。重新评分时，摘要都没变就保留 Agent 已补的内容，变了就清空 Agent 补充。
 - Agent 补充的维度必须有 `reason` 和 `evidence`：`jd` 是 JD 原文片段，必须逐字出现在岗位的 `raw_text` 里；`profile` 是档案条目的 id，必须存在。
 - `match validate` 检查结构、取值、分值范围和依据，并按上面的规则从各维度重新算出总分和等级，和记录不一致就报错。Agent 不能直接改总分。
@@ -221,3 +221,14 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 - **档案**：`target` 新增 `directions`（词表分组键的列表，例如 `["data", "product"]`；`general` 不算方向）和 `weights`（null，或四个维度的权重，每项不小于 0）。Profile 还没有随版本发布，直接加入 v1，不升版本号。字段说明见 [profile.md](profile.md#3-profilejson-字段)。
 - **建档**：`profile-setup.md` 要求问到"是否接受远程""是否愿意去其他城市"，并说明留空的后果；写了意向城市而这两项为空时，`profile validate` 给出警告。草稿放在 `data/profile/drafts/`。
 - **地点的理由**：判 `unknown` 时写明哪一方没写，见上文"各项条件"的说明。
+
+### 任选其一的技能（H16）
+
+JD 写"熟悉 Golang 或 Java"，意思是会一个就行。`jd parse` 把这样的技能记成一组（`requirements.skill_alternatives`，见 [job-schema.md](job-schema.md#任选其一的技能)），评分时：
+
+- **一组算一项要求**，取组里得分最高的技能。`matched` 和 `missing` 里这一项写成"Golang 或 Java"；理由写明"其中 N 项任选其一"；
+- **组里的技能在 JD 别处又出现**（`boss_intern` 的职责写"使用 Go 语言"，要求写"熟悉 Golang 或 Java"；Go 和 Golang 是同义写法），只在组里算一次，不再单独算一项；
+- 同义写法照常只算一次："Go 或 Golang"是同一个技能，不算一组；两组有同一个技能（含同义写法）时并成一组；
+- **缺口**只在组里一个都没有时列出，出处是写着这一组的那句原文。
+
+例：tech 示例档案对 `boss_intern`，原来 6 项技能（Go、MySQL、Redis、Java、Docker、Kubernetes）得 2.6，技能分 43；现在"Golang 或 Java"算一项，共 5 项，技能分 52，Java 不再是缺口。
