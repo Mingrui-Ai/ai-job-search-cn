@@ -33,7 +33,7 @@ SAMPLES = ("jd/boss_intern.txt", "jd/nowcoder_campus.txt", "jd/official_site.txt
 COMPLETED = ("jd/boss_intern.txt", "jd/nowcoder_campus.txt")
 
 sys.path.insert(0, str(REPO))
-from jobsearch_cn import cli, report, score  # noqa: E402
+from jobsearch_cn import cli, jd_parser, match, report, score  # noqa: E402
 
 NOW = datetime(2026, 10, 29, 9, 30, tzinfo=timezone(timedelta(hours=8)))
 
@@ -248,6 +248,29 @@ class FormAndPage(unittest.TestCase):
                 [_, row] = list(csv.reader(io.StringIO(text.lstrip("﻿"))))
                 self.assertEqual(row[1], "'" + title)
 
+    def test_no_cell_starts_a_formula(self):
+        # Every column passes the guard, not just the title: the company comes from the JD too.
+        job = {"title": "=1+1", "company": "@公司"}
+        text = report.feedback_csv([report.entry(self.record(), job, True)])
+        for row in csv.reader(io.StringIO(text.lstrip("﻿"))):
+            for cell in row:
+                self.assertNotIn(cell[:1], ("=", "+", "-", "@", "\t", "\r"), row)
+        self.assertEqual([report._cell(v) for v in ("-5", "\tx", None, 7)], ["'-5", "'\tx", "", "7"])
+
+    def test_the_grade_names_are_the_ones_in_match_md(self):
+        # match.md holds the one table of grade names; the report must not drift from it.
+        text = (REPO / "docs" / "cn" / "match.md").read_text(encoding="utf-8")
+        start = text.index("- **等级**")
+        text = text[start:text.index("\n- **", start + 1)]
+        table = dict(re.findall(r"^\s*\| `(\w+)` \| ([^|]+?) \|", text, re.M))
+        self.assertEqual(table, report.GRADES)
+        self.assertEqual(set(table), {name for name, _ in score.GRADES} | {score.INELIGIBLE})
+        legend = report._legend()
+        for name, floor in score.GRADES:
+            self.assertIn(f"{report.GRADES[name]}（{name}）", legend)
+        self.assertIn("很匹配（strong）≥ 75", legend)
+        self.assertIn("不匹配（poor）< 30", legend)
+
     def test_jd_text_is_escaped(self):
         job = {"title": "<script>alert(1)</script>", "company": "A&B"}
         page = report.build([report.entry(self.record(), job, False)], {}, "2026-10-29T09:30:00+08:00")
@@ -288,6 +311,67 @@ class FormAndPage(unittest.TestCase):
                                  total={"score": 46, "grade": "ineligible", "complete": False, "missing": ["salary"]})
         self.assertEqual(report.conclusion(ineligible), "不符合硬性条件（冲突：地点），各维度加权 46 分，仅供参考；缺薪资维度")
         self.assertEqual(report.conclusion(self.record(), stale=True), "已过期，先重新评分。符合硬性条件，一般（moderate），总分 50 分")
+
+
+def setting(data: dict, path: str, value) -> dict:
+    data = copy.deepcopy(data)
+    *parents, leaf = path.split(".")
+    target = data
+    for part in parents:
+        target = target[part]
+    target[leaf] = value
+    return data
+
+
+class ReasonWording(unittest.TestCase):
+    """The report tells the user whether to ask about the job or fill in the profile by reading the
+    filter's reasons for "JD 没写" and "档案没写" (the wording H17 fixed). Pin that, check by check, so
+    a rewording fails here instead of quietly sending the user to the wrong place."""
+
+    # check -> (JD field left unstated, profile field left unstated or None when the profile cannot be the gap)
+    SILENT = {
+        "graduation": (("requirements.graduation", None), ("graduation.year", None)),
+        "education": (("requirements.education.min", None), ("education", [])),
+        "days_per_week": (("requirements.days_per_week", None), ("availability.days_per_week", None)),
+        "min_months": (("requirements.min_months", None), ("availability.months", None)),
+        "location": (("cities", []), ("availability.cities", [])),
+        "employment_type": (("employment_type", None), ("target.employment_types", [])),
+        "exclusions": (("title", None), None),
+    }
+
+    def setUp(self):
+        sample = (FIXTURES / "jd" / "boss_intern.txt").read_text(encoding="utf-8")
+        [self.job], _ = jd_parser.parse_text(sample, now=NOW)
+        self.profile = json.loads((FIXTURES / "profile" / "tech" / "profile.json").read_text(encoding="utf-8"))
+
+    def advice(self, job, profile, check):
+        result = next(c for c in match.filter_job(job, profile)["checks"] if c["check"] == check)
+        self.assertEqual(result["result"], match.UNKNOWN, result["reason"])
+        record = {"filter": {"verdict": match.NEEDS_CHECK, "checks": [result]},
+                  "total": {"missing": []}, "dimensions": {}}
+        [(_, reason, how)] = report.pending(record, job, profile)
+        return reason, how
+
+    def test_every_check_is_covered(self):
+        self.assertEqual(set(self.SILENT), set(match.CHECKS))
+
+    def test_a_silent_jd_sends_the_user_to_the_jd(self):
+        for check, (jd_side, _) in self.SILENT.items():
+            with self.subTest(check=check):
+                reason, how = self.advice(setting(self.job, *jd_side), self.profile, check)
+                self.assertIn("JD 没写", reason)
+                self.assertNotIn("档案没写", reason)
+                self.assertEqual(how, report.ASK_JD)
+
+    def test_a_silent_profile_sends_the_user_to_the_profile(self):
+        for check, (_, profile_side) in self.SILENT.items():
+            if profile_side is None:
+                continue
+            with self.subTest(check=check):
+                reason, how = self.advice(self.job, setting(self.profile, *profile_side), check)
+                self.assertIn("档案没写", reason)
+                self.assertNotIn("JD 没写", reason)
+                self.assertEqual(how, report.FILL_PROFILE)
 
 
 if __name__ == "__main__":

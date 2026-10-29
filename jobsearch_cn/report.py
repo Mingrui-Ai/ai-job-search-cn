@@ -137,15 +137,15 @@ def feedback_csv(entries: list) -> str:
     for item in entries:
         record, job = item["record"], item["job"] or {}
         total = record.get("total") or {}
-        writer.writerow([record["job_id"], _cell(job.get("title")), _cell(job.get("company")),
-                         grade_text(total.get("grade")), "" if total.get("score") is None else total["score"],
-                         conclusion(record, item["stale"]), "", "", ""])
+        writer.writerow([_cell(value) for value in (
+            record["job_id"], job.get("title"), job.get("company"), grade_text(total.get("grade")),
+            total.get("score"), conclusion(record, item["stale"]), "", "", "")])
     return "﻿" + buffer.getvalue()
 
 
-def _cell(text) -> str:
-    """A JD's own text, kept from being read as a formula when the sheet is opened."""
-    text = "" if text is None else str(text)
+def _cell(value) -> str:
+    """Every cell, so no text - least of all the JD's - is read as a formula when the sheet is opened."""
+    text = "" if value is None else str(value)
     return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
 
 
@@ -171,6 +171,20 @@ td.num { text-align: right; white-space: nowrap; }
 q { quotes: "「" "」"; } ul { margin: 4px 0; padding-left: 20px; }
 @media print { h2 { break-before: page; } }
 """
+
+
+def _legend() -> str:
+    """The grade bands from score.GRADES, named as in GRADES: 很匹配（strong）≥ 75，较匹配（good）60–74，…"""
+    bands, ceiling = [], None
+    for name, floor in score.GRADES:
+        if ceiling is None:
+            bands.append(f"{grade_text(name)}≥ {floor}")
+        elif floor == 0:
+            bands.append(f"{grade_text(name)}< {ceiling + 1}")
+        else:
+            bands.append(f"{grade_text(name)}{floor}–{ceiling}")
+        ceiling = floor - 1
+    return "，".join(bands) + f"；有硬性条件冲突的记为{grade_text(score.INELIGIBLE)}"
 
 
 def _e(value) -> str:
@@ -222,8 +236,7 @@ def build(entries: list, profile: dict, generated_at: str) -> str:
         out.append(f'<p class="notice">有 {len(stale)} 条记录已过期（岗位或档案在评分后改过，或评分规则更新了），'
                    f"下面的结论可能不准：{RESCORE}。</p>")
     out += [
-        "<p>等级按总分划分：很匹配（strong）≥ 75，较匹配（good）60–74，一般（moderate）45–59，较弱（weak）30–44，"
-        "不匹配（poor）&lt; 30；有硬性条件冲突的记为不符合硬性条件（ineligible）。"
+        f"<p>等级按总分划分：{_e(_legend())}。"
         "看完后在同目录的 <code>feedback.csv</code> 里填写“你的等级”“认可”“原因”三列，"
         "保存时保持 CSV（UTF-8）格式，然后告诉 Agent。</p>",
         "<h2 id=\"ranking\">排序</h2>",
