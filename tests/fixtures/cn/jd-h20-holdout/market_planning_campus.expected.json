@@ -1,0 +1,49 @@
+{
+  "fixture": "market_planning_campus.txt",
+  "job_schema_version": 1,
+  "site_argument": "official",
+  "method": "agent",
+  "basis": "原创虚构样例；按现行 Job Schema、match 契约和收件箱 H20/V10 任务在首次运行本批 CLI 前人工写定。",
+  "fields": {
+    "title": {"value": "市场策划校招生", "evidence": ["市场策划校招生"]},
+    "company": {"value": "示例杉序策划有限公司", "evidence": ["公司名称：示例杉序策划有限公司"]},
+    "cities": {"value": ["上海"], "evidence": ["工作地点：上海"]},
+    "remote": {"value": false, "evidence": ["不支持远程办公"]},
+    "employment_type": {"value": "campus", "evidence": ["岗位类型：校招"]},
+    "salary": {"value": {"min": 9000, "max": 11000, "unit": "CNY/month", "months": null, "negotiable": false}, "evidence": ["薪资：9000-11000元/月"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": true}, "evidence": ["仅招2027届"]},
+    "requirements.days_per_week": {"value": null, "evidence": []},
+    "requirements.min_months": {"value": null, "evidence": []},
+    "requirements.education": {"value": {"min": "bachelor", "preferred": null}, "evidence": ["学历要求：硕士或本科均可"]},
+    "requirements.skills": {"value": ["统计学", "SPSS", "Excel"], "evidence": ["业务能力要求：具备统计学基础，能使用SPSS与Excel完成问卷分析"], "note": "统计学保留的依据是明确业务能力要求，不是前一行的专业。"},
+    "return_offer": {"value": null, "evidence": []},
+    "published_at": {"value": "2026-10-29", "evidence": ["发布日期：2026-10-29"]},
+    "deadline": {"value": "2026-11-30", "evidence": ["投递截止：2026-11-30"]}
+  },
+  "traps": [
+    {"text": "硕士或本科均可", "interpretation": "先写高学历仍应取较低的本科，未注明优先学历。"},
+    {"text": "专业要求：统计学或新闻传播学相关专业", "interpretation": "这句只限定专业；不能据此生成技能。"},
+    {"text": "业务能力要求：具备统计学基础", "interpretation": "同一词在别处明确作为能力要求，统计学必须保留，不能全局禁掉专业里出现过的词。"},
+    {"text": "试用期3个月；试用期不是实习安排", "interpretation": "试用期不是实习时长；校招未写实习天数/月数，两项不适用。"}
+  ],
+  "human_match": {
+    "tech": {"verdict": "ineligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"},
+      "education": {"result": "match", "reason": "硕士不低于本科。"},
+      "days_per_week": {"result": "not_applicable", "reason": "校招未规定实习到岗天数。"},
+      "min_months": {"result": "not_applicable", "reason": "校招未规定实习时长，试用期不是实习。"},
+      "location": {"result": "conflict", "reason": "上海不在意向城市内，不搬家且岗位不支持远程。"},
+      "employment_type": {"result": "conflict", "reason": "只找实习，不在目标校招类型内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }},
+    "ops": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"},
+      "education": {"result": "match", "reason": "本科达到最低值。"},
+      "days_per_week": {"result": "not_applicable", "reason": "校招未规定实习到岗天数。"},
+      "min_months": {"result": "not_applicable", "reason": "校招未规定实习时长，试用期不是实习。"},
+      "location": {"result": "match", "reason": "上海在意向城市内。"},
+      "employment_type": {"result": "match", "reason": "校招在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }}
+  }
+}

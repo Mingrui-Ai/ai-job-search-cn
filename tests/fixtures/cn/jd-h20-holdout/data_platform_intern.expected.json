@@ -1,0 +1,47 @@
+{
+  "fixture": "data_platform_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "ats",
+  "method": "agent",
+  "basis": "原创虚构样例；按现行 Job Schema、match 契约和收件箱 H20/V10 任务在首次运行本批 CLI 前人工写定。",
+  "fields": {
+    "title": {"value": "数据平台研发实习生", "evidence": ["数据平台研发实习生"]},
+    "company": {"value": "示例砾川软件有限公司", "evidence": ["公司名称：示例砾川软件有限公司"]},
+    "cities": {"value": ["深圳"], "evidence": ["工作地点：深圳"]},
+    "remote": {"value": false, "evidence": ["不支持远程办公"]},
+    "employment_type": {"value": "internship", "evidence": ["岗位类型：实习"]},
+    "salary": {"value": {"min": 230, "max": 290, "unit": "CNY/day", "months": null, "negotiable": false}, "evidence": ["薪资：230-290元/天"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": true}, "evidence": ["仅招2027届"]},
+    "requirements.days_per_week": {"value": 4, "evidence": ["每周至少到岗4天"]},
+    "requirements.min_months": {"value": 6, "evidence": ["至少实习6个月"]},
+    "requirements.education": {"value": {"min": "bachelor", "preferred": "master"}, "evidence": ["学历要求：本科及以上，硕士优先"]},
+    "requirements.skills": {"value": ["Python", "SQL"], "evidence": ["熟悉Python和SQL"]},
+    "return_offer": {"value": null, "evidence": []},
+    "published_at": {"value": "2026-10-29", "evidence": ["发布日期：2026-10-29"]},
+    "deadline": {"value": "2026-11-30", "evidence": ["投递截止：2026-11-30"]}
+  },
+  "traps": [
+    {"text": "本科及以上，硕士优先", "interpretation": "不是备选学历列表；最低本科、优先硕士应分别保留。"},
+    {"text": "统计学、计算机等相关专业，熟悉Python和SQL", "interpretation": "同一句以逗号切换专业和能力要求。只排除专业词，Python和SQL不能随整句被排除。"}
+  ],
+  "human_match": {
+    "tech": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"},
+      "education": {"result": "match", "reason": "硕士不低于本科并符合优先项。"},
+      "days_per_week": {"result": "match", "reason": "能到岗4天，达到4天。"},
+      "min_months": {"result": "match", "reason": "能实习6个月，达到6个月。"},
+      "location": {"result": "match", "reason": "深圳在意向城市内。"},
+      "employment_type": {"result": "match", "reason": "实习在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }},
+    "ops": {"verdict": "ineligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"},
+      "education": {"result": "match", "reason": "本科达到最低值，硕士只是优先，不是硬性要求。"},
+      "days_per_week": {"result": "conflict", "reason": "只能到岗3天，少于4天。"},
+      "min_months": {"result": "conflict", "reason": "只能实习3个月，少于6个月。"},
+      "location": {"result": "conflict", "reason": "深圳不在意向城市内，明确不搬家、不接受远程。"},
+      "employment_type": {"result": "match", "reason": "实习在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }}
+  }
+}
