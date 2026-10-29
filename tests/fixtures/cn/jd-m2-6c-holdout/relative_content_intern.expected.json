@@ -1,0 +1,33 @@
+{
+  "fixture": "relative_content_intern.txt", "job_schema_version": 1, "site_argument": "other", "method": "agent",
+  "basis": "首次运行前依据原创文本、Job Schema v1 与现行七项过滤契约独立写定；新字段另见 scheduling-oracles.json。",
+  "fields": {
+    "title": {"value": "展览传播运营实习生", "evidence": ["职位名称：展览传播运营实习生"]},
+    "company": {"value": "示例青页文化有限公司", "evidence": ["公司名称：示例青页文化有限公司"]},
+    "cities": {"value": ["上海"], "evidence": ["工作地点：上海"]},
+    "remote": {"value": true, "evidence": ["可远程实习"]},
+    "employment_type": {"value": "internship", "evidence": ["展览传播运营实习生"]},
+    "salary": {"value": {"min": 170, "max": 210, "unit": "CNY/day", "months": null, "negotiable": false}, "evidence": ["薪资：170-210元/天"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": true}, "evidence": ["仅面向2027届"]},
+    "requirements.days_per_week": {"value": 3, "evidence": ["每周至少到岗3天"]},
+    "requirements.min_months": {"value": 3, "evidence": ["连续实习3个月以上"]},
+    "requirements.education": {"value": {"min": "bachelor", "preferred": null}, "evidence": ["本科及以上学历"]},
+    "requirements.skills": {"value": ["剪映", "Photoshop"], "evidence": ["技能要求：熟悉 剪映、Photoshop。"]},
+    "return_offer": {"value": null, "evidence": []},
+    "published_at": {"value": "2026-10-29", "evidence": ["发布日期：2026-10-29"]},
+    "deadline": {"value": "2026-11-05", "evidence": ["报名截止日期：2026-11-05"]}
+  },
+  "traps": [
+    {"text": "电话面试或视频面试，任选一种，无需现场面试", "interpretation": "两种远程渠道任选一种；不得因现场面试一词而增加现场形式。"},
+    {"text": "面试通过后一周内到岗，通过日期以实际通知为准", "interpretation": "依赖尚未知晓的通过日期，不可用发布日期或运行日期加七天。"},
+    {"text": "报名截止日期：2026-11-05", "interpretation": "只约束报名，不是面试通过日期或到岗日期。"}
+  ],
+  "human_match": {
+    "tech": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"}, "education": {"result": "match", "reason": "硕士高于本科最低要求。"}, "days_per_week": {"result": "match", "reason": "可4天，达到3天。"}, "min_months": {"result": "match", "reason": "可6个月，达到3个月。"}, "location": {"result": "match", "reason": "岗位可远程且tech接受远程。"}, "employment_type": {"result": "match", "reason": "实习在目标类型内。"}, "exclusions": {"result": "match", "reason": "未命中排除项。"}
+    }},
+    "ops": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"}, "education": {"result": "match", "reason": "本科达到要求。"}, "days_per_week": {"result": "match", "reason": "可3天，达到3天。"}, "min_months": {"result": "match", "reason": "可3个月，达到3个月。"}, "location": {"result": "match", "reason": "上海直接在意向城市内。"}, "employment_type": {"result": "match", "reason": "实习在目标类型内。"}, "exclusions": {"result": "match", "reason": "未命中排除项。"}
+    }}
+  }
+}
