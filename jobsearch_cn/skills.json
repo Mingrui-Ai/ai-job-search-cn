@@ -65,6 +65,7 @@
         "gRPC",
         "AWS",
         "大模型",
+        "大语言模型",
         "机器学习",
         "深度学习",
         "强化学习",
@@ -149,6 +150,7 @@
         "Figma",
         "Sketch",
         "Photoshop",
+        "PS",
         "Illustrator",
         "After Effects",
         "Premiere",
@@ -198,6 +200,9 @@
     ["Kubernetes", "K8s"],
     ["自然语言处理", "NLP"],
     ["文案写作", "文案撰写"],
-    ["PowerPoint", "PPT"]
+    ["PowerPoint", "PPT"],
+    ["大模型", "LLM", "大语言模型"],
+    ["提示词工程", "Prompt"],
+    ["Photoshop", "PS"]
   ]
 }
