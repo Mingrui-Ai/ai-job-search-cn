@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "task": "V5",
+  "frozen_at_utc": "2026-10-28T08:11:22.065901+00:00",
+  "base_commit": "659b50da3c23b06ec491c7bf07f93a96c7ebf460",
+  "design_origin_commit": "143c48265c2db870c307e29cff71caaf92ddbb67",
+  "branch": "codex/v5-match-oracles",
+  "method": "Human judgments first; stdlib arithmetic/structure audit only. No project scoring executed.",
+  "independence": {
+    "scoring_code_read": false,
+    "scoring_tests_read": false,
+    "scoring_cli_executed": false,
+    "inputs_read": "10 JD texts, tech/ops profiles, match/profile/roadmap docs, published #26 vocabulary JSON configuration only",
+    "prior_exposure": "Earlier M1-6 touched parser/tests; V4 ran public parse/filter CLI. Neither is represented as unseen history."
+  },
+  "policy": "Freeze before M2-4b merge. Future actual output and planner decisions are separate; never backfill scores or ranks to fit implementation.",
+  "comparison_basis": {
+    "weights": {
+      "skills": 35,
+      "direction": 30,
+      "experience": 25,
+      "salary": 10
+    },
+    "skills_input": "Explicit manual list in each expected JSON, original body spelling; no parsing run. Same_as affects lookup; Go/Golang counted as two listed terms pending planner ruling.",
+    "experience": "Independent human band judgment, supported by verbatim JD quotes and existing experience IDs.",
+    "arithmetic": "Exact skill fractions for total, half-up total; six-decimal skill presentation. Null dimensions excluded from denominator.",
+    "filter_contract": "M2-4a design: not_applicable and education none; profile overrides tech/ops directions and null weights.",
+    "ranking": "All ineligible after non-ineligible; descending score within each; tie reasons in rankings.json; do not recommend poor/ineligible."
+  },
+  "m2_4b_merged_at_checkpoint": false,
+  "oracle_files_sha256": {
+    "ai_product.expected.json": "fce3fe651f3305d79f33cfb80eb64a0ab63297cf0368b586a65b8675534e71a5",
+    "boss_backend.expected.json": "f1187ae498a30bc5fe527de7a26b13b307c7d943be1b32200773bc9b86a01c25",
+    "campus_llm.expected.json": "3fb8aaf4f4075743665c09b121a833ed5eb1397ec3fd56aa01cfde85db02ccca",
+    "content_ops.expected.json": "f2cb1f3fa1ab8d6f950a95ca88dec0e9362271d066010ee9fec28833f7c132a1",
+    "data_intern.expected.json": "3ba022a6da6a8922e1abbc99ed976dd886d2dfa12641f31980c0d172e9337eac",
+    "experienced_java.expected.json": "aa6a5de954bb11f9156d6292de0ab31cc6059d21faa32f702986aae5b5bf2b5d",
+    "marketing_campus.expected.json": "0c7378a3f7e7d1a479363982caa0d7ff6e4e1abd807428760ef33003d9d6973b",
+    "official_algorithm.expected.json": "0e7bb4e1c05570ec496cf59a7bd09d6d843fae6e4fdd1643a9e0fe9fb7eff2f2",
+    "process-checkpoint.json": "f1abe4ca416b921b1137cb139a1cef35bb3b34f7f30d86e9089475c5d83ebd29",
+    "profile-overrides.json": "9fda66e50b7a27a89c5c076d9fe66f735981ed159e6c6a9fda1203ea4c5732d3",
+    "rankings.json": "6b3cac544d97340553d14365e6b61f5379d8def48c4fe9adf3f9ce32f0fa089f",
+    "README.md": "fa8b42874d36961b4fe048f521e93d740553991a81846051e71221ca498cec37",
+    "summary.json": "013681bfa4959255c130b1ef1f5db3554f3d035ddeb36af12fa225bd4309eb9e",
+    "test_dev.expected.json": "05336a368beca97cca5620383d8d8ad3279b99fb5c9d30e15c57f3c791f1b9ba",
+    "ui_design.expected.json": "2e9bc2855793078fb14097c605aae002b2c146df981c388af61303b843075c8c",
+    "verification.json": "47e3dd6660e57919b158ecdfb7289e57da72f813f9fb45760d818ff721b045c5"
+  },
+  "source_files": {
+    "tests/fixtures/cn/jd-m2-3/boss_ai_product_intern.txt": {
+      "sha256": "8b6ea4a10cad8bf7646ce92bb1c364fd9f281230482a3b515b5ee9d06b81dc21",
+      "lf_sha256": "72d442027042c88f29d5e614bfc3f1a13284f2a0d9695605e412599387fa483e"
+    },
+    "tests/fixtures/cn/jd/boss_intern.txt": {
+      "sha256": "12e594886830ba9326407611ea92021ec37a46b2296dd763c2997f462314e798",
+      "lf_sha256": "843d58dc2bb6a9411cf6c34401e9f02706ecd3e1453862235045b3f40ddd01ef"
+    },
+    "tests/fixtures/cn/jd/nowcoder_campus.txt": {
+      "sha256": "a77dc1b619d08584042a0f851821bcaa0cb7a35ac0ec5e482f27e57a9dc0f52b",
+      "lf_sha256": "b8f57126b426c461c125883591287a305053052faaf7c4e475fc87da5af71de7"
+    },
+    "tests/fixtures/cn/jd-m2-3/shixiseng_content_ops_intern.txt": {
+      "sha256": "e60825d16a57a5e0a1a8b61dec8e73e726efb89c21fa6896677eb6fbd9a72ccd",
+      "lf_sha256": "55d515034b676fc55aea04dc99666f4f7928bd4e879ff959298670f369843ee3"
+    },
+    "tests/fixtures/cn/jd/shixiseng_intern.txt": {
+      "sha256": "cd82dbffcecf39fd72dfbd5909ddad013436113e638d74751f342742a44c89a7",
+      "lf_sha256": "bec80b7da184393bfc7a19e93cc64c349bffb9da4784f158fc145d19f0e5f61b"
+    },
+    "tests/fixtures/cn/jd/experienced_hire.txt": {
+      "sha256": "46a8b808637849d502d6aa3c22a9ad648f2ab5116143cd00d7117ff7dec27988",
+      "lf_sha256": "f042d11eedeb8a8ca737b07f6b7ab0db08364e5b9f301f60931183bea1327ead"
+    },
+    "tests/fixtures/cn/jd-m2-3/official_marketing_campus.txt": {
+      "sha256": "591b0b1a7b2f8f011b9c70c1df931b4ce3a89832b6e310b1d5b03046475a4a70",
+      "lf_sha256": "db3403da4334ea27ab50e784e218257ccd565cdb3ae5cdcc28b57de948b34964"
+    },
+    "tests/fixtures/cn/jd/official_site.txt": {
+      "sha256": "f79dbea24691e8cfea8f24966b40cc52f878436cc9468f2d556d23a09b0ef0c0",
+      "lf_sha256": "512e03dad9f0ca45677737c0f6da268ab7f520cf636b281ce1a71d2b1c2a5c10"
+    },
+    "tests/fixtures/cn/jd-m2-3/nowcoder_test_dev_intern.txt": {
+      "sha256": "2cb02087b4cdaeff87ffa20f8acbf0924f5de37066869ddfa55ee50e5a23baec",
+      "lf_sha256": "22717a1c11cf8670f5c4117aa65727a04da45751c9921c0c9287e5710c24b7e8"
+    },
+    "tests/fixtures/cn/jd-m2-3/ats_ui_design_intern.txt": {
+      "sha256": "ee00d26b385cd50ffd3e85e51abe35631bcb47f26273cd6f8f1907e4d2378784",
+      "lf_sha256": "6cd4eeff1f3374a6e345a0ea9bebbcba3ff9db3f302089797937b9d39e32dd59"
+    },
+    "docs/cn/match.md": {
+      "sha256": "33e015520755d43dc36470cb76a3ab93303de5f9e5c27de1e3393a4b04732564",
+      "lf_sha256": "3945130fbe2a86970e234e87b0369c6f44855b8f03da6366eb8569e245791c87"
+    },
+    "docs/cn/profile.md": {
+      "sha256": "d1c782d2a0a1d42033c6edbc13e10f0f79e63131b0e3b3c378336d5aab7d4946",
+      "lf_sha256": "c52233caaaa1d8cad81f953499a1ca7f2413738e88627a3db3a218e0ce606df2"
+    },
+    "docs/cn/roadmap.md": {
+      "sha256": "b9dd9929d8c07e29583b0bde798d3e5e1d4ef81c816a342d9034f6b2c1ea12ec",
+      "lf_sha256": "f96c563d41ab6dcfdd0424517525459b43544fbc45d53755b9812abe8fe57a52"
+    },
+    "tests/fixtures/cn/profile/tech/profile.json": {
+      "sha256": "cd06c39d2041586ec52ecc11566a55b884ed93ed11c6485afba83807e0f4897e",
+      "lf_sha256": "3095c5b0631e581c30831711dec4b1c61100a7f16866f2efb92121be55b5b7b3"
+    },
+    "tests/fixtures/cn/profile/ops/profile.json": {
+      "sha256": "fe6fc3de8c9dc00ce8cf302175593cce2ead112de765dbe09db16e0ad92cb1d7",
+      "lf_sha256": "dea5c47f427656b77fc29e6ebbe4b53e986199a4944d0ff1be8245df588f33f5"
+    }
+  },
+  "vocabulary_basis": {
+    "commit": "993950275fe10d02a3364bdcda6a05d81b0c7b11",
+    "path": "jobsearch_cn/skills.json",
+    "sha256": "44911343c46d620b703fd4f1c903d163e0b006d169b15442e708601395fcad83",
+    "lf_sha256": "44911343c46d620b703fd4f1c903d163e0b006d169b15442e708601395fcad83"
+  },
+  "audit": {
+    "literal_input_quotes": 75,
+    "jobs": 10,
+    "pairs": 20,
+    "hard_checks": 140,
+    "skill_credit_entries": 126,
+    "dimensions": 80,
+    "null_dimensions": 16
+  }
+}

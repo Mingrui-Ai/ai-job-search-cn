@@ -1,0 +1,231 @@
+{
+  "kind": "manual_judgments_not_execution_results",
+  "pair_count": 20,
+  "dimension_count": 80,
+  "profiles": {
+    "tech": {
+      "boss_backend": {
+        "score": 82,
+        "grade": "strong",
+        "filter": "eligible",
+        "dimensions": {
+          "skills": 51.428571,
+          "direction": 100.0,
+          "experience": 95.0,
+          "salary": 100.0
+        }
+      },
+      "experienced_java": {
+        "score": 51,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 100.0,
+          "experience": 65.0,
+          "salary": null
+        }
+      },
+      "campus_llm": {
+        "score": 72,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 38.75,
+          "direction": 100.0,
+          "experience": 85.0,
+          "salary": null
+        }
+      },
+      "official_algorithm": {
+        "score": 49,
+        "grade": "moderate",
+        "filter": "needs_check",
+        "dimensions": {
+          "skills": 8.333333,
+          "direction": 100.0,
+          "experience": 45.0,
+          "salary": null
+        }
+      },
+      "data_intern": {
+        "score": 60,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 25.0,
+          "direction": 100.0,
+          "experience": 45.0,
+          "salary": 100.0
+        }
+      },
+      "ui_design": {
+        "score": 4,
+        "grade": "poor",
+        "filter": "needs_check",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 15.0,
+          "salary": null
+        }
+      },
+      "ai_product": {
+        "score": 21,
+        "grade": "poor",
+        "filter": "eligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 45.0,
+          "salary": 100.0
+        }
+      },
+      "test_dev": {
+        "score": 51,
+        "grade": "moderate",
+        "filter": "eligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 100.0,
+          "experience": 65.0,
+          "salary": null
+        }
+      },
+      "marketing_campus": {
+        "score": 4,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 15.0,
+          "salary": null
+        }
+      },
+      "content_ops": {
+        "score": 11,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 5.0,
+          "salary": 100.0
+        }
+      }
+    },
+    "ops": {
+      "boss_backend": {
+        "score": 3,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 10.0,
+          "salary": null
+        }
+      },
+      "experienced_java": {
+        "score": 0,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 0.0,
+          "salary": null
+        }
+      },
+      "campus_llm": {
+        "score": 1,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 5.0,
+          "salary": null
+        }
+      },
+      "official_algorithm": {
+        "score": 1,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 5.0,
+          "salary": null
+        }
+      },
+      "data_intern": {
+        "score": 13,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 45.0,
+          "salary": null
+        }
+      },
+      "ui_design": {
+        "score": 19,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 13.333333,
+          "direction": 0.0,
+          "experience": 50.0,
+          "salary": null
+        }
+      },
+      "ai_product": {
+        "score": 13,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 45.0,
+          "salary": null
+        }
+      },
+      "test_dev": {
+        "score": 1,
+        "grade": "ineligible",
+        "filter": "ineligible",
+        "dimensions": {
+          "skills": 0.0,
+          "direction": 0.0,
+          "experience": 5.0,
+          "salary": null
+        }
+      },
+      "marketing_campus": {
+        "score": 45,
+        "grade": "moderate",
+        "filter": "eligible",
+        "dimensions": {
+          "skills": 20.0,
+          "direction": 50.0,
+          "experience": 75.0,
+          "salary": null
+        }
+      },
+      "content_ops": {
+        "score": 80,
+        "grade": "strong",
+        "filter": "eligible",
+        "dimensions": {
+          "skills": 51.428571,
+          "direction": 100.0,
+          "experience": 95.0,
+          "salary": null
+        }
+      }
+    }
+  }
+}

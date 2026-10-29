@@ -174,7 +174,7 @@ python -m jobsearch_cn jd parse tests/fixtures/cn/jd/boss_intern.txt --site boss
 - 用 conda 时，先激活环境再启动 Codex / Claude Code，它们会继承终端的 Python。
 
 > [!WARNING]
-> **暂时不要运行上游的 `/setup`。** 它会把你的姓名、联系方式、工作经历写进 `CLAUDE.md` 等**被 git 跟踪**的文件。请改用 CN 版建档：Claude Code 用 `cn-setup` 技能，Codex 按 `AGENTS.md` 找到[建档流程](docs/cn/profile-setup.md)，档案只存在本地的 `data/profile/`（不入库）。建好后可以用 `python -m jobsearch_cn match filter <岗位id>` 按硬性条件过滤岗位（[说明](docs/cn/match.md)）。
+> **暂时不要运行上游的 `/setup`。** 它会把你的姓名、联系方式、工作经历写进 `CLAUDE.md` 等**被 git 跟踪**的文件。请改用 CN 版建档：Claude Code 用 `cn-setup` 技能，Codex 按 `AGENTS.md` 找到[建档流程](docs/cn/profile-setup.md)，档案只存在本地的 `data/profile/`（不入库）。建好后就可以让 Agent 给保存过的岗位评分：Claude Code 用 `cn-match` 技能，Codex 按 `AGENTS.md` 找到同一份[评分流程](docs/cn/match.md#评分工作流三个-agent-共用)，会给出硬性条件的结论、各维度的分数和依据，以及你还缺什么。只想按硬性条件过滤，可以用 `python -m jobsearch_cn match filter <岗位id>`。
 
 ## 数据来源与合规
 

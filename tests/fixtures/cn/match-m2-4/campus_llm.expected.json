@@ -1,0 +1,654 @@
+{
+  "schema_version": 1,
+  "kind": "manual_score_oracle",
+  "fixture": "tests/fixtures/cn/jd/nowcoder_campus.txt",
+  "title": "【2027届校园招聘】大模型应用开发工程师",
+  "inputs": {
+    "skills": [
+      {
+        "name": "大模型",
+        "group": "tech"
+      },
+      {
+        "name": "Agent",
+        "group": "tech"
+      },
+      {
+        "name": "RAG",
+        "group": "tech"
+      },
+      {
+        "name": "微调",
+        "group": "tech"
+      },
+      {
+        "name": "Python",
+        "group": "tech"
+      },
+      {
+        "name": "PyTorch",
+        "group": "tech"
+      },
+      {
+        "name": "LangChain",
+        "group": "tech"
+      },
+      {
+        "name": "LangGraph",
+        "group": "tech"
+      }
+    ],
+    "jd_evidence": [
+      "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+      "参与模型微调与评测体系建设",
+      "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+    ],
+    "hard_condition_evidence": [
+      "2027届应届毕业生",
+      "学历要求：硕士及以上，博士优先",
+      "工作城市：北京、杭州",
+      "【2027届校园招聘】大模型应用开发工程师"
+    ],
+    "salary": {
+      "min": 25000,
+      "max": 40000,
+      "unit": "CNY/month",
+      "months": 15,
+      "evidence": "25-40K·15薪"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届符合",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "硕士达到最低学历，博士只是偏好",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "days_per_week": {
+            "result": "not_applicable",
+            "reason": "校招缺实习天数，不适用",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "min_months": {
+            "result": "not_applicable",
+            "reason": "校招缺实习月数，不适用",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "location": {
+            "result": "unknown",
+            "reason": "北京/杭州无交集，不搬家但接受远程，JD远程未知，待确认",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "employment_type": {
+            "result": "conflict",
+            "reason": "校招不在仅实习的目标中",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 38.75,
+          "exact_credit_sum": "3.1",
+          "denominator": 8,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "大模型",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Agent",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "RAG",
+              "profile_skill": "RAG",
+              "credit": 0.8,
+              "profile_used_in": [
+                "exp-1",
+                "proj-1"
+              ],
+              "reason": "档案未写程度；按设计稿记0.8"
+            },
+            {
+              "jd_skill": "微调",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Python",
+              "profile_skill": "Python",
+              "credit": 1,
+              "profile_used_in": [
+                "exp-1"
+              ],
+              "reason": "档案proficient；按设计稿记1"
+            },
+            {
+              "jd_skill": "PyTorch",
+              "profile_skill": "PyTorch",
+              "credit": 0.5,
+              "profile_used_in": [],
+              "reason": "档案familiar；按设计稿记0.5"
+            },
+            {
+              "jd_skill": "LangChain",
+              "profile_skill": "LangChain",
+              "credit": 0.8,
+              "profile_used_in": [
+                "proj-1"
+              ],
+              "reason": "档案working；按设计稿记0.8"
+            },
+            {
+              "jd_skill": "LangGraph",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        "direction": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "tech": 8
+          },
+          "reason": "不计general后分组{'tech': 8}；tech为最多或并列最多组，目标为tech，记100",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 85,
+          "method": "manual_semantic_judgment",
+          "reason": "做过 RAG 评测脚本与 LangChain 课程问答，直接对应应用研发和评测；没有微调、LangGraph 或多智能体协作的明示经历。",
+          "evidence": {
+            "jd": [
+              "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+              "参与模型微调与评测体系建设",
+              "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+            ],
+            "profile": [
+              "exp-1",
+              "proj-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "JD单位CNY/month与档案CNY/day不同，不换算",
+          "jd": [
+            "25-40K·15薪"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 72,
+        "grade": "ineligible",
+        "score_grade_before_filter": "good",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "大模型",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Agent",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "微调",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "LangGraph",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "unknown",
+          "reason": "北京/杭州无交集，不搬家但接受远程，JD远程未知，待确认",
+          "jd": [
+            "2027届应届毕业生",
+            "学历要求：硕士及以上，博士优先",
+            "工作城市：北京、杭州",
+            "【2027届校园招聘】大模型应用开发工程师"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "employment_type",
+          "state": "conflict",
+          "reason": "校招不在仅实习的目标中",
+          "jd": [
+            "2027届应届毕业生",
+            "学历要求：硕士及以上，博士优先",
+            "工作城市：北京、杭州",
+            "【2027届校园招聘】大模型应用开发工程师"
+          ]
+        },
+        {
+          "kind": "experience",
+          "item": "无微调和多智能体协作经历依据；顶会论文仅优先，不作为硬性冲突",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        }
+      ]
+    },
+    "ops": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届符合",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "education": {
+            "result": "conflict",
+            "reason": "本科低于硕士",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "days_per_week": {
+            "result": "not_applicable",
+            "reason": "校招缺实习天数，不适用",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "min_months": {
+            "result": "not_applicable",
+            "reason": "校招缺实习月数，不适用",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "location": {
+            "result": "conflict",
+            "reason": "北京/杭州无交集、不搬家且不接受远程",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "校招属于目标类型",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "2027届应届毕业生",
+              "学历要求：硕士及以上，博士优先",
+              "工作城市：北京、杭州",
+              "【2027届校园招聘】大模型应用开发工程师"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 8,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "大模型",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Agent",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "RAG",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "微调",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Python",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "PyTorch",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "LangChain",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "LangGraph",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "tech": 8
+          },
+          "reason": "不计general后分组{'tech': 8}；没有技能属于目标ops，记0",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 5,
+          "method": "manual_semantic_judgment",
+          "reason": "运营活动和海报制作没有大模型应用研发或评测依据，只有一般团队协作可参考。",
+          "evidence": {
+            "jd": [
+              "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+              "参与模型微调与评测体系建设",
+              "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+            ],
+            "profile": [
+              "exp-1",
+              "campus-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "档案 salary_min 未填写，未知，不按0分处理",
+          "jd": [
+            "25-40K·15薪"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 1,
+        "grade": "ineligible",
+        "score_grade_before_filter": "poor",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "大模型",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Agent",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "RAG",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "微调",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Python",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "PyTorch",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "LangChain",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "LangGraph",
+          "jd": [
+            "负责大模型 Agent 应用的设计与研发，包括 RAG、工具调用与多智能体协作",
+            "参与模型微调与评测体系建设",
+            "熟悉 Python、PyTorch，有 LangChain / LangGraph 项目经验者优先"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "education",
+          "state": "conflict",
+          "reason": "本科低于硕士",
+          "jd": [
+            "2027届应届毕业生",
+            "学历要求：硕士及以上，博士优先",
+            "工作城市：北京、杭州",
+            "【2027届校园招聘】大模型应用开发工程师"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "conflict",
+          "reason": "北京/杭州无交集、不搬家且不接受远程",
+          "jd": [
+            "2027届应届毕业生",
+            "学历要求：硕士及以上，博士优先",
+            "工作城市：北京、杭州",
+            "【2027届校园招聘】大模型应用开发工程师"
+          ]
+        }
+      ]
+    }
+  }
+}

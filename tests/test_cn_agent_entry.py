@@ -18,6 +18,7 @@ REPO = Path(__file__).resolve().parent.parent
 WORKFLOWS = {
     "cn-jd-import": ("docs/cn/jd-import.md", "jd", {"parse", "save", "show", "list", "status", "validate"}),
     "cn-setup": ("docs/cn/profile-setup.md", "profile", {"validate", "show"}),
+    "cn-match": ("docs/cn/match.md", "match", {"score", "validate", "save", "show", "list"}),
 }
 
 sys.path.insert(0, str(REPO))

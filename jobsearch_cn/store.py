@@ -171,6 +171,12 @@ class MatchStore:
         _write_json(self.matches, self._path(record["job_id"]), record)
         return "created" if existing is None else "updated"
 
+    def write_draft(self, record: dict) -> Path:
+        """Write a record for an agent to complete to <data dir>/matches/drafts/<job id>.json; not a saved match."""
+        path = self.matches / "drafts" / self._path(record["job_id"]).name
+        _write_json(path.parent, path, record)
+        return path
+
 
 def _write_json(directory: Path, path: Path, record: dict) -> None:
     """Write atomically, so an interrupted save never leaves half a file."""
