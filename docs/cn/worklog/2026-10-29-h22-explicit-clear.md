@@ -13,19 +13,20 @@
 - 仍使用现有 Schema 校验：Agent 引用必须在原文中，用户空理由 `null` 仍合法但不表示清空；空白字符串、空出处列表等仍校验失败。原文是否足以支持纠正由 Agent 或用户核对，不让确定性工具推测语义。
 - 标量和对象的 `null`、按链接发现新原文时的整条替换、状态与首次导入时间保留规则均不变。
 - 不修改 `tools/security_guards.py`，不使用真实岗位或档案，不改冻结样例。
+- 按规划者更新的顺序，先基于最新 master 开 H22 PR，由 Codex B 审核当前实现；H16 合并后再合入 master、处理冲突并重跑检查。
 
 **验证**
 
 - 在修复前运行新增测试，复现无法明确清空以及清空后规则重新填回；修复后，新回归与原有存储、Schema 测试合计 84 项通过。
 - 基于 `master@a594e43`，在 `ai-job-search-cn` 环境跑全量测试：1203 项，跳过 12 项，通过（181.459 秒）；`security_guards`、`lint_skills`、`git diff --check` 均通过。
-- 提交前 `git status` 只有本次代码、测试和文档，无 `data/` 文件；H22 暂只在本地保存，尚未推送或开 PR。
+- 开 PR 前再次拉取并合入 `origin/master`，仍为已验证的 `a594e43`，代码和测试未变；提交前 `git status` 仅有本次改动，无 `data/` 文件。
 
 **遗留**
 
-- H16（#59）尚未合并，当前只验证已有的 `cities`、`requirements.skills` 列表。开 PR 前需合入包含 H16 的最新 master，补齐 `requirements.skill_alternatives` 的清空与重导入回归，去掉 H16 文档中“还不能清空全部”的临时说明，再跑提交前检查。
+- H16（#59）尚未合并，当前只验证已有的 `cities`、`requirements.skills` 列表。H16 合并后还需再合一次 master，处理 `store.py` 等文件的冲突，补齐 `requirements.skill_alternatives` 的清空与重导入回归，去掉 H16 文档中“还不能清空全部”的临时说明，重跑全量测试、`security_guards`、`lint_skills`。
 - H22 路线图任务单尚未出现在当前 master；同步后只更新本项进度。
 
 **下一步**
 
-- H16 合并并完成上述同步后推送 H22、开 PR，在评论回报，由 Codex B 审核。
+- 现在推送 H22 并开 PR，在描述和评论中注明 H16 合并后的同步要求，由 Codex B 先审；后续同步完成后再回报验证结果。
 - V9、V10 继续留在本地，分别等待 M2-6c、H20 的实现 PR。
