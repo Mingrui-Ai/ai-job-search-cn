@@ -77,7 +77,8 @@ python -m jobsearch_cn profile validate              # 校验 data/profile/ 下�
 | `cn` | Claude A（执行：主线功能开发） |
 | `cn-b` | Claude B（第二执行者） |
 | `cn-c` | Claude C（第三执行者） |
-| `cn-codex` | Codex（实测、验证） |
+| `cn-codex` | Codex A（实测、验证） |
+| `cn-codex-b` | Codex B（审核 PR） |
 | `cn-plan` | 规划 |
 
 ```powershell
@@ -92,11 +93,12 @@ git worktree remove ../cn-<名字>                           # 删除（目录�
 
 ### 多会话协作
 
-2026-10-29 起，本仓库同时有一个规划会话和几个工作会话：几个 Claude Code 执行者，加上 Codex 验证者。分工见[总体规划 §8](master-plan.md#8-协作方式)，任务和进度见[路线图](roadmap.md)。
+2026-10-29 起，本仓库同时有一个规划会话和几个工作会话：Claude Code 执行者 A、B、C，Codex A 验证者，Codex B 审核者。分工见[总体规划 §8](master-plan.md#8-协作方式)，任务和进度见[路线图](roadmap.md)。
 
-- **派活**：规划者先把任务单写进路线图，再直接通知各会话。Claude Code 会话之间用 SendMessage。Codex 的任务写在规划者维护的本机收件箱文件里（在仓库外，不入 git），再用 `codex queue` 通知它。用户不必转贴任务。
-- **回报**：Claude Code 会话在开 PR、推送新提交或需要裁定时，发消息给规划者；Codex 写在 PR 评论里。规划者用一个监视脚本跟踪 PR 的事件和 Codex 每一轮的结束。
-- **裁定只有一个出口**：验证者的复核意见写在 PR 评论里，由规划者裁定，再通知作者要改什么。工作会话之间不互相派活。
+- **派活**：规划者先把任务单写进路线图，再直接通知各会话。Claude Code 会话之间用 SendMessage。Codex 的任务写在规划者维护的本机收件箱文件里（在仓库外，不入 git，Codex A、B 各一个），再用 `codex queue` 通知它。用户不必转贴任务。
+- **回报**：Claude Code 会话在开 PR、推送新提交或需要裁定时，发消息给规划者；Codex 写在 PR 评论里。规划者用一个监视脚本跟踪 PR 的事件和两个 Codex 每一轮的结束。
+- **审核和合并**：实现类的 PR 开出后，规划者通知 Codex B 审核。Codex B 在自己的工作树里试合并最新 master、跑检查，在 PR 评论里写结论和按 P1–P3 分级的问题。要改的地方由规划者转告作者；Codex B 建议合并、CI 通过后，由规划者合并。规划者自己的文档 PR 和 Codex A 的测试数据 PR 不经过 Codex B。
+- **裁定只有一个出口**：审核者和验证者的意见都写在 PR 评论里，范围和口径由规划者裁定，再通知作者要改什么。工作会话之间不互相派活。
 - **交给 Codex 的事**：需要第二个模型的工作，即留出样例、规则改动的独立复核、Codex 入口的实测、真实数据验收。实现交给 Claude Code 会话。
 - **留出样例**：要检验的 PR 开出之前不推送。执行者在那之前不看验证者的工作树和分支。
 - **公开仓库**：提交、PR 文字和评论推送后立即公开。不写真实岗位、档案内容、本机用户名和密钥；用户的真实数据只在本机的 `data/` 下。
