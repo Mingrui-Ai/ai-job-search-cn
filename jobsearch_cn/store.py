@@ -200,22 +200,32 @@ def _set_field(record: dict, path: str, value) -> None:
     target[leaf] = value
 
 
+def _is_explicit_list_clear(value, evidence) -> bool:
+    """A validated empty list whose user/agent evidence explains the correction."""
+    return (value == [] and evidence is not None
+            and evidence.get("method") in ("user", "agent")
+            and bool(evidence.get("text")))
+
+
 def merge_same_text(old: dict, new: dict) -> dict:
     """Merge a re-import of the same JD text into the stored record.
 
-    Fill empty fields, but never erase a value with an empty import. When both
-    values exist, only equal or higher evidence priority can replace the old
-    value: user > agent > rule. Evidence follows the winning value, even when
-    the two values are equal. Status and first import time stay unchanged.
+    Fill unknown fields, but do not erase a value with an ordinary empty import.
+    A list explicitly cleared with user/agent evidence counts as a known value,
+    both when clearing it and on later imports. Only equal or higher evidence
+    priority can replace a known value: user > agent > rule. Evidence follows
+    the winning value, even when the two values are equal. Status and first
+    import time stay unchanged.
     """
     merged = json.loads(json.dumps(old))
     for path in schema.EVIDENCE_FIELDS:
         value = schema._field(new, path)
-        if not schema._has_value(value):
-            continue
         new_evidence = new["evidence"].get(path)
+        if not schema._has_value(value) and not _is_explicit_list_clear(value, new_evidence):
+            continue
         old_evidence = old["evidence"].get(path)
-        if schema._has_value(schema._field(old, path)):
+        old_value = schema._field(old, path)
+        if schema._has_value(old_value) or _is_explicit_list_clear(old_value, old_evidence):
             old_priority = _EVIDENCE_PRIORITY.get((old_evidence or {}).get("method"), 0)
             new_priority = _EVIDENCE_PRIORITY.get((new_evidence or {}).get("method"), 0)
             if new_priority < old_priority:
