@@ -76,6 +76,7 @@ python -m jobsearch_cn profile validate              # 校验 data/profile/ 下�
 | --- | --- |
 | `cn` | Claude A（执行：主线功能开发） |
 | `cn-b` | Claude B（第二执行者） |
+| `cn-c` | Claude C（第三执行者） |
 | `cn-codex` | Codex（实测、验证） |
 | `cn-plan` | 规划 |
 
