@@ -45,6 +45,7 @@ def minimal_record() -> dict:
         "salary": None,
         "requirements": {
             "graduation": None, "days_per_week": None, "min_months": None, "education": None, "skills": [],
+            "skill_alternatives": [],
         },
         "return_offer": None,
         "published_at": None,
@@ -253,6 +254,65 @@ class Requirements(SchemaCase):
             self.cited("requirements.education", {"min": "bachelor", "preferred": "none"}, "本科及以上"),
             "requirements.education.preferred: must be one of",
         )
+
+
+class SkillAlternatives(SchemaCase):
+    """H16: groups of skills the JD offers a choice between."""
+
+    CLAUSE = "熟悉 Golang 或 Java，了解 Docker"
+
+    def chosen(self, groups, text=None, method="rule") -> dict:
+        record = self.cited("requirements.skills", ["Golang", "Java", "Docker"], self.CLAUSE, method=method)
+        record["requirements"]["skill_alternatives"] = groups
+        record["evidence"]["requirements.skill_alternatives"] = {"text": text or "熟悉 Golang 或 Java", "method": method}
+        return record
+
+    def test_a_cited_group_of_listed_skills_is_valid(self):
+        self.assert_valid(self.chosen([["Golang", "Java"]]))
+        self.assert_valid(self.chosen([["golang", "ＪＡＶＡ"]], method="agent"))  # compared as skills are
+
+    def test_a_list_of_groups_of_two_or_more(self):
+        for groups, error in ((None, "must be a list of skill groups"), ([["Golang"]], "at least two skills"),
+                              (["Golang"], "at least two skills"), ([["Golang", "golang"]], "duplicate"),
+                              ([["Golang", ""]], "non-empty string")):
+            with self.subTest(groups=groups):
+                self.assert_error(self.chosen(groups), "requirements.skill_alternatives")
+                self.assertTrue(any(error in e for e in schema.validate(self.chosen(groups))), error)
+
+    def test_every_grouped_skill_is_listed_and_in_one_group(self):
+        self.assert_error(self.chosen([["Golang", "Rust"]], text=self.CLAUSE),
+                          "requirements.skill_alternatives[0]: 'Rust' is not in requirements.skills")
+        self.assert_error(self.chosen([["Golang", "Java"], ["Java", "Docker"]], text=self.CLAUSE),
+                          "requirements.skill_alternatives[1]: 'Java' is already in an earlier group")
+
+    def test_a_group_needs_evidence_offering_it_as_one_choice(self):
+        record = self.chosen([["Golang", "Java"]])
+        del record["evidence"]["requirements.skill_alternatives"]
+        self.assert_error(record, "requirements.skill_alternatives: has a value but no evidence")
+        # Each skill is cited, but not as a choice: the choice is not shown to be the JD's.
+        self.assert_error(self.chosen([["Golang", "Docker"]], text=["熟悉 Golang", "了解 Docker"]),
+                          "evidence.requirements.skill_alternatives: no snippets offer Golang / Docker as one choice")
+        self.assert_valid(self.chosen([["Golang", "Docker"]], text=self.CLAUSE))
+
+    def test_snippets_that_overlap_offer_a_merged_choice(self):
+        # "熟悉 Python 或 Java；熟悉 Java 或 Go": two snippets, linked by Java (Codex B's P2-2 on #59).
+        text = "熟悉 Python 或 Java；熟悉 Java 或 Go；了解 Docker、Kubernetes"
+        record = self.cited("requirements.skills", ["Python", "Java", "Go", "Docker", "Kubernetes"], text, "agent")
+        record["requirements"]["skill_alternatives"] = [["Python", "Java", "Go"]]
+        record["evidence"]["requirements.skill_alternatives"] = {"text": ["熟悉 Python 或 Java", "熟悉 Java 或 Go"],
+                                                                 "method": "agent"}
+        self.assert_valid(record)
+        # Two choices that share no skill are not one: Docker、Kubernetes is no link to Python, Java, Go.
+        record["requirements"]["skill_alternatives"] = [["Python", "Java", "Docker", "Kubernetes"]]
+        record["evidence"]["requirements.skill_alternatives"]["text"] = ["熟悉 Python 或 Java", "了解 Docker、Kubernetes"]
+        self.assert_error(record, "evidence.requirements.skill_alternatives: no snippets offer")
+
+    def test_upgrade_adds_the_field_to_an_older_record(self):
+        record = minimal_record()
+        del record["requirements"]["skill_alternatives"]
+        self.assert_error(record, "requirements.skill_alternatives: missing")
+        self.assert_valid(schema.upgrade(record))
+        self.assertEqual(schema.upgrade([1]), [1])  # not a record: left for validate to report
 
 
 class Evidence(SchemaCase):

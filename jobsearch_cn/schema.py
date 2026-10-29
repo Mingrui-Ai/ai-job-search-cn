@@ -19,6 +19,8 @@ Conventions:
   the JD does not contain, so an invented value cannot pass validation.
   Whether a value was *derived* correctly from real text is the parser's
   tests' job, not this module's.
+* requirements.skill_alternatives joined v1 after records had been stored
+  (H16); upgrade() adds it, empty, to a record read back from the store.
 """
 
 import math
@@ -52,7 +54,7 @@ TOP_LEVEL_KEYS = (
 )
 SOURCE_KEYS = ("type", "site", "url", "imported_at")
 SALARY_KEYS = ("min", "max", "unit", "months", "negotiable")
-REQUIREMENT_KEYS = ("graduation", "days_per_week", "min_months", "education", "skills")
+REQUIREMENT_KEYS = ("graduation", "days_per_week", "min_months", "education", "skills", "skill_alternatives")
 GRADUATION_KEYS = ("years", "strict")
 EDUCATION_KEYS = ("min", "preferred")
 EVIDENCE_KEYS = ("text", "method")
@@ -63,10 +65,12 @@ EVIDENCE_FIELDS = (
     "title", "company", "cities", "remote", "employment_type", "salary",
     "requirements.graduation", "requirements.days_per_week",
     "requirements.min_months", "requirements.education", "requirements.skills",
-    "return_offer", "published_at", "deadline",
+    "requirements.skill_alternatives", "return_offer", "published_at", "deadline",
 )
 # List fields whose every item must appear in the field's own evidence.
 ITEMIZED_FIELDS = ("cities", "requirements.skills")
+# Skill groups the JD asks for one of; their snippets must offer each group as one choice.
+ALTERNATIVES = "requirements.skill_alternatives"
 
 MAX_RAW_TEXT = 50_000
 MAX_NAME = 200
@@ -79,6 +83,14 @@ _FOLDED_AWAY = re.compile(r"[\s\u200b-\u200d\u2060\ufeff]+")
 def normalize_for_match(text: str) -> str:
     """Fold what copying a JD changes: width (NFKC), case, whitespace, zero-width characters."""
     return _FOLDED_AWAY.sub("", unicodedata.normalize("NFKC", text).casefold())
+
+
+def upgrade(record):
+    """A stored record with the fields v1 gained since it was saved, empty; changed in place and returned."""
+    requirements = record.get("requirements") if isinstance(record, dict) else None
+    if isinstance(requirements, dict):
+        requirements.setdefault("skill_alternatives", [])
+    return record
 
 
 def validate(record) -> list[str]:
@@ -283,6 +295,36 @@ def _check_requirements(requirements, errors: list) -> None:
         _check_education(requirements["education"], errors)
     if "skills" in requirements:
         _check_text_list(requirements["skills"], "requirements.skills", errors)
+    if "skill_alternatives" in requirements:
+        _check_alternatives(requirements, errors)
+
+
+def _check_alternatives(requirements: dict, errors: list) -> None:
+    """Groups of two or more skills the JD asks for one of; each skill listed in skills, in one group at most."""
+    path, groups = "requirements.skill_alternatives", requirements["skill_alternatives"]
+    if not isinstance(groups, list):
+        errors.append(f"{path}: must be a list of skill groups ([] when the JD offers no choice)")
+        return
+    skills = requirements.get("skills")
+    listed = {normalize_for_match(s) for s in skills if isinstance(s, str)} if isinstance(skills, list) else set()
+    grouped = set()
+    for index, group in enumerate(groups):
+        where = f"{path}[{index}]"
+        if not isinstance(group, list) or len(group) < 2:
+            errors.append(f"{where}: must be a list of at least two skills")
+            continue
+        group_errors = []
+        _check_text_list(group, where, group_errors)
+        errors.extend(group_errors)
+        if group_errors:
+            continue
+        for item in group:
+            folded = normalize_for_match(item)
+            if folded not in listed:
+                errors.append(f"{where}: {item!r} is not in requirements.skills")
+            if folded in grouped:
+                errors.append(f"{where}: {item!r} is already in an earlier group")
+            grouped.add(folded)
 
 
 def _check_graduation(graduation, errors: list) -> None:
@@ -358,6 +400,23 @@ def _has_value(value) -> bool:
     return value is not None and value != []
 
 
+def _offered_together(group: list, snippets: list) -> bool:
+    """Whether the snippets offer the group as one choice: each names two or more of its skills,
+    and together they link every skill. One snippet naming them all does; so do "Python 或 Java"
+    and "Java 或 Go" for [Python, Java, Go] (H16). "熟悉 Golang" and "了解 Docker" do not."""
+    items = [normalize_for_match(item) for item in group]
+    linked = []  # sets of skills one snippet, or a chain of them, names together
+    for text in snippets:
+        named = {item for item in items if item in text}
+        if len(named) < 2:
+            continue
+        for other in [s for s in linked if s & named]:
+            named |= other
+            linked.remove(other)
+        linked.append(named)
+    return any(len(s) == len(set(items)) for s in linked)
+
+
 def _check_evidence(record: dict, errors: list) -> None:
     evidence = record["evidence"]
     if not isinstance(evidence, dict):
@@ -388,11 +447,16 @@ def _check_evidence(record: dict, errors: list) -> None:
         for snippet in snippets:
             if normalize_for_match(snippet) not in haystack:
                 errors.append(f"{where}.text: not found in raw_text: {snippet!r}")
+        folded = [normalize_for_match(snippet) for snippet in snippets]
         if path in ITEMIZED_FIELDS and isinstance(_field(record, path), list):
-            folded = [normalize_for_match(snippet) for snippet in snippets]
             for item in _field(record, path):
                 if isinstance(item, str) and not any(normalize_for_match(item) in text for text in folded):
                     errors.append(f"{where}: {item!r} does not appear in its evidence text")
+        if path == ALTERNATIVES and isinstance(_field(record, path), list):
+            for group in _field(record, path):
+                if (isinstance(group, list) and all(isinstance(item, str) for item in group)
+                        and not _offered_together(group, folded)):
+                    errors.append(f"{where}: no snippets offer {' / '.join(group)} as one choice")
     for path in EVIDENCE_FIELDS:
         if _has_value(_field(record, path)) and path not in evidence:
             errors.append(f"{path}: has a value but no evidence; cite the JD text it came from, or use null")
