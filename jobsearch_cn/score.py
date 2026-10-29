@@ -26,7 +26,8 @@ SCHEMA_VERSION = 1
 # keeps the old wording until it is scored again (docs/cn/match.md, 匹配记录).
 # 2: new same_as synonyms 大模型 / LLM / 大语言模型, 提示词工程 / Prompt, Photoshop / PS (H18).
 # 3: skills the JD offers a choice between count as one requirement (H16).
-RULES_VERSION = 3
+# 4: the filter checks the interview and the start date; their unknowns are gaps to confirm (M2-6c).
+RULES_VERSION = 4
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary
 DEFAULT_WEIGHTS = {"skills": 35, "direction": 30, "experience": 25, "salary": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.

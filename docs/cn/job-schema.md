@@ -43,8 +43,10 @@ python -m jobsearch_cn jd validate job.json
     "min_months": 3,
     "education": {"min": "bachelor", "preferred": "master"},
     "skills": ["Python", "LangChain", "RAG"],
-    "skill_alternatives": []
+    "skill_alternatives": [],
+    "start": {"by": null, "asap": true}
   },
+  "interview": {"mode": "either", "cities": ["广州"]},
   "return_offer": true,
   "published_at": null,
   "deadline": null,
@@ -60,10 +62,12 @@ python -m jobsearch_cn jd validate job.json
     "requirements.min_months": {"text": "实习3个月以上", "method": "rule"},
     "requirements.education": {"text": ["本科及以上", "硕士优先"], "method": "rule"},
     "requirements.skills": {"text": "熟悉Python，了解LangChain、RAG", "method": "agent"},
+    "requirements.start": {"text": "能尽快到岗", "method": "rule"},
+    "interview": {"text": ["面试地点：广州", "也可视频面试"], "method": "rule"},
     "return_offer": {"text": "表现优秀者可转正", "method": "rule"}
   },
   "guard": {"verdict": "clean", "counts": {}},
-  "raw_text": "AI Agent开发实习生\n示例智能科技（广州）有限公司 · 广州\n薪资：200-300元/天\n\n岗位职责：\n1. 参与基于大模型的 AI Agent 应用开发与评测；\n2. 负责 RAG 检索链路的搭建与优化。\n\n任职要求：\n1. 2027届本科及以上在读，计算机相关专业，硕士优先；\n2. 熟悉Python，了解LangChain、RAG；\n3. 每周至少到岗4天，实习3个月以上；\n4. 表现优秀者可转正。\n\n工作地点：广州天河区"
+  "raw_text": "AI Agent开发实习生\n示例智能科技（广州）有限公司 · 广州\n薪资：200-300元/天\n\n岗位职责：\n1. 参与基于大模型的 AI Agent 应用开发与评测；\n2. 负责 RAG 检索链路的搭建与优化。\n\n任职要求：\n1. 2027届本科及以上在读，计算机相关专业，硕士优先；\n2. 熟悉Python，了解LangChain、RAG；\n3. 每周至少到岗4天，实习3个月以上，能尽快到岗；\n4. 表现优秀者可转正。\n\n工作地点：广州天河区\n面试地点：广州，也可视频面试"
 }
 ```
 
