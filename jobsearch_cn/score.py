@@ -55,6 +55,13 @@ def _digest(data) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def stale(record: dict, job, digest: str) -> bool:
+    """The job or the profile (its profile_hash is `digest`) changed since scoring, the job is gone,
+    or other rules scored it: score it again."""
+    return (job is None or record.get("job_hash") != job_hash(job)
+            or record.get("profile_hash") != digest or record.get("rules_version") != RULES_VERSION)
+
+
 def score_job(job: dict, profile: dict, vocabulary, previous=None, now=None) -> dict:
     """The match record for a job: the rule part, and the agent part of `previous` if neither side changed."""
     rules = rule_part(job, profile, vocabulary)

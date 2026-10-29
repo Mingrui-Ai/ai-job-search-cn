@@ -1,0 +1,294 @@
+"""Tests for match report (M2-6a; jobsearch_cn/report.py, docs/cn/match.md 评分报告).
+
+The report is only useful if what it shows is what was saved, so these build
+real records the way the scoring workflow does - sample JDs and the sample
+tech profile, two of them with the experience an agent added in M2-4c - run
+match report through the CLI, and check each job's section against match show
+and the ranking against match list. Then the feedback form (BOM, CRLF, commas
+and quotes, a JD title that looks like a formula), no contact details in
+either file, stale records, a page that loads nothing from outside and
+escapes the JD, the "how to settle it" for what is still open, and that the
+command only reads.
+"""
+import copy
+import csv
+import html
+import io
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+FIXTURES = REPO / "tests" / "fixtures" / "cn"
+JUDGMENTS = FIXTURES / "match-m2-4c" / "agent-judgments.json"
+# Eligible, needs_check, and two ineligible; the first two get the agent's experience.
+SAMPLES = ("jd/boss_intern.txt", "jd/nowcoder_campus.txt", "jd/official_site.txt", "jd/experienced_hire.txt")
+COMPLETED = ("jd/boss_intern.txt", "jd/nowcoder_campus.txt")
+
+sys.path.insert(0, str(REPO))
+from jobsearch_cn import cli, report, score  # noqa: E402
+
+NOW = datetime(2026, 10, 29, 9, 30, tzinfo=timezone(timedelta(hours=8)))
+
+
+def run_cli(*args, data_dir):
+    env = dict(os.environ, PYTHONIOENCODING="utf-8", JOBSEARCH_CN_DATA_DIR=str(data_dir))
+    return subprocess.run([sys.executable, "-m", "jobsearch_cn", *args], cwd=REPO, env=env, capture_output=True)
+
+
+def experience_for(sample: str) -> dict:
+    judgments = json.loads(JUDGMENTS.read_text(encoding="utf-8"))["judgments"]
+    return next(j["experience"] for j in judgments if (j["sample"], j["profile"]) == (sample, "tech"))
+
+
+class ReportFromSavedRecords(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.data = Path(directory.name)
+        shutil.copytree(FIXTURES / "profile" / "tech", self.data / "profile")
+        self.profile = json.loads((self.data / "profile" / "profile.json").read_text(encoding="utf-8"))
+        self.ids = {}
+        for sample in SAMPLES:
+            job_id = self.cli("jd", "parse", str(FIXTURES / sample), "--save")["saved"][0]["id"]
+            self.ids[sample] = job_id
+            record = self.cli("match", "score", job_id, "--save")
+            if sample in COMPLETED:
+                record["dimensions"]["experience"].update(experience_for(sample))
+                record["total"] = score.total(record["dimensions"], record["weights"], record["filter"]["verdict"])
+                draft = self.data / "draft.json"
+                draft.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+                self.assertEqual(self.cli("match", "save", str(draft))["saved"], "updated")
+
+    def cli(self, *args, expect=0):
+        proc = run_cli(*args, data_dir=self.data)
+        self.assertEqual(proc.returncode, expect, proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8", "replace"))
+        return json.loads(proc.stdout) if proc.stdout.strip() else json.loads(proc.stderr or "{}")
+
+    def generate(self, *ids):
+        result = self.cli("match", "report", *ids)
+        page = Path(result["report"]).read_text(encoding="utf-8")
+        form = Path(result["feedback"]).read_bytes()
+        return result, page, form
+
+    @staticmethod
+    def section(page: str, job_id: str) -> str:
+        start = page.index(f'<section id="{job_id}">')
+        return page[start:page.index("</section>", start)]
+
+    def test_each_section_matches_match_show(self):
+        result, page, _ = self.generate()
+        self.assertEqual(result["jobs"], len(SAMPLES))
+        self.assertEqual(result["stale"], [])
+        names = report._experience_names(self.profile)
+        for sample, job_id in self.ids.items():
+            with self.subTest(sample=sample):
+                record, part = self.cli("match", "show", job_id), self.section(page, job_id)
+                text = html.unescape(part)
+                hard = html.unescape(part[part.index("<h3>硬性条件</h3>"):part.index("<h3>各维度</h3>")])
+                dims = part[part.index("<h3>各维度</h3>"):part.index("<h3>总分怎么算</h3>")]
+                total = record["total"]
+                self.assertIn(report.conclusion(record), text)
+                self.assertIn(f"四舍五入为 <strong>{total['score']}</strong>", part)
+                for check in record["filter"]["checks"]:
+                    self.assertIn(check["reason"], hard)
+                    self.assertIn(report.RESULTS[check["result"]], hard)
+                    for field in check["jd"].values():
+                        for quote in [field["evidence"]] if isinstance(field["evidence"], str) else field["evidence"] or []:
+                            self.assertIn(quote, hard)
+                for key, dimension in record["dimensions"].items():
+                    shown = "—" if dimension["score"] is None else dimension["score"]
+                    self.assertIn(f"<td>{report.DIMENSIONS[key]}</td><td class=\"num\">{shown}</td>", dims)
+                    self.assertIn(dimension["reason"], html.unescape(dims))
+                    for skill in dimension.get("missing") or []:
+                        self.assertIn(skill, html.unescape(dims))
+                    evidence = dimension.get("evidence") or {}
+                    for quote in evidence.get("jd") or []:
+                        self.assertIn(quote, html.unescape(dims))
+                    for ref in evidence.get("profile") or []:
+                        self.assertIn(names[ref], html.unescape(dims))
+                gaps = html.unescape(part[part.index("<h3>缺口</h3>"):part.index("<h3>待确认</h3>")])
+                for gap in record["gaps"]:
+                    self.assertIn(gap["reason"] if gap["kind"] == "filter" else gap["item"], gaps)
+                    if gap["jd"]:
+                        self.assertIn(gap["jd"], gaps)
+                if not record["gaps"]:
+                    self.assertIn("没有列出的缺口", gaps)
+                opened = html.unescape(part[part.index("<h3>待确认</h3>"):])
+                for check in record["filter"]["checks"]:
+                    if check["result"] == "unknown":
+                        self.assertIn(check["reason"], opened)
+                for key in total["missing"]:
+                    self.assertIn(f"{report.DIMENSIONS[key]}维度", opened)
+                if sample in COMPLETED:
+                    self.assertEqual(record["dimensions"]["experience"]["method"], "agent")
+                    self.assertIn("<td>Agent</td>", part)
+
+    def test_the_working_gives_the_saved_total(self):
+        for job_id in self.ids.values():
+            record = self.cli("match", "show", job_id)
+            _, numerator, denominator = report.working(record)
+            self.assertEqual(score._round(numerator / denominator), record["total"]["score"])
+
+    def test_the_ranking_is_match_list_order(self):
+        _, page, form = self.generate()
+        listed = [row["job_id"] for row in self.cli("match", "list")["matches"]]
+        ranking = page[page.index('id="ranking"'):page.index("<section")]
+        self.assertEqual(re.findall(r'href="#(job_[0-9a-f]+)"', ranking), listed)
+        rows = list(csv.reader(io.StringIO(form.decode("utf-8-sig"))))
+        self.assertEqual([row[0] for row in rows[1:]], listed)
+        self.assertEqual(re.findall(r'<section id="(job_[0-9a-f]+)">', page), listed)
+
+    def test_the_feedback_form(self):
+        _, _, form = self.generate()
+        self.assertTrue(form.startswith(b"\xef\xbb\xbf"), "UTF-8 with a BOM, so Excel and WPS read it")
+        self.assertNotIn(b"\xef\xbb\xbf", form[3:])
+        text = form[3:].decode("utf-8")
+        self.assertEqual(text.count("\r\n"), len(SAMPLES) + 1)
+        self.assertNotIn("\n", text.replace("\r\n", ""))
+        header, *rows = csv.reader(io.StringIO(text))
+        self.assertEqual(tuple(header), report.FEEDBACK_HEADER)
+        for row in rows:
+            record = self.cli("match", "show", row[0])
+            job = self.cli("jd", "show", row[0])
+            self.assertEqual(row[1:3], [job["title"] or "", job["company"] or ""])
+            self.assertEqual(row[3], report.grade_text(record["total"]["grade"]))
+            self.assertEqual(row[4], str(record["total"]["score"]))
+            self.assertEqual(row[5], report.conclusion(record))
+            self.assertEqual(row[6:], ["", "", ""])
+
+    def test_no_contact_details(self):
+        _, page, form = self.generate()
+        contact = self.profile["contact"]
+        for value in (contact["name"], contact["phone"], contact["email"], contact["github"]):
+            with self.subTest(value=value):
+                self.assertNotIn(value, page)
+                self.assertNotIn(value, form.decode("utf-8-sig"))
+
+    def test_a_changed_profile_marks_every_record_stale(self):
+        changed = copy.deepcopy(self.profile)
+        changed["availability"]["days_per_week"] = 3
+        (self.data / "profile" / "profile.json").write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+        result, page, form = self.generate()
+        self.assertEqual(sorted(result["stale"]), sorted(self.ids.values()))
+        self.assertIn("条记录已过期", page)
+        for row in list(csv.reader(io.StringIO(form.decode("utf-8-sig"))))[1:]:
+            self.assertTrue(row[5].startswith("已过期，先重新评分。"))
+
+    def test_named_jobs_only(self):
+        job_id = self.ids["jd/official_site.txt"]
+        result, page, _ = self.generate(job_id, job_id)
+        self.assertEqual(result["jobs"], 1)
+        self.assertEqual(re.findall(r'<section id="(job_[0-9a-f]+)">', page), [job_id])
+
+    def test_the_page_loads_nothing_from_outside(self):
+        _, page, _ = self.generate()
+        for pattern in ("<script", "<link", "<img", "<iframe", "src=", "url(", "@import"):
+            self.assertNotIn(pattern, page.lower())
+        self.assertTrue(all(href.startswith("#") for href in re.findall(r'href="([^"]*)"', page)))
+
+    def test_it_only_reads(self):
+        def snapshot():
+            return {path: path.read_bytes() for path in sorted(self.data.rglob("*"))
+                    if path.is_file() and "reports" not in path.relative_to(self.data).parts}
+
+        before = snapshot()
+        self.generate()
+        self.assertEqual(snapshot(), before)
+
+    def test_each_report_gets_its_own_directory(self):
+        first, second = self.cli("match", "report"), self.cli("match", "report")
+        self.assertNotEqual(Path(first["report"]).parent, Path(second["report"]).parent)
+        self.assertEqual(Path(first["report"]).parent.parent, self.data / "reports")
+        with tempfile.TemporaryDirectory() as root:
+            made = [cli._report_dir(Path(root), NOW) for _ in range(3)]
+        self.assertEqual([path.name for path in made], ["20261029-093000", "20261029-093000-2", "20261029-093000-3"])
+
+    def test_errors(self):
+        self.cli("match", "report", "job_000000000000", expect=1)
+        self.cli("match", "report", "not-an-id", expect=2)
+        shutil.rmtree(self.data / "matches")
+        self.assertIn("no saved match records", self.cli("match", "report", expect=1)["error"])
+
+
+class FormAndPage(unittest.TestCase):
+    """report.py on hand-made records: CSV escaping, HTML escaping, how what is open gets settled."""
+
+    @staticmethod
+    def record(**changes) -> dict:
+        record = {
+            "job_id": "job_0123456789ab",
+            "filter": {"verdict": "eligible", "checks": []},
+            "dimensions": {key: {"score": 50, "method": "rule", "reason": "r"} for key in score.DIMENSIONS},
+            "weights": dict(score.DEFAULT_WEIGHTS),
+            "total": {"score": 50, "grade": "moderate", "complete": True, "missing": []},
+            "gaps": [],
+        }
+        record.update(changes)
+        return record
+
+    def test_commas_quotes_and_line_breaks_round_trip(self):
+        job = {"title": '数据分析实习生, "急招"\n可转正', "company": "示例,公司"}
+        text = report.feedback_csv([report.entry(self.record(), job, False)])
+        [_, row] = list(csv.reader(io.StringIO(text.lstrip("﻿"))))
+        self.assertEqual(row[1:3], [job["title"], job["company"]])
+        self.assertIn('"数据分析实习生, ""急招""\n可转正"', text)
+
+    def test_a_title_that_looks_like_a_formula_stays_text(self):
+        for title in ("=HYPERLINK(\"x\")", "+1", "-1", "@SUM(A1)"):
+            with self.subTest(title=title):
+                text = report.feedback_csv([report.entry(self.record(), {"title": title, "company": None}, False)])
+                [_, row] = list(csv.reader(io.StringIO(text.lstrip("﻿"))))
+                self.assertEqual(row[1], "'" + title)
+
+    def test_jd_text_is_escaped(self):
+        job = {"title": "<script>alert(1)</script>", "company": "A&B"}
+        page = report.build([report.entry(self.record(), job, False)], {}, "2026-10-29T09:30:00+08:00")
+        self.assertNotIn("<script>alert", page)
+        self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
+        self.assertIn("A&amp;B", page)
+
+    def test_how_to_settle_what_is_open(self):
+        checks = [
+            {"check": "graduation", "result": "unknown", "reason": "JD 没写届别；你是 2027 届"},
+            {"check": "days_per_week", "result": "unknown", "reason": "JD 要求每周到岗 4 天；档案没写每周能到岗几天"},
+            {"check": "min_months", "result": "unknown", "reason": "JD 没写实习时长要求；档案没写能实习几个月"},
+            {"check": "education", "result": "match", "reason": "最高学历硕士，满足本科及以上"},
+        ]
+        dimensions = {key: {"score": None, "method": "rule", "reason": "r"} for key in score.DIMENSIONS}
+        record = self.record(filter={"verdict": "needs_check", "checks": checks}, dimensions=dimensions,
+                             total={"score": None, "grade": None, "complete": False, "missing": list(score.DIMENSIONS)})
+        job = {"salary": {"min": None, "max": None, "unit": None, "negotiable": True}}
+        profile = {"experience": [{"id": "exp-1"}], "target": {"directions": [], "salary_min": None}}
+        how = {item: settle for item, _, settle in report.pending(record, job, profile)}
+        self.assertEqual(how, {
+            "届别": report.ASK_JD,
+            "每周到岗": report.FILL_PROFILE,
+            "实习时长": f"{report.ASK_JD}；{report.FILL_PROFILE}",
+            "技能维度": report.ASK_JD,
+            "方向维度": report.FILL_PROFILE,
+            "经历维度": report.ASK_AGENT,
+            "薪资维度": "问 HR 薪资范围",
+        })
+        unit = {"salary": {"min": 5000, "max": 8000, "unit": "CNY/month", "negotiable": False}}
+        wanted = {"target": {"salary_min": {"amount": 150, "unit": "CNY/day"}}}
+        self.assertIn("单位", report._settle("salary", unit, wanted))
+        self.assertEqual(report._settle("salary", unit, {"target": {}}), report.FILL_PROFILE)
+
+    def test_conclusions(self):
+        conflict = {"check": "location", "result": "conflict", "reason": "x"}
+        ineligible = self.record(filter={"verdict": "ineligible", "checks": [conflict]},
+                                 total={"score": 46, "grade": "ineligible", "complete": False, "missing": ["salary"]})
+        self.assertEqual(report.conclusion(ineligible), "不符合硬性条件（冲突：地点），各维度加权 46 分，仅供参考；缺薪资维度")
+        self.assertEqual(report.conclusion(self.record(), stale=True), "已过期，先重新评分。符合硬性条件，一般（moderate），总分 50 分")
+
+
+if __name__ == "__main__":
+    unittest.main()

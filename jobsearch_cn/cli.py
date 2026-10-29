@@ -10,9 +10,10 @@ import argparse
 import codecs
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import __version__, jd_parser, match, profile, resume_extract, schema, score, store, vocab
+from jobsearch_cn import __version__, jd_parser, match, profile, report, resume_extract, schema, score, store, vocab
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -392,11 +393,74 @@ def cmd_match_list(args) -> int:
             "complete": total.get("complete"),
             "verdict": (record.get("filter") or {}).get("verdict"),
             # Stale: the job or the profile changed since scoring (or the job is gone); score it again.
-            "stale": (job is None or record.get("job_hash") != score.job_hash(job)
-                      or record.get("profile_hash") != digest or record.get("rules_version") != score.RULES_VERSION),
+            "stale": score.stale(record, job, digest),
         })
     rows.sort(key=lambda row: score.list_key(row["grade"], row["score"], row["job_id"]))
     _emit({"matches": rows, "warnings": warnings})
+    return 0
+
+
+def _report_records(args, matches: store.MatchStore):
+    """(records, warnings) for match report: the named jobs' records, or every saved one; None if one is missing."""
+    if not args.ids:
+        records, warnings = matches.all()
+        kept = [r for r in records if isinstance(r, dict) and isinstance(r.get("job_id"), str)]
+        warnings += ["a match record without a job_id, skipped"] * (len(records) - len(kept))
+        return kept, warnings
+    records = []
+    for job_id in dict.fromkeys(args.ids):
+        try:
+            record = matches.get(job_id)
+        except store.StoreError as exc:
+            raise InputError(str(exc)) from None
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise InputError(f"the match record for {job_id} is unreadable: {exc}") from None
+        if record is None:
+            _emit({"error": f"no match record for {job_id}; run match score {job_id} --save"}, sys.stderr)
+            return None, None
+        records.append(record)
+    return records, []
+
+
+def _report_dir(root: Path, now) -> Path:
+    """<data dir>/reports/<date-time>/, a fresh directory even when two reports land in the same second."""
+    base = root / "reports" / now.strftime("%Y%m%d-%H%M%S")
+    path, suffix = base, 1
+    while path.exists():
+        suffix += 1
+        path = base.with_name(f"{base.name}-{suffix}")
+    path.mkdir(parents=True)
+    return path
+
+
+def cmd_match_report(args) -> int:
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    matches, job_store = _matches(args), _store(args)
+    records, warnings = _report_records(args, matches)
+    if records is None:
+        return 1
+    if not records:
+        _emit({"error": "no saved match records; run match score <id> --save first"}, sys.stderr)
+        return 1
+    digest, entries = score.profile_hash(data), []
+    for record in records:
+        try:
+            job = job_store.get(record["job_id"])
+        except store.StoreError:
+            job = None
+        entries.append(report.entry(record, job, score.stale(record, job, digest)))
+    entries = report.order(entries)
+    now = datetime.now().astimezone()
+    directory = _report_dir(store.data_dir(args.data_dir), now)
+    page, form = directory / "report.html", directory / "feedback.csv"
+    page.write_text(report.build(entries, data, now.isoformat(timespec="seconds")), encoding="utf-8", newline="\n")
+    # newline="": the form already ends its rows in CRLF, as Excel expects.
+    with open(form, "w", encoding="utf-8", newline="") as handle:
+        handle.write(report.feedback_csv(entries))
+    _emit({"report": str(page), "feedback": str(form), "jobs": len(entries),
+           "stale": [item["record"]["job_id"] for item in entries if item["stale"]], "warnings": warnings})
     return 0
 
 
@@ -535,6 +599,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     match_list.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     match_list.set_defaults(handler=cmd_match_list)
+
+    match_report = match_commands.add_parser(
+        "report", parents=[stored], help="把已保存的匹配记录生成可读的报告（HTML）和反馈表（CSV）",
+        description="读取已保存的匹配记录，写出 <数据目录>/reports/<日期时间>/report.html 和 feedback.csv，"
+                    "输出两个文件的路径。过期的记录会标出来。报告和反馈表都不含联系方式。",
+    )
+    match_report.add_argument("ids", nargs="*", metavar="id", help="岗位 id；省略时包括所有已保存的记录")
+    match_report.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    match_report.set_defaults(handler=cmd_match_report)
     return parser
 
 

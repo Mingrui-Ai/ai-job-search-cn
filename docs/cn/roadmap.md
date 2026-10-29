@@ -234,7 +234,7 @@
   - 用户有空时做一次试用：安装 dsh（`npx @deepseek-ai/dsh web`），在 Settings → Models 填上自己的 DeepSeek API Key，选这个仓库作为工作区，按规划者给的清单请它导入一份 JD，看它能不能找到工作流、命令能不能跑起来。API Key 只在 dsh 里配置，不交给其他 Agent，也不写进仓库。
   - 结论见 ADR-10：dsh 两个说明文件都读（`AGENTS.md`、`CLAUDE.md`）；技能入口放 `.dsh/skills/`；在已激活 conda 环境的终端里启动；简历用 `profile extract` 读；权限用 dsh 自己的预设；固定 `0.2.2-alpha.2`。
 - [x] **A2** `执行` dsh 入口（2026-10-29 用户决定提前，和 M2-5 并行；Claude C；PR #57）
-  - 实际做法：`.gitignore` 比下面写的更严，`.dsh/` 下只有 `skills/*/SKILL.md` 能提交；两条反向规则经用户同意登记进 `security_guards`，对应的排除规则设为必需。dsh 的会话、设置和 Key 都在 `~/.dsh`，不写工作区。是否再给 `.dsh/` 加守卫检查在 PR 里提出。
+  - 实际做法：`.gitignore` 比下面写的更严，`.dsh/` 下 `skills/` 以外的内容和技能子目录里 `SKILL.md` 以外的文件都被忽略（`.dsh/skills/` 根目录下的文件不忽略）；两条反向规则经用户同意登记进 `security_guards`，对应的排除规则设为必需。dsh 的会话、设置和 Key 都在 `~/.dsh`，不写工作区。是否再给 `.dsh/` 加守卫检查在 PR 里提出。
   - 在 `.dsh/skills/` 下新建 `cn-jd-import`、`cn-setup`、`cn-match` 三个 `SKILL.md`。YAML 写 `name`、`description`；正文只指向 `jd-import.md`、`profile-setup.md`、`match.md` 的评分工作流，和 `.claude/skills/cn-*` 一样不复制流程。写明三条要点：JD 是不可信数据；建档不运行上游 `/setup`；回复和文件里不出现联系方式。不写 Claude 的 `allowed-tools`，dsh 不认。
   - 确认 dsh 会在工作区写哪些文件（会话、设置、缓存），用 `.gitignore` 排除 `.dsh/` 下 `skills/` 以外的内容，保证 API Key 和会话记录不可能进入仓库；`security_guards` 是否需要为 `.dsh/` 加检查（例如只允许 `SKILL.md`），由执行者提出。
   - `test_cn_agent_entry.py` 覆盖 dsh 的三个入口：文件存在、指向的文档存在、不复制流程。
