@@ -3,7 +3,8 @@
 parse_text() splits pasted text into JDs, runs each one through the posting
 gate (jobsearch_cn/guard.py) and extracts the fields whose wording is regular
 enough for rules: salary, graduation year, days per week, internship length,
-education, return offer, employment type, cities, remote work, dates, a
+education, return offer, employment type, cities, remote work, dates, how the
+JD interviews and when it wants you to start, a
 labelled or headline title and company, and skills from the vocabulary - read
 from the body only, since the title names the job rather than asking for a
 skill, and only where the JD asks for them (not "无需 SQL", not "欢迎关注我们的
@@ -12,12 +13,16 @@ skill, and only where the JD asks for them (not "无需 SQL", not "欢迎关注�
 page with its link lines and "公司｜城市｜薪资｜N天/周｜N个月" tag line included. Every value
 cites the snippet it came from (method "rule"). What the rules cannot read
 with confidence stays null for an agent or the user to fill in and cite;
-nothing is guessed - a date without a year is left alone, a JD naming two
-internship lengths gets neither, and a city named only in passing prose, or as
-where the interview is, is not taken as the work location. Each record is
+nothing is guessed - a publication date or deadline without a year is left
+alone, a JD naming two internship lengths gets neither, and a city named only
+in passing prose, or as where the interview is, is not taken as the work
+location. A start date without a year ("11月1日前到岗") is the one exception:
+JDs almost never give the year, so it takes the year that puts the date
+nearest the JD's publication date, or the import date. Each record is
 validated against the schema before it is returned.
 """
 
+import calendar
 import hashlib
 import re
 from datetime import date, datetime
@@ -121,8 +126,44 @@ _LOCATION_LABEL = re.compile(
 # Where the rest of a location line turns to the interview: "工作地点：深圳；面试地点：北京".
 _INTERVIEW = re.compile(r"面试|笔试")
 _CITY_HEADLINE = re.compile(rf"^(?P<city>{_CITY.pattern})(?:[·・\-|丨/\s]|$)")
-_NO_REMOTE = re.compile(r"不(?:支持|可|能|接受)\s*远程")
-_REMOTE = re.compile(r"(?:可|支持|接受)\s*远程(?:办公|工作|实习)?|远程(?:办公|工作|实习)|居家办公|\bremote\b", re.I)
+# "支持远程面试" is about the interview, not the work.
+_NO_REMOTE = re.compile(r"不(?:支持|可|能|接受)\s*远程(?!\s*面)")
+_REMOTE = re.compile(r"(?:可|支持|接受)\s*远程(?!\s*面)(?:办公|工作|实习)?|远程(?:办公|工作|实习)|居家办公|\bremote\b", re.I)
+
+# The interview (M2-6c): online (线上、视频、电话面试), in person (现场、线下面试, "到公司面试"), or at a
+# place ("面试地点：北京", "面试可在杭州"). Both, with a word of choice in one line ("面试地点：北京，也可视频
+# 面试"), is the candidate's choice; both without one is some rounds in person.
+_ONLINE_WORD = r"(?:线上|视频|电话|远程|网络|在线)"
+_ONSITE_WORD = r"(?:现场|线下)"
+_PAIRED = r"\s*(?:或者?|/|／|和|及|与|、|\+|＋)\s*"
+_ONLINE_INTERVIEW = re.compile(rf"{_ONLINE_WORD}\s*(?:面试|面谈)|{_ONLINE_WORD}(?={_PAIRED}{_ONSITE_WORD}\s*(?:面试|面谈))"
+                               rf"|面试\s*(?:方式|形式|地点)\s*[:：为是]?\s*{_ONLINE_WORD}")
+_ONSITE_INTERVIEW = re.compile(rf"(?:{_ONSITE_WORD}|当面|到场)\s*(?:面试|面谈)|(?:到|来)\s*公司\s*(?:面试|面谈)"
+                               rf"|{_ONSITE_WORD}(?={_PAIRED}{_ONLINE_WORD}\s*(?:面试|面谈))"
+                               rf"|面试\s*(?:方式|形式)\s*[:：为是]?\s*{_ONSITE_WORD}")
+_INTERVIEW_PLACE = re.compile(
+    rf"面试\s*(?:地点|城市|地址)\s*[:：]\s*(?!{_ONLINE_WORD})[^\n，,。；;（(]{{0,40}}"
+    rf"|面试\s*(?:可|将|需|须)?\s*(?:在|于)\s*(?:{_CITY.pattern})"
+    rf"|(?:在|到|去)\s*(?:{_CITY.pattern})\s*(?:现场|线下)?\s*(?:面试|面谈)"
+    rf"|(?:现场|线下)\s*面试\s*[（(]\s*(?:{_CITY.pattern})"
+)
+_INTERVIEW_CHOICE = re.compile(r"也可|亦可|或者|或|可选|均可|任选|自选")
+# Interviews that are the job's own work, not the candidate's: "协助组织现场面试". "面试安排：" is a label.
+_INTERVIEW_DUTY = re.compile(r"负责|协助|组织|跟进|对接|邀约|筛选|(?<!面试)安排")
+
+# When to start (M2-6c): as soon as possible, or by a date - "11月1日前到岗", "2027年7月入职",
+# "入职时间：11月底前". A month alone is its last day. A start from a date on ("11月1日后到岗",
+# "11月起") is no deadline, "11月前" alone could mean October or November, and a date the JD only
+# prefers ("…前到岗者优先") is no requirement: none of these is read.
+_START_WORD = r"(?:到岗|入职|报到|上岗)"
+_START_ASAP = re.compile(rf"(?:尽快|尽早|立即|立刻|马上|随时)\s*(?:能|可以?)?\s*{_START_WORD}"
+                         rf"|{_START_WORD}\s*(?:时间|日期)\s*[:：]?\s*(?:尽快|越快越好|随时)")
+_START_DATE = r"(?:(?P<y>20\d{2})\s*年\s*)?(?P<m>\d{1,2})\s*月(?:\s*(?P<d>\d{1,2})\s*[日号]|\s*份)?\s*(?P<end>底|末)?"
+_START_BY = (
+    re.compile(rf"{_START_DATE}\s*(?P<before>之前|以前|前)?\s*(?:须|需要?|能|可以?)?\s*{_START_WORD}"),
+    re.compile(rf"{_START_WORD}\s*(?:时间|日期)\s*[:：]\s*(?:为\s*)?{_START_DATE}\s*(?P<before>之前|以前|前)?"
+               r"(?!\s*(?:\d|之后|以后|后|起))"),
+)
 
 _YMD = r"(?P<y>20\d{2})\s*[-/.年]\s*(?P<m>\d{1,2})\s*[-/.月]\s*(?P<d>\d{1,2})\s*日?"
 _PUBLISHED = re.compile(rf"(?:发布时间|发布日期|发布于|更新时间|更新于)\s*[:：]?\s*{_YMD}")
@@ -294,6 +335,9 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
     headline = _line_at(text, title_span[0]) if title_span else (lines[0] if lines else "")
     tag, piped = _tag_cells(lines, headline if title_span else None)
     hits = _skill_hits(text, skill_patterns or _builtin_patterns(), skip=title_span)
+    published = _dated(text, (_PUBLISHED,))
+    # A start date without a year is dated from the JD's own publication date, else the import date.
+    reference = date.fromisoformat(published[0] or imported_at[:10])
     record = {
         "schema_version": schema.SCHEMA_VERSION,
         "id": job_id(text),
@@ -311,9 +355,11 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
             "education": cite("requirements.education", _education(text, tag)),
             "skills": cite("requirements.skills", _skills(text, hits)) or [],
             "skill_alternatives": cite("requirements.skill_alternatives", _alternatives(text, hits)) or [],
+            "start": cite("requirements.start", _start(text, reference)),
         },
+        "interview": cite("interview", _interview(text)),
         "return_offer": cite("return_offer", _return_offer(text)),
-        "published_at": cite("published_at", _dated(text, (_PUBLISHED,))),
+        "published_at": cite("published_at", published),
         "deadline": cite("deadline", _dated(text, (_DEADLINE_AFTER, _DEADLINE_BEFORE), same_line=True)),
         "status": "new",
         "evidence": evidence,
@@ -518,6 +564,86 @@ def _remote(text: str):
         return False, [match.group(0)]
     match = _REMOTE.search(text)
     return (True, [match.group(0)]) if match else _NOTHING
+
+
+def _interview(text: str):
+    """How the JD interviews: online, in person (and where), either at the candidate's choice, or a mix."""
+    mentions = []  # (kind, match, cities)
+    for kind, pattern in (("online", _ONLINE_INTERVIEW), ("onsite", _ONSITE_INTERVIEW), ("onsite", _INTERVIEW_PLACE)):
+        for match in pattern.finditer(text):
+            left, _ = _clause_bounds(text, match.start(), match.end())
+            if _NEGATION.search(text, left, match.start()) or _INTERVIEW_DUTY.search(text, left, match.start()):
+                continue
+            mentions.append((kind, match, _CITY.findall(match.group(0)) if pattern is _INTERVIEW_PLACE else []))
+    if not mentions:
+        return _NOTHING
+    kinds = {kind for kind, _, _ in mentions}
+    mode = kinds.pop() if len(kinds) == 1 else "either" if _offers_a_choice(text, mentions) else "mixed"
+    cities = list(dict.fromkeys(city for _, _, found in mentions for city in found))
+    snippets = [_clause(text, match.start(), match.end()) for _, match, _ in sorted(mentions, key=lambda m: m[1].start())]
+    return {"mode": mode, "cities": cities}, list(dict.fromkeys(snippets))
+
+
+def _offers_a_choice(text: str, mentions: list) -> bool:
+    """Whether one line names both kinds with a word of choice from the first to the end of the last one's clause."""
+    lines = {}
+    for kind, match, _ in mentions:
+        lines.setdefault(text.count("\n", 0, match.start()), []).append((kind, match))
+    for found in lines.values():
+        if {kind for kind, _ in found} == {"online", "onsite"}:
+            start = min(match.start() for _, match in found)
+            last = max((match for _, match in found), key=lambda match: match.end())
+            if _INTERVIEW_CHOICE.search(text, start, _clause_bounds(text, last.start(), last.end())[1]):
+                return True
+    return False
+
+
+def _start(text: str, reference: date):
+    """When the JD wants you to start: by a date, as soon as possible, or both. Two different dates: neither."""
+    asap, dates = [], {}
+    for match in _START_ASAP.finditer(text):
+        left, _ = _clause_bounds(text, match.start(), match.end())
+        if not _NEGATION.search(text, left, match.start()):
+            asap.append(_clause(text, match.start(), match.end()))
+    for pattern in _START_BY:
+        for match in pattern.finditer(text):
+            left, right = _clause_bounds(text, match.start(), match.end())
+            if _NEGATION.search(text, left, match.start()) or _PREFERENCE.search(text, left, right):
+                continue
+            by = _start_by(match, reference)
+            if by:
+                dates.setdefault(by, _clause(text, match.start(), match.end()))
+    if len(dates) > 1:
+        dates = {}
+    if not dates and not asap:
+        return _NOTHING
+    return {"by": next(iter(dates), None), "asap": bool(asap)}, list(dict.fromkeys([*dates.values(), *asap]))
+
+
+def _start_by(match, reference: date):
+    """The date a start-by match names; a month is its last day. Without a year, the one nearest the reference."""
+    month, day = int(match["m"]), int(match["d"]) if match["d"] else None
+    if not 1 <= month <= 12 or (day is None and match["before"] and not match["end"]):
+        return None  # "11月前到岗": before November, or by its end?
+    year = int(match["y"]) if match["y"] else _nearest_year(month, 15 if day is None else day, reference)
+    try:
+        return date(year, month, calendar.monthrange(year, month)[1] if day is None else day).isoformat()
+    except ValueError:
+        return None
+
+
+def _nearest_year(month: int, day: int, reference: date) -> int:
+    """The year that puts a month and day nearest the reference date; the later one on a tie."""
+    best = None
+    for year in (reference.year - 1, reference.year, reference.year + 1):
+        try:
+            when = date(year, month, day)
+        except ValueError:  # 29 February
+            continue
+        key = (abs((when - reference).days), when < reference)
+        if best is None or key < best[0]:
+            best = (key, year)
+    return best[1] if best else reference.year
 
 
 def _employment_type(text: str, headline: str):

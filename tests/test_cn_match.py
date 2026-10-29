@@ -276,6 +276,62 @@ class Exclusions(CheckCase):
         self.assert_result(UNKNOWN, job=setting(self.job, "title", None))
 
 
+class Interview(CheckCase):
+    check = "interview"  # tech wants 深圳 or 广州
+
+    def held(self, mode, cities=()):
+        return setting(self.job, "interview", {"mode": mode, "cities": list(cities)})
+
+    def test_online_or_your_choice_costs_nothing(self):
+        for mode, cities in (("online", ()), ("either", ()), ("either", ("北京",))):
+            with self.subTest(mode=mode, cities=cities):
+                self.assertNotIn("note", self.assert_result(MATCH, job=self.held(mode, cities)))
+
+    def test_in_person_in_a_city_you_want(self):
+        self.assertNotIn("note", self.assert_result(MATCH, job=self.held("onsite", ["深圳市"])))
+
+    def test_in_person_elsewhere_matches_with_the_cost_noted(self):
+        for mode in ("onsite", "mixed"):
+            with self.subTest(mode=mode):
+                item = self.assert_result(MATCH, job=self.held(mode, ["北京", "深圳"]))
+                self.assertEqual(item["note"], "要去北京面试，有路费和时间成本")
+        item = self.assert_result(MATCH, job=self.held("onsite", ["北京"]),
+                                  profile=setting(self.profile, "availability.cities", []))
+        self.assertEqual(item["note"], "档案没写意向城市，看去北京面试要不要出行")
+
+    def test_unknown_when_the_jd_is_silent_or_names_no_place(self):
+        self.assert_unknown_reasons(
+            (setting(self.job, "interview", None), self.profile, "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试"),
+            (self.held("onsite"), self.profile, "JD 要现场面试，没写在哪里；需要确认面试地点"),
+            (self.held("mixed"), self.profile, "JD 有一轮要现场面试，没写在哪里；需要确认面试地点"),
+        )
+
+
+class StartDate(CheckCase):
+    check = "start_date"  # tech can start on 2026-11-15
+
+    def wants(self, by=None, asap=False):
+        return setting(self.job, "requirements.start", {"by": by, "asap": asap})
+
+    def test_a_date_you_can_make(self):
+        self.assert_result(MATCH, job=self.wants("2026-12-01"))
+        self.assert_result(MATCH, job=self.wants("2026-11-15", asap=True))  # on the very day
+
+    def test_a_date_you_cannot_make_is_a_conflict(self):
+        item = self.assert_result(CONFLICT, job=self.wants("2026-11-01"))
+        self.assertEqual(item["reason"], "JD 要求 2026-11-01 前到岗，你 2026-11-15 才能到岗")
+
+    def test_an_unknown_says_which_side_is_silent(self):
+        silent_job, silent_profile = setting(self.job, "requirements.start", None), setting(
+            self.profile, "availability.start_date", None)
+        self.assert_unknown_reasons(
+            (silent_job, self.profile, "JD 没写到岗时间；你 2026-11-15 可以到岗"),
+            (self.wants("2026-11-01"), silent_profile, "JD 要求 2026-11-01 前到岗；档案没写可到岗日期"),
+            (silent_job, silent_profile, "JD 没写到岗时间；档案没写可到岗日期"),
+            (self.wants(asap=True), self.profile, "JD 希望尽快到岗，没写具体日期；你 2026-11-15 可以到岗"),
+        )
+
+
 class Verdict(CheckCase):
     def test_any_conflict_rules_out(self):
         out = match.filter_job(setting(self.job, "employment_type", "experienced"), self.profile)
@@ -295,6 +351,16 @@ class Verdict(CheckCase):
         results = {c["check"]: c["result"] for c in out["checks"]}
         self.assertEqual((results["days_per_week"], results["min_months"]), (NOT_APPLICABLE, NOT_APPLICABLE))
         self.assertEqual(out["verdict"], "eligible")
+
+    def test_the_interview_and_start_date_count_only_when_they_conflict(self):
+        # Most JDs state neither: an unknown there is something to confirm, not a reason to hold a job back.
+        job = setting(setting(self.job, "interview", None), "requirements.start", None)
+        out = match.filter_job(job, self.profile)
+        results = {c["check"]: c["result"] for c in out["checks"]}
+        self.assertEqual((results["interview"], results["start_date"]), (UNKNOWN, UNKNOWN))
+        self.assertEqual(out["verdict"], "eligible")
+        job = setting(job, "requirements.start", {"by": "2026-11-01", "asap": False})
+        self.assertEqual(match.filter_job(job, self.profile)["verdict"], "ineligible")
 
     def test_an_empty_job_is_never_ruled_out(self):
         # Everything the parser could not read is unknown: the filter must not
@@ -319,7 +385,10 @@ class Verdict(CheckCase):
                 self.assertNotIn(value, text)
 
 
-G, E, D, M, L, T, X = match.CHECKS
+G, E, D, M, L, T, X, I, S = match.CHECKS
+# None of these samples says how it interviews or when to start, so the interview and the start
+# date are unknown for every pair - which leaves each verdict as it was (M2-6c).
+SILENT = {I: UNKNOWN, S: UNKNOWN}
 
 # (JD fixture, profile) -> verdict and every non-match check. Checked by hand (the 校招 and 社招
 # samples state no weekly days or internship length, so both are not_applicable for them):
@@ -372,7 +441,7 @@ class SampleTable(unittest.TestCase):
             with self.subTest(jd=jd, profile=name):
                 out = match.filter_job(job_from(jd), profile_from(name))
                 results = {c["check"]: c["result"] for c in out["checks"]}
-                self.assertEqual({k: v for k, v in results.items() if v != MATCH}, departures)
+                self.assertEqual({k: v for k, v in results.items() if v != MATCH}, {**SILENT, **departures})
                 self.assertEqual(out["verdict"], verdict)
 
 

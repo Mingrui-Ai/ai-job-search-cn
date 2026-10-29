@@ -8,8 +8,11 @@ like a match. The rule that matters most: a value either side leaves unstated
 is unknown, never a conflict - the parser leaves fields empty when it is
 unsure, and an empty field must not cost the user a job. The reason for an
 unknown names the side that is silent and says what the other side states, so
-the user knows whether to ask about the job or fill in the profile. Scoring
-and salary comparison are not here (M2-4); nothing is stored.
+the user knows whether to ask about the job or fill in the profile. The
+interview and the start date (M2-6c) are things to confirm more than
+conditions: most JDs state neither, so an unknown there leaves the verdict
+alone, and only a start date the user cannot make rules a job out. Scoring and
+salary comparison are not here (M2-4); nothing is stored.
 """
 
 from jobsearch_cn import schema
@@ -17,7 +20,10 @@ from jobsearch_cn import schema
 MATCH, CONFLICT, UNKNOWN, NOT_APPLICABLE = "match", "conflict", "unknown", "not_applicable"
 ELIGIBLE, NEEDS_CHECK, INELIGIBLE = "eligible", "needs_check", "ineligible"
 
-CHECKS = ("graduation", "education", "days_per_week", "min_months", "location", "employment_type", "exclusions")
+CHECKS = ("graduation", "education", "days_per_week", "min_months", "location", "employment_type", "exclusions",
+          "interview", "start_date")
+# Checks whose unknown is only something to confirm: it leaves the verdict alone.
+TO_CONFIRM = ("interview", "start_date")
 
 
 def filter_job(job: dict, profile: dict) -> dict:
@@ -32,8 +38,10 @@ def filter_job(job: dict, profile: dict) -> dict:
         _location(job, profile),
         _employment_type(job, profile),
         _exclusions(job, profile),
+        _interview(job, profile),
+        _start_date(job, profile),
     ]
-    outcomes = {r["result"] for r in results}
+    outcomes = {r["result"] for r in results if not (r["check"] in TO_CONFIRM and r["result"] == UNKNOWN)}
     verdict = INELIGIBLE if CONFLICT in outcomes else NEEDS_CHECK if UNKNOWN in outcomes else ELIGIBLE
     return {"job_id": job["id"], "title": job["title"], "company": job["company"],
             "verdict": verdict, "checks": results}
@@ -223,3 +231,45 @@ def _exclusions(job, profile):
     if unchecked:
         return _item("exclusions", UNKNOWN, f"JD 没写{'和'.join(unchecked)}，无法核对排除项", job, *fields, profile)
     return _item("exclusions", MATCH, "没有命中排除项", job, *fields, profile)
+
+
+def _interview(job, profile):
+    """Online, or in person in a city you want: a match. In person elsewhere: a match with a note of the cost."""
+    fields = ("interview",), ("availability.cities",)
+    interview = job["interview"]
+    if interview is None:
+        return _item("interview", UNKNOWN, "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试", job, *fields, profile)
+    mode, places = interview["mode"], interview["cities"]
+    where = "、".join(places)
+    if mode == "online":
+        return _item("interview", MATCH, "线上面试，不用出行", job, *fields, profile)
+    if mode == "either":
+        onsite = f"去{where}现场面试" if places else "现场面试"
+        return _item("interview", MATCH, f"可以线上面试，不用出行；也可以{onsite}", job, *fields, profile)
+    how = "有一轮要现场面试" if mode == "mixed" else "要现场面试"
+    if not places:
+        return _item("interview", UNKNOWN, f"JD {how}，没写在哪里；需要确认面试地点", job, *fields, profile)
+    wanted = {_city(c) for c in (profile.get("availability") or {}).get("cities") or []}
+    if not wanted:
+        return _item("interview", MATCH, f"{how}，在{where}", job, *fields, profile,
+                     note=f"档案没写意向城市，看去{where}面试要不要出行")
+    away = [c for c in places if _city(c) not in wanted]
+    if not away:
+        return _item("interview", MATCH, f"{how}，在{where}，在你的意向城市内", job, *fields, profile)
+    return _item("interview", MATCH, f"{how}，在{where}", job, *fields, profile,
+                 note=f"要去{'、'.join(away)}面试，有路费和时间成本")
+
+
+def _start_date(job, profile):
+    """A start-by date you can only reach later is a conflict; "as soon as possible" names no date to compare."""
+    fields = ("requirements.start",), ("availability.start_date",)
+    start = job["requirements"]["start"]
+    by, can = (start or {}).get("by"), _profile_field(profile, "availability.start_date")
+    if by and can:
+        if can <= by:
+            return _item("start_date", MATCH, f"JD 要求 {by} 前到岗，你 {can} 就能到岗", job, *fields, profile)
+        return _item("start_date", CONFLICT, f"JD 要求 {by} 前到岗，你 {can} 才能到岗", job, *fields, profile)
+    asked = (f"JD 要求 {by} 前到岗" if by else "JD 希望尽快到岗，没写具体日期" if start and start["asap"]
+             else "JD 没写到岗时间")
+    have = f"你 {can} 可以到岗" if can else "档案没写可到岗日期"
+    return _item("start_date", UNKNOWN, f"{asked}；{have}", job, *fields, profile)

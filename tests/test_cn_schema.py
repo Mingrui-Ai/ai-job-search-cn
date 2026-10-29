@@ -45,8 +45,9 @@ def minimal_record() -> dict:
         "salary": None,
         "requirements": {
             "graduation": None, "days_per_week": None, "min_months": None, "education": None, "skills": [],
-            "skill_alternatives": [],
+            "skill_alternatives": [], "start": None,
         },
+        "interview": None,
         "return_offer": None,
         "published_at": None,
         "deadline": None,
@@ -109,13 +110,15 @@ class DocumentedSchema(SchemaCase):
             ("requirements", schema.REQUIREMENT_KEYS),
             ("requirements.graduation", schema.GRADUATION_KEYS),
             ("requirements.education", schema.EDUCATION_KEYS),
+            ("requirements.start", schema.START_KEYS),
+            ("interview", schema.INTERVIEW_KEYS),
             ("guard", schema.GUARD_KEYS),
         ):
             names += [f"{prefix}.{key}" for key in keys]
         names += [
             *schema.SOURCE_TYPES, *schema.SITES, *schema.EMPLOYMENT_TYPES, *schema.SALARY_UNITS,
             *schema.EDUCATION_LEVELS, *schema.STATUSES, *schema.EVIDENCE_METHODS,
-            *schema.GUARD_VERDICTS, *schema.EVIDENCE_FIELDS,
+            *schema.GUARD_VERDICTS, *schema.EVIDENCE_FIELDS, *schema.INTERVIEW_MODES,
         ]
         missing = [name for name in names if f"`{name}`" not in text]
         self.assertEqual(missing, [], "docs/cn/job-schema.md is out of step with jobsearch_cn/schema.py")
@@ -300,6 +303,59 @@ class SkillAlternatives(SchemaCase):
         self.assert_error(record, "requirements.skill_alternatives: missing")
         self.assert_valid(schema.upgrade(record))
         self.assertEqual(schema.upgrade([1]), [1])  # not a record: left for validate to report
+
+
+class InterviewAndStart(SchemaCase):
+    """M2-6c: how the JD interviews, and when it wants you to start."""
+
+    def test_an_interview_online_in_person_or_both(self):
+        for mode, cities, text in (("online", [], "视频面试"), ("onsite", ["北京"], "面试地点：北京"),
+                                   ("either", ["北京"], "面试地点：北京，也可视频面试"), ("mixed", [], "一面视频，二面现场面试")):
+            with self.subTest(mode=mode):
+                self.assert_valid(self.cited("interview", {"mode": mode, "cities": cities}, text))
+
+    def test_an_interview_needs_a_known_mode_and_no_city_when_online(self):
+        for value, error in (({"mode": None, "cities": []}, "interview.mode: must be one of"),
+                             ({"mode": "video", "cities": []}, "interview.mode: must be one of"),
+                             ({"mode": "online", "cities": ["北京"]}, "interview.cities: an online interview has no city"),
+                             ({"mode": "onsite"}, "interview.cities: missing"),
+                             ("现场", "interview: must be null or an object")):
+            with self.subTest(value=value):
+                self.assert_error(self.cited("interview", value, "面试地点：北京"), error)
+
+    def test_each_interview_city_appears_in_the_evidence(self):
+        record = self.cited("interview", {"mode": "onsite", "cities": ["北京", "上海"]}, "面试地点：北京")
+        self.assert_error(record, "evidence.interview: '上海' does not appear in its evidence text")
+
+    def test_a_start_by_a_date_or_as_soon_as_possible(self):
+        for value, text in (({"by": "2026-11-01", "asap": False}, "11月1日前到岗"),
+                            ({"by": None, "asap": True}, "能尽快到岗"),
+                            ({"by": "2026-11-01", "asap": True}, "尽快到岗，最晚11月1日前到岗")):
+            with self.subTest(value=value):
+                self.assert_valid(self.cited("requirements.start", value, text))
+
+    def test_a_start_needs_a_date_or_haste(self):
+        for value, error in (({"by": None, "asap": False}, "requirements.start: use null"),
+                             ({"by": "2026-11-31", "asap": False}, "requirements.start.by: must be null or a date"),
+                             ({"by": "2026-11-01", "asap": None}, "requirements.start.asap: must be true or false"),
+                             ({"by": "2026-11-01"}, "requirements.start.asap: missing")):
+            with self.subTest(value=value):
+                self.assert_error(self.cited("requirements.start", value, "11月1日前到岗"), error)
+
+    def test_values_need_evidence(self):
+        record = with_value(minimal_record(), "requirements.start", {"by": None, "asap": True})
+        self.assert_error(record, "requirements.start: has a value but no evidence")
+        record = with_value(minimal_record(), "interview", {"mode": "online", "cities": []})
+        self.assert_error(record, "interview: has a value but no evidence")
+
+    def test_upgrade_adds_both_fields_to_an_older_record(self):
+        record = minimal_record()
+        del record["interview"], record["requirements"]["start"]
+        self.assert_error(record, "interview: missing")
+        self.assert_error(record, "requirements.start: missing")
+        upgraded = schema.upgrade(record)
+        self.assert_valid(upgraded)
+        self.assertEqual((upgraded["interview"], upgraded["requirements"]["start"]), (None, None))
 
 
 class Evidence(SchemaCase):

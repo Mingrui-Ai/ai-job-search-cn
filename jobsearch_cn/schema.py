@@ -20,7 +20,8 @@ Conventions:
   Whether a value was *derived* correctly from real text is the parser's
   tests' job, not this module's.
 * requirements.skill_alternatives joined v1 after records had been stored
-  (H16); upgrade() adds it, empty, to a record read back from the store.
+  (H16); upgrade() adds it, empty, to a record read back from the store. So did
+  interview and requirements.start (M2-6c), which upgrade() adds as null.
 """
 
 import math
@@ -46,17 +47,21 @@ NO_MINIMUM = "none"
 STATUSES = ("new", "skipped", "ranked", "expired", "unreachable")
 EVIDENCE_METHODS = ("rule", "agent", "user")
 GUARD_VERDICTS = ("clean", "warn")
+# Online only; in person only; either, the candidate's choice; mixed, some rounds in person.
+INTERVIEW_MODES = ("online", "onsite", "either", "mixed")
 
 TOP_LEVEL_KEYS = (
     "schema_version", "id", "source", "title", "company", "cities", "remote",
-    "employment_type", "salary", "requirements", "return_offer", "published_at",
+    "employment_type", "salary", "requirements", "interview", "return_offer", "published_at",
     "deadline", "status", "evidence", "guard", "raw_text",
 )
 SOURCE_KEYS = ("type", "site", "url", "imported_at")
 SALARY_KEYS = ("min", "max", "unit", "months", "negotiable")
-REQUIREMENT_KEYS = ("graduation", "days_per_week", "min_months", "education", "skills", "skill_alternatives")
+REQUIREMENT_KEYS = ("graduation", "days_per_week", "min_months", "education", "skills", "skill_alternatives", "start")
 GRADUATION_KEYS = ("years", "strict")
 EDUCATION_KEYS = ("min", "preferred")
+START_KEYS = ("by", "asap")
+INTERVIEW_KEYS = ("mode", "cities")
 EVIDENCE_KEYS = ("text", "method")
 GUARD_KEYS = ("verdict", "counts")
 
@@ -65,7 +70,8 @@ EVIDENCE_FIELDS = (
     "title", "company", "cities", "remote", "employment_type", "salary",
     "requirements.graduation", "requirements.days_per_week",
     "requirements.min_months", "requirements.education", "requirements.skills",
-    "requirements.skill_alternatives", "return_offer", "published_at", "deadline",
+    "requirements.skill_alternatives", "requirements.start", "interview", "return_offer", "published_at",
+    "deadline",
 )
 # List fields whose every item must appear in the field's own evidence.
 ITEMIZED_FIELDS = ("cities", "requirements.skills")
@@ -87,9 +93,12 @@ def normalize_for_match(text: str) -> str:
 
 def upgrade(record):
     """A stored record with the fields v1 gained since it was saved, empty; changed in place and returned."""
+    if isinstance(record, dict):
+        record.setdefault("interview", None)
     requirements = record.get("requirements") if isinstance(record, dict) else None
     if isinstance(requirements, dict):
         requirements.setdefault("skill_alternatives", [])
+        requirements.setdefault("start", None)
     return record
 
 
@@ -122,6 +131,8 @@ def validate(record) -> list[str]:
         _check_salary(record["salary"], errors)
     if "requirements" in record:
         _check_requirements(record["requirements"], errors)
+    if "interview" in record:
+        _check_interview(record["interview"], errors)
     for key in ("published_at", "deadline"):
         if key in record:
             _check_date(record[key], key, errors)
@@ -297,6 +308,40 @@ def _check_requirements(requirements, errors: list) -> None:
         _check_text_list(requirements["skills"], "requirements.skills", errors)
     if "skill_alternatives" in requirements:
         _check_alternatives(requirements, errors)
+    if "start" in requirements:
+        _check_start(requirements["start"], errors)
+
+
+def _check_start(start, errors: list) -> None:
+    """When the JD wants you to start: by a date, or as soon as possible."""
+    path = "requirements.start"
+    if start is None:
+        return
+    if not isinstance(start, dict):
+        errors.append(f"{path}: must be null or an object")
+        return
+    _check_keys(start, START_KEYS, path, errors)
+    if "by" in start:
+        _check_date(start["by"], f"{path}.by", errors)
+    if "asap" in start:
+        _check_bool(start["asap"], f"{path}.asap", errors, nullable=False)
+    if start.get("by") is None and start.get("asap") is False:
+        errors.append(f"{path}: use null when the JD names no start date and does not ask you to start soon")
+
+
+def _check_interview(interview, errors: list) -> None:
+    if interview is None:
+        return
+    if not isinstance(interview, dict):
+        errors.append("interview: must be null or an object")
+        return
+    _check_keys(interview, INTERVIEW_KEYS, "interview", errors)
+    if "mode" in interview:
+        _check_enum(interview["mode"], INTERVIEW_MODES, "interview.mode", errors, nullable=False)
+    if "cities" in interview:
+        _check_text_list(interview["cities"], "interview.cities", errors)
+        if interview.get("mode") == "online" and interview["cities"]:
+            errors.append("interview.cities: an online interview has no city; use [] or another mode")
 
 
 def _check_alternatives(requirements: dict, errors: list) -> None:
@@ -441,6 +486,11 @@ def _check_evidence(record: dict, errors: list) -> None:
                 if isinstance(group, list) and all(isinstance(item, str) for item in group) and not any(
                         all(normalize_for_match(item) in text for item in group) for text in folded):
                     errors.append(f"{where}: no snippet names all of {' / '.join(group)}")
+        if path == "interview" and isinstance(record.get("interview"), dict):
+            cities = record["interview"].get("cities")
+            for city in cities if isinstance(cities, list) else []:
+                if isinstance(city, str) and not any(normalize_for_match(city) in text for text in folded):
+                    errors.append(f"{where}: {city!r} does not appear in its evidence text")
     for path in EVIDENCE_FIELDS:
         if _has_value(_field(record, path)) and path not in evidence:
             errors.append(f"{path}: has a value but no evidence; cite the JD text it came from, or use null")
