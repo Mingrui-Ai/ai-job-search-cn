@@ -123,7 +123,7 @@ JD 让你在几个技能里选一个会就行时（"熟悉 Golang 或 Java""Pyth
 
 - 每组至少两个技能，组里的技能必须也在 `requirements.skills` 里；
 - 一个技能最多属于一组；
-- 出处写在 `evidence["requirements.skill_alternatives"]`，每组的技能必须一起出现在同一个出处片段里（例如"熟悉 Golang 或 Java"），证明选择是 JD 给的。
+- 出处写在 `evidence["requirements.skill_alternatives"]`，证明选择是 JD 给的：用到的每个片段都要含有这一组里至少两个技能，这些片段合起来要把整组连成一个选择。一个片段含有整组（"熟悉 Golang 或 Java"）就够了；JD 分两处写、有共同技能的（"熟悉 Python 或 Java""熟悉 Java 或 Go"，合成一组 `["Python", "Java", "Go"]`），两个片段都写上。只出现在"熟悉 Golang""了解 Docker"这类各自的片段里不算。
 
 评分时一组算一项要求，见 [match.md](match.md#维度)。规则怎么读出这些组，见 [jd-parse.md](jd-parse.md#规则能识别什么)；规则没读出、或者读错的，Agent 按原文补或改，`method` 写 `agent`。
 
@@ -138,7 +138,7 @@ JD 让你在几个技能里选一个会就行时（"熟悉 Golang 或 Java""Pyth
 
 1. 下列字段只要有值（不是 null，也不是 `[]`），就必须有对应的出处：`title`、`company`、`cities`、`remote`、`employment_type`、`salary`、`requirements.graduation`、`requirements.days_per_week`、`requirements.min_months`、`requirements.education`、`requirements.skills`、`requirements.skill_alternatives`、`return_offer`、`published_at`、`deadline`。
 2. `rule` 和 `agent` 给出的每个片段都必须真实出现在 `raw_text` 中。比较前会统一全角/半角和大小写，并去掉空白和零宽字符，所以复制时多出的换行、空格不影响匹配。
-3. 列表字段（`cities`、`requirements.skills`）的每一项都必须出现在自己的出处片段里；`requirements.skill_alternatives` 的每一组都必须整组出现在同一个片段里。
+3. 列表字段（`cities`、`requirements.skills`）的每一项都必须出现在自己的出处片段里；`requirements.skill_alternatives` 的每一组都要由出处片段说明是一个选择，规则见上文"任选其一的技能"。
 4. `user` 表示值来自用户本人，例如 JD 正文里没有公司名，由用户手动补上。这时 `text` 可以为 null，也不要求出现在原文中。
 
 这样模型就没法凭空编造字段：编出来的值找不到原文出处，校验就过不了。不过这条规则只保证出处真实存在，不保证从出处推出的值一定正确，例如把"10-15K"换算成 10000–15000 是否正确，由解析器自己的测试保证（第 2 步）。

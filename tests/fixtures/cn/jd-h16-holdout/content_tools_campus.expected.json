@@ -1,0 +1,197 @@
+{
+  "fixture": "content_tools_campus.txt",
+  "job_schema_version": 1,
+  "site_argument": "official",
+  "method": "agent",
+  "basis": "原创虚构样例；首次运行本批CLI前按Job Schema v1、现行match.md与H16任务单独立写定。技能比较忽略大小写、全半角和空格，解析不合并同义词。",
+  "fields": {
+    "title": {
+      "value": "内容编辑校招",
+      "evidence": [
+        "内容编辑校招"
+      ]
+    },
+    "company": {
+      "value": "示例舟序传媒有限公司",
+      "evidence": [
+        "公司名称：示例舟序传媒有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "上海",
+        "杭州"
+      ],
+      "evidence": [
+        "工作地点：上海或杭州"
+      ]
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "不支持远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "campus",
+      "evidence": [
+        "内容编辑校招"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 10000,
+        "max": 14000,
+        "unit": "CNY/month",
+        "months": 14,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪资：10-14K·14薪"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2026,
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅招2026届或2027届"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": null,
+      "evidence": []
+    },
+    "requirements.min_months": {
+      "value": null,
+      "evidence": []
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "本科及以上学历"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "秀米",
+        "剪映",
+        "Excel",
+        "PowerPoint"
+      ],
+      "evidence": [
+        "工具要求：熟悉 秀米、剪映 之一；能使用 Excel/PowerPoint，两项均需掌握。"
+      ],
+      "note": "正向技能按原文列出；任选组另见 alternative-groups.expected.json，不推测H16字段名。"
+    },
+    "return_offer": {
+      "value": null,
+      "evidence": []
+    },
+    "published_at": {
+      "value": "2026-10-29",
+      "evidence": [
+        "发布时间：2026-10-29"
+      ]
+    },
+    "deadline": {
+      "value": "2026-12-10",
+      "evidence": [
+        "投递截止：2026-12-10"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "上海或杭州",
+      "interpretation": "城市之间的或不是技能组。"
+    },
+    {
+      "text": "2026届或2027届",
+      "interpretation": "届别之间的或不是技能组。"
+    },
+    {
+      "text": "Excel/PowerPoint，两项均需掌握",
+      "interpretation": "斜线并列且明确都要，不生成任选组。"
+    },
+    {
+      "text": "试用期3个月",
+      "interpretation": "不是实习时长；校招的天数/月数为不适用。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届包含在明确招聘的届别范围内。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "tech硕士、ops本科均达到该岗位最低学历。"
+        },
+        "days_per_week": {
+          "result": "not_applicable",
+          "reason": "校招未写实习天数。"
+        },
+        "min_months": {
+          "result": "not_applicable",
+          "reason": "校招未写实习时长。"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "城市不在深圳/广州内；不搬家且岗位明确不支持远程。"
+        },
+        "employment_type": {
+          "result": "conflict",
+          "reason": "tech只求实习，此岗位为校招。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题、公司、城市未命中样例排除项。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届包含在明确招聘的届别范围内。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "tech硕士、ops本科均达到该岗位最低学历。"
+        },
+        "days_per_week": {
+          "result": "not_applicable",
+          "reason": "校招未写实习天数。"
+        },
+        "min_months": {
+          "result": "not_applicable",
+          "reason": "校招未写实习时长。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "岗位城市含上海，与ops意向相交。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习或校招均属于ops目标类型。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题、公司、城市未命中样例排除项。"
+        }
+      }
+    }
+  }
+}

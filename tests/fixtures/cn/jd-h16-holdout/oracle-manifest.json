@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "task": "V8",
+  "frozen_at_utc": "2026-10-29T06:46:23.775892+00:00",
+  "base_commit": "e42f82889ee2b5a2f8926cea7a2e6b4834a78486",
+  "branch": "codex/v8-h16-holdout",
+  "method": "Original manual inputs and judgments; stdlib static quote/structure audit only. This batch has not been executed through project CLI.",
+  "independence": {
+    "parser_source_read_this_session": false,
+    "scoring_source_read_this_session": false,
+    "h16_branch_read": false,
+    "prior_exposure": "V5 public sample CLI executions and public H16 task specification only in this session."
+  },
+  "policy": "H16 PR must exist before publishing. Never edit frozen files to fit implementation. Use separate comparison and planner rulings.",
+  "oracle_files_lf_sha256": {
+    ".gitattributes": "14877c66ad0ce8e2a1d7f3b6ab19fb0696d4e7f4ca557b4633a4f4091d310c2d",
+    "alternative-groups.expected.json": "83687417568e92773ea1711b62b80fc2e9092e29b1cd28a281cfe03abba381fb",
+    "backend_choices_intern.expected.json": "326f749d46e37837c6be51d0c0a1112bc6f9681bfa9358faf44d61cd92c5dec0",
+    "backend_choices_intern.txt": "51d996c9d61f32c06f54c01cde75e1f84dc9c5821db209b6c54c928b48870635",
+    "content_tools_campus.expected.json": "65fcf639c342f96d3e82a61c54c5be45b83264afdf164c19b61916af600d2142",
+    "content_tools_campus.txt": "d0277c861b7f25716f69d65e648d81853f9916f1f06cb883e83268ffa829f281",
+    "frontend_tools_intern.expected.json": "114479b9eb4ed4e39cf77e924b5da61f2e1e6baf2469829e1ff5e21fde7e96ae",
+    "frontend_tools_intern.txt": "534f46cf24e5f6b6dccddde2d2c911aad3de5a27d627e16ba6727a98df54fd00",
+    "README.md": "26f6e2eddb79ba439aa55d9622e763ed3f33a868799f9a0535513cc7db415a40",
+    "research_tools_intern.expected.json": "aedc154822c94b061b8eb4b6beb4a4e504d0bd6e38f27371ef6debe8c2884ee5",
+    "research_tools_intern.txt": "973989be84f52ee2d13f9efa5c620b9312f8fcd3c8bb69ae773bc544d0d907cc",
+    "visual_tools_intern.expected.json": "afaf9107c43723be561889085db41120d41e22edc1cc79be88b394e4e649b543",
+    "visual_tools_intern.txt": "8349bbfa59292a6b86368b1c83b8bd01347f69f995fe5ce3905ab1851bcd63ef"
+  },
+  "source_files_lf_sha256": {
+    "docs/cn/job-schema.md": "9bbcfaec1ab29318cd283f903b6b3ed4f68d9222172b93f835cba937d7ffbe13",
+    "docs/cn/match.md": "b138733e3550518d1b14aabd5e8619b2f2f789173f979e24fa2712f41634d0de",
+    "docs/cn/roadmap.md": "8bd5a24741d2ee58c3878c45be30736d02e99efeb863aa88e00e4959449f7d77",
+    "tests/fixtures/cn/profile/tech/profile.json": "735d1da011b41215dd381d1a8eeea42742a3fb247ba8f5557c17c9cf0a35a2d6",
+    "tests/fixtures/cn/profile/ops/profile.json": "4b7639b57a666d4adbd0f2b5aed1e7cc28ad150bac9b1e8e675981ffdb2a5f9c"
+  },
+  "counts": {
+    "jobs": 5,
+    "field_groups": 70,
+    "profile_pairs": 10,
+    "hard_checks": 70,
+    "alternative_groups": 9,
+    "nontechnical_jobs": 3
+  }
+}

@@ -75,7 +75,7 @@ EVIDENCE_FIELDS = (
 )
 # List fields whose every item must appear in the field's own evidence.
 ITEMIZED_FIELDS = ("cities", "requirements.skills")
-# Skill groups the JD asks for one of; each group must appear in one evidence snippet.
+# Skill groups the JD asks for one of; their snippets must offer each group as one choice.
 ALTERNATIVES = "requirements.skill_alternatives"
 
 MAX_RAW_TEXT = 50_000
@@ -445,6 +445,23 @@ def _has_value(value) -> bool:
     return value is not None and value != []
 
 
+def _offered_together(group: list, snippets: list) -> bool:
+    """Whether the snippets offer the group as one choice: each names two or more of its skills,
+    and together they link every skill. One snippet naming them all does; so do "Python 或 Java"
+    and "Java 或 Go" for [Python, Java, Go] (H16). "熟悉 Golang" and "了解 Docker" do not."""
+    items = [normalize_for_match(item) for item in group]
+    linked = []  # sets of skills one snippet, or a chain of them, names together
+    for text in snippets:
+        named = {item for item in items if item in text}
+        if len(named) < 2:
+            continue
+        for other in [s for s in linked if s & named]:
+            named |= other
+            linked.remove(other)
+        linked.append(named)
+    return any(len(s) == len(set(items)) for s in linked)
+
+
 def _check_evidence(record: dict, errors: list) -> None:
     evidence = record["evidence"]
     if not isinstance(evidence, dict):
@@ -481,11 +498,10 @@ def _check_evidence(record: dict, errors: list) -> None:
                 if isinstance(item, str) and not any(normalize_for_match(item) in text for text in folded):
                     errors.append(f"{where}: {item!r} does not appear in its evidence text")
         if path == ALTERNATIVES and isinstance(_field(record, path), list):
-            # The choice is the JD's: a group's skills are offered together, in one snippet.
             for group in _field(record, path):
-                if isinstance(group, list) and all(isinstance(item, str) for item in group) and not any(
-                        all(normalize_for_match(item) in text for item in group) for text in folded):
-                    errors.append(f"{where}: no snippet names all of {' / '.join(group)}")
+                if (isinstance(group, list) and all(isinstance(item, str) for item in group)
+                        and not _offered_together(group, folded)):
+                    errors.append(f"{where}: no snippets offer {' / '.join(group)} as one choice")
         if path == "interview" and isinstance(record.get("interview"), dict):
             cities = record["interview"].get("cities")
             for city in cities if isinstance(cities, list) else []:
