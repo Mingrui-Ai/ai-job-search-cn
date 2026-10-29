@@ -1,6 +1,6 @@
 # CN 迁移方案（D1 审计与架构决策）
 
-> 版本：v0.3（2026-10-26，新增 ADR-9 数据来源、账号与自动化路线）　｜　输入：[项目启动指导 v0.1](plan/kickoff-guide-v0.1.md)、[初步开发方案](plan/initial-guidelines.md)、上游 `master@e16acee` 代码审计
+> 版本：v0.4（2026-10-29，新增 ADR-10 DeepSeek Harness）　｜　输入：[项目启动指导 v0.1](plan/kickoff-guide-v0.1.md)、[初步开发方案](plan/initial-guidelines.md)、上游 `master@e16acee` 代码审计
 > 本文档回答三个问题：上游哪些能力可以直接复用、CN 代码放在哪里、第一周按什么顺序做。凡是与原计划不同的地方都写明了原因。项目还在初期，本文档随开发持续修订。
 
 ## 1. 上游审计结论
@@ -102,6 +102,17 @@ Codex 能读取这些 Markdown 并按步骤执行，但上述机制不会自动�
 - **对外发送**（投递、消息、邮件）一律先经用户确认，可以批量确认。
 
 2026-10-26 的 robots.txt 实测结果记录在 [工作记录](worklog.md)。
+
+**ADR-10　DeepSeek Harness（dsh）作为第三个 Agent。**（2026-10-29，A1。依据验证者的官方资料调研 [dsh-research.md](dsh-research.md)，资料固定在 tag `dsh-v0.2.2-alpha.2`。）沿用 ADR-7：逻辑都在 `python -m jobsearch_cn` 里，每个运行时只加薄入口，工作流说明只写一份。
+
+- **说明文件**：dsh 默认读取从项目根到工作目录的 `AGENTS.md` 和 `CLAUDE.md`，两个都读，不是二选一。所以 CN 规则继续写在根 `AGENTS.md`，不另写一份。根 `CLAUDE.md` 是上游的求职顾问模板，里面有上游 `/setup` 的指引，dsh 也会读到，因此 dsh 的入口要写明：建档按 `profile-setup.md`，不运行 `/setup`。
+- **技能入口**：放在 dsh 官方的项目目录 `.dsh/skills/<技能名>/SKILL.md`，共三个：`cn-jd-import`、`cn-setup`、`cn-match`。正文只指向共用的工作流说明，和 Claude Code 的 `.claude/skills/cn-*` 一样不复制流程。不放进 `.agents/skills/`：那里只放门户适配器（ADR-3）。dsh 也会发现 `.agents/skills/` 下的门户技能，这不影响 `/scrape`。
+- **运行命令**：在 Windows 上，dsh 每次用新的 PowerShell 进程（`-NoProfile`）执行命令，不会自动加载 conda。所以要在已经激活 `ai-job-search-cn` 的终端里启动 dsh，让命令继承这个环境的 PATH。
+- **读简历**：dsh 的 `read` 工具只读 UTF-8 文本，不读 PDF 和 Word。三个 Agent 都用 `python -m jobsearch_cn profile extract`（H11）读简历。
+- **权限**：dsh 用自己的权限预设和 profile 配置，`.claude/settings.json` 和技能里的 `allowed-tools` 对它不起作用。用默认的 `workspace-write + ask`；dsh 的批准只对一次请求有效。
+- **版本**：固定 `@deepseek-ai/dsh@0.2.2-alpha.2`。它是官方预发布版，要求 Node.js 24.9.0 及以上。README 写明用带版本号的 `npx @deepseek-ai/dsh@0.2.2-alpha.2 web` 启动；升级时另记版本和源码提交，复核本条各点，重跑 A3。
+- **密钥**：DeepSeek API Key 只在 dsh 的设置里填写，不交给本项目的工具，也不写进仓库（ADR-8）。
+- **只能实测的点**（A3）：本机的 Windows 沙箱和 conda 能否配合；中文文档的读取效果；模型会不会按薄入口找到并遵守共用说明，会不会照做确认步骤。这些靠读源码定不下来。
 
 ## 3. 目录结构
 

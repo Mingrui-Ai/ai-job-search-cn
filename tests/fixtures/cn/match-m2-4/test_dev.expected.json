@@ -1,0 +1,587 @@
+{
+  "schema_version": 1,
+  "kind": "manual_score_oracle",
+  "fixture": "tests/fixtures/cn/jd-m2-3/nowcoder_test_dev_intern.txt",
+  "title": "测试开发实习生（Web自动化）",
+  "inputs": {
+    "skills": [
+      {
+        "name": "TypeScript",
+        "group": "tech"
+      },
+      {
+        "name": "Playwright",
+        "group": "tech"
+      },
+      {
+        "name": "Postman",
+        "group": "tech"
+      },
+      {
+        "name": "Git",
+        "group": "tech"
+      },
+      {
+        "name": "接口测试",
+        "group": "tech"
+      },
+      {
+        "name": "自动化测试",
+        "group": "tech"
+      }
+    ],
+    "jd_evidence": [
+      "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+      "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+    ],
+    "hard_condition_evidence": [
+      "仅限2027届，本科及以上在读",
+      "每周4-5天，连续实习至少4个月",
+      "工作地点：深圳南山区；面试地点：北京",
+      "不支持远程",
+      "岗位性质：非外包"
+    ],
+    "salary": {
+      "min": 25,
+      "max": 35,
+      "unit": "CNY/hour",
+      "evidence": "25～35元/小时"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "filter": {
+        "verdict": "eligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届符合",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "硕士达到本科",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "days_per_week": {
+            "result": "match",
+            "reason": "4天达到区间下限4天",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "min_months": {
+            "result": "match",
+            "reason": "6个月达到4个月",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "location": {
+            "result": "match",
+            "reason": "只取深圳工作地点，不取北京面试地点",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "排除词只看标题，正文非外包不触发",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 6,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "TypeScript",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Playwright",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Postman",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Git",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "接口测试",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "自动化测试",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        "direction": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "tech": 6
+          },
+          "reason": "不计general后分组{'tech': 6}；tech为最多或并列最多组，目标为tech，记100",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 65,
+          "method": "manual_semantic_judgment",
+          "reason": "编写300条问题的 Python 检索评测脚本、重构后端接口，能迁移到测试与联调，但没有浏览器回归工具链经历。",
+          "evidence": {
+            "jd": [
+              "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+              "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+            ],
+            "profile": [
+              "exp-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "JD单位CNY/hour与档案CNY/day不同，不换算",
+          "jd": [
+            "25～35元/小时"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 51,
+        "grade": "moderate",
+        "score_grade_before_filter": "moderate",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "TypeScript",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Playwright",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Postman",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Git",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "接口测试",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "自动化测试",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        }
+      ]
+    },
+    "ops": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届符合",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "本科达到要求",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "days_per_week": {
+            "result": "conflict",
+            "reason": "3天少于4天",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "min_months": {
+            "result": "conflict",
+            "reason": "3个月少于4个月",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "location": {
+            "result": "conflict",
+            "reason": "深圳无交集、不搬家且不接受远程",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中电话销售",
+            "jd": [
+              "仅限2027届，本科及以上在读",
+              "每周4-5天，连续实习至少4个月",
+              "工作地点：深圳南山区；面试地点：北京",
+              "不支持远程",
+              "岗位性质：非外包"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 6,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "TypeScript",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Playwright",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Postman",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Git",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "接口测试",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "自动化测试",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "tech": 6
+          },
+          "reason": "不计general后分组{'tech': 6}；没有技能属于目标ops，记0",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 5,
+          "method": "manual_semantic_judgment",
+          "reason": "运营与宣传经历不涉及自动化回归、接口联调或缺陷定位，关联很弱。",
+          "evidence": {
+            "jd": [
+              "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+              "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+            ],
+            "profile": [
+              "exp-1",
+              "campus-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "档案 salary_min 未填写，未知，不按0分处理",
+          "jd": [
+            "25～35元/小时"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 1,
+        "grade": "ineligible",
+        "score_grade_before_filter": "poor",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "TypeScript",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Playwright",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Postman",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Git",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "接口测试",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "自动化测试",
+          "jd": [
+            "能使用 TypeScript、Playwright、Postman 和 Git，掌握接口测试、自动化测试",
+            "围绕浏览器端功能编写回归用例，参与缺陷定位，协助接口联调"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "days_per_week",
+          "state": "conflict",
+          "reason": "3天少于4天",
+          "jd": [
+            "仅限2027届，本科及以上在读",
+            "每周4-5天，连续实习至少4个月",
+            "工作地点：深圳南山区；面试地点：北京",
+            "不支持远程",
+            "岗位性质：非外包"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "min_months",
+          "state": "conflict",
+          "reason": "3个月少于4个月",
+          "jd": [
+            "仅限2027届，本科及以上在读",
+            "每周4-5天，连续实习至少4个月",
+            "工作地点：深圳南山区；面试地点：北京",
+            "不支持远程",
+            "岗位性质：非外包"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "conflict",
+          "reason": "深圳无交集、不搬家且不接受远程",
+          "jd": [
+            "仅限2027届，本科及以上在读",
+            "每周4-5天，连续实习至少4个月",
+            "工作地点：深圳南山区；面试地点：北京",
+            "不支持远程",
+            "岗位性质：非外包"
+          ]
+        }
+      ]
+    }
+  }
+}

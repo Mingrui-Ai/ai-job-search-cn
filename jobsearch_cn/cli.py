@@ -305,6 +305,8 @@ def cmd_match_score(args) -> int:
     record = score.score_job(job, data, _vocabulary(args), previous=_saved_match(matches, args.id))
     if args.save:
         matches.save(record)
+    if args.draft:
+        matches.write_draft(record)
     _emit(record)
     return 0
 
@@ -365,9 +367,6 @@ def cmd_match_show(args) -> int:
     return 0
 
 
-_GRADE_RANK = {grade: rank for rank, grade in enumerate([name for name, _ in score.GRADES] + [score.INELIGIBLE])}
-
-
 def cmd_match_list(args) -> int:
     data = _match_profile(args)
     if data is None:
@@ -396,8 +395,7 @@ def cmd_match_list(args) -> int:
             "stale": (job is None or record.get("job_hash") != score.job_hash(job)
                       or record.get("profile_hash") != digest or record.get("rules_version") != score.RULES_VERSION),
         })
-    rows.sort(key=lambda row: (_GRADE_RANK.get(row["grade"], len(_GRADE_RANK)),
-                               -row["score"] if isinstance(row["score"], int) else 1, row["job_id"]))
+    rows.sort(key=lambda row: score.list_key(row["grade"], row["score"], row["job_id"]))
     _emit({"matches": rows, "warnings": warnings})
     return 0
 
@@ -505,6 +503,8 @@ def build_parser() -> argparse.ArgumentParser:
     match_score.add_argument("id", help="岗位 id，例如 job_9f4694691d57")
     match_score.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     match_score.add_argument("--save", action="store_true", help="同时保存到 <数据目录>/matches/<岗位id>.json")
+    match_score.add_argument("--draft", action="store_true",
+                             help="同时写出草稿 <数据目录>/matches/drafts/<岗位id>.json，供 Agent 补充经历后校验、保存")
     match_score.set_defaults(handler=cmd_match_score)
 
     match_validate = match_commands.add_parser(

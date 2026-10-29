@@ -21,7 +21,10 @@ from jobsearch_cn import match, schema, vocab
 from jobsearch_cn.profile import WEIGHT_KEYS
 
 SCHEMA_VERSION = 1
-RULES_VERSION = 1  # bump when a rule or the default weights change
+# Bump when a rule's result changes - a check result or verdict, a dimension score, which
+# gaps are listed - or the default weights do. Rewording a reason does not: a saved record
+# keeps the old wording until it is scored again (docs/cn/match.md, 匹配记录).
+RULES_VERSION = 1
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary
 DEFAULT_WEIGHTS = {"skills": 35, "direction": 30, "experience": 25, "salary": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.
@@ -239,6 +242,15 @@ def total(dimensions: dict, weights: dict, verdict: str) -> dict:
             "missing": [key for key in DIMENSIONS if key not in scored]}
 
 
+_GRADE_ORDER = [name for name, _ in GRADES] + [INELIGIBLE]
+
+
+def list_key(grade, total_score, job_id) -> tuple:
+    """How match list orders records: by grade, strong first and ineligible last, then by score, high first."""
+    rank = _GRADE_ORDER.index(grade) if grade in _GRADE_ORDER else len(_GRADE_ORDER)
+    return rank, -total_score if isinstance(total_score, int) else 1, job_id
+
+
 def _fraction(number) -> Fraction:
     return Fraction(str(number))
 
@@ -287,8 +299,12 @@ def validate(record, job: dict, profile: dict, vocabulary) -> list:
             errors.append(f"dimensions.{key}: a rule dimension; an agent does not change it")
     errors += _agent_dimension(dimensions, rules["dimensions"], "direction", "jd_groups", job, profile)
     errors += _agent_dimension(dimensions, rules["dimensions"], "experience", "hints", job, profile)
-    if not errors and record["total"] != total(dimensions, record["weights"], record["filter"]["verdict"]):
-        errors.append("total: does not follow from the dimensions and weights; it is worked out, not written")
+    if not errors:
+        expected = total(dimensions, record["weights"], record["filter"]["verdict"])
+        if record["total"] != expected:
+            # An agent copies the total from here rather than doing the arithmetic.
+            errors.append("total: does not follow from the dimensions and weights; they give "
+                          f"{json.dumps(expected, ensure_ascii=False)}")
     return errors
 
 
@@ -325,7 +341,10 @@ def _agent_dimension(dimensions, rules, key, fixed, job, profile) -> list:
         errors.append(f"{where}.evidence.profile: name the experience (its id) the score rests on")
     ids = {item.get("id") for item in profile.get("experience") or [] if isinstance(item, dict)}
     for index, ref in enumerate(evidence["profile"]):
-        if ref not in ids:
+        # Check the type first: an object or a list here is an agent's slip, and an error, not a crash.
+        if not (isinstance(ref, str) and ref.strip()):
+            errors.append(f"{where}.evidence.profile[{index}]: must be an experience id (a string)")
+        elif ref not in ids:
             errors.append(f"{where}.evidence.profile[{index}]: no experience with id {ref!r} in the profile")
     return errors
 

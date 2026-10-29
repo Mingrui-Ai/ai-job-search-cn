@@ -107,7 +107,9 @@ ALLOWED_PERMISSIONS = {
     "Bash(python -m jobsearch_cn jd:*)",
     # CN fork: profile validate/show read data/profile/ (docs/cn/profile-setup.md).
     "Bash(python -m jobsearch_cn profile:*)",
-    # CN fork: match filter reads the job store and profile, writes nothing (docs/cn/match.md).
+    # CN fork: the jobsearch_cn match commands (docs/cn/match.md). They read the job store
+    # and profile; score --save, score --draft and save write match records under
+    # <data dir>/matches/. No network.
     "Bash(python -m jobsearch_cn match:*)",
 }
 
@@ -296,7 +298,7 @@ ALLOWED_SKILL_TOOLS = {
     "Bash(python3 tools/scrape_state.py:*)",
     "Bash(python -m jobsearch_cn jd:*)",  # CN fork: .claude/skills/cn-jd-import
     "Bash(python -m jobsearch_cn profile:*)",  # CN fork: .claude/skills/cn-setup
-    "Bash(python -m jobsearch_cn match:*)",  # CN fork: the M2 matching workflow
+    "Bash(python -m jobsearch_cn match:*)",  # CN fork: .claude/skills/cn-match
 }
 
 # The tools a shipped .claude/agents/*.md may list. These agents read untrusted

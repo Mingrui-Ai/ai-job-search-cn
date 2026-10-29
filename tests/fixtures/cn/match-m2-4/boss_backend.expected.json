@@ -1,0 +1,575 @@
+{
+  "schema_version": 1,
+  "kind": "manual_score_oracle",
+  "fixture": "tests/fixtures/cn/jd/boss_intern.txt",
+  "title": "后端开发实习生（Go方向）",
+  "inputs": {
+    "skills": [
+      {
+        "name": "Go",
+        "group": "tech"
+      },
+      {
+        "name": "MySQL",
+        "group": "tech"
+      },
+      {
+        "name": "Redis",
+        "group": "tech"
+      },
+      {
+        "name": "Golang",
+        "group": "tech"
+      },
+      {
+        "name": "Java",
+        "group": "tech"
+      },
+      {
+        "name": "Docker",
+        "group": "tech"
+      },
+      {
+        "name": "Kubernetes",
+        "group": "tech"
+      }
+    ],
+    "jd_evidence": [
+      "使用 Go 语言编写高并发服务",
+      "参与 MySQL、Redis 等存储方案的设计与优化",
+      "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+    ],
+    "hard_condition_evidence": [
+      "2026届/2027届本科及以上在读",
+      "深圳·南山区·科技园  本科  4天/周  6个月",
+      "每周至少实习4天，实习期6个月以上"
+    ],
+    "salary": {
+      "min": 200,
+      "max": 250,
+      "unit": "CNY/day",
+      "evidence": "200-250元/天"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "filter": {
+        "verdict": "eligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届在范围内",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "硕士达到本科",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "days_per_week": {
+            "result": "match",
+            "reason": "4天达到4天",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "min_months": {
+            "result": "match",
+            "reason": "6个月达到6个月",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "location": {
+            "result": "match",
+            "reason": "深圳直接命中",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标类型",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中外包或销售",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 51.428571,
+          "exact_credit_sum": "3.6",
+          "denominator": 7,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "Go",
+              "profile_skill": "Go",
+              "credit": 1,
+              "profile_used_in": [
+                "exp-1"
+              ],
+              "reason": "档案proficient；按设计稿记1"
+            },
+            {
+              "jd_skill": "MySQL",
+              "profile_skill": "MySQL",
+              "credit": 0.8,
+              "profile_used_in": [
+                "proj-1"
+              ],
+              "reason": "档案working；按设计稿记0.8"
+            },
+            {
+              "jd_skill": "Redis",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Golang",
+              "profile_skill": "Go",
+              "credit": 1,
+              "profile_used_in": [
+                "exp-1"
+              ],
+              "reason": "Golang 与 Go 按设计稿 same_as 视为同义；熟练记1"
+            },
+            {
+              "jd_skill": "Java",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Docker",
+              "profile_skill": "Docker",
+              "credit": 0.8,
+              "profile_used_in": [],
+              "reason": "档案working；按设计稿记0.8"
+            },
+            {
+              "jd_skill": "Kubernetes",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        "direction": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "tech": 7
+          },
+          "reason": "不计general后分组{'tech': 7}；tech为最多或并列最多组，目标为tech，记100",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 95,
+          "method": "manual_semantic_judgment",
+          "reason": "做过 Go 订单接口重构，同属后端服务开发；MySQL 有项目依据。尚无 Redis/Kubernetes 证明，不能给满分。",
+          "evidence": {
+            "jd": [
+              "使用 Go 语言编写高并发服务",
+              "参与 MySQL、Redis 等存储方案的设计与优化",
+              "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+            ],
+            "profile": [
+              "exp-1",
+              "proj-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "reason": "JD日薪上限250达到档案最低150元/天",
+          "jd": [
+            "200-250元/天"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 82,
+        "grade": "strong",
+        "score_grade_before_filter": "strong",
+        "complete": true,
+        "missing": [],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "Redis",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Java",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Kubernetes",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        }
+      ]
+    },
+    "ops": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届在范围内",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "本科达到要求",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "days_per_week": {
+            "result": "conflict",
+            "reason": "3天少于4天",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "min_months": {
+            "result": "conflict",
+            "reason": "3个月少于6个月",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "location": {
+            "result": "conflict",
+            "reason": "仅上海、不搬家且不接受远程，深圳无交集",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标类型",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中电话销售",
+            "jd": [
+              "2026届/2027届本科及以上在读",
+              "深圳·南山区·科技园  本科  4天/周  6个月",
+              "每周至少实习4天，实习期6个月以上"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 7,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "Go",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "MySQL",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Redis",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Golang",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Java",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Docker",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Kubernetes",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "tech": 7
+          },
+          "reason": "不计general后分组{'tech': 7}；没有技能属于目标ops，记0",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 10,
+          "method": "manual_semantic_judgment",
+          "reason": "已有公众号、活动及宣传经历，没有后端开发或存储方案经历；仅有一般协作可迁移。",
+          "evidence": {
+            "jd": [
+              "使用 Go 语言编写高并发服务",
+              "参与 MySQL、Redis 等存储方案的设计与优化",
+              "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+            ],
+            "profile": [
+              "exp-1",
+              "campus-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "档案 salary_min 未填写，未知，不按0分处理",
+          "jd": [
+            "200-250元/天"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 3,
+        "grade": "ineligible",
+        "score_grade_before_filter": "poor",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "Go",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "MySQL",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Redis",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Golang",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Java",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Docker",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Kubernetes",
+          "jd": [
+            "使用 Go 语言编写高并发服务",
+            "参与 MySQL、Redis 等存储方案的设计与优化",
+            "熟悉 Golang 或 Java，了解 Docker、Kubernetes"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "days_per_week",
+          "state": "conflict",
+          "reason": "3天少于4天",
+          "jd": [
+            "2026届/2027届本科及以上在读",
+            "深圳·南山区·科技园  本科  4天/周  6个月",
+            "每周至少实习4天，实习期6个月以上"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "min_months",
+          "state": "conflict",
+          "reason": "3个月少于6个月",
+          "jd": [
+            "2026届/2027届本科及以上在读",
+            "深圳·南山区·科技园  本科  4天/周  6个月",
+            "每周至少实习4天，实习期6个月以上"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "conflict",
+          "reason": "仅上海、不搬家且不接受远程，深圳无交集",
+          "jd": [
+            "2026届/2027届本科及以上在读",
+            "深圳·南山区·科技园  本科  4天/周  6个月",
+            "每周至少实习4天，实习期6个月以上"
+          ]
+        }
+      ]
+    }
+  }
+}

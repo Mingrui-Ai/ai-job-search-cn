@@ -1,0 +1,553 @@
+{
+  "schema_version": 1,
+  "kind": "manual_score_oracle",
+  "fixture": "tests/fixtures/cn/jd-m2-3/official_marketing_campus.txt",
+  "title": "市场管培生",
+  "inputs": {
+    "skills": [
+      {
+        "name": "Excel",
+        "group": "general"
+      },
+      {
+        "name": "PowerPoint",
+        "group": "general"
+      },
+      {
+        "name": "市场调研",
+        "group": "market"
+      },
+      {
+        "name": "活动策划",
+        "group": "ops"
+      },
+      {
+        "name": "商务沟通",
+        "group": "market"
+      }
+    ],
+    "jd_evidence": [
+      "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+      "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+    ],
+    "hard_condition_evidence": [
+      "仅招2027届毕业生，本科及以上学历，专业不限",
+      "工作地点：上海",
+      "入职试用期3个月",
+      "每周五例会",
+      "不支持远程",
+      "本岗位不承担销售指标"
+    ],
+    "salary": {
+      "min": 8000,
+      "max": 10000,
+      "unit": "CNY/month",
+      "months": 13,
+      "evidence": "8-10K/月，全年13薪"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届符合",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "硕士达到本科",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "days_per_week": {
+            "result": "not_applicable",
+            "reason": "校招未要求实习天数，周五例会不算，判不适用",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "min_months": {
+            "result": "not_applicable",
+            "reason": "试用期不是实习月数，校招缺该要求判不适用",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "location": {
+            "result": "conflict",
+            "reason": "上海无交集，不搬家且JD不支持远程",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "employment_type": {
+            "result": "conflict",
+            "reason": "校招不属于仅实习的目标",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题不含销售/外包；正文否定不触发",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 5,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "Excel",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "PowerPoint",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "市场调研",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "活动策划",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "商务沟通",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "market": 2,
+            "ops": 1
+          },
+          "reason": "不计general后分组{'market': 2, 'ops': 1}；没有技能属于目标tech，记0",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 15,
+          "method": "manual_semantic_judgment",
+          "reason": "技术项目有团队协作背景，但没有品牌活动筹备、市场调研或活动预算的经历依据。",
+          "evidence": {
+            "jd": [
+              "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+              "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+            ],
+            "profile": [
+              "exp-1",
+              "proj-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "JD单位CNY/month与档案CNY/day不同，不换算",
+          "jd": [
+            "8-10K/月，全年13薪"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 4,
+        "grade": "ineligible",
+        "score_grade_before_filter": "poor",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "Excel",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "PowerPoint",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "市场调研",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "活动策划",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "商务沟通",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "conflict",
+          "reason": "上海无交集，不搬家且JD不支持远程",
+          "jd": [
+            "仅招2027届毕业生，本科及以上学历，专业不限",
+            "工作地点：上海",
+            "入职试用期3个月",
+            "每周五例会",
+            "不支持远程",
+            "本岗位不承担销售指标"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "employment_type",
+          "state": "conflict",
+          "reason": "校招不属于仅实习的目标",
+          "jd": [
+            "仅招2027届毕业生，本科及以上学历，专业不限",
+            "工作地点：上海",
+            "入职试用期3个月",
+            "每周五例会",
+            "不支持远程",
+            "本岗位不承担销售指标"
+          ]
+        }
+      ]
+    },
+    "ops": {
+      "filter": {
+        "verdict": "eligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届符合",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "本科达到要求",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "days_per_week": {
+            "result": "not_applicable",
+            "reason": "校招缺实习天数，判不适用",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "min_months": {
+            "result": "not_applicable",
+            "reason": "试用期不是实习月数，判不适用",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "location": {
+            "result": "match",
+            "reason": "上海直接命中",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "校招属于目标",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中电话销售",
+            "jd": [
+              "仅招2027届毕业生，本科及以上学历，专业不限",
+              "工作地点：上海",
+              "入职试用期3个月",
+              "每周五例会",
+              "不支持远程",
+              "本岗位不承担销售指标"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 20.0,
+          "exact_credit_sum": "1",
+          "denominator": 5,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "Excel",
+              "profile_skill": "Excel",
+              "credit": 1,
+              "profile_used_in": [],
+              "reason": "档案proficient；按设计稿记1"
+            },
+            {
+              "jd_skill": "PowerPoint",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "市场调研",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "活动策划",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "商务沟通",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        },
+        "direction": {
+          "score": 50,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "market": 2,
+            "ops": 1
+          },
+          "reason": "不计general后分组{'market': 2, 'ops': 1}；market最多，但存在ops技能活动策划，目标ops记50",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 75,
+          "method": "manual_semantic_judgment",
+          "reason": "做过线上抽奖活动和校园大赛宣传，能迁移到活动筹备与执行；没有市场调研、商务沟通或预算管理的明确证明。",
+          "evidence": {
+            "jd": [
+              "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+              "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+            ],
+            "profile": [
+              "exp-1",
+              "campus-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "档案 salary_min 未填写，未知，不按0分处理",
+          "jd": [
+            "8-10K/月，全年13薪"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 45,
+        "grade": "moderate",
+        "score_grade_before_filter": "moderate",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "PowerPoint",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "市场调研",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "活动策划",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "商务沟通",
+          "jd": [
+            "掌握 Excel、PowerPoint，具备市场调研、活动策划、商务沟通能力",
+            "参与品牌活动筹备，整理用户反馈，协助跟进活动预算与执行进度"
+          ]
+        }
+      ]
+    }
+  }
+}
