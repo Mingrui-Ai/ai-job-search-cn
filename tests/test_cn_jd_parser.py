@@ -311,9 +311,25 @@ SEED_CASES = (
     ("负责公众号文案，协助短视频拍摄和直播活动", "requirements.skills", ["公众号"]),
     ("整理访谈记录，参与Web自动化回归", "requirements.skills", []),
     # Synonym spellings (M2-4a) are read as written; matching takes them as one skill.
-    ("熟悉HTML、CSS和JS，用过Node.js和JSON", "requirements.skills", ["JS", "Node.js"]),
+    ("熟悉HTML、CSS和JS，用过Node.js和JSON", "requirements.skills", ["HTML", "CSS", "JS", "Node.js"]),
     ("会做PPT，文案撰写能力强", "requirements.skills", ["PPT", "文案撰写"]),
     ("熟悉K8s和Kubernetes运维", "requirements.skills", ["K8s", "Kubernetes"]),
+    # H18: so are 大模型 / LLM / 大语言模型, 提示词工程 / Prompt and Photoshop / PS ...
+    ("熟悉大语言模型（LLM），有提示词工程和 Prompt 调优经验", "requirements.skills",
+     ["大语言模型", "LLM", "提示词工程", "Prompt"]),
+    ("了解大模型和LLM应用开发", "requirements.skills", ["大模型", "LLM"]),
+    ("熟练使用PS和Figma", "requirements.skills", ["PS", "Figma"]),
+    ("设计软件：PS、Figma", "requirements.skills", ["PS", "Figma"]),
+    # ... but LLM inside another word, 语言模型 or 提示词 on their own, and the PS opening a
+    # postscript are none of them.
+    ("用过vLLM部署推理服务，了解LLMOps", "requirements.skills", ["vLLM"]),
+    ("了解统计语言模型，能根据提示词生成图片", "requirements.skills", []),
+    ("熟悉Figma\nPS：简历请注明可到岗时间", "requirements.skills", ["Figma"]),
+    ("熟悉Figma\n ps: 请附上作品集", "requirements.skills", ["Figma"]),
+    ("熟悉GPS定位，能输出PSD切图", "requirements.skills", []),
+    # H18: HTML, CSS and SVN, which V8 found unread; a file name, SCSS or XHTML is not them.
+    ("熟悉 HTML/CSS/JavaScript，版本工具用 Git、SVN", "requirements.skills", ["HTML", "CSS", "JavaScript", "Git", "SVN"]),
+    ("样式用SCSS编写，模板见 docs/index.html，兼容XHTML", "requirements.skills", []),
     # The interview or written-test city on a location line is not a work city.
     ("工作地点：深圳南山区；面试地点：北京。", "cities", ["深圳"]),
     ("base 北京/上海，面试可在杭州", "cities", ["北京", "上海"]),

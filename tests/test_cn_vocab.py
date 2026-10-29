@@ -72,13 +72,17 @@ class Builtin(unittest.TestCase):
 
     def test_synonyms_are_one_skill_to_matching(self):
         pairs = (("K8s", "kubernetes"), ("Golang", "Go"), ("NLP", "自然语言处理"), ("JS", "JavaScript"),
-                 ("PPT", "PowerPoint"), ("文案撰写", "文案写作"), ("Ｐｙｔｈｏｎ", "python"))
+                 ("PPT", "PowerPoint"), ("文案撰写", "文案写作"), ("Ｐｙｔｈｏｎ", "python"),
+                 # H18: the planner grouped these near-synonyms, and PS (ruled on #59).
+                 ("LLM", "大模型"), ("大语言模型", "llm"), ("Prompt", "提示词工程"), ("PS", "Photoshop"))
         for a, b in pairs:
             with self.subTest(a=a, b=b):
                 self.assertTrue(self.vocabulary.same(a, b))
                 self.assertEqual(self.vocabulary.key(a), self.vocabulary.key(b))
         self.assertFalse(self.vocabulary.same("Go", "Java"))
-        self.assertFalse(self.vocabulary.same("大模型", "LLM"))  # close, but not listed as the same skill
+        # Related, but not the same skill (H18): nothing is inferred from RAG or LangChain.
+        self.assertFalse(self.vocabulary.same("RAG", "大模型"))
+        self.assertFalse(self.vocabulary.same("LangChain", "LLM"))
         self.assertEqual(self.vocabulary.key("打篮球"), "打篮球")
 
     def test_every_synonym_is_a_term_and_shares_its_group(self):
