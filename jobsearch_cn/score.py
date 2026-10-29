@@ -21,7 +21,10 @@ from jobsearch_cn import match, schema, vocab
 from jobsearch_cn.profile import WEIGHT_KEYS
 
 SCHEMA_VERSION = 1
-RULES_VERSION = 1  # bump when a rule or the default weights change
+# Bump when a rule's result changes - a check result or verdict, a dimension score, which
+# gaps are listed - or the default weights do. Rewording a reason does not: a saved record
+# keeps the old wording until it is scored again (docs/cn/match.md, 匹配记录).
+RULES_VERSION = 1
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary
 DEFAULT_WEIGHTS = {"skills": 35, "direction": 30, "experience": 25, "salary": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.
