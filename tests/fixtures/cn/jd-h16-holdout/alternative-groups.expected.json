@@ -1,0 +1,149 @@
+{
+  "kind": "manual_alternative_skill_groups",
+  "policy": "只记录语义集合，不预设H16字段名；同义写法在评分时只计一次，原文仍保留。仅斜线/顿号并列且无任选语义时不成组。",
+  "cases": {
+    "backend_choices_intern": {
+      "groups": [
+        {
+          "skills": [
+            "Go",
+            "Golang",
+            "Java"
+          ],
+          "evidence": "熟悉 Go 或 Golang 或 Java",
+          "meaning": "任选其一，一组计一项要求，按最佳匹配计分。"
+        },
+        {
+          "skills": [
+            "Docker",
+            "Kubernetes"
+          ],
+          "evidence": "Docker、Kubernetes 任选其一",
+          "meaning": "任选其一，一组计一项要求，按最佳匹配计分。"
+        }
+      ],
+      "not_groups": [
+        {
+          "text": "计算机或数学相关专业",
+          "reason": "专业二选一，不是技能组。"
+        }
+      ]
+    },
+    "research_tools_intern": {
+      "groups": [
+        {
+          "skills": [
+            "Excel",
+            "SPSS"
+          ],
+          "evidence": "Excel 或者 SPSS",
+          "meaning": "任选其一，一组计一项要求，按最佳匹配计分。"
+        },
+        {
+          "skills": [
+            "Tableau",
+            "Power BI"
+          ],
+          "evidence": "Tableau、Power BI 至少一种",
+          "meaning": "任选其一，一组计一项要求，按最佳匹配计分。"
+        }
+      ],
+      "not_groups": [
+        {
+          "text": "统计学或市场营销相关专业",
+          "reason": "专业范围不生成技能组。"
+        }
+      ]
+    },
+    "visual_tools_intern": {
+      "groups": [
+        {
+          "skills": [
+            "Photoshop",
+            "Illustrator"
+          ],
+          "evidence": "Photoshop、Illustrator 任一即可",
+          "meaning": "任选其一，一组计一项要求，按最佳匹配计分。"
+        },
+        {
+          "skills": [
+            "Figma",
+            "Sketch"
+          ],
+          "evidence": "Figma、Sketch 二选一",
+          "meaning": "任选其一，一组计一项要求，按最佳匹配计分。"
+        }
+      ],
+      "not_groups": [
+        {
+          "text": "大专或本科及以上学历",
+          "reason": "最低门槛为大专；学历备选不生成技能组。"
+        }
+      ]
+    },
+    "content_tools_campus": {
+      "groups": [
+        {
+          "skills": [
+            "秀米",
+            "剪映"
+          ],
+          "evidence": "秀米、剪映 之一",
+          "meaning": "任选其一，一组计一项要求，按最佳匹配计分。"
+        }
+      ],
+      "not_groups": [
+        {
+          "text": "上海或杭州",
+          "reason": "城市之间的或不是技能组。"
+        },
+        {
+          "text": "2026届或2027届",
+          "reason": "届别之间的或不是技能组。"
+        },
+        {
+          "text": "Excel/PowerPoint，两项均需掌握",
+          "reason": "斜线并列且明确都要，不生成任选组。"
+        },
+        {
+          "text": "试用期3个月",
+          "reason": "不是实习时长；校招的天数/月数为不适用。"
+        }
+      ]
+    },
+    "frontend_tools_intern": {
+      "groups": [
+        {
+          "skills": [
+            "Postman",
+            "Playwright"
+          ],
+          "evidence": "Postman、Playwright 至少一项",
+          "meaning": "任选其一，一组计一项要求，按最佳匹配计分。"
+        },
+        {
+          "skills": [
+            "Git",
+            "SVN"
+          ],
+          "evidence": "Git、SVN 其一即可",
+          "meaning": "任选其一，一组计一项要求，按最佳匹配计分。"
+        }
+      ],
+      "not_groups": [
+        {
+          "text": "HTML/CSS/JavaScript，三项均需掌握",
+          "reason": "斜线是并列必需，三个技能都保留但不成任选组。"
+        },
+        {
+          "text": "广州或深圳",
+          "reason": "城市备选不生成技能组。"
+        },
+        {
+          "text": "本科或硕士及以上学历",
+          "reason": "最低门槛为本科；学历备选不生成技能组。"
+        }
+      ]
+    }
+  }
+}

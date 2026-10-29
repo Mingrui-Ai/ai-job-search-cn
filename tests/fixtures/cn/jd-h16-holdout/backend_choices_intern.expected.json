@@ -1,0 +1,188 @@
+{
+  "fixture": "backend_choices_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "ats",
+  "method": "agent",
+  "basis": "原创虚构样例；首次运行本批CLI前按Job Schema v1、现行match.md与H16任务单独立写定。技能比较忽略大小写、全半角和空格，解析不合并同义词。",
+  "fields": {
+    "title": {
+      "value": "服务端研发实习生",
+      "evidence": [
+        "服务端研发实习生"
+      ]
+    },
+    "company": {
+      "value": "示例栖岚软件有限公司",
+      "evidence": [
+        "公司名称：示例栖岚软件有限公司"
+      ]
+    },
+    "cities": {
+      "value": [
+        "深圳"
+      ],
+      "evidence": [
+        "工作地点：深圳"
+      ]
+    },
+    "remote": {
+      "value": false,
+      "evidence": [
+        "不支持远程办公"
+      ]
+    },
+    "employment_type": {
+      "value": "internship",
+      "evidence": [
+        "服务端研发实习生"
+      ]
+    },
+    "salary": {
+      "value": {
+        "min": 220,
+        "max": 280,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "evidence": [
+        "薪资：220-280元/天"
+      ]
+    },
+    "requirements.graduation": {
+      "value": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "evidence": [
+        "仅招2027届"
+      ]
+    },
+    "requirements.days_per_week": {
+      "value": 4,
+      "evidence": [
+        "每周至少到岗4天"
+      ]
+    },
+    "requirements.min_months": {
+      "value": 6,
+      "evidence": [
+        "至少实习6个月"
+      ]
+    },
+    "requirements.education": {
+      "value": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "evidence": [
+        "本科及以上学历"
+      ]
+    },
+    "requirements.skills": {
+      "value": [
+        "Go",
+        "Golang",
+        "Java",
+        "Docker",
+        "Kubernetes"
+      ],
+      "evidence": [
+        "技能要求：熟悉 Go 或 Golang 或 Java；Docker、Kubernetes 任选其一。"
+      ],
+      "note": "正向技能按原文列出；任选组另见 alternative-groups.expected.json，不推测H16字段名。"
+    },
+    "return_offer": {
+      "value": null,
+      "evidence": []
+    },
+    "published_at": {
+      "value": "2026-10-29",
+      "evidence": [
+        "发布时间：2026-10-29"
+      ]
+    },
+    "deadline": {
+      "value": "2026-12-10",
+      "evidence": [
+        "投递截止：2026-12-10"
+      ]
+    }
+  },
+  "traps": [
+    {
+      "text": "计算机或数学相关专业",
+      "interpretation": "专业二选一，不是技能组。"
+    }
+  ],
+  "human_match": {
+    "tech": {
+      "verdict": "eligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届包含在明确招聘的届别范围内。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "tech硕士、ops本科均达到该岗位最低学历。"
+        },
+        "days_per_week": {
+          "result": "match",
+          "reason": "可每周4天，达到该岗位的天数。"
+        },
+        "min_months": {
+          "result": "match",
+          "reason": "可实习6个月，达到该岗位的月数。"
+        },
+        "location": {
+          "result": "match",
+          "reason": "深圳或广州与意向城市有交集。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "tech求实习。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题、公司、城市未命中样例排除项。"
+        }
+      }
+    },
+    "ops": {
+      "verdict": "ineligible",
+      "checks": {
+        "graduation": {
+          "result": "match",
+          "reason": "2027届包含在明确招聘的届别范围内。"
+        },
+        "education": {
+          "result": "match",
+          "reason": "tech硕士、ops本科均达到该岗位最低学历。"
+        },
+        "days_per_week": {
+          "result": "conflict",
+          "reason": "每周3天少于岗位要求4天。"
+        },
+        "min_months": {
+          "result": "conflict",
+          "reason": "可实习3个月少于岗位要求。"
+        },
+        "location": {
+          "result": "conflict",
+          "reason": "岗位城市不含上海；ops不搬家、不接受远程。"
+        },
+        "employment_type": {
+          "result": "match",
+          "reason": "实习或校招均属于ops目标类型。"
+        },
+        "exclusions": {
+          "result": "match",
+          "reason": "标题、公司、城市未命中样例排除项。"
+        }
+      }
+    }
+  }
+}
