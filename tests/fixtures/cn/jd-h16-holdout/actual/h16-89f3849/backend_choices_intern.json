@@ -1,0 +1,2194 @@
+{
+  "parse": {
+    "jobs": [
+      {
+        "schema_version": 1,
+        "id": "job_269f7090d6e9",
+        "source": {
+          "type": "file",
+          "site": "ats",
+          "url": null,
+          "imported_at": "2026-10-29T16:36:10+08:00"
+        },
+        "title": "服务端研发实习生",
+        "company": "示例栖岚软件有限公司",
+        "cities": [
+          "深圳"
+        ],
+        "remote": false,
+        "employment_type": "internship",
+        "salary": {
+          "min": 220,
+          "max": 280,
+          "unit": "CNY/day",
+          "months": null,
+          "negotiable": false
+        },
+        "requirements": {
+          "graduation": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "days_per_week": 4,
+          "min_months": 6,
+          "education": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "skills": [
+            "Go",
+            "Golang",
+            "Java",
+            "Docker",
+            "Kubernetes"
+          ],
+          "skill_alternatives": [
+            [
+              "Go",
+              "Java"
+            ],
+            [
+              "Docker",
+              "Kubernetes"
+            ]
+          ]
+        },
+        "return_offer": null,
+        "published_at": "2026-10-29",
+        "deadline": "2026-12-10",
+        "status": "new",
+        "evidence": {
+          "title": {
+            "text": "服务端研发实习生",
+            "method": "rule"
+          },
+          "company": {
+            "text": "示例栖岚软件有限公司",
+            "method": "rule"
+          },
+          "cities": {
+            "text": "工作地点：深圳",
+            "method": "rule"
+          },
+          "remote": {
+            "text": "不支持远程",
+            "method": "rule"
+          },
+          "employment_type": {
+            "text": "服务端研发实习生",
+            "method": "rule"
+          },
+          "salary": {
+            "text": "220-280元/天",
+            "method": "rule"
+          },
+          "requirements.graduation": {
+            "text": "仅招2027届",
+            "method": "rule"
+          },
+          "requirements.days_per_week": {
+            "text": "每周至少到岗4天",
+            "method": "rule"
+          },
+          "requirements.min_months": {
+            "text": "至少实习6个月",
+            "method": "rule"
+          },
+          "requirements.education": {
+            "text": "本科及以上",
+            "method": "rule"
+          },
+          "requirements.skills": {
+            "text": [
+              "技能要求：熟悉 Go 或 Golang 或 Java",
+              "Docker、Kubernetes 任选其一"
+            ],
+            "method": "rule"
+          },
+          "requirements.skill_alternatives": {
+            "text": [
+              "技能要求：熟悉 Go 或 Golang 或 Java",
+              "Docker、Kubernetes 任选其一"
+            ],
+            "method": "rule"
+          },
+          "published_at": {
+            "text": "发布时间：2026-10-29",
+            "method": "rule"
+          },
+          "deadline": {
+            "text": "投递截止：2026-12-10",
+            "method": "rule"
+          }
+        },
+        "guard": {
+          "verdict": "clean",
+          "counts": {}
+        },
+        "raw_text": "服务端研发实习生\n公司名称：示例栖岚软件有限公司\n工作地点：深圳\n不支持远程办公\n薪资：220-280元/天\n仅招2027届\n本科及以上学历\n每周至少到岗4天\n至少实习6个月\n岗位职责：协助维护内部服务，记录问题处理过程。\n计算机或数学相关专业。\n技能要求：熟悉 Go 或 Golang 或 Java；Docker、Kubernetes 任选其一。\n发布时间：2026-10-29\n投递截止：2026-12-10"
+      }
+    ],
+    "warnings": [],
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_269f7090d6e9",
+        "title": "服务端研发实习生",
+        "company": "示例栖岚软件有限公司",
+        "cities": [
+          "深圳"
+        ],
+        "status": "new"
+      }
+    ]
+  },
+  "differences": {},
+  "group_audit": {
+    "expected": [
+      [
+        "Go",
+        "Golang",
+        "Java"
+      ],
+      [
+        "Docker",
+        "Kubernetes"
+      ]
+    ],
+    "actual": [
+      [
+        "Go",
+        "Java"
+      ],
+      [
+        "Docker",
+        "Kubernetes"
+      ]
+    ],
+    "exact_matches": 1,
+    "semantic_matches": 2,
+    "missing": [],
+    "extra": [],
+    "quotes": [
+      "技能要求：熟悉 Go 或 Golang 或 Java",
+      "Docker、Kubernetes 任选其一"
+    ],
+    "quotes_are_verbatim": true,
+    "each_group_has_joint_quote": true,
+    "not_groups": [
+      {
+        "text": "计算机或数学相关专业",
+        "reason": "专业二选一，不是技能组。"
+      }
+    ]
+  },
+  "profiles": {
+    "tech": {
+      "filter": {
+        "job_id": "job_269f7090d6e9",
+        "title": "服务端研发实习生",
+        "company": "示例栖岚软件有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅招2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 4,
+                "evidence": "每周至少到岗4天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 6 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 6,
+                "evidence": "至少实习6个月"
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市深圳在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": "工作地点：深圳"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "服务端研发实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "服务端研发实习生",
+                "evidence": "服务端研发实习生"
+              },
+              "company": {
+                "value": "示例栖岚软件有限公司",
+                "evidence": "示例栖岚软件有限公司"
+              },
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": "工作地点：深圳"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rule_score": {
+        "schema_version": 1,
+        "job_id": "job_269f7090d6e9",
+        "rules_version": 2,
+        "scored_at": "2026-10-29T16:36:10+08:00",
+        "job_hash": "a9f13a3f9d67cb7cb4bf344a51064579c7709e8a1b5c30d2dea9819670560304",
+        "profile_hash": "f21053d1cae424dc01642647fd4422b62b7059d1d2e129dd03c556fc0880520d",
+        "filter": {
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅招2027届"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": "每周至少到岗4天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 6 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 6,
+                  "evidence": "至少实习6个月"
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市深圳在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": "工作地点：深圳"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "服务端研发实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "服务端研发实习生",
+                  "evidence": "服务端研发实习生"
+                },
+                "company": {
+                  "value": "示例栖岚软件有限公司",
+                  "evidence": "示例栖岚软件有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": "工作地点：深圳"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "dimensions": {
+          "skills": {
+            "score": 90,
+            "method": "rule",
+            "reason": "JD 要求 2 项技能，你有 2 项（其中 2 项任选其一）",
+            "matched": [
+              {
+                "jd": "Go 或 Java",
+                "profile": "Go",
+                "credit": 1
+              },
+              {
+                "jd": "Docker 或 Kubernetes",
+                "profile": "Docker",
+                "credit": 0.8
+              }
+            ],
+            "missing": []
+          },
+          "direction": {
+            "score": 100,
+            "method": "rule",
+            "reason": "JD 技能以技术方向为主，在你的求职方向中",
+            "jd_groups": {
+              "tech": 2
+            },
+            "evidence": null
+          },
+          "experience": {
+            "score": null,
+            "method": "agent",
+            "reason": "等 Agent 对照经历补充",
+            "hints": [
+              {
+                "jd": "Go",
+                "profile": [
+                  "exp-1"
+                ]
+              }
+            ],
+            "evidence": null
+          },
+          "salary": {
+            "score": 100,
+            "method": "rule",
+            "reason": "JD 上限 280 元/天，达到你的最低期望 150 元/天"
+          }
+        },
+        "weights": {
+          "skills": 35,
+          "direction": 30,
+          "experience": 25,
+          "salary": 10
+        },
+        "total": {
+          "score": 95,
+          "grade": "strong",
+          "complete": false,
+          "missing": [
+            "experience"
+          ]
+        },
+        "gaps": []
+      },
+      "manual_fields_filter": {
+        "job_id": "job_269f7090d6e9",
+        "title": "服务端研发实习生",
+        "company": "示例栖岚软件有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上学历"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 4,
+                "evidence": [
+                  "每周至少到岗4天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 6 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 6,
+                "evidence": [
+                  "至少实习6个月"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市深圳在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": [
+                  "工作地点：深圳"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "服务端研发实习生"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "服务端研发实习生",
+                "evidence": [
+                  "服务端研发实习生"
+                ]
+              },
+              "company": {
+                "value": "示例栖岚软件有限公司",
+                "evidence": [
+                  "公司名称：示例栖岚软件有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": [
+                  "工作地点：深圳"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "manual_fields_rule_score": {
+        "schema_version": 1,
+        "job_id": "job_269f7090d6e9",
+        "rules_version": 2,
+        "scored_at": "2026-10-29T16:36:11+08:00",
+        "job_hash": "1f1a6f8e4ec94bdc75021b3e0c42ffc45a23c346aa8e6cf642c0077808de4193",
+        "profile_hash": "f21053d1cae424dc01642647fd4422b62b7059d1d2e129dd03c556fc0880520d",
+        "filter": {
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅招2027届"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "本科及以上学历"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": [
+                    "每周至少到岗4天"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 6 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 6,
+                  "evidence": [
+                    "至少实习6个月"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市深圳在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "服务端研发实习生"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "服务端研发实习生",
+                  "evidence": [
+                    "服务端研发实习生"
+                  ]
+                },
+                "company": {
+                  "value": "示例栖岚软件有限公司",
+                  "evidence": [
+                    "公司名称：示例栖岚软件有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "dimensions": {
+          "skills": {
+            "score": 90,
+            "method": "rule",
+            "reason": "JD 要求 2 项技能，你有 2 项（其中 2 项任选其一）",
+            "matched": [
+              {
+                "jd": "Go 或 Java",
+                "profile": "Go",
+                "credit": 1
+              },
+              {
+                "jd": "Docker 或 Kubernetes",
+                "profile": "Docker",
+                "credit": 0.8
+              }
+            ],
+            "missing": []
+          },
+          "direction": {
+            "score": 100,
+            "method": "rule",
+            "reason": "JD 技能以技术方向为主，在你的求职方向中",
+            "jd_groups": {
+              "tech": 2
+            },
+            "evidence": null
+          },
+          "experience": {
+            "score": null,
+            "method": "agent",
+            "reason": "等 Agent 对照经历补充",
+            "hints": [
+              {
+                "jd": "Go",
+                "profile": [
+                  "exp-1"
+                ]
+              }
+            ],
+            "evidence": null
+          },
+          "salary": {
+            "score": 100,
+            "method": "rule",
+            "reason": "JD 上限 280 元/天，达到你的最低期望 150 元/天"
+          }
+        },
+        "weights": {
+          "skills": 35,
+          "direction": 30,
+          "experience": 25,
+          "salary": 10
+        },
+        "total": {
+          "score": 95,
+          "grade": "strong",
+          "complete": false,
+          "missing": [
+            "experience"
+          ]
+        },
+        "gaps": []
+      },
+      "parsed_input_arithmetic": {
+        "denominator": 2,
+        "credit_sum": "9/5",
+        "unrounded_score": "90",
+        "score": 90,
+        "requirements": [
+          [
+            "go",
+            "java"
+          ],
+          [
+            "docker",
+            "kubernetes"
+          ]
+        ],
+        "credits": [
+          "1",
+          "4/5"
+        ],
+        "missing": []
+      },
+      "manual_input_arithmetic": {
+        "denominator": 2,
+        "credit_sum": "9/5",
+        "unrounded_score": "90",
+        "score": 90,
+        "requirements": [
+          [
+            "go",
+            "java"
+          ],
+          [
+            "docker",
+            "kubernetes"
+          ]
+        ],
+        "credits": [
+          "1",
+          "4/5"
+        ],
+        "missing": []
+      },
+      "parsed_score_checks": {
+        "score_equal": true,
+        "item_count_equal": true,
+        "missing_equal": true,
+        "skill_gap_names_equal": true,
+        "skill_gap_quotes_valid": true,
+        "rules_version_2": true,
+        "experience_unfilled": true
+      },
+      "manual_score_checks": {
+        "score_equal": true,
+        "item_count_equal": true,
+        "missing_equal": true,
+        "skill_gap_names_equal": true,
+        "skill_gap_quotes_valid": true,
+        "rules_version_2": true,
+        "experience_unfilled": true
+      }
+    },
+    "ops": {
+      "filter": {
+        "job_id": "job_269f7090d6e9",
+        "title": "服务端研发实习生",
+        "company": "示例栖岚软件有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅招2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "conflict",
+            "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 4,
+                "evidence": "每周至少到岗4天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "conflict",
+            "reason": "JD 要求实习时长 6 个月，你只能 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 6,
+                "evidence": "至少实习6个月"
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "深圳不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": "工作地点：深圳"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "服务端研发实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "服务端研发实习生",
+                "evidence": "服务端研发实习生"
+              },
+              "company": {
+                "value": "示例栖岚软件有限公司",
+                "evidence": "示例栖岚软件有限公司"
+              },
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": "工作地点：深圳"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rule_score": {
+        "schema_version": 1,
+        "job_id": "job_269f7090d6e9",
+        "rules_version": 2,
+        "scored_at": "2026-10-29T16:36:11+08:00",
+        "job_hash": "a9f13a3f9d67cb7cb4bf344a51064579c7709e8a1b5c30d2dea9819670560304",
+        "profile_hash": "9253a7624b78ca09e1b99a1d9a0279af51fcede82057694e3124c1c0f6f8979b",
+        "filter": {
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅招2027届"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "conflict",
+              "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": "每周至少到岗4天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "conflict",
+              "reason": "JD 要求实习时长 6 个月，你只能 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 6,
+                  "evidence": "至少实习6个月"
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "深圳不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": "工作地点：深圳"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "服务端研发实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "服务端研发实习生",
+                  "evidence": "服务端研发实习生"
+                },
+                "company": {
+                  "value": "示例栖岚软件有限公司",
+                  "evidence": "示例栖岚软件有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": "工作地点：深圳"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "dimensions": {
+          "skills": {
+            "score": 0,
+            "method": "rule",
+            "reason": "JD 要求 2 项技能，你有 0 项（其中 2 项任选其一）",
+            "matched": [],
+            "missing": [
+              "Go 或 Java",
+              "Docker 或 Kubernetes"
+            ]
+          },
+          "direction": {
+            "score": 0,
+            "method": "rule",
+            "reason": "JD 技能以技术方向为主，不在你的求职方向中",
+            "jd_groups": {
+              "tech": 2
+            },
+            "evidence": null
+          },
+          "experience": {
+            "score": null,
+            "method": "agent",
+            "reason": "等 Agent 对照经历补充",
+            "hints": [],
+            "evidence": null
+          },
+          "salary": {
+            "score": null,
+            "method": "rule",
+            "reason": "档案没写最低期望薪资"
+          }
+        },
+        "weights": {
+          "skills": 35,
+          "direction": 30,
+          "experience": 25,
+          "salary": 10
+        },
+        "total": {
+          "score": 0,
+          "grade": "ineligible",
+          "complete": false,
+          "missing": [
+            "experience",
+            "salary"
+          ]
+        },
+        "gaps": [
+          {
+            "kind": "skill",
+            "item": "Go 或 Java",
+            "jd": "技能要求：熟悉 Go 或 Golang 或 Java"
+          },
+          {
+            "kind": "skill",
+            "item": "Docker 或 Kubernetes",
+            "jd": "Docker、Kubernetes 任选其一"
+          },
+          {
+            "kind": "filter",
+            "item": "days_per_week",
+            "result": "conflict",
+            "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+            "jd": "每周至少到岗4天"
+          },
+          {
+            "kind": "filter",
+            "item": "min_months",
+            "result": "conflict",
+            "reason": "JD 要求实习时长 6 个月，你只能 3 个月",
+            "jd": "至少实习6个月"
+          },
+          {
+            "kind": "filter",
+            "item": "location",
+            "result": "conflict",
+            "reason": "深圳不在意向城市内，且不能远程、不搬家",
+            "jd": "工作地点：深圳"
+          }
+        ]
+      },
+      "manual_fields_filter": {
+        "job_id": "job_269f7090d6e9",
+        "title": "服务端研发实习生",
+        "company": "示例栖岚软件有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上学历"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "conflict",
+            "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 4,
+                "evidence": [
+                  "每周至少到岗4天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "conflict",
+            "reason": "JD 要求实习时长 6 个月，你只能 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 6,
+                "evidence": [
+                  "至少实习6个月"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "深圳不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": [
+                  "工作地点：深圳"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "服务端研发实习生"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "服务端研发实习生",
+                "evidence": [
+                  "服务端研发实习生"
+                ]
+              },
+              "company": {
+                "value": "示例栖岚软件有限公司",
+                "evidence": [
+                  "公司名称：示例栖岚软件有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "深圳"
+                ],
+                "evidence": [
+                  "工作地点：深圳"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "manual_fields_rule_score": {
+        "schema_version": 1,
+        "job_id": "job_269f7090d6e9",
+        "rules_version": 2,
+        "scored_at": "2026-10-29T16:36:11+08:00",
+        "job_hash": "1f1a6f8e4ec94bdc75021b3e0c42ffc45a23c346aa8e6cf642c0077808de4193",
+        "profile_hash": "9253a7624b78ca09e1b99a1d9a0279af51fcede82057694e3124c1c0f6f8979b",
+        "filter": {
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": [
+                    "仅招2027届"
+                  ]
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": [
+                    "本科及以上学历"
+                  ]
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "conflict",
+              "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 4,
+                  "evidence": [
+                    "每周至少到岗4天"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "conflict",
+              "reason": "JD 要求实习时长 6 个月，你只能 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 6,
+                  "evidence": [
+                    "至少实习6个月"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "深圳不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳"
+                  ]
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": [
+                    "不支持远程办公"
+                  ]
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": [
+                    "服务端研发实习生"
+                  ]
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "服务端研发实习生",
+                  "evidence": [
+                    "服务端研发实习生"
+                  ]
+                },
+                "company": {
+                  "value": "示例栖岚软件有限公司",
+                  "evidence": [
+                    "公司名称：示例栖岚软件有限公司"
+                  ]
+                },
+                "cities": {
+                  "value": [
+                    "深圳"
+                  ],
+                  "evidence": [
+                    "工作地点：深圳"
+                  ]
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "dimensions": {
+          "skills": {
+            "score": 0,
+            "method": "rule",
+            "reason": "JD 要求 2 项技能，你有 0 项（其中 2 项任选其一）",
+            "matched": [],
+            "missing": [
+              "Go 或 Java",
+              "Docker 或 Kubernetes"
+            ]
+          },
+          "direction": {
+            "score": 0,
+            "method": "rule",
+            "reason": "JD 技能以技术方向为主，不在你的求职方向中",
+            "jd_groups": {
+              "tech": 2
+            },
+            "evidence": null
+          },
+          "experience": {
+            "score": null,
+            "method": "agent",
+            "reason": "等 Agent 对照经历补充",
+            "hints": [],
+            "evidence": null
+          },
+          "salary": {
+            "score": null,
+            "method": "rule",
+            "reason": "档案没写最低期望薪资"
+          }
+        },
+        "weights": {
+          "skills": 35,
+          "direction": 30,
+          "experience": 25,
+          "salary": 10
+        },
+        "total": {
+          "score": 0,
+          "grade": "ineligible",
+          "complete": false,
+          "missing": [
+            "experience",
+            "salary"
+          ]
+        },
+        "gaps": [
+          {
+            "kind": "skill",
+            "item": "Go 或 Java",
+            "jd": "熟悉 Go 或 Golang 或 Java"
+          },
+          {
+            "kind": "skill",
+            "item": "Docker 或 Kubernetes",
+            "jd": "Docker、Kubernetes 任选其一"
+          },
+          {
+            "kind": "filter",
+            "item": "days_per_week",
+            "result": "conflict",
+            "reason": "JD 要求每周到岗 4 天，你只能 3 天",
+            "jd": "每周至少到岗4天"
+          },
+          {
+            "kind": "filter",
+            "item": "min_months",
+            "result": "conflict",
+            "reason": "JD 要求实习时长 6 个月，你只能 3 个月",
+            "jd": "至少实习6个月"
+          },
+          {
+            "kind": "filter",
+            "item": "location",
+            "result": "conflict",
+            "reason": "深圳不在意向城市内，且不能远程、不搬家",
+            "jd": "工作地点：深圳"
+          }
+        ]
+      },
+      "parsed_input_arithmetic": {
+        "denominator": 2,
+        "credit_sum": "0",
+        "unrounded_score": "0",
+        "score": 0,
+        "requirements": [
+          [
+            "go",
+            "java"
+          ],
+          [
+            "docker",
+            "kubernetes"
+          ]
+        ],
+        "credits": [
+          "0",
+          "0"
+        ],
+        "missing": [
+          [
+            "docker",
+            "kubernetes"
+          ],
+          [
+            "go",
+            "java"
+          ]
+        ]
+      },
+      "manual_input_arithmetic": {
+        "denominator": 2,
+        "credit_sum": "0",
+        "unrounded_score": "0",
+        "score": 0,
+        "requirements": [
+          [
+            "go",
+            "java"
+          ],
+          [
+            "docker",
+            "kubernetes"
+          ]
+        ],
+        "credits": [
+          "0",
+          "0"
+        ],
+        "missing": [
+          [
+            "docker",
+            "kubernetes"
+          ],
+          [
+            "go",
+            "java"
+          ]
+        ]
+      },
+      "parsed_score_checks": {
+        "score_equal": true,
+        "item_count_equal": true,
+        "missing_equal": true,
+        "skill_gap_names_equal": true,
+        "skill_gap_quotes_valid": true,
+        "rules_version_2": true,
+        "experience_unfilled": true
+      },
+      "manual_score_checks": {
+        "score_equal": true,
+        "item_count_equal": true,
+        "missing_equal": true,
+        "skill_gap_names_equal": true,
+        "skill_gap_quotes_valid": true,
+        "rules_version_2": true,
+        "experience_unfilled": true
+      }
+    }
+  },
+  "manual_fields_job": {
+    "schema_version": 1,
+    "id": "job_269f7090d6e9",
+    "source": {
+      "type": "file",
+      "site": "ats",
+      "url": null,
+      "imported_at": "2026-10-29T16:36:10+08:00"
+    },
+    "title": "服务端研发实习生",
+    "company": "示例栖岚软件有限公司",
+    "cities": [
+      "深圳"
+    ],
+    "remote": false,
+    "employment_type": "internship",
+    "salary": {
+      "min": 220,
+      "max": 280,
+      "unit": "CNY/day",
+      "months": null,
+      "negotiable": false
+    },
+    "requirements": {
+      "graduation": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "days_per_week": 4,
+      "min_months": 6,
+      "education": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "skills": [
+        "Go",
+        "Golang",
+        "Java",
+        "Docker",
+        "Kubernetes"
+      ],
+      "skill_alternatives": [
+        [
+          "Go",
+          "Golang",
+          "Java"
+        ],
+        [
+          "Docker",
+          "Kubernetes"
+        ]
+      ]
+    },
+    "return_offer": null,
+    "published_at": "2026-10-29",
+    "deadline": "2026-12-10",
+    "status": "new",
+    "evidence": {
+      "title": {
+        "text": [
+          "服务端研发实习生"
+        ],
+        "method": "agent"
+      },
+      "company": {
+        "text": [
+          "公司名称：示例栖岚软件有限公司"
+        ],
+        "method": "agent"
+      },
+      "cities": {
+        "text": [
+          "工作地点：深圳"
+        ],
+        "method": "agent"
+      },
+      "remote": {
+        "text": [
+          "不支持远程办公"
+        ],
+        "method": "agent"
+      },
+      "employment_type": {
+        "text": [
+          "服务端研发实习生"
+        ],
+        "method": "agent"
+      },
+      "salary": {
+        "text": [
+          "薪资：220-280元/天"
+        ],
+        "method": "agent"
+      },
+      "requirements.graduation": {
+        "text": [
+          "仅招2027届"
+        ],
+        "method": "agent"
+      },
+      "requirements.days_per_week": {
+        "text": [
+          "每周至少到岗4天"
+        ],
+        "method": "agent"
+      },
+      "requirements.min_months": {
+        "text": [
+          "至少实习6个月"
+        ],
+        "method": "agent"
+      },
+      "requirements.education": {
+        "text": [
+          "本科及以上学历"
+        ],
+        "method": "agent"
+      },
+      "requirements.skills": {
+        "text": [
+          "技能要求：熟悉 Go 或 Golang 或 Java；Docker、Kubernetes 任选其一。"
+        ],
+        "method": "agent"
+      },
+      "requirements.skill_alternatives": {
+        "text": [
+          "熟悉 Go 或 Golang 或 Java",
+          "Docker、Kubernetes 任选其一"
+        ],
+        "method": "agent"
+      },
+      "published_at": {
+        "text": [
+          "发布时间：2026-10-29"
+        ],
+        "method": "agent"
+      },
+      "deadline": {
+        "text": [
+          "投递截止：2026-12-10"
+        ],
+        "method": "agent"
+      }
+    },
+    "guard": {
+      "verdict": "clean",
+      "counts": {}
+    },
+    "raw_text": "服务端研发实习生\n公司名称：示例栖岚软件有限公司\n工作地点：深圳\n不支持远程办公\n薪资：220-280元/天\n仅招2027届\n本科及以上学历\n每周至少到岗4天\n至少实习6个月\n岗位职责：协助维护内部服务，记录问题处理过程。\n计算机或数学相关专业。\n技能要求：熟悉 Go 或 Golang 或 Java；Docker、Kubernetes 任选其一。\n发布时间：2026-10-29\n投递截止：2026-12-10"
+  },
+  "manual_validate": {
+    "valid": true,
+    "errors": []
+  },
+  "manual_save": {
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_269f7090d6e9",
+        "title": "服务端研发实习生",
+        "company": "示例栖岚软件有限公司",
+        "cities": [
+          "深圳"
+        ],
+        "status": "new"
+      }
+    ],
+    "invalid": []
+  }
+}
