@@ -75,14 +75,14 @@ class Store:
         path = self._path(job_id)
         if not path.is_file():
             return None
-        return json.loads(path.read_text(encoding="utf-8"))
+        return schema.upgrade(json.loads(path.read_text(encoding="utf-8")))
 
     def all(self):
         """(records sorted by import time, warnings for files that could not be read)."""
         records, warnings = [], []
         for path in sorted(self.jobs.glob("job_*.json")) if self.jobs.is_dir() else []:
             try:
-                records.append(json.loads(path.read_text(encoding="utf-8")))
+                records.append(schema.upgrade(json.loads(path.read_text(encoding="utf-8"))))
             except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
                 warnings.append(f"{path.name}: unreadable, skipped ({exc})")
         records.sort(key=lambda r: ((r.get("source") or {}).get("imported_at") or "", r.get("id") or ""))
@@ -222,12 +222,33 @@ def merge_same_text(old: dict, new: dict) -> dict:
                 continue
         _set_field(merged, path, value)
         merged["evidence"][path] = new_evidence
+    _fit_alternatives(merged, old, new)
     source = merged["source"]
     for key in ("site", "url"):
         if source[key] is None:
             source[key] = new["source"][key]
     merged["guard"] = new["guard"]
     return merged
+
+
+def _fit_alternatives(merged: dict, old: dict, new: dict) -> None:
+    """Skill groups whose skills the merged record no longer lists follow the skills' own record.
+
+    Skills and skill groups merge field by field, so an agent's skills can be
+    kept beside a re-parse's groups, or the other way round. Each record on its
+    own is consistent, so the groups of whichever record the skills came from fit.
+    """
+    path = schema.ALTERNATIVES
+    listed = {schema.normalize_for_match(s) for s in merged["requirements"]["skills"]}
+    groups = merged["requirements"]["skill_alternatives"]
+    if all(schema.normalize_for_match(item) in listed for group in groups for item in group):
+        return
+    origin = new if merged["requirements"]["skills"] == new["requirements"]["skills"] else old
+    merged["requirements"]["skill_alternatives"] = json.loads(json.dumps(origin["requirements"]["skill_alternatives"]))
+    if path in origin["evidence"]:
+        merged["evidence"][path] = origin["evidence"][path]
+    else:
+        merged["evidence"].pop(path, None)
 
 
 def replace_edited(old: dict, new: dict) -> dict:
