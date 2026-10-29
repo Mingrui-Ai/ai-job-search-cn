@@ -30,7 +30,7 @@
 
 ```powershell
 conda activate ai-job-search-cn          # Python 3.12；Anaconda base 是 3.9，版本不够
-cd D:\06_Projects\ai-job-search-cn
+cd D:\06_Projects\ai-job-search\cn
 codex                                    # 或 claude；要从已激活环境的终端启动
 ```
 
@@ -70,18 +70,19 @@ python -m jobsearch_cn profile validate              # 校验 data/profile/ 下�
 
 ### 多个 Agent 并行工作
 
-两个 Agent 在同一个目录里工作会互相干扰：一方切换分支或提交，另一方的文件和验证结果随之改变（M1-5 实测中发生过）。所以每个 Agent 用自己的 `git worktree`：同一个仓库、共享提交历史，但各有一个工作目录。
+两个 Agent 在同一个目录里工作会互相干扰：一方切换分支或提交，另一方的文件和验证结果随之改变（M1-5 实测中发生过）。所以每个 Agent 用自己的 `git worktree`：同一个仓库、共享提交历史，但各有一个工作目录。2026-10-29 起，这些目录都放在 `D:\06_Projects\ai-job-search\` 下：
 
 | 目录 | 使用者 |
 | --- | --- |
-| `D:\06_Projects\ai-job-search-cn` | Claude Code（执行：功能开发） |
-| `D:\06_Projects\ai-job-search-cn-codex` | Codex（实测、验证） |
-| `D:\06_Projects\ai-job-search-cn-plan` | 规划 |
+| `cn` | Claude A（执行：主线功能开发） |
+| `cn-b` | Claude B（第二执行者） |
+| `cn-codex` | Codex（实测、验证） |
+| `cn-plan` | 规划 |
 
 ```powershell
-git worktree list                                                    # 查看所有工作目录
-git worktree add -b <新分支> ../ai-job-search-cn-<名字> origin/master  # 新建
-git worktree remove ../ai-job-search-cn-<名字>                       # 删除（目录里不能有未提交的改动）
+git worktree list                                         # 查看所有工作目录
+git worktree add -b <新分支> ../cn-<名字> origin/master     # 新建
+git worktree remove ../cn-<名字>                           # 删除（目录里不能有未提交的改动）
 ```
 
 - 一个分支同一时间只能在一个目录里签出。要查看别人正在用的分支，用 `git switch --detach origin/<分支>`。
