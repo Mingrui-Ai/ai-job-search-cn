@@ -1,0 +1,15 @@
+{
+  "basis": "match.md设计稿及路线图V5要求；不修改原示例档案",
+  "tech": {
+    "target.directions": [
+      "tech"
+    ],
+    "target.weights": null
+  },
+  "ops": {
+    "target.directions": [
+      "ops"
+    ],
+    "target.weights": null
+  }
+}

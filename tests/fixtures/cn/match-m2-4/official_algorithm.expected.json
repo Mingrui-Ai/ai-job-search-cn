@@ -1,0 +1,594 @@
+{
+  "schema_version": 1,
+  "kind": "manual_score_oracle",
+  "fixture": "tests/fixtures/cn/jd/official_site.txt",
+  "title": "大模型算法实习生",
+  "inputs": {
+    "skills": [
+      {
+        "name": "大模型",
+        "group": "tech"
+      },
+      {
+        "name": "推荐系统",
+        "group": "tech"
+      },
+      {
+        "name": "强化学习",
+        "group": "tech"
+      },
+      {
+        "name": "多模态",
+        "group": "tech"
+      },
+      {
+        "name": "PyTorch",
+        "group": "tech"
+      },
+      {
+        "name": "机器学习",
+        "group": "tech"
+      }
+    ],
+    "jd_evidence": [
+      "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+      "熟悉 PyTorch，具备扎实的机器学习基础"
+    ],
+    "hard_condition_evidence": [
+      "硕士研究生及以上学历",
+      "每周至少到岗 3 天，实习时长至少 6 个月",
+      "工作地点：杭州",
+      "支持远程实习"
+    ],
+    "salary": {
+      "min": null,
+      "max": null,
+      "unit": null,
+      "evidence": "薪资面议"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "filter": {
+        "verdict": "needs_check",
+        "checks": {
+          "graduation": {
+            "result": "unknown",
+            "reason": "JD未限定届别",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "硕士达到要求",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "days_per_week": {
+            "result": "match",
+            "reason": "4天达到3天",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "min_months": {
+            "result": "match",
+            "reason": "6个月达到要求",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "location": {
+            "result": "match",
+            "reason": "JD可远程且档案接受远程",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 8.333333,
+          "exact_credit_sum": "0.5",
+          "denominator": 6,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "大模型",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "推荐系统",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "强化学习",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "多模态",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "PyTorch",
+              "profile_skill": "PyTorch",
+              "credit": 0.5,
+              "profile_used_in": [],
+              "reason": "档案familiar；按设计稿记0.5"
+            },
+            {
+              "jd_skill": "机器学习",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        "direction": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "tech": 6
+          },
+          "reason": "不计general后分组{'tech': 6}；tech为最多或并列最多组，目标为tech，记100",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 45,
+          "method": "manual_semantic_judgment",
+          "reason": "RAG 应用与评测接触了模型应用，但没有推荐、强化学习、多模态研究或训练经历；需要说明从应用向算法迁移。",
+          "evidence": {
+            "jd": [
+              "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+              "熟悉 PyTorch，具备扎实的机器学习基础"
+            ],
+            "profile": [
+              "exp-1",
+              "proj-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "JD面议、金额与单位未知",
+          "jd": [
+            "薪资面议"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 49,
+        "grade": "moderate",
+        "score_grade_before_filter": "moderate",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "大模型",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "推荐系统",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "强化学习",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "多模态",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "机器学习",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "graduation",
+          "state": "unknown",
+          "reason": "JD未限定届别",
+          "jd": [
+            "硕士研究生及以上学历",
+            "每周至少到岗 3 天，实习时长至少 6 个月",
+            "工作地点：杭州",
+            "支持远程实习"
+          ]
+        },
+        {
+          "kind": "experience",
+          "item": "缺少推荐/强化学习/多模态研究的经历证明",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        }
+      ]
+    },
+    "ops": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "unknown",
+            "reason": "JD未限定届别",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "education": {
+            "result": "conflict",
+            "reason": "本科低于硕士",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "days_per_week": {
+            "result": "match",
+            "reason": "3天达到要求",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "min_months": {
+            "result": "conflict",
+            "reason": "3个月少于6个月",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "location": {
+            "result": "conflict",
+            "reason": "杭州无交集，不搬家且不接受远程",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "硕士研究生及以上学历",
+              "每周至少到岗 3 天，实习时长至少 6 个月",
+              "工作地点：杭州",
+              "支持远程实习"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 6,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "大模型",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "推荐系统",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "强化学习",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "多模态",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "PyTorch",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "机器学习",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "tech": 6
+          },
+          "reason": "不计general后分组{'tech': 6}；没有技能属于目标ops，记0",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 5,
+          "method": "manual_semantic_judgment",
+          "reason": "公众号与宣传工作没有模型算法依据，通用协作关联很弱。",
+          "evidence": {
+            "jd": [
+              "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+              "熟悉 PyTorch，具备扎实的机器学习基础"
+            ],
+            "profile": [
+              "exp-1",
+              "campus-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "档案 salary_min 未填写，未知，不按0分处理",
+          "jd": [
+            "薪资面议"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 1,
+        "grade": "ineligible",
+        "score_grade_before_filter": "poor",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "大模型",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "推荐系统",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "强化学习",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "多模态",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "PyTorch",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "机器学习",
+          "jd": [
+            "负责大模型在推荐系统中的落地，探索强化学习与多模态技术",
+            "熟悉 PyTorch，具备扎实的机器学习基础"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "graduation",
+          "state": "unknown",
+          "reason": "JD未限定届别",
+          "jd": [
+            "硕士研究生及以上学历",
+            "每周至少到岗 3 天，实习时长至少 6 个月",
+            "工作地点：杭州",
+            "支持远程实习"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "education",
+          "state": "conflict",
+          "reason": "本科低于硕士",
+          "jd": [
+            "硕士研究生及以上学历",
+            "每周至少到岗 3 天，实习时长至少 6 个月",
+            "工作地点：杭州",
+            "支持远程实习"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "min_months",
+          "state": "conflict",
+          "reason": "3个月少于6个月",
+          "jd": [
+            "硕士研究生及以上学历",
+            "每周至少到岗 3 天，实习时长至少 6 个月",
+            "工作地点：杭州",
+            "支持远程实习"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "conflict",
+          "reason": "杭州无交集，不搬家且不接受远程",
+          "jd": [
+            "硕士研究生及以上学历",
+            "每周至少到岗 3 天，实习时长至少 6 个月",
+            "工作地点：杭州",
+            "支持远程实习"
+          ]
+        }
+      ]
+    }
+  }
+}

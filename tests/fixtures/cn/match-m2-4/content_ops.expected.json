@@ -1,0 +1,571 @@
+{
+  "schema_version": 1,
+  "kind": "manual_score_oracle",
+  "fixture": "tests/fixtures/cn/jd-m2-3/shixiseng_content_ops_intern.txt",
+  "title": "新媒体内容运营实习生",
+  "inputs": {
+    "skills": [
+      {
+        "name": "秀米",
+        "group": "ops"
+      },
+      {
+        "name": "剪映",
+        "group": "ops"
+      },
+      {
+        "name": "Photoshop",
+        "group": "design"
+      },
+      {
+        "name": "Excel",
+        "group": "general"
+      },
+      {
+        "name": "内容策划",
+        "group": "ops"
+      },
+      {
+        "name": "文案写作",
+        "group": "ops"
+      },
+      {
+        "name": "数据复盘",
+        "group": "ops"
+      }
+    ],
+    "jd_evidence": [
+      "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+      "具备内容策划、文案写作、数据复盘能力",
+      "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+    ],
+    "hard_condition_evidence": [
+      "本科及以上在读；2027届优先，其他届别也可投递",
+      "每周至少到岗3天，连续实习至少3个月",
+      "工作地点：上海徐汇区",
+      "现场到岗，不支持远程"
+    ],
+    "salary": {
+      "min": 150,
+      "max": 180,
+      "unit": "CNY/day",
+      "evidence": "150-180元/天"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届符合软偏好",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "硕士达到本科",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "days_per_week": {
+            "result": "match",
+            "reason": "4天达到3天",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "min_months": {
+            "result": "match",
+            "reason": "6个月达到3个月",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "location": {
+            "result": "conflict",
+            "reason": "上海无交集、不搬家且JD不支持远程",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中外包/销售",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 7,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "秀米",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "剪映",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Photoshop",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Excel",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "内容策划",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "文案写作",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "数据复盘",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "design": 1,
+            "ops": 5
+          },
+          "reason": "不计general后分组{'design': 1, 'ops': 5}；没有技能属于目标tech，记0",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 5,
+          "method": "manual_semantic_judgment",
+          "reason": "技术开发和问答项目未记载图文选题、短视频或运营数据复盘工作，关联很弱。",
+          "evidence": {
+            "jd": [
+              "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+              "具备内容策划、文案写作、数据复盘能力",
+              "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+            ],
+            "profile": [
+              "exp-1",
+              "proj-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "reason": "JD日薪上限180达到档案最低150元/天",
+          "jd": [
+            "150-180元/天"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 11,
+        "grade": "ineligible",
+        "score_grade_before_filter": "poor",
+        "complete": true,
+        "missing": [],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "秀米",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "剪映",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Photoshop",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Excel",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "内容策划",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "文案写作",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "数据复盘",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "conflict",
+          "reason": "上海无交集、不搬家且JD不支持远程",
+          "jd": [
+            "本科及以上在读；2027届优先，其他届别也可投递",
+            "每周至少到岗3天，连续实习至少3个月",
+            "工作地点：上海徐汇区",
+            "现场到岗，不支持远程"
+          ]
+        }
+      ]
+    },
+    "ops": {
+      "filter": {
+        "verdict": "eligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届符合软偏好",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "本科达到要求",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "days_per_week": {
+            "result": "match",
+            "reason": "3天达到要求",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "min_months": {
+            "result": "match",
+            "reason": "3个月达到要求",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "location": {
+            "result": "match",
+            "reason": "上海直接命中",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中电话销售",
+            "jd": [
+              "本科及以上在读；2027届优先，其他届别也可投递",
+              "每周至少到岗3天，连续实习至少3个月",
+              "工作地点：上海徐汇区",
+              "现场到岗，不支持远程"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 51.428571,
+          "exact_credit_sum": "3.6",
+          "denominator": 7,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "秀米",
+              "profile_skill": "秀米",
+              "credit": 1,
+              "profile_used_in": [
+                "exp-1"
+              ],
+              "reason": "档案proficient；按设计稿记1"
+            },
+            {
+              "jd_skill": "剪映",
+              "profile_skill": "剪映",
+              "credit": 0.8,
+              "profile_used_in": [
+                "campus-1"
+              ],
+              "reason": "档案working；按设计稿记0.8"
+            },
+            {
+              "jd_skill": "Photoshop",
+              "profile_skill": "Photoshop",
+              "credit": 0.8,
+              "profile_used_in": [
+                "campus-1"
+              ],
+              "reason": "档案working；按设计稿记0.8"
+            },
+            {
+              "jd_skill": "Excel",
+              "profile_skill": "Excel",
+              "credit": 1,
+              "profile_used_in": [],
+              "reason": "档案proficient；按设计稿记1"
+            },
+            {
+              "jd_skill": "内容策划",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "文案写作",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "数据复盘",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        "direction": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "design": 1,
+            "ops": 5
+          },
+          "reason": "不计general后分组{'design': 1, 'ops': 5}；ops为最多组，目标为ops，记100",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 95,
+          "method": "manual_semantic_judgment",
+          "reason": "做过公众号推文、活动策划和海报/短视频制作，与图文和视频内容运营直接对口；还缺明确的数据复盘方法证明。",
+          "evidence": {
+            "jd": [
+              "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+              "具备内容策划、文案写作、数据复盘能力",
+              "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+            ],
+            "profile": [
+              "exp-1",
+              "campus-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "档案 salary_min 未填写，未知，不按0分处理",
+          "jd": [
+            "150-180元/天"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 80,
+        "grade": "strong",
+        "score_grade_before_filter": "strong",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "内容策划",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "文案写作",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "数据复盘",
+          "jd": [
+            "会用秀米排版、剪映制作短视频，能用 Photoshop 处理海报素材、Excel 整理运营数据",
+            "具备内容策划、文案写作、数据复盘能力",
+            "负责图文选题整理，协助短视频脚本制作，记录发布后的互动数据"
+          ]
+        }
+      ]
+    }
+  }
+}

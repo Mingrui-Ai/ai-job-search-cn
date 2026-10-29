@@ -1,0 +1,307 @@
+{
+  "kind": "manual_rankings",
+  "policy": "先排非ineligible，再按总分；所有ineligible都在后。poor不进推荐top_k。完整顺序并非全部可投。并列按档案逐项人工说明固定。",
+  "profiles": {
+    "tech": {
+      "full_order": [
+        {
+          "rank": 1,
+          "job": "boss_backend",
+          "score": 82,
+          "grade": "strong",
+          "filter": "eligible",
+          "dimensions": {
+            "skills": 51.428571,
+            "direction": 100.0,
+            "experience": 95.0,
+            "salary": 100.0
+          },
+          "recommended_top_k": true
+        },
+        {
+          "rank": 2,
+          "job": "test_dev",
+          "score": 51,
+          "grade": "moderate",
+          "filter": "eligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 100.0,
+            "experience": 65.0,
+            "salary": null
+          },
+          "recommended_top_k": true
+        },
+        {
+          "rank": 3,
+          "job": "official_algorithm",
+          "score": 49,
+          "grade": "moderate",
+          "filter": "needs_check",
+          "dimensions": {
+            "skills": 8.333333,
+            "direction": 100.0,
+            "experience": 45.0,
+            "salary": null
+          },
+          "recommended_top_k": true
+        },
+        {
+          "rank": 4,
+          "job": "ai_product",
+          "score": 21,
+          "grade": "poor",
+          "filter": "eligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 45.0,
+            "salary": 100.0
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 5,
+          "job": "ui_design",
+          "score": 4,
+          "grade": "poor",
+          "filter": "needs_check",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 15.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 6,
+          "job": "campus_llm",
+          "score": 72,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 38.75,
+            "direction": 100.0,
+            "experience": 85.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 7,
+          "job": "data_intern",
+          "score": 60,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 25.0,
+            "direction": 100.0,
+            "experience": 45.0,
+            "salary": 100.0
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 8,
+          "job": "experienced_java",
+          "score": 51,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 100.0,
+            "experience": 65.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 9,
+          "job": "content_ops",
+          "score": 11,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 5.0,
+            "salary": 100.0
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 10,
+          "job": "marketing_campus",
+          "score": 4,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 15.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        }
+      ],
+      "recommended_top_k": [
+        "boss_backend",
+        "test_dev",
+        "official_algorithm"
+      ],
+      "reason": "先排非ineligible；同一资格层按等级和总分降序。tech前三为后端、测试开发、算法实习；算法届别待确认。",
+      "acceptance_note": "与M2-4c前三交集至少2，且不可纳入人工ineligible/poor。"
+    },
+    "ops": {
+      "full_order": [
+        {
+          "rank": 1,
+          "job": "content_ops",
+          "score": 80,
+          "grade": "strong",
+          "filter": "eligible",
+          "dimensions": {
+            "skills": 51.428571,
+            "direction": 100.0,
+            "experience": 95.0,
+            "salary": null
+          },
+          "recommended_top_k": true
+        },
+        {
+          "rank": 2,
+          "job": "marketing_campus",
+          "score": 45,
+          "grade": "moderate",
+          "filter": "eligible",
+          "dimensions": {
+            "skills": 20.0,
+            "direction": 50.0,
+            "experience": 75.0,
+            "salary": null
+          },
+          "recommended_top_k": true
+        },
+        {
+          "rank": 3,
+          "job": "ui_design",
+          "score": 19,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 13.333333,
+            "direction": 0.0,
+            "experience": 50.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 4,
+          "job": "data_intern",
+          "score": 13,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 45.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 5,
+          "job": "ai_product",
+          "score": 13,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 45.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 6,
+          "job": "boss_backend",
+          "score": 3,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 10.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 7,
+          "job": "official_algorithm",
+          "score": 1,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 5.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 8,
+          "job": "campus_llm",
+          "score": 1,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 5.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 9,
+          "job": "test_dev",
+          "score": 1,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 5.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        },
+        {
+          "rank": 10,
+          "job": "experienced_java",
+          "score": 0,
+          "grade": "ineligible",
+          "filter": "ineligible",
+          "dimensions": {
+            "skills": 0.0,
+            "direction": 0.0,
+            "experience": 0.0,
+            "salary": null
+          },
+          "recommended_top_k": false
+        }
+      ],
+      "recommended_top_k": [
+        "content_ops",
+        "marketing_campus"
+      ],
+      "reason": "先排非ineligible的内容运营、市场管培；其余均硬性不符。排第3仅为完整清单位置，不是推荐第三名。13分并列时数据分析在上海、硬冲突较少，先于AI产品；1分并列按算法、校招大模型、测试开发固定顺序，不影响推荐集。",
+      "acceptance_note": "仅2个岗位可推荐；现有任务单的固定前三与不得纳入ineligible/poor无法同时满足。请规划者裁定使用前2，或另增岗位；本人工判断不为凑数改分。"
+    }
+  }
+}

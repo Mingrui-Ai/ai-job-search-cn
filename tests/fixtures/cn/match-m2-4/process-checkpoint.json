@@ -1,0 +1,17 @@
+{
+  "checked_at_utc": "2026-10-28T08:11:22.065901+00:00",
+  "origin_master": "659b50da3c23b06ec491c7bf07f93a96c7ebf460",
+  "m2_4_prs": [
+    {
+      "headRefName": "docs/cn-m2-4-brief",
+      "headRefOid": "a87ae4f3a94b334d2f556ccba40cdd0e6eecec83",
+      "mergedAt": "2026-10-28T07:18:18Z",
+      "number": 25,
+      "state": "MERGED",
+      "title": "docs(cn): M2-4 任务单：可解释评分设计稿与三步拆分"
+    }
+  ],
+  "m2_4b_prs": [],
+  "m2_4b_merged": false,
+  "note": "PR title/head metadata only; no scoring implementation or scoring test read."
+}

@@ -1,0 +1,610 @@
+{
+  "schema_version": 1,
+  "kind": "manual_score_oracle",
+  "fixture": "tests/fixtures/cn/jd-m2-3/ats_ui_design_intern.txt",
+  "title": "UI设计实习生",
+  "inputs": {
+    "skills": [
+      {
+        "name": "Figma",
+        "group": "design"
+      },
+      {
+        "name": "Sketch",
+        "group": "design"
+      },
+      {
+        "name": "Photoshop",
+        "group": "design"
+      },
+      {
+        "name": "交互设计",
+        "group": "design"
+      },
+      {
+        "name": "视觉设计",
+        "group": "design"
+      },
+      {
+        "name": "设计规范",
+        "group": "design"
+      }
+    ],
+    "jd_evidence": [
+      "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+      "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+    ],
+    "hard_condition_evidence": [
+      "学历：硕士及以上学历优先，不设最低学历门槛",
+      "工作地点：杭州；支持全程远程实习",
+      "每周五例会",
+      "项目周期6个月，具体实习时长另行协商"
+    ],
+    "salary": {
+      "min": null,
+      "max": null,
+      "unit": null,
+      "evidence": "薪酬：面议"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "filter": {
+        "verdict": "needs_check",
+        "checks": {
+          "graduation": {
+            "result": "unknown",
+            "reason": "第十二届设计周不是毕业届别，JD未限定届别",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "明确学历不限，按M2-4a min=none判符合",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "days_per_week": {
+            "result": "unknown",
+            "reason": "周五例会不等于实习天数，未知",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "min_months": {
+            "result": "unknown",
+            "reason": "项目周期不是最低实习月数，未知",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "location": {
+            "result": "match",
+            "reason": "JD支持远程且档案接受",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 6,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "Figma",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Sketch",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Photoshop",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "交互设计",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "视觉设计",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "设计规范",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "design": 6
+          },
+          "reason": "不计general后分组{'design': 6}；没有技能属于目标tech，记0",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 15,
+          "method": "manual_semantic_judgment",
+          "reason": "做过课程问答应用，但未写界面组件、视觉稿或设计交付；最多有开发协作背景。",
+          "evidence": {
+            "jd": [
+              "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+              "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+            ],
+            "profile": [
+              "proj-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "JD面议、金额与单位未知",
+          "jd": [
+            "薪酬：面议"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 4,
+        "grade": "poor",
+        "score_grade_before_filter": "poor",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "Figma",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Sketch",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Photoshop",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "交互设计",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "视觉设计",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "设计规范",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "graduation",
+          "state": "unknown",
+          "reason": "第十二届设计周不是毕业届别，JD未限定届别",
+          "jd": [
+            "学历：硕士及以上学历优先，不设最低学历门槛",
+            "工作地点：杭州；支持全程远程实习",
+            "每周五例会",
+            "项目周期6个月，具体实习时长另行协商"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "days_per_week",
+          "state": "unknown",
+          "reason": "周五例会不等于实习天数，未知",
+          "jd": [
+            "学历：硕士及以上学历优先，不设最低学历门槛",
+            "工作地点：杭州；支持全程远程实习",
+            "每周五例会",
+            "项目周期6个月，具体实习时长另行协商"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "min_months",
+          "state": "unknown",
+          "reason": "项目周期不是最低实习月数，未知",
+          "jd": [
+            "学历：硕士及以上学历优先，不设最低学历门槛",
+            "工作地点：杭州；支持全程远程实习",
+            "每周五例会",
+            "项目周期6个月，具体实习时长另行协商"
+          ]
+        }
+      ]
+    },
+    "ops": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "unknown",
+            "reason": "JD未限定毕业届别",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "明确学历不限，min=none判符合",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "days_per_week": {
+            "result": "unknown",
+            "reason": "只有周五例会，实习天数未知",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "min_months": {
+            "result": "unknown",
+            "reason": "项目周期不能当实习月数，未知",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "location": {
+            "result": "conflict",
+            "reason": "杭州无交集、不搬家且不接受远程",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "学历：硕士及以上学历优先，不设最低学历门槛",
+              "工作地点：杭州；支持全程远程实习",
+              "每周五例会",
+              "项目周期6个月，具体实习时长另行协商"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 13.333333,
+          "exact_credit_sum": "0.8",
+          "denominator": 6,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "Figma",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Sketch",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Photoshop",
+              "profile_skill": "Photoshop",
+              "credit": 0.8,
+              "profile_used_in": [
+                "campus-1"
+              ],
+              "reason": "档案working；按设计稿记0.8"
+            },
+            {
+              "jd_skill": "交互设计",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "视觉设计",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "设计规范",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "design": 6
+          },
+          "reason": "不计general后分组{'design': 6}；没有技能属于目标ops，记0",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 50,
+          "method": "manual_semantic_judgment",
+          "reason": "学生会海报和短视频制作与视觉素材处理沾边，尚无 UI 组件、交互规范或界面交付经历。",
+          "evidence": {
+            "jd": [
+              "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+              "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+            ],
+            "profile": [
+              "campus-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "档案 salary_min 未填写，未知，不按0分处理",
+          "jd": [
+            "薪酬：面议"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 19,
+        "grade": "ineligible",
+        "score_grade_before_filter": "poor",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "Figma",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Sketch",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "交互设计",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "视觉设计",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "设计规范",
+          "jd": [
+            "掌握 Figma、Sketch，能用 Photoshop 完成图像处理，具备交互设计、视觉设计和设计规范整理能力",
+            "协助整理界面组件，完成页面视觉稿，参与设计评审与交付检查"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "graduation",
+          "state": "unknown",
+          "reason": "JD未限定毕业届别",
+          "jd": [
+            "学历：硕士及以上学历优先，不设最低学历门槛",
+            "工作地点：杭州；支持全程远程实习",
+            "每周五例会",
+            "项目周期6个月，具体实习时长另行协商"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "days_per_week",
+          "state": "unknown",
+          "reason": "只有周五例会，实习天数未知",
+          "jd": [
+            "学历：硕士及以上学历优先，不设最低学历门槛",
+            "工作地点：杭州；支持全程远程实习",
+            "每周五例会",
+            "项目周期6个月，具体实习时长另行协商"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "min_months",
+          "state": "unknown",
+          "reason": "项目周期不能当实习月数，未知",
+          "jd": [
+            "学历：硕士及以上学历优先，不设最低学历门槛",
+            "工作地点：杭州；支持全程远程实习",
+            "每周五例会",
+            "项目周期6个月，具体实习时长另行协商"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "conflict",
+          "reason": "杭州无交集、不搬家且不接受远程",
+          "jd": [
+            "学历：硕士及以上学历优先，不设最低学历门槛",
+            "工作地点：杭州；支持全程远程实习",
+            "每周五例会",
+            "项目周期6个月，具体实习时长另行协商"
+          ]
+        }
+      ]
+    }
+  }
+}

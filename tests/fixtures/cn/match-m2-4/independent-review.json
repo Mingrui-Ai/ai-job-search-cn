@@ -1,0 +1,184 @@
+{
+  "head": "5c1445a7d2fc96263fedc4aadaa75541067aa879",
+  "negative_cases": [
+    {
+      "case": "element-object",
+      "outputs": {
+        "validate": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence.profile[0]: must be an experience id (a string)"
+          ]
+        },
+        "save": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence.profile[0]: must be an experience id (a string)"
+          ]
+        }
+      },
+      "no_saved_record": true
+    },
+    {
+      "case": "element-array",
+      "outputs": {
+        "validate": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence.profile[0]: must be an experience id (a string)"
+          ]
+        },
+        "save": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence.profile[0]: must be an experience id (a string)"
+          ]
+        }
+      },
+      "no_saved_record": true
+    },
+    {
+      "case": "element-number",
+      "outputs": {
+        "validate": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence.profile[0]: must be an experience id (a string)"
+          ]
+        },
+        "save": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence.profile[0]: must be an experience id (a string)"
+          ]
+        }
+      },
+      "no_saved_record": true
+    },
+    {
+      "case": "element-empty_string",
+      "outputs": {
+        "validate": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence.profile[0]: must be an experience id (a string)"
+          ]
+        },
+        "save": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence.profile[0]: must be an experience id (a string)"
+          ]
+        }
+      },
+      "no_saved_record": true
+    },
+    {
+      "case": "container-object",
+      "outputs": {
+        "validate": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence: must be {\"jd\": [JD quotes], \"profile\": [experience ids]}"
+          ]
+        },
+        "save": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence: must be {\"jd\": [JD quotes], \"profile\": [experience ids]}"
+          ]
+        }
+      },
+      "no_saved_record": true
+    },
+    {
+      "case": "container-array",
+      "outputs": {
+        "validate": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence.profile: name the experience (its id) the score rests on"
+          ]
+        },
+        "save": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence.profile: name the experience (its id) the score rests on"
+          ]
+        }
+      },
+      "no_saved_record": true
+    },
+    {
+      "case": "container-number",
+      "outputs": {
+        "validate": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence: must be {\"jd\": [JD quotes], \"profile\": [experience ids]}"
+          ]
+        },
+        "save": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence: must be {\"jd\": [JD quotes], \"profile\": [experience ids]}"
+          ]
+        }
+      },
+      "no_saved_record": true
+    },
+    {
+      "case": "container-empty_string",
+      "outputs": {
+        "validate": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence: must be {\"jd\": [JD quotes], \"profile\": [experience ids]}"
+          ]
+        },
+        "save": {
+          "exit_code": 1,
+          "valid": false,
+          "errors": [
+            "dimensions.experience.evidence: must be {\"jd\": [JD quotes], \"profile\": [experience ids]}"
+          ]
+        }
+      },
+      "no_saved_record": true
+    }
+  ],
+  "total_error": {
+    "valid": false,
+    "errors": [
+      "total: does not follow from the dimensions and weights; they give {\"score\": 76, \"grade\": \"strong\", \"complete\": true, \"missing\": []}"
+    ]
+  },
+  "copied_total": {
+    "score": 76,
+    "grade": "strong",
+    "complete": true,
+    "missing": []
+  },
+  "draft": {
+    "utf8_no_bom": true,
+    "excluded_from_list": true,
+    "saved_agent_experience_preserved": true
+  },
+  "workflow_pairs": 20,
+  "blocking_findings": []
+}

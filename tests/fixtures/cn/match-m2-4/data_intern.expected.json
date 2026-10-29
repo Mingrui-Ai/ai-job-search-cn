@@ -1,0 +1,476 @@
+{
+  "schema_version": 1,
+  "kind": "manual_score_oracle",
+  "fixture": "tests/fixtures/cn/jd/shixiseng_intern.txt",
+  "title": "数据分析实习生",
+  "inputs": {
+    "skills": [
+      {
+        "name": "SQL",
+        "group": "data"
+      },
+      {
+        "name": "Python",
+        "group": "tech"
+      },
+      {
+        "name": "Pandas",
+        "group": "data"
+      },
+      {
+        "name": "机器学习",
+        "group": "tech"
+      }
+    ],
+    "jd_evidence": [
+      "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+      "负责业务数据的清洗、分析与可视化"
+    ],
+    "hard_condition_evidence": [
+      "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+      "2027届在校生",
+      "工作地点：上海市徐汇区"
+    ],
+    "salary": {
+      "min": 150,
+      "max": 200,
+      "unit": "CNY/day",
+      "evidence": "150-200/天"
+    }
+  },
+  "human_match": {
+    "tech": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届符合",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "硕士达到本科",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "days_per_week": {
+            "result": "conflict",
+            "reason": "4天少于5天",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "min_months": {
+            "result": "match",
+            "reason": "6个月达到3个月",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "location": {
+            "result": "unknown",
+            "reason": "上海无交集、不搬家；档案接受远程但JD未知，待确认",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 25.0,
+          "exact_credit_sum": "1",
+          "denominator": 4,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "SQL",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Python",
+              "profile_skill": "Python",
+              "credit": 1,
+              "profile_used_in": [
+                "exp-1"
+              ],
+              "reason": "档案proficient；按设计稿记1"
+            },
+            {
+              "jd_skill": "Pandas",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "机器学习",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ]
+        },
+        "direction": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "data": 2,
+            "tech": 2
+          },
+          "reason": "不计general后分组{'data': 2, 'tech': 2}；tech为最多或并列最多组，目标为tech，记100",
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 45,
+          "method": "manual_semantic_judgment",
+          "reason": "Python 检索评测脚本与业务数据处理沾边，但档案没有 SQL/Pandas 分析和业务可视化案例。MySQL 不等于已列明 SQL 技能。",
+          "evidence": {
+            "jd": [
+              "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+              "负责业务数据的清洗、分析与可视化"
+            ],
+            "profile": [
+              "exp-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": 100,
+          "method": "manual_rule_application",
+          "reason": "JD日薪上限200达到档案最低150元/天",
+          "jd": [
+            "150-200/天"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 60,
+        "grade": "ineligible",
+        "score_grade_before_filter": "good",
+        "complete": true,
+        "missing": [],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "SQL",
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Pandas",
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "机器学习",
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "days_per_week",
+          "state": "conflict",
+          "reason": "4天少于5天",
+          "jd": [
+            "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+            "2027届在校生",
+            "工作地点：上海市徐汇区"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "location",
+          "state": "unknown",
+          "reason": "上海无交集、不搬家；档案接受远程但JD未知，待确认",
+          "jd": [
+            "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+            "2027届在校生",
+            "工作地点：上海市徐汇区"
+          ]
+        }
+      ]
+    },
+    "ops": {
+      "filter": {
+        "verdict": "ineligible",
+        "checks": {
+          "graduation": {
+            "result": "match",
+            "reason": "2027届符合",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "education": {
+            "result": "match",
+            "reason": "本科达到要求",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "days_per_week": {
+            "result": "conflict",
+            "reason": "3天少于5天",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "min_months": {
+            "result": "match",
+            "reason": "3个月达到要求",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "location": {
+            "result": "match",
+            "reason": "上海直接命中",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "employment_type": {
+            "result": "match",
+            "reason": "实习属于目标",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          },
+          "exclusions": {
+            "result": "match",
+            "reason": "标题未命中排除词",
+            "jd": [
+              "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+              "2027届在校生",
+              "工作地点：上海市徐汇区"
+            ]
+          }
+        }
+      },
+      "dimensions": {
+        "skills": {
+          "score": 0.0,
+          "exact_credit_sum": "0",
+          "denominator": 4,
+          "method": "manual_rule_application",
+          "reason": "逐技能按设计稿掌握程度记分，未列名记0；同义仅用于查找，不由经历补技能",
+          "items": [
+            {
+              "jd_skill": "SQL",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Python",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "Pandas",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            },
+            {
+              "jd_skill": "机器学习",
+              "profile_skill": null,
+              "credit": 0,
+              "profile_used_in": [],
+              "reason": "档案 skills[] 未列同名/指定同义技能，不从课程或经历推填"
+            }
+          ],
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ]
+        },
+        "direction": {
+          "score": 0,
+          "method": "manual_rule_application",
+          "jd_groups": {
+            "data": 2,
+            "tech": 2
+          },
+          "reason": "不计general后分组{'data': 2, 'tech': 2}；没有技能属于目标ops，记0",
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ],
+          "profile": [
+            "target.directions"
+          ]
+        },
+        "experience": {
+          "score": 45,
+          "method": "manual_semantic_judgment",
+          "reason": "公众号增长与活动反馈有业务指标背景，但没有 SQL、Python 或机器学习分析案例，需另证数据处理能力。",
+          "evidence": {
+            "jd": [
+              "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+              "负责业务数据的清洗、分析与可视化"
+            ],
+            "profile": [
+              "exp-1"
+            ]
+          }
+        },
+        "salary": {
+          "score": null,
+          "method": "manual_rule_application",
+          "reason": "档案 salary_min 未填写，未知，不按0分处理",
+          "jd": [
+            "150-200/天"
+          ],
+          "profile": [
+            "target.salary_min"
+          ]
+        }
+      },
+      "weights": {
+        "skills": 35,
+        "direction": 30,
+        "experience": 25,
+        "salary": 10
+      },
+      "total": {
+        "score": 13,
+        "grade": "ineligible",
+        "score_grade_before_filter": "poor",
+        "complete": false,
+        "missing": [
+          "salary"
+        ],
+        "rounding": "weighted mean using exact skill fraction; half up at final total"
+      },
+      "gaps": [
+        {
+          "kind": "skill",
+          "item": "SQL",
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Python",
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "Pandas",
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ]
+        },
+        {
+          "kind": "skill",
+          "item": "机器学习",
+          "jd": [
+            "熟练使用 SQL、Python（Pandas），掌握基本的机器学习方法者优先",
+            "负责业务数据的清洗、分析与可视化"
+          ]
+        },
+        {
+          "kind": "hard_condition",
+          "item": "days_per_week",
+          "state": "conflict",
+          "reason": "3天少于5天",
+          "jd": [
+            "150-200/天 | 上海 | 本科 | 5天/周 | 3个月",
+            "2027届在校生",
+            "工作地点：上海市徐汇区"
+          ]
+        }
+      ]
+    }
+  }
+}
