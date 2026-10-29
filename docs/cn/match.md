@@ -197,7 +197,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 }
 ```
 
-- `rules_version`：规则或默认权重改变时加 1。
+- `rules_version`：规则给出的结果变了就加 1，包括各项检查和总的结论、维度分数、列出的缺口，默认权重改变时也加 1。只改理由的措辞时不加：之前保存的记录保留旧理由，重新评分后更新；对这种旧记录运行 `match validate`，会报过滤和缺口与规则给出的不一致，重新评分即可。
 - `job_hash`、`profile_hash`：评分时岗位记录和档案的摘要，档案的摘要不含 `contact`。岗位或档案改了，`match list` 会把这条标为"过期"，需要重新评分。重新评分时，摘要都没变就保留 Agent 已补的内容，变了就清空 Agent 补充。
 - Agent 补充的维度必须有 `reason` 和 `evidence`：`jd` 是 JD 原文片段，必须逐字出现在岗位的 `raw_text` 里；`profile` 是档案条目的 id，必须存在。
 - `match validate` 检查结构、取值、分值范围和依据，并按上面的规则从各维度重新算出总分和等级，和记录不一致就报错。Agent 不能直接改总分。
