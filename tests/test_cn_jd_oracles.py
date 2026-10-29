@@ -13,6 +13,9 @@ exception the planner has ruled on is written here, with its reason.
 - V4 (tests/fixtures/cn/jd-m2-3-holdout/): the holdout for M2-3, a regression
   set since H9 tuned rules on it. Skills compare ignoring case and spaces, as
   its expectations were written (PowerBI is Power BI).
+- V6 (tests/fixtures/cn/jd-h9-holdout/): the holdout for H9, a regression set
+  since H12 tuned rules on it (H15). Skills compare as in V4. Its exceptions are
+  the rule-level expectations the verifier froze beside the human truth.
 """
 import hashlib
 import json
@@ -161,6 +164,45 @@ class V4(Oracles, unittest.TestCase):
     verdict_exceptions = {
         ("official_finance_campus.txt", "ops"): ("eligible", CAMPUS + "; nothing is unknown any more"),
     }
+
+
+# H9 (roadmap): when a JD gives different internship lengths, the rule leaves min_months
+# blank rather than pick one. Two V6 samples quote a platform's 3 months beside the
+# role's 4. Their human truth stays 4, and the verifier froze the rule's blank and the
+# filter results that follow from it next to it (rule_expectations, policy_blank_match).
+POLICY_BLANK = "H9: 3 and 4 months both appear, so the rule leaves min_months blank"
+MONTHS_UNKNOWN = "H9: a blank min_months is unknown to the filter"
+DURATION_SAMPLES = ("official_test_duration.txt", "ats_recruiting_duration.txt")
+
+
+class V6(Oracles, unittest.TestCase):
+    directory = REPO / "tests" / "fixtures" / "cn" / "jd-h9-holdout"
+    fold_skills = True
+    field_exceptions = {(name, "requirements.min_months"): (None, POLICY_BLANK) for name in DURATION_SAMPLES}
+    check_exceptions = {(name, who, "min_months"): ("unknown", MONTHS_UNKNOWN)
+                        for name in DURATION_SAMPLES for who in ("tech", "ops")}
+    verdict_exceptions = {
+        ("official_test_duration.txt", "tech"): ("needs_check", MONTHS_UNKNOWN),
+        ("ats_recruiting_duration.txt", "tech"): ("needs_check", MONTHS_UNKNOWN),
+        ("ats_recruiting_duration.txt", "ops"): ("needs_check", MONTHS_UNKNOWN),
+    }
+
+    def test_the_exceptions_are_the_frozen_rule_expectations(self):
+        # Every exception, and nothing more, is a value the verifier froze for the blank.
+        frozen = {}
+        for expected in self.expectations():
+            name = expected["fixture"]
+            for path, rule in expected.get("rule_expectations", {}).items():
+                frozen[(name, path)] = rule["value"]
+            for who, judged in expected.get("policy_blank_match", {}).items():
+                human = expected["human_match"][who]
+                if judged["verdict"] != human["verdict"]:
+                    frozen[(name, who)] = judged["verdict"]
+                for check, result in judged["checks"].items():
+                    if result["result"] != human["checks"][check]["result"]:
+                        frozen[(name, who, check)] = result["result"]
+        exceptions = {**self.field_exceptions, **self.check_exceptions, **self.verdict_exceptions}
+        self.assertEqual({key: value for key, (value, _) in exceptions.items()}, frozen)
 
 
 if __name__ == "__main__":
