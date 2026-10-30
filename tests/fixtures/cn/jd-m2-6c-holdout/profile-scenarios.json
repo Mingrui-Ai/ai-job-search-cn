@@ -1,0 +1,27 @@
+{
+  "purpose": "为尚未定稿的面试过滤契约冻结人工场景；不是 Profile Schema 的补丁，也不是从意向工作城市推断面试偏好。全部为新增虚构条件。",
+  "schema_mapping": "M2-6c PR 开出后仅在临时输入中映射到实际字段，本文件不改。无法表达的场景单列待裁定，不改人工期望。",
+  "tech": {
+    "base_profile": "tests/fixtures/cn/profile/tech/profile.json",
+    "available_from": "2026-11-15",
+    "accepts_remote_interview": true,
+    "accepted_remote_channels": ["online_unspecified", "video", "phone"],
+    "accepts_onsite_interview": true,
+    "onsite_interview_cities": ["广州", "深圳"],
+    "accepts_interview_travel_outside_these_cities": false
+  },
+  "ops": {
+    "base_profile": "tests/fixtures/cn/profile/ops/profile.json",
+    "available_from": "2026-12-01",
+    "accepts_remote_interview": true,
+    "accepted_remote_channels": ["online_unspecified", "video", "phone"],
+    "accepts_onsite_interview": true,
+    "onsite_interview_cities": ["上海"],
+    "accepts_interview_travel_outside_these_cities": false
+  },
+  "comparison_rules": {
+    "interview": "必需的每轮都能参加才为match；必需现场城市与明确面试偏好冲突时conflict；面试形式/必要地点未知时unknown。任选方式只需一种可行。不能用远程办公意愿替代远程面试意愿。",
+    "arrival": "available_from表示最早可到岗日。明确最晚日期与该日比较；指定月份内存在可行日期则match。尽快无日期、缺年份、依赖未知面试通过日期的相对时间均unknown，不把发布日期或今天作为锚点。",
+    "overall": "现有七项与这两项共同总结时，任一conflict为ineligible；无conflict但有unknown为needs_check；其余eligible。这是人工场景口径，实际契约不一致时交规划者裁定。"
+  }
+}

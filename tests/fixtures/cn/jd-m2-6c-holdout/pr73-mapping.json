@@ -1,0 +1,48 @@
+{
+  "target_commit": "52fa55500c5e2eb98d7968ab44a50bf51f9b0a2c",
+  "basis": "#73 Job Schema/match documentation and planner ruling https://github.com/Mingrui-Ai/ai-job-search-cn/pull/73#issuecomment-6514799668; mapping written before executing these frozen inputs on the PR.",
+  "frozen_manifest_sha256": "312d55e1a4908a038383e740198cba96b8a93cf6d95a5113ae662cf13b51bf54",
+  "policy": "Keep frozen files unchanged. Separate implementation errors from contract differences. Only use base tech/ops profiles; frozen travel preferences have no schema representation in #73 and are not inferred from work-location choices.",
+  "fixtures": {
+    "online_backend_intern": {
+      "interview": {"mode": "online", "cities": []},
+      "start": {"by": "2026-11-20", "asap": false},
+      "new_checks": {"tech": {"interview": "match", "start_date": "match"}, "ops": {"interview": "match", "start_date": "conflict"}},
+      "travel_note_required": false,
+      "inference_note_required": false,
+      "contract_differences": []
+    },
+    "onsite_finance_intern": {
+      "interview": {"mode": "onsite", "cities": ["南京"]},
+      "start": {"by": null, "asap": true},
+      "new_checks": {"tech": {"interview": "match", "start_date": "unknown"}, "ops": {"interview": "match", "start_date": "unknown"}},
+      "travel_note_required": true,
+      "inference_note_required": false,
+      "contract_differences": ["Frozen interview travel refusals cannot be represented; the accepted contract emits a cost note instead of conflict.", "Start-date unknown is a confirmation item, excluded from the overall verdict.", "Negotiable is not represented independently."]
+    },
+    "mixed_recruiting_intern": {
+      "interview": {"mode": "mixed", "cities": ["杭州"]},
+      "start": {"by": "2026-12-31", "asap": false},
+      "new_checks": {"tech": {"interview": "match", "start_date": "match"}, "ops": {"interview": "match", "start_date": "match"}},
+      "travel_note_required": true,
+      "inference_note_required": false,
+      "contract_differences": ["Mixed retains the required onsite round but not channel/order details.", "Month precision is mapped to the latest date, not an exact start date; the lower edge of the month window is not stored.", "Frozen interview travel refusals become a cost note, not conflict."]
+    },
+    "relative_content_intern": {
+      "interview": {"mode": "online", "cities": []},
+      "start": null,
+      "new_checks": {"tech": {"interview": "match", "start_date": "unknown"}, "ops": {"interview": "match", "start_date": "unknown"}},
+      "travel_note_required": false,
+      "inference_note_required": false,
+      "contract_differences": ["Phone/video alternatives are both online, not the online/onsite either mode.", "Event-relative deadline is left null under the approved scope; it is not a missed supported absolute date.", "Start-date unknown is excluded from the overall verdict."]
+    },
+    "unrelated_online_testing_intern": {
+      "interview": null,
+      "start": {"by": "2027-01-10", "asap": false},
+      "new_checks": {"tech": {"interview": "unknown", "start_date": "match"}, "ops": {"interview": "unknown", "start_date": "match"}},
+      "travel_note_required": false,
+      "inference_note_required": true,
+      "contract_differences": ["Planner permits year inference, unlike the original frozen oracle: nearest to 2026-10-29 is 2027-01-10. Mark it as an inference in the check reason.", "Interview unknown is excluded from the overall verdict."]
+    }
+  }
+}
