@@ -305,10 +305,13 @@ def cmd_match_score(args) -> int:
         return 1
     matches = _matches(args)
     record = score.score_job(job, data, _vocabulary(args), previous=_saved_match(matches, args.id))
-    if args.save:
-        matches.save(record)
-    if args.draft:
-        matches.write_draft(record)
+    try:
+        if args.save:
+            matches.save(record)
+        if args.draft:
+            matches.write_draft(record)
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
     _emit(record)
     return 0
 
@@ -353,7 +356,11 @@ def cmd_match_save(args) -> int:
     if errors:
         _emit({"valid": False, "errors": errors})
         return 1
-    _emit({"saved": _matches(args).save(record), "job_id": record["job_id"]})
+    try:
+        saved = _matches(args).save(record)
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
+    _emit({"saved": saved, "job_id": record["job_id"]})
     return 0
 
 
@@ -460,13 +467,14 @@ def _report_records(args, matches: store.MatchStore):
 
 
 def _report_dir(root: Path, now) -> Path:
-    """<data dir>/reports/<date-time>/, a fresh directory even when two reports land in the same second."""
-    base = root / "reports" / now.strftime("%Y%m%d-%H%M%S")
+    """<data dir>/reports/<date-time>/, a fresh directory even when two reports land in the same second.
+    reports/ must be a real folder inside the data directory (store.safe_dir)."""
+    base = store.safe_dir(root, "reports") / now.strftime("%Y%m%d-%H%M%S")
     path, suffix = base, 1
-    while path.exists():
+    while path.exists() or path.is_symlink():
         suffix += 1
         path = base.with_name(f"{base.name}-{suffix}")
-    path.mkdir(parents=True)
+    path.mkdir()
     return path
 
 
@@ -491,7 +499,10 @@ def cmd_match_report(args) -> int:
         entries.append(report.entry(record, job, bool(reasons), reasons))
     entries, vocabulary = report.order(entries), _vocabulary(args)
     now = datetime.now().astimezone()
-    directory = _report_dir(store.data_dir(args.data_dir), now)
+    try:
+        directory = _report_dir(store.data_dir(args.data_dir), now)
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
     page, form = directory / "report.html", directory / "feedback.csv"
     page.write_text(report.build(entries, data, now.isoformat(timespec="seconds"), vocabulary),
                     encoding="utf-8", newline="\n")
