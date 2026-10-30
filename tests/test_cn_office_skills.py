@@ -75,11 +75,14 @@ class OfficeSkills(unittest.TestCase):
                                ("使用PPT演示公司方案。", ["PPT"]),
                                ("使用PowerPoint呈现公司业务。", ["PowerPoint"]),
                                ("熟练使用Excel分析公司的销售数据。", ["Excel"]),
-                               ("使用Word汇总公司纪要。", ["Word"])):
+                               ("使用Word汇总公司纪要。", ["Word"]),
+                               ("了解如何用Excel分析集团经营数据。", ["Excel"]),
+                               ("了解使用PPT介绍集团业务的方法。", ["PPT"])):
             with self.subTest(text=text):
                 job = self.assert_skills(text, expected)
                 self.assertEqual(job["evidence"]["requirements.skills"]["text"], text.rstrip("。"))
         self.assert_skills("公司：Excel信息有限公司\n熟练使用Excel。", ["Excel"])
+        self.assert_skills("了解Excel信息有限公司的业务。", [])
 
     def test_company_names_do_not_supply_skills(self):
         for name in ("Word空间有限公司", "Office咨询有限公司", "Excel信息有限公司", "PPT文化有限公司",

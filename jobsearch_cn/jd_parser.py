@@ -336,10 +336,14 @@ _OFFICE_USE_AFTER = {
 _ENGLISH_NOUN_AFTER = re.compile(r"[\s-]+[A-Za-z]")
 _EXCEL_VERB_BEFORE = re.compile(r"\b(?:we|you|they|who|to|can|will|must|should)\s+$", re.I)
 _OFFICE_COMPANY_LABEL = re.compile(r"(?im)^\s*(?:company|employer)\s*:\s*[^\n，,。；;]+")
-# Company references need an entity form, not an arbitrary later "公司".
+# Company references need a narrow entity-name form, not an arbitrary phrase
+# that happens to end at "集团" or "公司" after a software requirement.
+_OFFICE_COMPANY_KIND = r"(?:信息|科技|文化|咨询|教育|服务|软件|空间|人才|网络|数据|智能|电子|传媒|实业|贸易|管理|商务|控股|产业|技术|数字|系统)"
 _OFFICE_COMPANY_REFERENCE = re.compile(
-    r"(?:加入|来自|任职于|就职于|了解|\bjoin\b)\s*"
-    r"(?P<name>[^\n，,。；;！!？?]{2,60}?(?:有限公司|有限责任公司|集团|\b(?:Inc|Ltd|LLC|Limited)\b))", re.I,
+    rf"(?:加入|来自|任职于|就职于|了解|\bjoin\b)\s*"
+    rf"(?P<name>(?:{_OFFICE_NAME})\s*(?:(?:{_OFFICE_COMPANY_KIND})\s*){{1,3}}"
+    rf"(?:股份有限公司|有限责任公司|有限公司|集团|公司)"
+    rf"|(?:{_OFFICE_NAME})\s+(?:[A-Za-z][A-Za-z0-9&.-]*\s+){{1,3}}(?:Inc|Ltd|LLC|Limited)\b)", re.I,
 )
 _OFFICE_ENGLISH_COMPANY_LINE = re.compile(
     r"(?im)^[ \t]*(?:[A-Za-z][A-Za-z0-9&.-]*[ \t]+){1,3}(?:Inc|Ltd|LLC|Limited)\.?[ \t]*$"
