@@ -259,6 +259,11 @@ SEED_CASES = (
     ("本科或硕士学历优先", "requirements.education", {"min": None, "preferred": "bachelor"}),
     ("本科或硕士期间有相关项目经历", "requirements.education", None),  # a pair alone asks for nothing
     ("本科或以上学历", "requirements.education", {"min": "bachelor", "preferred": None}),
+    # #79 review: the 研究生 of 博士研究生 qualifies the doctorate; it is no master's to choose.
+    ("博士研究生或博士及以上学历", "requirements.education", {"min": "phd", "preferred": None}),
+    ("博士或博士研究生及以上学历", "requirements.education", {"min": "phd", "preferred": None}),
+    ("本科或硕士研究生学历", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("研究生或博士学历", "requirements.education", {"min": "master", "preferred": None}),
     ("表现优秀者可转正", "return_offer", True),
     ("有转正机会", "return_offer", True),
     ("不提供转正", "return_offer", False),
@@ -386,6 +391,12 @@ SEED_CASES = (
     ("具备统计学专业知识", "requirements.skills", ["统计学"]),
     ("统计学、计算机等相关专业，熟悉统计学方法", "requirements.skills", ["统计学"]),
     ("熟悉数据分析", "requirements.skills", ["数据分析"]),
+    # #79 review: knowledge or an edition after 专业 is a skill, not a major.
+    ("熟悉统计学专业基础知识", "requirements.skills", ["统计学"]),
+    ("掌握统计学专业理论知识", "requirements.skills", ["统计学"]),
+    ("熟练使用Figma专业版", "requirements.skills", ["Figma"]),
+    ("统计学专业毕业", "requirements.skills", []),
+    ("统计学等相关专业优先", "requirements.skills", []),
     ("统计学或市场营销相关专业", ALTERNATIVES, []),
     ("熟悉Go语言，用过Google Cloud和MongoDB", "requirements.skills", ["Go", "MongoDB"]),
     ("精通JavaScript", "requirements.skills", ["JavaScript"]),
@@ -555,6 +566,19 @@ class SeedCases(unittest.TestCase):
         for text, _, _ in SEED_CASES:
             with self.subTest(text=text):
                 self.assertEqual(schema.validate(parse_one(text)), [])
+
+
+class EducationChoiceFilter(unittest.TestCase):
+    """#79 review: a doctorate asked for in either order still rules out the tech sample's master's."""
+
+    def test_a_doctorate_is_not_relaxed_to_a_masters(self):
+        from jobsearch_cn import match
+        tech = json.loads((REPO / "tests" / "fixtures" / "cn" / "profile" / "tech" / "profile.json")
+                          .read_text(encoding="utf-8"))
+        for text in ("博士研究生或博士及以上学历", "博士或博士研究生及以上学历"):
+            with self.subTest(text=text):
+                checks = {c["check"]: c for c in match.filter_job(parse_one(f"算法研究实习生\n{text}"), tech)["checks"]}
+                self.assertEqual(checks["education"]["result"], "conflict", checks["education"]["reason"])
 
 
 class InterviewAndStart(unittest.TestCase):

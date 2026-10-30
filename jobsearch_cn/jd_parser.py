@@ -107,6 +107,8 @@ _EDUCATION_PREFERRED = re.compile(
 # minimum is the lowest. A bare pair needs a label before it or a qualifier after it, as a single level
 # does: "本科或硕士期间的项目经历" asks for nothing.
 _LEVEL_ANY = "(?:大专|专科|本科|学士|硕士|研究生|博士)"
+# One option of a choice: "博士研究生" is one, a doctorate - its 研究生 qualifies it, and is no master's.
+_LEVEL_OPTION = re.compile(r"(博士|硕士)研究生|大专|专科|本科|学士|硕士|研究生|博士")
 _EDUCATION_CHOICE = re.compile(
     rf"(?P<label>学历\s*(?:要求)?\s*[:：]\s*)?{_LEVEL_ANY}(?:研究生)?"
     rf"(?:\s*(?:或者?|/|／|、)\s*{_LEVEL_ANY}(?:研究生)?)+"
@@ -254,7 +256,9 @@ _MAJOR_BEFORE = re.compile(r"专业\s*[:：]?\s*$")
 _MAJOR_WORD = r"[一-鿿A-Za-z]{1,12}?"
 _MAJOR_JOIN = r"\s*(?:、|/|／|或者|或|和|及|与)\s*"
 _MAJOR_TAIL = re.compile(
-    rf"(?:{_MAJOR_JOIN}{_MAJOR_WORD})*\s*(?:等)?\s*(?:相关)?\s*专业(?!\s*(?:知识|技能|能力|素养|术语|工具|软件))"
+    rf"(?:{_MAJOR_JOIN}{_MAJOR_WORD})*\s*(?:等)?\s*(?:相关)?\s*专业"
+    # "专业基础知识", "专业理论知识", "专业版": knowledge, or an edition of the software, not a major.
+    r"(?!\s*[一-鿿]{0,2}?(?:知识|技能|能力|素养|术语|理论|工具|软件|版))"
 )
 _MAJOR_LEAD = re.compile(rf"专业\s*(?:要求|背景|方向)?\s*(?:为|是|[:：])\s*(?:{_MAJOR_WORD}{_MAJOR_JOIN})*$")
 # A platform name is a skill when the JD asks for it, not when it points the reader at the
@@ -791,7 +795,8 @@ def _education(text: str, tag: list):
     candidates = []  # (start, end, level, snippet): the first one not a preference is the minimum
     choices = []  # (start, end, level, snippet) of every choice, for the preference too
     for match in _EDUCATION_CHOICE.finditer(text):
-        level = min((_LEVELS[word] for word in re.findall(_LEVEL_WORD, match.group(0))), key=order.index)
+        level = min((_LEVELS[option.group(1) or option.group(0)] for option in _LEVEL_OPTION.finditer(match.group(0))),
+                    key=order.index)
         choices.append((match.start(), match.end(), level, match.group(0).strip()))
         if match["label"] or match["tail"]:
             candidates.append(choices[-1])
