@@ -1,9 +1,13 @@
 """Read resume text without saving it; optional PDF dependencies stay upstream."""
 
+import io
+import os
+import signal
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
 import zipfile
+import zlib
 from pathlib import Path
 
 
@@ -18,12 +22,26 @@ _WORD_NAMESPACES = (
 _TOOLS = Path(__file__).resolve().parent.parent / "tools"
 _PDF_HELP = "请让 Agent 直接读取 PDF，或者安装 pypdf"
 
+# Budgets for a file the user points at (H25b). A real resume stays far below them; over one, the
+# file is refused in words that quote none of it.
+_MAX_INPUT_BYTES = 50 * 1024 * 1024
+_MAX_XML_BYTES = 16 * 1024 * 1024  # word/document.xml, uncompressed
+_MAX_XML_NODES = 200_000
+_MAX_XML_DEPTH = 256
+_DOCX_TOO_COMPLEX = "DOCX 的结构过于复杂或内容过大，已停止读取；请用 Word 或 WPS 重新另存为 .docx，或者让 Agent 直接读取"
+_PDF_TIMEOUT = 60  # seconds, for the whole process tree
+_REAP_TIMEOUT = 5  # seconds to collect the pipes once the tree is dead
+
 # This fixed bridge runs in the same Python environment, never through a shell.
 # Reuse upstream's optional-pypdf extraction and Poppler command/error handling.
 # We need text only: unlike extract_text_layer(), this does not also need pdfinfo.
 # No --dump-text, temporary files, or optional imports in the CN process.
+# It starts nothing before the parent's go-ahead on stdin (_run_tree): by then it is in the
+# parent's Job Object, so pdftotext is too.
 _PDF_BRIDGE = """\
 import sys
+if sys.stdin.buffer.read(1) != b"1":
+    sys.exit(3)
 from pathlib import Path
 sys.path.insert(0, sys.argv[1])
 from verify_pdf import _extract_pypdf, run_tool
@@ -40,9 +58,8 @@ sys.stdout.write(text)
 """
 
 
-def _word_text(element: ET.Element, namespace: str) -> str:
-    """Walk body XML in document order, including tables and content controls."""
-    prefix = "{" + namespace + "}"
+def _leaf_text(element: ET.Element, prefix: str):
+    """The text of an element that is not walked into; None for one that is."""
     if element.tag.startswith(prefix) and element.tag.endswith("Pr"):
         return ""  # Formatting properties can contain tab-stop definitions.
     if element.tag == prefix + "t":
@@ -51,28 +68,73 @@ def _word_text(element: ET.Element, namespace: str) -> str:
         return "\t"
     if element.tag in (prefix + "br", prefix + "cr"):
         return "\n"
-    if element.tag == prefix + "tr":
-        cells = []
+    return None
 
-        def read_cells(wrapper):
-            for child in wrapper:
-                if child.tag == prefix + "tc":
-                    cells.append(_word_text(child, namespace).rstrip("\n"))
-                else:
-                    read_cells(child)  # A content control can wrap a table cell.
 
-        read_cells(element)
-        return "\t".join(cells) + "\n"
-    text = "".join(_word_text(child, namespace) for child in element)
-    return text + "\n" if element.tag == prefix + "p" else text
+def _word_text(body: ET.Element, namespace: str) -> str:
+    """Walk body XML in document order, including tables and content controls.
+
+    An explicit stack, not recursion (H25b): a frame is [kind, element, children left, out].
+    "text" gathers its pieces in out, a "cell" too, for the row above it; a "row" gathers its
+    cells in out, and a "wrap" - a content control can wrap a table cell - shares its row's.
+    """
+    prefix = "{" + namespace + "}"
+    stack = [["text", body, iter(body), []]]
+    while True:
+        kind, element, children, out = stack[-1]
+        child = next(children, None)
+        if child is None:
+            stack.pop()
+            if kind == "wrap":
+                continue
+            if kind == "cell":
+                stack[-1][3].append("".join(out).rstrip("\n"))
+                continue
+            text = "\t".join(out) + "\n" if kind == "row" else "".join(out)
+            text += "\n" if kind == "text" and element.tag == prefix + "p" else ""
+            if not stack:
+                return text
+            stack[-1][3].append(text)
+        elif kind in ("row", "wrap"):
+            cell = child.tag == prefix + "tc"
+            stack.append(["cell" if cell else "wrap", child, iter(child), [] if cell else out])
+        else:
+            leaf = _leaf_text(child, prefix)
+            if leaf is not None:
+                out.append(leaf)
+            elif child.tag == prefix + "tr":
+                stack.append(["row", child, iter(child), []])
+            else:
+                stack.append(["text", child, iter(child), []])
+
+
+def _parse_document(data: bytes) -> ET.Element:
+    """word/document.xml, parsed within the node and depth budgets."""
+    root, depth, nodes = None, 0, 0
+    for event, element in ET.iterparse(io.BytesIO(data), events=("start", "end")):
+        if event == "end":
+            depth -= 1
+            continue
+        root = element if root is None else root
+        depth, nodes = depth + 1, nodes + 1
+        if depth > _MAX_XML_DEPTH or nodes > _MAX_XML_NODES:
+            raise ExtractionError(_DOCX_TOO_COMPLEX)
+    return root
 
 
 def _extract_docx(path: Path) -> str:
     try:
         with zipfile.ZipFile(path) as archive:
-            with archive.open("word/document.xml") as document:
-                root = ET.parse(document).getroot()
-    except (OSError, zipfile.BadZipFile, KeyError, ET.ParseError, RuntimeError, NotImplementedError):
+            info = archive.getinfo("word/document.xml")
+            if info.file_size > _MAX_XML_BYTES:
+                raise ExtractionError(_DOCX_TOO_COMPLEX)
+            with archive.open(info) as document:
+                data = document.read(_MAX_XML_BYTES + 1)  # The size in the header can be a lie.
+        if len(data) > _MAX_XML_BYTES:
+            raise ExtractionError(_DOCX_TOO_COMPLEX)
+        root = _parse_document(data)
+    except (OSError, EOFError, zlib.error, zipfile.BadZipFile, KeyError, ET.ParseError, RuntimeError,
+            NotImplementedError):
         raise ExtractionError("无法读取 DOCX 的 word/document.xml；请用 Word 或 WPS 重新另存为 .docx") from None
     for namespace in _WORD_NAMESPACES:
         body = root.find("{" + namespace + "}body")
@@ -106,12 +168,99 @@ def _pdf_text_is_damaged(text: str) -> bool:
     return bad >= 20 or (bad >= 3 and bad / nonspace >= 0.02)
 
 
+def _windows_job(process: subprocess.Popen):
+    """A Job Object holding process, or None if Windows refuses one.
+
+    What process starts once it is assigned joins the job, and terminating or closing the job
+    ends them all, so pdftotext goes with the bridge. A process started before the assignment
+    would not join, which is why the bridge waits for _run_tree's go-ahead.
+    """
+    import ctypes
+    from ctypes import wintypes
+
+    class BasicLimits(ctypes.Structure):
+        _fields_ = [("per_process_time", ctypes.c_int64), ("per_job_time", ctypes.c_int64),
+                    ("flags", wintypes.DWORD), ("min_working_set", ctypes.c_size_t),
+                    ("max_working_set", ctypes.c_size_t), ("process_limit", wintypes.DWORD),
+                    ("affinity", ctypes.c_size_t), ("priority", wintypes.DWORD), ("scheduling", wintypes.DWORD)]
+
+    class ExtendedLimits(ctypes.Structure):
+        _fields_ = [("basic", BasicLimits), ("io_counters", ctypes.c_uint64 * 6),
+                    ("process_memory", ctypes.c_size_t), ("job_memory", ctypes.c_size_t),
+                    ("peak_process_memory", ctypes.c_size_t), ("peak_job_memory", ctypes.c_size_t)]
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.CreateJobObjectW.restype = wintypes.HANDLE
+    kernel32.CreateJobObjectW.argtypes = (ctypes.c_void_p, wintypes.LPCWSTR)
+    kernel32.SetInformationJobObject.argtypes = (wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD)
+    kernel32.AssignProcessToJobObject.argtypes = (wintypes.HANDLE, wintypes.HANDLE)
+    kernel32.TerminateJobObject.argtypes = (wintypes.HANDLE, wintypes.UINT)
+    kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    job = kernel32.CreateJobObjectW(None, None)
+    if not job:
+        return None
+    limits = ExtendedLimits()
+    limits.basic.flags = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+    if (kernel32.SetInformationJobObject(job, 9, ctypes.byref(limits), ctypes.sizeof(limits))  # ExtendedLimitInformation
+            and kernel32.AssignProcessToJobObject(job, int(process._handle))):
+        return kernel32, job
+    kernel32.CloseHandle(job)
+    return None
+
+
+def _kill_tree(process: subprocess.Popen, job) -> None:
+    """End process and everything it started: the job on Windows, the session on POSIX."""
+    try:
+        if job is not None:
+            job[0].TerminateJobObject(job[1], 1)
+        elif os.name == "posix":
+            os.killpg(process.pid, signal.SIGKILL)
+        process.kill()
+    except OSError:
+        pass  # Already gone.
+
+
+GO_AHEAD = b"1"  # what _run_tree writes to the command's stdin once the tree is contained
+
+
+def _run_tree(command: list, timeout: float) -> subprocess.CompletedProcess:
+    """subprocess.run with its output captured and a timeout that holds for the whole process tree.
+
+    subprocess.run kills only its child, then waits for the pipes the grandchildren inherited, so
+    a stuck pdftotext outlived the timeout and held it open (H25b). tools/verify_pdf.py stays as
+    upstream wrote it: the tree is contained from here.
+
+    The command must read GO_AHEAD from stdin before it starts anything: it is written only once
+    the child is in its Job Object (Windows) - on POSIX the new session exists from the start.
+    Without a job, the go-ahead still comes; then only the child itself can be ended.
+    """
+    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               start_new_session=os.name == "posix")
+    job = None
+    try:
+        job = _windows_job(process) if os.name == "nt" else None
+        # communicate writes the go-ahead and closes stdin itself, a child that has already
+        # exited included; writing and closing it here first breaks communicate on POSIX.
+        stdout, stderr = process.communicate(input=GO_AHEAD, timeout=timeout)
+        return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
+    except BaseException:
+        _kill_tree(process, job)
+        try:
+            process.communicate(timeout=_REAP_TIMEOUT)
+        except (subprocess.TimeoutExpired, ValueError, OSError):
+            pass  # Something outside the tree holds a pipe; the caller is not kept waiting for it.
+        raise
+    finally:
+        if job is not None:
+            job[0].CloseHandle(job[1])
+
+
 def _extract_pdf(path: Path) -> str:
     poppler = _poppler_available()
     try:
-        result = subprocess.run(
+        result = _run_tree(
             [sys.executable, "-B", "-c", _PDF_BRIDGE, str(_TOOLS), str(path.resolve()), "1" if poppler else "0"],
-            stdin=subprocess.DEVNULL, capture_output=True, timeout=60,
+            _PDF_TIMEOUT,
         )
     except (OSError, subprocess.TimeoutExpired):
         raise ExtractionError(f"无法提取 PDF 文本；{_PDF_HELP}") from None
@@ -132,6 +281,8 @@ def extract_text(source: str | Path) -> str:
     path = Path(source)
     if not path.is_file():
         raise ExtractionError(f"文件不存在或不是普通文件：{path}")
+    if path.stat().st_size > _MAX_INPUT_BYTES:
+        raise ExtractionError(f"文件超过 {_MAX_INPUT_BYTES // (1024 * 1024)} MB，不像一份简历；请确认文件后重试")
     suffix = path.suffix.lower()
     if suffix == ".docx":
         text = _extract_docx(path)
