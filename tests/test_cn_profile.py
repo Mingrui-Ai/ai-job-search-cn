@@ -221,14 +221,30 @@ class Validate(unittest.TestCase):
         self.assertEqual(self.example["contact"]["name"], "张三", "redaction must not touch the original")
 
     def test_redaction_masks_a_malformed_contact_too(self):
-        # V18 P1-1: a contact that was not an object came out as it was.
-        canary = "13900001111"
-        for contact in (f"{canary} canary@example.com", [canary], {"phone": [canary], "wechat": canary}, 13900001111):
-            with self.subTest(contact=contact):
-                shown = profile.redacted(dict(self.example, contact=contact))
-                self.assertNotIn(canary, json.dumps(shown, ensure_ascii=False))
-                self.assertEqual(shown["skills"], self.example["skills"])
+        # V18 P1-1: a contact that was not an object came out as it was; Codex B on #86: so did a
+        # detail typed as a field name, and a field that strayed out of contact.
+        phone, email = "13900001111", "canary@example.com"
+        cases = [dict(self.example, contact=contact) for contact in (
+            f"{phone} {email}", [phone], {"phone": [phone], "wechat": phone}, 13900001111, {email: phone, "name": None})]
+        cases.append(dict(self.example, phone=phone, email=email))
+        for data in cases:
+            with self.subTest(data=data.get("contact"), stray="phone" in data):
+                shown = json.dumps(profile.redacted(data), ensure_ascii=False)
+                self.assertNotIn(phone, shown)
+                self.assertNotIn(email, shown)
+                self.assertEqual(profile.redacted(data)["skills"], self.example["skills"])
+        shown = profile.redacted(dict(self.example, contact={email: phone, "phone": "x", "name": None}))
+        self.assertEqual(shown["contact"], {"phone": "***", "name": None, "unknown_fields": 1})
         self.assertIsNone(profile.redacted(dict(self.example, contact=None))["contact"])
+
+    def test_an_unknown_contact_field_is_counted_not_named(self):
+        # Codex B on #86: the error repeated a phone number or email typed as a field name.
+        data = with_value(self.example, "contact", {"canary@example.com": "13900001111", **self.example["contact"]})
+        errors = profile.validate(data)
+        self.assertIn("contact: 1 unknown field(s), not named here; only name, phone, email, github, website belong",
+                      errors)
+        self.assertNotIn("canary@example.com", " ".join(errors))
+        self.assert_error(dict(self.example, hobbies=[]), "hobbies: unknown field")  # elsewhere names still help
 
 
 def run_cli(*args, data_dir):
@@ -282,20 +298,26 @@ class Commands(unittest.TestCase):
         self.assertIn("13800000000", run_cli("profile", "show", "--contact", data_dir=self.data).stdout.decode("utf-8"))
 
     def test_a_malformed_contact_stays_hidden_everywhere(self):
-        # V18 P1-1: show printed a string or list contact as it was. Validation and match errors name
-        # the field, never its value; --contact still shows whatever is there.
-        canary = "13900001111"
-        for contact in (f"{canary} canary@example.com", [canary], None, {"phone": canary, "wechat": canary}):
-            with self.subTest(contact=contact):
-                self.write(dict(documented_example(), contact=contact))
+        # V18 P1-1: show printed a string or list contact as it was; Codex B on #86: and a detail typed as
+        # a field name, which validate and match also repeated. --contact still shows whatever is there.
+        phone, email = "13900001111", "canary@example.com"
+        profiles = [dict(documented_example(), contact=contact) for contact in (
+            f"{phone} {email}", [phone], None, {"phone": phone, "wechat": email}, {email: phone})]
+        profiles.append(dict(documented_example(), phone=phone, email=email))  # strayed out of contact
+        for data in profiles:
+            with self.subTest(contact=data.get("contact"), stray="phone" in data):
+                self.write(data)
                 shown = run_cli("profile", "show", data_dir=self.data)
                 self.assertEqual(shown.returncode, 0, shown.stderr.decode("utf-8", "replace"))
-                for proc in (shown, run_cli("profile", "validate", data_dir=self.data),
-                             run_cli("match", "report", data_dir=self.data)):
-                    self.assertNotIn(canary, (proc.stdout + proc.stderr).decode("utf-8", "replace"))
-                if contact is not None:
+                report = run_cli("match", "report", "--profile", str(self.root / "profile.json"), data_dir=self.data)
+                self.assertEqual(report.returncode, 1, "the profile is invalid, so match stops before reading jobs")
+                for proc in (shown, run_cli("profile", "validate", data_dir=self.data), report):
+                    output = (proc.stdout + proc.stderr).decode("utf-8", "replace")
+                    self.assertNotIn(phone, output)
+                    self.assertNotIn(email, output)
+                if data.get("contact") is not None or "phone" in data:
                     explicit = run_cli("profile", "show", "--contact", data_dir=self.data)
-                    self.assertIn(canary, explicit.stdout.decode("utf-8"))
+                    self.assertIn(phone, explicit.stdout.decode("utf-8"))
 
     def test_show_refuses_a_profile_that_is_not_an_object(self):
         # Nothing to mask the contact details in, so say so without echoing the file.

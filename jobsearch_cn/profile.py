@@ -67,7 +67,7 @@ def validate(profile, sources=None, groups=None) -> list[str]:
     if "schema_version" in profile and not (_is_int(profile["schema_version"])
                                             and profile["schema_version"] == PROFILE_VERSION):
         errors.append(f"schema_version: must be {PROFILE_VERSION}")
-    if _obj(profile, "contact", CONTACT_KEYS, errors):
+    if _obj(profile, "contact", CONTACT_KEYS, errors, name_unknown=False):
         for key in CONTACT_KEYS:
             _check_text(profile["contact"].get(key), f"contact.{key}", errors)
     if _obj(profile, "graduation", GRADUATION_KEYS, errors, nullable=True):
@@ -200,28 +200,36 @@ def warnings(profile) -> list[str]:
 def redacted(profile: dict) -> dict:
     """The profile with contact details masked, for output that is not a CV.
 
-    Masked whatever contact holds: a malformed one (a string, a list) still holds the details.
+    Details typed in the wrong shape are masked too. A contact that is not an object is masked whole. A field
+    contact does not know is counted, never named: the name may be the detail itself ({"a@example.com": "138…"}).
+    A top-level field the format does not know keeps its name, as profile validate reports it, but not its value.
     """
-    copy = dict(profile)
+    copy = {key: (value if key in TOP_LEVEL_KEYS or value is None else "***") for key, value in profile.items()}
     contact = profile.get("contact")
     if isinstance(contact, dict):
-        copy["contact"] = {key: (None if value is None else "***") for key, value in contact.items()}
+        masked = {key: (None if contact[key] is None else "***") for key in CONTACT_KEYS if key in contact}
+        if len(masked) < len(contact):
+            masked["unknown_fields"] = len(contact) - len(masked)
+        copy["contact"] = masked
     elif contact is not None:
         copy["contact"] = "***"
     return copy
 
 
-def _keys(obj: dict, expected, path: str, errors: list) -> None:
+def _keys(obj: dict, expected, path: str, errors: list, name_unknown: bool = True) -> None:
     prefix = f"{path}." if path else ""
     for key in expected:
         if key not in obj:
             errors.append(f"{prefix}{key}: missing (use null, or [] for a list, when unknown)")
-    for key in obj:
-        if key not in expected:
-            errors.append(f"{prefix}{key}: unknown field")
+    unknown = [key for key in obj if key not in expected]
+    if name_unknown:
+        errors.extend(f"{prefix}{key}: unknown field" for key in unknown)
+    elif unknown:  # the name may be a contact detail typed as a key, so only the count goes out
+        errors.append(f"{path}: {len(unknown)} unknown field(s), not named here; only {', '.join(expected)} belong")
 
 
-def _obj(parent: dict, key: str, expected, errors: list, nullable: bool = False, path: str = None) -> bool:
+def _obj(parent: dict, key: str, expected, errors: list, nullable: bool = False, path: str = None,
+         name_unknown: bool = True) -> bool:
     """Check parent[key] is an object with exactly `expected` keys. True when its fields can be checked."""
     path = path or key
     if key not in parent:
@@ -232,7 +240,7 @@ def _obj(parent: dict, key: str, expected, errors: list, nullable: bool = False,
     if not isinstance(value, dict):
         errors.append(f"{path}: must be an object" + (" or null" if nullable else ""))
         return False
-    _keys(value, expected, path, errors)
+    _keys(value, expected, path, errors, name_unknown)
     return True
 
 
