@@ -75,14 +75,14 @@ class Store:
         path = self._path(job_id)
         if not path.is_file():
             return None
-        return json.loads(path.read_text(encoding="utf-8"))
+        return schema.upgrade(json.loads(path.read_text(encoding="utf-8")))
 
     def all(self):
         """(records sorted by import time, warnings for files that could not be read)."""
         records, warnings = [], []
         for path in sorted(self.jobs.glob("job_*.json")) if self.jobs.is_dir() else []:
             try:
-                records.append(json.loads(path.read_text(encoding="utf-8")))
+                records.append(schema.upgrade(json.loads(path.read_text(encoding="utf-8"))))
             except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
                 warnings.append(f"{path.name}: unreadable, skipped ({exc})")
         records.sort(key=lambda r: ((r.get("source") or {}).get("imported_at") or "", r.get("id") or ""))
@@ -200,34 +200,99 @@ def _set_field(record: dict, path: str, value) -> None:
     target[leaf] = value
 
 
+def _is_explicit_list_clear(value, evidence) -> bool:
+    """A validated empty list whose user/agent evidence explains the correction."""
+    return (value == [] and evidence is not None
+            and evidence.get("method") in ("user", "agent")
+            and bool(evidence.get("text")))
+
+
 def merge_same_text(old: dict, new: dict) -> dict:
     """Merge a re-import of the same JD text into the stored record.
 
-    Fill empty fields, but never erase a value with an empty import. When both
-    values exist, only equal or higher evidence priority can replace the old
-    value: user > agent > rule. Evidence follows the winning value, even when
-    the two values are equal. Status and first import time stay unchanged.
+    Fill unknown fields, but do not erase a value with an ordinary empty import.
+    A list explicitly cleared with user/agent evidence counts as a known value,
+    both when clearing it and on later imports. Only equal or higher evidence
+    priority can replace a known value: user > agent > rule. Evidence follows
+    the winning value, even when the two values are equal. Status and first
+    import time stay unchanged. An explicit skills clear that would strand
+    protected groups is rejected before H16's normal consistency fallback.
     """
     merged = json.loads(json.dumps(old))
     for path in schema.EVIDENCE_FIELDS:
         value = schema._field(new, path)
-        if not schema._has_value(value):
-            continue
         new_evidence = new["evidence"].get(path)
+        if not schema._has_value(value) and not _is_explicit_list_clear(value, new_evidence):
+            continue
         old_evidence = old["evidence"].get(path)
-        if schema._has_value(schema._field(old, path)):
+        old_value = schema._field(old, path)
+        if schema._has_value(old_value) or _is_explicit_list_clear(old_value, old_evidence):
             old_priority = _EVIDENCE_PRIORITY.get((old_evidence or {}).get("method"), 0)
             new_priority = _EVIDENCE_PRIORITY.get((new_evidence or {}).get("method"), 0)
             if new_priority < old_priority:
                 continue
         _set_field(merged, path, value)
         merged["evidence"][path] = new_evidence
+    _reject_protected_group_clear(merged, old, new)
+    _fit_alternatives(merged, old, new)
     source = merged["source"]
     for key in ("site", "url"):
         if source[key] is None:
             source[key] = new["source"][key]
     merged["guard"] = new["guard"]
     return merged
+
+
+def _reject_protected_group_clear(merged: dict, old: dict, new: dict) -> None:
+    """Reject an accepted incoming skills clear if group protections kept groups.
+
+    Each input was validated, so an incoming empty skills list has no groups.
+    Any groups still present after the field merge were retained from old.
+    Check the incoming clear, not just the merged empty list: an ordinary
+    re-import beside previously cleared skills still uses H16's normal fit.
+    """
+    skills = "requirements.skills"
+    if (schema._field(merged, skills) != []
+            or not _is_explicit_list_clear(schema._field(new, skills), new["evidence"].get(skills))):
+        return
+    path = schema.ALTERNATIVES
+    groups = schema._field(merged, path)
+    if not groups:
+        return
+    old_method = (old["evidence"].get(path) or {}).get("method", "rule")
+    evidence = new["evidence"].get(path)
+    new_method = (evidence or {}).get("method")
+    reasons = []
+    if not _is_explicit_list_clear(schema._field(new, path), evidence):
+        reasons.append(f"{path} is missing a user/agent clearing reason")
+    if _EVIDENCE_PRIORITY.get(new_method, 0) < _EVIDENCE_PRIORITY.get(old_method, 0):
+        reasons.append(f"{path} source {new_method!r} has lower priority than stored {old_method!r}")
+    retained = ", ".join(f"{path}[{index}] {group!r}" for index, group in enumerate(groups))
+    minimum = "user" if old_method == "user" else "agent"
+    raise StoreError(f"cannot clear {skills}: retained {retained} would lose its skills; "
+                     + "; ".join(reasons)
+                     + f"; clear both fields with a non-empty clearing reason for each, "
+                       f"using group evidence from {minimum!r} or higher priority")
+
+
+def _fit_alternatives(merged: dict, old: dict, new: dict) -> None:
+    """Skill groups whose skills the merged record no longer lists follow the skills' own record.
+
+    Skills and skill groups merge field by field, so an agent's skills can be
+    kept beside a re-parse's groups, or the other way round. Each record on its
+    own is consistent, so the groups of whichever record the skills came from fit.
+    """
+    path = schema.ALTERNATIVES
+    listed = {schema.normalize_for_match(s) for s in merged["requirements"]["skills"]}
+    groups = merged["requirements"]["skill_alternatives"]
+    if all(schema.normalize_for_match(item) in listed for group in groups for item in group):
+        return
+    origin = new if merged["requirements"]["skills"] == new["requirements"]["skills"] else old
+    merged["requirements"]["skill_alternatives"] = json.loads(json.dumps(origin["requirements"]["skill_alternatives"]))
+    if path in origin["evidence"]:
+        merged["evidence"][path] = origin["evidence"][path]
+    else:
+        merged["evidence"].pop(path, None)
 
 
 def replace_edited(old: dict, new: dict) -> dict:

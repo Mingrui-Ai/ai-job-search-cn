@@ -176,6 +176,27 @@ python -m jobsearch_cn jd parse tests/fixtures/cn/jd/boss_intern.txt --site boss
 > [!WARNING]
 > **暂时不要运行上游的 `/setup`。** 它会把你的姓名、联系方式、工作经历写进 `CLAUDE.md` 等**被 git 跟踪**的文件。请改用 CN 版建档：Claude Code 用 `cn-setup` 技能，Codex 按 `AGENTS.md` 找到[建档流程](docs/cn/profile-setup.md)，档案只存在本地的 `data/profile/`（不入库）。建好后就可以让 Agent 给保存过的岗位评分：Claude Code 用 `cn-match` 技能，Codex 按 `AGENTS.md` 找到同一份[评分流程](docs/cn/match.md#评分工作流三个-agent-共用)，会给出硬性条件的结论、各维度的分数和依据，以及你还缺什么。只想按硬性条件过滤，可以用 `python -m jobsearch_cn match filter <岗位id>`。
 
+### 用 DeepSeek 上手
+
+也可以用 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（`dsh`）配合你自己的 DeepSeek API Key 来用这三个工作流。dsh 会读 `AGENTS.md`，并从 `.dsh/skills/` 找到 `cn-jd-import`、`cn-setup`、`cn-match` 三个技能，它们和 Claude Code、Codex 用的是同一份流程说明（[ADR-10](docs/cn/cn-migration-plan.md#2-架构决策)）。
+
+1. 安装 Node.js 24.9.0 或更高版本。
+2. 打开终端，先激活能运行 `python -m jobsearch_cn` 的 Python 环境（本项目开发用 conda 环境 `ai-job-search-cn`：`conda activate ai-job-search-cn`），再在这个终端里启动 dsh：
+
+   ```powershell
+   npx @deepseek-ai/dsh@0.2.2-alpha.2 web
+   ```
+
+   dsh 每次执行命令都开一个新的 PowerShell 进程，不会自己加载 conda，只会继承启动它的终端的环境，所以一定要先激活再启动。
+3. 在 Settings → Models 里填你自己的 DeepSeek API Key。Key 只填在 dsh 里（dsh 把它存在用户目录的 `~/.dsh` 下），不要写进本仓库的任何文件，也不要交给其他 Agent。
+4. 选本仓库的目录作为工作区。
+5. 权限用默认的 `workspace-write + ask`：dsh 可以改工作区里的文件，超出这个范围的操作会先请你批准，每次批准只对那一次请求有效。
+
+然后就可以像用 Claude Code 一样说"导入这份 JD""帮我建档""给这个岗位评分"。
+
+> [!NOTE]
+> dsh 是官方的**预发布版**，这里固定在 `0.2.2-alpha.2`，换版本前请先看 [ADR-10](docs/cn/cn-migration-plan.md#2-架构决策)。在 dsh 上实际跑通三个工作流还在验收中（路线图 A3），遇到问题欢迎反馈。
+
 ## 数据来源与合规
 
 岗位数据分三层获取，逐步放开：
@@ -202,6 +223,7 @@ ai-job-search-cn/
 ├── tests/test_cn_*.py       # CN 测试（含"不联网、不引第三方库"的边界守卫）
 ├── tests/fixtures/cn/jd/    # 5 份脱敏样例 JD（BOSS、实习僧、牛客、官网、社招）
 ├── docs/cn/                 # 中文文档：路线图、工作记录、架构决策、格式说明
+├── .dsh/skills/             # DeepSeek Harness 的三个技能入口（只指向 docs/cn/ 的流程说明）
 ├── data/  logs/             # 本地数据与日志，不进 git，按需创建
 └── ……                       # 上游原有结构：.claude/、tools/、cv/、cover_letters/ 等
 ```

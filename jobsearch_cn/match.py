@@ -137,9 +137,11 @@ def _city(name: str) -> str:
 
 
 def _location(job, profile):
-    fields = ("cities", "remote"), ("availability.cities", "availability.remote_ok", "availability.relocate")
+    fields = ("cities", "remote"), ("availability.cities", "availability.acceptable_cities", "availability.remote_ok",
+                                    "availability.relocate")
     availability = profile.get("availability") or {}
     wanted = {_city(c) for c in availability.get("cities") or []}
+    acceptable = {_city(c) for c in availability.get("acceptable_cities") or []}
     offered = job["cities"]
     remote, remote_ok, relocate = job["remote"], availability.get("remote_ok"), availability.get("relocate")
 
@@ -148,9 +150,14 @@ def _location(job, profile):
         return _item("location", MATCH, f"工作城市{'、'.join(shared)}在你的意向内", job, *fields, profile)
     if remote is True and remote_ok is True:
         return _item("location", MATCH, "JD 可远程，你接受远程", job, *fields, profile)
+    if offered and acceptable & {_city(c) for c in offered}:
+        # A city the user accepts is one they can work in; how much less they like it is the score's (M2-6b).
+        shared = "、".join(c for c in offered if _city(c) in acceptable)
+        return _item("location", MATCH, f"工作城市{shared}在你可以接受的城市内", job, *fields, profile,
+                     note=f"{shared}是你可以接受的城市，不是首选")
     if not offered:
         return _item("location", UNKNOWN, "JD 没写工作城市", job, *fields, profile)
-    if not wanted:
+    if not wanted and not acceptable:
         return _item("location", UNKNOWN, "档案没写意向城市", job, *fields, profile)
     where = "、".join(offered)
     if relocate is True:

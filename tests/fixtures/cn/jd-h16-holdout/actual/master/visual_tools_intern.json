@@ -1,0 +1,1332 @@
+{
+  "parse": {
+    "jobs": [
+      {
+        "schema_version": 1,
+        "id": "job_22737c76fa65",
+        "source": {
+          "type": "file",
+          "site": "boss",
+          "url": null,
+          "imported_at": "2026-10-29T14:50:09+08:00"
+        },
+        "title": "视觉制作实习生",
+        "company": "示例映汀创意有限公司",
+        "cities": [
+          "上海"
+        ],
+        "remote": false,
+        "employment_type": "internship",
+        "salary": {
+          "min": 160,
+          "max": 200,
+          "unit": "CNY/day",
+          "months": null,
+          "negotiable": false
+        },
+        "requirements": {
+          "graduation": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "days_per_week": 3,
+          "min_months": 3,
+          "education": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "skills": [
+            "Photoshop",
+            "Illustrator",
+            "Figma",
+            "Sketch"
+          ]
+        },
+        "return_offer": null,
+        "published_at": "2026-10-29",
+        "deadline": "2026-12-10",
+        "status": "new",
+        "evidence": {
+          "title": {
+            "text": "视觉制作实习生",
+            "method": "rule"
+          },
+          "company": {
+            "text": "示例映汀创意有限公司",
+            "method": "rule"
+          },
+          "cities": {
+            "text": "工作地点：上海",
+            "method": "rule"
+          },
+          "remote": {
+            "text": "不支持远程",
+            "method": "rule"
+          },
+          "employment_type": {
+            "text": "视觉制作实习生",
+            "method": "rule"
+          },
+          "salary": {
+            "text": "160-200元/天",
+            "method": "rule"
+          },
+          "requirements.graduation": {
+            "text": "仅招2027届",
+            "method": "rule"
+          },
+          "requirements.days_per_week": {
+            "text": "每周至少到岗3天",
+            "method": "rule"
+          },
+          "requirements.min_months": {
+            "text": "至少实习3个月",
+            "method": "rule"
+          },
+          "requirements.education": {
+            "text": "本科及以上",
+            "method": "rule"
+          },
+          "requirements.skills": {
+            "text": [
+              "工具要求：Photoshop、Illustrator 任一即可",
+              "Figma、Sketch 二选一"
+            ],
+            "method": "rule"
+          },
+          "published_at": {
+            "text": "发布时间：2026-10-29",
+            "method": "rule"
+          },
+          "deadline": {
+            "text": "投递截止：2026-12-10",
+            "method": "rule"
+          }
+        },
+        "guard": {
+          "verdict": "clean",
+          "counts": {}
+        },
+        "raw_text": "视觉制作实习生\n公司名称：示例映汀创意有限公司\n工作地点：上海\n不支持远程办公\n薪资：160-200元/天\n仅招2027届\n大专或本科及以上学历\n每周至少到岗3天\n至少实习3个月\n岗位职责：根据已有草图整理页面素材，检查交付文件。\n工具要求：Photoshop、Illustrator 任一即可；Figma、Sketch 二选一。\n发布时间：2026-10-29\n投递截止：2026-12-10"
+      }
+    ],
+    "warnings": [],
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_22737c76fa65",
+        "title": "视觉制作实习生",
+        "company": "示例映汀创意有限公司",
+        "cities": [
+          "上海"
+        ],
+        "status": "new"
+      }
+    ]
+  },
+  "differences": {
+    "requirements.education": {
+      "expected": {
+        "min": "associate",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      }
+    }
+  },
+  "profiles": {
+    "tech": {
+      "filter": {
+        "job_id": "job_22737c76fa65",
+        "title": "视觉制作实习生",
+        "company": "示例映汀创意有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅招2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": "每周至少到岗3天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": "至少实习3个月"
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "视觉制作实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "视觉制作实习生",
+                "evidence": "视觉制作实习生"
+              },
+              "company": {
+                "value": "示例映汀创意有限公司",
+                "evidence": "示例映汀创意有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rule_score": {
+        "schema_version": 1,
+        "job_id": "job_22737c76fa65",
+        "rules_version": 1,
+        "scored_at": "2026-10-29T14:50:09+08:00",
+        "job_hash": "8b58cab4836bfb4cc9469b85e05fb380c679c0203e5cfb455c57196c5ea5b9f2",
+        "profile_hash": "f21053d1cae424dc01642647fd4422b62b7059d1d2e129dd03c556fc0880520d",
+        "filter": {
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅招2027届"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": "每周至少到岗3天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": "至少实习3个月"
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "上海不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作地点：上海"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "视觉制作实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "视觉制作实习生",
+                  "evidence": "视觉制作实习生"
+                },
+                "company": {
+                  "value": "示例映汀创意有限公司",
+                  "evidence": "示例映汀创意有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作地点：上海"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "dimensions": {
+          "skills": {
+            "score": 0,
+            "method": "rule",
+            "reason": "JD 要求 4 项技能，你有 0 项",
+            "matched": [],
+            "missing": [
+              "Photoshop",
+              "Illustrator",
+              "Figma",
+              "Sketch"
+            ]
+          },
+          "direction": {
+            "score": 0,
+            "method": "rule",
+            "reason": "JD 技能以设计方向为主，不在你的求职方向中",
+            "jd_groups": {
+              "design": 4
+            },
+            "evidence": null
+          },
+          "experience": {
+            "score": null,
+            "method": "agent",
+            "reason": "等 Agent 对照经历补充",
+            "hints": [],
+            "evidence": null
+          },
+          "salary": {
+            "score": 100,
+            "method": "rule",
+            "reason": "JD 上限 200 元/天，达到你的最低期望 150 元/天"
+          }
+        },
+        "weights": {
+          "skills": 35,
+          "direction": 30,
+          "experience": 25,
+          "salary": 10
+        },
+        "total": {
+          "score": 13,
+          "grade": "ineligible",
+          "complete": false,
+          "missing": [
+            "experience"
+          ]
+        },
+        "gaps": [
+          {
+            "kind": "skill",
+            "item": "Photoshop",
+            "jd": "工具要求：Photoshop、Illustrator 任一即可"
+          },
+          {
+            "kind": "skill",
+            "item": "Illustrator",
+            "jd": "工具要求：Photoshop、Illustrator 任一即可"
+          },
+          {
+            "kind": "skill",
+            "item": "Figma",
+            "jd": "Figma、Sketch 二选一"
+          },
+          {
+            "kind": "skill",
+            "item": "Sketch",
+            "jd": "Figma、Sketch 二选一"
+          },
+          {
+            "kind": "filter",
+            "item": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": "工作地点：上海"
+          }
+        ]
+      },
+      "manual_fields_filter": {
+        "job_id": "job_22737c76fa65",
+        "title": "视觉制作实习生",
+        "company": "示例映汀创意有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足大专及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "associate",
+                  "preferred": null
+                },
+                "evidence": [
+                  "大专或本科及以上学历"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": [
+                  "每周至少到岗3天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": [
+                  "至少实习3个月"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "视觉制作实习生"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "视觉制作实习生",
+                "evidence": [
+                  "视觉制作实习生"
+                ]
+              },
+              "company": {
+                "value": "示例映汀创意有限公司",
+                "evidence": [
+                  "公司名称：示例映汀创意有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "ops": {
+      "filter": {
+        "job_id": "job_22737c76fa65",
+        "title": "视觉制作实习生",
+        "company": "示例映汀创意有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅招2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": "每周至少到岗3天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": "至少实习3个月"
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "视觉制作实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "视觉制作实习生",
+                "evidence": "视觉制作实习生"
+              },
+              "company": {
+                "value": "示例映汀创意有限公司",
+                "evidence": "示例映汀创意有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rule_score": {
+        "schema_version": 1,
+        "job_id": "job_22737c76fa65",
+        "rules_version": 1,
+        "scored_at": "2026-10-29T14:50:10+08:00",
+        "job_hash": "8b58cab4836bfb4cc9469b85e05fb380c679c0203e5cfb455c57196c5ea5b9f2",
+        "profile_hash": "9253a7624b78ca09e1b99a1d9a0279af51fcede82057694e3124c1c0f6f8979b",
+        "filter": {
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅招2027届"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "match",
+              "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": 3,
+                  "evidence": "每周至少到岗3天"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "match",
+              "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+              "jd": {
+                "requirements.min_months": {
+                  "value": 3,
+                  "evidence": "至少实习3个月"
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作地点：上海"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "实习岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "internship",
+                  "evidence": "视觉制作实习生"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "视觉制作实习生",
+                  "evidence": "视觉制作实习生"
+                },
+                "company": {
+                  "value": "示例映汀创意有限公司",
+                  "evidence": "示例映汀创意有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "上海"
+                  ],
+                  "evidence": "工作地点：上海"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "dimensions": {
+          "skills": {
+            "score": 20,
+            "method": "rule",
+            "reason": "JD 要求 4 项技能，你有 1 项",
+            "matched": [
+              {
+                "jd": "Photoshop",
+                "profile": "Photoshop",
+                "credit": 0.8
+              }
+            ],
+            "missing": [
+              "Illustrator",
+              "Figma",
+              "Sketch"
+            ]
+          },
+          "direction": {
+            "score": 0,
+            "method": "rule",
+            "reason": "JD 技能以设计方向为主，不在你的求职方向中",
+            "jd_groups": {
+              "design": 4
+            },
+            "evidence": null
+          },
+          "experience": {
+            "score": null,
+            "method": "agent",
+            "reason": "等 Agent 对照经历补充",
+            "hints": [
+              {
+                "jd": "Photoshop",
+                "profile": [
+                  "campus-1"
+                ]
+              }
+            ],
+            "evidence": null
+          },
+          "salary": {
+            "score": null,
+            "method": "rule",
+            "reason": "档案没写最低期望薪资"
+          }
+        },
+        "weights": {
+          "skills": 35,
+          "direction": 30,
+          "experience": 25,
+          "salary": 10
+        },
+        "total": {
+          "score": 11,
+          "grade": "poor",
+          "complete": false,
+          "missing": [
+            "experience",
+            "salary"
+          ]
+        },
+        "gaps": [
+          {
+            "kind": "skill",
+            "item": "Illustrator",
+            "jd": "工具要求：Photoshop、Illustrator 任一即可"
+          },
+          {
+            "kind": "skill",
+            "item": "Figma",
+            "jd": "Figma、Sketch 二选一"
+          },
+          {
+            "kind": "skill",
+            "item": "Sketch",
+            "jd": "Figma、Sketch 二选一"
+          }
+        ]
+      },
+      "manual_fields_filter": {
+        "job_id": "job_22737c76fa65",
+        "title": "视觉制作实习生",
+        "company": "示例映汀创意有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足大专及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "associate",
+                  "preferred": null
+                },
+                "evidence": [
+                  "大专或本科及以上学历"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": [
+                  "每周至少到岗3天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": [
+                  "至少实习3个月"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "视觉制作实习生"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "视觉制作实习生",
+                "evidence": [
+                  "视觉制作实习生"
+                ]
+              },
+              "company": {
+                "value": "示例映汀创意有限公司",
+                "evidence": [
+                  "公司名称：示例映汀创意有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

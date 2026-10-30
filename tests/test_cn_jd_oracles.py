@@ -70,7 +70,8 @@ class Oracles:
         self.assertEqual(len(samples), 5)
         for expected in samples:
             with self.subTest(sample=expected["fixture"]):
-                self.assertCountEqual(expected["fields"], schema.EVIDENCE_FIELDS)
+                # Frozen before H16 added requirements.skill_alternatives, which they do not compare.
+                self.assertCountEqual(expected["fields"], [f for f in schema.EVIDENCE_FIELDS if f != schema.ALTERNATIVES])
                 self.assertCountEqual(expected["human_match"], ["tech", "ops"])
                 for judged in expected["human_match"].values():
                     self.assertCountEqual(judged["checks"], match.CHECKS)

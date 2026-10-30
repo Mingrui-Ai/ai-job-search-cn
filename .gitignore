@@ -129,3 +129,12 @@ company_research/*.json
 *.db
 *.sqlite
 *.sqlite3
+
+# DeepSeek Harness (dsh, ADR-10). The workspace .dsh/ holds only the CN skill
+# entries .dsh/skills/<name>/SKILL.md. dsh 0.2.2-alpha.2 keeps sessions, settings
+# and the API key under its home (~/.dsh), not here; everything else under .dsh/
+# stays out of git in case a later version or a DSH_HOME setting puts it here.
+/.dsh/*
+!/.dsh/skills/
+/.dsh/skills/*/*
+!/.dsh/skills/*/SKILL.md

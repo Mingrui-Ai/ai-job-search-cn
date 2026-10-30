@@ -31,6 +31,7 @@
     "cities": [
       "上海"
     ],
+    "acceptable_cities": [],
     "remote_ok": false,
     "relocate": false
   },

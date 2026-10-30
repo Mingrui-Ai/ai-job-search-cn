@@ -7,8 +7,9 @@ education, return offer, employment type, cities, remote work, dates, a
 labelled or headline title and company, and skills from the vocabulary - read
 from the body only, since the title names the job rather than asking for a
 skill, and only where the JD asks for them (not "无需 SQL", not "欢迎关注我们的
-公众号"). It reads the copies users actually paste, a BOSS直聘 page with its
-link lines and "公司｜城市｜薪资｜N天/周｜N个月" tag line included. Every value
+公众号"), with the skills it offers a choice between ("熟悉 Golang 或 Java",
+"Python、R 至少掌握一门"). It reads the copies users actually paste, a BOSS直聘
+page with its link lines and "公司｜城市｜薪资｜N天/周｜N个月" tag line included. Every value
 cites the snippet it came from (method "rule"). What the rules cannot read
 with confidence stays null for an agent or the user to fill in and cite;
 nothing is guessed - a date without a year is left alone, a JD naming two
@@ -168,12 +169,29 @@ _TAG_WORD = re.compile(
 )
 # A skill a clause rules out is not asked for: "无需 SQL 基础", "不要求 Rust 或 C++", "也不负责公众号运营".
 _NEGATION = re.compile(r"不要求|无需|无须|不需要|不需|不必|不用|不负责|不涉及|不承担|非必须|不是必须|不作要求|不做要求")
+# Skills the JD offers a choice between (H16). A run is skills joined only by 、 / 或 or
+# 或者 (a "语言", "框架" after a skill allowed). It is a choice when 或 joins it, or when a
+# marker - 任一, 之一, 二选一, 至少掌握一门 - sits within _MARK_REACH characters of it in the
+# same clause with nothing between that starts another statement (和/及/与/并, 是/为: "Python、Java
+# 是核心技术栈之一" describes, it does not offer). 、 and / alone list skills all wanted
+# ("HTML/CSS/JavaScript"); a run followed by 专业 names majors, not skills.
+_JOIN = re.compile(r"\s*(?:语言|框架|软件|工具)?\s*(?:、|/|／|或者|或)\s*")
+_ALT_MARK = re.compile(
+    r"任选其一|[二三四多]选一|其中之一|之一|其一|任一|(?:任意|其中)一[种门项个款]|一[种门项个款]即可"
+    r"|至少\s*(?:熟练)?(?:掌握|熟悉|精通|使用|会用|会)?\s*(?:其中)?\s*一[种门项个款]"
+)
+_MARK_REACH = 15
+_MARK_BREAK = re.compile(r"[和及与并是为]")
+_MAJOR_AFTER = re.compile(r"\s*(?:等)?\s*(?:相关)?\s*专业")
+_MAJOR_BEFORE = re.compile(r"专业\s*[:：]?\s*$")
 # A platform name is a skill when the JD asks for it, not when it points the reader at the
 # company's own channel ("欢迎关注我们的公众号", "动态见我们的 B站") or describes the company
 # in its introduction. A follow verb alone is a duty: "关注小红书热点".
 _PLATFORMS = frozenset(("公众号", "小红书", "抖音", "微博", "视频号", "B站", "知乎", "快手"))
 _FOLLOW = re.compile(r"关注|订阅|扫码|详见|动态见|了解更多")
 _OURS = re.compile(r"我们|本公司|官方|更多|招聘(?:信息|通知|动态)")
+# "PS：" opening a line starts a postscript ("PS：简历请注明到岗时间"); that PS is not Photoshop.
+_AFTER_POSTSCRIPT = re.compile(r"[ \t]*[:：]")
 _INTRO = re.compile(r"(?m)^[ \t]*[【\[]?\s*(?:公司介绍|公司简介|企业介绍|企业简介|关于我们|公司概况)\s*[】\]]?\s*(?:[:：]|$)")
 _SECTION = re.compile(
     r"(?m)^[ \t]*[【\[]?\s*(?:职位描述|职位详情|岗位描述|岗位职责|工作职责|职位职责|工作内容|任职要求|岗位要求|职位要求"
@@ -198,8 +216,10 @@ def _skill_pattern(term: str) -> re.Pattern:
 
 
 def _skill_patterns(vocabulary) -> list:
+    # (term, pattern, key): key is what the term compares as, one for every same_as spelling.
     # Longest first, so "Spring Boot" claims its text before "Spring" and "Golang" before "Go".
-    return sorted(((term, _skill_pattern(term)) for term in vocabulary.terms), key=lambda item: -len(item[0]))
+    return sorted(((term, _skill_pattern(term), vocabulary.key(term)) for term in vocabulary.terms),
+                  key=lambda item: -len(item[0]))
 
 
 _BUILTIN_PATTERNS = None
@@ -275,6 +295,7 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
     title = cite("title", found_title)
     headline = _line_at(text, title_span[0]) if title_span else (lines[0] if lines else "")
     tag, piped = _tag_cells(lines, headline if title_span else None)
+    hits = _skill_hits(text, skill_patterns or _builtin_patterns(), skip=title_span)
     record = {
         "schema_version": schema.SCHEMA_VERSION,
         "id": job_id(text),
@@ -290,8 +311,8 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
             "days_per_week": cite("requirements.days_per_week", _days_per_week(text)),
             "min_months": cite("requirements.min_months", _min_months(text, tag)),
             "education": cite("requirements.education", _education(text, tag)),
-            "skills": cite("requirements.skills",
-                           _skills(text, skill_patterns or _builtin_patterns(), skip=title_span)) or [],
+            "skills": cite("requirements.skills", _skills(text, hits)) or [],
+            "skill_alternatives": cite("requirements.skill_alternatives", _alternatives(text, hits)) or [],
         },
         "return_offer": cite("return_offer", _return_offer(text)),
         "published_at": cite("published_at", _dated(text, (_PUBLISHED,))),
@@ -659,32 +680,106 @@ def _dated(text: str, patterns, *, same_line=False):
     return _NOTHING
 
 
-def _skills(text: str, patterns, skip=None):
-    """Vocabulary terms in order of first appearance, none inside the span skip (the title)."""
-    claimed, first_seen = ([skip] if skip else []), {}
+def _skill_hits(text: str, patterns, skip=None) -> list:
+    """(match, term, key) wherever the JD asks for a vocabulary term, in text order; none in skip (the title)."""
+    claimed, hits = ([skip] if skip else []), []
     intro = _intro_spans(text)
-    for term, pattern in patterns:
+    for term, pattern, key in patterns:
         for match in pattern.finditer(text):
             if any(match.start() < end and start < match.end() for start, end in claimed):
                 continue
             claimed.append((match.start(), match.end()))
             if _asked(text, term, match, intro):
-                first_seen.setdefault(term, match)
+                hits.append((match, term, key))
+    return sorted(hits, key=lambda hit: hit[0].start())
+
+
+def _skills(text: str, hits: list):
+    """Vocabulary terms in order of first appearance."""
+    first_seen = {}
+    for match, term, _ in hits:
+        first_seen.setdefault(term, match)
     if not first_seen:
         return _NOTHING
-    ordered = sorted(first_seen.items(), key=lambda item: item[1].start())
     snippets = []
-    for _, match in ordered:
+    for match in first_seen.values():
         clause = _clause(text, match.start(), match.end())
         if clause not in snippets:
             snippets.append(clause)
-    return [term for term, _ in ordered], snippets
+    return list(first_seen), snippets
+
+
+def _alternatives(text: str, hits: list):
+    """Groups of skills the JD offers a choice between, each with the clauses that offer it.
+
+    A run counts when it names two skills or more ("Go 或 Golang" is one skill). Choices
+    that share a skill, a same_as spelling included, are one group: "熟悉 Python 或 Java；
+    熟悉 Java 或 Go" is [Python, Java, Go], citing both clauses. A group keeps every
+    spelling the JD used, so each one appears in a clause that is cited.
+    """
+    groups = []  # each [terms, keys, clauses], in the order first offered
+    for run in _runs(text, hits):
+        if not _offered_as_choice(text, run):
+            continue
+        terms, keys = list(dict.fromkeys(term for _, term, _ in run)), {key for _, _, key in run}
+        if len(keys) < 2:
+            continue
+        clause = _clause(text, run[0][0].start(), run[-1][0].end())
+        joined = [group for group in groups if group[1] & keys]
+        if not joined:
+            groups.append([terms, keys, [clause]])
+            continue
+        first = joined[0]
+        for group in joined[1:] + [[terms, keys, [clause]]]:
+            first[0] += [term for term in group[0] if term not in first[0]]
+            first[1] |= group[1]
+            first[2] += [c for c in group[2] if c not in first[2]]
+        groups = [group for group in groups if not any(group is other for other in joined[1:])]
+    if not groups:
+        return _NOTHING
+    snippets = []
+    for _, _, clauses in groups:
+        snippets += [clause for clause in clauses if clause not in snippets]
+    return [terms for terms, _, _ in groups], snippets
+
+
+def _runs(text: str, hits: list) -> list:
+    """Hits joined only by 、 / 或 或者, each run with the joins between its hits."""
+    runs = []
+    for hit in hits:
+        previous = runs[-1][-1][0] if runs else None
+        if previous is not None and _JOIN.fullmatch(text, previous.end(), hit[0].start()):
+            runs[-1].append(hit)
+        else:
+            runs.append([hit])
+    return [run for run in runs if len(run) >= 2]
+
+
+def _offered_as_choice(text: str, run: list) -> bool:
+    start, end = run[0][0].start(), run[-1][0].end()
+    if _MAJOR_AFTER.match(text, end) or _MAJOR_BEFORE.search(text, max(0, start - 8), start):
+        return False
+    if any("或" in text[a[0].end():b[0].start()] for a, b in zip(run, run[1:])):
+        return True
+    left, right = _clause_bounds(text, start, end)
+    for mark in _ALT_MARK.finditer(text, left, right):
+        if mark.start() >= end:
+            gap = text[end:mark.start()]
+        elif mark.end() <= start:
+            gap = text[mark.end():start]
+        else:
+            continue
+        if len(gap) <= _MARK_REACH and not _MARK_BREAK.search(gap):
+            return True
+    return False
 
 
 def _asked(text: str, term: str, match, intro: list) -> bool:
     """Whether the JD asks for the skill it names here: not ruled out, not just the company's channel."""
     left, right = _clause_bounds(text, match.start(), match.end())
     if _NEGATION.search(text, left, match.start()):
+        return False
+    if term == "PS" and _postscript(text, match):
         return False
     if term in _PLATFORMS:
         clause = text[left:right]
@@ -693,6 +788,12 @@ def _asked(text: str, term: str, match, intro: list) -> bool:
         if any(start <= match.start() < end for start, end in intro):
             return False
     return True
+
+
+def _postscript(text: str, match) -> bool:
+    """Whether a PS is the "PS：" that opens a line, a postscript."""
+    line_start = text.rfind("\n", 0, match.start()) + 1
+    return not text[line_start:match.start()].strip() and _AFTER_POSTSCRIPT.match(text, match.end()) is not None
 
 
 def _intro_spans(text: str) -> list:

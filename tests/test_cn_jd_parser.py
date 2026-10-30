@@ -49,6 +49,7 @@ def salary(low, high, unit, months=None):
 
 
 NEGOTIABLE = {"min": None, "max": None, "unit": None, "months": None, "negotiable": True}
+ALTERNATIVES = "requirements.skill_alternatives"
 
 
 class Fixtures(unittest.TestCase):
@@ -62,6 +63,7 @@ class Fixtures(unittest.TestCase):
             "requirements.days_per_week": 4, "requirements.min_months": 6,
             "requirements.education": {"min": "bachelor", "preferred": None},
             "requirements.skills": ["Go", "MySQL", "Redis", "Golang", "Java", "Docker", "Kubernetes"],
+            "requirements.skill_alternatives": [["Golang", "Java"]],
             "return_offer": True,
         },
         "shixiseng_intern.txt": {
@@ -311,9 +313,25 @@ SEED_CASES = (
     ("负责公众号文案，协助短视频拍摄和直播活动", "requirements.skills", ["公众号"]),
     ("整理访谈记录，参与Web自动化回归", "requirements.skills", []),
     # Synonym spellings (M2-4a) are read as written; matching takes them as one skill.
-    ("熟悉HTML、CSS和JS，用过Node.js和JSON", "requirements.skills", ["JS", "Node.js"]),
+    ("熟悉HTML、CSS和JS，用过Node.js和JSON", "requirements.skills", ["HTML", "CSS", "JS", "Node.js"]),
     ("会做PPT，文案撰写能力强", "requirements.skills", ["PPT", "文案撰写"]),
     ("熟悉K8s和Kubernetes运维", "requirements.skills", ["K8s", "Kubernetes"]),
+    # H18: so are 大模型 / LLM / 大语言模型, 提示词工程 / Prompt and Photoshop / PS ...
+    ("熟悉大语言模型（LLM），有提示词工程和 Prompt 调优经验", "requirements.skills",
+     ["大语言模型", "LLM", "提示词工程", "Prompt"]),
+    ("了解大模型和LLM应用开发", "requirements.skills", ["大模型", "LLM"]),
+    ("熟练使用PS和Figma", "requirements.skills", ["PS", "Figma"]),
+    ("设计软件：PS、Figma", "requirements.skills", ["PS", "Figma"]),
+    # ... but LLM inside another word, 语言模型 or 提示词 on their own, and the PS opening a
+    # postscript are none of them.
+    ("用过vLLM部署推理服务，了解LLMOps", "requirements.skills", ["vLLM"]),
+    ("了解统计语言模型，能根据提示词生成图片", "requirements.skills", []),
+    ("熟悉Figma\nPS：简历请注明可到岗时间", "requirements.skills", ["Figma"]),
+    ("熟悉Figma\n ps: 请附上作品集", "requirements.skills", ["Figma"]),
+    ("熟悉GPS定位，能输出PSD切图", "requirements.skills", []),
+    # H18: HTML, CSS and SVN, which V8 found unread; a file name, SCSS or XHTML is not them.
+    ("熟悉 HTML/CSS/JavaScript，版本工具用 Git、SVN", "requirements.skills", ["HTML", "CSS", "JavaScript", "Git", "SVN"]),
+    ("样式用SCSS编写，模板见 docs/index.html，兼容XHTML", "requirements.skills", []),
     # The interview or written-test city on a location line is not a work city.
     ("工作地点：深圳南山区；面试地点：北京。", "cities", ["深圳"]),
     ("base 北京/上海，面试可在杭州", "cities", ["北京", "上海"]),
@@ -371,6 +389,44 @@ SEED_CASES = (
     ("掌握客户访谈、CRM，熟悉财务分析和招聘流程，能完成数据清洗", "requirements.skills",
      ["客户访谈", "CRM", "财务分析", "招聘流程", "数据清洗"]),
     ("熟悉SCRM系统", "requirements.skills", []),
+    # H16: skills the JD offers a choice between, in each wording the roadmap lists, any direction.
+    ("熟悉 Golang 或 Java，了解 Docker、Kubernetes", ALTERNATIVES, [["Golang", "Java"]]),
+    ("熟悉 Vue 或者 React 框架", ALTERNATIVES, [["Vue", "React"]]),
+    ("熟悉 Java 语言或 Go 语言", ALTERNATIVES, [["Java", "Go"]]),
+    ("熟悉 Python、Java 或 Go", ALTERNATIVES, [["Python", "Java", "Go"]]),
+    ("熟悉 Python/SQL 或 Tableau", ALTERNATIVES, [["Python", "SQL", "Tableau"]]),
+    ("掌握 Java、Go 一门即可", ALTERNATIVES, [["Java", "Go"]]),
+    ("熟悉 Python、Java 任意一种", ALTERNATIVES, [["Python", "Java"]]),
+    ("熟悉 Python、Java、Go 任一语言", ALTERNATIVES, [["Python", "Java", "Go"]]),
+    ("Python/Java/Go 任选其一", ALTERNATIVES, [["Python", "Java", "Go"]]),
+    ("熟练使用 Excel、SPSS 其一", ALTERNATIVES, [["Excel", "SPSS"]]),
+    ("掌握 Java、Go 其中之一", ALTERNATIVES, [["Java", "Go"]]),
+    ("Excel、SPSS 二选一", ALTERNATIVES, [["Excel", "SPSS"]]),
+    ("至少掌握一种编程语言（Python、Java、Go）", ALTERNATIVES, [["Python", "Java", "Go"]]),
+    ("掌握 Python、Java、Go 等编程语言中的至少一种", ALTERNATIVES, [["Python", "Java", "Go"]]),
+    ("熟悉 Figma、Sketch 至少一款设计工具", ALTERNATIVES, [["Figma", "Sketch"]]),
+    ("熟练使用 Excel 或 SPSS 进行数据处理", ALTERNATIVES, [["Excel", "SPSS"]]),
+    ("会用 Photoshop 或 Illustrator 做海报", ALTERNATIVES, [["Photoshop", "Illustrator"]]),
+    ("熟练使用Excel、SQL，会用Tableau或Power BI", ALTERNATIVES, [["Tableau", "Power BI"]]),
+    ("熟悉 Java 或 Go，会用 Tableau 或 Power BI", ALTERNATIVES, [["Java", "Go"], ["Tableau", "Power BI"]]),
+    ("熟悉 Docker、Kubernetes 及至少一种语言 Java、Go", ALTERNATIVES, [["Java", "Go"]]),
+    # Choices that share a skill are one group, every spelling kept (Codex B's P2-1 on #59).
+    ("熟悉 Python 或 Java；熟悉 Java 或 Go", ALTERNATIVES, [["Python", "Java", "Go"]]),
+    ("熟悉 Rust 或 Go；熟悉 Golang 或 Java", ALTERNATIVES, [["Rust", "Go", "Golang", "Java"]]),
+    ("熟悉 Python 或 Java；熟悉 Go 或 Rust；会 Java、Go 任一", ALTERNATIVES, [["Python", "Java", "Go", "Rust"]]),
+    ("熟悉 Go、Golang 或 Java", ALTERNATIVES, [["Go", "Golang", "Java"]]),
+    # Not a choice: skills listed with 、 or / are all wanted; 或 between years, majors, levels or
+    # cities; a description; ruled-out skills; one skill in two spellings; the same choice twice.
+    ("熟悉 Python、SQL、Tableau", ALTERNATIVES, []),
+    ("熟悉 Python/SQL/Tableau", ALTERNATIVES, []),
+    ("2026届或2027届本科或硕士在读，计算机或数学相关专业，北京或上海", ALTERNATIVES, []),
+    ("机器学习或数据分析相关专业，熟悉 SQL", ALTERNATIVES, []),
+    ("专业：机器学习或数据分析，熟悉 SQL", ALTERNATIVES, []),
+    ("Python、Java 是我们的核心技术栈之一", ALTERNATIVES, []),
+    ("熟悉 Python、Java 均可", ALTERNATIVES, []),  # 均可 often means "both", so it is no marker
+    ("不要求 Rust 或 C++ 经验", ALTERNATIVES, []),
+    ("熟悉 Go 或 Golang", ALTERNATIVES, []),
+    ("熟悉 Java 或 Go；Java 或 Go 至少精通一门", ALTERNATIVES, [["Java", "Go"]]),
 )
 
 
@@ -384,6 +440,32 @@ class SeedCases(unittest.TestCase):
         for text, _, _ in SEED_CASES:
             with self.subTest(text=text):
                 self.assertEqual(schema.validate(parse_one(text)), [])
+
+
+class SkillAlternatives(unittest.TestCase):
+    """H16: a choice cites the clause that offers it; its skills stay in requirements.skills too."""
+
+    def test_a_choice_cites_its_clause_and_keeps_its_skills(self):
+        record = parse_one((FIXTURES / "boss_intern.txt").read_text(encoding="utf-8"))
+        self.assertEqual(record["evidence"][ALTERNATIVES], {"text": "熟悉 Golang 或 Java", "method": "rule"})
+        record = parse_one("任职要求：\n1. 熟悉 Java 或 Go，会用 Tableau 或 Power BI；\n2. 熟悉 Docker。")
+        self.assertEqual(record["evidence"][ALTERNATIVES]["text"], ["熟悉 Java 或 Go", "会用 Tableau 或 Power BI"])
+        self.assertEqual(record["requirements"]["skills"], ["Java", "Go", "Tableau", "Power BI", "Docker"])
+
+    def test_no_choice_no_evidence(self):
+        record = parse_one("熟悉 Python、SQL")
+        self.assertEqual(record["requirements"]["skill_alternatives"], [])
+        self.assertNotIn(ALTERNATIVES, record["evidence"])
+
+    def test_a_merged_choice_cites_every_clause_that_offers_part_of_it(self):
+        record = parse_one("任职要求：\n1. 熟悉 Rust 或 Go；\n2. 熟悉 Golang 或 Java。")
+        self.assertEqual(record["evidence"][ALTERNATIVES]["text"], ["熟悉 Rust 或 Go", "熟悉 Golang 或 Java"])
+        self.assertEqual(schema.validate(record), [])
+
+    def test_a_long_clause_cites_just_the_choice(self):
+        record = parse_one("熟悉 Docker 并能在高并发、大流量的复杂业务场景下持续优化性能与稳定性的同时用 Python 或 SQL 做数据分析")
+        self.assertEqual(record["evidence"][ALTERNATIVES]["text"], "Python 或 SQL")
+        self.assertEqual(record["requirements"]["skill_alternatives"], [["Python", "SQL"]])
 
 
 INJECTIONS = (

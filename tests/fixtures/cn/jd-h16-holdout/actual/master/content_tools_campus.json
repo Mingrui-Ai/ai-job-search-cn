@@ -1,0 +1,1394 @@
+{
+  "parse": {
+    "jobs": [
+      {
+        "schema_version": 1,
+        "id": "job_907b6d99b37a",
+        "source": {
+          "type": "file",
+          "site": "official",
+          "url": null,
+          "imported_at": "2026-10-29T14:50:03+08:00"
+        },
+        "title": "内容编辑校招",
+        "company": "示例舟序传媒有限公司",
+        "cities": [
+          "上海",
+          "杭州"
+        ],
+        "remote": false,
+        "employment_type": "campus",
+        "salary": {
+          "min": 10000,
+          "max": 14000,
+          "unit": "CNY/month",
+          "months": 14,
+          "negotiable": false
+        },
+        "requirements": {
+          "graduation": {
+            "years": [
+              2026,
+              2027
+            ],
+            "strict": true
+          },
+          "days_per_week": null,
+          "min_months": null,
+          "education": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "skills": [
+            "秀米",
+            "剪映",
+            "Excel",
+            "PowerPoint"
+          ]
+        },
+        "return_offer": null,
+        "published_at": "2026-10-29",
+        "deadline": "2026-12-10",
+        "status": "new",
+        "evidence": {
+          "title": {
+            "text": "内容编辑校招",
+            "method": "rule"
+          },
+          "company": {
+            "text": "示例舟序传媒有限公司",
+            "method": "rule"
+          },
+          "cities": {
+            "text": "工作地点：上海或杭州",
+            "method": "rule"
+          },
+          "remote": {
+            "text": "不支持远程",
+            "method": "rule"
+          },
+          "employment_type": {
+            "text": "内容编辑校招",
+            "method": "rule"
+          },
+          "salary": {
+            "text": "10-14K·14薪",
+            "method": "rule"
+          },
+          "requirements.graduation": {
+            "text": "仅招2026届或2027届",
+            "method": "rule"
+          },
+          "requirements.education": {
+            "text": "本科及以上",
+            "method": "rule"
+          },
+          "requirements.skills": {
+            "text": [
+              "工具要求：熟悉 秀米、剪映 之一",
+              "能使用 Excel/PowerPoint"
+            ],
+            "method": "rule"
+          },
+          "published_at": {
+            "text": "发布时间：2026-10-29",
+            "method": "rule"
+          },
+          "deadline": {
+            "text": "投递截止：2026-12-10",
+            "method": "rule"
+          }
+        },
+        "guard": {
+          "verdict": "clean",
+          "counts": {}
+        },
+        "raw_text": "内容编辑校招\n公司名称：示例舟序传媒有限公司\n工作地点：上海或杭州\n不支持远程办公\n薪资：10-14K·14薪\n仅招2026届或2027届\n本科及以上学历\n岗位职责：整理栏目素材，核对排期表。\n试用期3个月。\n工具要求：熟悉 秀米、剪映 之一；能使用 Excel/PowerPoint，两项均需掌握。\n发布时间：2026-10-29\n投递截止：2026-12-10"
+      }
+    ],
+    "warnings": [],
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_907b6d99b37a",
+        "title": "内容编辑校招",
+        "company": "示例舟序传媒有限公司",
+        "cities": [
+          "上海",
+          "杭州"
+        ],
+        "status": "new"
+      }
+    ]
+  },
+  "differences": {},
+  "profiles": {
+    "tech": {
+      "filter": {
+        "job_id": "job_907b6d99b37a",
+        "title": "内容编辑校招",
+        "company": "示例舟序传媒有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2026,
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅招2026届或2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写每周到岗，不适用",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": "内容编辑校招"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写实习时长，不适用",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": "内容编辑校招"
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海、杭州不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海",
+                  "杭州"
+                ],
+                "evidence": "工作地点：上海或杭州"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "conflict",
+            "reason": "这是校招岗位，你找的是实习",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": "内容编辑校招"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "内容编辑校招",
+                "evidence": "内容编辑校招"
+              },
+              "company": {
+                "value": "示例舟序传媒有限公司",
+                "evidence": "示例舟序传媒有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海",
+                  "杭州"
+                ],
+                "evidence": "工作地点：上海或杭州"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rule_score": {
+        "schema_version": 1,
+        "job_id": "job_907b6d99b37a",
+        "rules_version": 1,
+        "scored_at": "2026-10-29T14:50:04+08:00",
+        "job_hash": "a7858dde73e24e5d7a4171975993b1793d567f5613d695f01179eb0c606efb33",
+        "profile_hash": "f21053d1cae424dc01642647fd4422b62b7059d1d2e129dd03c556fc0880520d",
+        "filter": {
+          "verdict": "ineligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2026,
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅招2026届或2027届"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历硕士，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "master",
+                    "school": "示例理工大学",
+                    "major": "计算机科学与技术",
+                    "start": "2025-09",
+                    "end": "2027-06",
+                    "gpa": "3.6/4.0",
+                    "rank": "专业前15%",
+                    "courses": [
+                      "机器学习",
+                      "分布式系统",
+                      "数据库系统"
+                    ],
+                    "source": "resume.txt"
+                  },
+                  {
+                    "level": "bachelor",
+                    "school": "示例师范大学",
+                    "major": "软件工程",
+                    "start": "2021-09",
+                    "end": "2025-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写每周到岗，不适用",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "内容编辑校招"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 4
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写实习时长，不适用",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "内容编辑校招"
+                }
+              },
+              "profile": {
+                "availability.months": 6
+              }
+            },
+            {
+              "check": "location",
+              "result": "conflict",
+              "reason": "上海、杭州不在意向城市内，且不能远程、不搬家",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海",
+                    "杭州"
+                  ],
+                  "evidence": "工作地点：上海或杭州"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "深圳",
+                  "广州"
+                ],
+                "availability.remote_ok": true,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "conflict",
+              "reason": "这是校招岗位，你找的是实习",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "内容编辑校招"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "内容编辑校招",
+                  "evidence": "内容编辑校招"
+                },
+                "company": {
+                  "value": "示例舟序传媒有限公司",
+                  "evidence": "示例舟序传媒有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "上海",
+                    "杭州"
+                  ],
+                  "evidence": "工作地点：上海或杭州"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "外包",
+                    "销售"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "dimensions": {
+          "skills": {
+            "score": 0,
+            "method": "rule",
+            "reason": "JD 要求 4 项技能，你有 0 项",
+            "matched": [],
+            "missing": [
+              "秀米",
+              "剪映",
+              "Excel",
+              "PowerPoint"
+            ]
+          },
+          "direction": {
+            "score": 0,
+            "method": "rule",
+            "reason": "JD 技能以运营方向为主，不在你的求职方向中",
+            "jd_groups": {
+              "ops": 2
+            },
+            "evidence": null
+          },
+          "experience": {
+            "score": null,
+            "method": "agent",
+            "reason": "等 Agent 对照经历补充",
+            "hints": [],
+            "evidence": null
+          },
+          "salary": {
+            "score": null,
+            "method": "rule",
+            "reason": "JD 按元/月、你按元/天计，单位不同，不换算"
+          }
+        },
+        "weights": {
+          "skills": 35,
+          "direction": 30,
+          "experience": 25,
+          "salary": 10
+        },
+        "total": {
+          "score": 0,
+          "grade": "ineligible",
+          "complete": false,
+          "missing": [
+            "experience",
+            "salary"
+          ]
+        },
+        "gaps": [
+          {
+            "kind": "skill",
+            "item": "秀米",
+            "jd": "工具要求：熟悉 秀米、剪映 之一"
+          },
+          {
+            "kind": "skill",
+            "item": "剪映",
+            "jd": "工具要求：熟悉 秀米、剪映 之一"
+          },
+          {
+            "kind": "skill",
+            "item": "Excel",
+            "jd": "能使用 Excel/PowerPoint"
+          },
+          {
+            "kind": "skill",
+            "item": "PowerPoint",
+            "jd": "能使用 Excel/PowerPoint"
+          },
+          {
+            "kind": "filter",
+            "item": "location",
+            "result": "conflict",
+            "reason": "上海、杭州不在意向城市内，且不能远程、不搬家",
+            "jd": "工作地点：上海或杭州"
+          },
+          {
+            "kind": "filter",
+            "item": "employment_type",
+            "result": "conflict",
+            "reason": "这是校招岗位，你找的是实习",
+            "jd": "内容编辑校招"
+          }
+        ]
+      },
+      "manual_fields_filter": {
+        "job_id": "job_907b6d99b37a",
+        "title": "内容编辑校招",
+        "company": "示例舟序传媒有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2026,
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2026届或2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上学历"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写每周到岗，不适用",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "内容编辑校招"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写实习时长，不适用",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "内容编辑校招"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海、杭州不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海",
+                  "杭州"
+                ],
+                "evidence": [
+                  "工作地点：上海或杭州"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "conflict",
+            "reason": "这是校招岗位，你找的是实习",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "内容编辑校招"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "内容编辑校招",
+                "evidence": [
+                  "内容编辑校招"
+                ]
+              },
+              "company": {
+                "value": "示例舟序传媒有限公司",
+                "evidence": [
+                  "公司名称：示例舟序传媒有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海",
+                  "杭州"
+                ],
+                "evidence": [
+                  "工作地点：上海或杭州"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "ops": {
+      "filter": {
+        "job_id": "job_907b6d99b37a",
+        "title": "内容编辑校招",
+        "company": "示例舟序传媒有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2026,
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅招2026届或2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写每周到岗，不适用",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": "内容编辑校招"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写实习时长，不适用",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": "内容编辑校招"
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海",
+                  "杭州"
+                ],
+                "evidence": "工作地点：上海或杭州"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "校招岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": "内容编辑校招"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "内容编辑校招",
+                "evidence": "内容编辑校招"
+              },
+              "company": {
+                "value": "示例舟序传媒有限公司",
+                "evidence": "示例舟序传媒有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海",
+                  "杭州"
+                ],
+                "evidence": "工作地点：上海或杭州"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rule_score": {
+        "schema_version": 1,
+        "job_id": "job_907b6d99b37a",
+        "rules_version": 1,
+        "scored_at": "2026-10-29T14:50:05+08:00",
+        "job_hash": "a7858dde73e24e5d7a4171975993b1793d567f5613d695f01179eb0c606efb33",
+        "profile_hash": "9253a7624b78ca09e1b99a1d9a0279af51fcede82057694e3124c1c0f6f8979b",
+        "filter": {
+          "verdict": "eligible",
+          "checks": [
+            {
+              "check": "graduation",
+              "result": "match",
+              "reason": "2027 届在要求范围内",
+              "jd": {
+                "requirements.graduation": {
+                  "value": {
+                    "years": [
+                      2026,
+                      2027
+                    ],
+                    "strict": true
+                  },
+                  "evidence": "仅招2026届或2027届"
+                }
+              },
+              "profile": {
+                "graduation.year": 2027
+              }
+            },
+            {
+              "check": "education",
+              "result": "match",
+              "reason": "最高学历本科，满足本科及以上",
+              "jd": {
+                "requirements.education": {
+                  "value": {
+                    "min": "bachelor",
+                    "preferred": null
+                  },
+                  "evidence": "本科及以上"
+                }
+              },
+              "profile": {
+                "education": [
+                  {
+                    "level": "bachelor",
+                    "school": "示例财经大学",
+                    "major": "市场营销",
+                    "start": "2023-09",
+                    "end": "2027-06",
+                    "gpa": null,
+                    "rank": null,
+                    "courses": [],
+                    "source": "resume.txt"
+                  }
+                ]
+              }
+            },
+            {
+              "check": "days_per_week",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写每周到岗，不适用",
+              "jd": {
+                "requirements.days_per_week": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "内容编辑校招"
+                }
+              },
+              "profile": {
+                "availability.days_per_week": 3
+              }
+            },
+            {
+              "check": "min_months",
+              "result": "not_applicable",
+              "reason": "校招岗位，JD 没写实习时长，不适用",
+              "jd": {
+                "requirements.min_months": {
+                  "value": null,
+                  "evidence": null
+                },
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "内容编辑校招"
+                }
+              },
+              "profile": {
+                "availability.months": 3
+              }
+            },
+            {
+              "check": "location",
+              "result": "match",
+              "reason": "工作城市上海在你的意向内",
+              "jd": {
+                "cities": {
+                  "value": [
+                    "上海",
+                    "杭州"
+                  ],
+                  "evidence": "工作地点：上海或杭州"
+                },
+                "remote": {
+                  "value": false,
+                  "evidence": "不支持远程"
+                }
+              },
+              "profile": {
+                "availability.cities": [
+                  "上海"
+                ],
+                "availability.remote_ok": false,
+                "availability.relocate": false
+              }
+            },
+            {
+              "check": "employment_type",
+              "result": "match",
+              "reason": "校招岗位在你的求职方向内",
+              "jd": {
+                "employment_type": {
+                  "value": "campus",
+                  "evidence": "内容编辑校招"
+                }
+              },
+              "profile": {
+                "target.employment_types": [
+                  "internship",
+                  "campus"
+                ]
+              }
+            },
+            {
+              "check": "exclusions",
+              "result": "match",
+              "reason": "没有命中排除项",
+              "jd": {
+                "title": {
+                  "value": "内容编辑校招",
+                  "evidence": "内容编辑校招"
+                },
+                "company": {
+                  "value": "示例舟序传媒有限公司",
+                  "evidence": "示例舟序传媒有限公司"
+                },
+                "cities": {
+                  "value": [
+                    "上海",
+                    "杭州"
+                  ],
+                  "evidence": "工作地点：上海或杭州"
+                }
+              },
+              "profile": {
+                "exclusions": {
+                  "cities": [],
+                  "companies": [],
+                  "keywords": [
+                    "电话销售"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "dimensions": {
+          "skills": {
+            "score": 70,
+            "method": "rule",
+            "reason": "JD 要求 4 项技能，你有 3 项",
+            "matched": [
+              {
+                "jd": "秀米",
+                "profile": "秀米",
+                "credit": 1
+              },
+              {
+                "jd": "剪映",
+                "profile": "剪映",
+                "credit": 0.8
+              },
+              {
+                "jd": "Excel",
+                "profile": "Excel",
+                "credit": 1
+              }
+            ],
+            "missing": [
+              "PowerPoint"
+            ]
+          },
+          "direction": {
+            "score": 100,
+            "method": "rule",
+            "reason": "JD 技能以运营方向为主，在你的求职方向中",
+            "jd_groups": {
+              "ops": 2
+            },
+            "evidence": null
+          },
+          "experience": {
+            "score": null,
+            "method": "agent",
+            "reason": "等 Agent 对照经历补充",
+            "hints": [
+              {
+                "jd": "秀米",
+                "profile": [
+                  "exp-1"
+                ]
+              },
+              {
+                "jd": "剪映",
+                "profile": [
+                  "campus-1"
+                ]
+              }
+            ],
+            "evidence": null
+          },
+          "salary": {
+            "score": null,
+            "method": "rule",
+            "reason": "档案没写最低期望薪资"
+          }
+        },
+        "weights": {
+          "skills": 35,
+          "direction": 30,
+          "experience": 25,
+          "salary": 10
+        },
+        "total": {
+          "score": 84,
+          "grade": "strong",
+          "complete": false,
+          "missing": [
+            "experience",
+            "salary"
+          ]
+        },
+        "gaps": [
+          {
+            "kind": "skill",
+            "item": "PowerPoint",
+            "jd": "能使用 Excel/PowerPoint"
+          }
+        ]
+      },
+      "manual_fields_filter": {
+        "job_id": "job_907b6d99b37a",
+        "title": "内容编辑校招",
+        "company": "示例舟序传媒有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2026,
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2026届或2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上学历"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写每周到岗，不适用",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "内容编辑校招"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写实习时长，不适用",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "内容编辑校招"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海",
+                  "杭州"
+                ],
+                "evidence": [
+                  "工作地点：上海或杭州"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "校招岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "内容编辑校招"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "内容编辑校招",
+                "evidence": [
+                  "内容编辑校招"
+                ]
+              },
+              "company": {
+                "value": "示例舟序传媒有限公司",
+                "evidence": [
+                  "公司名称：示例舟序传媒有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海",
+                  "杭州"
+                ],
+                "evidence": [
+                  "工作地点：上海或杭州"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

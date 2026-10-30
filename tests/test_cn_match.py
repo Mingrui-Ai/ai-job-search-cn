@@ -232,6 +232,19 @@ class Location(CheckCase):
         item = self.assert_result(UNKNOWN, job=self.place(["北京"], False), profile=self.wants(["深圳"], False, None))
         self.assertEqual(item["reason"], "北京不在意向城市内；JD 不支持远程；你不接受远程；档案没写是否愿意去其他城市")
 
+    def test_an_acceptable_city_matches_with_a_note(self):
+        # M2-6b, ruled by the planner: a city the user accepts is one they can work in, even with
+        # relocate false; relocate is about the cities beyond both lists.
+        profile = setting(self.wants(["深圳"], False, False), "availability.acceptable_cities", ["杭州市"])
+        item = self.assert_result(MATCH, job=self.place(["杭州"], False), profile=profile)
+        self.assertEqual((item["reason"], item["note"]), ("工作城市杭州在你可以接受的城市内", "杭州是你可以接受的城市，不是首选"))
+        self.assertIn("availability.acceptable_cities", item["profile"])
+        # A preferred city wins over an acceptable one; beyond both lists the old rules hold.
+        self.assertNotIn("note", self.assert_result(MATCH, job=self.place(["杭州", "深圳"]), profile=profile))
+        self.assert_result(CONFLICT, job=self.place(["北京"], False), profile=profile)
+        only_acceptable = setting(self.wants([], False, False), "availability.acceptable_cities", ["杭州"])
+        self.assert_result(CONFLICT, job=self.place(["北京"], False), profile=only_acceptable)
+
 
 class EmploymentType(CheckCase):
     check = "employment_type"
