@@ -1,0 +1,484 @@
+{
+  "target_commit": "1a64eacaf6bb1f0f73449a1c368d1770a3fb2a47",
+  "baseline_commit": "c6055cc7aee16ce0ca956e948c3c654e1ae40334",
+  "manifest_lf_sha256": "4c0a3dc79bd98532124b7c12c29bc3a4601cf800e7adbddf504cde3c88ec99c2",
+  "profile_adaptations": {
+    "tech": "Add availability.acceptable_cities=[] in temporary copy only; original fields unchanged",
+    "ops": "Add availability.acceptable_cities=[] in temporary copy only; original fields unchanged"
+  },
+  "python_version": "3.12.15",
+  "started_at_utc": "2026-10-30T06:30:45.238461+00:00",
+  "cases": {
+    "data_platform_intern": {
+      "field_groups_equal": 14,
+      "differences": {},
+      "changes_from_baseline": {
+        "requirements.skills": {
+          "before": [
+            "统计学",
+            "Python",
+            "SQL"
+          ],
+          "after": [
+            "Python",
+            "SQL"
+          ]
+        }
+      },
+      "education": {
+        "min": "bachelor",
+        "preferred": "master"
+      },
+      "skills": [
+        "Python",
+        "SQL"
+      ],
+      "additional_fields": {
+        "interview": null,
+        "start": null
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        },
+        "ops": {
+          "parsed": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        }
+      }
+    },
+    "market_planning_campus": {
+      "field_groups_equal": 13,
+      "differences": {
+        "salary": {
+          "type": "missing",
+          "expected": {
+            "min": 9000,
+            "max": 11000,
+            "unit": "CNY/month",
+            "months": null,
+            "negotiable": false
+          },
+          "actual": null
+        }
+      },
+      "changes_from_baseline": {
+        "requirements.education": {
+          "before": null,
+          "after": {
+            "min": "bachelor",
+            "preferred": null
+          }
+        }
+      },
+      "education": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "skills": [
+        "统计学",
+        "SPSS",
+        "Excel"
+      ],
+      "additional_fields": {
+        "interview": null,
+        "start": null
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        },
+        "ops": {
+          "parsed": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        }
+      }
+    },
+    "operations_analysis_intern": {
+      "field_groups_equal": 13,
+      "differences": {
+        "requirements.skills": {
+          "type": "missing",
+          "expected": [
+            "Python",
+            "Excel",
+            "统计分析"
+          ],
+          "actual": [
+            "Python",
+            "Excel"
+          ],
+          "missing": [
+            "统计分析"
+          ],
+          "extra": []
+        }
+      },
+      "changes_from_baseline": {
+        "requirements.education": {
+          "before": {
+            "min": "master",
+            "preferred": null
+          },
+          "after": {
+            "min": "bachelor",
+            "preferred": null
+          }
+        },
+        "requirements.skills": {
+          "before": [
+            "统计学",
+            "Python",
+            "Excel"
+          ],
+          "after": [
+            "Python",
+            "Excel"
+          ]
+        }
+      },
+      "education": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "skills": [
+        "Python",
+        "Excel"
+      ],
+      "additional_fields": {
+        "interview": null,
+        "start": null
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "expected_verdict": "needs_check",
+            "actual_verdict": "needs_check",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "needs_check",
+            "actual_verdict": "needs_check",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        },
+        "ops": {
+          "parsed": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        }
+      }
+    },
+    "service_quality_intern": {
+      "field_groups_equal": 14,
+      "differences": {},
+      "changes_from_baseline": {
+        "requirements.education": {
+          "before": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "after": {
+            "min": "associate",
+            "preferred": null
+          }
+        },
+        "requirements.skills": {
+          "before": [
+            "统计学",
+            "Excel",
+            "客户沟通"
+          ],
+          "after": [
+            "Excel",
+            "客户沟通"
+          ]
+        }
+      },
+      "education": {
+        "min": "associate",
+        "preferred": null
+      },
+      "skills": [
+        "Excel",
+        "客户沟通"
+      ],
+      "additional_fields": {
+        "interview": null,
+        "start": null
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        },
+        "ops": {
+          "parsed": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        }
+      }
+    },
+    "statistics_research_intern": {
+      "field_groups_equal": 13,
+      "differences": {
+        "requirements.skills": {
+          "type": "missing",
+          "expected": [
+            "统计分析",
+            "Excel"
+          ],
+          "actual": [
+            "Excel"
+          ],
+          "missing": [
+            "统计分析"
+          ],
+          "extra": []
+        }
+      },
+      "changes_from_baseline": {
+        "requirements.education": {
+          "before": {
+            "min": "master",
+            "preferred": null
+          },
+          "after": {
+            "min": "bachelor",
+            "preferred": null
+          }
+        },
+        "requirements.skills": {
+          "before": [
+            "统计学",
+            "Excel"
+          ],
+          "after": [
+            "Excel"
+          ]
+        }
+      },
+      "education": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "skills": [
+        "Excel"
+      ],
+      "additional_fields": {
+        "interview": null,
+        "start": null
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        },
+        "ops": {
+          "parsed": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        }
+      }
+    }
+  },
+  "counts": {
+    "fields_match": 67,
+    "skill_expected": 12,
+    "skill_hit": 10,
+    "skill_missing": 2,
+    "skill_extra": 0,
+    "evidence_values": 60,
+    "evidence_verbatim": 60,
+    "manual_valid": 5,
+    "manual_saved": 5,
+    "parsed_old_checks_equal": 70,
+    "parsed_verdicts_equal": 10,
+    "manual_old_checks_equal": 70,
+    "manual_verdicts_equal": 10,
+    "fields_missing": 3
+  },
+  "baseline_metrics": {
+    "field_groups": {
+      "equal": 61,
+      "total": 70
+    },
+    "skills": {
+      "matched": 10,
+      "expected": 12,
+      "missing": 2,
+      "extra": 4
+    },
+    "filter_verdicts": {
+      "equal": 8,
+      "total": 10
+    },
+    "hard_checks": {
+      "equal": 66,
+      "total": 70
+    },
+    "manual_replay_verdicts": {
+      "equal": 10,
+      "total": 10
+    },
+    "manual_replay_checks": {
+      "equal": 70,
+      "total": 70
+    }
+  },
+  "successful_cli_calls": 35,
+  "frozen_inputs_verified": 12,
+  "target_source_unchanged": true,
+  "finished_at_utc": "2026-10-30T06:30:55.860350+00:00"
+}
