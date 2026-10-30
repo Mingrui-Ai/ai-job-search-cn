@@ -103,6 +103,17 @@ _EDUCATION_MIN = re.compile(
 _EDUCATION_PREFERRED = re.compile(
     rf"{_LEVEL_WORD}(?:研究生)?\s*(?:及以上)?\s*(?:学历)?\s*者?\s*(?:优先|为佳)"
 )
+# Two levels or more to choose from (H20): "本科或硕士及以上学历", "大专/本科学历", "学历：本科或硕士". The
+# minimum is the lowest. A bare pair needs a label before it or a qualifier after it, as a single level
+# does: "本科或硕士期间的项目经历" asks for nothing.
+_LEVEL_ANY = "(?:大专|专科|本科|学士|硕士|研究生|博士)"
+_EDUCATION_CHOICE = re.compile(
+    rf"(?P<label>学历\s*(?:要求)?\s*[:：]\s*)?{_LEVEL_ANY}(?:研究生)?"
+    rf"(?:\s*(?:或者?|/|／|、)\s*{_LEVEL_ANY}(?:研究生)?)+"
+    r"(?P<tail>\s*(?:学历\s*)?(?:及|或)?\s*以上|\s*(?:学历|在读|应届|毕业|学生)|\s*(?:均可|皆可|都可以?))?"
+)
+# A choice the JD prefers: "硕士或博士优先" prefers a master's, the lowest of them.
+_PREFERRED_AFTER = re.compile(r"\s*(?:及以上)?\s*(?:学历)?\s*者?\s*(?:优先|为佳)")
 # "学历不限", "不设最低学历门槛": no minimum, said outright. "专业不限" is about the major.
 _NO_MINIMUM_EDUCATION = re.compile(
     r"学历\s*(?:要求)?\s*[:：]?\s*(?:不限(?!于)|无要求|没有要求|不作要求|不做要求)|不限学历|(?:无|没有)学历要求"
@@ -227,6 +238,14 @@ _MARK_REACH = 15
 _MARK_BREAK = re.compile(r"[和及与并是为]")
 _MAJOR_AFTER = re.compile(r"\s*(?:等)?\s*(?:相关)?\s*专业")
 _MAJOR_BEFORE = re.compile(r"专业\s*[:：]?\s*$")
+# A term in a list of majors is no skill (H20): "统计学或市场营销相关专业", "专业：计算机、统计学". The same
+# term asking for knowledge still is: "熟悉统计学方法", "具备统计学专业知识".
+_MAJOR_WORD = r"[一-鿿A-Za-z]{1,12}?"
+_MAJOR_JOIN = r"\s*(?:、|/|／|或者|或|和|及|与)\s*"
+_MAJOR_TAIL = re.compile(
+    rf"(?:{_MAJOR_JOIN}{_MAJOR_WORD})*\s*(?:等)?\s*(?:相关)?\s*专业(?!\s*(?:知识|技能|能力|素养|术语|工具|软件))"
+)
+_MAJOR_LEAD = re.compile(rf"专业\s*(?:要求|背景|方向)?\s*(?:为|是|[:：])\s*(?:{_MAJOR_WORD}{_MAJOR_JOIN})*$")
 # A platform name is a skill when the JD asks for it, not when it points the reader at the
 # company's own channel ("欢迎关注我们的公众号", "动态见我们的 B站") or describes the company
 # in its introduction. A follow verb alone is a duty: "关注小红书热点".
@@ -755,11 +774,23 @@ def _min_months(text: str, tag: list):
 def _education(text: str, tag: list):
     lowest = preferred = None
     snippets = []
+    order = schema.EDUCATION_LEVELS
+    candidates = []  # (start, end, level, snippet): the first one not a preference is the minimum
+    choices = []  # (start, end, level, snippet) of every choice, for the preference too
+    for match in _EDUCATION_CHOICE.finditer(text):
+        level = min((_LEVELS[word] for word in re.findall(_LEVEL_WORD, match.group(0))), key=order.index)
+        choices.append((match.start(), match.end(), level, match.group(0).strip()))
+        if match["label"] or match["tail"]:
+            candidates.append(choices[-1])
     for match in _EDUCATION_MIN.finditer(text):
-        if _PREFERENCE.search(text[match.end():match.end() + 4]):
+        if not any(start <= match.start() < end for start, end, _, _ in candidates):
+            candidates.append((match.start(), match.end(), _LEVELS[match.group(1) or match.group(2)],
+                               match.group(0).strip()))
+    for _, end, level, snippet in sorted(candidates):
+        if _PREFERENCE.search(text[end:end + 4]):
             continue  # "硕士及以上学历优先" states a preference, not a minimum
-        lowest = _LEVELS[match.group(1) or match.group(2)]
-        snippets.append(match.group(0).strip())
+        lowest = level
+        snippets.append(snippet)
         break
     if lowest is None:
         match = _NO_MINIMUM_EDUCATION.search(text)
@@ -772,13 +803,16 @@ def _education(text: str, tag: list):
                 lowest = _LEVELS[cell]
                 snippets.append(cell)
                 break
-    match = _EDUCATION_PREFERRED.search(text)
-    if match:
-        level = _LEVELS[match.group(1)]
-        order = schema.EDUCATION_LEVELS
+    wanted = [(start, level, text[start:after.end()].strip()) for start, end, level, _ in choices
+              for after in [_PREFERRED_AFTER.match(text, end)] if after]
+    wanted += [(match.start(), _LEVELS[match.group(1)], match.group(0).strip())
+               for match in _EDUCATION_PREFERRED.finditer(text)
+               if not any(start <= match.start() < end for start, end, _, _ in choices)]
+    if wanted:
+        _, level, snippet = min(wanted)
         if lowest in (None, schema.NO_MINIMUM) or order.index(level) >= order.index(lowest):
             preferred = level
-            snippets.append(match.group(0).strip())
+            snippets.append(snippet)
     if lowest is None and preferred is None:
         return _NOTHING
     return {"min": lowest, "preferred": preferred}, snippets
@@ -907,6 +941,8 @@ def _asked(text: str, term: str, match, intro: list) -> bool:
     left, right = _clause_bounds(text, match.start(), match.end())
     if _NEGATION.search(text, left, match.start()):
         return False
+    if _MAJOR_TAIL.match(text, match.end(), right) or _MAJOR_LEAD.search(text[left:match.start()]):
+        return False  # a major, not a skill
     if term == "PS" and _postscript(text, match):
         return False
     if term in _PLATFORMS:
