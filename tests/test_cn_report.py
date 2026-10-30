@@ -178,7 +178,9 @@ class ReportFromSavedRecords(unittest.TestCase):
         self.assertNotIn("71.50", part)
 
     def test_scored_dimensions_that_weigh_nothing(self):
-        record, part = self.rescored_with({"skills": 0, "direction": 0, "experience": 100, "salary": 0, "location": 0})
+        # A job with no experience yet: new weights keep an agent's experience (M2-6d), which would weigh 100 here.
+        record, part = self.rescored_with({"skills": 0, "direction": 0, "experience": 100, "salary": 0, "location": 0},
+                                          "jd/official_site.txt")
         self.assertIsNone(record["total"]["score"])
         self.assertIn("÷ 已评分维度的权重之和 0：已评分维度的权重之和为 0", part)
         self.assertIn("权重大于 0 的维度", part)
@@ -313,8 +315,23 @@ class ReportFromSavedRecords(unittest.TestCase):
         for job_id in self.ids.values():
             # The rule dimensions quote today's job, which may not be what was scored.
             self.assertIn("依据可能已变，请先重新评分", self.section(page, job_id))
+            self.assertIn("这条记录已过期（档案在评分后改过）", self.section(page, job_id))
+            self.assertNotIn(report.WEIGHTS_ONLY, self.section(page, job_id))
         for row in list(csv.reader(io.StringIO(form.decode("utf-8-sig"))))[1:]:
             self.assertTrue(row[5].startswith("已过期，先重新评分。"))
+
+    def test_new_weights_say_so_and_leave_the_grounds_standing(self):
+        # M2-6d: only the total is out of date; scoring again keeps the agent's experience.
+        changed = setting(self.profile, "target.weights", dict(score.DEFAULT_WEIGHTS, location=40))
+        (self.data / "profile" / "profile.json").write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+        result, page, _ = self.generate()
+        self.assertEqual(sorted(result["stale"]), sorted(self.ids.values()))
+        ranking = page[page.index('id="ranking"'):page.index("<section")]
+        self.assertEqual(ranking.count("过期（权重在评分后改过）"), len(SAMPLES))
+        for job_id in self.ids.values():
+            part = self.section(page, job_id)
+            self.assertIn(f"这条记录已过期（权重在评分后改过）：{report.WEIGHTS_ONLY}", part)
+            self.assertNotIn("依据可能已变", part)
 
     def test_named_jobs_only(self):
         job_id = self.ids["jd/official_site.txt"]
@@ -453,6 +470,7 @@ class FormAndPage(unittest.TestCase):
 
     def test_every_dimension_has_a_chinese_name(self):
         self.assertEqual(list(report.DIMENSIONS), list(score.DIMENSIONS))
+        self.assertEqual(set(report.STALE), set(score.STALE_REASONS), "and every reason a record can be stale")
         page = report.build([report.entry(self.record(), None, False)], {}, "2026-10-29T09:30:00+08:00", VOCABULARY)
         for key, name in report.DIMENSIONS.items():
             with self.subTest(key=key):

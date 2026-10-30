@@ -4,7 +4,9 @@ Scoring is explainable only if it is reproducible and nobody can quietly bend
 it, so these pin: each rule dimension, including every way it can be null;
 the weighted total and its grade; gaps; that the same input gives the same
 record; that a change to the job or profile marks a record stale and drops
-what an agent added; that validate refuses the four tamperings in the roadmap
+what an agent added, while new weights mark it stale and keep it (M2-6d);
+that match list --weights tries other weights, writing nothing, and ranks as
+scoring again with them does; that validate refuses the four tamperings in the roadmap
 (an edited total, a JD quote that is not in the JD, a profile id that does
 not exist, an edited rule dimension); and the rule part for the ten sample
 JDs (the five v0.1 samples and V2's five) against both sample profiles, each
@@ -208,7 +210,8 @@ class Choices(Case):
         self.assertEqual(score.RULES_VERSION, 6)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
         # 5: M2-6c's two checks; 6: H26's statistical analysis vocabulary
         old = setting(scored(self.job, self.tech), "rules_version", 5)
-        self.assertTrue(score.stale(old, self.job, score.profile_hash(self.tech)))
+        reasons = score.stale_reasons(old, self.job, score.profile_hash(self.tech), score.weights_of(self.tech))
+        self.assertEqual(reasons, ["rules"])
         errors = score.validate(old, self.job, self.tech, VOCABULARY)
         self.assertTrue(any(e.startswith("rules_version: scored by other rules") for e in errors), errors)
 
@@ -429,6 +432,79 @@ class Records(Case):
         fresh = score.score_job(edited, self.tech, VOCABULARY, previous=filled, now=LATER)
         self.assertIsNone(fresh["dimensions"]["experience"]["score"])
 
+    def test_the_profile_hash_leaves_out_the_weights(self):
+        # M2-6d: the agent's judgments do not rest on the weights, and a record keeps the weights it used.
+        base = scored(self.job, self.tech)
+        heavier = setting(self.tech, "target.weights", dict(score.DEFAULT_WEIGHTS, location=40))
+        record = scored(self.job, heavier)
+        self.assertEqual(record["profile_hash"], base["profile_hash"])
+        self.assertEqual(record["weights"], heavier["target"]["weights"])
+        self.assertNotEqual(record["total"], base["total"])
+
+    def test_new_weights_keep_the_agents_work_and_redo_the_total(self):
+        job = with_skills(self.job, ["Excel"])  # nothing grouped: the agent gives the direction as well
+        filled = agent_filled(scored(job, self.tech))
+        filled["dimensions"]["direction"].update(score=100, method="agent", reason="标题是后端开发，属于技术方向",
+                                                 evidence={"jd": ["后端开发实习生（Go方向）"], "profile": []})
+        filled["total"] = score.total(filled["dimensions"], filled["weights"], filled["filter"]["verdict"])
+        weights = {"skills": 10, "direction": 40, "experience": 40, "salary": 0, "location": 10}
+        again = score.score_job(job, setting(self.tech, "target.weights", weights), VOCABULARY,
+                                previous=filled, now=LATER)
+        for key in ("experience", "direction"):
+            self.assertEqual(again["dimensions"][key], filled["dimensions"][key])
+        self.assertEqual(again["weights"], weights)
+        self.assertEqual(again["total"], score.trial_total(filled, weights))
+        self.assertNotEqual(again["total"], filled["total"])
+        # Anything else in the profile still clears the agent's work, here what an experience says.
+        rewritten = copy.deepcopy(self.tech)
+        rewritten["experience"][0]["bullets"] = ["重写了订单服务"]
+        fresh = score.score_job(job, rewritten, VOCABULARY, previous=filled, now=LATER)
+        self.assertIsNone(fresh["dimensions"]["experience"]["score"])
+        self.assertIsNone(fresh["dimensions"]["direction"]["score"])
+
+    def test_why_a_record_is_stale(self):
+        record = scored(self.job, self.tech)
+
+        def reasons(job=self.job, profile=self.tech, saved=record):
+            return score.stale_reasons(saved, job, score.profile_hash(profile), score.weights_of(profile))
+
+        self.assertEqual(reasons(), [])
+        self.assertEqual(reasons(job=None), ["job_gone"])
+        self.assertEqual(reasons(job=setting(self.job, "title", "后端开发实习生")), ["job"])
+        self.assertEqual(reasons(profile=setting(self.tech, "availability.days_per_week", 5)), ["profile"])
+        self.assertEqual(reasons(profile=setting(self.tech, "target.weights", dict(score.DEFAULT_WEIGHTS, location=40))),
+                         ["weights"])
+        self.assertEqual(reasons(saved=dict(record, rules_version=score.RULES_VERSION - 1)), ["rules"])
+
+
+class Trial(Case):
+    """M2-6d: match list --weights works out what scoring again with other weights would give."""
+
+    def test_a_trial_total_is_what_scoring_again_with_those_weights_gives(self):
+        record = agent_filled(scored(self.job, self.tech))
+        self.assertEqual(score.trial_total(record, record["weights"]), record["total"])
+        for weights in ({"skills": 0, "direction": 0, "experience": 0, "salary": 0, "location": 1},
+                        dict(score.DEFAULT_WEIGHTS, location=40)):
+            with self.subTest(weights=weights):
+                again = scored(self.job, setting(self.tech, "target.weights", weights), previous=record)
+                self.assertEqual(score.trial_total(record, weights), again["total"])
+
+    def test_a_dimension_the_record_lacks_counts_as_null(self):
+        # A record saved before M2-6b has no location; it is stale, but a trial must not fail on it.
+        record = agent_filled(scored(self.job, self.tech))
+        del record["dimensions"]["location"]
+        self.assertEqual(score.trial_total(record, score.DEFAULT_WEIGHTS)["missing"], ["location"])
+        self.assertEqual(score.trial_total({}, score.DEFAULT_WEIGHTS),
+                         {"score": None, "grade": None, "complete": False, "missing": list(score.DIMENSIONS)})
+
+    def test_shares_are_percentages_of_the_sum(self):
+        self.assertEqual(score.shares(score.DEFAULT_WEIGHTS), score.DEFAULT_WEIGHTS)  # they add up to 100
+        # Raising one weight keeps the others' numbers but not their shares: 30 of 130 is 23.08%.
+        self.assertEqual(score.shares(dict(score.DEFAULT_WEIGHTS, location=40)),
+                         {"skills": 23.1, "direction": 19.2, "experience": 19.2, "salary": 7.7, "location": 30.8})
+        self.assertEqual(score.shares({"skills": 1, "direction": 1, "experience": 1, "salary": 0, "location": 0}),
+                         {"skills": 33.3, "direction": 33.3, "experience": 33.3, "salary": 0, "location": 0})
+
 
 def agent_filled(record: dict) -> dict:
     """What an agent hands back: experience scored, with a reason and evidence; the total redone."""
@@ -498,6 +574,9 @@ class Validate(Case):
         self.assertTrue(any("run match score again" in e for e in errors), errors)
         errors = self.errors(job=setting(self.job, "title", "后端开发实习生"))
         self.assertTrue(any("run match score again" in e for e in errors), errors)
+        heavier = setting(self.tech, "target.weights", dict(score.DEFAULT_WEIGHTS, location=40))
+        self.assertEqual(self.errors(profile=heavier),
+                         ["weights: the profile's weights changed since scoring; run match score again"])
 
 
 # The rule part for the ten sample JDs against both sample profiles; experience is null
@@ -649,6 +728,90 @@ class Commands(unittest.TestCase):
         # salary: 1000/20 = 50; the ruled-out job (250+1000+8000)/100 = 92.5 -> 93 still lists last.
         self.assertEqual(self.listed(), [(boss, "strong", 95, False), (product, "strong", 80, False),
                                          (test_dev, "moderate", 50, False), (ruled_out, "ineligible", 93, False)])
+
+    def snapshot(self) -> dict:
+        return {path: path.read_bytes() for path in sorted(self.data.rglob("*")) if path.is_file()}
+
+    def save_agent_experience(self, job_id: str) -> dict:
+        record = agent_filled(self.cli("match", "show", job_id))
+        path = self.data / "draft.json"
+        path.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        self.cli("match", "save", str(path))
+        path.unlink()
+        return record
+
+    def test_a_trial_writes_nothing_and_says_so(self):
+        for job_id in self.ids:
+            self.cli("match", "score", job_id, "--save")
+        listed, before = self.cli("match", "list"), self.snapshot()
+        self.assertNotIn("trial", listed)
+        self.assertNotIn("saved", listed["matches"][0])
+        out = self.cli("match", "list", "--weights", "skills=30,direction=25,experience=25,salary=10,location=40")
+        self.assertEqual(self.snapshot(), before, "a trial writes no file")
+        self.assertIn("试算", out["trial"]["note"])
+        self.assertEqual(out["trial"]["weights"], dict(score.DEFAULT_WEIGHTS, location=40))
+        self.assertEqual(out["trial"]["shares"], score.shares(dict(score.DEFAULT_WEIGHTS, location=40)))
+        self.assertEqual(out["trial"]["profile"], {"weights": score.DEFAULT_WEIGHTS, "shares": score.DEFAULT_WEIGHTS})
+        saved = {row["job_id"]: {"grade": row["grade"], "score": row["score"]} for row in listed["matches"]}
+        self.assertEqual({row["job_id"]: row["saved"] for row in out["matches"]}, saved)
+        # boss: (30*52 + 25*100 + 10*100 + 40*100) / 105 = 86.3 -> 86, from 81.
+        boss = next(row for row in out["matches"] if row["job_id"] == self.ids[0])
+        self.assertEqual((boss["grade"], boss["score"], boss["stale"]), ("strong", 86, False))
+
+    def test_a_trial_ranks_as_scoring_again_with_those_weights_does(self):
+        # The M2-6d acceptance: try the weights, then write them to the profile and score every job again.
+        boss, test_dev, product, ruled_out = self.ids
+        for job_id in self.ids:
+            self.cli("match", "score", job_id, "--save")
+        record = self.save_agent_experience(boss)
+        weights = {"skills": 10, "direction": 10, "experience": 20, "salary": 60, "location": 0}
+        text = ",".join(f"{key}={value}" for key, value in weights.items())
+        trial = [(row["job_id"], row["grade"], row["score"], row["complete"])
+                 for row in self.cli("match", "list", "--weights", text)["matches"]]
+        # boss (520+1000+1600+6000)/100 = 91.2 -> 91, which needs its experience (94 without); product
+        # 6000/80 = 75; test_dev 1000/20 = 50, so product now ranks above it; the ruled-out job 7250/80 = 90.6 -> 91.
+        self.assertEqual([row[:3] for row in trial], [(boss, "strong", 91), (product, "strong", 75),
+                                                      (test_dev, "moderate", 50), (ruled_out, "ineligible", 91)])
+        self.write_profile(setting(profile_from("tech"), "target.weights", weights))
+        self.assertEqual([row["stale_reasons"] for row in self.cli("match", "list")["matches"]],
+                         [["weights"]] * len(self.ids))
+        for job_id in self.ids:
+            self.cli("match", "score", job_id, "--save")
+        self.assertEqual(self.cli("match", "show", boss)["dimensions"]["experience"], record["dimensions"]["experience"])
+        rescored = [(row["job_id"], row["grade"], row["score"], row["complete"], row["stale"])
+                    for row in self.cli("match", "list")["matches"]]
+        self.assertEqual(rescored, [row + (False,) for row in trial])
+
+    def test_the_list_says_why_a_record_is_stale(self):
+        self.cli("match", "score", self.ids[0], "--save")
+        for path, value, reasons in (("target.weights", dict(score.DEFAULT_WEIGHTS, location=40), ["weights"]),
+                                     ("availability.days_per_week", 5, ["profile"])):
+            with self.subTest(path=path):
+                self.write_profile(setting(profile_from("tech"), path, value))
+                [row] = self.cli("match", "list")["matches"]
+                self.assertEqual((row["stale"], row["stale_reasons"]), (True, reasons))
+        self.write_profile(profile_from("tech"))
+        [row] = self.cli("match", "list")["matches"]
+        self.assertEqual((row["stale"], row["stale_reasons"]), (False, []))
+
+    def test_trial_weights_must_be_five_numbers(self):
+        self.cli("match", "score", self.ids[0], "--save")
+        before = self.snapshot()
+        for text, fragment in (
+                ("skills=30,direction=25,experience=25,salary=10", "--weights.location: missing"),
+                ("skills=30,direction=25,experience=25,salary=10,location=10,city=5", "--weights.city: unknown field"),
+                ("skills=30,direction=25,experience=25,salary=10,location=-1", "is not one dimension=number"),
+                ("skills=30,direction=25,experience=25,salary=10,location=ten", "is not one dimension=number"),
+                ("skills=30,skills=25,experience=25,salary=10,location=10", "is not one dimension=number"),
+                ('{"skills": 30, "direction": 25}', "is not one dimension=number"),
+                ("skills=0,direction=0,experience=0,salary=0,location=0", "at least one weight must be above 0")):
+            with self.subTest(text=text):
+                proc = run_cli("match", "list", "--weights", text, data_dir=self.data)
+                self.assertEqual((proc.returncode, proc.stdout), (2, b""))
+                self.assertIn(fragment, json.loads(proc.stderr)["error"])
+        self.assertEqual(self.snapshot(), before)
+        spaced = self.cli("match", "list", "--weights", "skills=1.5, direction=0, experience=0, salary=0, location=0")
+        self.assertEqual(spaced["trial"]["weights"]["skills"], 1.5)
 
     def test_validate_and_save_an_agents_record(self):
         boss = self.ids[0]

@@ -162,6 +162,10 @@ class Validate(unittest.TestCase):
                           "at least one weight must be above 0")
         self.assert_error(with_value(self.example, "target.weights", [35, 30, 25, 10]),
                           "target.weights: must be an object")
+        # match list --weights runs the same check under its own name (M2-6d).
+        self.assertEqual(profile.weight_errors(weights), [])
+        self.assertEqual(profile.weight_errors(four, "--weights"),
+                         ["--weights.location: missing; name all five (skills, direction, experience, salary, location)"])
 
     def test_cities_without_an_answer_on_remote_or_moving_is_a_warning(self):
         # Valid either way; but every job outside the cities would be location unknown.
