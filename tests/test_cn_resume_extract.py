@@ -359,25 +359,59 @@ class Budgets(unittest.TestCase):
 class ProcessTree(unittest.TestCase):
     """H25b (V18 P2-3): the PDF timeout ends the bridge and whatever it started, pipes and all."""
 
-    def test_a_timeout_ends_the_grandchild_too(self):
+    def tree(self, delay_before_job=0.0):
+        """A child that, like the bridge, waits for the go-ahead and then starts a grandchild holding the pipes."""
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
-        marker = Path(temp.name) / "grandchild-finished.txt"
-        # The grandchild inherits the pipes, as pdftotext does from the bridge.
-        grandchild = f"import time, pathlib; time.sleep(3); pathlib.Path({str(marker)!r}).write_text('done')"
-        child = (f"import subprocess, sys, time; subprocess.Popen([sys.executable, '-c', {grandchild!r}]); "
-                 "time.sleep(30)")
+        self.marker = Path(temp.name) / "grandchild-finished.txt"
+        grandchild = f"import time, pathlib; time.sleep(3); pathlib.Path({str(self.marker)!r}).write_text('done')"
+        child = ("import subprocess, sys, time\n"
+                 "if sys.stdin.buffer.read(1) != b'1':\n    sys.exit(3)\n"
+                 f"subprocess.Popen([sys.executable, '-c', {grandchild!r}])\n"
+                 "time.sleep(30)\n")
+        if delay_before_job:
+            # #88 review: the parent is held up between starting the child and putting it in the job.
+            real = resume_extract._windows_job
+
+            def late(process):
+                time.sleep(delay_before_job)
+                return real(process)
+
+            self.enterContext(patch.object(resume_extract, "_windows_job", late))
+        return [sys.executable, "-c", child]
+
+    def assert_tree_ended(self, command, timeout, within):
         started = time.monotonic()
         with self.assertRaises(subprocess.TimeoutExpired):
-            resume_extract._run_tree([sys.executable, "-c", child], 0.8)
-        self.assertLess(time.monotonic() - started, 2.5, "the caller waited for the pipes the grandchild held")
+            resume_extract._run_tree(command, timeout)
+        self.assertLess(time.monotonic() - started, within, "the caller waited for the pipes the grandchild held")
         time.sleep(4)
-        self.assertFalse(marker.exists(), "the grandchild outlived the timeout")
+        self.assertFalse(self.marker.exists(), "the grandchild outlived the timeout")
+
+    def test_a_timeout_ends_the_grandchild_too(self):
+        self.assert_tree_ended(self.tree(), 0.8, 2.5)
+
+    def test_the_child_waits_for_the_job_even_when_the_parent_is_slow(self):
+        # Without the go-ahead the child would start its grandchild during the delay, outside the job.
+        self.assert_tree_ended(self.tree(delay_before_job=1.5), 0.8, 4)
+
+    def test_the_bridge_waits_for_the_go_ahead(self):
+        self.assertIn("sys.stdin.buffer.read(1) != b\"1\"", resume_extract._PDF_BRIDGE.split("from pathlib")[0])
+        self.assertEqual(resume_extract.GO_AHEAD, b"1")
+        # Without it, the bridge starts nothing and exits.
+        result = subprocess.run([sys.executable, "-B", "-c", resume_extract._PDF_BRIDGE, "x", "y", "0"],
+                                stdin=subprocess.DEVNULL, capture_output=True, timeout=30)
+        self.assertEqual(result.returncode, 3)
 
     def test_output_and_exit_code(self):
-        result = resume_extract._run_tree([sys.executable, "-c", "import sys; print('synthetic'); sys.exit(3)"], 30)
+        command = [sys.executable, "-c", "import sys; sys.stdin.buffer.read(1); print('synthetic'); sys.exit(3)"]
+        result = resume_extract._run_tree(command, 30)
         self.assertEqual(result.returncode, 3)
         self.assertIn(b"synthetic", result.stdout)
+
+    def test_a_child_that_never_reads_stdin(self):
+        result = resume_extract._run_tree([sys.executable, "-c", "print('synthetic')"], 30)
+        self.assertEqual(result.returncode, 0)
 
 
 if __name__ == "__main__":

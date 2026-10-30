@@ -36,8 +36,12 @@ _REAP_TIMEOUT = 5  # seconds to collect the pipes once the tree is dead
 # Reuse upstream's optional-pypdf extraction and Poppler command/error handling.
 # We need text only: unlike extract_text_layer(), this does not also need pdfinfo.
 # No --dump-text, temporary files, or optional imports in the CN process.
+# It starts nothing before the parent's go-ahead on stdin (_run_tree): by then it is in the
+# parent's Job Object, so pdftotext is too.
 _PDF_BRIDGE = """\
 import sys
+if sys.stdin.buffer.read(1) != b"1":
+    sys.exit(3)
 from pathlib import Path
 sys.path.insert(0, sys.argv[1])
 from verify_pdf import _extract_pypdf, run_tool
@@ -167,9 +171,9 @@ def _pdf_text_is_damaged(text: str) -> bool:
 def _windows_job(process: subprocess.Popen):
     """A Job Object holding process, or None if Windows refuses one.
 
-    What process starts later joins the job, and terminating or closing the job ends them all,
-    so pdftotext goes with the bridge. The bridge is our own Python, which takes far longer to
-    start than the call below, so it cannot start anything before it is assigned.
+    What process starts once it is assigned joins the job, and terminating or closing the job
+    ends them all, so pdftotext goes with the bridge. A process started before the assignment
+    would not join, which is why the bridge waits for _run_tree's go-ahead.
     """
     import ctypes
     from ctypes import wintypes
@@ -216,17 +220,30 @@ def _kill_tree(process: subprocess.Popen, job) -> None:
         pass  # Already gone.
 
 
+GO_AHEAD = b"1"  # what _run_tree writes to the command's stdin once the tree is contained
+
+
 def _run_tree(command: list, timeout: float) -> subprocess.CompletedProcess:
     """subprocess.run with its output captured and a timeout that holds for the whole process tree.
 
     subprocess.run kills only its child, then waits for the pipes the grandchildren inherited, so
     a stuck pdftotext outlived the timeout and held it open (H25b). tools/verify_pdf.py stays as
     upstream wrote it: the tree is contained from here.
+
+    The command must read GO_AHEAD from stdin before it starts anything: it is written only once
+    the child is in its Job Object (Windows) - on POSIX the new session exists from the start.
+    Without a job, the go-ahead still comes; then only the child itself can be ended.
     """
-    process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                start_new_session=os.name == "posix")
-    job = _windows_job(process) if os.name == "nt" else None
+    job = None
     try:
+        job = _windows_job(process) if os.name == "nt" else None
+        try:
+            process.stdin.write(GO_AHEAD)
+            process.stdin.close()
+        except OSError:
+            pass  # It has already exited; its exit code says why.
         stdout, stderr = process.communicate(timeout=timeout)
         return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
     except BaseException:

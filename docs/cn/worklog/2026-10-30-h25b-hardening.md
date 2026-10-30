@@ -18,5 +18,12 @@
 - P2-2：`_word_text` 改成显式栈，不再递归。用 4 万棵随机文档树和旧实现对比，输出全部一致。`_parse_document` 用 `iterparse` 边读边数，节点超 20 万、深度超 256 就停；`document.xml` 解压后上限 16 MB，既看 ZIP 头，也用 `read(上限 + 1)` 防头部造假；输入文件上限 50 MB。超限报不含原文的 `ExtractionError`。新增 `Budgets`。
 - P2-3：新增 `_run_tree`，用 Popen 代替 `subprocess.run`。Windows 用 Job Object（`KILL_ON_JOB_CLOSE`），POSIX 用新会话 + `killpg`；超时后回收管道，最多再等 5 秒。`tools/verify_pdf.py` 没改，权限白名单没动。原有 PDF 测试的 mock 从 `subprocess.run` 改到 `_run_tree`，断言不变。
 - `ProcessTree` 用短时合成孙进程回归。对照实测老写法（`subprocess.run`）：0.8 秒超时，2.2 秒才返回，孙进程照样跑完；新写法两点都过。中途有一次对照脚本卡住超过 2 分钟，查下来是我用 stdin 跑 unittest 的方式造成的，不是老代码的行为，已换成独立脚本重测。
-- 已知局限：Windows 上 Job Object 建不出来时退回只杀桥接进程；Popen 和 AssignProcessToJobObject 之间有极短的窗口，桥接是 Python，启动远慢于这一步，实际不会抢先启动 pdftotext。
+- 已知局限：Windows 上 Job Object 建不出来时，退回只杀桥接进程（规划者在 #88 裁定为已知限制）。
 - 文档：profile-setup.md 写明上限。
+
+**#88 审核（`9c1346f`）的修改**
+
+- Codex B 的 P2-1：桥接在 Popen 和 AssignProcessToJobObject 之间可能先启动后端，之前创建的子进程不会追加进 Job。我原来写的"Python 启动较慢、不会抢先"不成立，已删掉。
+- 规划者裁定加启动握手：`_run_tree` 用 stdin 管道，Job 分配成功后才写 `GO_AHEAD`（POSIX 的新会话在 exec 时就建好了）；`_PDF_BRIDGE` 的第一件事是读这个字节，读不到就退出 3，什么都不启动。分配失败时照常发信号，按已裁定的退路处理。
+- 测试：`ProcessTree` 的子进程都先等握手。新增 `test_the_child_waits_for_the_job_even_when_the_parent_is_slow`，在分配 Job 之前人为等 1.5 秒，孙进程仍被回收；另两项核对桥接没有握手时什么都不做，以及子进程不读 stdin 时也能跑完。
+- 变异：把分配挪到发信号之后，延迟用例失败，报"孙进程超时后仍在运行"，正好是 Codex B 复现的情况。
