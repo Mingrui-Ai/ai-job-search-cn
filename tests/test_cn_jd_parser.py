@@ -406,6 +406,12 @@ SEED_CASES = (
     ("统计学相关专业背景", "requirements.skills", []),
     ("统计学专业或数学专业毕业", "requirements.skills", []),
     ("统计学专业的学生优先", "requirements.skills", []),
+    # #79 third review: 背景 before a knowledge noun asks for what one knows.
+    ("熟悉统计学专业背景知识", "requirements.skills", ["统计学"]),
+    ("掌握统计学专业背景理论", "requirements.skills", ["统计学"]),
+    ("具备统计学专业背景能力", "requirements.skills", ["统计学"]),
+    ("统计学专业背景", "requirements.skills", []),
+    ("具有统计学相关专业背景，熟悉SQL", "requirements.skills", ["SQL"]),
     ("统计学或市场营销相关专业", ALTERNATIVES, []),
     ("熟悉Go语言，用过Google Cloud和MongoDB", "requirements.skills", ["Go", "MongoDB"]),
     ("精通JavaScript", "requirements.skills", ["JavaScript"]),

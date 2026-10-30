@@ -258,8 +258,9 @@ _MAJOR_BEFORE = re.compile(r"专业\s*[:：]?\s*$")
 # 专业知识", "Figma专业版". Rather a skill read once too often than a real requirement dropped.
 _MAJOR_WORD = r"[一-鿿A-Za-z]{1,12}?"
 _MAJOR_JOIN = r"\s*(?:、|/|／|或者|或|和|及|与)\s*"
-_MAJOR_DEGREE = (r"(?:的)?\s*(?:毕业|在读|学生|同学|应届|背景|优先|出身|学历|及以上|以上"
-                 r"|大专|专科|本科|学士|硕士|研究生|博士)")
+# "专业背景" asks for a degree subject; "专业背景知识", "专业背景理论" ask for what one knows.
+_MAJOR_DEGREE = (r"(?:的)?\s*(?:毕业|在读|学生|同学|应届|背景(?!\s*(?:知识|理论|能力|基础|技能|素养))|优先|出身|学历"
+                 r"|及以上|以上|大专|专科|本科|学士|硕士|研究生|博士)")
 _MAJOR_TAIL = re.compile(
     rf"(?:{_MAJOR_JOIN}{_MAJOR_WORD})*\s*(?:等)?\s*(?:相关)?\s*专业\s*"
     rf"(?=$|[{re.escape(_CLAUSE_END)}]|{_MAJOR_DEGREE}|{_MAJOR_JOIN}{_MAJOR_WORD}\s*(?:等)?\s*(?:相关)?\s*专业)"
