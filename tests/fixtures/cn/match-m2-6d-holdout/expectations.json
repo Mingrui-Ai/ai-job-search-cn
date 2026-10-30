@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "task": "V14",
+  "oracle_origin": "验证者在未读取 M2-6d 分支或实现的情况下，根据原创说法人工写定；不是模型运行输出，也不是真实用户偏好。",
+  "reference_weights": {
+    "skills": 30,
+    "direction": 25,
+    "experience": 25,
+    "salary": 10,
+    "location": 10
+  },
+  "comparison": {
+    "normalization": "比较 w_i / sum(w) * 100；总和必须大于零，各维度为非负有限数且五项齐全。",
+    "delta_values": {
+      "up": "归一化后严格大于该维度的 reference_weights",
+      "down": "归一化后严格小于该维度的 reference_weights",
+      "same": "归一化后等于该维度的 reference_weights",
+      "unresolved": "用户未给出可确定的增减方向；不解释为同等重要，也不自动改动"
+    },
+    "order": "只检查列明的严格大小关系。未列出的关系不限制，不强求总排序或精确数字。",
+    "clarification": "must_clarify=true 时先澄清，不直接给出声称已反映用户意愿的确定权重；不确定性未解决前保持原档案。可介绍选项，但不能把选项当作已确认偏好。"
+  },
+  "common_workflow_expectations": {
+    "before_batch_scoring": "先问本批岗位当前偏好；不能只依赖以前建档时问过。后续实测时应先触发批量评分入口，观察是否提问，再提供对应 utterance。",
+    "initial_profile": "各场景分别从指定公开示例档案的独立副本开始，target.weights 为 null；采用任务指定的五维默认值，不承接其他场景的改动。",
+    "before_confirmation": "数字及中文理由先展示，等待明确确认。六条初始说法均不等于对一组尚未展示的数字的确认，profile.json 与 notes.md 均不得提前改写。",
+    "after_confirmation": "只把确认后的五维权重写入 target.weights；notes.md 的偏好记录保存实际确认日期、user 来源、用户原意及确认的权重。记录为模拟确认，不声称真实用户接受。",
+    "preserve_facts": "不把偏好改成技能熟练度、项目经历、薪资事实或岗位事实；不自行修改城市、薪资门槛、方向列表、排除项或匹配记录。",
+    "trial": "临时试算明确标识，仅输出。对照前后完整数据目录的文件清单与文件内容，不能创建或改写档案、匹配、草稿、报告等文件。",
+    "rescore": "确认并改变权重后，旧记录应过期；重新评分后与用同一组权重试算的总分/等级/顺序一致。不手改历史匹配记录。",
+    "deferred": "本阶段仅冻结期望。未来澄清轮的回答、数值确认、实际权重、试算/重评结果另存，不回填本文件。"
+  },
+  "cases": [
+    {
+      "id": "v14-01",
+      "kind": "clear_location_then_salary",
+      "must_clarify": false,
+      "may_propose_weights": true,
+      "deltas": {"skills": "down", "direction": "down", "experience": "down", "salary": "up", "location": "up"},
+      "greater_than": [["location", "salary"], ["salary", "skills"], ["salary", "direction"], ["salary", "experience"]],
+      "clarify_topics": [],
+      "rationale": "用户明确把地点、薪资相对原来加重，并把另外三项各减轻；地点第一、薪资第二，后三项的相互顺序没有要求。",
+      "must_not": ["只把地点排到薪资前面却没有相对默认值提高二者", "按首选城市直接新增排除城市或改 relocate", "提出比例后直接保存"]
+    },
+    {
+      "id": "v14-02",
+      "kind": "clear_ops_salary_direction_fixed",
+      "must_clarify": false,
+      "may_propose_weights": true,
+      "deltas": {"skills": "down", "direction": "same", "experience": "down", "salary": "up", "location": "down"},
+      "greater_than": [["salary", "skills"], ["salary", "direction"], ["salary", "experience"], ["salary", "location"]],
+      "clarify_topics": [],
+      "rationale": "收入优先且要求比原来增加，方向份量明确不变；地点、编辑工具技能、既有经历降低。方向不变指权重，不代表需要重新填写 target.directions。",
+      "must_not": ["因为是运营就把 skills 当成编程技能而归零", "擅自填写 ops 示例档案未知的最低薪资", "降低或提高 direction 的归一化权重", "没有得到数值确认就保存"]
+    },
+    {
+      "id": "v14-03",
+      "kind": "clear_experience_then_skills_two_fixed",
+      "must_clarify": false,
+      "may_propose_weights": true,
+      "deltas": {"skills": "up", "direction": "down", "experience": "up", "salary": "same", "location": "same"},
+      "greater_than": [["experience", "skills"], ["skills", "direction"], ["skills", "salary"], ["skills", "location"]],
+      "clarify_topics": [],
+      "rationale": "类似经历和技能都比原来重要，经历第一、技能第二；方向减轻，地点和钱保留原份量。这是评价偏好的表达，不是增加项目成果或证明面试事实。",
+      "must_not": ["只交换 skills 与 experience 的默认权重而没有同时提高两者", "为了归一化改动明确要求不变的 salary/location 份额", "提高简历技能等级或经历维度分数来替代调权重", "没展示数值就直接保存"]
+    },
+    {
+      "id": "v14-04",
+      "kind": "ambiguous_ops",
+      "must_clarify": true,
+      "may_propose_weights": false,
+      "deltas": {"skills": "unresolved", "direction": "unresolved", "experience": "unresolved", "salary": "unresolved", "location": "unresolved"},
+      "greater_than": [],
+      "clarify_topics": ["用具体取舍或二选一帮助用户识别最重要的一两项，例如地点更合适与收入更高如何选择", "如果仍没有明确取舍，说明可以保持默认并等待用户明确选择，不能把迟疑当成确认"],
+      "rationale": "舍不得放弃几项且拿不准，没有授权把五维设成均分，也没有说维持默认就是其确认的偏好。",
+      "must_not": ["直接写入五项相同权重", "因为提及收入/地点/内容，就降低未提及的技能和经历", "把未回答或迟疑记作已确认", "先改档案再追问"]
+    },
+    {
+      "id": "v14-05",
+      "kind": "contradictory_priority",
+      "must_clarify": true,
+      "may_propose_weights": false,
+      "deltas": {"skills": "unresolved", "direction": "unresolved", "experience": "unresolved", "salary": "unresolved", "location": "unresolved"},
+      "greater_than": [],
+      "clarify_topics": ["指出薪资高于地点、地点又高于薪资无法同时成立，请用户明确先后", "如用户其实想设地点硬门槛，先确认这一含义，与权重偏好分开处理；本句本身没有给出可落地的城市门槛"],
+      "rationale": "同一对维度同时要求互相更重，不存在满足两条严格不等式的权重；不能擅自按最后一句、第一句或均分消解。",
+      "must_not": ["静默采用最后一句而忽略仍坚持的工资第一", "把矛盾视作相等权重并写入", "为配合其中一句擅改其他三项", "要求用户确认之前先保存猜测值"]
+    },
+    {
+      "id": "v14-06",
+      "kind": "negative_only_ops",
+      "must_clarify": true,
+      "may_propose_weights": false,
+      "deltas": {"skills": "unresolved", "direction": "unresolved", "experience": "unresolved", "salary": "unresolved", "location": "unresolved"},
+      "greater_than": [],
+      "clarify_topics": ["说明电话销售、电话拉人、外包是岗位排除范围，不能直接翻译成五维权重", "追问在可接受岗位内最看重收入、地点、内容方向、工具技能还是既有经历", "若另行更新排除项，先对照已有电话销售条目确认范围和增量，单独确认；本条没有授权一组具体评分权重"],
+      "rationale": "只说哪些岗位不想要，没有正向维度排序。ops 原有排除项已含电话销售，不应重复添加或将负面词转成 direction=100 等权重。",
+      "must_not": ["将不要销售直接换算成提高 direction 或降低 salary", "凭运营身份猜地点/薪资优先级", "在本次调权重过程中静默改 exclusions 或其他档案字段", "重复记录已有排除项并宣称完成偏好换算"]
+    }
+  ]
+}

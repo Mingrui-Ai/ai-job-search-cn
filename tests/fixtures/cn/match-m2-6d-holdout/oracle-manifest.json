@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "task": "V14",
+  "frozen_at_utc": "2026-10-30T02:52:31.589732+00:00",
+  "baseline_master": "5085bec8561d30eee4cc9cb9c9699d92d3a7941d",
+  "phase": "local_freeze_before_m2_6d_comparison",
+  "independence": {
+    "m2_6d_branch_or_new_workflow_read": false,
+    "product_prior_knowledge": "已做 V13，已知 M2-6b 五维规则；本轮仅使用任务要求和 master 来源。",
+    "cases_executed_against_agent_or_product": false,
+    "oracle_method": "人工编写相对偏好和澄清期望，未由产品输出生成",
+    "publish_before_planner_notifies_pr_open": false
+  },
+  "frozen_files_sha256": {
+    ".gitattributes": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+    "utterances.json": "26e1806cce46c97dd618f65bd60dbbc32d2c3e4204eb39b55d5d600a8cd8f9f1",
+    "expectations.json": "a04a280c32e990f1a6b6d17022d6c7a0bbe8b9d683157b707727b7111df4f4fd",
+    "README.md": "bbf2beb3ab8c387eb73123981d301f37e4cf13560934a106e9131a25cdc6032c",
+    "baseline.md": "9a2f6369caecc37e62783a138289f16563e116342ff9731e1eb569777d062024"
+  },
+  "baseline_git_blob_sha256": {
+    "AGENTS.md": "5b20ecc7067d7551516b2a1b7ae3a7416c775f5b4daea3a854ea468634faf2f9",
+    "docs/cn/roadmap.md": "e5a9c25062a2f89b3ff0dda2351f803e995d28ebab52c401c9eab518b4adfb40",
+    "docs/cn/match.md": "16d73b24863c455936c7b7d3f991dbed7b54bd54dcdf86564c32a9043ddd75a5",
+    "docs/cn/profile-setup.md": "12eafbc0c1b961c694fee576fde9a2b5f5e4e39b6505384ccad3706082fcee5f",
+    "docs/cn/profile.md": "57b4a7fd69d690989e1d36b11c101b70dcdd7cda532d9ed64c7709fa5af9c6c6",
+    "jobsearch_cn/cli.py": "ceff0a57820eeffb869dd448471bd710f73fd3da973bc8bbdcaea0bad70ab4d6",
+    "tests/fixtures/cn/profile/tech/profile.json": "735d1da011b41215dd381d1a8eeea42742a3fb247ba8f5557c17c9cf0a35a2d6",
+    "tests/fixtures/cn/profile/ops/profile.json": "4b7639b57a666d4adbd0f2b5aed1e7cc28ad150bac9b1e8e675981ffdb2a5f9c"
+  },
+  "artifact_checks": {
+    "cases": 6,
+    "ops_cases": 3,
+    "clarify_cases": 3,
+    "constraints": {
+      "v14-01": "relative_constraints_satisfiable",
+      "v14-02": "relative_constraints_satisfiable",
+      "v14-03": "relative_constraints_satisfiable",
+      "v14-04": "clarify_before_quantifying",
+      "v14-05": "clarify_before_quantifying",
+      "v14-06": "clarify_before_quantifying"
+    }
+  },
+  "policy": "冻结文件和本清单不再修改；后续运行输出、澄清回复、裁定和对照另存。"
+}
