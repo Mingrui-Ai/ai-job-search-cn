@@ -66,6 +66,11 @@
       "amount": 150,
       "unit": "CNY/day"
     },
+    "salary_ideal": null,
+    "salary_step": null,
+    "meal_value": null,
+    "salary_days_per_week": null,
+    "one_meal_points": null,
     "directions": [
       "tech"
     ],

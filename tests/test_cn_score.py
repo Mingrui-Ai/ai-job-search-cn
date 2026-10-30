@@ -224,8 +224,9 @@ class Choices(Case):
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
 
     def test_a_new_rules_version_marks_older_records_stale(self):
-        self.assertEqual(score.RULES_VERSION, 7)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
-        # 5: M2-6c's two checks; 6: H26's statistical analysis; 7: H29's office vocabulary
+        self.assertEqual(score.RULES_VERSION, 9)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
+        # 5: M2-6c's two checks; 6: H26's statistical analysis; 7: H29's office vocabulary;
+        # 8: H21's versioned skills (#91); 9: M2-6e's salary tiers
         old = setting(scored(self.job, self.tech), "rules_version", 6)
         reasons = score.stale_reasons(old, self.job, score.profile_hash(self.tech), score.weights_of(self.tech))
         self.assertEqual(reasons, ["rules"])
@@ -286,6 +287,113 @@ class Salary(Case):
                 dimension = self.dimension("salary", job=job, profile=profile)
                 self.assertIsNone(dimension["score"])
                 self.assertIn(reason, dimension["reason"])
+
+
+def pay(low, high=None, unit="CNY/day") -> dict:
+    return {"min": low, "max": high if high is not None else low, "unit": unit, "months": None, "negotiable": False}
+
+
+def tiered(profile: dict, minimum, ideal, step, unit="CNY/day", **more) -> dict:
+    """The profile with salary tiers (M2-6e); the figures are examples, nobody's own."""
+    profile = setting(profile, "target.salary_min", {"amount": minimum, "unit": unit})
+    profile = setting(profile, "target.salary_ideal", {"amount": ideal, "unit": unit})
+    profile = setting(profile, "target.salary_step", step)
+    for key, value in more.items():
+        profile = setting(profile, f"target.{key}", value)
+    return profile
+
+
+class SalaryTiers(Case):
+    """M2-6e: 50 from the minimum to the ideal, 10 a step above the ideal or below the minimum, within 0-100."""
+
+    def setUp(self):
+        super().setUp()
+        self.daily = tiered(self.tech, 150, 220, 20)  # boss_intern pays 200-250 a day and asks 4 days a week
+
+    def salary(self, job=None, profile=None) -> dict:
+        return self.dimension("salary", job=job, profile=profile or self.daily)
+
+    def test_the_tiers(self):
+        cases = {150: 50, 200: 50, 220: 50, 230: 55, 260: 70, 320: 100, 330: 100,  # 50 + 10 * (pay - 220) / 20
+                 140: 45, 125: 38, 50: 0, 30: 0}  # 50 - 10 * (150 - pay) / 20; 37.5 rounds to 38
+        for amount, expected in cases.items():
+            with self.subTest(pay=amount):
+                self.assertEqual(self.salary(setting(self.job, "salary", pay(amount)))["score"], expected)
+
+    def test_a_range_counts_its_lowest_figure(self):
+        dimension = self.salary(setting(self.job, "salary", pay(200, 400)))
+        self.assertEqual(dimension["score"], 50)
+        self.assertTrue(dimension["reason"].startswith("JD 200–400 元/天，取最低的 200 元/天"), dimension["reason"])
+
+    def test_pay_turns_into_the_profile_unit(self):
+        monthly = tiered(self.tech, 2600, 3400, 160, unit="CNY/month", salary_days_per_week=4.5)
+        # A day rate counts the JD's own days a week: 200 * 4 * 52 / 12 = 3466.7, 50 + 10 * 66.7 / 160 = 54.2.
+        dimension = self.salary(profile=monthly)
+        self.assertEqual(dimension["score"], 54)
+        self.assertIn("折合 3466.7 元/月（按JD 写的每周 4 天、一年 52 周）", dimension["reason"])
+        # The JD silent, the profile's: 200 * 4.5 * 52 / 12 = 3900, 50 + 10 * 500 / 160 = 81.25.
+        silent = setting(self.job, "requirements.days_per_week", None)
+        dimension = self.salary(silent, monthly)
+        self.assertEqual(dimension["score"], 81)
+        self.assertIn("按档案的每周 4.5 天", dimension["reason"])
+        neither = self.salary(silent, setting(monthly, "target.salary_days_per_week", None))
+        self.assertIsNone(neither["score"])
+        self.assertIn("target.salary_days_per_week", neither["reason"])
+        # A year is twelve months: 42000 / 12 = 3500, 50 + 10 * 100 / 160 = 56.25.
+        self.assertEqual(self.salary(setting(self.job, "salary", pay(42000, unit="CNY/year")), monthly)["score"], 56)
+        hourly = self.salary(setting(self.job, "salary", pay(40, unit="CNY/hour")), monthly)
+        self.assertIsNone(hourly["score"])
+        self.assertIn("按小时的不换算", hourly["reason"])
+        # #93 review: by the hour on both sides is not tiered either; the same unit is no exception.
+        by_hour = tiered(self.tech, 30, 45, 5, unit="CNY/hour")
+        for amount in (25, 40, 60):
+            with self.subTest(hourly=amount):
+                both = self.salary(setting(self.job, "salary", pay(amount, unit="CNY/hour")), by_hour)
+                self.assertIsNone(both["score"])
+                self.assertIn("JD 和你都按元/小时计，按小时的不换算", both["reason"])
+        self.assertIsNone(self.salary(profile=by_hour)["score"])  # a day rate against an hourly profile
+
+    def test_meals_add_their_value_and_one_meal_adds_points(self):
+        profile = setting(setting(self.daily, "target.meal_value", {"amount": 25, "unit": "CNY/day"}),
+                          "target.one_meal_points", 10)
+
+        def with_meals(per_day, allowance=None):
+            return self.salary(setting(self.job, "benefits.meals", {"per_day": per_day, "allowance": allowance}),
+                               profile)
+
+        self.assertEqual(with_meals(2)["score"], 53)  # 200 + 25 = 225: 52.5 rounds half up
+        self.assertEqual(with_meals(3)["score"], 53)
+        self.assertEqual(with_meals(None)["score"], 53)  # 包吃 with no count: two or more
+        self.assertIn("包两餐，加 25 元/天；合计 225 元/天", with_meals(2)["reason"])
+        self.assertEqual(with_meals(1)["score"], 60)  # 50 for 200 a day, and 10 points for the one meal
+        self.assertIn("只包一餐，加 10 分", with_meals(1)["reason"])
+        self.assertEqual(with_meals(0, {"amount": 20, "unit": "CNY/day"})["score"], 50)  # 220 is the ideal
+        self.assertEqual(with_meals(2, {"amount": 20, "unit": "CNY/day"})["score"], 63)  # 245: 62.5
+        # A monthly allowance is turned with the JD's days: 520 / (4 * 52 / 12) = 30 a day; 230 scores 55.
+        self.assertEqual(with_meals(0, {"amount": 520, "unit": "CNY/month"})["score"], 55)
+        plain = setting(self.job, "benefits.meals", {"per_day": 2, "allowance": None})
+        self.assertIn("档案没写包餐折合多少", self.salary(plain)["reason"])  # no meal value: nothing added
+        self.assertEqual(self.salary(plain)["score"], 50)
+
+    def test_pay_below_the_minimum_is_a_gap(self):
+        short = setting(self.job, "salary", pay(140))
+        [gap] = [g for g in scored(short, self.daily)["gaps"] if g["kind"] == "salary"]
+        self.assertEqual(gap["item"], "按 JD 最低的薪资算，是 140 元/天，低于你的最低期望 150 元/天")
+        self.assertEqual([g for g in scored(self.job, self.daily)["gaps"] if g["kind"] == "salary"], [])
+        # Points for one meal can lift the score; the pay is still short.
+        lifted = tiered(self.tech, 150, 220, 20, one_meal_points=10)
+        record = scored(setting(short, "benefits.meals", {"per_day": 1, "allowance": None}), lifted)
+        self.assertEqual(record["dimensions"]["salary"]["score"], 55)
+        self.assertEqual(len([g for g in record["gaps"] if g["kind"] == "salary"]), 1)
+
+    def test_without_tiers_salary_scores_as_before(self):
+        # The sample profiles leave the tier keys null: the upper figure reaches the minimum or not.
+        self.assertEqual(self.dimension("salary")["score"], 100)
+        self.assertEqual(self.dimension("salary", job=setting(self.job, "salary", pay(100, 140)))["score"], 0)
+
+    def test_a_tiered_record_validates(self):
+        record = scored(self.job, self.daily)
+        self.assertEqual(score.validate(record, self.job, self.daily, VOCABULARY), [])
 
 
 class Location(Case):

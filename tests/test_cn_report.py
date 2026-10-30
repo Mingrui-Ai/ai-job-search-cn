@@ -474,6 +474,26 @@ class FormAndPage(unittest.TestCase):
         wanted = {"target": {"salary_min": {"amount": 150, "unit": "CNY/day"}}}
         self.assertIn("单位", report._settle("salary", unit, wanted))
         self.assertEqual(report._settle("salary", unit, {"target": {}}), report.FILL_PROFILE)
+        # M2-6e: with tiers a null salary is pay that could not be turned: hourly, or days a week unknown.
+        tiers = {"target": {"salary_min": {"amount": 150, "unit": "CNY/day"},
+                            "salary_ideal": {"amount": 220, "unit": "CNY/day"}, "salary_step": 20}}
+        self.assertIn("salary_days_per_week", report._settle("salary", unit, tiers))
+        hourly = {"salary": {"min": 40, "max": 40, "unit": "CNY/hour", "negotiable": False}}
+        self.assertIn("按小时的不换算", report._settle("salary", hourly, tiers))
+        # #93 review: an hourly profile never tiers, so the profile is what to change.
+        by_hour = {"target": {"salary_min": {"amount": 30, "unit": "CNY/hour"},
+                              "salary_ideal": {"amount": 45, "unit": "CNY/hour"}, "salary_step": 5}}
+        self.assertIn("改按天或按月计", report._settle("salary", hourly, by_hour))
+
+    def test_the_salary_row_quotes_the_meals_too(self):
+        # M2-6e: meals add to the pay, so the salary grounds quote them beside it.
+        job = {"evidence": {"salary": {"text": "200-260元/天", "method": "rule"},
+                            "benefits.meals": {"text": ["包午餐", "另有餐补 12 元/天"], "method": "rule"}},
+               "requirements": {"skills": [], "skill_alternatives": []}}
+        dimension = {"score": 50, "method": "rule", "reason": "r"}
+        grounds = html.unescape(report._grounds("salary", dimension, {}, job, VOCABULARY, {}))
+        for text in ("200-260元/天", "包午餐", "另有餐补 12 元/天"):
+            self.assertIn(text, grounds)
         acceptable = {"availability": {"cities": [], "acceptable_cities": ["杭州"]}}
         self.assertEqual(report._settle("location", {"cities": []}, acceptable), report.ASK_JD)
         self.assertEqual(report._settle("location", {"cities": ["杭州"]}, {"availability": {}}), report.FILL_PROFILE)

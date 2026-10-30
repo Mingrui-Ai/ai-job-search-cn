@@ -46,6 +46,11 @@
     ],
     "industries": [],
     "salary_min": null,
+    "salary_ideal": null,
+    "salary_step": null,
+    "meal_value": null,
+    "salary_days_per_week": null,
+    "one_meal_points": null,
     "directions": [
       "ops"
     ],
