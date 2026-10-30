@@ -1,6 +1,6 @@
 # 2026-10-30 · H20：可选学历取较低的一个，专业里的词不算技能（Claude B 会话）
 
-> 状态：**已开 PR，等审核**。分支 `feat/cn-h20-edu-major`，从 `origin/feat/cn-m2-6c-interview` 叠着开（#73 合并后合入 master 再开 PR）。任务单见路线图 §2 H20；V10 是留出样例，PR 开出之前不看 `cn-codex` 和 `codex/v10-*`。
+> 状态：**已开 PR #79，等审核**（V10 由 Codex A 对照）。分支 `feat/cn-h20-edu-major`，从 `origin/feat/cn-m2-6c-interview` 叠着开（#73 合并后合入 master 再开 PR）。任务单见路线图 §2 H20；V10 是留出样例，PR 开出之前不看 `cn-codex` 和 `codex/v10-*`。
 
 **起因**（V8 对照 #61，`tests/fixtures/cn/jd-h16-holdout/comparison.md`）
 
