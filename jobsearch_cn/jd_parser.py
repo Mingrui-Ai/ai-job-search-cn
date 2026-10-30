@@ -150,6 +150,8 @@ _INTERVIEW_PLACE = re.compile(
 _INTERVIEW_CHOICE = re.compile(r"也可|亦可|或者|或|可选|均可|任选|自选")
 # Interviews that are the job's own work, not the candidate's: "协助组织现场面试". "面试安排：" is a label.
 _INTERVIEW_DUTY = re.compile(r"负责|协助|组织|跟进|对接|邀约|筛选|(?<!面试)安排")
+# A way of interviewing the JD rules out: "不支持远程面试", "不接受视频面试".
+_INTERVIEW_REFUSED = re.compile(r"不(?:支持|接受|提供|安排|采用|可|能)")
 
 # When to start (M2-6c): as soon as possible, or by a date - "11月1日前到岗", "2027年7月入职",
 # "入职时间：11月底前". A month alone is its last day. A start from a date on ("11月1日后到岗",
@@ -574,7 +576,7 @@ def _interview(text: str):
     for kind, pattern in (("online", _ONLINE_INTERVIEW), ("onsite", _ONSITE_INTERVIEW), ("onsite", _INTERVIEW_PLACE)):
         for match in pattern.finditer(text):
             left, _ = _clause_bounds(text, match.start(), match.end())
-            if _NEGATION.search(text, left, match.start()) or _INTERVIEW_DUTY.search(text, left, match.start()):
+            if any(stop.search(text, left, match.start()) for stop in (_NEGATION, _INTERVIEW_REFUSED, _INTERVIEW_DUTY)):
                 continue
             mentions.append((kind, match, _CITY.findall(match.group(0)) if pattern is _INTERVIEW_PLACE else []))
     if not mentions:

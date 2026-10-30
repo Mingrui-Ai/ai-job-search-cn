@@ -252,6 +252,74 @@ SEED_CASES = (
     ("支持远程实习", "remote", True),
     ("不支持远程办公", "remote", False),
     ("负责远程控制系统开发", "remote", None),
+    ("支持远程面试", "remote", None),  # the interview, not the work (M2-6c)
+    ("不支持远程面试", "remote", None),
+    ("可远程面试，支持远程实习", "remote", True),
+    # M2-6c: how the JD interviews. Online:
+    ("采用线上面试", "interview", {"mode": "online", "cities": []}),
+    ("视频面试", "interview", {"mode": "online", "cities": []}),
+    ("电话面试", "interview", {"mode": "online", "cities": []}),
+    ("支持远程面试", "interview", {"mode": "online", "cities": []}),
+    ("网络面试", "interview", {"mode": "online", "cities": []}),
+    ("在线面试", "interview", {"mode": "online", "cities": []}),
+    ("面试方式：线上", "interview", {"mode": "online", "cities": []}),
+    ("面试地点：线上", "interview", {"mode": "online", "cities": []}),
+    ("面试安排：视频面试", "interview", {"mode": "online", "cities": []}),  # 面试安排： is a label
+    # In person, and where:
+    ("现场面试", "interview", {"mode": "onsite", "cities": []}),
+    ("线下面试", "interview", {"mode": "onsite", "cities": []}),
+    ("当面面试", "interview", {"mode": "onsite", "cities": []}),
+    ("到场面试", "interview", {"mode": "onsite", "cities": []}),
+    ("需到公司面试", "interview", {"mode": "onsite", "cities": []}),
+    ("来公司面试", "interview", {"mode": "onsite", "cities": []}),
+    ("面试方式：现场", "interview", {"mode": "onsite", "cities": []}),
+    ("面试地点：北京", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    ("面试城市：上海", "interview", {"mode": "onsite", "cities": ["上海"]}),
+    ("面试地址：深圳市南山区", "interview", {"mode": "onsite", "cities": ["深圳"]}),
+    ("面试可在杭州进行", "interview", {"mode": "onsite", "cities": ["杭州"]}),
+    ("需到北京面试", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    ("现场面试（广州）", "interview", {"mode": "onsite", "cities": ["广州"]}),
+    ("工作地点：深圳南山区；面试地点：北京", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    # Both: the candidate's choice when one line offers it, else some rounds in person.
+    ("面试地点：广州，也可视频面试", "interview", {"mode": "either", "cities": ["广州"]}),
+    ("线上或现场面试均可", "interview", {"mode": "either", "cities": []}),
+    ("一面电话面试，终面现场面试", "interview", {"mode": "mixed", "cities": []}),
+    ("初试视频面试\n复试需到上海现场面试", "interview", {"mode": "mixed", "cities": ["上海"]}),
+    ("视频面试\n面试地点：北京，也可电话面试", "interview", {"mode": "either", "cities": ["北京"]}),
+    ("线上/线下面试", "interview", {"mode": "mixed", "cities": []}),  # no word of choice: not read as one
+    # Not the candidate's interview, or ruled out:
+    ("无需现场面试，全程线上", "interview", None),
+    ("不支持远程面试", "interview", None),
+    ("不能视频面试", "interview", None),
+    ("不接受视频面试，需到北京现场面试", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    ("面试地点：北京，不可线上面试", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    ("负责协助组织现场面试", "interview", None),
+    ("负责候选人面试安排", "interview", None),
+    ("公司主营线上业务", "interview", None),
+    ("工作地点：北京", "interview", None),
+    # M2-6c: when to start (dated from NOW, 2026-10-27, when the JD has no publication date).
+    ("尽快到岗", "requirements.start", {"by": None, "asap": True}),
+    ("能尽快到岗", "requirements.start", {"by": None, "asap": True}),
+    ("可立即到岗", "requirements.start", {"by": None, "asap": True}),
+    ("随时到岗", "requirements.start", {"by": None, "asap": True}),
+    ("到岗时间：尽快", "requirements.start", {"by": None, "asap": True}),
+    ("入职时间：随时", "requirements.start", {"by": None, "asap": True}),
+    ("11月1日前到岗", "requirements.start", {"by": "2026-11-01", "asap": False}),
+    ("11月1号之前入职", "requirements.start", {"by": "2026-11-01", "asap": False}),
+    ("12月底前到岗", "requirements.start", {"by": "2026-12-31", "asap": False}),
+    ("入职时间：11月底前", "requirements.start", {"by": "2026-11-30", "asap": False}),
+    ("2027年7月入职", "requirements.start", {"by": "2027-07-31", "asap": False}),
+    ("到岗时间：2027年3月", "requirements.start", {"by": "2027-03-31", "asap": False}),
+    ("1月15日前到岗", "requirements.start", {"by": "2027-01-15", "asap": False}),  # nearest: next January
+    ("尽快到岗，最晚11月15日前到岗", "requirements.start", {"by": "2026-11-15", "asap": True}),
+    ("11月前到岗", "requirements.start", None),  # end of October, or of November?
+    ("11月1日后到岗", "requirements.start", None),  # the earliest day, not a deadline
+    ("11月起到岗", "requirements.start", None),
+    ("11月1日前到岗者优先", "requirements.start", None),  # only preferred
+    ("面试通过后一周内到岗", "requirements.start", None),
+    ("11月1日前到岗，12月1日前入职", "requirements.start", None),  # two dates: neither
+    ("无需立即到岗", "requirements.start", None),
+    ("实习3个月以上", "requirements.start", None),
     ("工作地点：广州天河区", "cities", ["广州"]),
     ("base 北京/上海", "cities", ["北京", "上海"]),
     ("工作城市：深圳、杭州", "cities", ["深圳", "杭州"]),
@@ -440,6 +508,48 @@ class SeedCases(unittest.TestCase):
         for text, _, _ in SEED_CASES:
             with self.subTest(text=text):
                 self.assertEqual(schema.validate(parse_one(text)), [])
+
+
+class InterviewAndStart(unittest.TestCase):
+    """M2-6c: each value cites its clauses; a start date without a year is dated from the JD's own date."""
+
+    def test_both_kinds_cite_every_clause(self):
+        record = parse_one("面试地点：广州，也可视频面试")
+        self.assertEqual(record["evidence"]["interview"], {"text": ["面试地点：广州", "也可视频面试"], "method": "rule"})
+        record = parse_one("尽快到岗，最晚11月15日前到岗")
+        self.assertEqual(record["evidence"]["requirements.start"]["text"], ["最晚11月15日前到岗", "尽快到岗"])
+
+    def test_nothing_read_nothing_cited(self):
+        record = parse_one("岗位职责：负责后端开发")
+        self.assertIsNone(record["interview"])
+        self.assertIsNone(record["requirements"]["start"])
+        self.assertNotIn("interview", record["evidence"])
+        self.assertNotIn("requirements.start", record["evidence"])
+
+    def start_by(self, text, now=NOW):
+        [record], _ = jd_parser.parse_text(text, now=now)
+        return (record["requirements"]["start"] or {}).get("by")
+
+    def test_a_date_without_a_year_takes_the_year_nearest_the_publication_date(self):
+        self.assertEqual(self.start_by("发布时间：2026-06-01\n1月15日前到岗"), "2026-01-15")
+        self.assertEqual(self.start_by("发布时间：2026-12-20\n1月15日前到岗"), "2027-01-15")
+        self.assertEqual(self.start_by("发布时间：2027-02-01\n12月底前到岗"), "2026-12-31")
+
+    def test_without_a_publication_date_the_import_date(self):
+        self.assertEqual(self.start_by("3月1日前到岗"), "2027-03-01")
+        march = datetime(2027, 2, 10, 10, 0, tzinfo=NOW.tzinfo)
+        self.assertEqual(self.start_by("12月底前到岗", now=march), "2026-12-31")
+        self.assertEqual(self.start_by("3月1日前到岗", now=march), "2027-03-01")
+
+    def test_a_tie_takes_the_later_year(self):
+        # 2027-08-31 is 183 days after 2027-03-01 and 183 before 2028-03-01 (2028 is a leap year).
+        tie = datetime(2027, 8, 31, 10, 0, tzinfo=NOW.tzinfo)
+        self.assertEqual(self.start_by("3月1日前到岗", now=tie), "2028-03-01")
+        # 2026-10-27 is 183 days after 2026-04-27 and 182 before 2027-04-27: no tie, the nearer.
+        self.assertEqual(self.start_by("4月27日前到岗"), "2027-04-27")
+
+    def test_a_stated_year_is_kept(self):
+        self.assertEqual(self.start_by("发布时间：2026-10-20\n2028年7月入职"), "2028-07-31")
 
 
 class SkillAlternatives(unittest.TestCase):
