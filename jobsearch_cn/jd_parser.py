@@ -219,10 +219,14 @@ _INTERVIEW_REFUSED = re.compile(r"不(?:支持|接受|提供|安排|采用|可|�
 _MEAL_GIVE = r"(?:包|提供|免费提供|管|含)"
 _MEAL = r"餐(?!\s*(?:补|费|津))"
 _MEAL_NAME = r"(?:早|午|晚)(?:餐|饭)(?!\s*(?:补|费|津))"
+_MEAL_AND = r"\s*(?:和|及|与|、|/)\s*"
 _MEALS = (
-    (re.compile(rf"{_MEAL_GIVE}\s*(?:一日)?\s*(?:三|3)\s*{_MEAL}|三餐\s*(?:全包|免费|全免)"), 3),
+    # Three meals named one by one ("提供早餐、午餐和晚餐") are three, not the two of their first pair (#93 review).
+    (re.compile(rf"{_MEAL_GIVE}\s*(?:一日)?\s*(?:三|3)\s*{_MEAL}|三餐\s*(?:全包|免费|全免)"
+                rf"|{_MEAL_GIVE}\s*{_MEAL_NAME}{_MEAL_AND}{_MEAL_NAME}{_MEAL_AND}{_MEAL_NAME}"
+                rf"|{_MEAL_GIVE}\s*早\s*[中午]\s*晚\s*(?:三|3)?\s*{_MEAL}"), 3),
     (re.compile(rf"{_MEAL_GIVE}\s*(?:一日)?\s*(?:两|二|2)\s*{_MEAL}|{_MEAL_GIVE}\s*(?:早午|午晚|早晚)\s*{_MEAL}"
-                rf"|{_MEAL_GIVE}\s*{_MEAL_NAME}\s*(?:和|及|与|、|/)\s*{_MEAL_NAME}"), 2),
+                rf"|{_MEAL_GIVE}\s*{_MEAL_NAME}{_MEAL_AND}{_MEAL_NAME}"), 2),
     (re.compile(rf"(?<![面红书背钱荷])包\s*吃|管\s*吃\s*管?\s*住|管\s*饭|{_MEAL_GIVE}\s*(?:食宿|伙食)"
                 rf"|(?:食宿|吃住)\s*全包"), None),
     (re.compile(rf"{_MEAL_GIVE}\s*(?:一|1)\s*{_MEAL}|{_MEAL_GIVE}\s*(?:免费)?\s*(?:{_MEAL_NAME}|(?:工作|员工){_MEAL})"
