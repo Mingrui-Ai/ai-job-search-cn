@@ -61,6 +61,7 @@ class Builtin(unittest.TestCase):
         self.assertEqual(self.vocabulary.group_of("招聘流程"), "hr")
         self.assertEqual(self.vocabulary.group_of("CRM"), "market")
         self.assertEqual(self.vocabulary.group_of("数据清洗"), "data")
+        self.assertEqual(self.vocabulary.group_of("统计分析"), "data")
         self.assertIsNone(self.vocabulary.group_of("打篮球"))
 
     def test_content_forms_are_not_skills_on_their_own(self):
@@ -83,6 +84,8 @@ class Builtin(unittest.TestCase):
         # Related, but not the same skill (H18): nothing is inferred from RAG or LangChain.
         self.assertFalse(self.vocabulary.same("RAG", "大模型"))
         self.assertFalse(self.vocabulary.same("LangChain", "LLM"))
+        self.assertFalse(self.vocabulary.same("统计分析", "统计学"))
+        self.assertFalse(self.vocabulary.same("统计分析", "数据分析"))
         self.assertEqual(self.vocabulary.key("打篮球"), "打篮球")
 
     def test_every_synonym_is_a_term_and_shares_its_group(self):

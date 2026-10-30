@@ -391,6 +391,15 @@ SEED_CASES = (
     ("技术总监", "title", "技术总监"),
     ("校园招聘 / 市场与品牌", "title", None),
     # Terms added in M2-3, as JDs write them; content forms alone are not skills.
+    # H26: the complete skill term, including when followed by 方法/能力.
+    ("任职要求：能够独立完成统计分析", "requirements.skills", ["统计分析"]),
+    ("掌握统计分析方法，使用SPSS复核结果", "requirements.skills", ["统计分析", "SPSS"]),
+    ("具备统计分析能力和统计学基础", "requirements.skills", ["统计分析", "统计学"]),
+    ("职责：运用数据分析与统计分析支撑决策", "requirements.skills", ["数据分析", "统计分析"]),
+    ("统计分析专员\n岗位职责：整理客户记录", "requirements.skills", []),
+    ("无需统计分析经验，熟悉Excel即可", "requirements.skills", ["Excel"]),
+    ("负责报表汇总，不涉及统计分析", "requirements.skills", []),
+    ("统计报名人数，分析活动安排", "requirements.skills", []),
     ("熟悉 Playwright、Postman，有接口测试和自动化测试经验", "requirements.skills",
      ["Playwright", "Postman", "接口测试", "自动化测试"]),
     ("熟练使用 Excel、PowerPoint，具备市场调研和商务沟通能力", "requirements.skills",

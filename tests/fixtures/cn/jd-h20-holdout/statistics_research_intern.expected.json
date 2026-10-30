@@ -1,0 +1,48 @@
+{
+  "fixture": "statistics_research_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "official",
+  "method": "agent",
+  "basis": "原创虚构样例；按现行 Job Schema、match 契约和收件箱 H20/V10 任务在首次运行本批 CLI 前人工写定。专业词不自动算技能，具备相应能力的正向要求才计入。",
+  "fields": {
+    "title": {"value": "问卷研究实习生", "evidence": ["问卷研究实习生"]},
+    "company": {"value": "示例禾森调研有限公司", "evidence": ["公司名称：示例禾森调研有限公司"]},
+    "cities": {"value": ["上海"], "evidence": ["工作地点：上海"]},
+    "remote": {"value": false, "evidence": ["不支持远程办公"]},
+    "employment_type": {"value": "internship", "evidence": ["岗位类型：实习"]},
+    "salary": {"value": {"min": 180, "max": 240, "unit": "CNY/day", "months": null, "negotiable": false}, "evidence": ["薪资：180-240元/天"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": true}, "evidence": ["仅招2027届"]},
+    "requirements.days_per_week": {"value": 3, "evidence": ["每周至少到岗3天"]},
+    "requirements.min_months": {"value": 3, "evidence": ["至少实习3个月"]},
+    "requirements.education": {"value": {"min": "bachelor", "preferred": null}, "evidence": ["学历要求：本科或硕士在读，两个层次均可"]},
+    "requirements.skills": {"value": ["统计分析", "Excel"], "evidence": ["能力要求：熟悉统计分析方法，能用Excel整理调研表"]},
+    "return_offer": {"value": null, "evidence": []},
+    "published_at": {"value": "2026-10-29", "evidence": ["发布日期：2026-10-29"]},
+    "deadline": {"value": "2026-11-30", "evidence": ["投递截止：2026-11-30"]}
+  },
+  "traps": [
+    {"text": "本科或硕士在读，两个层次均可", "interpretation": "两个学历任选，最低本科；不是仅招硕士，也没有硕士优先。"},
+    {"text": "统计学、计算机等相关专业", "interpretation": "仅指定专业范围；统计学和计算机不因此进入技能列表。"},
+    {"text": "熟悉统计分析方法", "interpretation": "明确能力要求，统计分析应保留为技能。"}
+  ],
+  "human_match": {
+    "tech": {"verdict": "ineligible", "checks": {
+      "graduation": {"result": "match", "reason": "档案2027届在限定年份内。"},
+      "education": {"result": "match", "reason": "硕士不低于最低本科。"},
+      "days_per_week": {"result": "match", "reason": "能到岗4天，不少于3天。"},
+      "min_months": {"result": "match", "reason": "能实习6个月，不少于3个月。"},
+      "location": {"result": "conflict", "reason": "上海不在意向城市内，明确不搬家，岗位明确不支持远程。"},
+      "employment_type": {"result": "match", "reason": "实习在目标类型内。"},
+      "exclusions": {"result": "match", "reason": "标题、公司、城市均未命中排除项。"}
+    }},
+    "ops": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "档案2027届在限定年份内。"},
+      "education": {"result": "match", "reason": "本科达到最低本科，不能误判为要求硕士。"},
+      "days_per_week": {"result": "match", "reason": "能到岗3天，恰好达到3天。"},
+      "min_months": {"result": "match", "reason": "能实习3个月，恰好达到3个月。"},
+      "location": {"result": "match", "reason": "上海在意向城市内。"},
+      "employment_type": {"result": "match", "reason": "实习在目标类型内。"},
+      "exclusions": {"result": "match", "reason": "标题、公司、城市均未命中排除项。"}
+    }}
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "fixture": "operations_analysis_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "referral",
+  "method": "agent",
+  "basis": "原创虚构样例；按现行 Job Schema、match 契约和收件箱 H20/V10 任务在首次运行本批 CLI 前人工写定。",
+  "fields": {
+    "title": {"value": "经营分析实习生", "evidence": ["经营分析实习生"]},
+    "company": {"value": "示例澄屿咨询有限公司", "evidence": ["公司名称：示例澄屿咨询有限公司"]},
+    "cities": {"value": ["广州"], "evidence": ["工作地点：广州"]},
+    "remote": {"value": true, "evidence": ["支持远程办公"]},
+    "employment_type": {"value": "internship", "evidence": ["岗位类型：实习"]},
+    "salary": {"value": {"min": null, "max": null, "unit": null, "months": null, "negotiable": true}, "evidence": ["薪资面议"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": false}, "evidence": ["2027届优先"]},
+    "requirements.days_per_week": {"value": null, "evidence": []},
+    "requirements.min_months": {"value": null, "evidence": []},
+    "requirements.education": {"value": {"min": "bachelor", "preferred": null}, "evidence": ["学历要求：本科/硕士在读"]},
+    "requirements.skills": {"value": ["Python", "Excel", "统计分析"], "evidence": ["熟悉Python、Excel，能使用统计分析方法解释问卷数据"]},
+    "return_offer": {"value": null, "evidence": []},
+    "published_at": {"value": "2026-10-29", "evidence": ["发布日期：2026-10-29"]},
+    "deadline": {"value": "2026-11-30", "evidence": ["投递截止：2026-11-30"]}
+  },
+  "traps": [
+    {"text": "本科/硕士在读", "interpretation": "斜线列学历备选，最低本科，优先项为空。"},
+    {"text": "统计学或经济学相关专业，熟悉Python、Excel，能使用统计分析方法解释问卷数据", "interpretation": "同一句中只有前段是专业要求；Python、Excel、统计分析都是后段的正向技能。"},
+    {"text": "每周五举行分享会", "interpretation": "星期五不是每周工作5天；天数和时长未定，保留未知。"}
+  ],
+  "human_match": {
+    "tech": {"verdict": "needs_check", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合优先年份。"},
+      "education": {"result": "match", "reason": "硕士不低于最低本科。"},
+      "days_per_week": {"result": "unknown", "reason": "JD没写确定的每周到岗天数；档案可4天。"},
+      "min_months": {"result": "unknown", "reason": "JD没写确定实习时长；档案可6个月。"},
+      "location": {"result": "match", "reason": "广州在意向城市内；也接受远程。"},
+      "employment_type": {"result": "match", "reason": "实习在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }},
+    "ops": {"verdict": "ineligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合优先年份。"},
+      "education": {"result": "match", "reason": "本科达到最低值。"},
+      "days_per_week": {"result": "unknown", "reason": "JD没写确定的每周到岗天数；档案可3天。"},
+      "min_months": {"result": "unknown", "reason": "JD没写确定实习时长；档案可3个月。"},
+      "location": {"result": "conflict", "reason": "广州不在意向城市内，明确不搬家、不接受远程，岗位可远程也不能满足档案。"},
+      "employment_type": {"result": "match", "reason": "实习在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }}
+  }
+}

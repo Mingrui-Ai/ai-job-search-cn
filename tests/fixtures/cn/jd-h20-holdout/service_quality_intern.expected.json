@@ -1,0 +1,47 @@
+{
+  "fixture": "service_quality_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "other",
+  "method": "agent",
+  "basis": "原创虚构样例；按现行 Job Schema、match 契约和收件箱 H20/V10 任务在首次运行本批 CLI 前人工写定。",
+  "fields": {
+    "title": {"value": "服务质量实习生", "evidence": ["服务质量实习生"]},
+    "company": {"value": "示例青岑服务有限公司", "evidence": ["公司名称：示例青岑服务有限公司"]},
+    "cities": {"value": ["上海"], "evidence": ["工作地点：上海"]},
+    "remote": {"value": false, "evidence": ["不支持远程办公"]},
+    "employment_type": {"value": "internship", "evidence": ["岗位类型：实习"]},
+    "salary": {"value": {"min": 160, "max": 200, "unit": "CNY/day", "months": null, "negotiable": false}, "evidence": ["薪资：160-200元/天"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": true}, "evidence": ["仅招2027届"]},
+    "requirements.days_per_week": {"value": 4, "evidence": ["每周至少到岗4天"]},
+    "requirements.min_months": {"value": 3, "evidence": ["至少实习3个月"]},
+    "requirements.education": {"value": {"min": "associate", "preferred": null}, "evidence": ["学历要求：大专/本科及以上学历"]},
+    "requirements.skills": {"value": ["Excel", "客户沟通"], "evidence": ["技能要求：熟悉Excel，能够进行客户沟通"]},
+    "return_offer": {"value": null, "evidence": []},
+    "published_at": {"value": "2026-10-29", "evidence": ["发布日期：2026-10-29"]},
+    "deadline": {"value": "2026-11-30", "evidence": ["投递截止：2026-11-30"]}
+  },
+  "traps": [
+    {"text": "大专/本科及以上学历", "interpretation": "斜线列出备选学历，最低大专，不取更高的本科。"},
+    {"text": "专业要求：电子商务、统计学等相关专业；技能要求：熟悉Excel，能够进行客户沟通", "interpretation": "同一行中专业段不贡献技能，后面的Excel和客户沟通仍是技能，不能整行删掉。"}
+  ],
+  "human_match": {
+    "tech": {"verdict": "ineligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"},
+      "education": {"result": "match", "reason": "硕士不低于大专。"},
+      "days_per_week": {"result": "match", "reason": "能到岗4天，达到4天。"},
+      "min_months": {"result": "match", "reason": "能实习6个月，不少于3个月。"},
+      "location": {"result": "conflict", "reason": "上海不在意向城市内，不搬家且岗位不支持远程。"},
+      "employment_type": {"result": "match", "reason": "实习在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }},
+    "ops": {"verdict": "ineligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"},
+      "education": {"result": "match", "reason": "本科不低于大专。"},
+      "days_per_week": {"result": "conflict", "reason": "只能到岗3天，少于4天。"},
+      "min_months": {"result": "match", "reason": "能实习3个月，达到3个月。"},
+      "location": {"result": "match", "reason": "上海在意向城市内。"},
+      "employment_type": {"result": "match", "reason": "实习在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }}
+  }
+}
