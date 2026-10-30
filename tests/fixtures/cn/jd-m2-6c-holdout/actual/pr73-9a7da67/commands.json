@@ -1,0 +1,61 @@
+[
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\jd-m2-6c-holdout\\mixed_recruiting_intern.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "<workspace>\\data\\v9-check\\pr73-9a7da67\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "validate",
+      "<workspace>\\data\\v9-check\\pr73-9a7da67\\mixed_recruiting_intern.manual.json"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "save",
+      "<workspace>\\data\\v9-check\\pr73-9a7da67\\mixed_recruiting_intern.manual.json",
+      "--data-dir",
+      "<workspace>\\data\\v9-check\\pr73-9a7da67\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_c86ae88c4bff",
+      "--profile",
+      "<workspace>\\data\\v9-check\\pr73-9a7da67\\frozen-profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v9-check\\pr73-9a7da67\\parsed"
+    ],
+    "exit_code": 1,
+    "stderr": "{\n  \"error\": \"the profile is invalid; run profile validate\",\n  \"errors\": [\n    \"availability.acceptable_cities: missing (use null, or [] for a list, when unknown)\",\n    \"availability.acceptable_cities: must be a list ([] when there is nothing)\"\n  ]\n}\n"
+  }
+]

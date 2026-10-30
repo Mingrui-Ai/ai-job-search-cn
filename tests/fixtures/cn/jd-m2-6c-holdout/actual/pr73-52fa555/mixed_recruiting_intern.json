@@ -1,0 +1,1499 @@
+{
+  "parse": {
+    "jobs": [
+      {
+        "schema_version": 1,
+        "id": "job_c86ae88c4bff",
+        "source": {
+          "type": "file",
+          "site": "other",
+          "url": null,
+          "imported_at": "2026-10-30T12:42:03+08:00"
+        },
+        "title": "招聘项目助理实习生",
+        "company": "示例星筏人才服务有限公司",
+        "cities": [
+          "上海"
+        ],
+        "remote": false,
+        "employment_type": "internship",
+        "salary": {
+          "min": 160,
+          "max": 190,
+          "unit": "CNY/day",
+          "months": null,
+          "negotiable": false
+        },
+        "requirements": {
+          "graduation": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "days_per_week": 3,
+          "min_months": 3,
+          "education": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "skills": [
+            "Excel"
+          ],
+          "skill_alternatives": [],
+          "start": {
+            "by": "2026-12-31",
+            "asap": false
+          }
+        },
+        "interview": {
+          "mode": "online",
+          "cities": []
+        },
+        "return_offer": null,
+        "published_at": "2026-10-29",
+        "deadline": null,
+        "status": "new",
+        "evidence": {
+          "title": {
+            "text": "招聘项目助理实习生",
+            "method": "rule"
+          },
+          "company": {
+            "text": "示例星筏人才服务有限公司",
+            "method": "rule"
+          },
+          "cities": {
+            "text": "工作地点：上海",
+            "method": "rule"
+          },
+          "remote": {
+            "text": "不支持远程",
+            "method": "rule"
+          },
+          "employment_type": {
+            "text": "职位名称：招聘项目助理实习生",
+            "method": "rule"
+          },
+          "salary": {
+            "text": "160-190元/天",
+            "method": "rule"
+          },
+          "requirements.graduation": {
+            "text": "仅面向2027届",
+            "method": "rule"
+          },
+          "requirements.days_per_week": {
+            "text": "每周至少到岗3天",
+            "method": "rule"
+          },
+          "requirements.min_months": {
+            "text": "实习3个月",
+            "method": "rule"
+          },
+          "requirements.education": {
+            "text": "本科及以上",
+            "method": "rule"
+          },
+          "requirements.skills": {
+            "text": "技能要求：熟悉 Excel、Word",
+            "method": "rule"
+          },
+          "requirements.start": {
+            "text": "到岗安排：2026年12月入职",
+            "method": "rule"
+          },
+          "interview": {
+            "text": "面试流程：第一轮为电话面试",
+            "method": "rule"
+          },
+          "published_at": {
+            "text": "发布日期：2026-10-29",
+            "method": "rule"
+          }
+        },
+        "guard": {
+          "verdict": "clean",
+          "counts": {}
+        },
+        "raw_text": "职位名称：招聘项目助理实习生\n公司名称：示例星筏人才服务有限公司\n本岗位及公司为原创虚构测试材料。\n工作地点：上海\n薪资：160-190元/天\n岗位职责：维护候选人名单，安排沟通时段，整理项目周报。\n技能要求：熟悉 Excel、Word。\n仅面向2027届，本科及以上学历。\n每周至少到岗3天，连续实习3个月以上。\n工作方式：不支持远程办公。\n面试流程：第一轮为电话面试；通过后必须到杭州参加现场复试，两轮均需完成。\n到岗安排：2026年12月入职，具体日期在该月内商定。\n发布日期：2026-10-29"
+      }
+    ],
+    "warnings": [],
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_c86ae88c4bff",
+        "title": "招聘项目助理实习生",
+        "company": "示例星筏人才服务有限公司",
+        "cities": [
+          "上海"
+        ],
+        "status": "new"
+      }
+    ]
+  },
+  "old_fields": {
+    "title": {
+      "type": "match",
+      "expected": "招聘项目助理实习生",
+      "actual": "招聘项目助理实习生",
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "company": {
+      "type": "match",
+      "expected": "示例星筏人才服务有限公司",
+      "actual": "示例星筏人才服务有限公司",
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "cities": {
+      "type": "match",
+      "expected": [
+        "上海"
+      ],
+      "actual": [
+        "上海"
+      ],
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "remote": {
+      "type": "match",
+      "expected": false,
+      "actual": false,
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "employment_type": {
+      "type": "match",
+      "expected": "internship",
+      "actual": "internship",
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "salary": {
+      "type": "match",
+      "expected": {
+        "min": 160,
+        "max": 190,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 160,
+        "max": 190,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "requirements.graduation": {
+      "type": "match",
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "requirements.days_per_week": {
+      "type": "match",
+      "expected": 3,
+      "actual": 3,
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "requirements.min_months": {
+      "type": "match",
+      "expected": 3,
+      "actual": 3,
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "requirements.education": {
+      "type": "match",
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "requirements.skills": {
+      "type": "missing",
+      "expected": [
+        "Excel",
+        "Word"
+      ],
+      "actual": [
+        "Excel"
+      ],
+      "missing_normalized": [
+        "word"
+      ],
+      "extra_normalized": []
+    },
+    "return_offer": {
+      "type": "match",
+      "expected": null,
+      "actual": null,
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "published_at": {
+      "type": "match",
+      "expected": "2026-10-29",
+      "actual": "2026-10-29",
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "deadline": {
+      "type": "match",
+      "expected": null,
+      "actual": null,
+      "missing_normalized": [],
+      "extra_normalized": []
+    }
+  },
+  "new_fields": {
+    "interview.mode": {
+      "type": "wrong",
+      "expected": "mixed",
+      "actual": "online",
+      "missing_normalized": [],
+      "extra_normalized": []
+    },
+    "interview.cities": {
+      "type": "missing",
+      "expected": [
+        "杭州"
+      ],
+      "actual": [],
+      "missing_normalized": [
+        "杭州"
+      ],
+      "extra_normalized": [],
+      "unknown_expected": false,
+      "unknown_actual": false
+    },
+    "requirements.start": {
+      "type": "match",
+      "expected": {
+        "by": "2026-12-31",
+        "asap": false
+      },
+      "actual": {
+        "by": "2026-12-31",
+        "asap": false
+      },
+      "missing_normalized": [],
+      "extra_normalized": []
+    }
+  },
+  "new_evidence": {
+    "interview": {
+      "value": {
+        "mode": "online",
+        "cities": []
+      },
+      "evidence": {
+        "text": "面试流程：第一轮为电话面试",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "requirements.start": {
+      "value": {
+        "by": "2026-12-31",
+        "asap": false
+      },
+      "evidence": {
+        "text": "到岗安排：2026年12月入职",
+        "method": "rule"
+      },
+      "verbatim": true
+    }
+  },
+  "manual_job": {
+    "schema_version": 1,
+    "id": "job_c86ae88c4bff",
+    "source": {
+      "type": "file",
+      "site": "other",
+      "url": null,
+      "imported_at": "2026-10-30T12:42:03+08:00"
+    },
+    "title": "招聘项目助理实习生",
+    "company": "示例星筏人才服务有限公司",
+    "cities": [
+      "上海"
+    ],
+    "remote": false,
+    "employment_type": "internship",
+    "salary": {
+      "min": 160,
+      "max": 190,
+      "unit": "CNY/day",
+      "months": null,
+      "negotiable": false
+    },
+    "requirements": {
+      "graduation": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "days_per_week": 3,
+      "min_months": 3,
+      "education": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "skills": [
+        "Excel",
+        "Word"
+      ],
+      "skill_alternatives": [],
+      "start": {
+        "by": "2026-12-31",
+        "asap": false
+      }
+    },
+    "interview": {
+      "mode": "mixed",
+      "cities": [
+        "杭州"
+      ]
+    },
+    "return_offer": null,
+    "published_at": "2026-10-29",
+    "deadline": null,
+    "status": "new",
+    "evidence": {
+      "title": {
+        "text": [
+          "职位名称：招聘项目助理实习生"
+        ],
+        "method": "agent"
+      },
+      "company": {
+        "text": [
+          "公司名称：示例星筏人才服务有限公司"
+        ],
+        "method": "agent"
+      },
+      "cities": {
+        "text": [
+          "工作地点：上海"
+        ],
+        "method": "agent"
+      },
+      "remote": {
+        "text": [
+          "不支持远程办公"
+        ],
+        "method": "agent"
+      },
+      "employment_type": {
+        "text": [
+          "招聘项目助理实习生"
+        ],
+        "method": "agent"
+      },
+      "salary": {
+        "text": [
+          "薪资：160-190元/天"
+        ],
+        "method": "agent"
+      },
+      "requirements.graduation": {
+        "text": [
+          "仅面向2027届"
+        ],
+        "method": "agent"
+      },
+      "requirements.days_per_week": {
+        "text": [
+          "每周至少到岗3天"
+        ],
+        "method": "agent"
+      },
+      "requirements.min_months": {
+        "text": [
+          "连续实习3个月以上"
+        ],
+        "method": "agent"
+      },
+      "requirements.education": {
+        "text": [
+          "本科及以上学历"
+        ],
+        "method": "agent"
+      },
+      "requirements.skills": {
+        "text": [
+          "技能要求：熟悉 Excel、Word。"
+        ],
+        "method": "agent"
+      },
+      "requirements.start": {
+        "text": [
+          "到岗安排：2026年12月入职，具体日期在该月内商定。"
+        ],
+        "method": "agent"
+      },
+      "interview": {
+        "text": [
+          "面试流程：第一轮为电话面试；通过后必须到杭州参加现场复试，两轮均需完成。"
+        ],
+        "method": "agent"
+      },
+      "published_at": {
+        "text": [
+          "发布日期：2026-10-29"
+        ],
+        "method": "agent"
+      }
+    },
+    "guard": {
+      "verdict": "clean",
+      "counts": {}
+    },
+    "raw_text": "职位名称：招聘项目助理实习生\n公司名称：示例星筏人才服务有限公司\n本岗位及公司为原创虚构测试材料。\n工作地点：上海\n薪资：160-190元/天\n岗位职责：维护候选人名单，安排沟通时段，整理项目周报。\n技能要求：熟悉 Excel、Word。\n仅面向2027届，本科及以上学历。\n每周至少到岗3天，连续实习3个月以上。\n工作方式：不支持远程办公。\n面试流程：第一轮为电话面试；通过后必须到杭州参加现场复试，两轮均需完成。\n到岗安排：2026年12月入职，具体日期在该月内商定。\n发布日期：2026-10-29"
+  },
+  "manual_validate": {
+    "valid": true,
+    "errors": []
+  },
+  "manual_save": {
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_c86ae88c4bff",
+        "title": "招聘项目助理实习生",
+        "company": "示例星筏人才服务有限公司",
+        "cities": [
+          "上海"
+        ],
+        "status": "new"
+      }
+    ],
+    "invalid": []
+  },
+  "profiles": {
+    "tech": {
+      "filter": {
+        "job_id": "job_c86ae88c4bff",
+        "title": "招聘项目助理实习生",
+        "company": "示例星筏人才服务有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅面向2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": "每周至少到岗3天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": "实习3个月"
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "职位名称：招聘项目助理实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "招聘项目助理实习生",
+                "evidence": "招聘项目助理实习生"
+              },
+              "company": {
+                "value": "示例星筏人才服务有限公司",
+                "evidence": "示例星筏人才服务有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          },
+          {
+            "check": "interview",
+            "result": "match",
+            "reason": "线上面试，不用出行",
+            "jd": {
+              "interview": {
+                "value": {
+                  "mode": "online",
+                  "cities": []
+                },
+                "evidence": "面试流程：第一轮为电话面试"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ]
+            }
+          },
+          {
+            "check": "start_date",
+            "result": "match",
+            "reason": "JD 要求 2026-12-31 前到岗，你 2026-11-15 就能到岗",
+            "jd": {
+              "requirements.start": {
+                "value": {
+                  "by": "2026-12-31",
+                  "asap": false
+                },
+                "evidence": "到岗安排：2026年12月入职"
+              }
+            },
+            "profile": {
+              "availability.start_date": "2026-11-15"
+            }
+          }
+        ]
+      },
+      "manual_filter": {
+        "job_id": "job_c86ae88c4bff",
+        "title": "招聘项目助理实习生",
+        "company": "示例星筏人才服务有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅面向2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上学历"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": [
+                  "每周至少到岗3天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": [
+                  "连续实习3个月以上"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "招聘项目助理实习生"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "招聘项目助理实习生",
+                "evidence": [
+                  "职位名称：招聘项目助理实习生"
+                ]
+              },
+              "company": {
+                "value": "示例星筏人才服务有限公司",
+                "evidence": [
+                  "公司名称：示例星筏人才服务有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          },
+          {
+            "check": "interview",
+            "result": "match",
+            "reason": "有一轮要现场面试，在杭州",
+            "jd": {
+              "interview": {
+                "value": {
+                  "mode": "mixed",
+                  "cities": [
+                    "杭州"
+                  ]
+                },
+                "evidence": [
+                  "面试流程：第一轮为电话面试；通过后必须到杭州参加现场复试，两轮均需完成。"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ]
+            },
+            "note": "要去杭州面试，有路费和时间成本"
+          },
+          {
+            "check": "start_date",
+            "result": "match",
+            "reason": "JD 要求 2026-12-31 前到岗，你 2026-11-15 就能到岗",
+            "jd": {
+              "requirements.start": {
+                "value": {
+                  "by": "2026-12-31",
+                  "asap": false
+                },
+                "evidence": [
+                  "到岗安排：2026年12月入职，具体日期在该月内商定。"
+                ]
+              }
+            },
+            "profile": {
+              "availability.start_date": "2026-11-15"
+            }
+          }
+        ]
+      },
+      "comparison": {
+        "parsed": {
+          "old": {
+            "verdict_match": true,
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "check_matches": 7,
+            "check_differences": {}
+          },
+          "new": {
+            "interview": {
+              "expected": "match",
+              "actual": "match",
+              "match": true
+            },
+            "start_date": {
+              "expected": "match",
+              "actual": "match",
+              "match": true
+            }
+          },
+          "mapped_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "frozen_scenario_differences": {
+            "interview": {
+              "frozen": "conflict",
+              "actual": "match"
+            }
+          },
+          "frozen_scenario_verdict": "ineligible",
+          "travel_note": "",
+          "travel_note_ok": false,
+          "inference_reason": "JD 要求 2026-12-31 前到岗，你 2026-11-15 就能到岗",
+          "inference_note_ok": null
+        },
+        "manual": {
+          "old": {
+            "verdict_match": true,
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "check_matches": 7,
+            "check_differences": {}
+          },
+          "new": {
+            "interview": {
+              "expected": "match",
+              "actual": "match",
+              "match": true
+            },
+            "start_date": {
+              "expected": "match",
+              "actual": "match",
+              "match": true
+            }
+          },
+          "mapped_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "frozen_scenario_differences": {
+            "interview": {
+              "frozen": "conflict",
+              "actual": "match"
+            }
+          },
+          "frozen_scenario_verdict": "ineligible",
+          "travel_note": "要去杭州面试，有路费和时间成本",
+          "travel_note_ok": true,
+          "inference_reason": "JD 要求 2026-12-31 前到岗，你 2026-11-15 就能到岗",
+          "inference_note_ok": null
+        }
+      }
+    },
+    "ops": {
+      "filter": {
+        "job_id": "job_c86ae88c4bff",
+        "title": "招聘项目助理实习生",
+        "company": "示例星筏人才服务有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "仅面向2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": "每周至少到岗3天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": "实习3个月"
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "职位名称：招聘项目助理实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "招聘项目助理实习生",
+                "evidence": "招聘项目助理实习生"
+              },
+              "company": {
+                "value": "示例星筏人才服务有限公司",
+                "evidence": "示例星筏人才服务有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          },
+          {
+            "check": "interview",
+            "result": "match",
+            "reason": "线上面试，不用出行",
+            "jd": {
+              "interview": {
+                "value": {
+                  "mode": "online",
+                  "cities": []
+                },
+                "evidence": "面试流程：第一轮为电话面试"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ]
+            }
+          },
+          {
+            "check": "start_date",
+            "result": "match",
+            "reason": "JD 要求 2026-12-31 前到岗，你 2026-12-01 就能到岗",
+            "jd": {
+              "requirements.start": {
+                "value": {
+                  "by": "2026-12-31",
+                  "asap": false
+                },
+                "evidence": "到岗安排：2026年12月入职"
+              }
+            },
+            "profile": {
+              "availability.start_date": "2026-12-01"
+            }
+          }
+        ]
+      },
+      "manual_filter": {
+        "job_id": "job_c86ae88c4bff",
+        "title": "招聘项目助理实习生",
+        "company": "示例星筏人才服务有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅面向2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "本科及以上学历"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": [
+                  "每周至少到岗3天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": [
+                  "连续实习3个月以上"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "招聘项目助理实习生"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "招聘项目助理实习生",
+                "evidence": [
+                  "职位名称：招聘项目助理实习生"
+                ]
+              },
+              "company": {
+                "value": "示例星筏人才服务有限公司",
+                "evidence": [
+                  "公司名称：示例星筏人才服务有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          },
+          {
+            "check": "interview",
+            "result": "match",
+            "reason": "有一轮要现场面试，在杭州",
+            "jd": {
+              "interview": {
+                "value": {
+                  "mode": "mixed",
+                  "cities": [
+                    "杭州"
+                  ]
+                },
+                "evidence": [
+                  "面试流程：第一轮为电话面试；通过后必须到杭州参加现场复试，两轮均需完成。"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ]
+            },
+            "note": "要去杭州面试，有路费和时间成本"
+          },
+          {
+            "check": "start_date",
+            "result": "match",
+            "reason": "JD 要求 2026-12-31 前到岗，你 2026-12-01 就能到岗",
+            "jd": {
+              "requirements.start": {
+                "value": {
+                  "by": "2026-12-31",
+                  "asap": false
+                },
+                "evidence": [
+                  "到岗安排：2026年12月入职，具体日期在该月内商定。"
+                ]
+              }
+            },
+            "profile": {
+              "availability.start_date": "2026-12-01"
+            }
+          }
+        ]
+      },
+      "comparison": {
+        "parsed": {
+          "old": {
+            "verdict_match": true,
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "check_matches": 7,
+            "check_differences": {}
+          },
+          "new": {
+            "interview": {
+              "expected": "match",
+              "actual": "match",
+              "match": true
+            },
+            "start_date": {
+              "expected": "match",
+              "actual": "match",
+              "match": true
+            }
+          },
+          "mapped_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "frozen_scenario_differences": {
+            "interview": {
+              "frozen": "conflict",
+              "actual": "match"
+            }
+          },
+          "frozen_scenario_verdict": "ineligible",
+          "travel_note": "",
+          "travel_note_ok": false,
+          "inference_reason": "JD 要求 2026-12-31 前到岗，你 2026-12-01 就能到岗",
+          "inference_note_ok": null
+        },
+        "manual": {
+          "old": {
+            "verdict_match": true,
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "check_matches": 7,
+            "check_differences": {}
+          },
+          "new": {
+            "interview": {
+              "expected": "match",
+              "actual": "match",
+              "match": true
+            },
+            "start_date": {
+              "expected": "match",
+              "actual": "match",
+              "match": true
+            }
+          },
+          "mapped_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "frozen_scenario_differences": {
+            "interview": {
+              "frozen": "conflict",
+              "actual": "match"
+            }
+          },
+          "frozen_scenario_verdict": "ineligible",
+          "travel_note": "要去杭州面试，有路费和时间成本",
+          "travel_note_ok": true,
+          "inference_reason": "JD 要求 2026-12-31 前到岗，你 2026-12-01 就能到岗",
+          "inference_note_ok": null
+        }
+      }
+    }
+  }
+}
