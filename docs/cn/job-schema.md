@@ -104,6 +104,12 @@ python -m jobsearch_cn jd validate job.json
 | `requirements.education.preferred` | 枚举或 null | 优先学历，不能低于最低学历 |
 | `requirements.skills` | 字符串列表 | 技能关键词 |
 | `requirements.skill_alternatives` | 列表的列表 | "任选其一"的技能组，例如 JD 写"熟悉 Golang 或 Java"时为 `[["Golang", "Java"]]`；没有时为 `[]`。见下文"任选其一的技能" |
+| `requirements.start` | 对象或 null | 到岗时间；两项都没写时整体填 null。见下文"面试和到岗时间" |
+| `requirements.start.by` | 日期或 null | 最晚的到岗日期，`YYYY-MM-DD`；只写了月份时取当月最后一天 |
+| `requirements.start.asap` | 布尔 | JD 写了尽快到岗时为 true |
+| `interview` | 对象或 null | 面试形式；JD 没写时为 null。见下文"面试和到岗时间" |
+| `interview.mode` | 枚举 | `online` 只有线上、`onsite` 要到现场、`either` 线上和现场由候选人选、`mixed` 有线上也有现场（至少一轮要到现场） |
+| `interview.cities` | 字符串列表 | 现场面试的城市；没写时为 `[]`，`online` 时必须为 `[]` |
 | `return_offer` | 布尔或 null | 是否可转正 |
 | `published_at` | 日期或 null | 发布日期，`YYYY-MM-DD` |
 | `deadline` | 日期或 null | 截止日期，`YYYY-MM-DD` |
@@ -131,6 +137,28 @@ JD 让你在几个技能里选一个会就行时（"熟悉 Golang 或 Java""Pyth
 
 评分时一组算一项要求，见 [match.md](match.md#维度)。规则怎么读出这些组，见 [jd-parse.md](jd-parse.md#规则能识别什么)；规则没读出、或者读错的，Agent 按原文补或改，`method` 写 `agent`。
 
+## 面试和到岗时间
+
+这两项帮你估计投递的成本，不是任职要求：大多数 JD 不写，过滤时没写只算"待确认"，见 [match.md](match.md#过滤硬性条件)。
+
+```json
+"requirements": {"start": {"by": "2026-11-30", "asap": false}},
+"interview": {"mode": "onsite", "cities": ["北京"]}
+```
+
+- **面试** `interview`：
+  - `mode` 有四种：`online`（"视频面试""电话面试"）、`onsite`（"现场面试""面试地点：北京"）、`either`（两种都写了，而且是让你选，例如"面试地点：广州，也可视频面试"）、`mixed`（两种都写了，但不是二选一，例如"一面电话面试，终面现场面试"）；
+  - `cities` 是现场面试的城市，只写 JD 明确说的面试地点，不从工作地点推；JD 只说现场面试、没写在哪里时为 `[]`；
+  - 每个城市都要出现在 `interview` 的出处片段里。
+- **到岗时间** `requirements.start`：
+  - `by` 是 JD 要求最晚哪天到岗："11月1日前到岗"是 11 月 1 日，"11月底前入职""2027年7月入职"取当月最后一天；
+  - `asap` 是 JD 写了"尽快到岗""随时到岗"；和日期可以同时出现；
+  - `by` 为 null、`asap` 为 false 时没有信息，整体用 null；
+  - JD 很少写年份。没写年份的日期，取离 JD 发布日期最近的那一年（没有发布日期时用导入日期），相距一样时取后一年；
+  - "11月1日后到岗""11月起"是最早日期，"…前到岗者优先"只是优先，都不是截止日期，不填 `by`。
+
+规则怎么读出这两项，见 [jd-parse.md](jd-parse.md#规则能识别什么)；规则留空或读错的，Agent 按原文补或改，`method` 写 `agent`。
+
 ## 出处（evidence）
 
 `evidence` 以字段路径为键，例如 `salary`、`requirements.skills`。每一项包含两个键：
@@ -140,9 +168,9 @@ JD 让你在几个技能里选一个会就行时（"熟悉 Golang 或 Java""Pyth
 
 校验规则：
 
-1. 下列字段只要有值（不是 null，也不是 `[]`），就必须有对应的出处：`title`、`company`、`cities`、`remote`、`employment_type`、`salary`、`requirements.graduation`、`requirements.days_per_week`、`requirements.min_months`、`requirements.education`、`requirements.skills`、`requirements.skill_alternatives`、`return_offer`、`published_at`、`deadline`。
+1. 下列字段只要有值（不是 null，也不是 `[]`），就必须有对应的出处：`title`、`company`、`cities`、`remote`、`employment_type`、`salary`、`requirements.graduation`、`requirements.days_per_week`、`requirements.min_months`、`requirements.education`、`requirements.skills`、`requirements.skill_alternatives`、`requirements.start`、`interview`、`return_offer`、`published_at`、`deadline`。
 2. `rule` 和 `agent` 给出的每个片段都必须真实出现在 `raw_text` 中。比较前会统一全角/半角和大小写，并去掉空白和零宽字符，所以复制时多出的换行、空格不影响匹配。
-3. 列表字段（`cities`、`requirements.skills`）的每一项都必须出现在自己的出处片段里；`requirements.skill_alternatives` 的每一组都要由出处片段说明是一个选择，规则见上文"任选其一的技能"。
+3. 列表字段（`cities`、`requirements.skills`）的每一项都必须出现在自己的出处片段里；`interview.cities` 的每个城市都必须出现在 `interview` 的出处片段里；`requirements.skill_alternatives` 的每一组都要由出处片段说明是一个选择，规则见上文"任选其一的技能"。
 4. `user` 表示值来自用户本人，例如 JD 正文里没有公司名，由用户手动补上。这时 `text` 可以为 null，也不要求出现在原文中。
 
 这样模型就没法凭空编造字段：编出来的值找不到原文出处，校验就过不了。不过这条规则只保证出处真实存在，不保证从出处推出的值一定正确，例如把"10-15K"换算成 10000–15000 是否正确，由解析器自己的测试保证（第 2 步）。
@@ -168,3 +196,4 @@ JD 让你在几个技能里选一个会就行时（"熟悉 Golang 或 Java""Pyth
 
 - v1（2026-10-26）：首版。
 - v1 新增 `requirements.skill_alternatives`（2026-10-29，H16）。只是加了一个字段，版本号不变：本地岗位库里在这之前保存的记录读出时自动补上 `[]`；自己手写、没有这个字段的记录，`jd validate` 会报"missing"，补上 `"skill_alternatives": []` 即可。
+- v1 新增 `interview` 和 `requirements.start`（2026-10-30，M2-6c）。同样只是加字段，版本号不变：之前保存的记录读出时自动补上 null；手写、没有这两个字段的记录，补上 `"interview": null` 和 `requirements` 里的 `"start": null` 即可。
