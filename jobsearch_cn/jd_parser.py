@@ -55,14 +55,26 @@ CITIES = (
 
 _N = r"\d+(?:\.\d+)?"
 _TO = r"\s*(?:-|~|～|－|—|–|至|到)\s*"
+_SCALED_START = r"(?<![\d.A-Za-z_])"
+# Keep unit abbreviations out of identifiers, audience counts and video
+# formats, while preserving Kx14薪 (x is a supported pay-month separator).
+_SCALED_END = (r"(?:(?![A-Za-z\d+])|(?=[xX]\s*\d{2}\s*薪))"
+               rf"(?!粉丝|用户|客户|人(?![{_HAN}])|视频|画质|分辨率)")
+_K_AMOUNT = rf"(?P<lo>{_N})\s*(?:[kK千]?{_TO}(?P<hi>{_N})\s*)?[kK千]{_SCALED_END}"
+_WAN_AMOUNT = rf"(?P<lo>{_N})\s*(?:[万wW]?{_TO}(?P<hi>{_N})\s*)?[万wW]{_SCALED_END}"
+# Never salvage one endpoint of a range whose units the pattern cannot read.
+_SCALED_RANGE_BEFORE = re.compile(rf"{_N}\s*[kK千万wW]?{_TO}$")
+_SCALED_RANGE_AFTER = re.compile(rf"{_TO}{_N}(?![\d.])(?!\s*薪)")
 # (pattern, unit, multiplier). Every pattern names its amounts lo and hi.
 _SALARY = (
-    (re.compile(rf"(?P<lo>{_N})\s*[kK千]?{_TO}(?P<hi>{_N})\s*[kK千](?:\s*/\s*月)?"
+    (re.compile(rf"{_SCALED_START}{_K_AMOUNT}(?:\s*元)?(?:\s*(?:/|每)\s*月)?(?!\s*(?:/|每))"
                 rf"(?:\s*[·・•*xX×]\s*(?P<months>\d{{2}})\s*薪)?"), "CNY/month", 1000),
-    (re.compile(rf"(?P<lo>{_N})\s*万?{_TO}(?P<hi>{_N})\s*万\s*元?\s*(?:/|每)\s*月"), "CNY/month", 10000),
-    (re.compile(rf"月薪\s*(?P<lo>{_N})\s*万?(?:{_TO}(?P<hi>{_N}))?\s*万"), "CNY/month", 10000),
-    (re.compile(rf"年薪\s*(?P<lo>{_N})\s*万?(?:{_TO}(?P<hi>{_N}))?\s*万"), "CNY/year", 10000),
-    (re.compile(rf"(?P<lo>{_N})\s*万?{_TO}(?P<hi>{_N})\s*万\s*元?\s*(?:/|每)\s*年"), "CNY/year", 10000),
+    (re.compile(rf"{_SCALED_START}{_WAN_AMOUNT}\s*元?\s*(?:/|每)\s*月"), "CNY/month", 10000),
+    (re.compile(rf"月薪\s*{_WAN_AMOUNT}"), "CNY/month", 10000),
+    (re.compile(rf"年薪\s*{_WAN_AMOUNT}"), "CNY/year", 10000),
+    (re.compile(rf"{_SCALED_START}{_WAN_AMOUNT}\s*元?\s*(?:/|每)\s*年"), "CNY/year", 10000),
+    (re.compile(rf"年薪\s*{_K_AMOUNT}"), "CNY/year", 1000),
+    (re.compile(rf"{_SCALED_START}{_K_AMOUNT}\s*元?\s*(?:/|每)\s*年"), "CNY/year", 1000),
     # Unscaled monthly/yearly amounts need an explicit 元 and period; bare
     # numbers also occur in dates, phone numbers and company headcounts.
     (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*月"), "CNY/month", 1),
@@ -73,10 +85,12 @@ _SALARY = (
     (re.compile(rf"月薪\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
 )
 _NEGOTIABLE = re.compile(r"(?:薪资|薪酬|待遇|工资)?\s*面议")
-# Pay/cost labels can precede or follow their amount. A later explicit pay
+# Pay/non-pay labels can precede or follow their amount. A later explicit pay
 # label starts a new salary context.
 _SALARY_CONTEXT = re.compile(
-    r"(?P<cost>补贴|补助|餐补|房补|收费|费用|押金|培训费|住宿费|餐费|租金)"
+    r"(?P<cost>补贴|补助|餐补|房补|收费|费用|押金|培训费|住宿费|餐费|租金|分辨率|画质"
+    # Finance job names (融资经理 / 估值分析师) are not amount labels.
+    r"|(?:融资|估值|注册资本|注册资金)(?=\s*(?:金额|规模|总额|为|约|达|[:：]|\d|$)))"
     r"|(?P<pay>月薪|年薪|日薪|时薪|工资|薪资|薪酬|薪水|底薪|报酬)"
 )
 _SALARY_ASIDE = re.compile(r"另|额外|含(?!税)|包括|加上|^\s*(?:以及|和|及|并(?:享有|提供|发放|有))")
@@ -739,6 +753,9 @@ def _salary(text: str):
     best = None
     for pattern, unit, scale in _SALARY:
         for match in pattern.finditer(text):
+            if scale != 1 and (_SCALED_RANGE_BEFORE.search(text[:match.start("lo")])
+                               or _SCALED_RANGE_AFTER.match(text[match.end():])):
+                continue
             if _non_salary_amount(text, match.start("lo"), match.end()):
                 continue
             low = float(match["lo"])

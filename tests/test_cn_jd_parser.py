@@ -649,6 +649,90 @@ class SeedCases(unittest.TestCase):
                         self.assertEqual(schema.validate(record), [])
 
 
+class ScaledSalary(unittest.TestCase):
+    """H28: original examples of amounts, periods, evidence and non-pay uses."""
+
+    def test_scaled_single_values_and_ranges(self):
+        for text, low, high, unit, quote in (
+                ("固定报酬为1.3万/月。", 13000, 13000, "month", "1.3万/月"),
+                ("待遇1.1-1.6万/月。", 11000, 16000, "month", "1.1-1.6万/月"),
+                ("报酬1.1万至1.6万元每月。", 11000, 16000, "month", "1.1万至1.6万元每月"),
+                ("约定1.35w/月。", 13500, 13500, "month", "1.35w/月"),
+                ("月薪 1.4 W。", 14000, 14000, "month", "月薪 1.4 W"),
+                ("月薪1.1w-1.6万。", 11000, 16000, "month", "月薪1.1w-1.6万"),
+                ("待遇为13k。", 13000, 13000, "month", "13k"),
+                ("约定13 K / 月。", 13000, 13000, "month", "13 K / 月"),
+                ("岗位工资9k-13K。", 9000, 13000, "month", "9k-13K"),
+                ("待遇9-13K/月。", 9000, 13000, "month", "9-13K/月"),
+                ("报酬9千至13千每月。", 9000, 13000, "month", "9千至13千每月"),
+                ("该岗年薪 16-21 万。", 160000, 210000, "year", "年薪 16-21 万"),
+                ("岗位报酬22万/年。", 220000, 220000, "year", "22万/年"),
+                ("年薪 17 W。", 170000, 170000, "year", "年薪 17 W"),
+                ("报酬16w～21w每年。", 160000, 210000, "year", "16w～21w每年"),
+                ("年薪 160-210k。", 160000, 210000, "year", "年薪 160-210k"),
+                ("报酬180k/年。", 180000, 180000, "year", "180k/年"),
+                ("年薪180k。", 180000, 180000, "year", "年薪180k")):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(low, high, "CNY/" + unit))
+                self.assertEqual(record["evidence"]["salary"]["text"], quote)
+                self.assertEqual(schema.validate(record), [])
+
+    def test_scaled_pay_months_preserve_existing_separators(self):
+        for amount, low, high in (("13k", 13000, 13000), ("9-13K", 9000, 13000)):
+            for separator in ("·", "・", "•", "*", "x", "X", "×"):
+                text = f"薪酬{amount}{separator}14薪"
+                with self.subTest(text=text):
+                    record = parse_one(text)
+                    self.assertEqual(record["salary"], salary(low, high, "CNY/month", 14))
+                    self.assertEqual(record["evidence"]["salary"]["text"], text[2:])
+        for text, unit, months, quote in (
+                ("报酬1.3万/月，全年14薪", "month", 14, ["1.3万/月", "全年14薪"]),
+                ("报酬1.3万/年，全年14薪", "year", None, "1.3万/年"),
+                ("报酬1.3万/月，转正后14薪", "month", None, "1.3万/月"),
+                ("报酬1.3万/月\n福利：14薪", "month", None, "1.3万/月")):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(13000, 13000, "CNY/" + unit, months))
+                self.assertEqual(record["evidence"]["salary"]["text"], quote)
+
+    def test_scale_numbers_are_not_pay(self):
+        for text in ("账号已有2万+粉丝", "本轮融资 850 万", "平台服务 11 万用户",
+                     "读者规模13k用户", "账号已有13k粉丝", "目前覆盖13k人", "本轮融资850k",
+                     "开发板编号A13k", "处理13KB报文", "视频分辨率4K", "需剪辑4K视频", "电源功率1.3W",
+                     "薪酬1.3万", "薪酬1.3w", "报酬13K/天", "报酬13K/小时",
+                     "薪酬9k-1.3w/月", "薪酬1.3w-19k/月", "薪酬19-13K/月"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertIsNone(record["salary"])
+                self.assertNotIn("salary", record["evidence"])
+                self.assertEqual(schema.validate(record), [])
+
+    def test_scaled_amounts_keep_benefit_and_cost_ownership(self):
+        for amount in ("0.6k", "0.06万/月", "0.06w/月", "0.8万/年", "0.8w/年", "8k/年"):
+            for label in ("交通补贴", "餐补", "培训费用"):
+                for text in (f"{label}为{amount}", f"{amount}作为{label}",
+                             f"{label}：\n每人按标准发放{amount}"):
+                    with self.subTest(text=text):
+                        record = parse_one(text + "；工资面议。")
+                        self.assertEqual(record["salary"], NEGOTIABLE)
+                        self.assertEqual(record["evidence"]["salary"]["text"], "工资面议")
+        for text in ("交通补贴0.6k，工资1.3万/月", "工资1.3万/月，交通补贴0.6k",
+                     "0.6k交通补贴 工资1.3万/月", "工资1.3万/月 0.6k交通补贴",
+                     "工资1.3万/月含餐补", "工资1.3万/月另有餐补", "1.3万/月 餐补另计",
+                     "1.3万/月 房补另算", "交通补贴：\n实际月薪1.3万/月"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(13000, 13000, "CNY/month"))
+                self.assertEqual(schema.validate(record), [])
+        for text in ("本轮融资850k，岗位工资13k", "本轮融资850k 岗位工资13k", "工资13k，需剪辑4K视频",
+                     "融资经理 13k", "估值分析师 13k", "13k 人事专员", "13k 视频剪辑专员"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(13000, 13000, "CNY/month"))
+                self.assertEqual(record["evidence"]["salary"]["text"], "13k")
+
+
 class InterviewAndStart(unittest.TestCase):
     """M2-6c: each value cites its clauses; a start date without a year is dated from the JD's own date."""
 
