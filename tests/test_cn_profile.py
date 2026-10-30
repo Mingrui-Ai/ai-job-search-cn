@@ -168,6 +168,35 @@ class Validate(unittest.TestCase):
         self.assertEqual(profile.weight_errors(four, "--weights"),
                          ["--weights.location: missing; name all five (skills, direction, experience, salary, location)"])
 
+    def test_salary_tiers_go_together_and_share_the_minimums_unit(self):
+        # M2-6e: an ideal and a step score pay in tiers; the meal value, days a week and points for one meal
+        # are optional; all null scores pay as before. The documented example uses them all.
+        self.assertEqual(profile.validate(self.example), [])
+        cases = (
+            ("target.salary_ideal", {"amount": 5000, "unit": "CNY/month"}, "target.salary_ideal.unit: must be"),
+            ("target.salary_ideal", {"amount": 120, "unit": "CNY/day"}, "target.salary_ideal.amount: below"),
+            ("target.salary_ideal", None, "target.salary_ideal, target.salary_step: give both or neither"),
+            ("target.salary_step", 0, "target.salary_step: must be null or a positive number"),
+            ("target.meal_value", {"amount": 30, "unit": "CNY/hour"}, "target.meal_value.unit: must be one of"),
+            ("target.meal_value", {"amount": -5, "unit": "CNY/day"}, "target.meal_value.amount"),
+            ("target.salary_days_per_week", 0, "target.salary_days_per_week"),
+            ("target.salary_days_per_week", 8, "target.salary_days_per_week"),
+            ("target.one_meal_points", 101, "target.one_meal_points"),
+            ("target.one_meal_points", -1, "target.one_meal_points"),
+        )
+        for path, value, fragment in cases:
+            with self.subTest(path=path, value=value):
+                self.assert_error(with_value(self.example, path, value), fragment)
+        self.assert_error(with_value(self.example, "target.salary_min", None),
+                          "target.salary_ideal: set target.salary_min too")
+        self.assertEqual(profile.validate(with_value(self.example, "target.salary_days_per_week", 4.5)), [])
+        self.assertEqual(profile.validate(with_value(with_value(self.example, "target.salary_ideal", None),
+                                                     "target.salary_step", None)), [])
+        # A profile from before M2-6e lacks the keys: profile validate says so, nothing is filled in.
+        older = copy.deepcopy(self.example)
+        del older["target"]["one_meal_points"]
+        self.assert_error(older, "target.one_meal_points: missing")
+
     def test_cities_without_an_answer_on_remote_or_moving_is_a_warning(self):
         # Valid either way; but every job outside the cities would be location unknown.
         self.assertEqual(profile.warnings(self.example), [])
