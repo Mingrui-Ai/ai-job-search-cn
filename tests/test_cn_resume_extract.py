@@ -213,11 +213,17 @@ class ResumeExtract(unittest.TestCase):
         self.assert_failure(self.cli(path, PYTHONPATH=pythonpath), "请让 Agent 直接读取 PDF，或者安装 pypdf")
         self.assertEqual(self.snapshot(), before)
 
+    def bridge(self, **mock):
+        """The bridge call (_run_tree, H25b) mocked; no Poppler, so no real pdftotext -v either."""
+        return patch.object(resume_extract, "_run_tree", **mock), \
+            patch.object(resume_extract, "_poppler_available", return_value=False)
+
     def test_backend_failure_never_echoes_resume_text_in_diagnostics(self):
         path = self.sources / "error.pdf"
         make_pdf(path)
         result = subprocess.CompletedProcess([], 1, b"private resume fragment", b"sensitive diagnostic")
-        with patch.object(resume_extract.subprocess, "run", return_value=result):
+        run, poppler = self.bridge(return_value=result)
+        with run, poppler:
             with self.assertRaises(resume_extract.ExtractionError) as caught:
                 resume_extract.extract_text(path)
         self.assertNotIn("private", str(caught.exception))
@@ -226,14 +232,16 @@ class ResumeExtract(unittest.TestCase):
     def test_empty_pdf_text_layer_has_direct_read_guidance(self):
         path = self.sources / "scan.pdf"
         make_pdf(path)
-        with patch.object(resume_extract.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, b"\n\f", b"")):
+        run, poppler = self.bridge(return_value=subprocess.CompletedProcess([], 0, b"\n\f", b""))
+        with run, poppler:
             with self.assertRaisesRegex(resume_extract.ExtractionError, "没有可提取的文本层"):
                 resume_extract.extract_text(path)
 
     def test_pdf_backend_timeout_is_an_input_error(self):
         path = self.sources / "timeout.pdf"
         make_pdf(path)
-        with patch.object(resume_extract.subprocess, "run", side_effect=subprocess.TimeoutExpired("python", 60)):
+        run, poppler = self.bridge(side_effect=subprocess.TimeoutExpired("python", 60))
+        with run, poppler:
             with self.assertRaisesRegex(resume_extract.ExtractionError, "请让 Agent 直接读取 PDF"):
                 resume_extract.extract_text(path)
 
@@ -262,7 +270,8 @@ class ResumeExtract(unittest.TestCase):
         for success in (False, True):
             with self.subTest(pypdf_success=success):
                 result = subprocess.CompletedProcess([], 0 if success else 1, "合成简历".encode() if success else b"", b"")
-                with patch.object(resume_extract.subprocess, "run", side_effect=[version, result]) as run:
+                with patch.object(resume_extract.subprocess, "run", return_value=version), \
+                        patch.object(resume_extract, "_run_tree", return_value=result) as run:
                     if success:
                         self.assertEqual(resume_extract.extract_text(path), "合成简历")
                     else:
@@ -280,7 +289,7 @@ class ResumeExtract(unittest.TestCase):
                 with self.subTest(poppler=poppler, text=text[:12]):
                     result = subprocess.CompletedProcess([], 0, text.encode("utf-8"), b"")
                     with patch.object(resume_extract, "_poppler_available", return_value=poppler), \
-                            patch.object(resume_extract.subprocess, "run", return_value=result):
+                            patch.object(resume_extract, "_run_tree", return_value=result):
                         with self.assertRaisesRegex(resume_extract.ExtractionError, "大量替换字符或控制字符"):
                             resume_extract.extract_text(path)
 
@@ -290,7 +299,7 @@ class ResumeExtract(unittest.TestCase):
         text = ("合成简历\t项目经历\r\n示例大学\f" * 10) + "\ufffd"
         result = subprocess.CompletedProcess([], 0, text.encode("utf-8"), b"")
         with patch.object(resume_extract, "_poppler_available", return_value=True), \
-                patch.object(resume_extract.subprocess, "run", return_value=result):
+                patch.object(resume_extract, "_run_tree", return_value=result):
             self.assertEqual(resume_extract.extract_text(path), text)
 
 
