@@ -22,7 +22,7 @@ exception the planner has ruled on is written here, with its reason.
 - V7 (tests/fixtures/cn/jd-m2-4a-holdout/): the holdout for M2-4a (H30). Compared
   exactly, with no exception: H12 closed the two differences its report left.
 - V9 (tests/fixtures/cn/jd-m2-6c-holdout/): the holdout for M2-6c (H30). Compared
-  exactly but for one known miss. Its interviews and start dates compare with
+  exactly but for one miss until H29 merges. Its interviews and start dates compare with
   pr73-mapping.json, not scheduling-oracles.json: the planner ruled on #73 that
   the contract differs from those frozen semantics, and the mapping says how.
 - V10 (tests/fixtures/cn/jd-h20-holdout/): the holdout for H20 (H30). Compared
@@ -248,8 +248,8 @@ class V7(Oracles, unittest.TestCase):
     directory = REPO / "tests" / "fixtures" / "cn" / "jd-m2-4a-holdout"
 
 
-# Reported by V9's comparison as older than M2-6c and left there; skills.json has no such term.
-WORD_UNREAD = "V9 comparison.md: Word is not read as a skill, a miss from before M2-6c"
+# Not an accepted difference: H29 (#90) adds the term, and this exception goes when it merges.
+WORD_UNREAD = "V9 comparison.md: Word is not read as a skill until H29 (#90)"
 
 
 class V9(Oracles, unittest.TestCase):
