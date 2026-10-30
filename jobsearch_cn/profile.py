@@ -128,13 +128,8 @@ def validate(profile, sources=None, groups=None) -> list[str]:
                 choices = ", ".join(sorted(set(groups) - {vocab.GENERAL}))
                 errors.append(f"target.directions[{index}]: {key!r} is not a skill vocabulary group ({choices})")
         weights = target.get("weights")
-        if weights is not None and _obj(target, "weights", WEIGHT_KEYS, errors, path="target.weights"):
-            values = [weights.get(key) for key in WEIGHT_KEYS]
-            for key, value in zip(WEIGHT_KEYS, values):
-                if not (schema._is_number(value) and value >= 0):
-                    errors.append(f"target.weights.{key}: must be a number, 0 or more")
-            if all(schema._is_number(value) and value >= 0 for value in values) and not any(values):
-                errors.append("target.weights: at least one weight must be above 0")
+        if weights is not None:
+            errors += weight_errors(weights)
 
     experience_ids = set()
     for index, item in check.items(profile, "experience", EXPERIENCE_KEYS):
@@ -183,6 +178,21 @@ def validate(profile, sources=None, groups=None) -> list[str]:
     if _obj(profile, "exclusions", EXCLUSION_KEYS, errors):
         for key in EXCLUSION_KEYS:
             check.texts(profile["exclusions"].get(key), f"exclusions.{key}")
+    return errors
+
+
+def weight_errors(weights, path: str = "target.weights") -> list[str]:
+    """Every problem with a set of weights, the profile's or match list --weights': all five dimensions,
+    each a number 0 or more, at least one above 0."""
+    if not isinstance(weights, dict):
+        return [f"{path}: must be an object"]
+    errors = [f"{path}.{key}: missing; name all five ({', '.join(WEIGHT_KEYS)})"
+              for key in WEIGHT_KEYS if key not in weights]
+    errors += [f"{path}.{key}: unknown field" for key in weights if key not in WEIGHT_KEYS]
+    errors += [f"{path}.{key}: must be a number, 0 or more" for key in WEIGHT_KEYS
+               if key in weights and not (schema._is_number(weights[key]) and weights[key] >= 0)]
+    if not errors and not any(weights.values()):
+        errors.append(f"{path}: at least one weight must be above 0")
     return errors
 
 
