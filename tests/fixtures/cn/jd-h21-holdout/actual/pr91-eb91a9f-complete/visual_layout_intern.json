@@ -1,0 +1,1495 @@
+{
+  "parse": {
+    "jobs": [
+      {
+        "schema_version": 1,
+        "id": "job_4f9b8e1ad0c0",
+        "source": {
+          "type": "file",
+          "site": "official",
+          "url": null,
+          "imported_at": "2026-10-30T20:02:22+08:00"
+        },
+        "title": "视觉排版实习生",
+        "company": "示例绘汀视觉有限公司",
+        "cities": [
+          "上海"
+        ],
+        "remote": false,
+        "employment_type": "internship",
+        "salary": {
+          "min": 150,
+          "max": 190,
+          "unit": "CNY/day",
+          "months": null,
+          "negotiable": false
+        },
+        "requirements": {
+          "graduation": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "days_per_week": 3,
+          "min_months": 3,
+          "education": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "skills": [
+            "Photoshop",
+            "Illustrator",
+            "C4D"
+          ],
+          "skill_alternatives": [],
+          "start": null
+        },
+        "interview": null,
+        "return_offer": false,
+        "published_at": "2026-10-30",
+        "deadline": "2026-11-28",
+        "status": "new",
+        "evidence": {
+          "title": {
+            "text": "视觉排版实习生",
+            "method": "rule"
+          },
+          "company": {
+            "text": "示例绘汀视觉有限公司",
+            "method": "rule"
+          },
+          "cities": {
+            "text": "工作地点：上海",
+            "method": "rule"
+          },
+          "remote": {
+            "text": "不支持远程",
+            "method": "rule"
+          },
+          "employment_type": {
+            "text": "视觉排版实习生",
+            "method": "rule"
+          },
+          "salary": {
+            "text": "150-190元/天",
+            "method": "rule"
+          },
+          "requirements.graduation": {
+            "text": "招聘对象：仅招2027届",
+            "method": "rule"
+          },
+          "requirements.days_per_week": {
+            "text": "每周至少到岗3天",
+            "method": "rule"
+          },
+          "requirements.min_months": {
+            "text": "至少实习3个月",
+            "method": "rule"
+          },
+          "requirements.education": {
+            "text": "本科及以上",
+            "method": "rule"
+          },
+          "requirements.skills": {
+            "text": [
+              "熟练使用Photoshop2024、Illustrator28.0完成版面",
+              "掌握C4D制作展示画面"
+            ],
+            "method": "rule"
+          },
+          "return_offer": {
+            "text": "不提供转正",
+            "method": "rule"
+          },
+          "published_at": {
+            "text": "发布日期：2026-10-30",
+            "method": "rule"
+          },
+          "deadline": {
+            "text": "投递截止：2026-11-28",
+            "method": "rule"
+          }
+        },
+        "guard": {
+          "verdict": "clean",
+          "counts": {}
+        },
+        "raw_text": "视觉排版实习生\n公司名称：示例绘汀视觉有限公司\n工作地点：上海\n岗位类型：实习\n薪资：150-190元/天\n学历要求：本科及以上\n招聘对象：仅招2027届\n到岗安排：每周至少到岗3天，至少实习3个月\n办公方式：不支持远程办公\n岗位职责：\n熟练使用Photoshop2024、Illustrator28.0完成版面，掌握C4D制作展示画面。\n服务对象包括4A广告公司，项目按交付日期安排。\n不提供转正机会。\n发布日期：2026-10-30\n投递截止：2026-11-28"
+      }
+    ],
+    "warnings": [],
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_4f9b8e1ad0c0",
+        "title": "视觉排版实习生",
+        "company": "示例绘汀视觉有限公司",
+        "cities": [
+          "上海"
+        ],
+        "status": "new"
+      }
+    ]
+  },
+  "fields": {
+    "title": {
+      "type": "match",
+      "expected": "视觉排版实习生",
+      "actual": "视觉排版实习生"
+    },
+    "company": {
+      "type": "match",
+      "expected": "示例绘汀视觉有限公司",
+      "actual": "示例绘汀视觉有限公司"
+    },
+    "cities": {
+      "type": "match",
+      "expected": [
+        "上海"
+      ],
+      "actual": [
+        "上海"
+      ],
+      "missing": [],
+      "extra": []
+    },
+    "remote": {
+      "type": "match",
+      "expected": false,
+      "actual": false
+    },
+    "employment_type": {
+      "type": "match",
+      "expected": "internship",
+      "actual": "internship"
+    },
+    "salary": {
+      "type": "match",
+      "expected": {
+        "min": 150,
+        "max": 190,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "actual": {
+        "min": 150,
+        "max": 190,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      }
+    },
+    "requirements.graduation": {
+      "type": "match",
+      "expected": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "actual": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      }
+    },
+    "requirements.days_per_week": {
+      "type": "match",
+      "expected": 3,
+      "actual": 3
+    },
+    "requirements.min_months": {
+      "type": "match",
+      "expected": 3,
+      "actual": 3
+    },
+    "requirements.education": {
+      "type": "match",
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "bachelor",
+        "preferred": null
+      }
+    },
+    "requirements.skills": {
+      "type": "match",
+      "expected": [
+        "Photoshop",
+        "Illustrator",
+        "C4D"
+      ],
+      "actual": [
+        "Photoshop",
+        "Illustrator",
+        "C4D"
+      ],
+      "missing": [],
+      "extra": []
+    },
+    "return_offer": {
+      "type": "match",
+      "expected": false,
+      "actual": false
+    },
+    "published_at": {
+      "type": "match",
+      "expected": "2026-10-30",
+      "actual": "2026-10-30"
+    },
+    "deadline": {
+      "type": "match",
+      "expected": "2026-11-28",
+      "actual": "2026-11-28"
+    }
+  },
+  "evidence": {
+    "title": {
+      "evidence": {
+        "text": "视觉排版实习生",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "company": {
+      "evidence": {
+        "text": "示例绘汀视觉有限公司",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "cities": {
+      "evidence": {
+        "text": "工作地点：上海",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "remote": {
+      "evidence": {
+        "text": "不支持远程",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "employment_type": {
+      "evidence": {
+        "text": "视觉排版实习生",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "salary": {
+      "evidence": {
+        "text": "150-190元/天",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "requirements.graduation": {
+      "evidence": {
+        "text": "招聘对象：仅招2027届",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "requirements.days_per_week": {
+      "evidence": {
+        "text": "每周至少到岗3天",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "requirements.min_months": {
+      "evidence": {
+        "text": "至少实习3个月",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "requirements.education": {
+      "evidence": {
+        "text": "本科及以上",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "requirements.skills": {
+      "evidence": {
+        "text": [
+          "熟练使用Photoshop2024、Illustrator28.0完成版面",
+          "掌握C4D制作展示画面"
+        ],
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "return_offer": {
+      "evidence": {
+        "text": "不提供转正",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "published_at": {
+      "evidence": {
+        "text": "发布日期：2026-10-30",
+        "method": "rule"
+      },
+      "verbatim": true
+    },
+    "deadline": {
+      "evidence": {
+        "text": "投递截止：2026-11-28",
+        "method": "rule"
+      },
+      "verbatim": true
+    }
+  },
+  "probes": [
+    {
+      "text": "Photoshop2024",
+      "expected_skill": "Photoshop",
+      "decision": "must_read",
+      "passed": true
+    },
+    {
+      "text": "Illustrator28.0",
+      "expected_skill": "Illustrator",
+      "decision": "must_read",
+      "passed": true
+    },
+    {
+      "text": "C4D",
+      "expected_skill": "C4D",
+      "decision": "must_keep_intrinsic_digit",
+      "passed": true
+    }
+  ],
+  "manual_job": {
+    "schema_version": 1,
+    "id": "job_4f9b8e1ad0c0",
+    "source": {
+      "type": "file",
+      "site": "official",
+      "url": null,
+      "imported_at": "2026-10-30T20:02:22+08:00"
+    },
+    "title": "视觉排版实习生",
+    "company": "示例绘汀视觉有限公司",
+    "cities": [
+      "上海"
+    ],
+    "remote": false,
+    "employment_type": "internship",
+    "salary": {
+      "min": 150,
+      "max": 190,
+      "unit": "CNY/day",
+      "months": null,
+      "negotiable": false
+    },
+    "requirements": {
+      "graduation": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "days_per_week": 3,
+      "min_months": 3,
+      "education": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "skills": [
+        "Photoshop",
+        "Illustrator",
+        "C4D"
+      ],
+      "skill_alternatives": [],
+      "start": null
+    },
+    "interview": null,
+    "return_offer": false,
+    "published_at": "2026-10-30",
+    "deadline": "2026-11-28",
+    "status": "new",
+    "evidence": {
+      "title": {
+        "text": [
+          "视觉排版实习生"
+        ],
+        "method": "agent"
+      },
+      "company": {
+        "text": [
+          "公司名称：示例绘汀视觉有限公司"
+        ],
+        "method": "agent"
+      },
+      "cities": {
+        "text": [
+          "工作地点：上海"
+        ],
+        "method": "agent"
+      },
+      "remote": {
+        "text": [
+          "不支持远程办公"
+        ],
+        "method": "agent"
+      },
+      "employment_type": {
+        "text": [
+          "岗位类型：实习"
+        ],
+        "method": "agent"
+      },
+      "salary": {
+        "text": [
+          "薪资：150-190元/天"
+        ],
+        "method": "agent"
+      },
+      "requirements.graduation": {
+        "text": [
+          "仅招2027届"
+        ],
+        "method": "agent"
+      },
+      "requirements.days_per_week": {
+        "text": [
+          "每周至少到岗3天"
+        ],
+        "method": "agent"
+      },
+      "requirements.min_months": {
+        "text": [
+          "至少实习3个月"
+        ],
+        "method": "agent"
+      },
+      "requirements.education": {
+        "text": [
+          "学历要求：本科及以上"
+        ],
+        "method": "agent"
+      },
+      "requirements.skills": {
+        "text": [
+          "熟练使用Photoshop2024、Illustrator28.0完成版面，掌握C4D制作展示画面。"
+        ],
+        "method": "agent"
+      },
+      "return_offer": {
+        "text": [
+          "不提供转正机会"
+        ],
+        "method": "agent"
+      },
+      "published_at": {
+        "text": [
+          "发布日期：2026-10-30"
+        ],
+        "method": "agent"
+      },
+      "deadline": {
+        "text": [
+          "投递截止：2026-11-28"
+        ],
+        "method": "agent"
+      }
+    },
+    "guard": {
+      "verdict": "clean",
+      "counts": {}
+    },
+    "raw_text": "视觉排版实习生\n公司名称：示例绘汀视觉有限公司\n工作地点：上海\n岗位类型：实习\n薪资：150-190元/天\n学历要求：本科及以上\n招聘对象：仅招2027届\n到岗安排：每周至少到岗3天，至少实习3个月\n办公方式：不支持远程办公\n岗位职责：\n熟练使用Photoshop2024、Illustrator28.0完成版面，掌握C4D制作展示画面。\n服务对象包括4A广告公司，项目按交付日期安排。\n不提供转正机会。\n发布日期：2026-10-30\n投递截止：2026-11-28"
+  },
+  "manual_validate": {
+    "valid": true,
+    "errors": []
+  },
+  "manual_save": {
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_4f9b8e1ad0c0",
+        "title": "视觉排版实习生",
+        "company": "示例绘汀视觉有限公司",
+        "cities": [
+          "上海"
+        ],
+        "status": "new"
+      }
+    ],
+    "invalid": []
+  },
+  "profiles": {
+    "tech": {
+      "filter": {
+        "job_id": "job_4f9b8e1ad0c0",
+        "title": "视觉排版实习生",
+        "company": "示例绘汀视觉有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "招聘对象：仅招2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": "每周至少到岗3天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": "至少实习3个月"
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.acceptable_cities": [],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "视觉排版实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "视觉排版实习生",
+                "evidence": "视觉排版实习生"
+              },
+              "company": {
+                "value": "示例绘汀视觉有限公司",
+                "evidence": "示例绘汀视觉有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          },
+          {
+            "check": "interview",
+            "result": "unknown",
+            "reason": "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试",
+            "jd": {
+              "interview": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.acceptable_cities": []
+            }
+          },
+          {
+            "check": "start_date",
+            "result": "unknown",
+            "reason": "JD 没写到岗时间；你 2026-11-15 可以到岗",
+            "jd": {
+              "requirements.start": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.start_date": "2026-11-15"
+            }
+          }
+        ]
+      },
+      "manual_filter": {
+        "job_id": "job_4f9b8e1ad0c0",
+        "title": "视觉排版实习生",
+        "company": "示例绘汀视觉有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "学历要求：本科及以上"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": [
+                  "每周至少到岗3天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": [
+                  "至少实习3个月"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.acceptable_cities": [],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "岗位类型：实习"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "视觉排版实习生",
+                "evidence": [
+                  "视觉排版实习生"
+                ]
+              },
+              "company": {
+                "value": "示例绘汀视觉有限公司",
+                "evidence": [
+                  "公司名称：示例绘汀视觉有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          },
+          {
+            "check": "interview",
+            "result": "unknown",
+            "reason": "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试",
+            "jd": {
+              "interview": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.acceptable_cities": []
+            }
+          },
+          {
+            "check": "start_date",
+            "result": "unknown",
+            "reason": "JD 没写到岗时间；你 2026-11-15 可以到岗",
+            "jd": {
+              "requirements.start": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.start_date": "2026-11-15"
+            }
+          }
+        ]
+      },
+      "comparison": {
+        "parsed": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "old_check_differences": {},
+          "additional_checks": {
+            "interview": "unknown",
+            "start_date": "unknown"
+          }
+        },
+        "manual": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "old_check_differences": {},
+          "additional_checks": {
+            "interview": "unknown",
+            "start_date": "unknown"
+          }
+        }
+      }
+    },
+    "ops": {
+      "filter": {
+        "job_id": "job_4f9b8e1ad0c0",
+        "title": "视觉排版实习生",
+        "company": "示例绘汀视觉有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "招聘对象：仅招2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": "每周至少到岗3天"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": "至少实习3个月"
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.acceptable_cities": [],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "视觉排版实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "视觉排版实习生",
+                "evidence": "视觉排版实习生"
+              },
+              "company": {
+                "value": "示例绘汀视觉有限公司",
+                "evidence": "示例绘汀视觉有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          },
+          {
+            "check": "interview",
+            "result": "unknown",
+            "reason": "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试",
+            "jd": {
+              "interview": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.acceptable_cities": []
+            }
+          },
+          {
+            "check": "start_date",
+            "result": "unknown",
+            "reason": "JD 没写到岗时间；你 2026-12-01 可以到岗",
+            "jd": {
+              "requirements.start": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.start_date": "2026-12-01"
+            }
+          }
+        ]
+      },
+      "manual_filter": {
+        "job_id": "job_4f9b8e1ad0c0",
+        "title": "视觉排版实习生",
+        "company": "示例绘汀视觉有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "学历要求：本科及以上"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "match",
+            "reason": "JD 要求每周到岗 3 天，你可以 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": 3,
+                "evidence": [
+                  "每周至少到岗3天"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "match",
+            "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": 3,
+                "evidence": [
+                  "至少实习3个月"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.acceptable_cities": [],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "岗位类型：实习"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "视觉排版实习生",
+                "evidence": [
+                  "视觉排版实习生"
+                ]
+              },
+              "company": {
+                "value": "示例绘汀视觉有限公司",
+                "evidence": [
+                  "公司名称：示例绘汀视觉有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          },
+          {
+            "check": "interview",
+            "result": "unknown",
+            "reason": "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试",
+            "jd": {
+              "interview": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.acceptable_cities": []
+            }
+          },
+          {
+            "check": "start_date",
+            "result": "unknown",
+            "reason": "JD 没写到岗时间；你 2026-12-01 可以到岗",
+            "jd": {
+              "requirements.start": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.start_date": "2026-12-01"
+            }
+          }
+        ]
+      },
+      "comparison": {
+        "parsed": {
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "old_check_differences": {},
+          "additional_checks": {
+            "interview": "unknown",
+            "start_date": "unknown"
+          }
+        },
+        "manual": {
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "old_check_differences": {},
+          "additional_checks": {
+            "interview": "unknown",
+            "start_date": "unknown"
+          }
+        }
+      }
+    }
+  },
+  "comparison": {
+    "field_groups_equal": 14,
+    "differences": {},
+    "changes_from_baseline": {
+      "requirements.skills": {
+        "before": [
+          "C4D"
+        ],
+        "after": [
+          "Photoshop",
+          "Illustrator",
+          "C4D"
+        ]
+      }
+    },
+    "skills": {
+      "type": "match",
+      "expected": [
+        "Photoshop",
+        "Illustrator",
+        "C4D"
+      ],
+      "actual": [
+        "Photoshop",
+        "Illustrator",
+        "C4D"
+      ],
+      "missing": [],
+      "extra": []
+    },
+    "probes": [
+      {
+        "text": "Photoshop2024",
+        "expected_skill": "Photoshop",
+        "decision": "must_read",
+        "passed": true
+      },
+      {
+        "text": "Illustrator28.0",
+        "expected_skill": "Illustrator",
+        "decision": "must_read",
+        "passed": true
+      },
+      {
+        "text": "C4D",
+        "expected_skill": "C4D",
+        "decision": "must_keep_intrinsic_digit",
+        "passed": true
+      }
+    ],
+    "profiles": {
+      "tech": {
+        "parsed": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "old_check_differences": {},
+          "additional_checks": {
+            "interview": "unknown",
+            "start_date": "unknown"
+          }
+        },
+        "manual": {
+          "expected_verdict": "ineligible",
+          "actual_verdict": "ineligible",
+          "old_check_differences": {},
+          "additional_checks": {
+            "interview": "unknown",
+            "start_date": "unknown"
+          }
+        }
+      },
+      "ops": {
+        "parsed": {
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "old_check_differences": {},
+          "additional_checks": {
+            "interview": "unknown",
+            "start_date": "unknown"
+          }
+        },
+        "manual": {
+          "expected_verdict": "eligible",
+          "actual_verdict": "eligible",
+          "old_check_differences": {},
+          "additional_checks": {
+            "interview": "unknown",
+            "start_date": "unknown"
+          }
+        }
+      }
+    }
+  }
+}

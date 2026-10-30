@@ -30,9 +30,11 @@ SCHEMA_VERSION = 1
 # 4: the location dimension and its default weight (M2-6b).
 # 5: the filter checks the interview and the start date; their unknowns are gaps to confirm (M2-6c).
 # 6: 统计分析 joins the skill vocabulary's data group (H26).
-# 7: salary in tiers from target.salary_ideal and salary_step; pay turned into the profile's unit, meals
+# 7: office software vocabulary and synonyms, with Word/Office context checks (H29).
+# 8: left for H21's versioned skill names (#91), due to merge first.
+# 9: salary in tiers from target.salary_ideal and salary_step; pay turned into the profile's unit, meals
 #    added; the JD's job record gains benefits.meals (M2-6e).
-RULES_VERSION = 7
+RULES_VERSION = 9
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary, location
 DEFAULT_WEIGHTS = {"skills": 30, "direction": 25, "experience": 25, "salary": 10, "location": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.
