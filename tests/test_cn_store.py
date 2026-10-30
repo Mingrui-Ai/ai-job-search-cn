@@ -153,6 +153,40 @@ class Merge(StoreCase):
         self.assertEqual(self.store.get(self.base["id"])["status"], "skipped")
 
 
+class InterviewMerge(StoreCase):
+    """M2-6c: interview and requirements.start merge as whole objects, by evidence priority."""
+
+    TEXT = "职位名称：资料整理实习生\n面试地点：北京\n线上/线下面试\n能尽快到岗"
+
+    def test_an_agent_correction_survives_a_rule_reimport(self):
+        [rule], _ = jd_parser.parse_text(self.TEXT, now=NOW)
+        self.assertEqual(rule["interview"], {"mode": "mixed", "cities": ["北京"]})
+        corrected = json.loads(json.dumps(rule))
+        corrected["interview"] = {"mode": "either", "cities": ["北京"]}
+        corrected["evidence"]["interview"] = {"text": ["面试地点：北京", "线上/线下面试"], "method": "agent"}
+        self.assertEqual(schema.validate(corrected), [])
+        self.store.save(rule)
+        self.store.save(corrected)
+        _, stored = self.store.save(rule)
+        self.assertEqual(stored["interview"], {"mode": "either", "cities": ["北京"]})
+        self.assertEqual(stored["evidence"]["interview"]["method"], "agent")
+        self.assertEqual(stored["requirements"]["start"], {"by": None, "asap": True})
+
+    def test_a_record_saved_before_m2_6c_gains_them_on_reimport(self):
+        [record], _ = jd_parser.parse_text(self.TEXT, now=NOW)
+        self.store.save(record)
+        path = self.root / "jobs" / f"{record['id']}.json"
+        old = json.loads(path.read_text(encoding="utf-8"))
+        del old["interview"], old["requirements"]["start"]
+        for key in ("interview", "requirements.start"):
+            old["evidence"].pop(key)
+        path.write_text(json.dumps(old, ensure_ascii=False), encoding="utf-8")
+        self.assertIsNone(self.store.get(record["id"])["interview"])
+        _, stored = self.store.save(record)
+        self.assertEqual(stored["interview"], record["interview"])
+        self.assertEqual(stored["requirements"]["start"], record["requirements"]["start"])
+
+
 class MergePriority(StoreCase):
     def setUp(self):
         super().setUp()

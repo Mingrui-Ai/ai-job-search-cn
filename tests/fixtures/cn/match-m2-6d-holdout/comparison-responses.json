@@ -1,0 +1,71 @@
+{
+  "task": "V14",
+  "implementation_commit": "eb0ef30f813429881ad8437534813d33b0163882",
+  "method": "本会话按 #76 match.md 新节人工换算并写回应；已读冻结期望，不是独立盲测。六条初始回应不运行 CLI，完整流程仅 01、05。",
+  "shares_unit": "percent; displayed to two decimals, comparisons use exact ratios",
+  "cases": [
+    {
+      "id": "v14-01",
+      "clarify": false,
+      "weights": {"skills": 15, "direction": 10, "experience": 10, "salary": 20, "location": 30},
+      "shares": {"skills": 17.65, "direction": 11.76, "experience": 11.76, "salary": 23.53, "location": 35.29},
+      "response": "按当前规则，技能、方向、经历先减到 15、10、10，薪资其次为 20，地点第一为 30。按技能/方向/经历/薪资/地点顺序，原数字 30/25/25/10/10，新数字 15/10/10/20/30；占比从 30%/25%/25%/10%/10% 变为约 17.65%/11.76%/11.76%/23.53%/35.29%。地点最高、薪资第二，两项占比提高，其余降低。先看方案，确认这组数字以后才写档案。",
+      "comparison": {"deltas": "5/5", "orders": "4/4", "result": "pass"}
+    },
+    {
+      "id": "v14-02",
+      "clarify": false,
+      "weights": {"skills": 15, "direction": 25, "experience": 10, "salary": 35, "location": 5},
+      "shares": {"skills": 16.67, "direction": 27.78, "experience": 11.11, "salary": 38.89, "location": 5.56},
+      "response": "按当前规则，技能、经历、地点降到 15、10、5，方向数字保留 25，薪资第一为 35。按技能/方向/经历/薪资/地点顺序，新数字 15/25/10/35/5；占比从 30%/25%/25%/10%/10% 变为约 16.67%/27.78%/11.11%/38.89%/5.56%。收入最重，但方向数字没动时，占比会从 25% 升至 27.78%，这与您说的方向份量别动有差异。这只是当前规则给出的方案，尚未确认或写入。",
+      "comparison": {"deltas": "4/5", "orders": "4/4", "result": "P2", "mismatch": "direction expected same share 25%, observed 250/9% (27.777...%); extra increase"}
+    },
+    {
+      "id": "v14-03",
+      "clarify": false,
+      "weights": {"skills": 30, "direction": 10, "experience": 40, "salary": 10, "location": 10},
+      "shares": {"skills": 30, "direction": 10, "experience": 40, "salary": 10, "location": 10},
+      "response": "按当前规则，方向先减到 10；其次的技能候选是未调高项最大值 10 加 5，但原本已是 30，规则要求不动；经历第一变为 40。新数字 30/10/40/10/10，占比也为 30%/10%/40%/10%/10%（原为 30%/25%/25%/10%/10%）。经历第一、技能第二，地点和钱保持；不过技能没有比原来提高，这部分未满足您的原意。先列出这处差异，不把这组数当作已确认方案，也不改档案。",
+      "comparison": {"deltas": "4/5", "orders": "4/4", "result": "P2", "mismatch": "skills expected share >30%, observed 30%; missed increase"}
+    },
+    {
+      "id": "v14-04",
+      "clarify": true,
+      "weights": null,
+      "shares": null,
+      "response": "先用具体取舍帮您选：如果两份内容运营工作，一份地点更合适、一份收入更高，其他条件相近，您更愿意选哪份？做的内容方向能否接受稍有偏离？先定最重要的一两项；如果现在仍拿不准，可以暂时沿用默认继续看，但需要您明确选择，我不会把迟疑当成同意，也不会改成五项均分或写档案。",
+      "comparison": {"clarification": "2/2 topics", "result": "pass"}
+    },
+    {
+      "id": "v14-05",
+      "clarify": true,
+      "weights": null,
+      "shares": null,
+      "response": "您同时要求薪资高于地点、地点又高于薪资，这两个排序不能同时成立。请明确哪项排第一；或者您是想把地点设成必须满足的城市条件，再在符合的岗位里比较薪资？如果是城市门槛，还需要明确城市并按建档流程单独确认。在澄清前我保留原档案，不猜数字。",
+      "comparison": {"clarification": "2/2 topics", "result": "pass"}
+    },
+    {
+      "id": "v14-06",
+      "clarify": true,
+      "weights": null,
+      "shares": null,
+      "response": "您说的是想排除的岗位范围，还不能直接换成五项权重。电话销售、电话拉人和外包，是看到就不投，还是可以投但放后面？档案已有电话销售排除项；如要补充范围，先核对电话拉人和外包的具体含义及新增部分，走建档流程单独确认，不在这步重复追加或修改排除项。五维没有公司是否外包这一项。在您可接受的岗位内，收入、地点、内容方向、工具技能、已有经历，您现在最看重哪一两项？明确前不设新权重。",
+      "comparison": {"clarification": "3/3 topics", "result": "pass"}
+    }
+  ],
+  "full_flow_cases": [
+    {
+      "id": "v14-01",
+      "profile": "tech",
+      "clarification": null,
+      "weights": {"skills": 15, "direction": 10, "experience": 10, "salary": 20, "location": 30}
+    },
+    {
+      "id": "v14-05",
+      "profile": "tech",
+      "clarification": "模拟用户：我刚才说反了，地点第一，薪资第二，两项比原来重要；其余三项保留原来的数字就好。地点不是必须满足的城市门槛，只是排序偏好。先试算给我看。",
+      "proposal": "依据规则，薪资=max(30,25,25)+5=35；地点=max(30,25,25,35)+10=45。原数字30/25/25/10/10，新数字30/25/25/35/45；占比18.75%/15.625%/15.625%/21.875%/28.125%。未提及三项数字没变，但占比会下降，确认时要明确展示。",
+      "weights": {"skills": 30, "direction": 25, "experience": 25, "salary": 35, "location": 45}
+    }
+  ]
+}

@@ -20,7 +20,8 @@ from jobsearch_cn import match, score
 VERDICTS = {match.ELIGIBLE: "符合", match.NEEDS_CHECK: "待确认", match.INELIGIBLE: "不符合"}
 RESULTS = {match.MATCH: "符合", match.CONFLICT: "冲突", match.UNKNOWN: "未知", match.NOT_APPLICABLE: "不适用"}
 CHECKS = {"graduation": "届别", "education": "学历", "days_per_week": "每周到岗", "min_months": "实习时长",
-          "location": "地点", "employment_type": "岗位类型", "exclusions": "排除项"}
+          "location": "地点", "employment_type": "岗位类型", "exclusions": "排除项",
+          "interview": "面试", "start_date": "到岗时间"}
 DIMENSIONS = {"skills": "技能", "direction": "方向", "experience": "经历", "salary": "薪资", "location": "地点"}
 GRADES = {"strong": "很匹配", "good": "较匹配", "moderate": "一般", "weak": "较弱", "poor": "不匹配",
           score.INELIGIBLE: "不符合硬性条件"}
@@ -75,13 +76,16 @@ def conclusion(record: dict, stale: bool = False) -> str:
     total = record.get("total") or {}
 
     def named(result):
-        return "、".join(_label(CHECKS, c.get("check")) for c in _checks(record) if c.get("result") == result)
+        return "、".join(_label(CHECKS, c.get("check")) for c in _checks(record) if c.get("result") == result
+                        and not (result == match.UNKNOWN and c.get("check") in match.TO_CONFIRM))
 
     total_score = "无" if total.get("score") is None else f"{total['score']} 分"
     if verdict == match.INELIGIBLE:
         text = f"不符合硬性条件（冲突：{named(match.CONFLICT)}），各维度加权 {total_score}，仅供参考"
     else:
-        unknown = [c for c in _checks(record) if c.get("result") == match.UNKNOWN]
+        # As in the filter, an unknown interview or start date is only to confirm (pending), no hard condition.
+        unknown = [c for c in _checks(record)
+                   if c.get("result") == match.UNKNOWN and c.get("check") not in match.TO_CONFIRM]
         head = f"待确认 {len(unknown)} 项硬性条件（{named(match.UNKNOWN)}）" if unknown else "符合硬性条件"
         text = f"{head}，{grade_text(total.get('grade'))}，总分 {total_score}"
     if total.get("missing"):
