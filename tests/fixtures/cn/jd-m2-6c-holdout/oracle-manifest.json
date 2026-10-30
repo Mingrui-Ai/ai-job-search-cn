@@ -1,0 +1,85 @@
+{
+  "base_commit": "a70dbc7c43f370af8caf8baa8416ac0ca23cc50f",
+  "branch": "codex/v9-m2-6c-holdout",
+  "frozen_at_utc": "2026-10-29T08:24:08.253276+00:00",
+  "policy": "首次运行本批 jd parse / match filter 前冻结。冻结文件不改。M2-6c PR 开出前不推送；之后仅在单独转换层映射新字段结构。",
+  "assignment": "规划者2026-10-29 V9任务：面试形式、地点与到岗时间，至少2份非技术方向；冻结时master尚未包含V9路线图条目。",
+  "independence": {
+    "current_task": "只读取任务、文档契约、示例档案与V4/V7产物格式；未读取解析/匹配源码、现有JD测试或M2-6c分支。",
+    "prior_context": "同一会话此前有实现复核先验，M2-5期间看过评分函数片段；不声称完全没有源码先验。本批期望独立先写，未查看本批执行结果。"
+  },
+  "comparison_policy": {
+    "field_groups": [
+      "title",
+      "company",
+      "cities",
+      "remote",
+      "employment_type",
+      "salary",
+      "requirements.graduation",
+      "requirements.days_per_week",
+      "requirements.min_months",
+      "requirements.education",
+      "requirements.skills",
+      "return_offer",
+      "published_at",
+      "deadline"
+    ],
+    "skills": "正文正向技能；NFKC、忽略大小写和空白，按集合，不依照词表删改人工值。",
+    "cities": "只收工作城市；按集合比较。面试城市另存，不因差旅或复试混入。",
+    "other_fields": "标量和对象逐值比较；毕业年份按集合，strict精确比较。",
+    "existing_match": "现行七项契约与10组总判断分别比较，不把新字段尚未实现算成旧契约退步。",
+    "new_fields": "面试形式/流程、现场城市、到岗时间3个语义组，共15组；结构待定，master缺字段记unsupported，而不是原文unknown。20项新检查与10组扩展总判断仅为带冻结偏好的人工场景，实际契约未定前不宣称已自动验收。",
+    "difference_types": "match相同；missing仅漏读；extra仅多读；wrong值错误或同时漏读与多读。"
+  },
+  "oracle_files_sha256": {
+    ".gitattributes": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+    "mixed_recruiting_intern.expected.json": "be086cc572fc5401356d7da583289fe3289c0aca2f90b4793dcbc47293e38dc9",
+    "mixed_recruiting_intern.txt": "3eb795d330a1f6d8ec6adf45168a4032f09291f0fc4663cf41cb4788b0c30e19",
+    "online_backend_intern.expected.json": "9975fa1c6b974427a203a694a63d2f0329450971eb12c85d25c123b1b34e4144",
+    "online_backend_intern.txt": "9cee243eb6226a861a62d085811b9d30bd880cf813996ba0597a707404eb900e",
+    "onsite_finance_intern.expected.json": "9bf904d9489c32a7bbd2b5b08c0f777121d0e5892e22d051a1ec932347b3a26e",
+    "onsite_finance_intern.txt": "a98952bff3b6efa2cfa0a7a7cb634a933b551f4d3bdf9ae86f07d5c0a6b17d76",
+    "profile-scenarios.json": "ff9c8529c604b8da5cbe3249e615869e839d8e80bb600c3ff3cd240af4a9f755",
+    "relative_content_intern.expected.json": "de9747cf103bca34bb0b8c41f062adeaef988feee9e17d49dc94cf259b730115",
+    "relative_content_intern.txt": "fabbac652ce000fea4b5572e062a1f29775893042078e0b4c867c06bbaed3636",
+    "scheduling-oracles.json": "f9bb9e0be51893909704576213621e483bda512fd3375e4baf1663d76c4dfb12",
+    "unrelated_online_testing_intern.expected.json": "d74b9b3b466d2f70b501b0589990d4744ffba92cf6405e89d9e808e2631ce876",
+    "unrelated_online_testing_intern.txt": "6cfc4c592578438036cbd5ecb5a6543cbc4bd30104ed7419fc7a5c825746423f"
+  },
+  "contract_and_profile_sha256": {
+    "docs/cn/job-schema.md": {
+      "working_bytes": "a9a5ddfb4d13445397740753bcafe59921b305dc26a19b8aa8bb0ea2c32b4937",
+      "lf_bytes": "9bbcfaec1ab29318cd283f903b6b3ed4f68d9222172b93f835cba937d7ffbe13"
+    },
+    "docs/cn/match.md": {
+      "working_bytes": "8d36b80af3cdda22db6bd546945028b68d0b4a2c867d7066ef20ab3ebc839d43",
+      "lf_bytes": "22fd758da1eacb43d08c742fba497a176b670d99a59ec1db4387bbbf53eb412f"
+    },
+    "docs/cn/profile.md": {
+      "working_bytes": "f4e3dc41d8a4f8fa069468b14b8d6ad9437a9fa68f8ceded0dda428f889d7741",
+      "lf_bytes": "57b4a7fd69d690989e1d36b11c101b70dcdd7cda532d9ed64c7709fa5af9c6c6"
+    },
+    "tests/fixtures/cn/profile/tech/profile.json": {
+      "working_bytes": "7be0824b1d2850059928c2a5aa286ee88c208a84e5fe4ba4d2484c4f537625ee",
+      "lf_bytes": "735d1da011b41215dd381d1a8eeea42742a3fb247ba8f5557c17c9cf0a35a2d6"
+    },
+    "tests/fixtures/cn/profile/ops/profile.json": {
+      "working_bytes": "2c746adee663a13386af6fd41219ce37cf7569aaabf212051685a72ba3ac92df",
+      "lf_bytes": "4b7639b57a666d4adbd0f2b5aed1e7cc28ad150bac9b1e8e675981ffdb2a5f9c"
+    }
+  },
+  "pre_execution_audit": {
+    "jd_count": 5,
+    "nontechnical_count": 3,
+    "field_groups": 70,
+    "human_matches": 10,
+    "check_states": 70,
+    "new_field_semantic_groups": 15,
+    "new_check_states": 20,
+    "verbatim_evidence_snippets": 74,
+    "all_evidence_found": true,
+    "encoding": "UTF-8 without BOM, LF",
+    "application_rules_executed": false
+  }
+}
