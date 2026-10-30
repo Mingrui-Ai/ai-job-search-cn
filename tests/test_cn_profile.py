@@ -68,7 +68,7 @@ class Validate(unittest.TestCase):
             "graduation": None,
             "education": [],
             "availability": {"start_date": None, "days_per_week": None, "months": None,
-                             "cities": [], "remote_ok": None, "relocate": None},
+                             "cities": [], "acceptable_cities": [], "remote_ok": None, "relocate": None},
             "target": {"employment_types": [], "roles": [], "industries": [], "salary_min": None,
                        "directions": [], "weights": None},
             "skills": [], "experience": [], "awards": [], "certificates": [], "languages": [],
@@ -146,11 +146,14 @@ class Validate(unittest.TestCase):
         # Without the vocabulary (match filter checks structure only) any key passes.
         self.assertEqual(profile.validate(with_value(self.example, "target.directions", ["game"])), [])
 
-    def test_weights_are_null_or_all_four(self):
-        weights = {"skills": 40, "direction": 20, "experience": 30.5, "salary": 0}
+    def test_weights_are_null_or_all_five(self):
+        weights = {"skills": 40, "direction": 20, "experience": 30.5, "salary": 0, "location": 10}
         self.assertEqual(profile.validate(with_value(self.example, "target.weights", weights)), [])
         self.assert_error(with_value(self.example, "target.weights", {"skills": 100}),
                           "target.weights.direction: missing")
+        # Weights written before M2-6b name four dimensions; the fifth must be added, even as 0.
+        four = {key: value for key, value in weights.items() if key != "location"}
+        self.assert_error(with_value(self.example, "target.weights", four), "target.weights.location: missing")
         for value in (-1, True, "35", None):
             with self.subTest(value=value):
                 self.assert_error(with_value(self.example, "target.weights", dict(weights, skills=value)),
@@ -169,7 +172,44 @@ class Validate(unittest.TestCase):
         self.assertTrue(warning.startswith("availability.remote_ok:"), warning)
         both = with_value(open_remote, "availability.relocate", None)
         self.assertEqual(len(profile.warnings(both)), 2)
-        self.assertEqual(profile.warnings(with_value(both, "availability.cities", [])), [])
+        no_preferred = with_value(both, "availability.cities", [])
+        self.assertEqual(len(profile.warnings(no_preferred)), 2, "acceptable cities alone ask the same question")
+        self.assertEqual(profile.warnings(with_value(no_preferred, "availability.acceptable_cities", [])), [])
+
+    def test_acceptable_cities_are_a_list_apart_from_the_preferred(self):
+        # M2-6b: preferred cities stay in availability.cities; acceptable ones are the next best.
+        self.assertEqual(self.example["availability"]["acceptable_cities"], ["佛山"])
+        self.assert_error(with_value(self.example, "availability.acceptable_cities", None),
+                          "availability.acceptable_cities: must be a list")
+        self.assert_error(with_value(self.example, "availability.acceptable_cities", ["佛山", "佛山"]), "duplicate")
+        self.assert_error(with_value(self.example, "availability.acceptable_cities", ["深圳"]),
+                          "availability.acceptable_cities[0]: '深圳' is already a preferred city")
+        older = with_value(self.example, "availability", {key: value for key, value in
+                                                          self.example["availability"].items()
+                                                          if key != "acceptable_cities"})
+        self.assert_error(older, "availability.acceptable_cities: missing")
+
+    def test_cities_compare_as_the_filter_and_the_score_compare_them(self):
+        # Codex B on #68: the filter and the score take 深圳市 for 深圳 (match._city), so the validator does
+        # too, across the two tiers either way round and within each.
+        self.assert_error(with_value(self.example, "availability.acceptable_cities", ["深圳市"]),
+                          "availability.acceptable_cities[0]: '深圳市' is already a preferred city")
+        suffixed = with_value(self.example, "availability.cities", ["广州市", "深圳市"])
+        self.assertEqual(profile.validate(suffixed), [])
+        self.assert_error(with_value(suffixed, "availability.acceptable_cities", ["深圳"]),
+                          "availability.acceptable_cities[0]: '深圳' is already a preferred city")
+        self.assert_error(with_value(self.example, "availability.cities", ["深圳", "深圳市"]),
+                          "availability.cities[1]: duplicate")
+        self.assert_error(with_value(self.example, "availability.acceptable_cities", ["佛山市", "佛山"]),
+                          "availability.acceptable_cities[1]: duplicate")
+
+    def test_cities_that_are_not_a_list_are_an_error_not_a_crash(self):
+        # Codex B on #68: a number here raised TypeError while comparing the two tiers.
+        for key in ("cities", "acceptable_cities"):
+            for value in (123, True, 1.5, "深圳"):
+                with self.subTest(key=key, value=value):
+                    self.assert_error(with_value(self.example, f"availability.{key}", value),
+                                      f"availability.{key}: must be a list")
 
     def test_redaction_masks_contact_only(self):
         shown = profile.redacted(self.example)
@@ -240,6 +280,18 @@ class Commands(unittest.TestCase):
         out = json.loads(run_cli("profile", "validate", data_dir=self.data).stdout)
         self.assertTrue(out["valid"])
         self.assertTrue(any(w.startswith("availability.relocate:") for w in out["warnings"]), out["warnings"])
+
+    def test_cities_that_are_not_a_list_are_reported_as_json(self):
+        # Codex B on #68: profile validate crashed here, with nothing on stdout.
+        for key in ("cities", "acceptable_cities"):
+            for value in (123, True):
+                with self.subTest(key=key, value=value):
+                    self.write(with_value(documented_example(), f"availability.{key}", value))
+                    proc = run_cli("profile", "validate", data_dir=self.data)
+                    self.assertEqual(proc.returncode, 1, proc.stderr.decode("utf-8", "replace"))
+                    out = json.loads(proc.stdout)
+                    self.assertFalse(out["valid"])
+                    self.assertIn(f"availability.{key}: must be a list ([] when there is nothing)", out["errors"])
 
     def test_directions_are_checked_against_the_data_dir_vocabulary(self):
         self.write(with_value(documented_example(), "target.directions", ["game"]))
