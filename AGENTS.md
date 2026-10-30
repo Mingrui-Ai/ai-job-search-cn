@@ -36,7 +36,7 @@ To prevent duplication and configuration drift across different AI agent framewo
 
 **建立个人档案**：用户要建档或更新档案时，按 [docs/cn/profile-setup.md](docs/cn/profile-setup.md) 执行（与 Claude Code 的 `cn-setup` 技能共用），不要运行上游 `/setup`。
 
-**岗位评分**：用户要给已保存的岗位评分、比较岗位，或问值不值得投时，按 [docs/cn/match.md](docs/cn/match.md) 的"评分工作流"一节执行（与 Claude Code 的 `cn-match` 技能共用这一份说明）。
+**岗位评分**：用户要给已保存的岗位评分、比较岗位，问值不值得投，或者说现在更看重什么、想调整评分的权重时，按 [docs/cn/match.md](docs/cn/match.md) 的"评分工作流"一节执行（与 Claude Code 的 `cn-match` 技能共用这一份说明）。
 
 **工程底线（开发与运行时都适用）**
 
