@@ -251,14 +251,18 @@ _MARK_REACH = 15
 _MARK_BREAK = re.compile(r"[和及与并是为]")
 _MAJOR_AFTER = re.compile(r"\s*(?:等)?\s*(?:相关)?\s*专业")
 _MAJOR_BEFORE = re.compile(r"专业\s*[:：]?\s*$")
-# A term in a list of majors is no skill (H20): "统计学或市场营销相关专业", "专业：计算机、统计学". The same
-# term asking for knowledge still is: "熟悉统计学方法", "具备统计学专业知识".
+# A term is no skill only where the JD asks for a degree subject (H20): a list that ends in 专业, at the
+# clause's end or before what a degree subject takes - "统计学或市场营销相关专业", "统计学专业毕业",
+# "统计学等相关专业优先", "统计学专业本科及以上", "统计学相关专业背景" - or after a 专业 label
+# ("专业：计算机、统计学"). Anything else after 专业 keeps the skill: "统计学专业基础扎实", "具备统计学
+# 专业知识", "Figma专业版". Rather a skill read once too often than a real requirement dropped.
 _MAJOR_WORD = r"[一-鿿A-Za-z]{1,12}?"
 _MAJOR_JOIN = r"\s*(?:、|/|／|或者|或|和|及|与)\s*"
+_MAJOR_DEGREE = (r"(?:的)?\s*(?:毕业|在读|学生|同学|应届|背景|优先|出身|学历|及以上|以上"
+                 r"|大专|专科|本科|学士|硕士|研究生|博士)")
 _MAJOR_TAIL = re.compile(
-    rf"(?:{_MAJOR_JOIN}{_MAJOR_WORD})*\s*(?:等)?\s*(?:相关)?\s*专业"
-    # "专业基础知识", "专业理论知识", "专业版": knowledge, or an edition of the software, not a major.
-    r"(?!\s*[一-鿿]{0,2}?(?:知识|技能|能力|素养|术语|理论|工具|软件|版))"
+    rf"(?:{_MAJOR_JOIN}{_MAJOR_WORD})*\s*(?:等)?\s*(?:相关)?\s*专业\s*"
+    rf"(?=$|[{re.escape(_CLAUSE_END)}]|{_MAJOR_DEGREE}|{_MAJOR_JOIN}{_MAJOR_WORD}\s*(?:等)?\s*(?:相关)?\s*专业)"
 )
 _MAJOR_LEAD = re.compile(rf"专业\s*(?:要求|背景|方向)?\s*(?:为|是|[:：])\s*(?:{_MAJOR_WORD}{_MAJOR_JOIN})*$")
 # A platform name is a skill when the JD asks for it, not when it points the reader at the
