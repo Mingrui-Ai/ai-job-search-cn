@@ -127,6 +127,8 @@ class Validate(unittest.TestCase):
         data["experience"].append(copy.deepcopy(data["experience"][0]))
         self.assert_error(data, "duplicate id 'exp-1'")
         self.assert_error(with_value(self.example, "experience.0.id", "Exp 1"), "experience[0].id")
+        # "$" with re.match let a trailing newline through (V18 P3-1 found it in job ids).
+        self.assert_error(with_value(self.example, "experience.0.id", "exp-1\n"), "experience[0].id")
 
     def test_duplicate_skills_fold_case_and_width(self):
         data = copy.deepcopy(self.example)
@@ -162,6 +164,10 @@ class Validate(unittest.TestCase):
                           "at least one weight must be above 0")
         self.assert_error(with_value(self.example, "target.weights", [35, 30, 25, 10]),
                           "target.weights: must be an object")
+        # match list --weights runs the same check under its own name (M2-6d).
+        self.assertEqual(profile.weight_errors(weights), [])
+        self.assertEqual(profile.weight_errors(four, "--weights"),
+                         ["--weights.location: missing; name all five (skills, direction, experience, salary, location)"])
 
     def test_cities_without_an_answer_on_remote_or_moving_is_a_warning(self):
         # Valid either way; but every job outside the cities would be location unknown.
@@ -218,6 +224,32 @@ class Validate(unittest.TestCase):
         self.assertEqual(shown["skills"], self.example["skills"])
         self.assertEqual(self.example["contact"]["name"], "张三", "redaction must not touch the original")
 
+    def test_redaction_masks_a_malformed_contact_too(self):
+        # V18 P1-1: a contact that was not an object came out as it was; Codex B on #86: so did a
+        # detail typed as a field name, and a field that strayed out of contact.
+        phone, email = "13900001111", "canary@example.com"
+        cases = [dict(self.example, contact=contact) for contact in (
+            f"{phone} {email}", [phone], {"phone": [phone], "wechat": phone}, 13900001111, {email: phone, "name": None})]
+        cases.append(dict(self.example, phone=phone, email=email))
+        for data in cases:
+            with self.subTest(data=data.get("contact"), stray="phone" in data):
+                shown = json.dumps(profile.redacted(data), ensure_ascii=False)
+                self.assertNotIn(phone, shown)
+                self.assertNotIn(email, shown)
+                self.assertEqual(profile.redacted(data)["skills"], self.example["skills"])
+        shown = profile.redacted(dict(self.example, contact={email: phone, "phone": "x", "name": None}))
+        self.assertEqual(shown["contact"], {"phone": "***", "name": None, "unknown_fields": 1})
+        self.assertIsNone(profile.redacted(dict(self.example, contact=None))["contact"])
+
+    def test_an_unknown_contact_field_is_counted_not_named(self):
+        # Codex B on #86: the error repeated a phone number or email typed as a field name.
+        data = with_value(self.example, "contact", {"canary@example.com": "13900001111", **self.example["contact"]})
+        errors = profile.validate(data)
+        self.assertIn("contact: 1 unknown field(s), not named here; only name, phone, email, github, website belong",
+                      errors)
+        self.assertNotIn("canary@example.com", " ".join(errors))
+        self.assert_error(dict(self.example, hobbies=[]), "hobbies: unknown field")  # elsewhere names still help
+
 
 def run_cli(*args, data_dir):
     env = dict(os.environ, PYTHONIOENCODING="utf-8", **{store.DATA_DIR_ENV: str(data_dir)})
@@ -268,6 +300,36 @@ class Commands(unittest.TestCase):
         self.assertNotIn("13800000000", hidden)
         self.assertNotIn("a@example.com", hidden)
         self.assertIn("13800000000", run_cli("profile", "show", "--contact", data_dir=self.data).stdout.decode("utf-8"))
+
+    def test_a_malformed_contact_stays_hidden_everywhere(self):
+        # V18 P1-1: show printed a string or list contact as it was; Codex B on #86: and a detail typed as
+        # a field name, which validate and match also repeated. --contact still shows whatever is there.
+        phone, email = "13900001111", "canary@example.com"
+        profiles = [dict(documented_example(), contact=contact) for contact in (
+            f"{phone} {email}", [phone], None, {"phone": phone, "wechat": email}, {email: phone})]
+        profiles.append(dict(documented_example(), phone=phone, email=email))  # strayed out of contact
+        for data in profiles:
+            with self.subTest(contact=data.get("contact"), stray="phone" in data):
+                self.write(data)
+                shown = run_cli("profile", "show", data_dir=self.data)
+                self.assertEqual(shown.returncode, 0, shown.stderr.decode("utf-8", "replace"))
+                report = run_cli("match", "report", "--profile", str(self.root / "profile.json"), data_dir=self.data)
+                self.assertEqual(report.returncode, 1, "the profile is invalid, so match stops before reading jobs")
+                for proc in (shown, run_cli("profile", "validate", data_dir=self.data), report):
+                    output = (proc.stdout + proc.stderr).decode("utf-8", "replace")
+                    self.assertNotIn(phone, output)
+                    self.assertNotIn(email, output)
+                if data.get("contact") is not None or "phone" in data:
+                    explicit = run_cli("profile", "show", "--contact", data_dir=self.data)
+                    self.assertIn(phone, explicit.stdout.decode("utf-8"))
+
+    def test_show_refuses_a_profile_that_is_not_an_object(self):
+        # Nothing to mask the contact details in, so say so without echoing the file.
+        (self.root / "profile.json").write_text(json.dumps(["13900001111"]), encoding="utf-8")
+        proc = run_cli("profile", "show", data_dir=self.data)
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("JSON object", proc.stderr.decode("utf-8"))
+        self.assertNotIn("13900001111", (proc.stdout + proc.stderr).decode("utf-8", "replace"))
 
     def test_an_explicit_file(self):
         other = self.data / "draft.json"

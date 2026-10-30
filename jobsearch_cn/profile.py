@@ -47,7 +47,7 @@ MAX_BULLET = 300
 
 _MONTH = re.compile(r"^\d{4}-\d{2}$")
 _DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-_EXPERIENCE_ID = re.compile(r"^[a-z][a-z0-9-]{0,39}$")
+_EXPERIENCE_ID = re.compile(r"[a-z][a-z0-9-]{0,39}")  # fullmatch: "$" would let "exp-1\n" through
 
 
 def validate(profile, sources=None, groups=None) -> list[str]:
@@ -67,7 +67,7 @@ def validate(profile, sources=None, groups=None) -> list[str]:
     if "schema_version" in profile and not (_is_int(profile["schema_version"])
                                             and profile["schema_version"] == PROFILE_VERSION):
         errors.append(f"schema_version: must be {PROFILE_VERSION}")
-    if _obj(profile, "contact", CONTACT_KEYS, errors):
+    if _obj(profile, "contact", CONTACT_KEYS, errors, name_unknown=False):
         for key in CONTACT_KEYS:
             _check_text(profile["contact"].get(key), f"contact.{key}", errors)
     if _obj(profile, "graduation", GRADUATION_KEYS, errors, nullable=True):
@@ -128,19 +128,14 @@ def validate(profile, sources=None, groups=None) -> list[str]:
                 choices = ", ".join(sorted(set(groups) - {vocab.GENERAL}))
                 errors.append(f"target.directions[{index}]: {key!r} is not a skill vocabulary group ({choices})")
         weights = target.get("weights")
-        if weights is not None and _obj(target, "weights", WEIGHT_KEYS, errors, path="target.weights"):
-            values = [weights.get(key) for key in WEIGHT_KEYS]
-            for key, value in zip(WEIGHT_KEYS, values):
-                if not (schema._is_number(value) and value >= 0):
-                    errors.append(f"target.weights.{key}: must be a number, 0 or more")
-            if all(schema._is_number(value) and value >= 0 for value in values) and not any(values):
-                errors.append("target.weights: at least one weight must be above 0")
+        if weights is not None:
+            errors += weight_errors(weights)
 
     experience_ids = set()
     for index, item in check.items(profile, "experience", EXPERIENCE_KEYS):
         where = f"experience[{index}]"
         item_id = item.get("id")
-        if not (isinstance(item_id, str) and _EXPERIENCE_ID.match(item_id)):
+        if not (isinstance(item_id, str) and _EXPERIENCE_ID.fullmatch(item_id)):
             errors.append(f"{where}.id: must be lowercase letters, digits and hyphens, like exp-1")
         elif item_id in experience_ids:
             errors.append(f"{where}.id: duplicate id {item_id!r}")
@@ -186,6 +181,21 @@ def validate(profile, sources=None, groups=None) -> list[str]:
     return errors
 
 
+def weight_errors(weights, path: str = "target.weights") -> list[str]:
+    """Every problem with a set of weights, the profile's or match list --weights': all five dimensions,
+    each a number 0 or more, at least one above 0."""
+    if not isinstance(weights, dict):
+        return [f"{path}: must be an object"]
+    errors = [f"{path}.{key}: missing; name all five ({', '.join(WEIGHT_KEYS)})"
+              for key in WEIGHT_KEYS if key not in weights]
+    errors += [f"{path}.{key}: unknown field" for key in weights if key not in WEIGHT_KEYS]
+    errors += [f"{path}.{key}: must be a number, 0 or more" for key in WEIGHT_KEYS
+               if key in weights and not (schema._is_number(weights[key]) and weights[key] >= 0)]
+    if not errors and not any(weights.values()):
+        errors.append(f"{path}: at least one weight must be above 0")
+    return errors
+
+
 def warnings(profile) -> list[str]:
     """What a valid profile leaves open that will cost answers later, as "<field path>: <message>"."""
     availability = profile.get("availability") if isinstance(profile, dict) else None
@@ -198,24 +208,38 @@ def warnings(profile) -> list[str]:
 
 
 def redacted(profile: dict) -> dict:
-    """The profile with contact details masked, for output that is not a CV."""
-    copy = dict(profile)
-    if isinstance(profile.get("contact"), dict):
-        copy["contact"] = {key: (None if value is None else "***") for key, value in profile["contact"].items()}
+    """The profile with contact details masked, for output that is not a CV.
+
+    Details typed in the wrong shape are masked too. A contact that is not an object is masked whole. A field
+    contact does not know is counted, never named: the name may be the detail itself ({"a@example.com": "138…"}).
+    A top-level field the format does not know keeps its name, as profile validate reports it, but not its value.
+    """
+    copy = {key: (value if key in TOP_LEVEL_KEYS or value is None else "***") for key, value in profile.items()}
+    contact = profile.get("contact")
+    if isinstance(contact, dict):
+        masked = {key: (None if contact[key] is None else "***") for key in CONTACT_KEYS if key in contact}
+        if len(masked) < len(contact):
+            masked["unknown_fields"] = len(contact) - len(masked)
+        copy["contact"] = masked
+    elif contact is not None:
+        copy["contact"] = "***"
     return copy
 
 
-def _keys(obj: dict, expected, path: str, errors: list) -> None:
+def _keys(obj: dict, expected, path: str, errors: list, name_unknown: bool = True) -> None:
     prefix = f"{path}." if path else ""
     for key in expected:
         if key not in obj:
             errors.append(f"{prefix}{key}: missing (use null, or [] for a list, when unknown)")
-    for key in obj:
-        if key not in expected:
-            errors.append(f"{prefix}{key}: unknown field")
+    unknown = [key for key in obj if key not in expected]
+    if name_unknown:
+        errors.extend(f"{prefix}{key}: unknown field" for key in unknown)
+    elif unknown:  # the name may be a contact detail typed as a key, so only the count goes out
+        errors.append(f"{path}: {len(unknown)} unknown field(s), not named here; only {', '.join(expected)} belong")
 
 
-def _obj(parent: dict, key: str, expected, errors: list, nullable: bool = False, path: str = None) -> bool:
+def _obj(parent: dict, key: str, expected, errors: list, nullable: bool = False, path: str = None,
+         name_unknown: bool = True) -> bool:
     """Check parent[key] is an object with exactly `expected` keys. True when its fields can be checked."""
     path = path or key
     if key not in parent:
@@ -226,7 +250,7 @@ def _obj(parent: dict, key: str, expected, errors: list, nullable: bool = False,
     if not isinstance(value, dict):
         errors.append(f"{path}: must be an object" + (" or null" if nullable else ""))
         return False
-    _keys(value, expected, path, errors)
+    _keys(value, expected, path, errors, name_unknown)
     return True
 
 

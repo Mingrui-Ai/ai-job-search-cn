@@ -227,6 +227,40 @@ class FrozenJudgments(unittest.TestCase):
                 self.assertEqual(ranked(name), expected)
 
 
+class TrialWeights(unittest.TestCase):
+    """M2-6d on the frozen judgments: a trial with other weights (match list --weights) ranks the twenty records
+    as writing those weights to the profile and scoring every job again does, total for total, and scoring
+    again keeps the agent's experience."""
+
+    # match.md's conversions on the default weights (location most; salary most, location next; location most
+    # with direction kept; salary not at all), and one dimension alone.
+    WEIGHTS = tuple(dict(zip(score.DIMENSIONS, values)) for values in (
+        (24, 19, 19, 8, 30), (18, 16, 16, 30, 20), (21, 25, 17, 7, 30), (33, 28, 28, 0, 11), (0, 0, 1, 0, 0)))
+
+    @staticmethod
+    def in_list_order(rows: list) -> list:
+        return sorted(rows, key=lambda row: score.list_key(row[2]["grade"], row[2]["score"], row[1]))
+
+    def test_a_trial_ranks_as_scoring_again_does(self):
+        reordered = set()
+        for name in ("tech", "ops"):
+            saved = records(name)
+            for weights in self.WEIGHTS:
+                with self.subTest(profile=name, weights=weights):
+                    trial = [(sample, record["job_id"], score.trial_total(record, weights))
+                             for sample, _, _, record in saved]
+                    again = []
+                    for sample, job, profile, record in saved:
+                        changed = dict(profile, target=dict(profile["target"], weights=weights))
+                        rescored = score.score_job(job, changed, VOCABULARY, previous=record, now=NOW)
+                        self.assertEqual(rescored["dimensions"]["experience"], record["dimensions"]["experience"])
+                        again.append((sample, rescored["job_id"], rescored["total"]))
+                    self.assertEqual(self.in_list_order(trial), self.in_list_order(again))
+                    if [row[0] for row in self.in_list_order(trial)] != RANKINGS[name]:
+                        reordered.add(name)
+        self.assertEqual(reordered, {"tech", "ops"}, "some weights must reorder each profile's list")
+
+
 def v5_rankings() -> dict:
     """V5's ranking for each sample profile: every job in order with its grade, and the ones it recommends."""
     return json.loads((V5 / "rankings.json").read_text(encoding="utf-8"))["profiles"]
