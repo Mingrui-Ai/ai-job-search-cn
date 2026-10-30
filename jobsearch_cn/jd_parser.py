@@ -63,6 +63,10 @@ _SALARY = (
     (re.compile(rf"月薪\s*(?P<lo>{_N})\s*万?(?:{_TO}(?P<hi>{_N}))?\s*万"), "CNY/month", 10000),
     (re.compile(rf"年薪\s*(?P<lo>{_N})\s*万?(?:{_TO}(?P<hi>{_N}))?\s*万"), "CNY/year", 10000),
     (re.compile(rf"(?P<lo>{_N})\s*万?{_TO}(?P<hi>{_N})\s*万\s*元?\s*(?:/|每)\s*年"), "CNY/year", 10000),
+    # Unscaled monthly/yearly amounts need an explicit 元 and period; bare
+    # numbers also occur in dates, phone numbers and company headcounts.
+    (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*月"), "CNY/month", 1),
+    (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*年"), "CNY/year", 1),
     (re.compile(rf"(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元?\s*(?:/|每)\s*(?:天|日)"), "CNY/day", 1),
     (re.compile(rf"(?:日薪|每天|每日)\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/day", 1),
     (re.compile(rf"(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元?\s*(?:/|每)\s*(?:小时|时)"), "CNY/hour", 1),

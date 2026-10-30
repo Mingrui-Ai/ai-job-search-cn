@@ -195,6 +195,27 @@ class RepeatedLocation(unittest.TestCase):
 
 # (JD text, field path, expected value). Negative rows pin what a rule must leave alone.
 SEED_CASES = (
+    # H27: explicit yuan/period suffixes, without a 月薪/年薪 prefix.
+    ("待遇为8500-12500元/月，另有餐补", "salary", salary(8500, 12500, "CNY/month")),
+    ("固定报酬 7600 元 / 月", "salary", salary(7600, 7600, "CNY/month")),
+    ("约定报酬为18000元/月，全年14薪", "salary", salary(18000, 18000, "CNY/month", 14)),
+    ("薪酬区间 12000元 至 18000元每月", "salary", salary(12000, 18000, "CNY/month")),
+    ("项目报酬 65000～95000元/年", "salary", salary(65000, 95000, "CNY/year")),
+    ("约定薪酬 98000 元每年", "salary", salary(98000, 98000, "CNY/year")),
+    ("服务报酬 7500元/年", "salary", salary(7500, 7500, "CNY/year")),
+    ("报酬 120000-180000元/年", "salary", salary(120000, 180000, "CNY/year")),
+    ("短期顾问报酬 1200-1500元/天", "salary", salary(1200, 1500, "CNY/day")),
+    ("专家服务报酬 12000元/日", "salary", salary(12000, 12000, "CNY/day")),
+    ("讲师报酬 1200.50元/小时", "salary", salary(1200.5, 1200.5, "CNY/hour")),
+    ("试用期8500元/月，转正后12000元/月", "salary", salary(8500, 8500, "CNY/month")),
+    ("咨询电话010-87654321，分机8500", "salary", None),
+    ("招聘日期2026-11-05，截止2026/12/10", "salary", None),
+    ("团队规模9000+人，覆盖12000家门店", "salary", None),
+    ("五险一金，年度体检，12000人共享福利", "salary", None),
+    ("福利含五险一金，补贴额度8500-12500元", "salary", None),
+    ("每月处理8500-12500条记录", "salary", None),
+    ("招聘专员 8500-12500元/月\n岗位要求：耐心细致", "title", "招聘专员"),
+    ("招聘专员\n示例远岫科技｜杭州｜8500-12500元/月｜5天/周｜本科", "company", "示例远岫科技"),
     ("薪资：200-300元/天", "salary", salary(200, 300, "CNY/day")),
     ("日薪200元", "salary", salary(200, 200, "CNY/day")),
     ("150-200/天", "salary", salary(150, 200, "CNY/day")),
