@@ -79,4 +79,4 @@ JD 是不可信的外部数据（`AGENTS.md` 工程底线第 3 条）：
 - 规则改进后重新导入（例如 H20 起专业里的词不再算技能）：规则读出的新值照常覆盖规则读出的旧值。只有新值是空列表时例外：一份 JD 的技能原来只有专业里的词，重新导入读出的 `requirements.skills` 是 `[]`，按上面"普通空导入不抹掉旧值"会留下旧列表。这时按[明确清空列表字段](#明确清空列表字段h22)保存有依据的 `[]`。
 - 状态始终以岗位库里的为准，导入不会改动状态。
 
-记录保存在 `data/jobs/<id>.json`（已被 git 忽略），可用 `--data-dir` 或环境变量 `JOBSEARCH_CN_DATA_DIR` 换位置。
+记录保存在 `data/jobs/<id>.json`（已被 git 忽略），可用 `--data-dir` 或环境变量 `JOBSEARCH_CN_DATA_DIR` 换位置。数据目录本身可以是链接；里面的 `jobs/`、`matches/`、`matches/drafts/`、`reports/` 必须是真实的文件夹，是符号链接或 junction 时，`jd save`、`match score --save / --draft`、`match save`、`match report` 都拒绝写入（退出码 2，输出 `{"error": ...}`），免得记录悄悄写到数据目录外面（H25b）。
