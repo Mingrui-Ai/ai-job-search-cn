@@ -196,15 +196,23 @@ def weight_errors(weights, path: str = "target.weights") -> list[str]:
     return errors
 
 
+# What leaving each open costs a job outside both tiers of cities, as match._location and score._location
+# treat it: neither field alone settles every such job, so each message says when it still can.
+_OPEN_ENDS = {
+    "remote_ok": "a job elsewhere that offers remote work cannot count as remote for you: it scores on its city, "
+                 "and unless you will move (relocate true) its location check stays unknown",
+    "relocate": "unless a job elsewhere is remote and you accept that (remote_ok true), it scores 0 on location "
+                "and its location check stays unknown",
+}
+
+
 def warnings(profile) -> list[str]:
     """What a valid profile leaves open that will cost answers later, as "<field path>: <message>"."""
     availability = profile.get("availability") if isinstance(profile, dict) else None
     if not isinstance(availability, dict) or not (availability.get("cities") or availability.get("acceptable_cities")):
         return []
-    # With cities named but no word on remote work or moving, every job elsewhere is
-    # location unknown: the filter cannot rule it in or out.
-    return [f"availability.{key}: null while availability.cities is set; jobs in other cities will all be "
-            "location unknown" for key in ("remote_ok", "relocate") if availability.get(key) is None]
+    return [f"availability.{key}: null while you name cities; {cost}" for key, cost in _OPEN_ENDS.items()
+            if availability.get(key) is None]
 
 
 def redacted(profile: dict) -> dict:

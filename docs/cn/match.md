@@ -106,7 +106,7 @@
    python -m jobsearch_cn match validate data/matches/drafts/<岗位id>.json
    ```
 
-   - 先按提示改其他报错。报 `the job or the profile changed since scoring` 或 `the profile's weights changed since scoring` 时，回到第 2 步重新评分（只是权重改了的，重新评分会保留已补的经历和方向）。
+   - 先按提示改其他报错。报 `rules_version: scored by other rules`、`the job or the profile changed since scoring` 或 `the profile's weights changed since scoring` 时，回到第 2 步重新评分，不要手改 `rules_version`、摘要或权重。只是权重改了的，重新评分会保留已补的经历和方向；其他几种要重新补。
    - 其他都对了以后，校验会报 `total: ... they give {...}`：补了经历，总分一定会变。把报错里给出的对象原样抄进 `total`，不要自己算，再校验一次。
 5. **保存。**
 
@@ -123,7 +123,7 @@
    - **排序**：评了几个岗位时，用 `python -m jobsearch_cn match list` 按等级、总分排序给出；标为 `stale` 的记录先重新评分：`stale_reasons` 只有 `weights` 的运行 `match score <岗位id> --save` 即可，其他原因的回到第 2 步。`ineligible` 的岗位不算推荐；可投的岗位不到 3 个时如实告诉用户，不拿 `ineligible` 的岗位凑数。用户想看换一组权重排序会怎样，用 `match list --weights` 试算（见上文"[评一批岗位前](#评分工作流三个-agent-共用)"），说明这是试算，档案和记录都没改。
    - **报告和反馈表**：评了几个岗位时，再运行 `python -m jobsearch_cn match report <岗位id ...>`（不写 id 时包括所有已保存的记录），把输出里的 `report` 和 `feedback` 两个路径告诉用户：报告用浏览器打开；反馈表用 Excel 或 WPS 打开，填"你的等级""认可""原因"三列，保存时保持 CSV（UTF-8）格式。输出的 `stale` 不为空时，先说明这些记录已过期，重新评分后再生成。用户说填好了以后，读反馈表，向用户汇总：哪些岗位认可、部分认可、不认可，各自的原因，以及你的等级和工具给的等级不同的地方。不改匹配记录。用户想调整权重的，按上文"评一批岗位前"换算、确认后改档案；想改意向城市等其他偏好的，按建档工作流改档案；改完都要重新评分。报告只显示已保存的记录，不显示试算。详见下文[评分报告和反馈表](#评分报告和反馈表m2-6a)。
 
-**评多个岗位**：可以先对每个岗位运行 `python -m jobsearch_cn match score <岗位id> --save`，只保存规则部分（经历留空），再挑用户关心的岗位按第 2–5 步补上经历。岗位和档案都没变时，重新评分会保留已保存记录里 Agent 补的经历和方向；只改了权重不算档案变了。
+**评多个岗位**：可以先对每个岗位运行 `python -m jobsearch_cn match score <岗位id> --save`，只保存规则部分（经历留空），再挑用户关心的岗位按第 2–5 步补上经历。岗位摘要、档案摘要和评分规则版本（`rules_version`）都没变时，重新评分会保留已保存记录里 Agent 补的经历和方向；只改了权重不算档案变了。
 
 ## 硬性条件过滤：`match filter`
 
@@ -226,7 +226,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 | `direction` 方向 | 规则，Agent 可补 | 把 JD 的技能按词表分组计数（`general` 组不计；任选其一的一组，按组里技能所属的分组各计 1 次），数量最多的组（并列都算）就是岗位方向。岗位方向在档案 `target.directions` 里记 100；不在，但有 JD 技能属于你的方向记 50；都不属于记 0 | 档案没写 `target.directions`；JD 没有技能，或技能都在 `general` 组（这时由 Agent 根据标题和职责判断） |
 | `experience` 经历 | Agent | 对照 JD 的职责和要求，看档案 `experience[]`：80–100 做过同类工作；60–79 相关，能迁移；40–59 沾边，需要自己说明；0–39 无关。规则会列出有经历依据的 JD 技能（`used_in`）作为提示 | Agent 还没补 |
 | `salary` 薪资 | 规则 | 单位相同时比较：JD 薪资上限达到你的最低期望（`target.salary_min`）记 100，达不到记 0 | 面议；单位不同（不换算）；任一方没写 |
-| `location` 地点 | 规则 | 首选城市（`availability.cities`）或你接受的远程 100；可以接受的城市（`availability.acceptable_cities`）60；其他城市，你愿意去（`relocate: true`）30，否则 0。JD 写了几个城市时取最高的。见下文"[地点偏好](#地点偏好m2-6b)" | JD 没写城市（也不是你接受的远程）；档案首选和可以接受的城市都没写 |
+| `location` 地点 | 规则 | 首选城市（`availability.cities`）或你接受的远程 100；可以接受的城市（`availability.acceptable_cities`）60；其他城市，你愿意去（`relocate: true`）30，否则 0。JD 写了几个城市时取最高的。见下文"[地点偏好](#地点偏好m2-6b)" | JD 没写城市；档案首选和可以接受的城市都没写。两种都不包括"JD 可远程、你接受远程"，那是 100 |
 
 - Agent 只能补 `experience`，以及规则给出 null 的 `direction`；不能改 `skills`、`salary`、`location` 和规则已经算出的 `direction`。
 - 比较技能名时忽略大小写和全角半角，并把词表 `same_as` 里同一组的词视为相同（见下文"契约补充"）。
@@ -285,14 +285,14 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 ```
 
 - `rules_version`：规则给出的结果变了就加 1，包括各项检查和总的结论、维度分数、列出的缺口，默认权重改变时也加 1。只改理由的措辞时不加：之前保存的记录保留旧理由，重新评分后更新；对这种旧记录运行 `match validate`，会报过滤和缺口与规则给出的不一致，重新评分即可。现在是 5（2：H18 的近义词；3：H16 的任选其一的技能；4：M2-6b 的地点维度和新的默认权重；5：M2-6c 的面试和到岗时间两项检查）。加 1 后，旧记录标为过期，重新评分时 Agent 补的内容清空，要重新补。
-- `job_hash`、`profile_hash`：评分时岗位记录和档案的摘要，档案的摘要不含 `contact` 和 `target.weights`（M2-6d：Agent 的判断不依据权重，记录自己存着评分时的 `weights`）。岗位或档案改了，或者档案的权重和记录里的 `weights` 不同，`match list` 会把这条标为"过期"，需要重新评分。重新评分时，摘要都没变就保留 Agent 已补的内容（只改了权重时也保留，只按新权重重算总分），变了就清空 Agent 补充。
+- `job_hash`、`profile_hash`：评分时岗位记录和档案的摘要，档案的摘要不含 `contact` 和 `target.weights`（M2-6d：Agent 的判断不依据权重，记录自己存着评分时的 `weights`）。岗位或档案改了，或者档案的权重和记录里的 `weights` 不同，`match list` 会把这条标为"过期"，需要重新评分。重新评分时，两个摘要和 `rules_version` 都没变就保留 Agent 已补的内容（只改了权重时也保留，只按新权重重算总分），有一样变了就清空 Agent 补充。
 - Agent 补充的维度必须有 `reason` 和 `evidence`：`jd` 是 JD 原文片段，必须逐字出现在岗位的 `raw_text` 里；`profile` 是档案条目的 id，必须存在。
 - `match validate` 检查结构、取值、分值范围和依据，并按上面的规则从各维度重新算出总分和等级，和记录不一致就报错。Agent 不能直接改总分。
 - 实现补充（M2-4b）：
   - `direction`、`experience` 都带 `evidence`，规则给出时为 null；`experience` 还有 `hints`，列出档案里用到 JD 技能的经历 id，供 Agent 参考；
   - 缺口里 `filter` 一类另带 `result`、`reason`；JD 没写的项 `jd` 为 null；
   - 岗位的摘要不含 `status`（改岗位状态不算岗位变了），档案的摘要不含 `contact`（M2-6d 起也不含 `target.weights`）；`rules_version` 和现在的不同也算过期；
-  - `match validate` 先核对两个摘要，岗位或档案改过就要求重新评分；再重算规则部分（过滤、技能、薪资、规则给出的方向、权重、缺口），和记录不一致即报错；
+  - `match validate` 先核对两个摘要，岗位或档案改过就要求重新评分；再重算规则部分（过滤、技能、薪资、地点、规则给出的方向、权重、缺口），和记录不一致即报错；
   - 算分全程用分数运算，四舍五入取整（62.5 记 63），同一输入重复运行只有 `scored_at` 不同。
 
 ### 命令
@@ -306,7 +306,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 | `match list [--weights ...]` | 按等级、总分列出已评分的岗位，标出过期的记录和原因；加 `--weights` 换一组权重试算 |
 | `match report [岗位id ...]` | 把已保存的记录生成可读的报告（HTML）和反馈表（CSV），见下文 |
 
-- `match score` 输出匹配记录；加 `--save` 时同时保存，加 `--draft` 时同时写出草稿 `<数据目录>/matches/drafts/<岗位id>.json`，输出都不变。岗位和档案都没变时，重新评分保留已保存记录里 Agent 补的经历和方向。
+- `match score` 输出匹配记录；加 `--save` 时同时保存，加 `--draft` 时同时写出草稿 `<数据目录>/matches/drafts/<岗位id>.json`，输出都不变。岗位摘要、档案摘要和 `rules_version` 都没变时（只改了权重也算没变），重新评分保留已保存记录里 Agent 补的经历和方向。
 - `match validate` 输出 `{"valid": ..., "errors": [...]}`；`match save` 校验通过后输出 `{"saved": "created" | "updated" | "unchanged", "job_id": ...}`。
 - `match list` 输出 `{"matches": [...], "warnings": [...]}`，每行有 `job_id`、`title`、`company`、`grade`、`score`、`complete`、`verdict`、`stale`、`stale_reasons`，按等级（strong → poor → ineligible）、总分从高到低排序。`stale_reasons` 列出过期的原因，没过期时为 `[]`：`job` 岗位改过，`job_gone` 岗位已删除，`profile` 档案改过，`weights` 档案的权重改过（只影响总分，重新评分保留 Agent 补的内容），`rules` 评分规则更新了。
 - `match list --weights skills=30,direction=25,experience=25,salary=10,location=40` 是试算（M2-6d）：用这组权重和已保存的各维度分数重新算总分、等级和排序，只输出，不改档案和记录，也不写别的文件。
@@ -380,9 +380,9 @@ M2-5 第一轮试评分时，用户希望地区偏好和薪资回报一起权衡
 | 其他城市，你愿意去（`relocate: true`） | 30 | 北京不在你写的城市里，你愿意去其他城市 |
 | 其他城市，你不考虑异地，或档案没写 | 0 | 北京不在你写的城市里，你不考虑异地 / 档案没写是否愿意去其他城市 |
 | JD 没写城市（也不是你接受的远程） | null | JD 没写工作城市 |
-| 档案首选和可以接受的城市都没写 | null | 档案没写意向城市 |
+| 档案首选和可以接受的城市都没写（JD 可远程、你接受远程的除外） | null | 档案没写意向城市 |
 
-- JD 写了几个城市时，取最高的一个（"北京、杭州"对可以接受杭州的人是 60）。
+- JD 写了几个城市时，取最高的一个（"北京、杭州"对可以接受杭州的人是 60）。"JD 可远程、你接受远程"单独算一个 100 分的选项，和各个城市一起取最高，所以档案一个城市都没写、或者 JD 没写城市时，它仍然是 100。
 - "其他城市、档案没写是否愿意去"记 0，不记 null：城市不在你写的范围里是确定的，记 null 反而会让这种岗位的总分只看其他维度、显得更高。硬性条件里它仍判"未知"，提示你补上 `relocate`。
 - 远程只在你接受远程时算数；JD 可远程、你没写或不接受远程时，按城市算。
 
