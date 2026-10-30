@@ -189,6 +189,28 @@ class Validate(unittest.TestCase):
                                                           if key != "acceptable_cities"})
         self.assert_error(older, "availability.acceptable_cities: missing")
 
+    def test_cities_compare_as_the_filter_and_the_score_compare_them(self):
+        # Codex B on #68: the filter and the score take 深圳市 for 深圳 (match._city), so the validator does
+        # too, across the two tiers either way round and within each.
+        self.assert_error(with_value(self.example, "availability.acceptable_cities", ["深圳市"]),
+                          "availability.acceptable_cities[0]: '深圳市' is already a preferred city")
+        suffixed = with_value(self.example, "availability.cities", ["广州市", "深圳市"])
+        self.assertEqual(profile.validate(suffixed), [])
+        self.assert_error(with_value(suffixed, "availability.acceptable_cities", ["深圳"]),
+                          "availability.acceptable_cities[0]: '深圳' is already a preferred city")
+        self.assert_error(with_value(self.example, "availability.cities", ["深圳", "深圳市"]),
+                          "availability.cities[1]: duplicate")
+        self.assert_error(with_value(self.example, "availability.acceptable_cities", ["佛山市", "佛山"]),
+                          "availability.acceptable_cities[1]: duplicate")
+
+    def test_cities_that_are_not_a_list_are_an_error_not_a_crash(self):
+        # Codex B on #68: a number here raised TypeError while comparing the two tiers.
+        for key in ("cities", "acceptable_cities"):
+            for value in (123, True, 1.5, "深圳"):
+                with self.subTest(key=key, value=value):
+                    self.assert_error(with_value(self.example, f"availability.{key}", value),
+                                      f"availability.{key}: must be a list")
+
     def test_redaction_masks_contact_only(self):
         shown = profile.redacted(self.example)
         self.assertEqual(shown["contact"]["phone"], "***")
@@ -258,6 +280,18 @@ class Commands(unittest.TestCase):
         out = json.loads(run_cli("profile", "validate", data_dir=self.data).stdout)
         self.assertTrue(out["valid"])
         self.assertTrue(any(w.startswith("availability.relocate:") for w in out["warnings"]), out["warnings"])
+
+    def test_cities_that_are_not_a_list_are_reported_as_json(self):
+        # Codex B on #68: profile validate crashed here, with nothing on stdout.
+        for key in ("cities", "acceptable_cities"):
+            for value in (123, True):
+                with self.subTest(key=key, value=value):
+                    self.write(with_value(documented_example(), f"availability.{key}", value))
+                    proc = run_cli("profile", "validate", data_dir=self.data)
+                    self.assertEqual(proc.returncode, 1, proc.stderr.decode("utf-8", "replace"))
+                    out = json.loads(proc.stdout)
+                    self.assertFalse(out["valid"])
+                    self.assertIn(f"availability.{key}: must be a list ([] when there is nothing)", out["errors"])
 
     def test_directions_are_checked_against_the_data_dir_vocabulary(self):
         self.write(with_value(documented_example(), "target.directions", ["game"]))

@@ -15,7 +15,7 @@ compare directly. Every fact names its source: a file under sources/, or
 import re
 from datetime import date
 
-from jobsearch_cn import schema, vocab
+from jobsearch_cn import match, schema, vocab
 from jobsearch_cn.schema import _check_bool, _check_enum, _check_int_range, _check_text, _is_int
 
 PROFILE_VERSION = 1
@@ -91,12 +91,14 @@ def validate(profile, sources=None, groups=None) -> list[str]:
         _check_day(availability.get("start_date"), "availability.start_date", errors)
         _check_int_range(availability.get("days_per_week"), 1, 7, "availability.days_per_week", errors)
         _check_int_range(availability.get("months"), 1, 24, "availability.months", errors)
-        check.texts(availability.get("cities"), "availability.cities")
-        check.texts(availability.get("acceptable_cities"), "availability.acceptable_cities")
-        preferred = {schema.normalize_for_match(c) for c in availability.get("cities") or [] if isinstance(c, str)}
-        acceptable = availability.get("acceptable_cities")
+        # Cities compare as the filter and the score compare them (match._city): 深圳 and 深圳市 are one city,
+        # within a tier and across the two. A field that is not a list has its error already; skip it.
+        cities, acceptable = availability.get("cities"), availability.get("acceptable_cities")
+        check.texts(cities, "availability.cities", fold=match._city)
+        check.texts(acceptable, "availability.acceptable_cities", fold=match._city)
+        preferred = {match._city(c) for c in cities if isinstance(c, str)} if isinstance(cities, list) else set()
         for index, city in enumerate(acceptable if isinstance(acceptable, list) else []):
-            if isinstance(city, str) and schema.normalize_for_match(city) in preferred:
+            if isinstance(city, str) and match._city(city) in preferred:
                 errors.append(f"availability.acceptable_cities[{index}]: {city!r} is already a preferred city "
                               "(availability.cities)")
         for key in ("remote_ok", "relocate"):
@@ -277,7 +279,8 @@ class _Checker:
             _keys(item, expected, f"{key}[{index}]", self.errors)
             yield index, item
 
-    def texts(self, value, path: str, max_length: int = schema.MAX_NAME) -> None:
+    def texts(self, value, path: str, max_length: int = schema.MAX_NAME, fold=schema.normalize_for_match) -> None:
+        """A list of distinct non-empty strings; fold says which two count as the same."""
         if not isinstance(value, list):
             self.errors.append(f"{path}: must be a list ([] when there is nothing)")
             return
@@ -289,7 +292,7 @@ class _Checker:
                 continue
             if len(item) > max_length:
                 self.errors.append(f"{where}: longer than {max_length} characters")
-            folded = schema.normalize_for_match(item)
+            folded = fold(item)
             if folded in seen:
                 self.errors.append(f"{where}: duplicate of an earlier item")
             seen.add(folded)
