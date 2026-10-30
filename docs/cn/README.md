@@ -12,7 +12,7 @@
 | [master-plan.md](master-plan.md) | 总体规划：最终目的、设计原则、系统全貌、M1–M8 的目标与完成标准、待决事项、分工 |
 | [worklog.md](worklog.md) | 工作记录：每一步做了什么、验证结果、遗留问题。2026-10-28 起每条一个文件，放在 [worklog/](worklog/) |
 | [CHANGELOG.md](CHANGELOG.md) | 版本更新记录（CN） |
-| [cn-migration-plan.md](cn-migration-plan.md) | 上游审计结论、架构决策（ADR-1 至 ADR-9）、目录结构、上游同步流程 |
+| [cn-migration-plan.md](cn-migration-plan.md) | 上游审计结论、架构决策（ADR）、目录结构、上游同步流程 |
 | [job-schema.md](job-schema.md) | 岗位记录格式（Job Schema v1）：字段说明、出处规则、与上游字段的对应 |
 | [jd-import.md](jd-import.md) | JD 导入工作流（Codex 与 Claude Code 共用）：解析、补全、校验、保存、去重、查询 |
 | [profile.md](profile.md) | 个人档案格式（Profile v1）：字段、来源规则、与 JD 硬性条件的对照 |
