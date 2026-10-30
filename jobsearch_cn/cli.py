@@ -239,6 +239,9 @@ def cmd_profile_validate(args) -> int:
 def cmd_profile_show(args) -> int:
     path, _ = _profile_paths(args)
     data = _load_profile(path)
+    if not args.contact and not isinstance(data, dict):
+        # Nothing to mask the contact details in: say what is wrong without echoing the file.
+        raise InputError(f"{path}: must be a JSON object; run profile validate")
     _emit(data if args.contact else profile.redacted(data))
     return 0
 

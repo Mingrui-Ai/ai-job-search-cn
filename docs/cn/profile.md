@@ -148,7 +148,7 @@ JD 字段为 `null` 时结论是"未知"，不判为不符合。面试和到岗�
 
 - 新增测试，检查上游 `/setup` 会写入的文件（`CLAUDE.md`、`job-application-assistant/01–08`、`cv/main_example.tex`）仍是占位符，防止有人误跑上游 `/setup` 后把个人信息提交上去；
 - 新增测试，检查 `data/profile/` 被 git 忽略；
-- CN 命令输出档案时默认隐去 `contact`，需要时显式加参数。
+- CN 命令输出档案时默认隐去 `contact`，需要时显式加参数。`contact` 写错类型（字符串、列表等）时也整个隐去；档案顶层不是对象时，`profile show` 报错，不回显内容。
 
 ## 8. 已定与待定
 

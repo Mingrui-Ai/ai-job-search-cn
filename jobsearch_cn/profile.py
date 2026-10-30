@@ -47,7 +47,7 @@ MAX_BULLET = 300
 
 _MONTH = re.compile(r"^\d{4}-\d{2}$")
 _DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-_EXPERIENCE_ID = re.compile(r"^[a-z][a-z0-9-]{0,39}$")
+_EXPERIENCE_ID = re.compile(r"[a-z][a-z0-9-]{0,39}")  # fullmatch: "$" would let "exp-1\n" through
 
 
 def validate(profile, sources=None, groups=None) -> list[str]:
@@ -140,7 +140,7 @@ def validate(profile, sources=None, groups=None) -> list[str]:
     for index, item in check.items(profile, "experience", EXPERIENCE_KEYS):
         where = f"experience[{index}]"
         item_id = item.get("id")
-        if not (isinstance(item_id, str) and _EXPERIENCE_ID.match(item_id)):
+        if not (isinstance(item_id, str) and _EXPERIENCE_ID.fullmatch(item_id)):
             errors.append(f"{where}.id: must be lowercase letters, digits and hyphens, like exp-1")
         elif item_id in experience_ids:
             errors.append(f"{where}.id: duplicate id {item_id!r}")
@@ -198,10 +198,16 @@ def warnings(profile) -> list[str]:
 
 
 def redacted(profile: dict) -> dict:
-    """The profile with contact details masked, for output that is not a CV."""
+    """The profile with contact details masked, for output that is not a CV.
+
+    Masked whatever contact holds: a malformed one (a string, a list) still holds the details.
+    """
     copy = dict(profile)
-    if isinstance(profile.get("contact"), dict):
-        copy["contact"] = {key: (None if value is None else "***") for key, value in profile["contact"].items()}
+    contact = profile.get("contact")
+    if isinstance(contact, dict):
+        copy["contact"] = {key: (None if value is None else "***") for key, value in contact.items()}
+    elif contact is not None:
+        copy["contact"] = "***"
     return copy
 
 

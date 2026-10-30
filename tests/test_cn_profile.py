@@ -127,6 +127,8 @@ class Validate(unittest.TestCase):
         data["experience"].append(copy.deepcopy(data["experience"][0]))
         self.assert_error(data, "duplicate id 'exp-1'")
         self.assert_error(with_value(self.example, "experience.0.id", "Exp 1"), "experience[0].id")
+        # "$" with re.match let a trailing newline through (V18 P3-1 found it in job ids).
+        self.assert_error(with_value(self.example, "experience.0.id", "exp-1\n"), "experience[0].id")
 
     def test_duplicate_skills_fold_case_and_width(self):
         data = copy.deepcopy(self.example)
@@ -218,6 +220,16 @@ class Validate(unittest.TestCase):
         self.assertEqual(shown["skills"], self.example["skills"])
         self.assertEqual(self.example["contact"]["name"], "张三", "redaction must not touch the original")
 
+    def test_redaction_masks_a_malformed_contact_too(self):
+        # V18 P1-1: a contact that was not an object came out as it was.
+        canary = "13900001111"
+        for contact in (f"{canary} canary@example.com", [canary], {"phone": [canary], "wechat": canary}, 13900001111):
+            with self.subTest(contact=contact):
+                shown = profile.redacted(dict(self.example, contact=contact))
+                self.assertNotIn(canary, json.dumps(shown, ensure_ascii=False))
+                self.assertEqual(shown["skills"], self.example["skills"])
+        self.assertIsNone(profile.redacted(dict(self.example, contact=None))["contact"])
+
 
 def run_cli(*args, data_dir):
     env = dict(os.environ, PYTHONIOENCODING="utf-8", **{store.DATA_DIR_ENV: str(data_dir)})
@@ -268,6 +280,30 @@ class Commands(unittest.TestCase):
         self.assertNotIn("13800000000", hidden)
         self.assertNotIn("a@example.com", hidden)
         self.assertIn("13800000000", run_cli("profile", "show", "--contact", data_dir=self.data).stdout.decode("utf-8"))
+
+    def test_a_malformed_contact_stays_hidden_everywhere(self):
+        # V18 P1-1: show printed a string or list contact as it was. Validation and match errors name
+        # the field, never its value; --contact still shows whatever is there.
+        canary = "13900001111"
+        for contact in (f"{canary} canary@example.com", [canary], None, {"phone": canary, "wechat": canary}):
+            with self.subTest(contact=contact):
+                self.write(dict(documented_example(), contact=contact))
+                shown = run_cli("profile", "show", data_dir=self.data)
+                self.assertEqual(shown.returncode, 0, shown.stderr.decode("utf-8", "replace"))
+                for proc in (shown, run_cli("profile", "validate", data_dir=self.data),
+                             run_cli("match", "report", data_dir=self.data)):
+                    self.assertNotIn(canary, (proc.stdout + proc.stderr).decode("utf-8", "replace"))
+                if contact is not None:
+                    explicit = run_cli("profile", "show", "--contact", data_dir=self.data)
+                    self.assertIn(canary, explicit.stdout.decode("utf-8"))
+
+    def test_show_refuses_a_profile_that_is_not_an_object(self):
+        # Nothing to mask the contact details in, so say so without echoing the file.
+        (self.root / "profile.json").write_text(json.dumps(["13900001111"]), encoding="utf-8")
+        proc = run_cli("profile", "show", data_dir=self.data)
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("JSON object", proc.stderr.decode("utf-8"))
+        self.assertNotIn("13900001111", (proc.stdout + proc.stderr).decode("utf-8", "replace"))
 
     def test_an_explicit_file(self):
         other = self.data / "draft.json"
