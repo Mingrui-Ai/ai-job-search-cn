@@ -47,6 +47,7 @@
       "深圳",
       "广州"
     ],
+    "acceptable_cities": [],
     "remote_ok": true,
     "relocate": false
   },
