@@ -43,6 +43,11 @@ data/profile/
     "roles": ["后端开发", "大模型应用开发"],
     "industries": ["互联网"],
     "salary_min": {"amount": 150, "unit": "CNY/day"},
+    "salary_ideal": {"amount": 220, "unit": "CNY/day"},
+    "salary_step": 20,
+    "meal_value": {"amount": 30, "unit": "CNY/day"},
+    "salary_days_per_week": 4,
+    "one_meal_points": 10,
     "directions": ["tech"],
     "weights": null
   },

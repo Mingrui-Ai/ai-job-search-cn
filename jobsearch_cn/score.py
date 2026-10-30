@@ -30,7 +30,9 @@ SCHEMA_VERSION = 1
 # 4: the location dimension and its default weight (M2-6b).
 # 5: the filter checks the interview and the start date; their unknowns are gaps to confirm (M2-6c).
 # 6: 统计分析 joins the skill vocabulary's data group (H26).
-RULES_VERSION = 6
+# 7: salary in tiers from target.salary_ideal and salary_step; pay turned into the profile's unit, meals
+#    added; the JD's job record gains benefits.meals (M2-6e).
+RULES_VERSION = 7
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary, location
 DEFAULT_WEIGHTS = {"skills": 30, "direction": 25, "experience": 25, "salary": 10, "location": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.
@@ -125,7 +127,7 @@ def rule_part(job: dict, profile: dict, vocabulary) -> dict:
     """What the rules give: the filter, the dimensions before any agent adds to them, weights and gaps."""
     filtered = match.filter_job(job, profile)
     skills = _skills(job, profile, vocabulary)
-    salary = _salary(job, profile)
+    salary, short = _salary(job, profile)
     return {
         "filter": {"verdict": filtered["verdict"], "checks": filtered["checks"]},
         "dimensions": {
@@ -136,7 +138,7 @@ def rule_part(job: dict, profile: dict, vocabulary) -> dict:
             "location": _location(job, profile),
         },
         "weights": weights_of(profile),
-        "gaps": _gaps(job, skills, salary, filtered["checks"], vocabulary),
+        "gaps": _gaps(job, skills, short, filtered["checks"], vocabulary),
     }
 
 
@@ -266,24 +268,143 @@ def _experience(job, profile, vocabulary) -> dict:
     return {"score": None, "method": "agent", "reason": "等 Agent 对照经历补充", "hints": hints, "evidence": None}
 
 
-def _salary(job, profile) -> dict:
+def _salary(job, profile):
+    """The salary dimension, and the gap item when the pay falls short of the minimum (else None).
+
+    With target.salary_ideal and salary_step the pay is scored in tiers (_salary_tiers); without them, as
+    before M2-6e: the JD's upper figure reaches salary_min (100) or not (0), in the same unit only.
+    """
+    target = profile.get("target") or {}
+    if target.get("salary_min") and target.get("salary_ideal") and target.get("salary_step"):
+        return _salary_tiers(job, target)
     offered = job.get("salary") or {}
-    wanted = (profile.get("target") or {}).get("salary_min")
+    wanted = target.get("salary_min")
     upper = offered.get("max") if offered.get("max") is not None else offered.get("min")
 
     def result(score, reason):
         return {"score": score, "method": "rule", "reason": reason}
 
     if upper is None:
-        return result(None, "JD 薪资面议" if offered.get("negotiable") else "JD 没写薪资")
+        return result(None, "JD 薪资面议" if offered.get("negotiable") else "JD 没写薪资"), None
     if not wanted:
-        return result(None, "档案没写最低期望薪资")
+        return result(None, "档案没写最低期望薪资"), None
     if offered.get("unit") != wanted.get("unit"):
-        return result(None, f"JD 按{_UNIT[offered['unit']]}、你按{_UNIT[wanted['unit']]}计，单位不同，不换算")
+        return result(None, f"JD 按{_UNIT[offered['unit']]}、你按{_UNIT[wanted['unit']]}计，单位不同，不换算"), None
     unit, amount = _UNIT[offered["unit"]], wanted["amount"]
     if upper >= amount:
-        return result(100, f"JD 上限 {_plain(upper)} {unit}，达到你的最低期望 {_plain(amount)} {unit}")
-    return result(0, f"JD 上限 {_plain(upper)} {unit}，低于你的最低期望 {_plain(amount)} {unit}")
+        return result(100, f"JD 上限 {_plain(upper)} {unit}，达到你的最低期望 {_plain(amount)} {unit}"), None
+    reason = f"JD 上限 {_plain(upper)} {unit}，低于你的最低期望 {_plain(amount)} {unit}"
+    return result(0, reason), reason
+
+
+# Salary tiers (M2-6e): the pay - the JD's lowest figure, in the profile's unit, meals added - scores 50
+# from the minimum to the ideal, and 10 more for each step above the ideal or 10 less for each step below
+# the minimum, pro rata, within 0 and 100. A day rate counts the JD's days a week, else the profile's.
+_TIER, _STEP_POINTS, _WEEKS = 50, 10, 52
+_MEALS = {3: "包三餐", 2: "包两餐", None: "包吃"}  # what adds target.meal_value; one meal adds points instead
+
+
+def _salary_tiers(job, target):
+    offered, unit = job.get("salary") or {}, target["salary_min"]["unit"]
+    minimum, ideal = _fraction(target["salary_min"]["amount"]), _fraction(target["salary_ideal"]["amount"])
+    step, label = _fraction(target["salary_step"]), _UNIT[unit]
+
+    def result(score, reason):
+        return {"score": score, "method": "rule", "reason": reason}
+
+    low = offered.get("min") if offered.get("min") is not None else offered.get("max")
+    if low is None:
+        return result(None, "JD 薪资面议" if offered.get("negotiable") else "JD 没写薪资"), None
+    days, whose = _days_a_week(job, target)
+    stated = _UNIT[offered["unit"]]
+    ranged = offered.get("max") is not None and offered.get("max") != low
+    words = [f"JD {_plain(low)}–{_plain(offered['max'])} {stated}，取最低的 {_plain(low)} {stated}" if ranged
+             else f"JD {_plain(low)} {stated}"]
+    pay = _in_unit(_fraction(low), offered["unit"], unit, days)
+    if pay is None:
+        return result(None, "；".join(words + [_not_turned(offered["unit"], unit)])), None
+    if offered["unit"] != unit:
+        by_day = "CNY/day" in (offered["unit"], unit)
+        words.append(f"折合 {_money(pay)} {label}" + (f"（按{whose}每周 {_plain(days)} 天、一年 {_WEEKS} 周）"
+                                                     if by_day else ""))
+    meals = (job.get("benefits") or {}).get("meals") or {}
+    added = False
+    if meals and meals.get("per_day") in _MEALS:
+        value = target.get("meal_value")
+        extra = _in_unit(_fraction(value["amount"]), value["unit"], unit, days) if value else None
+        if extra is None:
+            words.append(f"{_MEALS[meals['per_day']]}，" + ("包餐折合的金额换算不了，不加" if value
+                                                          else "档案没写包餐折合多少（target.meal_value），不加"))
+        else:
+            pay, added = pay + extra, True
+            words.append(f"{_MEALS[meals['per_day']]}，加 {_money(extra)} {label}")
+    allowance = meals.get("allowance") if meals else None
+    if allowance:
+        extra = _in_unit(_fraction(allowance["amount"]), allowance["unit"], unit, days)
+        named = f"餐补 {_plain(allowance['amount'])} {_UNIT[allowance['unit']]}"
+        if extra is None:
+            words.append(f"{named}，换算不了，不加")
+        else:
+            pay, added = pay + extra, True
+            words.append(f"{named}，加 {_money(extra)} {label}")
+    if added:
+        words.append(f"合计 {_money(pay)} {label}")
+    gap = None
+    if pay < minimum:
+        score = max(Fraction(0), _TIER - _STEP_POINTS * (minimum - pay) / step)
+        words.append(f"低于最低期望 {_money(minimum)} {label}，每差一个步长 {_money(step)} 扣 {_STEP_POINTS} 分")
+        gap = f"按 JD 最低的薪资算，是 {_money(pay)} {label}，低于你的最低期望 {_money(minimum)} {label}"
+    elif pay <= ideal:
+        score = Fraction(_TIER)
+        words.append(f"在最低期望 {_money(minimum)} 和理想 {_money(ideal)} {label}之间")
+    else:
+        score = min(Fraction(100), _TIER + _STEP_POINTS * (pay - ideal) / step)
+        words.append(f"高于理想 {_money(ideal)} {label}，每多一个步长 {_money(step)} 加 {_STEP_POINTS} 分")
+    if meals.get("per_day") == 1 and target.get("one_meal_points"):
+        score = min(Fraction(100), score + _fraction(target["one_meal_points"]))
+        words.append(f"只包一餐，加 {_plain(target['one_meal_points'])} 分")
+    return result(_round(score), "；".join(words) + f"，记 {_round(score)} 分"), gap
+
+
+def _days_a_week(job: dict, target: dict):
+    """(days, whose) a day rate is worked a week: the JD's own figure ("每周至少 4 天" is 4), else the profile's."""
+    stated = (job.get("requirements") or {}).get("days_per_week")
+    if stated is not None:
+        return _fraction(stated), "JD 写的"
+    if target.get("salary_days_per_week") is not None:
+        return _fraction(target["salary_days_per_week"]), "档案的"
+    return None, None
+
+
+def _per_month(unit: str, days):
+    """What one yuan in unit comes to a month; None by the hour, or by the day with no days a week."""
+    if unit == "CNY/month":
+        return Fraction(1)
+    if unit == "CNY/year":
+        return Fraction(1, 12)
+    if unit == "CNY/day" and days is not None:
+        return days * _WEEKS / 12
+    return None
+
+
+def _in_unit(amount: Fraction, source: str, target: str, days):
+    """amount, paid by source, as paid by target; None when it cannot be turned (_per_month)."""
+    if source == target:
+        return amount
+    rates = _per_month(source, days), _per_month(target, days)
+    return None if None in rates else amount * rates[0] / rates[1]
+
+
+def _not_turned(source: str, target: str) -> str:
+    if "CNY/hour" in (source, target):
+        return f"JD 按{_UNIT[source]}、你按{_UNIT[target]}计，按小时的不换算"
+    return (f"JD 按{_UNIT[source]}、你按{_UNIT[target]}计，按天换算要知道每周几天：JD 没写，档案也没写"
+            "（target.salary_days_per_week），不换算")
+
+
+def _money(value: Fraction) -> str:
+    """A sum of money as the reason shows it: whole, or to one decimal place, rounded half up."""
+    return str(int(value)) if value.denominator == 1 else f"{_round(value * 10) / 10:.1f}"
 
 
 # Where the job is against where the candidate wants to be (M2-6b): a preferred city, an
@@ -321,14 +442,15 @@ def _location(job, profile) -> dict:
     return result(None, "档案没写意向城市")
 
 
-def _gaps(job, skills, salary, checks, vocabulary) -> list:
-    """What stands between you and the job, each with the JD text it rests on (null when the JD is silent)."""
+def _gaps(job, skills, short, checks, vocabulary) -> list:
+    """What stands between you and the job, each with the JD text it rests on (null when the JD is silent).
+    short is how the pay falls short of the minimum, from _salary, or None."""
     gaps = []
     for item in _requirements(job, vocabulary):
         if _label(item) in skills["missing"]:
             gaps.append({"kind": "skill", "item": _label(item), "jd": _skill_quote(job, item, vocabulary)})
-    if salary["score"] == 0:
-        gaps.append({"kind": "salary", "item": salary["reason"], "jd": _quote(job, "salary")})
+    if short:
+        gaps.append({"kind": "salary", "item": short, "jd": _quote(job, "salary")})
     for check in checks:
         if check["result"] in (match.CONFLICT, match.UNKNOWN):
             quote = next((_first(field["evidence"]) for field in check["jd"].values() if field["evidence"]), None)

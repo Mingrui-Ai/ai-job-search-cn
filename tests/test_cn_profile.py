@@ -70,7 +70,8 @@ class Validate(unittest.TestCase):
             "availability": {"start_date": None, "days_per_week": None, "months": None,
                              "cities": [], "acceptable_cities": [], "remote_ok": None, "relocate": None},
             "target": {"employment_types": [], "roles": [], "industries": [], "salary_min": None,
-                       "directions": [], "weights": None},
+                       "salary_ideal": None, "salary_step": None, "meal_value": None, "salary_days_per_week": None,
+                       "one_meal_points": None, "directions": [], "weights": None},
             "skills": [], "experience": [], "awards": [], "certificates": [], "languages": [],
             "exclusions": {"cities": [], "companies": [], "keywords": []},
         }

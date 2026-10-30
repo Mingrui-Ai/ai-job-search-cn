@@ -33,8 +33,8 @@ sys.path.insert(0, str(REPO))
 from jobsearch_cn import jd_parser, match, schema  # noqa: E402
 
 NOW = datetime(2026, 10, 27, 10, 0, tzinfo=timezone(timedelta(hours=8)))
-# Fields added after the expectations were frozen (H16, M2-6c).
-LATER_FIELDS = (schema.ALTERNATIVES, "requirements.start", "interview")
+# Fields added after the expectations were frozen (H16, M2-6c, M2-6e).
+LATER_FIELDS = (schema.ALTERNATIVES, "requirements.start", "interview", "benefits.meals")
 
 
 def profile(name: str) -> dict:
@@ -74,8 +74,8 @@ class Oracles:
         self.assertEqual(len(samples), 5)
         for expected in samples:
             with self.subTest(sample=expected["fixture"]):
-                # Frozen before H16 added requirements.skill_alternatives, and M2-6c the interview and
-                # the start date with their checks: the expectations do not compare those.
+                # Frozen before H16 added requirements.skill_alternatives, M2-6c the interview and the
+                # start date with their checks, and M2-6e the meals: the expectations do not compare those.
                 self.assertCountEqual(expected["fields"], [f for f in schema.EVIDENCE_FIELDS if f not in LATER_FIELDS])
                 self.assertCountEqual(expected["human_match"], ["tech", "ops"])
                 for judged in expected["human_match"].values():

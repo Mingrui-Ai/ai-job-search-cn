@@ -637,6 +637,36 @@ SEED_CASES = (
     ("不要求 Rust 或 C++ 经验", ALTERNATIVES, []),
     ("熟悉 Go 或 Golang", ALTERNATIVES, []),
     ("熟悉 Java 或 Go；Java 或 Go 至少精通一门", ALTERNATIVES, [["Java", "Go"]]),
+    # M2-6e: the meals a day the job provides, and a meal allowance with its amount and period.
+    ("包三餐", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("提供一日三餐", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("三餐全包", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("包两餐", "benefits.meals", {"per_day": 2, "allowance": None}),
+    ("提供午餐和晚餐", "benefits.meals", {"per_day": 2, "allowance": None}),
+    ("包午晚餐", "benefits.meals", {"per_day": 2, "allowance": None}),
+    ("包吃住", "benefits.meals", {"per_day": None, "allowance": None}),
+    ("包吃不包住", "benefits.meals", {"per_day": None, "allowance": None}),
+    ("提供食宿", "benefits.meals", {"per_day": None, "allowance": None}),
+    ("管吃管住", "benefits.meals", {"per_day": None, "allowance": None}),
+    ("提供午餐", "benefits.meals", {"per_day": 1, "allowance": None}),
+    ("免费工作餐", "benefits.meals", {"per_day": 1, "allowance": None}),
+    ("包一餐", "benefits.meals", {"per_day": 1, "allowance": None}),
+    ("餐补 25 元/天", "benefits.meals", {"per_day": 0, "allowance": {"amount": 25, "unit": "CNY/day"}}),
+    ("每天餐补30元", "benefits.meals", {"per_day": 0, "allowance": {"amount": 30, "unit": "CNY/day"}}),
+    ("餐补每月 500 元", "benefits.meals", {"per_day": 0, "allowance": {"amount": 500, "unit": "CNY/month"}}),
+    ("餐补：480元/月", "benefits.meals", {"per_day": 0, "allowance": {"amount": 480, "unit": "CNY/month"}}),
+    # A meal word with 补贴 after it is an allowance, not a meal.
+    ("提供午餐补贴 22 元/天", "benefits.meals", {"per_day": 0, "allowance": {"amount": 22, "unit": "CNY/day"}}),
+    ("包午餐，另有餐补 12 元/天", "benefits.meals", {"per_day": 1, "allowance": {"amount": 12, "unit": "CNY/day"}}),
+    # Not read: what the JD refuses, an allowance without an amount or a period, a canteen, no meal at all.
+    ("包住不包吃", "benefits.meals", None),
+    ("不包吃住", "benefits.meals", None),
+    ("不提供三餐", "benefits.meals", None),
+    ("无餐补", "benefits.meals", None),
+    ("有餐补", "benefits.meals", None),
+    ("餐补300元", "benefits.meals", None),
+    ("员工食堂", "benefits.meals", None),
+    ("背包吃饭", "benefits.meals", None),
 )
 
 
@@ -723,6 +753,16 @@ class InterviewAndStart(unittest.TestCase):
         self.assertEqual(record["evidence"]["interview"], {"text": ["面试地点：广州", "也可视频面试"], "method": "rule"})
         record = parse_one("尽快到岗，最晚11月15日前到岗")
         self.assertEqual(record["evidence"]["requirements.start"]["text"], ["最晚11月15日前到岗", "尽快到岗"])
+
+    def test_meals_cite_each_clause_and_count_the_most(self):
+        # M2-6e: a meal and an allowance cite both clauses; 包吃 with no count and 包三餐 is three meals.
+        record = parse_one("包午餐，另有餐补 12 元/天")
+        self.assertEqual(record["evidence"]["benefits.meals"], {"text": ["包午餐", "另有餐补 12 元/天"], "method": "rule"})
+        self.assertEqual(parse_one("包吃住，提供一日三餐")["benefits"]["meals"]["per_day"], 3)
+        self.assertEqual(parse_one("提供午餐；包吃包住")["benefits"]["meals"]["per_day"], None)
+        record = parse_one("岗位职责：负责后端开发")
+        self.assertEqual(record["benefits"], {"meals": None})
+        self.assertNotIn("benefits.meals", record["evidence"])
 
     def test_nothing_read_nothing_cited(self):
         record = parse_one("岗位职责：负责后端开发")
