@@ -424,6 +424,15 @@ class ReasonWording(unittest.TestCase):
         "location": (("cities", []), ("availability.cities", [])),
         "employment_type": (("employment_type", None), ("target.employment_types", [])),
         "exclusions": (("title", None), None),
+        "interview": (("interview", None), None),
+        "start_date": (("requirements.start", None), ("availability.start_date", None)),
+    }
+    # What the JD must state for the profile to be the only gap.
+    STATED = {"start_date": ("requirements.start", {"by": "2026-12-31", "asap": False})}
+    # Unknowns where the JD says something, but not enough: still the JD to read, then HR to ask.
+    VAGUE = {
+        "interview": ("interview", {"mode": "onsite", "cities": []}),
+        "start_date": ("requirements.start", {"by": None, "asap": True}),
     }
 
     def setUp(self):
@@ -455,10 +464,19 @@ class ReasonWording(unittest.TestCase):
             if profile_side is None:
                 continue
             with self.subTest(check=check):
-                reason, how = self.advice(self.job, setting(self.profile, *profile_side), check)
+                job = setting(self.job, *self.STATED[check]) if check in self.STATED else self.job
+                reason, how = self.advice(job, setting(self.profile, *profile_side), check)
                 self.assertIn("档案没写", reason)
                 self.assertNotIn("JD 没写", reason)
                 self.assertEqual(how, report.FILL_PROFILE)
+
+    def test_a_vague_jd_sends_the_user_to_the_jd(self):
+        for check, jd_side in self.VAGUE.items():
+            with self.subTest(check=check):
+                reason, how = self.advice(setting(self.job, *jd_side), self.profile, check)
+                self.assertIn("JD 没写", reason)
+                self.assertNotIn("档案没写", reason)
+                self.assertEqual(how, report.ASK_JD)
 
 
 if __name__ == "__main__":

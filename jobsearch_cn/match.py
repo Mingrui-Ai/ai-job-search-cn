@@ -248,7 +248,7 @@ def _interview(job, profile):
         return _item("interview", MATCH, f"可以线上面试，不用出行；也可以{onsite}", job, *fields, profile)
     how = "有一轮要现场面试" if mode == "mixed" else "要现场面试"
     if not places:
-        return _item("interview", UNKNOWN, f"JD {how}，没写在哪里；需要确认面试地点", job, *fields, profile)
+        return _item("interview", UNKNOWN, f"JD 没写面试地点（{how}）；需要确认在哪里面试", job, *fields, profile)
     wanted = {_city(c) for c in (profile.get("availability") or {}).get("cities") or []}
     if not wanted:
         return _item("interview", MATCH, f"{how}，在{where}", job, *fields, profile,
@@ -269,7 +269,7 @@ def _start_date(job, profile):
         if can <= by:
             return _item("start_date", MATCH, f"JD 要求 {by} 前到岗，你 {can} 就能到岗", job, *fields, profile)
         return _item("start_date", CONFLICT, f"JD 要求 {by} 前到岗，你 {can} 才能到岗", job, *fields, profile)
-    asked = (f"JD 要求 {by} 前到岗" if by else "JD 希望尽快到岗，没写具体日期" if start and start["asap"]
+    asked = (f"JD 要求 {by} 前到岗" if by else "JD 没写具体到岗日期，只说希望尽快到岗" if start and start["asap"]
              else "JD 没写到岗时间")
     have = f"你 {can} 可以到岗" if can else "档案没写可到岗日期"
     return _item("start_date", UNKNOWN, f"{asked}；{have}", job, *fields, profile)

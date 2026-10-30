@@ -20,7 +20,8 @@ from jobsearch_cn import match, score
 VERDICTS = {match.ELIGIBLE: "符合", match.NEEDS_CHECK: "待确认", match.INELIGIBLE: "不符合"}
 RESULTS = {match.MATCH: "符合", match.CONFLICT: "冲突", match.UNKNOWN: "未知", match.NOT_APPLICABLE: "不适用"}
 CHECKS = {"graduation": "届别", "education": "学历", "days_per_week": "每周到岗", "min_months": "实习时长",
-          "location": "地点", "employment_type": "岗位类型", "exclusions": "排除项"}
+          "location": "地点", "employment_type": "岗位类型", "exclusions": "排除项",
+          "interview": "面试", "start_date": "到岗时间"}
 DIMENSIONS = {"skills": "技能", "direction": "方向", "experience": "经历", "salary": "薪资"}
 GRADES = {"strong": "很匹配", "good": "较匹配", "moderate": "一般", "weak": "较弱", "poor": "不匹配",
           score.INELIGIBLE: "不符合硬性条件"}

@@ -302,8 +302,8 @@ class Interview(CheckCase):
     def test_unknown_when_the_jd_is_silent_or_names_no_place(self):
         self.assert_unknown_reasons(
             (setting(self.job, "interview", None), self.profile, "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试"),
-            (self.held("onsite"), self.profile, "JD 要现场面试，没写在哪里；需要确认面试地点"),
-            (self.held("mixed"), self.profile, "JD 有一轮要现场面试，没写在哪里；需要确认面试地点"),
+            (self.held("onsite"), self.profile, "JD 没写面试地点（要现场面试）；需要确认在哪里面试"),
+            (self.held("mixed"), self.profile, "JD 没写面试地点（有一轮要现场面试）；需要确认在哪里面试"),
         )
 
 
@@ -328,7 +328,7 @@ class StartDate(CheckCase):
             (silent_job, self.profile, "JD 没写到岗时间；你 2026-11-15 可以到岗"),
             (self.wants("2026-11-01"), silent_profile, "JD 要求 2026-11-01 前到岗；档案没写可到岗日期"),
             (silent_job, silent_profile, "JD 没写到岗时间；档案没写可到岗日期"),
-            (self.wants(asap=True), self.profile, "JD 希望尽快到岗，没写具体日期；你 2026-11-15 可以到岗"),
+            (self.wants(asap=True), self.profile, "JD 没写具体到岗日期，只说希望尽快到岗；你 2026-11-15 可以到岗"),
         )
 
 
