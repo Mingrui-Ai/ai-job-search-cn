@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
-import shutil
+import re
 import subprocess
 import sys
 
@@ -23,6 +23,7 @@ def git(*args, cwd=ROOT):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, required=True, help='own clean checkout of the frozen master')
+    parser.add_argument('--label', default='master-d8ec9ad-run2', help='new output label; never overwrite an earlier attempt')
     args = parser.parse_args()
     repo = args.repo.resolve()
     assert git('rev-parse', 'HEAD', cwd=repo).decode().strip() == BASE
@@ -33,12 +34,19 @@ def main():
     for name in [*FROZEN_NAMES, 'oracle-manifest.json']:
         relative = (FIX / name).relative_to(ROOT).as_posix()
         assert git('show', f'{input_commit}:{relative}') == (FIX / name).read_bytes(), name
-    out = FIX / 'actual' / 'master-d8ec9ad'
-    data = ROOT / 'data' / 'v19-master-d8ec9ad'
+    assert re.fullmatch(r'master-d8ec9ad(?:-[a-z0-9]+)?', args.label)
+    out = FIX / 'actual' / args.label
+    data = ROOT / 'data' / ('v19-' + args.label)
     assert not out.exists() and not data.exists(), 'Never overwrite a recorded baseline.'
     out.mkdir(parents=True)
     (data / 'profile').mkdir(parents=True)
-    shutil.copyfile(FIX / 'baseline-profile.json', data / 'profile' / 'profile.json')
+    projection = read('baseline-profile.json')
+    # Preserve the frozen input. In v1 an unknown graduation is the whole
+    # object set to null, not an object with year/month both null.
+    assert projection['graduation'] == {'year': None, 'month': None}
+    projection['graduation'] = None
+    (data / 'profile' / 'profile.json').write_text(json.dumps(projection, ensure_ascii=False, indent=2) + '\n',
+                                                 encoding='utf-8', newline='\n')
     commands = []
 
     def safe(value):
@@ -63,17 +71,21 @@ def main():
                                 env={**os.environ, 'PYTHONUTF8': '1', 'PYTHONPATH': str(repo)})
         commands.append({'command': ['python', *command[1:]], 'exit_code': result.returncode,
                          'stderr': result.stderr})
+        if result.returncode:
+            commands[-1]['stdout_on_failure'] = result.stdout
         write('commands.json', commands)
         assert result.returncode == 0, (args[:2], result.returncode, 'see commands.json')
         assert not result.stderr.strip(), args[:2]
         return json.loads(result.stdout)
 
+    write('profile-projection.json', projection)
     validation = cli('profile', 'validate')
     write('profile-validation.json', validation)
     summary = {
         'code_commit': BASE, 'input_commit': input_commit, 'manifest_sha256': MANIFEST_HASH,
         'python_version': sys.version.split()[0], 'started_at_utc': datetime.now(timezone.utc).isoformat(),
         'scope': '旧schema投影与旧评分行为；未把新参数或新福利字段伪装成已支持',
+        'profile_compatibility': '冻结baseline-profile的未知graduation对象机械映射为null；不修改冻结文件或薪资参数',
         'new_contract_comparison': 'not_executed_before_m2_6e_pr', 'cases': [],
     }
     for case in read('expectations.json')['cases']:

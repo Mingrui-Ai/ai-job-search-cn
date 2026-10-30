@@ -1,0 +1,15 @@
+[
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "profile",
+      "validate",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 1,
+    "stderr": ""
+  }
+]

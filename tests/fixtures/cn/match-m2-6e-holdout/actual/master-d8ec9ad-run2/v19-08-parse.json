@@ -1,0 +1,78 @@
+{
+  "jobs": [
+    {
+      "schema_version": 1,
+      "id": "job_b5a3b7122b1e",
+      "source": {
+        "type": "file",
+        "site": "other",
+        "url": null,
+        "imported_at": "2026-10-30T15:16:14+08:00"
+      },
+      "title": "门店资料审核员",
+      "company": "示例樟汐服务有限公司",
+      "cities": [
+        "青岛"
+      ],
+      "remote": null,
+      "employment_type": null,
+      "salary": {
+        "min": 35,
+        "max": 45,
+        "unit": "CNY/hour",
+        "months": null,
+        "negotiable": false
+      },
+      "requirements": {
+        "graduation": null,
+        "days_per_week": null,
+        "min_months": null,
+        "education": null,
+        "skills": [],
+        "skill_alternatives": [],
+        "start": null
+      },
+      "interview": null,
+      "return_offer": null,
+      "published_at": null,
+      "deadline": null,
+      "status": "new",
+      "evidence": {
+        "title": {
+          "text": "门店资料审核员",
+          "method": "rule"
+        },
+        "company": {
+          "text": "示例樟汐服务有限公司",
+          "method": "rule"
+        },
+        "cities": {
+          "text": "工作地点：青岛",
+          "method": "rule"
+        },
+        "salary": {
+          "text": "35-45元/小时",
+          "method": "rule"
+        }
+      },
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      },
+      "raw_text": "职位名称：门店资料审核员\n公司：示例樟汐服务有限公司\n工作地点：青岛\n工作内容：核验餐饮行业客户的门店资料，不参与餐食制作。\n薪酬：35-45元/小时。\n福利：餐补300元/月，此项在时薪之外单独发放。\n本招聘文本为V19原创虚构样例。"
+    }
+  ],
+  "warnings": [],
+  "saved": [
+    {
+      "action": "created",
+      "id": "job_b5a3b7122b1e",
+      "title": "门店资料审核员",
+      "company": "示例樟汐服务有限公司",
+      "cities": [
+        "青岛"
+      ],
+      "status": "new"
+    }
+  ]
+}
