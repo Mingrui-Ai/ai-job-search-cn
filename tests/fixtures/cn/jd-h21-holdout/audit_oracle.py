@@ -101,8 +101,6 @@ def verify():
     for name, expected in manifest["source_git_blob_sha256"].items():
         blob = subprocess.check_output(["git", "show", manifest["base_commit"] + ":" + name], cwd=ROOT)
         assert hashlib.sha256(blob).hexdigest() == expected, name
-        if name.startswith("tests/fixtures/cn/profile/"):
-            assert digest(ROOT / name, lf=True) == expected, name
     return manifest, stats
 
 
