@@ -56,6 +56,7 @@ python -m jobsearch_cn jd validate job.json          # 按 job-schema.md 校验�
 python -m jobsearch_cn jd parse jd.txt --save        # 解析并保存到本地岗位库 data/jobs/（自动去重）
 python -m jobsearch_cn jd list                       # 列出岗位库；jd show <id>、jd status <id> <状态>
 python -m jobsearch_cn match filter <id>             # 用个人档案过滤一个已保存的岗位（硬性条件）
+python -m jobsearch_cn match report                  # 把已保存的评分生成可读的报告（HTML）和反馈表（CSV），写到 data/reports/
 python -m jobsearch_cn profile validate              # 校验 data/profile/ 下的个人档案；profile show 查看（隐去联系方式）
 ```
 
