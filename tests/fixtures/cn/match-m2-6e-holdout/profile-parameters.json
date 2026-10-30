@@ -1,0 +1,16 @@
+{
+  "kind": "v19_synthetic_semantic_parameters_not_a_product_schema",
+  "source": "V19作者为算术边界独立编写；全部虚构，不取自用户档案",
+  "currency": "CNY",
+  "comparison_unit": "month",
+  "minimum_monthly": 4500,
+  "ideal_monthly": 6500,
+  "step_monthly": 800,
+  "points_per_step": 10,
+  "working_days_per_week": 4,
+  "weeks_per_year": 52,
+  "months_per_year": 12,
+  "provided_meals_monthly_equivalent": 600,
+  "unknown_field_names": "实现者定义新增字段；以后另存字段映射，不改本文件",
+  "current_master_projection": "baseline-profile.json 中仅映射 minimum_monthly 到 target.salary_min，working_days_per_week 到 availability.days_per_week；当前 master 没有理想值、步长和包餐折合参数，不伪造支持"
+}
