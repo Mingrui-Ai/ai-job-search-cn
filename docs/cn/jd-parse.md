@@ -113,7 +113,7 @@ Windows 文件的 CRLF 换行可以正常处理。
 | `market` | 市场 | 市场调研、商务沟通、客户访谈、CRM |
 | `finance` | 财务 | 财务分析 |
 | `hr` | 人力资源 | 招聘流程 |
-| `general` | 通用 | Excel、PowerPoint、PPT（各个方向都用的办公软件） |
+| `general` | 通用 | Word、Excel、PowerPoint / PPT、Office、WPS、Visio（各个方向都用的办公软件） |
 
 词条用 JD 里技能的完整写法：是"文案写作"，不是"文案"。"短视频""直播"是内容形式，单独出现时不算技能；词表里收的是"短视频运营""直播运营"。
 
@@ -121,7 +121,12 @@ Windows 文件的 CRLF 换行可以正常处理。
 
 **同义词**（`same_as`）：同一个技能的不同写法列成一组，内置的有 Go / Golang、JavaScript / JS、Kubernetes / K8s、自然语言处理 / NLP、文案写作 / 文案撰写、PowerPoint / PPT、大模型 / LLM / 大语言模型、提示词工程 / Prompt、Photoshop / PS。解析结果保留 JD 原文的写法（JD 写"K8s"就记"K8s"）；评分比较技能时，同一组的写法算同一个技能。相关但不是同一个技能的不并组，例如 RAG、LangChain 和"大模型"；"AI"多指人工智能，不收作 Adobe Illustrator 的写法。
 
+办公软件的同义组是 Word / Microsoft Word、Excel / Microsoft Excel、PowerPoint / PPT / Microsoft PowerPoint、Office / Microsoft Office / MS Office、WPS / WPS Office、Visio / Microsoft Visio。长名称优先，所以 `WPS Office` 不会额外读成 `Office`。Office、WPS 是不同套件，Word、Excel、PowerPoint、Visio 是不同软件；它们之间不并组，不因为会套件就推断会每个软件。这些词都放在 `general` 组，参与技能评分，不决定岗位方向。
+
 **正文里提到也不一定是要求**：
+
+- Word 和 Office 有普通英文含义，需要软件语境：紧邻“熟悉 / 使用 / 技能：”等要求、文档/办公套件等用法，或出现在办公软件列表中。大小写不决定含义；`Every word matters`、`word count`、`word embeddings`、`office hours`、`office administration`、`work from the office` 不算。`We excel at…` 这类把 excel 当动词的表达也不算 Excel 软件。单独的 `Word` 或 `Office` 没有上下文时留给 Agent 确认；
+- 办公软件名出现在公司名称标签（含 `Company:` / `Employer:`）、已识别的公司标签格，或紧跟“公司 / 集团 / Ltd / Inc”等公司名结尾时不算技能。后面真正的技能要求照常读；`WordPress`、`PPTX`、`Excellent` 等单词片段也不算；
 
 - 被否定的不算：分句里技能前面有"不要求""无需""不需要""不必""不负责""不涉及""不承担""非必须"等词，例如"无需 SQL 基础""不要求 Rust 或 C++ 经验"；
 - 平台名（公众号、小红书、抖音、微博等）在两种地方不算：分句既有"关注""订阅""扫码""详见""动态见"这类引导词，又有"我们""官方""更多""招聘信息"这类指向公司自己的词（"欢迎关注我们的公众号"）；或者在"公司介绍""公司简介""关于我们"一节里，到下一个"岗位职责""任职要求"之类的小标题为止。只有引导词不算数："关注小红书热点"是工作内容，照常读出；
