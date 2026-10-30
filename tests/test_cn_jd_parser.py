@@ -705,6 +705,53 @@ class SeedCases(unittest.TestCase):
 class ScaledSalary(unittest.TestCase):
     """H28: original examples of amounts, periods, evidence and non-pay uses."""
 
+    def test_review_counts_and_video_specs_cannot_displace_wages(self):
+        for text in ("负责剪辑 8K 视频", "本岗需处理8K高清视频素材", "平台覆盖 16k 用户",
+                     "每天接待3千人次", "累计服务16k活跃用户", "账号已有16k 粉丝",
+                     "分辨率：\n8K", "用户数：\n16k", "薪资说明：视频分辨率8K",
+                     "每日接待3千名访客", "需剪辑8K素材"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertIsNone(record["salary"])
+                self.assertNotIn("salary", record["evidence"])
+                record = parse_one(text + "；月薪11k")
+                self.assertEqual(record["salary"], salary(11000, 11000, "CNY/month"))
+                self.assertEqual(record["evidence"]["salary"]["text"], "11k")
+                self.assertEqual(parse_one(text + "；工资面议")["salary"], NEGOTIABLE)
+        for text in ("月薪11k 需剪辑8K视频", "需剪辑8K视频 月薪11k",
+                     "月薪11k 每日服务16k用户", "每日服务16k用户 月薪11k",
+                     "每日服务16k用户 11k工资", "月薪11k 每年组织团建"):
+            with self.subTest(text=text):
+                self.assertEqual(parse_one(text)["salary"], salary(11000, 11000, "CNY/month"))
+        for text in ("11k 视频剪辑专员", "视频剪辑专员 11k", "11k 用户运营专员",
+                     "11k 画质工程师", "11k 人事专员", "用户运营专员 月薪11k",
+                     "用户需求分析师11k", "系统用户分析师11k"):
+            with self.subTest(text=text):
+                self.assertEqual(parse_one(text)["salary"], salary(11000, 11000, "CNY/month"))
+
+    def test_review_yearly_context_survives_modifiers_and_line_break(self):
+        for text in ("年薪约210k", "年薪税前210K", "年薪：\n约210k", "年薪税前：\n预计210k",
+                     "年薪：\n税前约210k", "年薪下限暂按210k", "税前年薪约210k", "年薪约210k，全年15薪",
+                     "年薪\n约210k", "年薪税前\n约210k"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(210000, 210000, "CNY/year"))
+                self.assertIn("年薪", record["evidence"]["salary"]["text"])
+                self.assertEqual(schema.validate(record), [])
+        self.assertEqual(parse_one("月薪约21k")["salary"], salary(21000, 21000, "CNY/month"))
+        self.assertEqual(parse_one("年薪：\n通勤补贴0.6k；工资面议")["salary"], NEGOTIABLE)
+        for text in ("日薪约1k", "时薪约0.2k"):
+            self.assertIsNone(parse_one(text)["salary"])
+
+    def test_review_plus_pay_months_keeps_master_evidence(self):
+        for separator in ("+", " + ", "+ "):
+            with self.subTest(separator=separator):
+                record = parse_one(f"薪资11-17K{separator}15薪")
+                self.assertEqual(record["salary"], salary(11000, 17000, "CNY/month", 15))
+                self.assertEqual(record["evidence"]["salary"]["text"], ["11-17K", "15薪"])
+        for text in ("账号覆盖16k+用户", "账号已有3万+粉丝"):
+            self.assertIsNone(parse_one(text)["salary"])
+
     def test_scaled_single_values_and_ranges(self):
         for text, low, high, unit, quote in (
                 ("固定报酬为1.3万/月。", 13000, 13000, "month", "1.3万/月"),
