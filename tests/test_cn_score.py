@@ -71,6 +71,18 @@ class Case(unittest.TestCase):
 
 
 class Skills(Case):
+    def test_statistical_analysis_is_scored_without_inferring_related_skills(self):
+        [job], _ = jd_parser.parse_text("任职要求：掌握统计分析方法", now=NOW)
+        for name, expected in (("统计分析", 100), ("统计学", 0), ("数据分析", 0)):
+            with self.subTest(profile_skill=name):
+                profile = setting(self.tech, "skills", [
+                    {"name": name, "level": "proficient", "used_in": [], "source": "user"},
+                ])
+                result = scored(job, profile)
+                self.assertEqual(result["dimensions"]["skills"]["score"], expected)
+                self.assertEqual(result["dimensions"]["skills"]["missing"], [] if expected else ["统计分析"])
+                self.assertEqual(result["dimensions"]["direction"]["jd_groups"], {"data": 1})
+
     def test_each_level_earns_its_credit(self):
         # tech: Python proficient, Go proficient, MySQL working, RAG no level but used, PyTorch familiar.
         profile = setting(self.tech, "skills", self.tech["skills"] + [
@@ -195,9 +207,10 @@ class Choices(Case):
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
 
     def test_a_new_rules_version_marks_older_records_stale(self):
-        self.assertEqual(score.RULES_VERSION, 5)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
-        # 5: M2-6c's two checks
-        old = setting(scored(self.job, self.tech), "rules_version", 3)
+        self.assertEqual(score.RULES_VERSION, 6)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
+        # 5: M2-6c's two checks; 6: H26's statistical analysis vocabulary
+        old = setting(scored(self.job, self.tech), "rules_version", 5)
+        self.assertTrue(score.stale(old, self.job, score.profile_hash(self.tech)))
         errors = score.validate(old, self.job, self.tech, VOCABULARY)
         self.assertTrue(any(e.startswith("rules_version: scored by other rules") for e in errors), errors)
 

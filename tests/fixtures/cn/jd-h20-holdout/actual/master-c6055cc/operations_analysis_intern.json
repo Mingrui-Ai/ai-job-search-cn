@@ -1,0 +1,998 @@
+{
+  "parse": {
+    "jobs": [
+      {
+        "schema_version": 1,
+        "id": "job_b26305377602",
+        "source": {
+          "type": "file",
+          "site": "referral",
+          "url": null,
+          "imported_at": "2026-10-29T17:36:28+08:00"
+        },
+        "title": "经营分析实习生",
+        "company": "示例澄屿咨询有限公司",
+        "cities": [
+          "广州"
+        ],
+        "remote": true,
+        "employment_type": "internship",
+        "salary": {
+          "min": null,
+          "max": null,
+          "unit": null,
+          "months": null,
+          "negotiable": true
+        },
+        "requirements": {
+          "graduation": {
+            "years": [
+              2027
+            ],
+            "strict": false
+          },
+          "days_per_week": null,
+          "min_months": null,
+          "education": {
+            "min": "master",
+            "preferred": null
+          },
+          "skills": [
+            "统计学",
+            "Python",
+            "Excel"
+          ]
+        },
+        "return_offer": null,
+        "published_at": "2026-10-29",
+        "deadline": "2026-11-30",
+        "status": "new",
+        "evidence": {
+          "title": {
+            "text": "经营分析实习生",
+            "method": "rule"
+          },
+          "company": {
+            "text": "示例澄屿咨询有限公司",
+            "method": "rule"
+          },
+          "cities": {
+            "text": "工作地点：广州；支持远程办公。",
+            "method": "rule"
+          },
+          "remote": {
+            "text": "支持远程办公",
+            "method": "rule"
+          },
+          "employment_type": {
+            "text": "经营分析实习生",
+            "method": "rule"
+          },
+          "salary": {
+            "text": "薪资面议",
+            "method": "rule"
+          },
+          "requirements.graduation": {
+            "text": "任职要求：2027届优先",
+            "method": "rule"
+          },
+          "requirements.education": {
+            "text": "硕士在读",
+            "method": "rule"
+          },
+          "requirements.skills": {
+            "text": [
+              "统计学或经济学相关专业",
+              "熟悉Python、Excel"
+            ],
+            "method": "rule"
+          },
+          "published_at": {
+            "text": "发布日期：2026-10-29",
+            "method": "rule"
+          },
+          "deadline": {
+            "text": "投递截止：2026-11-30",
+            "method": "rule"
+          }
+        },
+        "guard": {
+          "verdict": "clean",
+          "counts": {}
+        },
+        "raw_text": "经营分析实习生\n公司名称：示例澄屿咨询有限公司\n工作地点：广州；支持远程办公。\n岗位类型：实习。\n薪资面议。\n岗位职责：整理经营记录，协助解释问卷结果。\n任职要求：2027届优先；学历要求：本科/硕士在读。\n统计学或经济学相关专业，熟悉Python、Excel，能使用统计分析方法解释问卷数据。\n每周五举行分享会；具体每周到岗天数和实习时长面议。\n发布日期：2026-10-29。\n投递截止：2026-11-30。"
+      }
+    ],
+    "warnings": [],
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_b26305377602",
+        "title": "经营分析实习生",
+        "company": "示例澄屿咨询有限公司",
+        "cities": [
+          "广州"
+        ],
+        "status": "new"
+      }
+    ]
+  },
+  "differences": {
+    "requirements.education": {
+      "expected": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "actual": {
+        "min": "master",
+        "preferred": null
+      }
+    },
+    "requirements.skills": {
+      "expected": [
+        "Python",
+        "Excel",
+        "统计分析"
+      ],
+      "actual": [
+        "统计学",
+        "Python",
+        "Excel"
+      ]
+    }
+  },
+  "manual_fields_job": {
+    "schema_version": 1,
+    "id": "job_b26305377602",
+    "source": {
+      "type": "file",
+      "site": "referral",
+      "url": null,
+      "imported_at": "2026-10-29T17:36:28+08:00"
+    },
+    "title": "经营分析实习生",
+    "company": "示例澄屿咨询有限公司",
+    "cities": [
+      "广州"
+    ],
+    "remote": true,
+    "employment_type": "internship",
+    "salary": {
+      "min": null,
+      "max": null,
+      "unit": null,
+      "months": null,
+      "negotiable": true
+    },
+    "requirements": {
+      "graduation": {
+        "years": [
+          2027
+        ],
+        "strict": false
+      },
+      "days_per_week": null,
+      "min_months": null,
+      "education": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "skills": [
+        "Python",
+        "Excel",
+        "统计分析"
+      ]
+    },
+    "return_offer": null,
+    "published_at": "2026-10-29",
+    "deadline": "2026-11-30",
+    "status": "new",
+    "evidence": {
+      "title": {
+        "text": [
+          "经营分析实习生"
+        ],
+        "method": "agent"
+      },
+      "company": {
+        "text": [
+          "公司名称：示例澄屿咨询有限公司"
+        ],
+        "method": "agent"
+      },
+      "cities": {
+        "text": [
+          "工作地点：广州"
+        ],
+        "method": "agent"
+      },
+      "remote": {
+        "text": [
+          "支持远程办公"
+        ],
+        "method": "agent"
+      },
+      "employment_type": {
+        "text": [
+          "岗位类型：实习"
+        ],
+        "method": "agent"
+      },
+      "salary": {
+        "text": [
+          "薪资面议"
+        ],
+        "method": "agent"
+      },
+      "requirements.graduation": {
+        "text": [
+          "2027届优先"
+        ],
+        "method": "agent"
+      },
+      "requirements.education": {
+        "text": [
+          "学历要求：本科/硕士在读"
+        ],
+        "method": "agent"
+      },
+      "requirements.skills": {
+        "text": [
+          "熟悉Python、Excel，能使用统计分析方法解释问卷数据"
+        ],
+        "method": "agent"
+      },
+      "published_at": {
+        "text": [
+          "发布日期：2026-10-29"
+        ],
+        "method": "agent"
+      },
+      "deadline": {
+        "text": [
+          "投递截止：2026-11-30"
+        ],
+        "method": "agent"
+      }
+    },
+    "guard": {
+      "verdict": "clean",
+      "counts": {}
+    },
+    "raw_text": "经营分析实习生\n公司名称：示例澄屿咨询有限公司\n工作地点：广州；支持远程办公。\n岗位类型：实习。\n薪资面议。\n岗位职责：整理经营记录，协助解释问卷结果。\n任职要求：2027届优先；学历要求：本科/硕士在读。\n统计学或经济学相关专业，熟悉Python、Excel，能使用统计分析方法解释问卷数据。\n每周五举行分享会；具体每周到岗天数和实习时长面议。\n发布日期：2026-10-29。\n投递截止：2026-11-30。"
+  },
+  "manual_validate": {
+    "valid": true,
+    "errors": []
+  },
+  "manual_save": {
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_b26305377602",
+        "title": "经营分析实习生",
+        "company": "示例澄屿咨询有限公司",
+        "cities": [
+          "广州"
+        ],
+        "status": "new"
+      }
+    ],
+    "invalid": []
+  },
+  "profiles": {
+    "tech": {
+      "filter": {
+        "job_id": "job_b26305377602",
+        "title": "经营分析实习生",
+        "company": "示例澄屿咨询有限公司",
+        "verdict": "needs_check",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": false
+                },
+                "evidence": "任职要求：2027届优先"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足硕士及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "master",
+                  "preferred": null
+                },
+                "evidence": "硕士在读"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 没写每周到岗要求；你每周能到岗 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 没写实习时长要求；你能实习 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市广州在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "广州"
+                ],
+                "evidence": "工作地点：广州；支持远程办公。"
+              },
+              "remote": {
+                "value": true,
+                "evidence": "支持远程办公"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "经营分析实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "经营分析实习生",
+                "evidence": "经营分析实习生"
+              },
+              "company": {
+                "value": "示例澄屿咨询有限公司",
+                "evidence": "示例澄屿咨询有限公司"
+              },
+              "cities": {
+                "value": [
+                  "广州"
+                ],
+                "evidence": "工作地点：广州；支持远程办公。"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "manual_fields_filter": {
+        "job_id": "job_b26305377602",
+        "title": "经营分析实习生",
+        "company": "示例澄屿咨询有限公司",
+        "verdict": "needs_check",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": false
+                },
+                "evidence": [
+                  "2027届优先"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "学历要求：本科/硕士在读"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 没写每周到岗要求；你每周能到岗 4 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 没写实习时长要求；你能实习 6 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市广州在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "广州"
+                ],
+                "evidence": [
+                  "工作地点：广州"
+                ]
+              },
+              "remote": {
+                "value": true,
+                "evidence": [
+                  "支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "岗位类型：实习"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "经营分析实习生",
+                "evidence": [
+                  "经营分析实习生"
+                ]
+              },
+              "company": {
+                "value": "示例澄屿咨询有限公司",
+                "evidence": [
+                  "公司名称：示例澄屿咨询有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "广州"
+                ],
+                "evidence": [
+                  "工作地点：广州"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "comparison": {
+        "parsed": {
+          "verdict_equal": true,
+          "check_differences": {}
+        },
+        "manual": {
+          "verdict_equal": true,
+          "check_differences": {}
+        }
+      }
+    },
+    "ops": {
+      "filter": {
+        "job_id": "job_b26305377602",
+        "title": "经营分析实习生",
+        "company": "示例澄屿咨询有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": false
+                },
+                "evidence": "任职要求：2027届优先"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "conflict",
+            "reason": "JD 要求硕士及以上，你的最高学历是本科",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "master",
+                  "preferred": null
+                },
+                "evidence": "硕士在读"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 没写每周到岗要求；你每周能到岗 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 没写实习时长要求；你能实习 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "广州不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "广州"
+                ],
+                "evidence": "工作地点：广州；支持远程办公。"
+              },
+              "remote": {
+                "value": true,
+                "evidence": "支持远程办公"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": "经营分析实习生"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "经营分析实习生",
+                "evidence": "经营分析实习生"
+              },
+              "company": {
+                "value": "示例澄屿咨询有限公司",
+                "evidence": "示例澄屿咨询有限公司"
+              },
+              "cities": {
+                "value": [
+                  "广州"
+                ],
+                "evidence": "工作地点：广州；支持远程办公。"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "manual_fields_filter": {
+        "job_id": "job_b26305377602",
+        "title": "经营分析实习生",
+        "company": "示例澄屿咨询有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": false
+                },
+                "evidence": [
+                  "2027届优先"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "学历要求：本科/硕士在读"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "unknown",
+            "reason": "JD 没写每周到岗要求；你每周能到岗 3 天",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "unknown",
+            "reason": "JD 没写实习时长要求；你能实习 3 个月",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "广州不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "广州"
+                ],
+                "evidence": [
+                  "工作地点：广州"
+                ]
+              },
+              "remote": {
+                "value": true,
+                "evidence": [
+                  "支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "实习岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "internship",
+                "evidence": [
+                  "岗位类型：实习"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "经营分析实习生",
+                "evidence": [
+                  "经营分析实习生"
+                ]
+              },
+              "company": {
+                "value": "示例澄屿咨询有限公司",
+                "evidence": [
+                  "公司名称：示例澄屿咨询有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "广州"
+                ],
+                "evidence": [
+                  "工作地点：广州"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "comparison": {
+        "parsed": {
+          "verdict_equal": true,
+          "check_differences": {
+            "education": {
+              "expected": "match",
+              "actual": "conflict"
+            }
+          }
+        },
+        "manual": {
+          "verdict_equal": true,
+          "check_differences": {}
+        }
+      }
+    }
+  }
+}

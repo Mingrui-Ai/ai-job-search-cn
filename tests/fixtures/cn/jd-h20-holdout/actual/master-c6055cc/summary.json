@@ -1,0 +1,287 @@
+{
+  "code_commit": "c6055cc7aee16ce0ca956e948c3c654e1ae40334",
+  "execution_commit": "6263566858797d20dca4ab87594c2c5d4832fa3b",
+  "manifest_lf_sha256": "4c0a3dc79bd98532124b7c12c29bc3a4601cf800e7adbddf504cde3c88ec99c2",
+  "python_version": "3.12.15",
+  "started_at_utc": "2026-10-29T09:36:26.186098+00:00",
+  "field_groups": {
+    "equal": 61,
+    "total": 70
+  },
+  "skills": {
+    "matched": 10,
+    "expected": 12,
+    "missing": 2,
+    "extra": 4
+  },
+  "filter_verdicts": {
+    "equal": 8,
+    "total": 10
+  },
+  "hard_checks": {
+    "equal": 66,
+    "total": 70
+  },
+  "manual_validations": {
+    "equal": 5,
+    "total": 5
+  },
+  "manual_replay_verdicts": {
+    "equal": 10,
+    "total": 10
+  },
+  "manual_replay_checks": {
+    "equal": 70,
+    "total": 70
+  },
+  "cases": {
+    "data_platform_intern": {
+      "field_groups_equal": 13,
+      "differences": {
+        "requirements.skills": {
+          "expected": [
+            "Python",
+            "SQL"
+          ],
+          "actual": [
+            "统计学",
+            "Python",
+            "SQL"
+          ]
+        }
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        },
+        "ops": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        }
+      }
+    },
+    "market_planning_campus": {
+      "field_groups_equal": 12,
+      "differences": {
+        "salary": {
+          "expected": {
+            "min": 9000,
+            "max": 11000,
+            "unit": "CNY/month",
+            "months": null,
+            "negotiable": false
+          },
+          "actual": null
+        },
+        "requirements.education": {
+          "expected": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "actual": null
+        }
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {
+              "education": {
+                "expected": "match",
+                "actual": "unknown"
+              }
+            }
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        },
+        "ops": {
+          "parsed": {
+            "verdict_equal": false,
+            "check_differences": {
+              "education": {
+                "expected": "match",
+                "actual": "unknown"
+              }
+            }
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        }
+      }
+    },
+    "operations_analysis_intern": {
+      "field_groups_equal": 12,
+      "differences": {
+        "requirements.education": {
+          "expected": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "actual": {
+            "min": "master",
+            "preferred": null
+          }
+        },
+        "requirements.skills": {
+          "expected": [
+            "Python",
+            "Excel",
+            "统计分析"
+          ],
+          "actual": [
+            "统计学",
+            "Python",
+            "Excel"
+          ]
+        }
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        },
+        "ops": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {
+              "education": {
+                "expected": "match",
+                "actual": "conflict"
+              }
+            }
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        }
+      }
+    },
+    "service_quality_intern": {
+      "field_groups_equal": 12,
+      "differences": {
+        "requirements.education": {
+          "expected": {
+            "min": "associate",
+            "preferred": null
+          },
+          "actual": {
+            "min": "bachelor",
+            "preferred": null
+          }
+        },
+        "requirements.skills": {
+          "expected": [
+            "Excel",
+            "客户沟通"
+          ],
+          "actual": [
+            "统计学",
+            "Excel",
+            "客户沟通"
+          ]
+        }
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        },
+        "ops": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        }
+      }
+    },
+    "statistics_research_intern": {
+      "field_groups_equal": 12,
+      "differences": {
+        "requirements.education": {
+          "expected": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "actual": {
+            "min": "master",
+            "preferred": null
+          }
+        },
+        "requirements.skills": {
+          "expected": [
+            "统计分析",
+            "Excel"
+          ],
+          "actual": [
+            "统计学",
+            "Excel"
+          ]
+        }
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        },
+        "ops": {
+          "parsed": {
+            "verdict_equal": false,
+            "check_differences": {
+              "education": {
+                "expected": "match",
+                "actual": "conflict"
+              }
+            }
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        }
+      }
+    }
+  },
+  "finished_at_utc": "2026-10-29T09:36:31.631399+00:00",
+  "successful_cli_calls": 35
+}
