@@ -46,3 +46,14 @@
    - **B、C 的 DOCX 就是 A 的那份**：同样的内容，PDF 1 页，DOCX 在 Word 里 2 页。B、C 的 Word 版和 PDF 由两套引擎排版，页数可能不一致，没有 Word（或 LibreOffice）就量不出 DOCX 的页数。
 - 本机的 Noto Sans SC 是系统字体：注册在 HKLM，文件和微软雅黑一样由 Windows 组件仓库硬链接，版本 2.04，OFL，`fsType` 0。
 - 做法 B、C 各加了一个微软雅黑的变体（`B-edge-yahei`、`C-typst-yahei`），也用来回答"Word 和 PDF 用不用同一款字体"。
+
+### 拉齐三种做法的版式
+
+不拉齐的话，用户比的是我写的三份模板，不是三种做法。
+
+- 统一：A4、页边距 1.5 cm、正文 10 pt、行距 14.5 pt、标题 11.5 pt、姓名 18 pt。Typst 原来的行距（`leading` 0.55em，从大写字母高度量起）太挤，改成每行固定 1em 加 0.45em 行间距；列表圆点放大。
+- **Word 的"单倍行距"对雅黑特别松**：按页面量，10 pt 雅黑每行约 17 pt（1.72 em），而字体自己标的是 1.32 em（winAscent + winDescent），中文用户常说的"微软雅黑行距大"就是这个。用倍数怎么调都和 B、C 对不齐，改成**固定值** 14.5 pt（姓名、标题另设）后，A 和 B 的页面几乎一样：压力测试里两者的第 2 页都从"专业技能"开始。
+- 分页：三种做法都改成条目不拆开、标题不落在页尾。Word 用"与下段同页"（`keepNext`，一直加到条目的倒数第二条要点），CSS 用 `break-inside: avoid` 和 `break-after: avoid`，Typst 用 `block(breakable: false)` 和 `sticky: true`。
+- 压力测试放大到 7 倍，五份都超出一页，分页处都没有拆开条目。
+- 耗时（同一台机器，多次运行的范围）：A 4–6 秒，Word 冷启动时一次到过 27 秒；B 约 1 秒；C 约 0.12 秒。跑完后没有残留的 Word、Edge 或 Typst 进程。
+- 样张整理到 `data/m3-0/samples/`（被 git 忽略），文件名写明做法；三种做法的 Word 版是同一份。脚本 SHA-256 前 16 位：`resume.py` `a2a3a6724063d3ad`，`render.ps1` `6fb36ceda0f6ab1c`。
