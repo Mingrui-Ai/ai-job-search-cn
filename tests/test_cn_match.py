@@ -232,6 +232,19 @@ class Location(CheckCase):
         item = self.assert_result(UNKNOWN, job=self.place(["北京"], False), profile=self.wants(["深圳"], False, None))
         self.assertEqual(item["reason"], "北京不在意向城市内；JD 不支持远程；你不接受远程；档案没写是否愿意去其他城市")
 
+    def test_an_acceptable_city_matches_with_a_note(self):
+        # M2-6b, ruled by the planner: a city the user accepts is one they can work in, even with
+        # relocate false; relocate is about the cities beyond both lists.
+        profile = setting(self.wants(["深圳"], False, False), "availability.acceptable_cities", ["杭州市"])
+        item = self.assert_result(MATCH, job=self.place(["杭州"], False), profile=profile)
+        self.assertEqual((item["reason"], item["note"]), ("工作城市杭州在你可以接受的城市内", "杭州是你可以接受的城市，不是首选"))
+        self.assertIn("availability.acceptable_cities", item["profile"])
+        # A preferred city wins over an acceptable one; beyond both lists the old rules hold.
+        self.assertNotIn("note", self.assert_result(MATCH, job=self.place(["杭州", "深圳"]), profile=profile))
+        self.assert_result(CONFLICT, job=self.place(["北京"], False), profile=profile)
+        only_acceptable = setting(self.wants([], False, False), "availability.acceptable_cities", ["杭州"])
+        self.assert_result(CONFLICT, job=self.place(["北京"], False), profile=only_acceptable)
+
 
 class EmploymentType(CheckCase):
     check = "employment_type"
@@ -289,6 +302,9 @@ class Interview(CheckCase):
 
     def test_in_person_in_a_city_you_want(self):
         self.assertNotIn("note", self.assert_result(MATCH, job=self.held("onsite", ["深圳市"])))
+        # A city you would accept is one you would go to, as in the location check (M2-6b).
+        accepting = setting(self.profile, "availability.acceptable_cities", ["北京"])
+        self.assertNotIn("note", self.assert_result(MATCH, job=self.held("onsite", ["北京"]), profile=accepting))
 
     def test_in_person_elsewhere_matches_with_the_cost_noted(self):
         for mode in ("onsite", "mixed"):
@@ -320,6 +336,27 @@ class StartDate(CheckCase):
     def test_a_date_you_cannot_make_is_a_conflict(self):
         item = self.assert_result(CONFLICT, job=self.wants("2026-11-01"))
         self.assertEqual(item["reason"], "JD 要求 2026-11-01 前到岗，你 2026-11-15 才能到岗")
+
+    def cited(self, by, text, published_at=None):
+        job = setting(self.wants(by), "published_at", published_at)
+        job["evidence"]["requirements.start"] = {"text": text, "method": "rule"}
+        return job
+
+    def test_an_inferred_year_is_said_to_be_inferred(self):
+        # #73 ruling: the parser dates "11月1日前到岗" from the JD's publication date, else its import date.
+        item = self.assert_result(CONFLICT, job=self.cited("2026-11-01", "11月1日前到岗", "2026-10-20"))
+        self.assertEqual(item["reason"], "JD 写“11月1日前到岗”，没写年份，按发布日期推断为 2026-11-01 前到岗，"
+                                         "你 2026-11-15 才能到岗")
+        item = self.assert_result(MATCH, job=self.cited("2026-12-31", ["尽快到岗", "12月底前到岗"]))
+        self.assertEqual(item["reason"], "JD 写“12月底前到岗”，没写年份，按导入日期推断为 2026-12-31 前到岗，"
+                                         "你 2026-11-15 就能到岗")
+        item = self.assert_result(UNKNOWN, job=self.cited("2026-11-01", "11月1日前到岗"),
+                                  profile=setting(self.profile, "availability.start_date", None))
+        self.assertEqual(item["reason"], "JD 写“11月1日前到岗”，没写年份，按导入日期推断为 2026-11-01 前到岗；档案没写可到岗日期")
+
+    def test_a_stated_year_is_not_inferred(self):
+        item = self.assert_result(MATCH, job=self.cited("2027-07-31", "2027年7月入职", "2026-10-20"))
+        self.assertEqual(item["reason"], "JD 要求 2027-07-31 前到岗，你 2026-11-15 就能到岗")
 
     def test_an_unknown_says_which_side_is_silent(self):
         silent_job, silent_profile = setting(self.job, "requirements.start", None), setting(

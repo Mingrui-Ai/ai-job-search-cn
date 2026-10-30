@@ -145,9 +145,11 @@ def _city(name: str) -> str:
 
 
 def _location(job, profile):
-    fields = ("cities", "remote"), ("availability.cities", "availability.remote_ok", "availability.relocate")
+    fields = ("cities", "remote"), ("availability.cities", "availability.acceptable_cities", "availability.remote_ok",
+                                    "availability.relocate")
     availability = profile.get("availability") or {}
     wanted = {_city(c) for c in availability.get("cities") or []}
+    acceptable = {_city(c) for c in availability.get("acceptable_cities") or []}
     offered = job["cities"]
     remote, remote_ok, relocate = job["remote"], availability.get("remote_ok"), availability.get("relocate")
 
@@ -156,9 +158,14 @@ def _location(job, profile):
         return _item("location", MATCH, f"工作城市{'、'.join(shared)}在你的意向内", job, *fields, profile)
     if remote is True and remote_ok is True:
         return _item("location", MATCH, "JD 可远程，你接受远程", job, *fields, profile)
+    if offered and acceptable & {_city(c) for c in offered}:
+        # A city the user accepts is one they can work in; how much less they like it is the score's (M2-6b).
+        shared = "、".join(c for c in offered if _city(c) in acceptable)
+        return _item("location", MATCH, f"工作城市{shared}在你可以接受的城市内", job, *fields, profile,
+                     note=f"{shared}是你可以接受的城市，不是首选")
     if not offered:
         return _item("location", UNKNOWN, "JD 没写工作城市", job, *fields, profile)
-    if not wanted:
+    if not wanted and not acceptable:
         return _item("location", UNKNOWN, "档案没写意向城市", job, *fields, profile)
     where = "、".join(offered)
     if relocate is True:
@@ -235,7 +242,7 @@ def _exclusions(job, profile):
 
 def _interview(job, profile):
     """Online, or in person in a city you want: a match. In person elsewhere: a match with a note of the cost."""
-    fields = ("interview",), ("availability.cities",)
+    fields = ("interview",), ("availability.cities", "availability.acceptable_cities")
     interview = job["interview"]
     if interview is None:
         return _item("interview", UNKNOWN, "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试", job, *fields, profile)
@@ -249,7 +256,9 @@ def _interview(job, profile):
     how = "有一轮要现场面试" if mode == "mixed" else "要现场面试"
     if not places:
         return _item("interview", UNKNOWN, f"JD 没写面试地点（{how}）；需要确认在哪里面试", job, *fields, profile)
-    wanted = {_city(c) for c in (profile.get("availability") or {}).get("cities") or []}
+    # Both tiers are cities you would go to, as in the location check (M2-6b).
+    availability = profile.get("availability") or {}
+    wanted = {_city(c) for key in ("cities", "acceptable_cities") for c in availability.get(key) or []}
     if not wanted:
         return _item("interview", MATCH, f"{how}，在{where}", job, *fields, profile,
                      note=f"档案没写意向城市，看去{where}面试要不要出行")
@@ -265,11 +274,23 @@ def _start_date(job, profile):
     fields = ("requirements.start",), ("availability.start_date",)
     start = job["requirements"]["start"]
     by, can = (start or {}).get("by"), _profile_field(profile, "availability.start_date")
+    asked = (_asked_by(job, by) if by else "JD 没写具体到岗日期，只说希望尽快到岗" if start and start["asap"]
+             else "JD 没写到岗时间")
     if by and can:
         if can <= by:
-            return _item("start_date", MATCH, f"JD 要求 {by} 前到岗，你 {can} 就能到岗", job, *fields, profile)
-        return _item("start_date", CONFLICT, f"JD 要求 {by} 前到岗，你 {can} 才能到岗", job, *fields, profile)
-    asked = (f"JD 要求 {by} 前到岗" if by else "JD 没写具体到岗日期，只说希望尽快到岗" if start and start["asap"]
-             else "JD 没写到岗时间")
+            return _item("start_date", MATCH, f"{asked}，你 {can} 就能到岗", job, *fields, profile)
+        return _item("start_date", CONFLICT, f"{asked}，你 {can} 才能到岗", job, *fields, profile)
     have = f"你 {can} 可以到岗" if can else "档案没写可到岗日期"
     return _item("start_date", UNKNOWN, f"{asked}；{have}", job, *fields, profile)
+
+
+def _asked_by(job, by: str) -> str:
+    """The start-by date, saying so when the JD gave no year and the year was inferred (jd_parser._nearest_year)."""
+    text = (job["evidence"].get("requirements.start") or {}).get("text")
+    snippets = [text] if isinstance(text, str) else [s for s in text or [] if isinstance(s, str)]
+    if not snippets or any(by[:4] in snippet for snippet in snippets):
+        return f"JD 要求 {by} 前到岗"
+    month = f"{int(by[5:7])}月"
+    quoted = next((snippet for snippet in snippets if month in snippet), snippets[0])
+    basis = "发布日期" if job.get("published_at") else "导入日期"
+    return f"JD 写“{quoted}”，没写年份，按{basis}推断为 {by} 前到岗"

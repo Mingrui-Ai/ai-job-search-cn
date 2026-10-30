@@ -22,7 +22,7 @@ RESULTS = {match.MATCH: "符合", match.CONFLICT: "冲突", match.UNKNOWN: "未�
 CHECKS = {"graduation": "届别", "education": "学历", "days_per_week": "每周到岗", "min_months": "实习时长",
           "location": "地点", "employment_type": "岗位类型", "exclusions": "排除项",
           "interview": "面试", "start_date": "到岗时间"}
-DIMENSIONS = {"skills": "技能", "direction": "方向", "experience": "经历", "salary": "薪资"}
+DIMENSIONS = {"skills": "技能", "direction": "方向", "experience": "经历", "salary": "薪资", "location": "地点"}
 GRADES = {"strong": "很匹配", "good": "较匹配", "moderate": "一般", "weak": "较弱", "poor": "不匹配",
           score.INELIGIBLE: "不符合硬性条件"}
 METHODS = {"rule": "规则", "agent": "Agent"}
@@ -111,6 +111,11 @@ def _settle(key: str, job, profile: dict) -> str:
         if not target.get("salary_min"):
             return FILL_PROFILE
         return "档案的最低期望薪资改用 JD 的单位（例如实习按天），再重新评分"
+    if key == "location" and job is not None:
+        availability = profile.get("availability") or {}
+        how = ([ASK_JD] if not job.get("cities") else []) + (
+            [] if availability.get("cities") or availability.get("acceptable_cities") else [FILL_PROFILE])
+        return "；".join(how) or "对照理由核对 JD 原文和档案"
     return "对照理由核对 JD 原文和档案"
 
 
@@ -296,7 +301,7 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
     if job is None:
         out.append('<p class="notice">岗位已删除，规则给出的维度列不出 JD 原文。</p>')
     elif item["stale"]:
-        out.append('<p class="notice stale">依据栏里技能、薪资、方向的 JD 原文取自现在的岗位库，'
+        out.append('<p class="notice stale">依据栏里技能、薪资、方向、地点的 JD 原文取自现在的岗位库，'
                    "这条记录已过期，依据可能已变，请先重新评分。</p>")
     out.append("<table><tr><th>维度</th><th>分数</th><th>权重</th><th>给出方</th><th>理由</th><th>依据</th></tr>")
     for key, dimension in (record.get("dimensions") or {}).items():
@@ -307,7 +312,7 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
                    f"<td class=\"num\">{_e(_decimal(weights[key]) if key in weights else '—')}</td>"
                    f"<td>{_e(_label(METHODS, dimension.get('method')) if value is not None else '—')}</td>"
                    f"<td>{_e(dimension.get('reason'))}</td>"
-                   f"<td>{_grounds(key, dimension, names, job, vocabulary)}</td></tr>")
+                   f"<td>{_grounds(key, dimension, names, job, vocabulary, profile)}</td></tr>")
     out.append("</table>")
 
     rows, numerator, denominator = working(record)
@@ -349,7 +354,7 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
     return out
 
 
-def _grounds(key: str, dimension: dict, names: dict, job, vocabulary) -> str:
+def _grounds(key: str, dimension: dict, names: dict, job, vocabulary, profile: dict) -> str:
     """What a dimension rests on: the JD text from the stored job for the rule dimensions, the agent's evidence."""
     parts = []
     quotes = score.skill_quotes(job, vocabulary) if _has_evidence(job) else {}
@@ -367,6 +372,15 @@ def _grounds(key: str, dimension: dict, names: dict, job, vocabulary) -> str:
         quote = score._quote(job, "salary") if _has_evidence(job) else None
         if quote:
             parts.append("JD：" + _quotes(quote))
+    if key == "location" and _has_evidence(job):
+        # The JD's cities, and its remote offer when that counts for you as a preferred city (score._location).
+        remote = job.get("remote") is True and (profile.get("availability") or {}).get("remote_ok") is True
+        snippets = []
+        for path in ("cities", "remote") if remote else ("cities",):
+            text = (job["evidence"].get(path) or {}).get("text")
+            snippets += [s for s in ([text] if isinstance(text, str) else text or []) if s not in snippets]
+        if snippets:
+            parts.append("JD：" + _quotes(snippets))
     if dimension.get("jd_groups"):
         counted = score.direction_skills(job, vocabulary) if _has_evidence(job) else {}
         for group, count in dimension["jd_groups"].items():

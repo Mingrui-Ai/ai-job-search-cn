@@ -562,7 +562,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     match_score = match_commands.add_parser(
         "score", parents=[stored], help="可解释评分：计算规则部分，输出匹配记录",
-        description="按 docs/cn/match.md 给一个已保存的岗位评分：技能、方向、薪资由规则计算，带上硬性过滤的结论，"
+        description="按 docs/cn/match.md 给一个已保存的岗位评分：技能、方向、薪资、地点由规则计算，带上硬性过滤的结论，"
                     "给出加权总分、等级和缺口；经历由 Agent 补充。输出匹配记录，加 --save 同时保存。",
     )
     match_score.add_argument("id", help="岗位 id，例如 job_9f4694691d57")
