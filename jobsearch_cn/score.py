@@ -30,8 +30,9 @@ SCHEMA_VERSION = 1
 # 4: the location dimension and its default weight (M2-6b).
 # 5: the filter checks the interview and the start date; their unknowns are gaps to confirm (M2-6c).
 # 6: 统计分析 joins the skill vocabulary's data group (H26).
-# 7: a version right after an English term reads as the term: HTML5, Vue2.x, Python 3.10 (H21).
-RULES_VERSION = 7
+# 7: office software vocabulary and synonyms, with Word/Office context checks (H29).
+# 8: a version right after an English term reads as the term: HTML5, Vue2.x, Python 3.10 (H21).
+RULES_VERSION = 8
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary, location
 DEFAULT_WEIGHTS = {"skills": 30, "direction": 25, "experience": 25, "salary": 10, "location": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.

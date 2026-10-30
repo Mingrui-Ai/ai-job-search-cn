@@ -193,8 +193,19 @@
       "label": "通用",
       "terms": [
         "Excel",
+        "Microsoft Excel",
+        "Word",
+        "Microsoft Word",
         "PowerPoint",
-        "PPT"
+        "PPT",
+        "Microsoft PowerPoint",
+        "Office",
+        "Microsoft Office",
+        "MS Office",
+        "WPS",
+        "WPS Office",
+        "Visio",
+        "Microsoft Visio"
       ]
     }
   },
@@ -204,7 +215,12 @@
     ["Kubernetes", "K8s"],
     ["自然语言处理", "NLP"],
     ["文案写作", "文案撰写"],
-    ["PowerPoint", "PPT"],
+    ["Excel", "Microsoft Excel"],
+    ["Word", "Microsoft Word"],
+    ["PowerPoint", "PPT", "Microsoft PowerPoint"],
+    ["Office", "Microsoft Office", "MS Office"],
+    ["WPS", "WPS Office"],
+    ["Visio", "Microsoft Visio"],
     ["大模型", "LLM", "大语言模型"],
     ["提示词工程", "Prompt"],
     ["Photoshop", "PS"]

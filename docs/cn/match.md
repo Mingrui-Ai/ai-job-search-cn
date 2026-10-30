@@ -265,7 +265,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 {
   "schema_version": 1,
   "job_id": "job_9f4694691d57",
-  "rules_version": 6,
+  "rules_version": 7,
   "scored_at": "2026-10-28T15:00:00+08:00",
   "job_hash": "…",
   "profile_hash": "…",
@@ -286,7 +286,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 }
 ```
 
-- `rules_version`：规则给出的结果变了就加 1，包括各项检查和总的结论、维度分数、列出的缺口，默认权重改变时也加 1。只改理由的措辞时不加：之前保存的记录保留旧理由，重新评分后更新；对这种旧记录运行 `match validate`，会报过滤和缺口与规则给出的不一致，重新评分即可。现在是 7（2：H18 的近义词；3：H16 的任选其一的技能；4：M2-6b 的地点维度和新的默认权重；5：M2-6c 的面试和到岗时间两项检查；6：H26 在词表的 data 组加上"统计分析"；7：H21 的版本号写法，例如 HTML5、Vue2.x、Python 3.10）。加 1 后，旧记录标为过期，重新评分时 Agent 补的内容清空，要重新补。
+- `rules_version`：规则给出的结果变了就加 1，包括各项检查和总的结论、维度分数、列出的缺口，默认权重改变时也加 1。只改理由的措辞时不加：之前保存的记录保留旧理由，重新评分后更新；对这种旧记录运行 `match validate`，会报过滤和缺口与规则给出的不一致，重新评分即可。现在是 8（2：H18 的近义词；3：H16 的任选其一的技能；4：M2-6b 的地点维度和新的默认权重；5：M2-6c 的面试和到岗时间两项检查；6：H26 在词表的 data 组加上"统计分析"；7：H29 补充办公软件词条、同义组和 Word/Office 语境判别；8：H21 的版本号写法，例如 HTML5、Vue2.x、Python 3.10）。加 1 后，旧记录标为过期，重新评分时 Agent 补的内容清空，要重新补。
 - `job_hash`、`profile_hash`：评分时岗位记录和档案的摘要，档案的摘要不含 `contact` 和 `target.weights`（M2-6d：Agent 的判断不依据权重，记录自己存着评分时的 `weights`）。岗位或档案改了，或者档案的权重和记录里的 `weights` 不同，`match list` 会把这条标为"过期"，需要重新评分。重新评分时，两个摘要和 `rules_version` 都没变就保留 Agent 已补的内容（只改了权重时也保留，只按新权重重算总分），有一样变了就清空 Agent 补充。
 - Agent 补充的维度必须有 `reason` 和 `evidence`：`jd` 是 JD 原文片段，必须逐字出现在岗位的 `raw_text` 里；`profile` 是档案条目的 id，必须存在。
 - `match validate` 检查结构、取值、分值范围和依据，并按上面的规则从各维度重新算出总分和等级，和记录不一致就报错。Agent 不能直接改总分。

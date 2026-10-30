@@ -71,6 +71,23 @@ class Case(unittest.TestCase):
 
 
 class Skills(Case):
+    def test_office_synonyms_count_once_without_implying_other_apps(self):
+        [job], _ = jd_parser.parse_text(
+            "技能要求：熟练使用 Word、Microsoft Word、PPT、PowerPoint、Microsoft PowerPoint、Office、WPS、Visio。", now=NOW)
+        profile = setting(self.tech, "skills", [
+            {"name": "Microsoft Word", "level": "proficient", "used_in": [], "source": "user"},
+            {"name": "PPT", "level": "proficient", "used_in": [], "source": "user"},
+            {"name": "Microsoft Office", "level": "proficient", "used_in": [], "source": "user"},
+        ])
+        result = scored(job, profile)
+        dimension = result["dimensions"]["skills"]
+        self.assertEqual(dimension["score"], 60)  # three of five apps/suites; aliases count once
+        self.assertEqual(dimension["missing"], ["WPS", "Visio"])
+        self.assertEqual([entry["jd"] for entry in dimension["matched"]], ["Word", "PPT", "Office"])
+        self.assertEqual(result["dimensions"]["direction"]["jd_groups"], {})
+        only_suite = setting(profile, "skills", profile["skills"][-1:])
+        self.assertEqual(scored(job, only_suite)["dimensions"]["skills"]["score"], 20)
+
     def test_statistical_analysis_is_scored_without_inferring_related_skills(self):
         [job], _ = jd_parser.parse_text("任职要求：掌握统计分析方法", now=NOW)
         for name, expected in (("统计分析", 100), ("统计学", 0), ("数据分析", 0)):
@@ -207,9 +224,10 @@ class Choices(Case):
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
 
     def test_a_new_rules_version_marks_older_records_stale(self):
-        self.assertEqual(score.RULES_VERSION, 7)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
-        # 5: M2-6c's two checks; 6: H26's statistical analysis vocabulary; 7: H21's versioned skills
-        old = setting(scored(self.job, self.tech), "rules_version", 6)
+        self.assertEqual(score.RULES_VERSION, 8)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
+        # 5: M2-6c's two checks; 6: H26's statistical analysis; 7: H29's office vocabulary;
+        # 8: H21's versioned skills
+        old = setting(scored(self.job, self.tech), "rules_version", 7)
         reasons = score.stale_reasons(old, self.job, score.profile_hash(self.tech), score.weights_of(self.tech))
         self.assertEqual(reasons, ["rules"])
         errors = score.validate(old, self.job, self.tech, VOCABULARY)

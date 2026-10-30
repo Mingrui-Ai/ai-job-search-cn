@@ -556,6 +556,13 @@ SEED_CASES = (
     ("熟悉Python3D渲染", "requirements.skills", []),
     ("有 3 年以上 Python 开发经验，熟悉Python3。", "requirements.skills", ["Python"]),
     ("熟悉 Python 3.10 或 Java 8（任选其一）", ALTERNATIVES, [["Python", "Java"]]),
+    # H21 with H29: a version does not break a list of office software, nor make plain words software.
+    ("熟悉 Office 2016 和 Word 2019", "requirements.skills", ["Office", "Word"]),
+    ("熟悉 Word 2019 和 Office 2016", "requirements.skills", ["Word", "Office"]),
+    ("Excel2016、Word2019", "requirements.skills", ["Excel", "Word"]),
+    ("熟练使用 Excel 2016、WPS 2019", "requirements.skills", ["Excel", "WPS"]),
+    ("word 2019 and office 2016", "requirements.skills", []),
+    ("Experience with office 2016 relocation", "requirements.skills", []),
     # ... and a number with a time or count unit is neither a version nor a console: PS 5年 is Photoshop.
     ("PS 5年以上经验，玩过 PS5", "requirements.skills", ["PS"]),
     # A decimal or ".x" after PS is a Photoshop version, not a console.
