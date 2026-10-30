@@ -558,6 +558,10 @@ SEED_CASES = (
     ("熟悉 Python 3.10 或 Java 8（任选其一）", ALTERNATIVES, [["Python", "Java"]]),
     # ... and a number with a time or count unit is neither a version nor a console: PS 5年 is Photoshop.
     ("PS 5年以上经验，玩过 PS5", "requirements.skills", ["PS"]),
+    # A decimal or ".x" after PS is a Photoshop version, not a console.
+    ("熟练使用 PS 5.1", "requirements.skills", ["PS"]),
+    ("熟练使用 PS5.x 和 Figma", "requirements.skills", ["PS", "Figma"]),
+    ("玩过 PS4 和 PS 5。会用 Figma", "requirements.skills", ["Figma"]),
     ("Python3年以上，Java 2 个月实习，Excel 10w 行数据", "requirements.skills", ["Python", "Java", "Excel"]),
     ("熟悉 Vue2.x 或 React", ALTERNATIVES, [["Vue", "React"]]),
     ("样式用SCSS编写，模板见 docs/index.html，兼容XHTML", "requirements.skills", []),

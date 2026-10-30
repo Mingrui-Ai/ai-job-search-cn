@@ -311,8 +311,8 @@ _UNIT = r"[^\S\r\n]*(?:年|个月|月|周|天|小时|人|次|元|[kKwW](?![A-Za-
 _COUNT = rf"[^\S\r\n]*\d+(?:\.\d+)?{_UNIT}"
 _VERSION = rf"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?(?![A-Za-z0-9#])(?!{_UNIT})"
 # One digit after PS is a games console (PS4, PS 5), not Photoshop; a year still is ("PS2024"),
-# and so is a count ("PS 5年以上").
-_CONSOLE = rf"(?![^\S\r\n]*\d(?!\d)(?!{_UNIT}))"
+# and so are a count ("PS 5年以上") and a decimal or ".x" version ("PS 5.1", "PS5.x").
+_CONSOLE = rf"(?![^\S\r\n]*\d(?!\d|\.[\dx])(?!{_UNIT}))"
 
 
 def _skill_pattern(term: str) -> re.Pattern:
