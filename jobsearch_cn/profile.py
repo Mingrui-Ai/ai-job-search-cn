@@ -44,6 +44,8 @@ LANGUAGE_KEYS = ("name", "level", "source")
 EXCLUSION_KEYS = ("cities", "companies", "keywords")
 
 MAX_BULLET = 300
+# Sections whose entries may carry an optional id (M3-1), so a CV can cite them; experience ids are required.
+OPTIONAL_ID_SECTIONS = ("education", "awards", "certificates", "languages")
 
 _MONTH = re.compile(r"^\d{4}-\d{2}$")
 _DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -77,8 +79,9 @@ def validate(profile, sources=None, groups=None) -> list[str]:
         _check_int_range(graduation.get("year"), 2000, 2100, "graduation.year", errors)
         _check_int_range(graduation.get("month"), 1, 12, "graduation.month", errors)
 
-    for index, item in check.items(profile, "education", EDUCATION_KEYS):
+    for index, item in check.items(profile, "education", EDUCATION_KEYS, optional=("id",)):
         where = f"education[{index}]"
+        check.entry_id(item, where, required=False)
         _check_enum(item.get("level"), schema.EDUCATION_LEVELS, f"{where}.level", errors, nullable=False)
         for key in ("school", "major", "gpa", "rank"):
             _check_text(item.get(key), f"{where}.{key}", errors)
@@ -134,13 +137,8 @@ def validate(profile, sources=None, groups=None) -> list[str]:
     experience_ids = set()
     for index, item in check.items(profile, "experience", EXPERIENCE_KEYS):
         where = f"experience[{index}]"
-        item_id = item.get("id")
-        if not (isinstance(item_id, str) and _EXPERIENCE_ID.fullmatch(item_id)):
-            errors.append(f"{where}.id: must be lowercase letters, digits and hyphens, like exp-1")
-        elif item_id in experience_ids:
-            errors.append(f"{where}.id: duplicate id {item_id!r}")
-        else:
-            experience_ids.add(item_id)
+        if check.entry_id(item, where, required=True):
+            experience_ids.add(item["id"])
         _check_enum(item.get("type"), EXPERIENCE_TYPES, f"{where}.type", errors, nullable=False)
         # name: the project, contest or topic; org: where; role: the candidate's position.
         for key in ("name", "org", "role"):
@@ -161,16 +159,19 @@ def validate(profile, sources=None, groups=None) -> list[str]:
         check.source(item, where)
     check.unique_names(profile.get("skills"), "skills")
 
-    for index, item in check.items(profile, "awards", AWARD_KEYS):
+    for index, item in check.items(profile, "awards", AWARD_KEYS, optional=("id",)):
+        check.entry_id(item, f"awards[{index}]", required=False)
         _required_text(item.get("name"), f"awards[{index}].name", errors)
         _check_month(item.get("date"), f"awards[{index}].date", errors)
         check.source(item, f"awards[{index}]")
-    for index, item in check.items(profile, "certificates", CERTIFICATE_KEYS):
+    for index, item in check.items(profile, "certificates", CERTIFICATE_KEYS, optional=("id",)):
+        check.entry_id(item, f"certificates[{index}]", required=False)
         _required_text(item.get("name"), f"certificates[{index}].name", errors)
         _check_text(item.get("detail"), f"certificates[{index}].detail", errors)
         _check_month(item.get("date"), f"certificates[{index}].date", errors)
         check.source(item, f"certificates[{index}]")
-    for index, item in check.items(profile, "languages", LANGUAGE_KEYS):
+    for index, item in check.items(profile, "languages", LANGUAGE_KEYS, optional=("id",)):
+        check.entry_id(item, f"languages[{index}]", required=False)
         _required_text(item.get("name"), f"languages[{index}].name", errors)
         _check_text(item.get("level"), f"languages[{index}].level", errors)
         check.source(item, f"languages[{index}]")
@@ -234,12 +235,12 @@ def redacted(profile: dict) -> dict:
     return copy
 
 
-def _keys(obj: dict, expected, path: str, errors: list, name_unknown: bool = True) -> None:
+def _keys(obj: dict, expected, path: str, errors: list, name_unknown: bool = True, optional=()) -> None:
     prefix = f"{path}." if path else ""
     for key in expected:
         if key not in obj:
             errors.append(f"{prefix}{key}: missing (use null, or [] for a list, when unknown)")
-    unknown = [key for key in obj if key not in expected]
+    unknown = [key for key in obj if key not in expected and key not in optional]
     if name_unknown:
         errors.extend(f"{prefix}{key}: unknown field" for key in unknown)
     elif unknown:  # the name may be a contact detail typed as a key, so only the count goes out
@@ -295,8 +296,23 @@ class _Checker:
     def __init__(self, errors: list, sources):
         self.errors = errors
         self.sources = sources
+        self.ids = set()  # entry ids are unique across the whole profile, so a citation needs no section
 
-    def items(self, parent: dict, key: str, expected):
+    def entry_id(self, item: dict, where: str, required: bool) -> bool:
+        """Check item's id; True when it is well formed and not taken."""
+        if "id" not in item and not required:
+            return False
+        item_id = item.get("id")
+        if not (isinstance(item_id, str) and _EXPERIENCE_ID.fullmatch(item_id)):
+            self.errors.append(f"{where}.id: must be lowercase letters, digits and hyphens, like exp-1")
+        elif item_id in self.ids:
+            self.errors.append(f"{where}.id: duplicate id {item_id!r}")
+        else:
+            self.ids.add(item_id)
+            return True
+        return False
+
+    def items(self, parent: dict, key: str, expected, optional=()):
         """(index, item) for each well-formed object in the list parent[key]."""
         value = parent.get(key)
         if key not in parent:
@@ -308,7 +324,7 @@ class _Checker:
             if not isinstance(item, dict):
                 self.errors.append(f"{key}[{index}]: must be an object")
                 continue
-            _keys(item, expected, f"{key}[{index}]", self.errors)
+            _keys(item, expected, f"{key}[{index}]", self.errors, optional=optional)
             yield index, item
 
     def texts(self, value, path: str, max_length: int = schema.MAX_NAME, fold=schema.normalize_for_match) -> None:
