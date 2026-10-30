@@ -480,6 +480,10 @@ class FormAndPage(unittest.TestCase):
         self.assertIn("salary_days_per_week", report._settle("salary", unit, tiers))
         hourly = {"salary": {"min": 40, "max": 40, "unit": "CNY/hour", "negotiable": False}}
         self.assertIn("按小时的不换算", report._settle("salary", hourly, tiers))
+        # #93 review: an hourly profile never tiers, so the profile is what to change.
+        by_hour = {"target": {"salary_min": {"amount": 30, "unit": "CNY/hour"},
+                              "salary_ideal": {"amount": 45, "unit": "CNY/hour"}, "salary_step": 5}}
+        self.assertIn("改按天或按月计", report._settle("salary", hourly, by_hour))
 
     def test_the_salary_row_quotes_the_meals_too(self):
         # M2-6e: meals add to the pay, so the salary grounds quote them beside it.

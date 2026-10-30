@@ -388,7 +388,10 @@ def _per_month(unit: str, days):
 
 
 def _in_unit(amount: Fraction, source: str, target: str, days):
-    """amount, paid by source, as paid by target; None when it cannot be turned (_per_month)."""
+    """amount, paid by source, as paid by target; None when it cannot be turned (_per_month). By the hour is
+    never tiered, on both sides too (#93 review): pay by the hour says nothing of a month."""
+    if "CNY/hour" in (source, target):
+        return None
     if source == target:
         return amount
     rates = _per_month(source, days), _per_month(target, days)
@@ -396,6 +399,8 @@ def _in_unit(amount: Fraction, source: str, target: str, days):
 
 
 def _not_turned(source: str, target: str) -> str:
+    if source == target == "CNY/hour":
+        return f"JD 和你都按{_UNIT[source]}计，按小时的不换算，不分档"
     if "CNY/hour" in (source, target):
         return f"JD 按{_UNIT[source]}、你按{_UNIT[target]}计，按小时的不换算"
     return (f"JD 按{_UNIT[source]}、你按{_UNIT[target]}计，按天换算要知道每周几天：JD 没写，档案也没写"

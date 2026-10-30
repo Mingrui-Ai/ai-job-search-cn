@@ -644,6 +644,12 @@ SEED_CASES = (
     ("包两餐", "benefits.meals", {"per_day": 2, "allowance": None}),
     ("提供午餐和晚餐", "benefits.meals", {"per_day": 2, "allowance": None}),
     ("包午晚餐", "benefits.meals", {"per_day": 2, "allowance": None}),
+    # #93 review: three meals named one by one are three, not the two of their first pair; two named stay two.
+    ("提供早餐、午餐和晚餐", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("提供早餐、午餐及晚餐", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("包早中晚三餐", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("提供早餐、午餐", "benefits.meals", {"per_day": 2, "allowance": None}),
+    ("提供早餐和午餐", "benefits.meals", {"per_day": 2, "allowance": None}),
     ("包吃住", "benefits.meals", {"per_day": None, "allowance": None}),
     ("包吃不包住", "benefits.meals", {"per_day": None, "allowance": None}),
     ("提供食宿", "benefits.meals", {"per_day": None, "allowance": None}),

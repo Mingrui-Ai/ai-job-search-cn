@@ -125,7 +125,9 @@ def _settle(key: str, job, profile: dict) -> str:
         if not target.get("salary_min"):
             return FILL_PROFILE
         if target.get("salary_ideal") and target.get("salary_step"):  # tiers (M2-6e): it could not be turned
-            if "CNY/hour" in (offered.get("unit"), target["salary_min"].get("unit")):
+            if target["salary_min"].get("unit") == "CNY/hour":
+                return f"{FILL_PROFILE}：最低期望和理想薪资改按天或按月计（按小时的不换算），再重新评分"
+            if offered.get("unit") == "CNY/hour":
                 return "问 HR 按天或按月大概多少（按小时的不换算）"
             return f"看 JD 原文或问 HR 每周几天；或者{FILL_PROFILE}，补上每周天数（target.salary_days_per_week）"
         return "档案的最低期望薪资改用 JD 的单位（例如实习按天），再重新评分"

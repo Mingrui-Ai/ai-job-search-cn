@@ -326,6 +326,14 @@ class SalaryTiers(Case):
         hourly = self.salary(setting(self.job, "salary", pay(40, unit="CNY/hour")), monthly)
         self.assertIsNone(hourly["score"])
         self.assertIn("按小时的不换算", hourly["reason"])
+        # #93 review: by the hour on both sides is not tiered either; the same unit is no exception.
+        by_hour = tiered(self.tech, 30, 45, 5, unit="CNY/hour")
+        for amount in (25, 40, 60):
+            with self.subTest(hourly=amount):
+                both = self.salary(setting(self.job, "salary", pay(amount, unit="CNY/hour")), by_hour)
+                self.assertIsNone(both["score"])
+                self.assertIn("JD 和你都按元/小时计，按小时的不换算", both["reason"])
+        self.assertIsNone(self.salary(profile=by_hour)["score"])  # a day rate against an hourly profile
 
     def test_meals_add_their_value_and_one_meal_adds_points(self):
         profile = setting(setting(self.daily, "target.meal_value", {"amount": 25, "unit": "CNY/day"}),
