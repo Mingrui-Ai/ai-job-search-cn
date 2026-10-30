@@ -727,8 +727,9 @@ def _non_salary_amount(text: str, position: int, end: int) -> bool:
         # the purpose of the quoted wage; "600元/月餐补" names its purpose.
         next_label = _SALARY_CONTEXT.search(suffix, label.end())
         purpose_end = min(boundary, next_label.start() if next_label else len(suffix))
-        separately_priced = (labels and labels[-1].lastgroup == "pay"
-                             and re.search(r"另计|另算", suffix[label.end():purpose_end]))
+        # "餐补另计" / "房补另算" exclude the benefit from this quote even
+        # when the wage itself has no leading 工资/月薪 label.
+        separately_priced = re.search(r"另计|另算", suffix[label.end():purpose_end])
         if not _SALARY_ASIDE.search(suffix[:label.start()]) and not separately_priced:
             return label.lastgroup == "cost"
     return bool(labels and labels[-1].lastgroup == "cost")

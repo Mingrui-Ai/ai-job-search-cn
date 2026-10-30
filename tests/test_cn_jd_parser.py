@@ -612,6 +612,31 @@ class SeedCases(unittest.TestCase):
         self.assertEqual(record["salary"], salary(9500, 12500, "CNY/month", 13))
         self.assertEqual(record["evidence"]["salary"]["text"], ["9500-12500元/月", "全年13薪"])
 
+    def test_separately_priced_benefits_preserve_unlabelled_wages(self):
+        for text, low, high, quote in (
+                ("8-10K 餐补另计", 8000, 10000, "8-10K"),
+                ("12-15K/月 房补另算", 12000, 15000, "12-15K/月"),
+                ("月薪8-10K 餐补另计", 8000, 10000, "8-10K"),
+                ("8-10K，餐补另计", 8000, 10000, "8-10K"),
+                ("12-15K/月，房补另算", 12000, 15000, "12-15K/月"),
+                ("8-10K", 8000, 10000, "8-10K"),
+                ("12-15K/月", 12000, 15000, "12-15K/月")):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(low, high, "CNY/month"))
+                self.assertEqual(record["evidence"]["salary"]["text"], quote)
+                self.assertEqual(schema.validate(record), [])
+        # The same rates labelled as allowances still are not the wage.
+        for text in ("8-10K 餐补", "12-15K/月 房补", "8-10K作为餐补", "12-15K/月作为房补"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertIsNone(record["salary"])
+                self.assertNotIn("salary", record["evidence"])
+                record = parse_one(text + "。工资面议")
+                self.assertEqual(record["salary"], NEGOTIABLE)
+                self.assertEqual(record["evidence"]["salary"]["text"], "工资面议")
+                self.assertEqual(schema.validate(record), [])
+
     def test_cost_purpose_after_amount_and_header_with_modifiers(self):
         for label in ("交通补贴", "生活补助", "餐补", "房补", "培训收费", "住宿费用", "押金", "培训费", "住宿费", "餐费", "租金"):
             for amount in ("650元/月", "26000元/年", "30元/天", "12元/小时", "1-2K/月"):
