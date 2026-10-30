@@ -253,6 +253,19 @@ class Validate(unittest.TestCase):
                                                           if key != "acceptable_cities"})
         self.assert_error(older, "availability.acceptable_cities: missing")
 
+    def test_interview_travel_is_optional_and_true_false_or_null(self):
+        # M2-6f: profiles written before it have no interview_travel; that reads as not said (null).
+        older = with_value(self.example, "availability", {key: value for key, value in
+                                                          self.example["availability"].items()
+                                                          if key != "interview_travel"})
+        self.assertEqual(profile.validate(older, sources={"resume.pdf"}), [])
+        for value in (True, False, None):
+            with self.subTest(value=value):
+                data = with_value(self.example, "availability.interview_travel", value)
+                self.assertEqual(profile.validate(data, sources={"resume.pdf"}), [])
+        self.assert_error(with_value(self.example, "availability.interview_travel", "不去"),
+                          "availability.interview_travel")
+
     def test_cities_compare_as_the_filter_and_the_score_compare_them(self):
         # Codex B on #68: the filter and the score take 深圳市 for 深圳 (match._city), so the validator does
         # too, across the two tiers either way round and within each.

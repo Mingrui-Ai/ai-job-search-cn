@@ -315,6 +315,46 @@ class Interview(CheckCase):
                                   profile=setting(self.profile, "availability.cities", []))
         self.assertEqual(item["note"], "档案没写意向城市，看去北京面试要不要出行")
 
+    def test_not_travelling_to_interview_asks_for_an_online_one(self):
+        # M2-6f: in person only outside your cities, and you will not travel to interview - to confirm, not a
+        # conflict: a JD naming where it interviews may still interview online when asked.
+        staying = setting(self.profile, "availability.interview_travel", False)
+        for mode, how in (("onsite", "要现场面试"), ("mixed", "有一轮要现场面试")):
+            with self.subTest(mode=mode):
+                item = self.assert_result(UNKNOWN, job=self.held(mode, ["北京", "上海"]), profile=staying)
+                self.assertEqual(item["reason"], f"JD 写{how}，在北京、上海，不在你的意向城市内；你暂时不去外地面试，"
+                                                 "投之前先问能不能线上面试")
+                self.assertNotIn("note", item)
+                self.assertIs(item["profile"]["availability.interview_travel"], False)
+
+    def test_the_travel_preference_changes_only_in_person_elsewhere(self):
+        older = copy.deepcopy(self.profile)  # the fixture predates M2-6f: no interview_travel at all
+        self.assertNotIn("interview_travel", older["availability"])
+        profiles = {"older": older, None: setting(self.profile, "availability.interview_travel", None),
+                    True: setting(self.profile, "availability.interview_travel", True),
+                    False: setting(self.profile, "availability.interview_travel", False)}
+        jobs = {"elsewhere": self.held("onsite", ["北京"]), "online": self.held("online"),
+                "either": self.held("either", ["北京"]), "one here": self.held("onsite", ["北京", "深圳"]),
+                "no place": self.held("onsite"), "silent": setting(self.job, "interview", None)}
+        baseline = {name: self.result(job, older) for name, job in jobs.items()}
+        self.assertEqual(baseline["elsewhere"]["note"], "要去北京面试，有路费和时间成本")
+        for said, chosen in profiles.items():
+            for name, job in jobs.items():
+                with self.subTest(said=said, job=name):
+                    item = self.result(job, chosen)
+                    if said is False and name == "elsewhere":
+                        self.assertEqual(item["result"], UNKNOWN)
+                        continue
+                    expected = baseline[name]
+                    self.assertEqual((item["result"], item["reason"], item.get("note")),
+                                     (expected["result"], expected["reason"], expected.get("note")))
+
+    def test_without_cities_a_place_is_not_known_to_be_elsewhere(self):
+        # No cities in the profile: no telling whether 北京 is away, so the travel preference does not apply.
+        bare = setting(setting(self.profile, "availability.cities", []), "availability.interview_travel", False)
+        item = self.assert_result(MATCH, job=self.held("onsite", ["北京"]), profile=bare)
+        self.assertEqual(item["note"], "档案没写意向城市，看去北京面试要不要出行")
+
     def test_unknown_when_the_jd_is_silent_or_names_no_place(self):
         self.assert_unknown_reasons(
             (setting(self.job, "interview", None), self.profile, "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试"),

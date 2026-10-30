@@ -589,6 +589,13 @@ class ReasonWording(unittest.TestCase):
                 self.assertNotIn("档案没写", reason)
                 self.assertEqual(how, report.ASK_JD)
 
+    def test_not_travelling_to_interview_sends_the_user_to_hr(self):
+        # M2-6f: in person only elsewhere and you will not travel - both sides have spoken; ask for online.
+        job = setting(self.job, "interview", {"mode": "onsite", "cities": ["北京"]})
+        reason, how = self.advice(job, setting(self.profile, "availability.interview_travel", False), "interview")
+        self.assertIn("你暂时不去外地面试", reason)
+        self.assertEqual(how, "问 HR 能不能线上面试")
+
     def test_a_null_location_sends_the_user_to_the_side_without_a_city(self):
         # M2-6b: the location dimension is null when the JD names no city, or the profile neither tier.
         cases = {"JD 没写工作城市": (setting(self.job, "cities", []), self.profile, report.ASK_JD),

@@ -243,8 +243,10 @@ def _exclusions(job, profile):
 
 
 def _interview(job, profile):
-    """Online, or in person in a city you want: a match. In person elsewhere: a match with a note of the cost."""
-    fields = ("interview",), ("availability.cities", "availability.acceptable_cities")
+    """Online, or in person in a city you want: a match. In person only elsewhere: a match with a note of the
+    cost, or to confirm when you will not travel to interview (M2-6f) - the JD may still allow an online one."""
+    fields = ("interview",), ("availability.cities", "availability.acceptable_cities",
+                              "availability.interview_travel")
     interview = job["interview"]
     if interview is None:
         return _item("interview", UNKNOWN, "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试", job, *fields, profile)
@@ -267,6 +269,9 @@ def _interview(job, profile):
     away = [c for c in places if _city(c) not in wanted]
     if not away:
         return _item("interview", MATCH, f"{how}，在{where}，在你的意向城市内", job, *fields, profile)
+    if len(away) == len(places) and availability.get("interview_travel") is False:
+        return _item("interview", UNKNOWN, f"JD 写{how}，在{where}，不在你的意向城市内；你暂时不去外地面试，"
+                     "投之前先问能不能线上面试", job, *fields, profile)
     return _item("interview", MATCH, f"{how}，在{where}", job, *fields, profile,
                  note=f"要去{'、'.join(away)}面试，有路费和时间成本")
 
