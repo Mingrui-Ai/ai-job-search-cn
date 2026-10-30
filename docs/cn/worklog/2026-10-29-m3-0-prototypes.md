@@ -7,7 +7,7 @@
 - 读了路线图 §5 的 M3-0 任务单。
 - 摸清本机已有的工具（只查看，没装）：Microsoft Word（Office16）、Edge、`pdftotext`（Git 自带的 mingw 版）、pypdf 6.21；**没有** LaTeX、Typst、LibreOffice、pandoc。
 - 字体：Windows 自带 Noto Sans SC、Noto Serif SC（OFL）以及微软雅黑、宋体、黑体、等线。读了各字体 OS/2 表的 `fsType`：Noto 两款是 0（无限制），微软的四款是 8（允许嵌入、可编辑），都可以嵌进 PDF。
-- 安装：用 AskUserQuestion 问过用户，**只同意装 Typst 便携版**（不装 TinyTeX、LibreOffice）。已装 Typst 0.15.1 官方 Windows 包到仓库外的 `D:\05_Software\typst-0.15.1\`（21 MB，解压即用，不需要管理员权限）；下载文件的 SHA-256 和 GitHub 发布页给出的 digest 一致（`19ce3551…6736`）。`typst fonts` 能看到 Noto Sans SC 等中文字体。
+- 安装：用 AskUserQuestion 问过用户，**只同意装 Typst 便携版**（不装 TinyTeX、LibreOffice）。已装 Typst 0.15.1 官方 Windows 包到仓库外的 `D:\05_Software\typst-0.15.1\`（下载的压缩包 21 MB，解压后 `typst.exe` 52 MB；解压即用，不需要管理员权限）；下载文件的 SHA-256 和 GitHub 发布页给出的 digest 一致（`19ce3551…6736`）。`typst fonts` 能看到 Noto Sans SC 等中文字体。
 - 原型脚本写好了，**还没运行**：`data/m3-0/scripts/resume.py`（被 git 忽略，不进 `jobsearch_cn/`；本机文件 SHA-256 前 16 位 `3fb1fd3ee35c7117`）。它从示例档案 `tests/fixtures/cn/profile/tech` 生成同一份内容模型，再按三种做法各出一份 Word 和 PDF，输出到 `data/m3-0/out/`：
   - **A**：标准库写 DOCX（zipfile + WordprocessingML，字体微软雅黑），用本机 Word（PowerShell 调 COM 的 `ExportAsFixedFormat`）导出 PDF。脚本只在 Word 里没有其他打开的文档时才退出 Word，不会关掉用户开着的文档；
   - **B**：HTML + CSS，用 Edge 无界面模式打印成 PDF（临时的 `--user-data-dir`，不碰用户的 Edge 配置）；DOCX 用和 A 相同的写法；
@@ -41,7 +41,7 @@
 2. **B：用 Noto Sans SC 时，PDF 文本层有 16 个字是康熙部首。** 例如"大"存成 U+2F24"⼤"、"示"存成 U+2F70"⽰"，页面上一模一样，复制出来或按"示例理工大学"搜索就对不上。原因：本机的 Noto Sans SC 是可变字体（`NotoSansSC-VF.ttf`），Edge 把它嵌成了 81 个 Type 3 字体（矢量字形，没有字体名，PDF 390 KB），反查 cmap 生成 ToUnicode 时，同一个字形先查到了部首的码位。换成微软雅黑就是正常的 CID 字体，没有部首，104 KB。
    - `verify_pdf` 发现不了：它只做 NFC，pypdf 读出的部首原样保留，但它不检查；而 `pdftotext` 会把部首折回正常汉字，用它读反而看不出问题。M3-2 的检查要单独查 U+2E80–U+2FDF。
    - 同一份 PDF 用 `pdftotext -layout` 读，相邻两条要点的字会交错成一行（"G主P修A 课3.6程…"）。换微软雅黑后也没有了。
-3. **C：嵌入的字体名叫 `NotoSansSC-Thin`，但页面粗细正常。** 这是字体文件自己的 PostScript 名（name 表 ID 6 就是 `NotoSansSC-Thin`），Typst 0.15 实际按常规和粗体排的。另外 Noto 的"•"和"·"共用一个字形，文本层里列表圆点都记成了"·"；换微软雅黑没有这个问题。第一次编译 6 秒（建系统字体缓存），之后每次约 0.15 秒。
+3. **C：嵌入的字体名叫 `NotoSansSC-Thin`，但页面粗细正常。** 这是字体文件自己的 PostScript 名（name 表 ID 6 就是 `NotoSansSC-Thin`），Typst 0.15 实际按常规和粗体排的。另外 Noto 的"•"和"·"共用一个字形，文本层里列表圆点都记成了"·"；换微软雅黑没有这个问题。第一次编译 6 秒，之后每次约 0.15 秒（原因没查）。
 4. **压力测试**：实习和项目放大 3 倍时五份都还是一页，改成 5 倍。5 倍时 A（Word）2 页，B、C 都是 1 页，原因是 A 的行距（1.15 倍单倍行距，雅黑约合 15.2 pt）比 B、C 的 14.5 pt 松。A 的第 2 页开头是一条孤立的项目要点，标题留在第 1 页底部，要加"与下段同页"。
    - **B、C 的 DOCX 就是 A 的那份**：同样的内容，PDF 1 页，DOCX 在 Word 里 2 页。B、C 的 Word 版和 PDF 由两套引擎排版，页数可能不一致，没有 Word（或 LibreOffice）就量不出 DOCX 的页数。
 - 本机的 Noto Sans SC 是系统字体：注册在 HKLM，文件和微软雅黑一样由 Windows 组件仓库硬链接，版本 2.04，OFL，`fsType` 0。
@@ -55,5 +55,16 @@
 - **Word 的"单倍行距"对雅黑特别松**：按页面量，10 pt 雅黑每行约 17 pt（1.72 em），而字体自己标的是 1.32 em（winAscent + winDescent），中文用户常说的"微软雅黑行距大"就是这个。用倍数怎么调都和 B、C 对不齐，改成**固定值** 14.5 pt（姓名、标题另设）后，A 和 B 的页面几乎一样：压力测试里两者的第 2 页都从"专业技能"开始。
 - 分页：三种做法都改成条目不拆开、标题不落在页尾。Word 用"与下段同页"（`keepNext`，一直加到条目的倒数第二条要点），CSS 用 `break-inside: avoid` 和 `break-after: avoid`，Typst 用 `block(breakable: false)` 和 `sticky: true`。
 - 压力测试放大到 7 倍，五份都超出一页，分页处都没有拆开条目。
-- 耗时（同一台机器，多次运行的范围）：A 4–6 秒，Word 冷启动时一次到过 27 秒；B 约 1 秒；C 约 0.12 秒。跑完后没有残留的 Word、Edge 或 Typst 进程。
+- 耗时（同一台机器，多次运行的范围）：A 4–6 秒，有一次 27 秒（原因没查）；B 约 1 秒；C 约 0.12 秒。跑完后没有残留的 Word、Edge 或 Typst 进程。
 - 样张整理到 `data/m3-0/samples/`（被 git 忽略），文件名写明做法；三种做法的 Word 版是同一份。脚本 SHA-256 前 16 位：`resume.py` `a2a3a6724063d3ad`，`render.ps1` `6fb36ceda0f6ab1c`。
+- 样张路径和简单对比已发给规划者（我倾向 C）。规划者请用户看样张，并请 Codex A 做 V16（独立核对文本层，只读 `data/m3-0/samples/`）。这批样张从此不再重新生成；各文件的 SHA-256 记在报告附录里。
+
+### 用户的新意见：借用开源简历项目（2026-10-30）
+
+用户看了样张："三种简历肉眼基本没区别……可以找一下 github 上开源自动生成简历的项目融合或者借鉴一下，不需要完全自己搞"。三份看着一样，是因为版式拉齐了，规划者已向用户解释。规划者据此给 M3-0 加了三步：
+
+1. 调研 GitHub 上开源的简历生成项目和模板，重点看对中文友好的，按工具链（Typst、LaTeX、HTML/CSS、DOCX）分类。每个都看许可（本仓库是 MIT：复制进仓库的只能是 MIT、BSD、Apache 这类宽松许可，并保留版权声明；GPL、AGPL 的只能当外部工具调用）、中文排版、Word 版怎么配套、PDF 文本层、输入格式和 `profile.json` 的映射、维护情况、安装成本。
+2. 挑 2–3 个，用示例档案各出一份样张（能出 Word 的也出），放在被忽略的目录。下载模板试用可以直接做；装新软件或 Python 包（包括 pip）要先问用户本人。
+3. 报告的推荐改成"生成工具 + 借用的模板"，写清我们自己写哪些部分、借用的部分怎么放进仓库、许可声明放在哪。原来三种做法的对比保留，作为选工具链的依据。
+
+新样张放 `data/m3-0/samples-oss/`，不碰 V16 在核对的 `samples/`。
