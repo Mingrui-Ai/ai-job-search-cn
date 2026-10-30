@@ -43,7 +43,11 @@
   - 过滤结论 66 组都没变；原有检查的结论都没变；`remote` 都没变；
   - 读出面试的只有 V2 的 3 份，和人工核对一致：UI 设计 `either` 北京、AI 产品 `either` 北京（"面试地点：北京（也可视频面试）"）、测试开发 `onsite` 北京（工作地点深圳）。测试开发在两份档案下都带"要去北京面试"的说明；
   - 33 份都没读出到岗时间。其余岗位两项检查都是"未知"，不影响结论。
-- 全量测试 1260 项通过（跳过 11），`security_guards`、`lint_skills` 通过。
+- 合入 master `c7da657`（#67 H22 明确清空列表字段，以及 #70、#71、#72）：jd-import.md 第 3 步有冲突，两边都保留（H22 的技能组清空写法，加上本 PR 的面试和到岗一条）。按规划者的提醒核对 H22：
+  - `store.merge_same_text` 按 `schema.EVIDENCE_FIELDS` 逐项合并，`interview`、`requirements.start` 整个对象按出处优先级合并，不用改代码；
+  - `interview.cities` 是对象里的列表，没有单独的出处，不适用 H22 的明确清空；要改面试城市，整个 `interview` 连同出处一起改写。job-schema.md 两处写明了；
+  - `test_cn_store.py` 新增 `InterviewMerge`：Agent 改过的面试形式在规则重新导入后保留；M2-6c 之前保存的记录读出时补 null，重新导入时补上新值。
+- 全量测试 1280 项通过（跳过 11），`security_guards`、`lint_skills` 通过。
 
 **未决问题（PR 里请规划者裁定）**
 
