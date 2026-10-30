@@ -19,5 +19,6 @@ do not restate or extend it here.
   data into tracked files. The profile is built with `docs/cn/profile-setup.md`.
 - Never put the user's contact details into a reply or a file.
 
-Write files only under `data/matches/drafts/`, and - only after the user confirms new weights -
-`target.weights` in `data/profile/profile.json` and the 偏好记录 section of `data/profile/notes.md`.
+Write files only under `data/matches/drafts/`, except once the user explicitly confirms new
+weights: then set `target.weights` in `data/profile/profile.json` and append one entry to the
+偏好记录 section of `data/profile/notes.md`, and change nothing else in the profile.

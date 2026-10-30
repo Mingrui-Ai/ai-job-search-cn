@@ -53,9 +53,10 @@
    - 每一项写出"现在 → 新"的数字和占比：现在的在输出的 `trial.profile` 里，新的在 `trial.weights`、`trial.shares` 里，照抄，不自己算。总分按占比算：只调高一项以后，五项之和不再是 100，只看数字容易误解，所以占比也要讲；
    - 已经有保存的记录时，说明排序会怎么变：每行的 `grade`、`score` 是试算的结果，`saved` 是现在保存的；
    - 试算只输出，不写任何文件。
-6. **用户确认后才写进档案**：
+6. **用户明确确认后才写进档案**，而且只写这两处，档案的其他字段（包括第 3 条说到的硬性条件）都不在这里改：
    - 把五项写进 `data/profile/profile.json` 的 `target.weights`，运行 `python -m jobsearch_cn profile validate`；
-   - 在 `data/profile/notes.md` 的"偏好记录"一节追加一条：日期、`target.weights`、新的值、来源。来源写 `user`，附用户的原话；用户只是同意了你的提议，就写"用户确认"。格式见 [profile.md §4](profile.md#4-notesmd)。第 3 条改了硬性条件的字段，也各记一条；
+   - 在 `data/profile/notes.md` 的"偏好记录"一节追加一条：日期、`target.weights`、新的值、来源。来源写 `user`，附用户的原话；用户只是同意了你的提议，就写"用户确认"。格式见 [profile.md §4](profile.md#4-notesmd)；
+   - 硬性条件要改的，告诉用户按[建档工作流](profile-setup.md)改，那里也会记偏好记录；
    - 用户要调整，就改了再给用户看；用户不同意，什么都不写。
 7. **重新评分**：权重写进档案以后，`python -m jobsearch_cn match list` 会把旧记录标为过期，`stale_reasons` 写着原因。
    - 只有 `weights` 的，对每个岗位运行 `python -m jobsearch_cn match score <岗位id> --save` 即可：Agent 补的经历和方向都保留，只按新权重重算总分，排序和刚才的试算一致；
