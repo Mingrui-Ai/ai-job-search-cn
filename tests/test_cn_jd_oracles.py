@@ -16,6 +16,8 @@ exception the planner has ruled on is written here, with its reason.
 - V6 (tests/fixtures/cn/jd-h9-holdout/): the holdout for H9, a regression set
   since H12 tuned rules on it (H15). Skills compare as in V4. Its exceptions are
   the rule-level expectations the verifier froze beside the human truth.
+- V8 (tests/fixtures/cn/jd-h16-holdout/): the holdout for H16; only the minimum
+  degree, the skills and the education check, which H20 fixed (V8Education).
 """
 import hashlib
 import json
@@ -31,6 +33,8 @@ sys.path.insert(0, str(REPO))
 from jobsearch_cn import jd_parser, match, schema  # noqa: E402
 
 NOW = datetime(2026, 10, 27, 10, 0, tzinfo=timezone(timedelta(hours=8)))
+# Fields added after the expectations were frozen (H16, M2-6c).
+LATER_FIELDS = (schema.ALTERNATIVES, "requirements.start", "interview")
 
 
 def profile(name: str) -> dict:
@@ -70,11 +74,12 @@ class Oracles:
         self.assertEqual(len(samples), 5)
         for expected in samples:
             with self.subTest(sample=expected["fixture"]):
-                # Frozen before H16 added requirements.skill_alternatives, which they do not compare.
-                self.assertCountEqual(expected["fields"], [f for f in schema.EVIDENCE_FIELDS if f != schema.ALTERNATIVES])
+                # Frozen before H16 added requirements.skill_alternatives, and M2-6c the interview and
+                # the start date with their checks: the expectations do not compare those.
+                self.assertCountEqual(expected["fields"], [f for f in schema.EVIDENCE_FIELDS if f not in LATER_FIELDS])
                 self.assertCountEqual(expected["human_match"], ["tech", "ops"])
                 for judged in expected["human_match"].values():
-                    self.assertCountEqual(judged["checks"], match.CHECKS)
+                    self.assertCountEqual(judged["checks"], [c for c in match.CHECKS if c not in match.TO_CONFIRM])
 
     def test_every_exception_departs_from_a_frozen_value_and_says_why(self):
         # A stale exception - one the code no longer needs, or one naming nothing - fails here.
@@ -204,6 +209,39 @@ class V6(Oracles, unittest.TestCase):
                         frozen[(name, who, check)] = result["result"]
         exceptions = {**self.field_exceptions, **self.check_exceptions, **self.verdict_exceptions}
         self.assertEqual({key: value for key, (value, _) in exceptions.items()}, frozen)
+
+
+class V8Education(unittest.TestCase):
+    """H20: V8 (tests/fixtures/cn/jd-h16-holdout/, the holdout for H16) found two misreads the rules
+    had before H16 - a choice of degrees took the higher one, a major was read as a skill. Its
+    minimum degrees, skills and education checks now meet the frozen expectations; the rest of
+    V8 is compared in its own reports, not here."""
+
+    directory = REPO / "tests" / "fixtures" / "cn" / "jd-h16-holdout"
+    FIELDS = ("requirements.education", "requirements.skills")
+
+    def expectations(self) -> list:
+        manifest = json.loads((self.directory / "oracle-manifest.json").read_text(encoding="utf-8"))
+        samples = []
+        for name, digest in manifest["oracle_files_lf_sha256"].items():
+            if name.endswith(".expected.json") and name != "alternative-groups.expected.json":
+                data = (self.directory / name).read_bytes().replace(b"\r\n", b"\n")
+                self.assertEqual(hashlib.sha256(data).hexdigest(), digest, name)  # frozen, never edited
+                samples.append(json.loads(data.decode("utf-8")))
+        self.assertEqual(len(samples), 5)
+        return samples
+
+    def test_education_and_skills(self):
+        for expected in self.expectations():
+            text = (self.directory / expected["fixture"]).read_text(encoding="utf-8")
+            [record], _ = jd_parser.parse_text(text, source_type="file", site=expected["site_argument"], now=NOW)
+            for path in self.FIELDS:
+                with self.subTest(sample=expected["fixture"], field=path):
+                    self.assertEqual(schema._field(record, path), expected["fields"][path]["value"])
+            for who, judged in expected["human_match"].items():
+                checks = {c["check"]: c["result"] for c in match.filter_job(record, profile(who))["checks"]}
+                with self.subTest(sample=expected["fixture"], profile=who):
+                    self.assertEqual(checks["education"], judged["checks"]["education"]["result"])
 
 
 if __name__ == "__main__":

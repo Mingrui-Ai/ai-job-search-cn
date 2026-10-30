@@ -1,13 +1,14 @@
 """Explainable scoring: the match record for one stored job and the profile.
 
 score_job() works out the rule part of a match (docs/cn/match.md, "可解释评分"):
-the hard-condition filter, and the skills, direction and salary dimensions,
-each 0-100, or null when a side does not say enough. An agent adds the
+the hard-condition filter, and the skills, direction, salary and location
+dimensions, each 0-100, or null when a side does not say enough. An agent adds the
 experience dimension - and the direction, where the rules leave it null -
 with a reason and evidence; validate() checks such a record before it is
 saved: the rule part must be what the rules give, agent evidence must quote
 the JD and name experience the profile holds, and the total must follow from
-the dimensions. job_hash and profile_hash tell when a record has gone stale.
+the dimensions. job_hash, profile_hash and the weights tell when a record has
+gone stale; a change of weights alone keeps the agent's work (M2-6d).
 Integer arithmetic throughout (Fraction), so the same input always gives the
 same record, scored_at aside.
 """
@@ -26,9 +27,12 @@ SCHEMA_VERSION = 1
 # keeps the old wording until it is scored again (docs/cn/match.md, 匹配记录).
 # 2: new same_as synonyms 大模型 / LLM / 大语言模型, 提示词工程 / Prompt, Photoshop / PS (H18).
 # 3: skills the JD offers a choice between count as one requirement (H16).
-RULES_VERSION = 3
-DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary
-DEFAULT_WEIGHTS = {"skills": 35, "direction": 30, "experience": 25, "salary": 10}
+# 4: the location dimension and its default weight (M2-6b).
+# 5: the filter checks the interview and the start date; their unknowns are gaps to confirm (M2-6c).
+# 6: 统计分析 joins the skill vocabulary's data group (H26).
+RULES_VERSION = 6
+DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary, location
+DEFAULT_WEIGHTS = {"skills": 30, "direction": 25, "experience": 25, "salary": 10, "location": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.
 GRADES = (("strong", 75), ("good", 60), ("moderate", 45), ("weak", 30), ("poor", 0))
 INELIGIBLE = "ineligible"
@@ -48,8 +52,18 @@ def job_hash(job: dict) -> str:
 
 
 def profile_hash(profile: dict) -> str:
-    """A digest of the profile without its contact details, which no match record holds."""
-    return _digest({key: value for key, value in profile.items() if key != "contact"})
+    """A digest of what the agent's judgments rest on: the profile without its contact details, which no match
+    record holds, and without its weights, which only the total uses and the record keeps itself (M2-6d)."""
+    data = {key: value for key, value in profile.items() if key != "contact"}
+    if isinstance(data.get("target"), dict):
+        data["target"] = {key: value for key, value in data["target"].items() if key != "weights"}
+    return _digest(data)
+
+
+def weights_of(profile: dict) -> dict:
+    """The weights a score uses: the profile's target.weights, or the defaults when it gives none."""
+    weights = (profile.get("target") or {}).get("weights") or DEFAULT_WEIGHTS
+    return {key: weights[key] for key in DIMENSIONS}
 
 
 def _digest(data) -> str:
@@ -57,15 +71,30 @@ def _digest(data) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def stale(record: dict, job, digest: str) -> bool:
-    """The job or the profile (its profile_hash is `digest`) changed since scoring, the job is gone,
-    or other rules scored it: score it again."""
-    return (job is None or record.get("job_hash") != job_hash(job)
-            or record.get("profile_hash") != digest or record.get("rules_version") != RULES_VERSION)
+# Why a saved record no longer stands: the job changed or is gone, the profile changed, the weights
+# changed (only the total: scoring again keeps the agent's work), or other rules scored it.
+STALE_REASONS = ("job", "job_gone", "profile", "weights", "rules")
+
+
+def stale_reasons(record: dict, job, digest: str, weights: dict) -> list:
+    """Why a record is stale, [] if it is not. digest is the profile's profile_hash, weights its weights_of."""
+    reasons = []
+    if job is None:
+        reasons.append("job_gone")
+    elif record.get("job_hash") != job_hash(job):
+        reasons.append("job")
+    if record.get("profile_hash") != digest:
+        reasons.append("profile")
+    if record.get("weights") != weights:
+        reasons.append("weights")
+    if record.get("rules_version") != RULES_VERSION:
+        reasons.append("rules")
+    return reasons
 
 
 def score_job(job: dict, profile: dict, vocabulary, previous=None, now=None) -> dict:
-    """The match record for a job: the rule part, and the agent part of `previous` if neither side changed."""
+    """The match record for a job: the rule part, and the agent part of `previous` if neither side changed
+    (new weights do not count: the judgments do not rest on them, and the total is worked out afresh)."""
     rules = rule_part(job, profile, vocabulary)
     record = {
         "schema_version": SCHEMA_VERSION,
@@ -97,7 +126,6 @@ def rule_part(job: dict, profile: dict, vocabulary) -> dict:
     filtered = match.filter_job(job, profile)
     skills = _skills(job, profile, vocabulary)
     salary = _salary(job, profile)
-    weights = (profile.get("target") or {}).get("weights") or DEFAULT_WEIGHTS
     return {
         "filter": {"verdict": filtered["verdict"], "checks": filtered["checks"]},
         "dimensions": {
@@ -105,8 +133,9 @@ def rule_part(job: dict, profile: dict, vocabulary) -> dict:
             "direction": _direction(job, profile, vocabulary),
             "experience": _experience(job, profile, vocabulary),
             "salary": salary,
+            "location": _location(job, profile),
         },
-        "weights": {key: weights[key] for key in DIMENSIONS},
+        "weights": weights_of(profile),
         "gaps": _gaps(job, skills, salary, filtered["checks"], vocabulary),
     }
 
@@ -257,6 +286,41 @@ def _salary(job, profile) -> dict:
     return result(0, f"JD 上限 {_plain(upper)} {unit}，低于你的最低期望 {_plain(amount)} {unit}")
 
 
+# Where the job is against where the candidate wants to be (M2-6b): a preferred city, an
+# acceptable one, elsewhere if they are willing to move, elsewhere; remote work they accept
+# counts as a preferred city. A JD naming several cities takes the best.
+_PREFERRED, _ACCEPTABLE, _ELSEWHERE_WILLING, _ELSEWHERE = 100, 60, 30, 0
+
+
+def _location(job, profile) -> dict:
+    availability = profile.get("availability") or {}
+    preferred = {match._city(c) for c in availability.get("cities") or []}
+    acceptable = {match._city(c) for c in availability.get("acceptable_cities") or []} - preferred
+    relocate = availability.get("relocate")
+
+    def result(score, reason):
+        return {"score": score, "method": "rule", "reason": reason}
+
+    options = []  # (score, reason), best first on a tie by JD order
+    if job["remote"] is True and availability.get("remote_ok") is True:
+        options.append((_PREFERRED, "JD 可远程，你接受远程"))
+    for city in job["cities"] if preferred or acceptable else []:
+        if match._city(city) in preferred:
+            options.append((_PREFERRED, f"{city}是你的首选城市"))
+        elif match._city(city) in acceptable:
+            options.append((_ACCEPTABLE, f"{city}是你可以接受的城市，不是首选"))
+        elif relocate is True:
+            options.append((_ELSEWHERE_WILLING, f"{city}不在你写的城市里，你愿意去其他城市"))
+        else:
+            options.append((_ELSEWHERE, f"{city}不在你写的城市里" + ("，你不考虑异地" if relocate is False
+                                                                  else "，档案没写是否愿意去其他城市")))
+    if options:
+        return result(*max(options, key=lambda option: option[0]))
+    if not job["cities"]:
+        return result(None, "JD 没写工作城市" + ("，也不能远程" if job["remote"] is False else ""))
+    return result(None, "档案没写意向城市")
+
+
 def _gaps(job, skills, salary, checks, vocabulary) -> list:
     """What stands between you and the job, each with the JD text it rests on (null when the JD is silent)."""
     gaps = []
@@ -326,6 +390,25 @@ def total(dimensions: dict, weights: dict, verdict: str) -> dict:
             "missing": [key for key in DIMENSIONS if key not in scored]}
 
 
+def trial_total(record: dict, weights: dict) -> dict:
+    """The total a saved record's dimension scores give under other weights (match list --weights); what
+    scoring again gives once the profile has those weights. A dimension the record lacks counts as null."""
+    dimensions = record.get("dimensions") if isinstance(record.get("dimensions"), dict) else {}
+    scores = {}
+    for key in DIMENSIONS:
+        value = dimensions[key].get("score") if isinstance(dimensions.get(key), dict) else None
+        scores[key] = {"score": value if schema._is_number(value) else None}
+    verdict = record["filter"].get("verdict") if isinstance(record.get("filter"), dict) else None
+    return total(scores, weights, verdict)
+
+
+def shares(weights: dict) -> dict:
+    """Each weight as a percentage of their sum, rounded half up to one decimal place: how much of a total
+    each dimension makes when all five are scored."""
+    whole = sum((_fraction(weights[key]) for key in DIMENSIONS), Fraction(0))
+    return {key: _plain(Fraction(_round(_fraction(weights[key]) * 1000 / whole), 10)) for key in DIMENSIONS}
+
+
 _GRADE_ORDER = [name for name, _ in GRADES] + [INELIGIBLE]
 
 
@@ -368,6 +451,8 @@ def validate(record, job: dict, profile: dict, vocabulary) -> list:
         errors.append("scored_at: must be an ISO 8601 time with an offset")
     if record["job_hash"] != job_hash(job) or record["profile_hash"] != profile_hash(profile):
         errors.append("job_hash/profile_hash: the job or the profile changed since scoring; run match score again")
+    elif record["weights"] != weights_of(profile):
+        errors.append("weights: the profile's weights changed since scoring; run match score again")
     if errors:
         return errors
 
@@ -378,7 +463,7 @@ def validate(record, job: dict, profile: dict, vocabulary) -> list:
     dimensions = record["dimensions"]
     if not isinstance(dimensions, dict) or sorted(dimensions) != sorted(DIMENSIONS):
         return errors + [f"dimensions: must hold exactly {', '.join(DIMENSIONS)}"]
-    for key in ("skills", "salary"):
+    for key in ("skills", "salary", "location"):
         if dimensions[key] != rules["dimensions"][key]:
             errors.append(f"dimensions.{key}: a rule dimension; an agent does not change it")
     errors += _agent_dimension(dimensions, rules["dimensions"], "direction", "jd_groups", job, profile)

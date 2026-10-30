@@ -4,7 +4,9 @@ Scoring is explainable only if it is reproducible and nobody can quietly bend
 it, so these pin: each rule dimension, including every way it can be null;
 the weighted total and its grade; gaps; that the same input gives the same
 record; that a change to the job or profile marks a record stale and drops
-what an agent added; that validate refuses the four tamperings in the roadmap
+what an agent added, while new weights mark it stale and keep it (M2-6d);
+that match list --weights tries other weights, writing nothing, and ranks as
+scoring again with them does; that validate refuses the four tamperings in the roadmap
 (an edited total, a JD quote that is not in the JD, a profile id that does
 not exist, an edited rule dimension); and the rule part for the ten sample
 JDs (the five v0.1 samples and V2's five) against both sample profiles, each
@@ -69,6 +71,18 @@ class Case(unittest.TestCase):
 
 
 class Skills(Case):
+    def test_statistical_analysis_is_scored_without_inferring_related_skills(self):
+        [job], _ = jd_parser.parse_text("任职要求：掌握统计分析方法", now=NOW)
+        for name, expected in (("统计分析", 100), ("统计学", 0), ("数据分析", 0)):
+            with self.subTest(profile_skill=name):
+                profile = setting(self.tech, "skills", [
+                    {"name": name, "level": "proficient", "used_in": [], "source": "user"},
+                ])
+                result = scored(job, profile)
+                self.assertEqual(result["dimensions"]["skills"]["score"], expected)
+                self.assertEqual(result["dimensions"]["skills"]["missing"], [] if expected else ["统计分析"])
+                self.assertEqual(result["dimensions"]["direction"]["jd_groups"], {"data": 1})
+
     def test_each_level_earns_its_credit(self):
         # tech: Python proficient, Go proficient, MySQL working, RAG no level but used, PyTorch familiar.
         profile = setting(self.tech, "skills", self.tech["skills"] + [
@@ -193,8 +207,11 @@ class Choices(Case):
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
 
     def test_a_new_rules_version_marks_older_records_stale(self):
-        self.assertEqual(score.RULES_VERSION, 3)  # 2: H18's synonyms; 3: H16's choices
-        old = setting(scored(self.job, self.tech), "rules_version", 2)
+        self.assertEqual(score.RULES_VERSION, 6)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
+        # 5: M2-6c's two checks; 6: H26's statistical analysis vocabulary
+        old = setting(scored(self.job, self.tech), "rules_version", 5)
+        reasons = score.stale_reasons(old, self.job, score.profile_hash(self.tech), score.weights_of(self.tech))
+        self.assertEqual(reasons, ["rules"])
         errors = score.validate(old, self.job, self.tech, VOCABULARY)
         self.assertTrue(any(e.startswith("rules_version: scored by other rules") for e in errors), errors)
 
@@ -254,6 +271,73 @@ class Salary(Case):
                 self.assertIn(reason, dimension["reason"])
 
 
+class Location(Case):
+    """M2-6b: where the job is against the cities the profile names, 0-100, the best of the JD's cities."""
+
+    def where(self, cities, remote=None):
+        return setting(setting(self.job, "cities", cities), "remote", remote)
+
+    def wants(self, cities, acceptable=(), remote_ok=None, relocate=None):
+        availability = dict(self.tech["availability"], cities=cities, acceptable_cities=list(acceptable),
+                            remote_ok=remote_ok, relocate=relocate)
+        return setting(self.tech, "availability", availability)
+
+    def location(self, job, profile):
+        dimension = self.dimension("location", job=job, profile=profile)
+        return dimension["score"], dimension["reason"]
+
+    def test_each_city_case(self):
+        profile = self.wants(["深圳"], ["杭州"], relocate=False)
+        cases = (
+            (self.where(["深圳市"]), profile, 100, "深圳市是你的首选城市"),
+            (self.where(["杭州"]), profile, 60, "杭州是你可以接受的城市，不是首选"),
+            (self.where(["北京"]), profile, 0, "北京不在你写的城市里，你不考虑异地"),
+            (self.where(["北京"]), self.wants(["深圳"], relocate=None), 0, "北京不在你写的城市里，档案没写是否愿意去其他城市"),
+            (self.where(["北京"]), self.wants(["深圳"], relocate=True), 30, "北京不在你写的城市里，你愿意去其他城市"),
+            (self.where(["北京"]), self.wants([], ["杭州"], relocate=False), 0, "北京不在你写的城市里，你不考虑异地"),
+        )
+        for job, wanted, expected, reason in cases:
+            with self.subTest(cities=job["cities"], availability=wanted["availability"]):
+                self.assertEqual(self.location(job, wanted), (expected, reason))
+
+    def test_several_cities_take_the_best(self):
+        profile = self.wants(["深圳"], ["杭州"])
+        self.assertEqual(self.location(self.where(["北京", "杭州"]), profile), (60, "杭州是你可以接受的城市，不是首选"))
+        self.assertEqual(self.location(self.where(["杭州", "深圳"]), profile), (100, "深圳是你的首选城市"))
+
+    def test_remote_counts_as_a_preferred_city_only_when_you_accept_it(self):
+        self.assertEqual(self.location(self.where(["北京"], True), self.wants(["深圳"], remote_ok=True)),
+                         (100, "JD 可远程，你接受远程"))
+        self.assertEqual(self.location(self.where([], True), self.wants([], remote_ok=True)), (100, "JD 可远程，你接受远程"))
+        for remote_ok in (False, None):
+            with self.subTest(remote_ok=remote_ok):
+                self.assertEqual(self.location(self.where(["北京"], True), self.wants(["深圳"], remote_ok=remote_ok))[0], 0)
+
+    def test_null_when_a_side_names_no_city(self):
+        self.assertEqual(self.location(self.where([]), self.wants(["深圳"])), (None, "JD 没写工作城市"))
+        self.assertEqual(self.location(self.where([], False), self.wants(["深圳"])), (None, "JD 没写工作城市，也不能远程"))
+        self.assertEqual(self.location(self.where(["北京"]), self.wants([], relocate=True)), (None, "档案没写意向城市"))
+        record = scored(self.where([]), self.wants(["深圳"]))
+        self.assertIn("location", record["total"]["missing"])
+
+    def test_location_and_salary_offset_each_other(self):
+        # Equal default weights (10 each). Experience is unscored, so the total is over 75:
+        # preferred city, salary met:   (30*52 + 25*100 + 10*100 + 10*100) / 75 = 80.8 -> 81
+        # acceptable city, salary met:  (30*52 + 25*100 + 10*100 + 10*60) / 75 = 75.5 -> 75
+        # preferred city, salary short: (30*52 + 25*100 + 10*0 + 10*100) / 75 = 67.5 -> 67 (5060/75 = 67.47)
+        # A salary that meets your minimum outweighs the step down to an acceptable city.
+        self.assertEqual((score.DEFAULT_WEIGHTS["location"], score.DEFAULT_WEIGHTS["salary"]), (10, 10))
+        profile = self.wants(["深圳"], ["杭州"])
+        short = setting(profile, "target.salary_min", {"amount": 300, "unit": "CNY/day"})
+        self.assertEqual([scored(self.where([city]), wanted)["total"]["score"]
+                          for city, wanted in (("深圳", profile), ("杭州", profile), ("深圳", short))], [81, 75, 67])
+
+    def test_an_agent_may_not_change_it(self):
+        record = agent_filled(scored(self.job, self.tech))
+        errors = score.validate(setting(record, "dimensions.location.score", 50), self.job, self.tech, VOCABULARY)
+        self.assertIn("dimensions.location: a rule dimension; an agent does not change it", errors)
+
+
 class Total(Case):
     def dims(self, **scores):
         return {name: {"score": scores.get(name)} for name in score.DIMENSIONS}
@@ -261,10 +345,12 @@ class Total(Case):
     def test_weighted_mean_of_the_scored_dimensions_rounded_half_up(self):
         weights = score.DEFAULT_WEIGHTS
         self.assertEqual(score.total(self.dims(skills=50, direction=75), weights, "eligible"),
-                         {"score": 62, "grade": "good", "complete": False, "missing": ["experience", "salary"]})  # 4000/65 = 61.5
+                         {"score": 61, "grade": "good", "complete": False,
+                          "missing": ["experience", "salary", "location"]})  # (30*50 + 25*75) / 55 = 61.4
         # 62.5 rounds up to 63, not to the even 62.
         self.assertEqual(score.total(self.dims(skills=25, direction=100), {"skills": 1, "direction": 1,
-                                                                            "experience": 1, "salary": 1}, "eligible")["score"], 63)
+                                                                            "experience": 1, "salary": 1,
+                                                                            "location": 1}, "eligible")["score"], 63)
 
     def test_grades(self):
         for value, grade in ((75, "strong"), (74, "good"), (60, "good"), (59, "moderate"), (45, "moderate"),
@@ -273,8 +359,8 @@ class Total(Case):
                 self.assertEqual(score.total(self.dims(skills=value), score.DEFAULT_WEIGHTS, "needs_check")["grade"], grade)
 
     def test_ruled_out_jobs_are_ineligible_but_keep_their_scores(self):
-        result = score.total(self.dims(skills=100, direction=100, experience=100, salary=100), score.DEFAULT_WEIGHTS,
-                             "ineligible")
+        result = score.total(self.dims(skills=100, direction=100, experience=100, salary=100, location=100),
+                             score.DEFAULT_WEIGHTS, "ineligible")
         self.assertEqual((result["score"], result["grade"], result["complete"]), (100, "ineligible", True))
 
     def test_nothing_scored_has_no_total(self):
@@ -285,7 +371,7 @@ class Total(Case):
         self.assertIsNone(score.total(self.dims(skills=80), zero, "eligible")["score"])
 
     def test_profile_weights_replace_the_defaults(self):
-        weights = {"skills": 10, "direction": 10, "experience": 0, "salary": 80}
+        weights = {"skills": 10, "direction": 10, "experience": 0, "salary": 80, "location": 0}
         record = scored(self.job, setting(self.tech, "target.weights", weights))
         self.assertEqual(record["weights"], weights)
         self.assertEqual(record["total"]["score"], 95)  # (10*52 + 10*100 + 80*100) / 100 = 95.2
@@ -298,8 +384,11 @@ class Gaps(Case):
         gaps = scored(self.job, profile)["gaps"]
         self.assertIn({"kind": "skill", "item": "Redis", "jd": "参与 MySQL、Redis 等存储方案的设计与优化"}, gaps)
         self.assertIn({"kind": "salary", "item": "JD 上限 250 元/天，低于你的最低期望 300 元/天", "jd": "200-250元/天"}, gaps)
-        [days] = [gap for gap in gaps if gap["kind"] == "filter"]
-        self.assertEqual((days["item"], days["result"], days["jd"]), ("days_per_week", "conflict", "4天/周"))
+        filters = {gap["item"]: gap for gap in gaps if gap["kind"] == "filter"}
+        self.assertEqual((filters["days_per_week"]["result"], filters["days_per_week"]["jd"]), ("conflict", "4天/周"))
+        # The JD says nothing of the interview or the start date: both are listed to confirm (M2-6c).
+        self.assertEqual(sorted(filters), ["days_per_week", "interview", "start_date"])
+        self.assertEqual({filters[key]["result"] for key in ("interview", "start_date")}, {"unknown"})
 
     def test_an_unknown_check_is_a_gap_too(self):
         job = setting(self.job, "requirements.graduation", None)
@@ -343,6 +432,79 @@ class Records(Case):
         fresh = score.score_job(edited, self.tech, VOCABULARY, previous=filled, now=LATER)
         self.assertIsNone(fresh["dimensions"]["experience"]["score"])
 
+    def test_the_profile_hash_leaves_out_the_weights(self):
+        # M2-6d: the agent's judgments do not rest on the weights, and a record keeps the weights it used.
+        base = scored(self.job, self.tech)
+        heavier = setting(self.tech, "target.weights", dict(score.DEFAULT_WEIGHTS, location=40))
+        record = scored(self.job, heavier)
+        self.assertEqual(record["profile_hash"], base["profile_hash"])
+        self.assertEqual(record["weights"], heavier["target"]["weights"])
+        self.assertNotEqual(record["total"], base["total"])
+
+    def test_new_weights_keep_the_agents_work_and_redo_the_total(self):
+        job = with_skills(self.job, ["Excel"])  # nothing grouped: the agent gives the direction as well
+        filled = agent_filled(scored(job, self.tech))
+        filled["dimensions"]["direction"].update(score=100, method="agent", reason="标题是后端开发，属于技术方向",
+                                                 evidence={"jd": ["后端开发实习生（Go方向）"], "profile": []})
+        filled["total"] = score.total(filled["dimensions"], filled["weights"], filled["filter"]["verdict"])
+        weights = {"skills": 10, "direction": 40, "experience": 40, "salary": 0, "location": 10}
+        again = score.score_job(job, setting(self.tech, "target.weights", weights), VOCABULARY,
+                                previous=filled, now=LATER)
+        for key in ("experience", "direction"):
+            self.assertEqual(again["dimensions"][key], filled["dimensions"][key])
+        self.assertEqual(again["weights"], weights)
+        self.assertEqual(again["total"], score.trial_total(filled, weights))
+        self.assertNotEqual(again["total"], filled["total"])
+        # Anything else in the profile still clears the agent's work, here what an experience says.
+        rewritten = copy.deepcopy(self.tech)
+        rewritten["experience"][0]["bullets"] = ["重写了订单服务"]
+        fresh = score.score_job(job, rewritten, VOCABULARY, previous=filled, now=LATER)
+        self.assertIsNone(fresh["dimensions"]["experience"]["score"])
+        self.assertIsNone(fresh["dimensions"]["direction"]["score"])
+
+    def test_why_a_record_is_stale(self):
+        record = scored(self.job, self.tech)
+
+        def reasons(job=self.job, profile=self.tech, saved=record):
+            return score.stale_reasons(saved, job, score.profile_hash(profile), score.weights_of(profile))
+
+        self.assertEqual(reasons(), [])
+        self.assertEqual(reasons(job=None), ["job_gone"])
+        self.assertEqual(reasons(job=setting(self.job, "title", "后端开发实习生")), ["job"])
+        self.assertEqual(reasons(profile=setting(self.tech, "availability.days_per_week", 5)), ["profile"])
+        self.assertEqual(reasons(profile=setting(self.tech, "target.weights", dict(score.DEFAULT_WEIGHTS, location=40))),
+                         ["weights"])
+        self.assertEqual(reasons(saved=dict(record, rules_version=score.RULES_VERSION - 1)), ["rules"])
+
+
+class Trial(Case):
+    """M2-6d: match list --weights works out what scoring again with other weights would give."""
+
+    def test_a_trial_total_is_what_scoring_again_with_those_weights_gives(self):
+        record = agent_filled(scored(self.job, self.tech))
+        self.assertEqual(score.trial_total(record, record["weights"]), record["total"])
+        for weights in ({"skills": 0, "direction": 0, "experience": 0, "salary": 0, "location": 1},
+                        dict(score.DEFAULT_WEIGHTS, location=40)):
+            with self.subTest(weights=weights):
+                again = scored(self.job, setting(self.tech, "target.weights", weights), previous=record)
+                self.assertEqual(score.trial_total(record, weights), again["total"])
+
+    def test_a_dimension_the_record_lacks_counts_as_null(self):
+        # A record saved before M2-6b has no location; it is stale, but a trial must not fail on it.
+        record = agent_filled(scored(self.job, self.tech))
+        del record["dimensions"]["location"]
+        self.assertEqual(score.trial_total(record, score.DEFAULT_WEIGHTS)["missing"], ["location"])
+        self.assertEqual(score.trial_total({}, score.DEFAULT_WEIGHTS),
+                         {"score": None, "grade": None, "complete": False, "missing": list(score.DIMENSIONS)})
+
+    def test_shares_are_percentages_of_the_sum(self):
+        self.assertEqual(score.shares(score.DEFAULT_WEIGHTS), score.DEFAULT_WEIGHTS)  # they add up to 100
+        # Raising one weight keeps the others' numbers but not their shares: 30 of 130 is 23.08%.
+        self.assertEqual(score.shares(dict(score.DEFAULT_WEIGHTS, location=40)),
+                         {"skills": 23.1, "direction": 19.2, "experience": 19.2, "salary": 7.7, "location": 30.8})
+        self.assertEqual(score.shares({"skills": 1, "direction": 1, "experience": 1, "salary": 0, "location": 0}),
+                         {"skills": 33.3, "direction": 33.3, "experience": 33.3, "salary": 0, "location": 0})
+
 
 def agent_filled(record: dict) -> dict:
     """What an agent hands back: experience scored, with a reason and evidence; the total redone."""
@@ -369,7 +531,7 @@ class Validate(Case):
     def test_a_rule_record_and_an_agent_completed_one_are_valid(self):
         self.assertEqual(self.errors(scored(self.job, self.tech)), [])
         self.assertEqual(self.errors(), [])
-        self.assertEqual(self.record["total"]["score"], 78)  # (35*52 + 30*100 + 25*80 + 10*100) / 100 = 78.2
+        self.assertEqual(self.record["total"]["score"], 81)  # (30*52 + 25*100 + 25*80 + 10*100 + 10*100) / 100 = 80.6
 
     def test_the_four_tamperings(self):
         self.assert_refused(setting(self.record, "total.score", 95), "total: does not follow")
@@ -412,61 +574,79 @@ class Validate(Case):
         self.assertTrue(any("run match score again" in e for e in errors), errors)
         errors = self.errors(job=setting(self.job, "title", "后端开发实习生"))
         self.assertTrue(any("run match score again" in e for e in errors), errors)
+        heavier = setting(self.tech, "target.weights", dict(score.DEFAULT_WEIGHTS, location=40))
+        self.assertEqual(self.errors(profile=heavier),
+                         ["weights: the profile's weights changed since scoring; run match score again"])
 
 
 # The rule part for the ten sample JDs against both sample profiles; experience is null
-# (an agent's), so totals weigh skills 35, direction 30 and salary 10 over what is scored.
+# (an agent's), so totals weigh skills 30, direction 25, salary 10 and location 10 over what
+# is scored (M2-6b; 35, 30, 10 and no location before).
 # Credits (match.md): 精通/熟练 1, 熟悉 0.8, 了解 0.5; no level 0.8 if used in an experience.
 #   tech: Python 1, Go 1, MySQL 0.8, LangChain 0.8, RAG 0.8 (no level, used), Docker 0.8, PyTorch 0.5;
-#         directions [tech]; salary_min 150 元/天.  ops: Excel 1, 秀米 1, 剪映 0.8, Photoshop 0.8;
-#         directions [ops]; no salary_min (so salary is null for every ops row).
-# Checked by hand:
+#         directions [tech]; salary_min 150 元/天; cities 深圳、广州, remote_ok, no relocating.
+#   ops:  Excel 1, 秀米 1, 剪映 0.8, Photoshop 0.8; directions [ops]; no salary_min (so salary is
+#         null for every ops row); cities 上海, no remote, no relocating.
+# Location (M2-6b): a preferred city, or remote work you accept, 100; any other city 0 here, since
+# neither profile names acceptable cities or relocates.
+# Checked by hand (skills, direction and salary as before M2-6b; location and the totals new):
 #   boss_intern       tech  "熟悉 Golang 或 Java" is one choice (H16), and the Go of 职责 is the same skill, so it
 #                           counts there: 5 skills, Go|Java 1 (Go held) + MySQL 0.8 + Redis 0 + Docker 0.8 +
 #                           Kubernetes 0 = 2.6/5 -> 52 (43 before H16: Go, Java apart, 2.6/6);
-#                           all tech -> 100; 250 >= 150 -> 100; (35*52+30*100+10*100)/75 = 77.6 -> 78 strong
-#                     ops   no skill held -> 0; tech only, no ops skill -> 0; total 0; filter conflicts -> ineligible
+#                           all tech -> 100; 250 >= 150 -> 100; 深圳 preferred -> 100;
+#                           (30*52+25*100+10*100+10*100)/75 = 80.8 -> 81 strong
+#                     ops   no skill held -> 0; tech only, no ops skill -> 0; 深圳 -> 0; 0; filter -> ineligible
 #   shixiseng_intern  tech  4 skills, Python 1 -> 25; data 2 = tech 2, a tie both lead -> 100; 200 >= 150 -> 100;
-#                           (875+3000+1000)/75 = 65; the filter rules it out (每周5天 > 4) -> ineligible
+#                           上海 -> 0; (750+2500+1000)/75 = 56.7 -> 57; the filter rules it out (每周5天 > 4)
+#                     ops   0, 0; 上海 -> 100; 1000/65 = 15.4 -> 15; ineligible
 #   nowcoder_campus   tech  8 skills: RAG 0.8 + Python 1 + PyTorch 0.5 + LangChain 0.8 = 3.1/8 -> 39; tech -> 100;
-#                           元/月 vs 元/天 -> null; (1365+3000)/65 = 67.2 -> 67; 校招 vs 实习 -> ineligible
-#   official_site     tech  6 skills, PyTorch 0.5 -> 8; tech -> 100; 面议 -> null; (280+3000)/65 = 50.5 -> 50;
-#                           no 届别 in the JD -> needs_check, so the grade stands: moderate
-#   experienced_hire  tech  none of 8 held -> 0; tech -> 100; 元/月 -> null; 3000/65 = 46.2 -> 46; 社招 -> ineligible
-#   boss_ai_product   tech  none held -> 0; product 4 leads, no tech skill -> 0; 220 >= 150 -> 100; 1000/75 = 13.3
-#                           -> 13; the filter passes it -> poor
-#                     ops   0; product leads, no ops skill -> 0; 0 -> ineligible (4天 > 3, 广州)
-#   shixiseng_content tech  none held -> 0; ops 5 leads -> 0; 180 >= 150 -> 100; 13; 上海 -> ineligible
+#                           元/月 vs 元/天 -> null; 北京、杭州 -> 0; (1170+2500)/65 = 56.5 -> 56; 校招 -> ineligible
+#   official_site     tech  6 skills, PyTorch 0.5 -> 8; tech -> 100; 面议 -> null; 杭州, but remote and you accept
+#                           remote -> 100; (240+2500+1000)/65 = 57.5 -> 58; no 届别 -> needs_check: moderate
+#                     ops   杭州, remote, but ops does not accept remote -> 0; 0
+#   experienced_hire  tech  none of 8 held -> 0; tech -> 100; 元/月 -> null; 上海 -> 0; 2500/65 = 38.5 -> 38;
+#                           社招 -> ineligible
+#                     ops   0, 0; 上海 -> 100; 1000/65 = 15.4 -> 15; ineligible
+#   boss_ai_product   tech  none held -> 0; product 4 leads, no tech skill -> 0; 220 >= 150 -> 100; 广州 -> 100;
+#                           2000/75 = 26.7 -> 27; the filter passes it -> poor
+#                     ops   0; product leads, no ops skill -> 0; 广州 -> 0; 0 -> ineligible (4天 > 3, 广州)
+#   shixiseng_content tech  none held -> 0; ops 5 leads -> 0; 180 >= 150 -> 100; 上海 -> 0; 1000/75 = 13.3 -> 13;
+#                           上海 -> ineligible
 #                     ops   7 skills: 秀米 1 + 剪映 0.8 + Photoshop 0.8 + Excel 1 = 3.6/7 -> 51 (Excel is general:
-#                           held, but no direction); ops leads -> 100; (1785+3000)/65 = 73.6 -> 74 good
-#   ats_ui_design     tech  none held -> 0; design 6 -> 0; 面议 -> null; 0; needs_check -> poor
-#                     ops   Photoshop 0.8/6 -> 13; design -> 0; 455/65 = 7; 杭州 -> ineligible
-#   nowcoder_test_dev tech  none of the 6 test skills held -> 0; tech -> 100; 元/小时 -> null; 46 moderate
-#   official_marketing tech none held -> 0; market 2 leads, no tech skill -> 0; 元/月 -> null; 0; 校招 -> ineligible
-#                     ops   Excel 1/5 -> 20; market leads, 活动策划 is ops -> 50; (700+1500)/65 = 33.8 -> 34 weak
-#   Every other ops row: no skill held, no ops skill -> 0 and 0, ruled out by the filter -> ineligible.
+#                           held, but no direction); ops leads -> 100; 上海 -> 100;
+#                           (1530+2500+1000)/65 = 77.4 -> 77 strong
+#   ats_ui_design     tech  none held -> 0; design 6 -> 0; 面议 -> null; 杭州, remote, accepted -> 100;
+#                           1000/65 = 15.4 -> 15; needs_check -> poor
+#                     ops   Photoshop 0.8/6 -> 13; design -> 0; 杭州 -> 0; 390/65 = 6; 杭州 -> ineligible
+#   nowcoder_test_dev tech  none of the 6 test skills held -> 0; tech -> 100; 元/小时 -> null; 深圳 -> 100;
+#                           3500/65 = 53.8 -> 54 moderate
+#   official_marketing tech none held -> 0; market 2 leads, no tech skill -> 0; 元/月 -> null; 上海 -> 0; 0;
+#                           校招 -> ineligible
+#                     ops   Excel 1/5 -> 20; market leads, 活动策划 is ops -> 50; 上海 -> 100;
+#                           (600+1250+1000)/65 = 43.8 -> 44 weak
+#   Every other ops row: no skill held, no ops skill, not in 上海 -> 0, 0 and 0; ruled out by the filter.
 EXPECTED = {
-    # (sample, profile): (skills, direction, salary, total, grade)
-    ("jd/boss_intern.txt", "tech"): (52, 100, 100, 78, "strong"),
-    ("jd/shixiseng_intern.txt", "tech"): (25, 100, 100, 65, "ineligible"),
-    ("jd/nowcoder_campus.txt", "tech"): (39, 100, None, 67, "ineligible"),
-    ("jd/official_site.txt", "tech"): (8, 100, None, 50, "moderate"),
-    ("jd/experienced_hire.txt", "tech"): (0, 100, None, 46, "ineligible"),
-    ("jd-m2-3/boss_ai_product_intern.txt", "tech"): (0, 0, 100, 13, "poor"),
-    ("jd-m2-3/shixiseng_content_ops_intern.txt", "tech"): (0, 0, 100, 13, "ineligible"),
-    ("jd-m2-3/ats_ui_design_intern.txt", "tech"): (0, 0, None, 0, "poor"),
-    ("jd-m2-3/nowcoder_test_dev_intern.txt", "tech"): (0, 100, None, 46, "moderate"),
-    ("jd-m2-3/official_marketing_campus.txt", "tech"): (0, 0, None, 0, "ineligible"),
-    ("jd/boss_intern.txt", "ops"): (0, 0, None, 0, "ineligible"),
-    ("jd/shixiseng_intern.txt", "ops"): (0, 0, None, 0, "ineligible"),
-    ("jd/nowcoder_campus.txt", "ops"): (0, 0, None, 0, "ineligible"),
-    ("jd/official_site.txt", "ops"): (0, 0, None, 0, "ineligible"),
-    ("jd/experienced_hire.txt", "ops"): (0, 0, None, 0, "ineligible"),
-    ("jd-m2-3/boss_ai_product_intern.txt", "ops"): (0, 0, None, 0, "ineligible"),
-    ("jd-m2-3/shixiseng_content_ops_intern.txt", "ops"): (51, 100, None, 74, "good"),
-    ("jd-m2-3/ats_ui_design_intern.txt", "ops"): (13, 0, None, 7, "ineligible"),
-    ("jd-m2-3/nowcoder_test_dev_intern.txt", "ops"): (0, 0, None, 0, "ineligible"),
-    ("jd-m2-3/official_marketing_campus.txt", "ops"): (20, 50, None, 34, "weak"),
+    # (sample, profile): (skills, direction, salary, location, total, grade)
+    ("jd/boss_intern.txt", "tech"): (52, 100, 100, 100, 81, "strong"),
+    ("jd/shixiseng_intern.txt", "tech"): (25, 100, 100, 0, 57, "ineligible"),
+    ("jd/nowcoder_campus.txt", "tech"): (39, 100, None, 0, 56, "ineligible"),
+    ("jd/official_site.txt", "tech"): (8, 100, None, 100, 58, "moderate"),
+    ("jd/experienced_hire.txt", "tech"): (0, 100, None, 0, 38, "ineligible"),
+    ("jd-m2-3/boss_ai_product_intern.txt", "tech"): (0, 0, 100, 100, 27, "poor"),
+    ("jd-m2-3/shixiseng_content_ops_intern.txt", "tech"): (0, 0, 100, 0, 13, "ineligible"),
+    ("jd-m2-3/ats_ui_design_intern.txt", "tech"): (0, 0, None, 100, 15, "poor"),
+    ("jd-m2-3/nowcoder_test_dev_intern.txt", "tech"): (0, 100, None, 100, 54, "moderate"),
+    ("jd-m2-3/official_marketing_campus.txt", "tech"): (0, 0, None, 0, 0, "ineligible"),
+    ("jd/boss_intern.txt", "ops"): (0, 0, None, 0, 0, "ineligible"),
+    ("jd/shixiseng_intern.txt", "ops"): (0, 0, None, 100, 15, "ineligible"),
+    ("jd/nowcoder_campus.txt", "ops"): (0, 0, None, 0, 0, "ineligible"),
+    ("jd/official_site.txt", "ops"): (0, 0, None, 0, 0, "ineligible"),
+    ("jd/experienced_hire.txt", "ops"): (0, 0, None, 100, 15, "ineligible"),
+    ("jd-m2-3/boss_ai_product_intern.txt", "ops"): (0, 0, None, 0, 0, "ineligible"),
+    ("jd-m2-3/shixiseng_content_ops_intern.txt", "ops"): (51, 100, None, 100, 77, "strong"),
+    ("jd-m2-3/ats_ui_design_intern.txt", "ops"): (13, 0, None, 0, 6, "ineligible"),
+    ("jd-m2-3/nowcoder_test_dev_intern.txt", "ops"): (0, 0, None, 0, 0, "ineligible"),
+    ("jd-m2-3/official_marketing_campus.txt", "ops"): (20, 50, None, 100, 44, "weak"),
 }
 
 
@@ -476,13 +656,14 @@ class SampleTable(unittest.TestCase):
         self.assertEqual(len(EXPECTED), 20)
 
     def test_each_pair(self):
-        for (sample, name), (skills, direction, salary, total, grade) in EXPECTED.items():
+        for (sample, name), (skills, direction, salary, location, total, grade) in EXPECTED.items():
             with self.subTest(sample=sample, profile=name):
                 record = scored(job_from(sample), profile_from(name))
                 dimensions = record["dimensions"]
                 self.assertEqual((dimensions["skills"]["score"], dimensions["direction"]["score"],
-                                  dimensions["experience"]["score"], dimensions["salary"]["score"]),
-                                 (skills, direction, None, salary))
+                                  dimensions["experience"]["score"], dimensions["salary"]["score"],
+                                  dimensions["location"]["score"]),
+                                 (skills, direction, None, salary, location))
                 self.assertEqual((record["total"]["score"], record["total"]["grade"]), (total, grade))
                 self.assertEqual(score.validate(record, job_from(sample), profile_from(name), VOCABULARY), [])
 
@@ -523,13 +704,13 @@ class Commands(unittest.TestCase):
     def test_score_save_show_and_list(self):
         boss, test_dev, product, ruled_out = self.ids
         record = self.cli("match", "score", boss)
-        self.assertEqual(record["total"]["score"], 78)
+        self.assertEqual(record["total"]["score"], 81)
         self.assertFalse((self.data / "matches").exists(), "score without --save writes nothing")
         for job_id in self.ids:
             self.cli("match", "score", job_id, "--save")
         self.assertEqual(dict(self.cli("match", "show", boss), scored_at=None), dict(record, scored_at=None))
-        self.assertEqual(self.listed(), [(boss, "strong", 78, False), (test_dev, "moderate", 46, False),
-                                         (product, "poor", 13, False), (ruled_out, "ineligible", 65, False)])
+        self.assertEqual(self.listed(), [(boss, "strong", 81, False), (test_dev, "moderate", 54, False),
+                                         (product, "poor", 27, False), (ruled_out, "ineligible", 57, False)])
         self.cli("match", "show", "job_000000000000", expect=1)
 
     def test_new_weights_reorder_the_list_once_rescored(self):
@@ -537,16 +718,100 @@ class Commands(unittest.TestCase):
         for job_id in self.ids:
             self.cli("match", "score", job_id, "--save")
         before = [row[0] for row in self.listed()]
-        self.assertEqual(before, [boss, test_dev, product, ruled_out])  # 78 strong, 46 moderate, 13 poor, ineligible
+        self.assertEqual(before, [boss, test_dev, product, ruled_out])  # 81 strong, 54 moderate, 27 poor, ineligible
         self.write_profile(setting(profile_from("tech"), "target.weights",
-                                   {"skills": 10, "direction": 10, "experience": 0, "salary": 80}))
+                                   {"skills": 10, "direction": 10, "experience": 0, "salary": 80, "location": 0}))
         self.assertTrue(all(row[3] for row in self.listed()), "a changed profile makes every record stale")
         for job_id in self.ids:
             self.cli("match", "score", job_id, "--save")
-        # boss (10*52+10*100+80*100)/100 = 95.2 -> 95; product 8000/100 = 80; test_dev has no salary: 1000/20 = 50;
-        # the ruled-out job (250+1000+8000)/100 = 92.5 -> 93 still lists last.
+        # Location weighs 0 here. boss (10*52+10*100+80*100)/100 = 95.2 -> 95; product 8000/100 = 80; test_dev has no
+        # salary: 1000/20 = 50; the ruled-out job (250+1000+8000)/100 = 92.5 -> 93 still lists last.
         self.assertEqual(self.listed(), [(boss, "strong", 95, False), (product, "strong", 80, False),
                                          (test_dev, "moderate", 50, False), (ruled_out, "ineligible", 93, False)])
+
+    def snapshot(self) -> dict:
+        return {path: path.read_bytes() for path in sorted(self.data.rglob("*")) if path.is_file()}
+
+    def save_agent_experience(self, job_id: str) -> dict:
+        record = agent_filled(self.cli("match", "show", job_id))
+        path = self.data / "draft.json"
+        path.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        self.cli("match", "save", str(path))
+        path.unlink()
+        return record
+
+    def test_a_trial_writes_nothing_and_says_so(self):
+        for job_id in self.ids:
+            self.cli("match", "score", job_id, "--save")
+        listed, before = self.cli("match", "list"), self.snapshot()
+        self.assertNotIn("trial", listed)
+        self.assertNotIn("saved", listed["matches"][0])
+        out = self.cli("match", "list", "--weights", "skills=30,direction=25,experience=25,salary=10,location=40")
+        self.assertEqual(self.snapshot(), before, "a trial writes no file")
+        self.assertIn("试算", out["trial"]["note"])
+        self.assertEqual(out["trial"]["weights"], dict(score.DEFAULT_WEIGHTS, location=40))
+        self.assertEqual(out["trial"]["shares"], score.shares(dict(score.DEFAULT_WEIGHTS, location=40)))
+        self.assertEqual(out["trial"]["profile"], {"weights": score.DEFAULT_WEIGHTS, "shares": score.DEFAULT_WEIGHTS})
+        saved = {row["job_id"]: {"grade": row["grade"], "score": row["score"]} for row in listed["matches"]}
+        self.assertEqual({row["job_id"]: row["saved"] for row in out["matches"]}, saved)
+        # boss: (30*52 + 25*100 + 10*100 + 40*100) / 105 = 86.3 -> 86, from 81.
+        boss = next(row for row in out["matches"] if row["job_id"] == self.ids[0])
+        self.assertEqual((boss["grade"], boss["score"], boss["stale"]), ("strong", 86, False))
+
+    def test_a_trial_ranks_as_scoring_again_with_those_weights_does(self):
+        # The M2-6d acceptance: try the weights, then write them to the profile and score every job again.
+        boss, test_dev, product, ruled_out = self.ids
+        for job_id in self.ids:
+            self.cli("match", "score", job_id, "--save")
+        record = self.save_agent_experience(boss)
+        weights = {"skills": 10, "direction": 10, "experience": 20, "salary": 60, "location": 0}
+        text = ",".join(f"{key}={value}" for key, value in weights.items())
+        trial = [(row["job_id"], row["grade"], row["score"], row["complete"])
+                 for row in self.cli("match", "list", "--weights", text)["matches"]]
+        # boss (520+1000+1600+6000)/100 = 91.2 -> 91, which needs its experience (94 without); product
+        # 6000/80 = 75; test_dev 1000/20 = 50, so product now ranks above it; the ruled-out job 7250/80 = 90.6 -> 91.
+        self.assertEqual([row[:3] for row in trial], [(boss, "strong", 91), (product, "strong", 75),
+                                                      (test_dev, "moderate", 50), (ruled_out, "ineligible", 91)])
+        self.write_profile(setting(profile_from("tech"), "target.weights", weights))
+        self.assertEqual([row["stale_reasons"] for row in self.cli("match", "list")["matches"]],
+                         [["weights"]] * len(self.ids))
+        for job_id in self.ids:
+            self.cli("match", "score", job_id, "--save")
+        self.assertEqual(self.cli("match", "show", boss)["dimensions"]["experience"], record["dimensions"]["experience"])
+        rescored = [(row["job_id"], row["grade"], row["score"], row["complete"], row["stale"])
+                    for row in self.cli("match", "list")["matches"]]
+        self.assertEqual(rescored, [row + (False,) for row in trial])
+
+    def test_the_list_says_why_a_record_is_stale(self):
+        self.cli("match", "score", self.ids[0], "--save")
+        for path, value, reasons in (("target.weights", dict(score.DEFAULT_WEIGHTS, location=40), ["weights"]),
+                                     ("availability.days_per_week", 5, ["profile"])):
+            with self.subTest(path=path):
+                self.write_profile(setting(profile_from("tech"), path, value))
+                [row] = self.cli("match", "list")["matches"]
+                self.assertEqual((row["stale"], row["stale_reasons"]), (True, reasons))
+        self.write_profile(profile_from("tech"))
+        [row] = self.cli("match", "list")["matches"]
+        self.assertEqual((row["stale"], row["stale_reasons"]), (False, []))
+
+    def test_trial_weights_must_be_five_numbers(self):
+        self.cli("match", "score", self.ids[0], "--save")
+        before = self.snapshot()
+        for text, fragment in (
+                ("skills=30,direction=25,experience=25,salary=10", "--weights.location: missing"),
+                ("skills=30,direction=25,experience=25,salary=10,location=10,city=5", "--weights.city: unknown field"),
+                ("skills=30,direction=25,experience=25,salary=10,location=-1", "is not one dimension=number"),
+                ("skills=30,direction=25,experience=25,salary=10,location=ten", "is not one dimension=number"),
+                ("skills=30,skills=25,experience=25,salary=10,location=10", "is not one dimension=number"),
+                ('{"skills": 30, "direction": 25}', "is not one dimension=number"),
+                ("skills=0,direction=0,experience=0,salary=0,location=0", "at least one weight must be above 0")):
+            with self.subTest(text=text):
+                proc = run_cli("match", "list", "--weights", text, data_dir=self.data)
+                self.assertEqual((proc.returncode, proc.stdout), (2, b""))
+                self.assertIn(fragment, json.loads(proc.stderr)["error"])
+        self.assertEqual(self.snapshot(), before)
+        spaced = self.cli("match", "list", "--weights", "skills=1.5, direction=0, experience=0, salary=0, location=0")
+        self.assertEqual(spaced["trial"]["weights"]["skills"], 1.5)
 
     def test_validate_and_save_an_agents_record(self):
         boss = self.ids[0]

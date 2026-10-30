@@ -36,7 +36,7 @@ data/profile/
   ],
   "availability": {
     "start_date": "2026-11-15", "days_per_week": 4, "months": 6,
-    "cities": ["广州", "深圳"], "remote_ok": true, "relocate": false
+    "cities": ["广州", "深圳"], "acceptable_cities": ["佛山"], "remote_ok": true, "relocate": false
   },
   "target": {
     "employment_types": ["internship"],
@@ -70,10 +70,12 @@ data/profile/
 | `contact` | 写简历用。只存在本地；除简历外，任何输出（日志、报告、Agent 汇总）都不应复制它 |
 | `graduation` | 毕业年月。与 JD 的 `requirements.graduation.years` 比较 |
 | `education[]` | `level` 取值同 Job Schema：`associate` / `bachelor` / `master` / `phd`。最高学历用于和 JD 的 `requirements.education.min` 比较 |
-| `availability` | 可到岗日期、每周天数、可实习月数、意向城市、是否接受远程、是否愿意搬到其他城市。分别对应 JD 的 `days_per_week`、`min_months`、`cities`、`remote`。写了意向城市时，`remote_ok`、`relocate` 也要写：留空的话，意向城市以外的岗位地点都会判"未知"，`profile validate` 会给出警告 |
-| `target` | 求职方向。`employment_types` 取值同 Job Schema；`salary_min.unit` 取值同 Job Schema 的薪资单位。`directions` 是想做的方向，取[技能词表](jd-parse.md#技能词表)的分组键，例如 `["data", "product"]`；可以用自己词表里新增的分组，`general`（通用办公软件）不算方向；`profile validate` 会对照词表检查。`weights` 是评分四个维度的权重，为 null 时用默认值（技能 35、方向 30、经历 25、薪资 10）；要改就写全四项，例如 `{"skills": 40, "direction": 20, "experience": 30, "salary": 10}`，每项不小于 0，至少一项大于 0。评分方法见 [match.md](match.md#可解释评分m2-4-设计稿) |
+| `availability` | 可到岗日期、每周天数、可实习月数、意向城市、是否接受远程、是否愿意去其他城市。分别对应 JD 的 `days_per_week`、`min_months`、`cities`、`remote`，可到岗日期对应 `requirements.start`，意向城市（两档）也用来判断面试要不要出行。意向城市分两档：`cities` 是首选城市，`acceptable_cities` 是可以接受、但不是首选的城市（M2-6b），两者不能重复；硬性条件里两档都算意向城市，评分的地点维度首选记 100、可以接受记 60。`relocate` 指是否愿意去这两档以外的城市。写了意向城市时，`remote_ok`、`relocate` 也要写，留空会影响两档以外的岗位：硬性条件的地点检查可能判"未知"（另一项已经写明能远程或愿意搬家时，仍可能判符合）；评分时，`relocate` 没写，这类岗位的地点分是 0（JD 可远程、你接受远程的除外，这时是 100 分）。`profile validate` 会给出警告 |
+| `target` | 求职方向。`employment_types` 取值同 Job Schema；`salary_min.unit` 取值同 Job Schema 的薪资单位。`directions` 是想做的方向，取[技能词表](jd-parse.md#技能词表)的分组键，例如 `["data", "product"]`；可以用自己词表里新增的分组，`general`（通用办公软件）不算方向；`profile validate` 会对照词表检查。`weights` 是评分五个维度的权重，为 null 时用默认值（技能 30、方向 25、经历 25、薪资 10、地点 10）；要改就写全五项，例如 `{"skills": 40, "direction": 20, "experience": 20, "salary": 10, "location": 10}`，每项不小于 0，至少一项大于 0。改了权重，已保存的匹配记录会标为过期；重新评分时 Agent 补的经历和方向保留，只按新权重重算总分。改之前可以用 `match list --weights` 试算（M2-6d）。评分方法见 [match.md](match.md#可解释评分m2-4-设计稿) |
 | `skills[]` | `level`：`familiar`（了解）、`working`（熟悉）、`proficient`（熟练）、`expert`（精通）。`used_in` 指向用到它的经历或项目的 `id`，写简历时据此给出事实依据。收录范围见下方"填写约定" |
 | `experience[]` | 实习、项目、科研、竞赛、校园经历都放这里，用 `type` 区分：`internship` / `project` / `research` / `competition` / `campus` / `work`。`name`、`org`、`role` 的分工见下方"填写约定" |
+| `awards[]`、`certificates[]`、`languages[]` | 奖项、证书、语言 |
+| `exclusions` | 硬性排除：不去的城市（岗位的工作城市全部在其中时才排除）、不考虑的公司、标题中出现即排除的关键词（只看标题，不看正文，见 [match.md](match.md#各项条件)） |
 
 **填写约定**（2026-10-27 起，H7；两个 Agent 对同一份简历必须填得一样）：
 
@@ -86,8 +88,6 @@ data/profile/
   - 只出现在经历描述里的技术（例如只在实习描述中提到的 RAG）也收，`level` 留 `null`，`used_in` 指向出现它的经历；
   - 同一技能两处都出现时只记一条：`level` 取技能栏的写法，`used_in` 列出所有出现它的经历。
   - 技能栏里有、但没有任何经历用到的技能，`used_in` 为 `[]`。
-| `awards[]`、`certificates[]`、`languages[]` | 奖项、证书、语言 |
-| `exclusions` | 硬性排除：不去的城市、不考虑的公司、标题或正文中出现即排除的关键词 |
 
 **来源（`source`）**：经历、技能、教育、奖项等条目都带 `source`，取值是 `sources/` 下的文件名，或者 `user`（用户口述）。这与 JD 的出处规则对应：简历里没有、用户也没说过的内容不能出现在档案里。写简历时只能用档案里有的事实。
 
@@ -100,13 +100,23 @@ data/profile/
 
 ## 4. notes.md
 
-自由文本，没有固定格式，校验只检查它存在且是 UTF-8。建议的小节：
+自由文本，除了"偏好记录"一节，没有固定格式；校验只检查它存在且是 UTF-8。建议的小节：
 
 - 一句话自我介绍
 - 优势和代表性成果（每条都应能在 `profile.json` 的经历里找到）
 - 求职方向与动机
 - 工作方式和偏好的团队氛围
 - 不考虑的情况（硬性的写进 `exclusions`，这里写原因和软性偏好）
+- **偏好记录**（固定的一节，标题就写"偏好记录"）：`availability`、`target` 没有 `source` 字段，也不能自己加（`profile validate` 会报未知字段），改了其中哪一项、什么时候改的、谁说的，记在这里。一次改了几个字段就记几条，新的追加在最后，旧的不改：
+
+  ```text
+  ## 偏好记录
+
+  - 2026-10-30 · `availability.acceptable_cities` → ["佛山"] · 来源：user（"佛山也行，离家近"）
+  - 2026-10-30 · `target.weights` → {"skills": 25, "direction": 25, "experience": 20, "salary": 10, "location": 20} · 来源：user（用户确认）
+  ```
+
+  每条依次写日期（YYYY-MM-DD）、字段、新的值（照 `profile.json` 里的写法）、来源。来源写 `user`，括号里附用户的原话；用户没有原话、只是确认了 Agent 给的提议（例如换算出来的权重）时，写"用户确认"。
 
 ## 5. 建档流程 `cn-setup`
 
@@ -126,17 +136,19 @@ data/profile/
 | `requirements.education.min` | `education[]` 中的最高 `level` | 低于最低学历 |
 | `requirements.days_per_week` | `availability.days_per_week` | JD 要求的天数多于可到岗天数 |
 | `requirements.min_months` | `availability.months` | JD 要求的月数多于可实习月数 |
-| `cities` + `remote` | `availability.cities`、`remote_ok`、`relocate` | 城市不在意向中，也不能远程或搬家 |
+| `cities` + `remote` | `availability.cities`、`acceptable_cities`、`remote_ok`、`relocate` | 城市不在首选和可以接受的城市中，也不能远程或去其他城市 |
 | `employment_type` | `target.employment_types` | 不在求职方向中 |
-| 标题、公司、正文 | `exclusions` | 命中排除项 |
+| `title`、`company`、`cities` | `exclusions` | 标题含排除的关键词（只看标题，不看正文）；公司名含排除的公司；工作城市全部在排除的城市中 |
+| `requirements.start.by` | `availability.start_date` | JD 要求的最晚到岗日期早于可到岗日期 |
+| `interview` | `availability.cities` | 不判不符合；去意向城市以外的地方现场面试时，提示路费和时间成本 |
 
-JD 字段为 `null` 时结论是"未知"，不判为不符合。
+JD 字段为 `null` 时结论是"未知"，不判为不符合。面试和到岗时间的"未知"只是待确认的事项，不影响总结论（M2-6c，见 [match.md](match.md#各项条件)）。
 
 ## 7. 隐私护栏
 
 - 新增测试，检查上游 `/setup` 会写入的文件（`CLAUDE.md`、`job-application-assistant/01–08`、`cv/main_example.tex`）仍是占位符，防止有人误跑上游 `/setup` 后把个人信息提交上去；
 - 新增测试，检查 `data/profile/` 被 git 忽略；
-- CN 命令输出档案时默认隐去 `contact`，需要时显式加参数。
+- CN 命令输出档案时默认隐去 `contact`，需要时显式加参数。写错了也不漏：`contact` 不是对象（字符串、列表等）时整个隐去；`contact` 里有格式之外的字段时只给出个数（`unknown_fields`），不显示键名，因为键名本身可能就是误填的手机号或邮箱，`profile validate` 的报错也只说个数；顶层有格式之外的字段时隐去它的值；档案顶层不是对象时，`profile show` 报错，不回显内容。
 
 ## 8. 已定与待定
 
@@ -144,3 +156,5 @@ JD 字段为 `null` 时结论是"未知"，不判为不符合。
 - `experience[].name` 与上方"填写约定"（H7，2026-10-27）：M1-5 第二轮发现两个 Agent 对同一份简历的填法不同（项目名称一个放 `org`、一个放 `role`；只在经历里出现的技能一个收、一个不收），M3 生成简历前必须统一。新增 `name` 而不是规定"项目名放 `role`"，是为了让每个字段只表达一件事。Profile 尚未随任何版本发布，所以直接加入 v1，不升版本号；已有的本地档案需要为每段经历补上 `"name": null` 或项目名称，`profile validate` 会逐条提示。
 - `exclusions.keywords` 暂定只匹配岗位标题（正文容易误伤，例如"非外包岗位"），在 v0.2 硬性过滤中实现，可再讨论。
 - `target.directions` 和 `target.weights`（M2-4a，2026-10-28）：供 M2-4 评分的"方向"维度和加权总分使用。和 `experience[].name` 一样直接加入 v1，不升版本号；已有的本地档案需要在 `target` 里补上 `"directions": []`（或自己的方向）和 `"weights": null`，`profile validate` 会提示。
+- `availability.acceptable_cities` 和 `target.weights.location`（M2-6b，2026-10-29）：供评分的"地点"维度使用。同样直接加入 v1，不升版本号；已有的本地档案需要在 `availability` 里补上 `"acceptable_cities": []`（或可以接受的城市），自己写过 `weights` 的还要补上 `"location"`（写 0 就和以前算法一样），`profile validate` 会提示。`relocate` 的含义随之收窄为"愿意去首选和可以接受的城市以外的地方"。
+- 偏好怎么改（M2-6d，2026-10-30）：评一批岗位前，Agent 问用户现在看重什么，换算成 `target.weights`，用户确认后写进档案，在 `notes.md` 的"偏好记录"记一条（见 §4 和 match.md 的评分工作流）。权重不算进匹配记录里的档案摘要，所以只改权重时，重新评分不会清空 Agent 补的经历和方向。

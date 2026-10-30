@@ -1,0 +1,1439 @@
+{
+  "task": "V14",
+  "run_at_utc": "2026-10-30T05:32:37.620085+00:00",
+  "implementation_commit": "eb0ef30f813429881ad8437534813d33b0163882",
+  "python": "3.12.15",
+  "frozen_files_sha256": {
+    ".gitattributes": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+    "utterances.json": "26e1806cce46c97dd618f65bd60dbbc32d2c3e4204eb39b55d5d600a8cd8f9f1",
+    "expectations.json": "a04a280c32e990f1a6b6d17022d6c7a0bbe8b9d683157b707727b7111df4f4fd",
+    "README.md": "bbf2beb3ab8c387eb73123981d301f37e4cf13560934a106e9131a25cdc6032c",
+    "baseline.md": "9a2f6369caecc37e62783a138289f16563e116342ff9731e1eb569777d062024"
+  },
+  "manifest_sha256": "c63616dafe273103ce2c42735138a935617ff03a0e4d386ebfa1493e8a53a5d8",
+  "execution_note": "人工已选回应、澄清与模拟确认由脚本重放；实际执行 CLI 并比较文件字节，不代表模型自动遵守流程的独立盲测。",
+  "flows": [
+    {
+      "id": "v14-01",
+      "synthetic": true,
+      "events": [
+        {
+          "role": "synthetic_user",
+          "text": "请比较这两份已保存岗位。"
+        },
+        {
+          "role": "agent",
+          "text": "技能看 JD 要求是否具备，方向看是否想做，经历看做过的事是否对口，薪资看是否达到最低期望，地点看是否首选或可接受。这批最看重哪一项，有没有不太在乎的？"
+        },
+        {
+          "role": "synthetic_user",
+          "text": "这回找后端实习，我最在乎工作地点合不合心意，钱排第二。比原先多看重这两项，方向、会哪些技术、做没做过类似项目都可以各退一点；后面这三项不用硬排先后。先给我看看比例，别直接改档案。"
+        },
+        {
+          "role": "agent",
+          "text": "按当前规则，技能、方向、经历先减到 15、10、10，薪资其次为 20，地点第一为 30。按技能/方向/经历/薪资/地点顺序，原数字 30/25/25/10/10，新数字 15/10/10/20/30；占比从 30%/25%/25%/10%/10% 变为约 17.65%/11.76%/11.76%/23.53%/35.29%。地点最高、薪资第二，两项占比提高，其余降低。先看方案，确认这组数字以后才写档案。"
+        },
+        {
+          "role": "agent",
+          "text": "以下数字和占比照抄 CLI；仅试算，确认前不写入。",
+          "display": {
+            "note": "试算：按这组权重和已保存的各维度分数重新算总分、等级和排序，只输出，不改档案和匹配记录。要换成这组权重，改档案的 target.weights，再重新评分。",
+            "weights": {
+              "skills": 15,
+              "direction": 10,
+              "experience": 10,
+              "salary": 20,
+              "location": 30
+            },
+            "shares": {
+              "skills": 17.6,
+              "direction": 11.8,
+              "experience": 11.8,
+              "salary": 23.5,
+              "location": 35.3
+            },
+            "profile": {
+              "weights": {
+                "skills": 30,
+                "direction": 25,
+                "experience": 25,
+                "salary": 10,
+                "location": 10
+              },
+              "shares": {
+                "skills": 30,
+                "direction": 25,
+                "experience": 25,
+                "salary": 10,
+                "location": 10
+              }
+            }
+          },
+          "ranking": [
+            {
+              "job_id": "job_e46507ab5d14",
+              "grade": "good",
+              "score": 65,
+              "complete": true
+            },
+            {
+              "job_id": "job_dc29d8db74b8",
+              "grade": "good",
+              "score": 64,
+              "complete": true
+            }
+          ]
+        },
+        {
+          "role": "synthetic_user",
+          "text": "模拟确认：同意刚展示的五项数字及占比，写入这组权重；只追加本次偏好记录。"
+        }
+      ],
+      "profile_fixture": "tests/fixtures/cn/profile/tech",
+      "initial_profile_sha256": "f74db53b24c4c2510cbf028e325db3f9c95efa721e4bcb979a6a9a2d9fecc675",
+      "profile_migration": "none",
+      "profile_validation_before": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "profile_validation_after": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "parse_warnings": [],
+      "before": {
+        "matches": [
+          {
+            "job_id": "job_dc29d8db74b8",
+            "title": "后端开发实习生",
+            "company": "示例乙测试科技有限公司",
+            "grade": "strong",
+            "score": 88,
+            "complete": true,
+            "verdict": "needs_check",
+            "stale": false,
+            "stale_reasons": []
+          },
+          {
+            "job_id": "job_e46507ab5d14",
+            "title": "后端开发实习生",
+            "company": "示例甲测试科技有限公司",
+            "grade": "good",
+            "score": 68,
+            "complete": true,
+            "verdict": "eligible",
+            "stale": false,
+            "stale_reasons": []
+          }
+        ],
+        "warnings": []
+      },
+      "trial": {
+        "trial": {
+          "note": "试算：按这组权重和已保存的各维度分数重新算总分、等级和排序，只输出，不改档案和匹配记录。要换成这组权重，改档案的 target.weights，再重新评分。",
+          "weights": {
+            "skills": 15,
+            "direction": 10,
+            "experience": 10,
+            "salary": 20,
+            "location": 30
+          },
+          "shares": {
+            "skills": 17.6,
+            "direction": 11.8,
+            "experience": 11.8,
+            "salary": 23.5,
+            "location": 35.3
+          },
+          "profile": {
+            "weights": {
+              "skills": 30,
+              "direction": 25,
+              "experience": 25,
+              "salary": 10,
+              "location": 10
+            },
+            "shares": {
+              "skills": 30,
+              "direction": 25,
+              "experience": 25,
+              "salary": 10,
+              "location": 10
+            }
+          }
+        },
+        "matches": [
+          {
+            "job_id": "job_e46507ab5d14",
+            "title": "后端开发实习生",
+            "company": "示例甲测试科技有限公司",
+            "grade": "good",
+            "score": 65,
+            "complete": true,
+            "verdict": "eligible",
+            "stale": false,
+            "stale_reasons": [],
+            "saved": {
+              "grade": "good",
+              "score": 68
+            }
+          },
+          {
+            "job_id": "job_dc29d8db74b8",
+            "title": "后端开发实习生",
+            "company": "示例乙测试科技有限公司",
+            "grade": "good",
+            "score": 64,
+            "complete": true,
+            "verdict": "needs_check",
+            "stale": false,
+            "stale_reasons": [],
+            "saved": {
+              "grade": "strong",
+              "score": 88
+            }
+          }
+        ],
+        "warnings": []
+      },
+      "stale_after_confirmation": {
+        "matches": [
+          {
+            "job_id": "job_dc29d8db74b8",
+            "title": "后端开发实习生",
+            "company": "示例乙测试科技有限公司",
+            "grade": "strong",
+            "score": 88,
+            "complete": true,
+            "verdict": "needs_check",
+            "stale": true,
+            "stale_reasons": [
+              "weights"
+            ]
+          },
+          {
+            "job_id": "job_e46507ab5d14",
+            "title": "后端开发实习生",
+            "company": "示例甲测试科技有限公司",
+            "grade": "good",
+            "score": 68,
+            "complete": true,
+            "verdict": "eligible",
+            "stale": true,
+            "stale_reasons": [
+              "weights"
+            ]
+          }
+        ],
+        "warnings": []
+      },
+      "after": {
+        "matches": [
+          {
+            "job_id": "job_e46507ab5d14",
+            "title": "后端开发实习生",
+            "company": "示例甲测试科技有限公司",
+            "grade": "good",
+            "score": 65,
+            "complete": true,
+            "verdict": "eligible",
+            "stale": false,
+            "stale_reasons": []
+          },
+          {
+            "job_id": "job_dc29d8db74b8",
+            "title": "后端开发实习生",
+            "company": "示例乙测试科技有限公司",
+            "grade": "good",
+            "score": 64,
+            "complete": true,
+            "verdict": "needs_check",
+            "stale": false,
+            "stale_reasons": []
+          }
+        ],
+        "warnings": []
+      },
+      "trial_files_before": {
+        "jobs/job_dc29d8db74b8.json": "1238c9a7af28088513086e99988f079c98c8db97400dccd765021eb96fb13f9f",
+        "jobs/job_e46507ab5d14.json": "a62674621752f9a20ff6e9504c302c0233078b494e2b6816c360ab503486470a",
+        "matches/drafts/job_dc29d8db74b8.json": "5feecb12b758e5b5c4bb96560e780d63165347a3ec9967136d33d62c760614e7",
+        "matches/drafts/job_e46507ab5d14.json": "4352cdf0490a7f517e2492e045365d30426009477ff571957dcb21fc82cf75d5",
+        "matches/job_dc29d8db74b8.json": "332b3ef476def24db102498b2d9c8d798eef47633cbcac0fac39fffc63b59dcf",
+        "matches/job_e46507ab5d14.json": "786f3db21b07fe8668e3adf3a397fb707a6db6af19f1f96c98f3f4ba20a3dd1e",
+        "profile/notes.md": "3b2d45206fbcc80979e4e29af952f22d0ce0ce5b3da0c377601bfa48391df761",
+        "profile/profile.json": "f74db53b24c4c2510cbf028e325db3f9c95efa721e4bcb979a6a9a2d9fecc675",
+        "profile/sources/resume.txt": "0627da95aa3e4c717480cdb06e45200f7b99421ae8fd20f0f54090cf8f4080d2"
+      },
+      "trial_files_after": {
+        "jobs/job_dc29d8db74b8.json": "1238c9a7af28088513086e99988f079c98c8db97400dccd765021eb96fb13f9f",
+        "jobs/job_e46507ab5d14.json": "a62674621752f9a20ff6e9504c302c0233078b494e2b6816c360ab503486470a",
+        "matches/drafts/job_dc29d8db74b8.json": "5feecb12b758e5b5c4bb96560e780d63165347a3ec9967136d33d62c760614e7",
+        "matches/drafts/job_e46507ab5d14.json": "4352cdf0490a7f517e2492e045365d30426009477ff571957dcb21fc82cf75d5",
+        "matches/job_dc29d8db74b8.json": "332b3ef476def24db102498b2d9c8d798eef47633cbcac0fac39fffc63b59dcf",
+        "matches/job_e46507ab5d14.json": "786f3db21b07fe8668e3adf3a397fb707a6db6af19f1f96c98f3f4ba20a3dd1e",
+        "profile/notes.md": "3b2d45206fbcc80979e4e29af952f22d0ce0ce5b3da0c377601bfa48391df761",
+        "profile/profile.json": "f74db53b24c4c2510cbf028e325db3f9c95efa721e4bcb979a6a9a2d9fecc675",
+        "profile/sources/resume.txt": "0627da95aa3e4c717480cdb06e45200f7b99421ae8fd20f0f54090cf8f4080d2"
+      },
+      "trial_changed_files": [],
+      "confirmation_changed_files": [
+        "profile/notes.md",
+        "profile/profile.json"
+      ],
+      "only_target_weights_changed": true,
+      "notes_append_only": true,
+      "note_entry": "- 2026-10-30 · `target.weights` → {\"skills\": 15, \"direction\": 10, \"experience\": 10, \"salary\": 20, \"location\": 30} · 来源：user（模拟确认，非真实用户；原意：这回找后端实习，我最在乎工作地点合不合心意，钱排第二。比原先多看重这两项，方向、会哪些技术、做没做过类似项目都可以各退一点；后面这三项不用硬排先后。先给我看看比例，别直接改档案。；模拟确认：同意刚展示的五项数字及占比，写入这组权重；只追加本次偏好记录。）\n",
+      "profiles_untouched_until_confirmation": true,
+      "dimensions_preserved": true,
+      "profile_hash_preserved": true,
+      "rescore_equals_trial": true,
+      "ranking_changed": true,
+      "judgments": {
+        "job_e46507ab5d14": {
+          "before": {
+            "score": 60,
+            "method": "agent",
+            "reason": "示例经历 exp-1 有 Python 检索评测脚本、proj-1 有 MySQL 项目；可迁移到接口测试数据整理，未声称做过同一测试工作。",
+            "hints": [
+              {
+                "jd": "Python",
+                "profile": [
+                  "exp-1"
+                ]
+              },
+              {
+                "jd": "MySQL",
+                "profile": [
+                  "proj-1"
+                ]
+              }
+            ],
+            "evidence": {
+              "jd": [
+                "使用 Python 和 MySQL 整理接口测试数据。"
+              ],
+              "profile": [
+                "exp-1",
+                "proj-1"
+              ]
+            }
+          },
+          "after": {
+            "score": 60,
+            "method": "agent",
+            "reason": "示例经历 exp-1 有 Python 检索评测脚本、proj-1 有 MySQL 项目；可迁移到接口测试数据整理，未声称做过同一测试工作。",
+            "hints": [
+              {
+                "jd": "Python",
+                "profile": [
+                  "exp-1"
+                ]
+              },
+              {
+                "jd": "MySQL",
+                "profile": [
+                  "proj-1"
+                ]
+              }
+            ],
+            "evidence": {
+              "jd": [
+                "使用 Python 和 MySQL 整理接口测试数据。"
+              ],
+              "profile": [
+                "exp-1",
+                "proj-1"
+              ]
+            }
+          }
+        },
+        "job_dc29d8db74b8": {
+          "before": {
+            "score": 90,
+            "method": "agent",
+            "reason": "示例经历 exp-1 用 Go 重构订单查询接口，也使用 Python；与此职责同类。",
+            "hints": [
+              {
+                "jd": "Go",
+                "profile": [
+                  "exp-1"
+                ]
+              },
+              {
+                "jd": "Python",
+                "profile": [
+                  "exp-1"
+                ]
+              }
+            ],
+            "evidence": {
+              "jd": [
+                "使用 Go 和 Python 开发订单查询接口。"
+              ],
+              "profile": [
+                "exp-1"
+              ]
+            }
+          },
+          "after": {
+            "score": 90,
+            "method": "agent",
+            "reason": "示例经历 exp-1 用 Go 重构订单查询接口，也使用 Python；与此职责同类。",
+            "hints": [
+              {
+                "jd": "Go",
+                "profile": [
+                  "exp-1"
+                ]
+              },
+              {
+                "jd": "Python",
+                "profile": [
+                  "exp-1"
+                ]
+              }
+            ],
+            "evidence": {
+              "jd": [
+                "使用 Go 和 Python 开发订单查询接口。"
+              ],
+              "profile": [
+                "exp-1"
+              ]
+            }
+          }
+        }
+      },
+      "commands": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "profile",
+            "validate",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "jd",
+            "parse",
+            "<fixtures>\\flow-jobs.txt",
+            "--save",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "jd",
+            "show",
+            "job_e46507ab5d14",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "score",
+            "job_e46507ab5d14",
+            "--draft",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "validate",
+            "<data-dir>\\matches\\drafts\\job_e46507ab5d14.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 1
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "validate",
+            "<data-dir>\\matches\\drafts\\job_e46507ab5d14.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "save",
+            "<data-dir>\\matches\\drafts\\job_e46507ab5d14.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "show",
+            "job_e46507ab5d14",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "jd",
+            "show",
+            "job_dc29d8db74b8",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "score",
+            "job_dc29d8db74b8",
+            "--draft",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "validate",
+            "<data-dir>\\matches\\drafts\\job_dc29d8db74b8.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 1
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "validate",
+            "<data-dir>\\matches\\drafts\\job_dc29d8db74b8.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "save",
+            "<data-dir>\\matches\\drafts\\job_dc29d8db74b8.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "show",
+            "job_dc29d8db74b8",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "list",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "profile",
+            "show",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "list",
+            "--weights",
+            "skills=15,direction=10,experience=10,salary=20,location=30",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "profile",
+            "validate",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "list",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "score",
+            "job_e46507ab5d14",
+            "--save",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "show",
+            "job_e46507ab5d14",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "score",
+            "job_dc29d8db74b8",
+            "--save",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "show",
+            "job_dc29d8db74b8",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "list",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "id": "v14-05",
+      "synthetic": true,
+      "events": [
+        {
+          "role": "synthetic_user",
+          "text": "请比较这两份已保存岗位。"
+        },
+        {
+          "role": "agent",
+          "text": "技能看 JD 要求是否具备，方向看是否想做，经历看做过的事是否对口，薪资看是否达到最低期望，地点看是否首选或可接受。这批最看重哪一项，有没有不太在乎的？"
+        },
+        {
+          "role": "synthetic_user",
+          "text": "我现在就是工资第一，地点得排在工资后头。可地点又必须比工资更重要，我前面那个工资第一也没说错，这两条都要算进去。"
+        },
+        {
+          "role": "agent",
+          "text": "您同时要求薪资高于地点、地点又高于薪资，这两个排序不能同时成立。请明确哪项排第一；或者您是想把地点设成必须满足的城市条件，再在符合的岗位里比较薪资？如果是城市门槛，还需要明确城市并按建档流程单独确认。在澄清前我保留原档案，不猜数字。"
+        },
+        {
+          "role": "synthetic_user",
+          "text": "模拟用户：我刚才说反了，地点第一，薪资第二，两项比原来重要；其余三项保留原来的数字就好。地点不是必须满足的城市门槛，只是排序偏好。先试算给我看。"
+        },
+        {
+          "role": "agent",
+          "text": "以下数字和占比照抄 CLI；仅试算，确认前不写入。",
+          "display": {
+            "note": "试算：按这组权重和已保存的各维度分数重新算总分、等级和排序，只输出，不改档案和匹配记录。要换成这组权重，改档案的 target.weights，再重新评分。",
+            "weights": {
+              "skills": 30,
+              "direction": 25,
+              "experience": 25,
+              "salary": 35,
+              "location": 45
+            },
+            "shares": {
+              "skills": 18.8,
+              "direction": 15.6,
+              "experience": 15.6,
+              "salary": 21.9,
+              "location": 28.1
+            },
+            "profile": {
+              "weights": {
+                "skills": 30,
+                "direction": 25,
+                "experience": 25,
+                "salary": 10,
+                "location": 10
+              },
+              "shares": {
+                "skills": 30,
+                "direction": 25,
+                "experience": 25,
+                "salary": 10,
+                "location": 10
+              }
+            }
+          },
+          "ranking": [
+            {
+              "job_id": "job_dc29d8db74b8",
+              "grade": "good",
+              "score": 70,
+              "complete": true
+            },
+            {
+              "job_id": "job_e46507ab5d14",
+              "grade": "good",
+              "score": 64,
+              "complete": true
+            }
+          ]
+        },
+        {
+          "role": "synthetic_user",
+          "text": "模拟确认：同意刚展示的五项数字及占比，写入这组权重；只追加本次偏好记录。"
+        }
+      ],
+      "profile_fixture": "tests/fixtures/cn/profile/tech",
+      "initial_profile_sha256": "f74db53b24c4c2510cbf028e325db3f9c95efa721e4bcb979a6a9a2d9fecc675",
+      "profile_migration": "none",
+      "profile_validation_before": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "profile_validation_after": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "parse_warnings": [],
+      "before": {
+        "matches": [
+          {
+            "job_id": "job_dc29d8db74b8",
+            "title": "后端开发实习生",
+            "company": "示例乙测试科技有限公司",
+            "grade": "strong",
+            "score": 88,
+            "complete": true,
+            "verdict": "needs_check",
+            "stale": false,
+            "stale_reasons": []
+          },
+          {
+            "job_id": "job_e46507ab5d14",
+            "title": "后端开发实习生",
+            "company": "示例甲测试科技有限公司",
+            "grade": "good",
+            "score": 68,
+            "complete": true,
+            "verdict": "eligible",
+            "stale": false,
+            "stale_reasons": []
+          }
+        ],
+        "warnings": []
+      },
+      "trial": {
+        "trial": {
+          "note": "试算：按这组权重和已保存的各维度分数重新算总分、等级和排序，只输出，不改档案和匹配记录。要换成这组权重，改档案的 target.weights，再重新评分。",
+          "weights": {
+            "skills": 30,
+            "direction": 25,
+            "experience": 25,
+            "salary": 35,
+            "location": 45
+          },
+          "shares": {
+            "skills": 18.8,
+            "direction": 15.6,
+            "experience": 15.6,
+            "salary": 21.9,
+            "location": 28.1
+          },
+          "profile": {
+            "weights": {
+              "skills": 30,
+              "direction": 25,
+              "experience": 25,
+              "salary": 10,
+              "location": 10
+            },
+            "shares": {
+              "skills": 30,
+              "direction": 25,
+              "experience": 25,
+              "salary": 10,
+              "location": 10
+            }
+          }
+        },
+        "matches": [
+          {
+            "job_id": "job_dc29d8db74b8",
+            "title": "后端开发实习生",
+            "company": "示例乙测试科技有限公司",
+            "grade": "good",
+            "score": 70,
+            "complete": true,
+            "verdict": "needs_check",
+            "stale": false,
+            "stale_reasons": [],
+            "saved": {
+              "grade": "strong",
+              "score": 88
+            }
+          },
+          {
+            "job_id": "job_e46507ab5d14",
+            "title": "后端开发实习生",
+            "company": "示例甲测试科技有限公司",
+            "grade": "good",
+            "score": 64,
+            "complete": true,
+            "verdict": "eligible",
+            "stale": false,
+            "stale_reasons": [],
+            "saved": {
+              "grade": "good",
+              "score": 68
+            }
+          }
+        ],
+        "warnings": []
+      },
+      "stale_after_confirmation": {
+        "matches": [
+          {
+            "job_id": "job_dc29d8db74b8",
+            "title": "后端开发实习生",
+            "company": "示例乙测试科技有限公司",
+            "grade": "strong",
+            "score": 88,
+            "complete": true,
+            "verdict": "needs_check",
+            "stale": true,
+            "stale_reasons": [
+              "weights"
+            ]
+          },
+          {
+            "job_id": "job_e46507ab5d14",
+            "title": "后端开发实习生",
+            "company": "示例甲测试科技有限公司",
+            "grade": "good",
+            "score": 68,
+            "complete": true,
+            "verdict": "eligible",
+            "stale": true,
+            "stale_reasons": [
+              "weights"
+            ]
+          }
+        ],
+        "warnings": []
+      },
+      "after": {
+        "matches": [
+          {
+            "job_id": "job_dc29d8db74b8",
+            "title": "后端开发实习生",
+            "company": "示例乙测试科技有限公司",
+            "grade": "good",
+            "score": 70,
+            "complete": true,
+            "verdict": "needs_check",
+            "stale": false,
+            "stale_reasons": []
+          },
+          {
+            "job_id": "job_e46507ab5d14",
+            "title": "后端开发实习生",
+            "company": "示例甲测试科技有限公司",
+            "grade": "good",
+            "score": 64,
+            "complete": true,
+            "verdict": "eligible",
+            "stale": false,
+            "stale_reasons": []
+          }
+        ],
+        "warnings": []
+      },
+      "trial_files_before": {
+        "jobs/job_dc29d8db74b8.json": "834e64dd745bdf61f70477367cee52a1cc9abb7bd0a5c69f8a3853ce8652e424",
+        "jobs/job_e46507ab5d14.json": "165fa797aea1ec0b0c2ce1a8ee08f6cd097bef1138f623bcb0da268369deaf73",
+        "matches/drafts/job_dc29d8db74b8.json": "51a38b3968dbd4fd0f11cc55c979ea564a66400f4529ec3608a102a483ad655a",
+        "matches/drafts/job_e46507ab5d14.json": "1f7224e1a16f275dd9ed6ca04e67e92a8429f581704643d7b956a6e1af619870",
+        "matches/job_dc29d8db74b8.json": "e5f7eadd93224ecdcdfaac3bae724c88b72897bcbed016b1be6254d5206acd30",
+        "matches/job_e46507ab5d14.json": "e6e0f2b639ef8d5e36c9689a6ef61902ff71f5ee752ca1a0873d9f53633c0bb0",
+        "profile/notes.md": "3b2d45206fbcc80979e4e29af952f22d0ce0ce5b3da0c377601bfa48391df761",
+        "profile/profile.json": "f74db53b24c4c2510cbf028e325db3f9c95efa721e4bcb979a6a9a2d9fecc675",
+        "profile/sources/resume.txt": "0627da95aa3e4c717480cdb06e45200f7b99421ae8fd20f0f54090cf8f4080d2"
+      },
+      "trial_files_after": {
+        "jobs/job_dc29d8db74b8.json": "834e64dd745bdf61f70477367cee52a1cc9abb7bd0a5c69f8a3853ce8652e424",
+        "jobs/job_e46507ab5d14.json": "165fa797aea1ec0b0c2ce1a8ee08f6cd097bef1138f623bcb0da268369deaf73",
+        "matches/drafts/job_dc29d8db74b8.json": "51a38b3968dbd4fd0f11cc55c979ea564a66400f4529ec3608a102a483ad655a",
+        "matches/drafts/job_e46507ab5d14.json": "1f7224e1a16f275dd9ed6ca04e67e92a8429f581704643d7b956a6e1af619870",
+        "matches/job_dc29d8db74b8.json": "e5f7eadd93224ecdcdfaac3bae724c88b72897bcbed016b1be6254d5206acd30",
+        "matches/job_e46507ab5d14.json": "e6e0f2b639ef8d5e36c9689a6ef61902ff71f5ee752ca1a0873d9f53633c0bb0",
+        "profile/notes.md": "3b2d45206fbcc80979e4e29af952f22d0ce0ce5b3da0c377601bfa48391df761",
+        "profile/profile.json": "f74db53b24c4c2510cbf028e325db3f9c95efa721e4bcb979a6a9a2d9fecc675",
+        "profile/sources/resume.txt": "0627da95aa3e4c717480cdb06e45200f7b99421ae8fd20f0f54090cf8f4080d2"
+      },
+      "trial_changed_files": [],
+      "confirmation_changed_files": [
+        "profile/notes.md",
+        "profile/profile.json"
+      ],
+      "only_target_weights_changed": true,
+      "notes_append_only": true,
+      "note_entry": "- 2026-10-30 · `target.weights` → {\"skills\": 30, \"direction\": 25, \"experience\": 25, \"salary\": 35, \"location\": 45} · 来源：user（模拟确认，非真实用户；原意：我现在就是工资第一，地点得排在工资后头。可地点又必须比工资更重要，我前面那个工资第一也没说错，这两条都要算进去。；澄清：模拟用户：我刚才说反了，地点第一，薪资第二，两项比原来重要；其余三项保留原来的数字就好。地点不是必须满足的城市门槛，只是排序偏好。先试算给我看。；模拟确认：同意刚展示的五项数字及占比，写入这组权重；只追加本次偏好记录。）\n",
+      "profiles_untouched_until_confirmation": true,
+      "dimensions_preserved": true,
+      "profile_hash_preserved": true,
+      "rescore_equals_trial": true,
+      "ranking_changed": false,
+      "judgments": {
+        "job_e46507ab5d14": {
+          "before": {
+            "score": 60,
+            "method": "agent",
+            "reason": "示例经历 exp-1 有 Python 检索评测脚本、proj-1 有 MySQL 项目；可迁移到接口测试数据整理，未声称做过同一测试工作。",
+            "hints": [
+              {
+                "jd": "Python",
+                "profile": [
+                  "exp-1"
+                ]
+              },
+              {
+                "jd": "MySQL",
+                "profile": [
+                  "proj-1"
+                ]
+              }
+            ],
+            "evidence": {
+              "jd": [
+                "使用 Python 和 MySQL 整理接口测试数据。"
+              ],
+              "profile": [
+                "exp-1",
+                "proj-1"
+              ]
+            }
+          },
+          "after": {
+            "score": 60,
+            "method": "agent",
+            "reason": "示例经历 exp-1 有 Python 检索评测脚本、proj-1 有 MySQL 项目；可迁移到接口测试数据整理，未声称做过同一测试工作。",
+            "hints": [
+              {
+                "jd": "Python",
+                "profile": [
+                  "exp-1"
+                ]
+              },
+              {
+                "jd": "MySQL",
+                "profile": [
+                  "proj-1"
+                ]
+              }
+            ],
+            "evidence": {
+              "jd": [
+                "使用 Python 和 MySQL 整理接口测试数据。"
+              ],
+              "profile": [
+                "exp-1",
+                "proj-1"
+              ]
+            }
+          }
+        },
+        "job_dc29d8db74b8": {
+          "before": {
+            "score": 90,
+            "method": "agent",
+            "reason": "示例经历 exp-1 用 Go 重构订单查询接口，也使用 Python；与此职责同类。",
+            "hints": [
+              {
+                "jd": "Go",
+                "profile": [
+                  "exp-1"
+                ]
+              },
+              {
+                "jd": "Python",
+                "profile": [
+                  "exp-1"
+                ]
+              }
+            ],
+            "evidence": {
+              "jd": [
+                "使用 Go 和 Python 开发订单查询接口。"
+              ],
+              "profile": [
+                "exp-1"
+              ]
+            }
+          },
+          "after": {
+            "score": 90,
+            "method": "agent",
+            "reason": "示例经历 exp-1 用 Go 重构订单查询接口，也使用 Python；与此职责同类。",
+            "hints": [
+              {
+                "jd": "Go",
+                "profile": [
+                  "exp-1"
+                ]
+              },
+              {
+                "jd": "Python",
+                "profile": [
+                  "exp-1"
+                ]
+              }
+            ],
+            "evidence": {
+              "jd": [
+                "使用 Go 和 Python 开发订单查询接口。"
+              ],
+              "profile": [
+                "exp-1"
+              ]
+            }
+          }
+        }
+      },
+      "commands": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "profile",
+            "validate",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "jd",
+            "parse",
+            "<fixtures>\\flow-jobs.txt",
+            "--save",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "jd",
+            "show",
+            "job_e46507ab5d14",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "score",
+            "job_e46507ab5d14",
+            "--draft",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "validate",
+            "<data-dir>\\matches\\drafts\\job_e46507ab5d14.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 1
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "validate",
+            "<data-dir>\\matches\\drafts\\job_e46507ab5d14.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "save",
+            "<data-dir>\\matches\\drafts\\job_e46507ab5d14.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "show",
+            "job_e46507ab5d14",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "jd",
+            "show",
+            "job_dc29d8db74b8",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "score",
+            "job_dc29d8db74b8",
+            "--draft",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "validate",
+            "<data-dir>\\matches\\drafts\\job_dc29d8db74b8.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 1
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "validate",
+            "<data-dir>\\matches\\drafts\\job_dc29d8db74b8.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "save",
+            "<data-dir>\\matches\\drafts\\job_dc29d8db74b8.json",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "show",
+            "job_dc29d8db74b8",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "list",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "profile",
+            "show",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "list",
+            "--weights",
+            "skills=30,direction=25,experience=25,salary=35,location=45",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "profile",
+            "validate",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "list",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "score",
+            "job_e46507ab5d14",
+            "--save",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "show",
+            "job_e46507ab5d14",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "score",
+            "job_dc29d8db74b8",
+            "--save",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "show",
+            "job_dc29d8db74b8",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "jobsearch_cn",
+            "match",
+            "list",
+            "--data-dir",
+            "<data-dir>"
+          ],
+          "exit_code": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "fixture": "online_backend_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "other",
+  "method": "agent",
+  "basis": "首次运行前依据原创文本、Job Schema v1 与现行七项过滤契约独立写定；新字段另见 scheduling-oracles.json。",
+  "fields": {
+    "title": {"value": "服务接口研发实习生", "evidence": ["职位名称：服务接口研发实习生"]},
+    "company": {"value": "示例澄律软件有限公司", "evidence": ["公司名称：示例澄律软件有限公司"]},
+    "cities": {"value": ["广州"], "evidence": ["工作地点：广州"]},
+    "remote": {"value": false, "evidence": ["不支持远程办公"]},
+    "employment_type": {"value": "internship", "evidence": ["服务接口研发实习生"]},
+    "salary": {"value": {"min": 220, "max": 300, "unit": "CNY/day", "months": null, "negotiable": false}, "evidence": ["薪资：220-300元/天"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": true}, "evidence": ["仅面向2027届"]},
+    "requirements.days_per_week": {"value": 4, "evidence": ["每周至少到岗4天"]},
+    "requirements.min_months": {"value": 6, "evidence": ["连续实习6个月以上"]},
+    "requirements.education": {"value": {"min": "bachelor", "preferred": null}, "evidence": ["本科及以上学历"]},
+    "requirements.skills": {"value": ["Python", "MySQL", "Docker"], "evidence": ["技能要求：熟悉 Python、MySQL、Docker。"]},
+    "return_offer": {"value": true, "evidence": ["表现优秀者可转正"]},
+    "published_at": {"value": "2026-10-29", "evidence": ["发布日期：2026-10-29"]},
+    "deadline": {"value": null, "evidence": [], "note": "到岗期限不是报名截止日期。"}
+  },
+  "traps": [
+    {"text": "全程线上视频面试，不安排现场面试", "interpretation": "只有线上视频面试；否定现场面试不增加现场形式。"},
+    {"text": "不支持远程办公", "interpretation": "线上面试不能覆盖明确的现场办公要求。"},
+    {"text": "2026年11月20日前到岗（含当日）", "interpretation": "是包含11月20日的最晚到岗日期，不是报名截止日期。"}
+  ],
+  "human_match": {
+    "tech": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"}, "education": {"result": "match", "reason": "硕士高于本科最低要求。"}, "days_per_week": {"result": "match", "reason": "可4天，达到4天。"}, "min_months": {"result": "match", "reason": "可6个月，达到6个月。"}, "location": {"result": "match", "reason": "广州在意向城市内。"}, "employment_type": {"result": "match", "reason": "实习在目标类型内。"}, "exclusions": {"result": "match", "reason": "未命中排除项。"}
+    }},
+    "ops": {"verdict": "ineligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"}, "education": {"result": "match", "reason": "本科达到要求。"}, "days_per_week": {"result": "conflict", "reason": "可3天，小于4天。"}, "min_months": {"result": "conflict", "reason": "可3个月，小于6个月。"}, "location": {"result": "conflict", "reason": "只选上海且不搬家，岗位不支持远程。"}, "employment_type": {"result": "match", "reason": "实习在目标类型内。"}, "exclusions": {"result": "match", "reason": "未命中排除项。"}
+    }}
+  }
+}

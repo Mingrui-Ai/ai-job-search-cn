@@ -1,0 +1,941 @@
+{
+  "target_commit": "52fa55500c5e2eb98d7968ab44a50bf51f9b0a2c",
+  "archive_sha256": "25ba07cc6beff45556ac5d2352f75d91e95d7f3560ae2f1e6e766c8b9be67e02",
+  "manifest_sha256": "312d55e1a4908a038383e740198cba96b8a93cf6d95a5113ae662cf13b51bf54",
+  "mapping_sha256": "8ff7add79297d4bb0bab192eb02cec470976bf91f5b674bb2d43bd6a4a853e65",
+  "python_version": "3.12.15",
+  "started_at_utc": "2026-10-30T04:44:31.581260+00:00",
+  "cases": {
+    "mixed_recruiting_intern": {
+      "old_field_differences": {
+        "requirements.skills": {
+          "type": "missing",
+          "expected": [
+            "Excel",
+            "Word"
+          ],
+          "actual": [
+            "Excel"
+          ],
+          "missing_normalized": [
+            "word"
+          ],
+          "extra_normalized": []
+        }
+      },
+      "new_field_differences": {
+        "interview.mode": {
+          "type": "wrong",
+          "expected": "mixed",
+          "actual": "online",
+          "missing_normalized": [],
+          "extra_normalized": []
+        },
+        "interview.cities": {
+          "type": "missing",
+          "expected": [
+            "杭州"
+          ],
+          "actual": [],
+          "missing_normalized": [
+            "杭州"
+          ],
+          "extra_normalized": [],
+          "unknown_expected": false,
+          "unknown_actual": false
+        }
+      },
+      "new_values": {
+        "interview": {
+          "mode": "online",
+          "cities": []
+        },
+        "start": {
+          "by": "2026-12-31",
+          "asap": false
+        }
+      },
+      "new_evidence": {
+        "interview": {
+          "value": {
+            "mode": "online",
+            "cities": []
+          },
+          "evidence": {
+            "text": "面试流程：第一轮为电话面试",
+            "method": "rule"
+          },
+          "verbatim": true
+        },
+        "requirements.start": {
+          "value": {
+            "by": "2026-12-31",
+            "asap": false
+          },
+          "evidence": {
+            "text": "到岗安排：2026年12月入职",
+            "method": "rule"
+          },
+          "verbatim": true
+        }
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "ineligible",
+              "actual_verdict": "ineligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              }
+            },
+            "mapped_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "frozen_scenario_differences": {
+              "interview": {
+                "frozen": "conflict",
+                "actual": "match"
+              }
+            },
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "",
+            "travel_note_ok": false,
+            "inference_reason": "JD 要求 2026-12-31 前到岗，你 2026-11-15 就能到岗",
+            "inference_note_ok": null
+          },
+          "manual": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "ineligible",
+              "actual_verdict": "ineligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              }
+            },
+            "mapped_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "frozen_scenario_differences": {
+              "interview": {
+                "frozen": "conflict",
+                "actual": "match"
+              }
+            },
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "要去杭州面试，有路费和时间成本",
+            "travel_note_ok": true,
+            "inference_reason": "JD 要求 2026-12-31 前到岗，你 2026-11-15 就能到岗",
+            "inference_note_ok": null
+          }
+        },
+        "ops": {
+          "parsed": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {
+              "interview": {
+                "frozen": "conflict",
+                "actual": "match"
+              }
+            },
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "",
+            "travel_note_ok": false,
+            "inference_reason": "JD 要求 2026-12-31 前到岗，你 2026-12-01 就能到岗",
+            "inference_note_ok": null
+          },
+          "manual": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {
+              "interview": {
+                "frozen": "conflict",
+                "actual": "match"
+              }
+            },
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "要去杭州面试，有路费和时间成本",
+            "travel_note_ok": true,
+            "inference_reason": "JD 要求 2026-12-31 前到岗，你 2026-12-01 就能到岗",
+            "inference_note_ok": null
+          }
+        }
+      }
+    },
+    "online_backend_intern": {
+      "old_field_differences": {},
+      "new_field_differences": {},
+      "new_values": {
+        "interview": {
+          "mode": "online",
+          "cities": []
+        },
+        "start": {
+          "by": "2026-11-20",
+          "asap": false
+        }
+      },
+      "new_evidence": {
+        "interview": {
+          "value": {
+            "mode": "online",
+            "cities": []
+          },
+          "evidence": {
+            "text": "面试安排：全程线上视频面试",
+            "method": "rule"
+          },
+          "verbatim": true
+        },
+        "requirements.start": {
+          "value": {
+            "by": "2026-11-20",
+            "asap": false
+          },
+          "evidence": {
+            "text": "到岗要求：2026年11月20日前到岗（含当日）",
+            "method": "rule"
+          },
+          "verbatim": true
+        }
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {},
+            "frozen_scenario_verdict": "eligible",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 要求 2026-11-20 前到岗，你 2026-11-15 就能到岗",
+            "inference_note_ok": null
+          },
+          "manual": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {},
+            "frozen_scenario_verdict": "eligible",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 要求 2026-11-20 前到岗，你 2026-11-15 就能到岗",
+            "inference_note_ok": null
+          }
+        },
+        "ops": {
+          "parsed": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "ineligible",
+              "actual_verdict": "ineligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "conflict",
+                "actual": "conflict",
+                "match": true
+              }
+            },
+            "mapped_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "frozen_scenario_differences": {},
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 要求 2026-11-20 前到岗，你 2026-12-01 才能到岗",
+            "inference_note_ok": null
+          },
+          "manual": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "ineligible",
+              "actual_verdict": "ineligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "conflict",
+                "actual": "conflict",
+                "match": true
+              }
+            },
+            "mapped_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "frozen_scenario_differences": {},
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 要求 2026-11-20 前到岗，你 2026-12-01 才能到岗",
+            "inference_note_ok": null
+          }
+        }
+      }
+    },
+    "onsite_finance_intern": {
+      "old_field_differences": {},
+      "new_field_differences": {
+        "interview.cities": {
+          "type": "missing",
+          "expected": [
+            "南京"
+          ],
+          "actual": [],
+          "missing_normalized": [
+            "南京"
+          ],
+          "extra_normalized": [],
+          "unknown_expected": false,
+          "unknown_actual": false
+        }
+      },
+      "new_values": {
+        "interview": {
+          "mode": "onsite",
+          "cities": []
+        },
+        "start": {
+          "by": null,
+          "asap": true
+        }
+      },
+      "new_evidence": {
+        "interview": {
+          "value": {
+            "mode": "onsite",
+            "cities": []
+          },
+          "evidence": {
+            "text": "面试安排：须到南京参加现场面试",
+            "method": "rule"
+          },
+          "verbatim": true
+        },
+        "requirements.start": {
+          "value": {
+            "by": null,
+            "asap": true
+          },
+          "evidence": {
+            "text": "到岗安排：尽快到岗",
+            "method": "rule"
+          },
+          "verbatim": true
+        }
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "ineligible",
+              "actual_verdict": "ineligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "unknown",
+                "match": false
+              },
+              "start_date": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              }
+            },
+            "mapped_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "frozen_scenario_differences": {
+              "interview": {
+                "frozen": "conflict",
+                "actual": "unknown"
+              }
+            },
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "",
+            "travel_note_ok": false,
+            "inference_reason": "JD 没写具体到岗日期，只说希望尽快到岗；你 2026-11-15 可以到岗",
+            "inference_note_ok": null
+          },
+          "manual": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "ineligible",
+              "actual_verdict": "ineligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              }
+            },
+            "mapped_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "frozen_scenario_differences": {
+              "interview": {
+                "frozen": "conflict",
+                "actual": "match"
+              }
+            },
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "要去南京面试，有路费和时间成本",
+            "travel_note_ok": true,
+            "inference_reason": "JD 没写具体到岗日期，只说希望尽快到岗；你 2026-11-15 可以到岗",
+            "inference_note_ok": null
+          }
+        },
+        "ops": {
+          "parsed": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "unknown",
+                "match": false
+              },
+              "start_date": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {
+              "interview": {
+                "frozen": "conflict",
+                "actual": "unknown"
+              }
+            },
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "",
+            "travel_note_ok": false,
+            "inference_reason": "JD 没写具体到岗日期，只说希望尽快到岗；你 2026-12-01 可以到岗",
+            "inference_note_ok": null
+          },
+          "manual": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {
+              "interview": {
+                "frozen": "conflict",
+                "actual": "match"
+              }
+            },
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "要去南京面试，有路费和时间成本",
+            "travel_note_ok": true,
+            "inference_reason": "JD 没写具体到岗日期，只说希望尽快到岗；你 2026-12-01 可以到岗",
+            "inference_note_ok": null
+          }
+        }
+      }
+    },
+    "relative_content_intern": {
+      "old_field_differences": {},
+      "new_field_differences": {},
+      "new_values": {
+        "interview": {
+          "mode": "online",
+          "cities": []
+        },
+        "start": null
+      },
+      "new_evidence": {
+        "interview": {
+          "value": {
+            "mode": "online",
+            "cities": []
+          },
+          "evidence": {
+            "text": "面试安排：仅需电话面试或视频面试",
+            "method": "rule"
+          },
+          "verbatim": true
+        }
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {},
+            "frozen_scenario_verdict": "needs_check",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 没写到岗时间；你 2026-11-15 可以到岗",
+            "inference_note_ok": null
+          },
+          "manual": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {},
+            "frozen_scenario_verdict": "needs_check",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 没写到岗时间；你 2026-11-15 可以到岗",
+            "inference_note_ok": null
+          }
+        },
+        "ops": {
+          "parsed": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {},
+            "frozen_scenario_verdict": "needs_check",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 没写到岗时间；你 2026-12-01 可以到岗",
+            "inference_note_ok": null
+          },
+          "manual": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              },
+              "start_date": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {},
+            "frozen_scenario_verdict": "needs_check",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 没写到岗时间；你 2026-12-01 可以到岗",
+            "inference_note_ok": null
+          }
+        }
+      }
+    },
+    "unrelated_online_testing_intern": {
+      "old_field_differences": {},
+      "new_field_differences": {},
+      "new_values": {
+        "interview": null,
+        "start": {
+          "by": "2027-01-10",
+          "asap": false
+        }
+      },
+      "new_evidence": {
+        "requirements.start": {
+          "value": {
+            "by": "2027-01-10",
+            "asap": false
+          },
+          "evidence": {
+            "text": "到岗要求：1月10日前到岗",
+            "method": "rule"
+          },
+          "verbatim": true
+        }
+      },
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              },
+              "start_date": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {
+              "start_date": {
+                "frozen": "unknown",
+                "actual": "match"
+              }
+            },
+            "frozen_scenario_verdict": "needs_check",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 要求 2027-01-10 前到岗，你 2026-11-15 就能到岗",
+            "inference_note_ok": false
+          },
+          "manual": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "eligible",
+              "actual_verdict": "eligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              },
+              "start_date": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              }
+            },
+            "mapped_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "frozen_scenario_differences": {
+              "start_date": {
+                "frozen": "unknown",
+                "actual": "match"
+              }
+            },
+            "frozen_scenario_verdict": "needs_check",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 要求 2027-01-10 前到岗，你 2026-11-15 就能到岗",
+            "inference_note_ok": false
+          }
+        },
+        "ops": {
+          "parsed": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "ineligible",
+              "actual_verdict": "ineligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              },
+              "start_date": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              }
+            },
+            "mapped_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "frozen_scenario_differences": {
+              "start_date": {
+                "frozen": "unknown",
+                "actual": "match"
+              }
+            },
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 要求 2027-01-10 前到岗，你 2026-12-01 就能到岗",
+            "inference_note_ok": false
+          },
+          "manual": {
+            "old": {
+              "verdict_match": true,
+              "expected_verdict": "ineligible",
+              "actual_verdict": "ineligible",
+              "check_matches": 7,
+              "check_differences": {}
+            },
+            "new": {
+              "interview": {
+                "expected": "unknown",
+                "actual": "unknown",
+                "match": true
+              },
+              "start_date": {
+                "expected": "match",
+                "actual": "match",
+                "match": true
+              }
+            },
+            "mapped_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "frozen_scenario_differences": {
+              "start_date": {
+                "frozen": "unknown",
+                "actual": "match"
+              }
+            },
+            "frozen_scenario_verdict": "ineligible",
+            "travel_note": "",
+            "travel_note_ok": null,
+            "inference_reason": "JD 要求 2027-01-10 前到岗，你 2026-12-01 就能到岗",
+            "inference_note_ok": false
+          }
+        }
+      }
+    }
+  },
+  "counts": {
+    "old_fields_match": 69,
+    "old_fields_missing": 1,
+    "skill_expected": 11,
+    "skill_hit": 10,
+    "skill_extra": 0,
+    "new_fields_wrong": 1,
+    "new_fields_missing": 2,
+    "new_fields_match": 12,
+    "new_evidence_values": 8,
+    "new_evidence_verbatim": 8,
+    "manual_valid": 5,
+    "parsed_old_check_matches": 70,
+    "parsed_old_verdict_matches": 10,
+    "parsed_new_check_matches": 18,
+    "parsed_mapped_verdict_matches": 10,
+    "parsed_frozen_scenario_check_matches": 14,
+    "parsed_frozen_scenario_verdict_matches": 5,
+    "parsed_travel_notes_expected": 4,
+    "parsed_travel_notes_present": 0,
+    "manual_old_check_matches": 70,
+    "manual_old_verdict_matches": 10,
+    "manual_new_check_matches": 20,
+    "manual_mapped_verdict_matches": 10,
+    "manual_frozen_scenario_check_matches": 14,
+    "manual_frozen_scenario_verdict_matches": 5,
+    "manual_travel_notes_expected": 4,
+    "manual_travel_notes_present": 4,
+    "parsed_inference_notes_expected": 2,
+    "parsed_inference_notes_present": 0,
+    "manual_inference_notes_expected": 2,
+    "manual_inference_notes_present": 0
+  },
+  "baseline_counts": {
+    "fields_match": 69,
+    "fields_missing": 1,
+    "skill_expected": 11,
+    "skill_hit": 10,
+    "skill_extra": 0,
+    "parsed_verdict_match": 10,
+    "parsed_check_match": 70,
+    "replay_valid": 5,
+    "replay_verdict_match": 10,
+    "replay_check_match": 70
+  },
+  "successful_cli_calls": 35,
+  "frozen_files_verified": 13,
+  "source_archive_unchanged": true,
+  "finished_at_utc": "2026-10-30T04:44:37.993561+00:00"
+}

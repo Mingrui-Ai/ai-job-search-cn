@@ -148,7 +148,7 @@ class DocumentedSteps(unittest.TestCase):
                 self.assertEqual(shown["dimensions"]["experience"]["score"], judged(sample, "tech")["score"])
         rows = [(row["job_id"], row["grade"], row["score"], row["complete"], row["stale"])            # step 6
                 for row in self.cli("match", "list")["matches"]]
-        self.assertEqual(rows, [(self.ids[0], "strong", 79, True, False), (self.ids[1], "moderate", 49, False, False)])
+        self.assertEqual(rows, [(self.ids[0], "strong", 82, True, False), (self.ids[1], "moderate", 54, False, False)])
         # Scoring an unchanged job again carries the agent's work into the next draft.
         again = self.cli("match", "score", self.ids[0], "--draft")
         self.assertEqual(again["dimensions"]["experience"]["score"], 85)
@@ -156,43 +156,47 @@ class DocumentedSteps(unittest.TestCase):
 
 
 # (sample, profile) -> (experience, total, grade). Rule parts as in tests/test_cn_score.py,
-# experience from the frozen judgments; totals weigh skills 35, direction 30, experience 25,
-# salary 10 over what is scored, rounded half up. E.g. tech boss: (35*52 + 30*100 + 25*85 +
-# 10*100) / 100 = 79.45 -> 79 strong (76 before H16 read "Golang 或 Java" as one choice: skills
-# 43 -> 52); ops marketing: (35*20 + 30*50 + 25*70) / 90 = 43.9 -> 44 weak.
+# experience from the frozen judgments; totals weigh skills 30, direction 25, experience 25,
+# salary 10, location 10 over what is scored, rounded half up (M2-6b). E.g. tech boss:
+# (30*52 + 25*100 + 25*85 + 10*100 + 10*100) / 100 = 81.85 -> 82 strong (79 before M2-6b; 76
+# before H16 read "Golang 或 Java" as one choice); ops marketing: (30*20 + 25*50 + 25*70 +
+# 10*100) / 90 = 51.1 -> 51 moderate (44 weak before M2-6b: 上海 is ops' city).
+# Grades M2-6b moved: tech ai_product poor -> weak (21 -> 31: 广州 is a preferred city),
+# ops marketing weak -> moderate.
 EXPECTED = {
-    ("jd/boss_intern.txt", "tech"): (85, 79, "strong"),
-    ("jd/shixiseng_intern.txt", "tech"): (50, 61, "ineligible"),
-    ("jd/nowcoder_campus.txt", "tech"): (80, 71, "ineligible"),
-    ("jd/official_site.txt", "tech"): (45, 49, "moderate"),
-    ("jd/experienced_hire.txt", "tech"): (40, 44, "ineligible"),
-    ("jd-m2-3/boss_ai_product_intern.txt", "tech"): (45, 21, "poor"),
+    ("jd/boss_intern.txt", "tech"): (85, 82, "strong"),
+    ("jd/shixiseng_intern.txt", "tech"): (50, 55, "ineligible"),
+    ("jd/nowcoder_campus.txt", "tech"): (80, 63, "ineligible"),
+    ("jd/official_site.txt", "tech"): (45, 54, "moderate"),
+    ("jd/experienced_hire.txt", "tech"): (40, 39, "ineligible"),
+    ("jd-m2-3/boss_ai_product_intern.txt", "tech"): (45, 31, "weak"),
     ("jd-m2-3/shixiseng_content_ops_intern.txt", "tech"): (5, 11, "ineligible"),
-    ("jd-m2-3/ats_ui_design_intern.txt", "tech"): (5, 1, "poor"),
-    ("jd-m2-3/nowcoder_test_dev_intern.txt", "tech"): (60, 50, "moderate"),
+    ("jd-m2-3/ats_ui_design_intern.txt", "tech"): (5, 13, "poor"),
+    ("jd-m2-3/nowcoder_test_dev_intern.txt", "tech"): (60, 56, "moderate"),
     ("jd-m2-3/official_marketing_campus.txt", "tech"): (5, 1, "ineligible"),
     ("jd/boss_intern.txt", "ops"): (5, 1, "ineligible"),
-    ("jd/shixiseng_intern.txt", "ops"): (20, 6, "ineligible"),
+    ("jd/shixiseng_intern.txt", "ops"): (20, 17, "ineligible"),
     ("jd/nowcoder_campus.txt", "ops"): (5, 1, "ineligible"),
     ("jd/official_site.txt", "ops"): (5, 1, "ineligible"),
-    ("jd/experienced_hire.txt", "ops"): (5, 1, "ineligible"),
+    ("jd/experienced_hire.txt", "ops"): (5, 13, "ineligible"),
     ("jd-m2-3/boss_ai_product_intern.txt", "ops"): (20, 6, "ineligible"),
-    ("jd-m2-3/shixiseng_content_ops_intern.txt", "ops"): (85, 77, "strong"),
-    ("jd-m2-3/ats_ui_design_intern.txt", "ops"): (35, 15, "ineligible"),
+    ("jd-m2-3/shixiseng_content_ops_intern.txt", "ops"): (85, 80, "strong"),
+    ("jd-m2-3/ats_ui_design_intern.txt", "ops"): (35, 14, "ineligible"),
     ("jd-m2-3/nowcoder_test_dev_intern.txt", "ops"): (5, 1, "ineligible"),
-    ("jd-m2-3/official_marketing_campus.txt", "ops"): (70, 44, "weak"),
+    ("jd-m2-3/official_marketing_campus.txt", "ops"): (70, 51, "moderate"),
 }
 
-# match list order (score.list_key): grade, then total, then job id for ties.
+# match list order (score.list_key): grade, then total, then job id for ties. M2-6b moved only
+# ops' ineligible tail: the two 上海 jobs (data intern, experienced hire) gained location points.
 RANKINGS = {
     "tech": ["jd/boss_intern.txt", "jd-m2-3/nowcoder_test_dev_intern.txt", "jd/official_site.txt",
              "jd-m2-3/boss_ai_product_intern.txt", "jd-m2-3/ats_ui_design_intern.txt", "jd/nowcoder_campus.txt",
              "jd/shixiseng_intern.txt", "jd/experienced_hire.txt", "jd-m2-3/shixiseng_content_ops_intern.txt",
              "jd-m2-3/official_marketing_campus.txt"],
     "ops": ["jd-m2-3/shixiseng_content_ops_intern.txt", "jd-m2-3/official_marketing_campus.txt",
-            "jd-m2-3/ats_ui_design_intern.txt", "jd-m2-3/boss_ai_product_intern.txt", "jd/shixiseng_intern.txt",
-            "jd-m2-3/nowcoder_test_dev_intern.txt", "jd/boss_intern.txt", "jd/nowcoder_campus.txt",
-            "jd/experienced_hire.txt", "jd/official_site.txt"],
+            "jd/shixiseng_intern.txt", "jd-m2-3/ats_ui_design_intern.txt", "jd/experienced_hire.txt",
+            "jd-m2-3/boss_ai_product_intern.txt", "jd-m2-3/nowcoder_test_dev_intern.txt", "jd/boss_intern.txt",
+            "jd/nowcoder_campus.txt", "jd/official_site.txt"],
 }
 
 
@@ -221,6 +225,40 @@ class FrozenJudgments(unittest.TestCase):
         for name, expected in RANKINGS.items():
             with self.subTest(profile=name):
                 self.assertEqual(ranked(name), expected)
+
+
+class TrialWeights(unittest.TestCase):
+    """M2-6d on the frozen judgments: a trial with other weights (match list --weights) ranks the twenty records
+    as writing those weights to the profile and scoring every job again does, total for total, and scoring
+    again keeps the agent's experience."""
+
+    # match.md's conversions on the default weights (location most; salary most, location next; location most
+    # with direction kept; salary not at all), and one dimension alone.
+    WEIGHTS = tuple(dict(zip(score.DIMENSIONS, values)) for values in (
+        (24, 19, 19, 8, 30), (18, 16, 16, 30, 20), (21, 25, 17, 7, 30), (33, 28, 28, 0, 11), (0, 0, 1, 0, 0)))
+
+    @staticmethod
+    def in_list_order(rows: list) -> list:
+        return sorted(rows, key=lambda row: score.list_key(row[2]["grade"], row[2]["score"], row[1]))
+
+    def test_a_trial_ranks_as_scoring_again_does(self):
+        reordered = set()
+        for name in ("tech", "ops"):
+            saved = records(name)
+            for weights in self.WEIGHTS:
+                with self.subTest(profile=name, weights=weights):
+                    trial = [(sample, record["job_id"], score.trial_total(record, weights))
+                             for sample, _, _, record in saved]
+                    again = []
+                    for sample, job, profile, record in saved:
+                        changed = dict(profile, target=dict(profile["target"], weights=weights))
+                        rescored = score.score_job(job, changed, VOCABULARY, previous=record, now=NOW)
+                        self.assertEqual(rescored["dimensions"]["experience"], record["dimensions"]["experience"])
+                        again.append((sample, rescored["job_id"], rescored["total"]))
+                    self.assertEqual(self.in_list_order(trial), self.in_list_order(again))
+                    if [row[0] for row in self.in_list_order(trial)] != RANKINGS[name]:
+                        reordered.add(name)
+        self.assertEqual(reordered, {"tech", "ops"}, "some weights must reorder each profile's list")
 
 
 def v5_rankings() -> dict:

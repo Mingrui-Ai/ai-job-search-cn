@@ -3,7 +3,8 @@
 parse_text() splits pasted text into JDs, runs each one through the posting
 gate (jobsearch_cn/guard.py) and extracts the fields whose wording is regular
 enough for rules: salary, graduation year, days per week, internship length,
-education, return offer, employment type, cities, remote work, dates, a
+education, return offer, employment type, cities, remote work, dates, how the
+JD interviews and when it wants you to start, a
 labelled or headline title and company, and skills from the vocabulary - read
 from the body only, since the title names the job rather than asking for a
 skill, and only where the JD asks for them (not "无需 SQL", not "欢迎关注我们的
@@ -12,12 +13,16 @@ skill, and only where the JD asks for them (not "无需 SQL", not "欢迎关注�
 page with its link lines and "公司｜城市｜薪资｜N天/周｜N个月" tag line included. Every value
 cites the snippet it came from (method "rule"). What the rules cannot read
 with confidence stays null for an agent or the user to fill in and cite;
-nothing is guessed - a date without a year is left alone, a JD naming two
-internship lengths gets neither, and a city named only in passing prose, or as
-where the interview is, is not taken as the work location. Each record is
+nothing is guessed - a publication date or deadline without a year is left
+alone, a JD naming two internship lengths gets neither, and a city named only
+in passing prose, or as where the interview is, is not taken as the work
+location. A start date without a year ("11月1日前到岗") is the one exception:
+JDs almost never give the year, so it takes the year that puts the date
+nearest the JD's publication date, or the import date. Each record is
 validated against the schema before it is returned.
 """
 
+import calendar
 import hashlib
 import re
 from datetime import date, datetime
@@ -50,20 +55,60 @@ CITIES = (
 
 _N = r"\d+(?:\.\d+)?"
 _TO = r"\s*(?:-|~|～|－|—|–|至|到)\s*"
+_SCALED_START = r"(?<![\d.A-Za-z_])"
+# Token edges only: whether this is a wage, a count or a video format is
+# decided from its clause. Preserve both Kx14薪 and the existing K+14薪.
+_SCALED_END = r"(?:(?![A-Za-z\d+])|(?=[xX+]\s*\d{2}\s*薪))"
+_K_AMOUNT = rf"(?P<lo>{_N})\s*(?:[kK千]?{_TO}(?P<hi>{_N})\s*)?[kK千]{_SCALED_END}"
+_WAN_AMOUNT = rf"(?P<lo>{_N})\s*(?:[万wW]?{_TO}(?P<hi>{_N})\s*)?[万wW]{_SCALED_END}"
+# Never salvage one endpoint of a range whose units the pattern cannot read.
+_SCALED_RANGE_BEFORE = re.compile(rf"{_N}\s*[kK千万wW]?{_TO}$")
+_SCALED_RANGE_AFTER = re.compile(rf"{_TO}{_N}(?![\d.])(?!\s*薪)")
 # (pattern, unit, multiplier). Every pattern names its amounts lo and hi.
 _SALARY = (
-    (re.compile(rf"(?P<lo>{_N})\s*[kK千]?{_TO}(?P<hi>{_N})\s*[kK千](?:\s*/\s*月)?"
+    (re.compile(rf"{_SCALED_START}{_K_AMOUNT}(?:\s*元)?(?:\s*(?:/|每)\s*月)?"
+                rf"(?!\s*/)(?!\s*每\s*(?:年|周|天|日|小时|时)(?![{_HAN}]))"
                 rf"(?:\s*[·・•*xX×]\s*(?P<months>\d{{2}})\s*薪)?"), "CNY/month", 1000),
-    (re.compile(rf"(?P<lo>{_N})\s*万?{_TO}(?P<hi>{_N})\s*万\s*元?\s*(?:/|每)\s*月"), "CNY/month", 10000),
-    (re.compile(rf"月薪\s*(?P<lo>{_N})\s*万?(?:{_TO}(?P<hi>{_N}))?\s*万"), "CNY/month", 10000),
-    (re.compile(rf"年薪\s*(?P<lo>{_N})\s*万?(?:{_TO}(?P<hi>{_N}))?\s*万"), "CNY/year", 10000),
-    (re.compile(rf"(?P<lo>{_N})\s*万?{_TO}(?P<hi>{_N})\s*万\s*元?\s*(?:/|每)\s*年"), "CNY/year", 10000),
+    (re.compile(rf"{_SCALED_START}{_WAN_AMOUNT}\s*元?\s*(?:/|每)\s*月"), "CNY/month", 10000),
+    (re.compile(rf"月薪\s*[:：为]?\s*{_WAN_AMOUNT}"), "CNY/month", 10000),
+    (re.compile(rf"年薪\s*[:：为]?\s*{_WAN_AMOUNT}"), "CNY/year", 10000),
+    (re.compile(rf"{_SCALED_START}{_WAN_AMOUNT}\s*元?\s*(?:/|每)\s*年"), "CNY/year", 10000),
+    (re.compile(rf"年薪\s*[:：为]?\s*{_K_AMOUNT}"), "CNY/year", 1000),
+    (re.compile(rf"{_SCALED_START}{_K_AMOUNT}\s*元?\s*(?:/\s*年|每\s*年(?![{_HAN}]))"), "CNY/year", 1000),
+    # Unscaled monthly/yearly amounts need an explicit 元 and period; bare
+    # numbers also occur in dates, phone numbers and company headcounts.
+    (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*月"), "CNY/month", 1),
+    (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*年"), "CNY/year", 1),
     (re.compile(rf"(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元?\s*(?:/|每)\s*(?:天|日)"), "CNY/day", 1),
     (re.compile(rf"(?:日薪|每天|每日)\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/day", 1),
     (re.compile(rf"(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元?\s*(?:/|每)\s*(?:小时|时)"), "CNY/hour", 1),
     (re.compile(rf"月薪\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
 )
 _NEGOTIABLE = re.compile(r"(?:薪资|薪酬|待遇|工资)?\s*面议")
+# Pay/non-pay labels can precede or follow their amount. A later explicit pay
+# label starts a new salary context.
+_SALARY_CONTEXT = re.compile(
+    r"(?P<cost>补贴|补助|餐补|房补|收费|费用|押金|培训费|住宿费|餐费|租金"
+    # Finance job names (融资经理 / 估值分析师) are not amount labels.
+    r"|(?:融资|估值|注册资本|注册资金)(?=\s*(?:金额|规模|总额|为|约|达|[:：]|\d|$)))"
+    r"|(?P<pay>月薪|年薪|日薪|时薪|工资|薪资|薪酬|薪水|底薪|报酬)"
+)
+_SALARY_ASIDE = re.compile(r"另|额外|含(?!税)|包括|加上|^\s*(?:以及|和|及|并(?:享有|提供|发放|有))")
+# A count/specification must bind to this number, not merely occur elsewhere
+# in its clause (e.g. 8-10K/月 负责客户维护).
+_SCALED_PURPOSE_AFTER = re.compile(
+    r"^\s*(?:[+＋]\s*)?(?:[名位个]\s*)?(?:活跃|注册|付费|新增|日活|月活)?\s*"
+    rf"(?:粉丝|用户|客户|人次|人数|人员|员工|访客|人流量|人(?![{_HAN}]))"
+    r"|^\s*(?:高清|超清)?\s*(?:视频|素材|画面|分辨率|画质)")
+_SCALED_PURPOSE_BEFORE = re.compile(
+    r"(?:(?:粉丝|用户|客户|人员|员工|访客)(?:数量|总数|数|规模)"
+    r"|人数|人次|人流量|分辨率|画质)"
+    r"(?:\s*(?:[:：]|为|约|达到|达|至少|超过|不少于|不低于))*\s*$")
+_SCALED_PAY_END = re.compile(r"(?:元|(?:/|每)\s*[月年]|\d{2}\s*薪)\s*$")
+_SCALED_ACTIVITY = re.compile(r"需(?!求)|负责|每日|每天|累计|达到|至少|"
+                              r"(?:剪辑|服务|覆盖|接待|处理|播放|支持|拥有|包含)\s*$")
+_SALARY_PERIOD = re.compile(r"年薪|月薪|日薪|时薪")
+_SALARY_PERIOD_HEADER = re.compile(r"(?:年薪|月薪|日薪|时薪)[^\d，,。；;！!？?]*")
 # "全年13薪" written apart from a monthly salary; a range ("13-15薪") is left alone.
 _PAY_MONTHS = re.compile(r"(?:全年\s*)?(?<![\d.\-~～－—–至到])(?P<months>\d{2})\s*薪(?![资酬水])")
 
@@ -98,6 +143,19 @@ _EDUCATION_MIN = re.compile(
 _EDUCATION_PREFERRED = re.compile(
     rf"{_LEVEL_WORD}(?:研究生)?\s*(?:及以上)?\s*(?:学历)?\s*者?\s*(?:优先|为佳)"
 )
+# Two levels or more to choose from (H20): "本科或硕士及以上学历", "大专/本科学历", "学历：本科或硕士". The
+# minimum is the lowest. A bare pair needs a label before it or a qualifier after it, as a single level
+# does: "本科或硕士期间的项目经历" asks for nothing.
+_LEVEL_ANY = "(?:大专|专科|本科|学士|硕士|研究生|博士)"
+# One option of a choice: "博士研究生" is one, a doctorate - its 研究生 qualifies it, and is no master's.
+_LEVEL_OPTION = re.compile(r"(博士|硕士)研究生|大专|专科|本科|学士|硕士|研究生|博士")
+_EDUCATION_CHOICE = re.compile(
+    rf"(?P<label>学历\s*(?:要求)?\s*[:：]\s*)?{_LEVEL_ANY}(?:研究生)?"
+    rf"(?:\s*(?:或者?|/|／|、)\s*{_LEVEL_ANY}(?:研究生)?)+"
+    r"(?P<tail>\s*(?:学历\s*)?(?:及|或)?\s*以上|\s*(?:学历|在读|应届|毕业|学生)|\s*(?:均可|皆可|都可以?))?"
+)
+# A choice the JD prefers: "硕士或博士优先" prefers a master's, the lowest of them.
+_PREFERRED_AFTER = re.compile(r"\s*(?:及以上)?\s*(?:学历)?\s*者?\s*(?:优先|为佳)")
 # "学历不限", "不设最低学历门槛": no minimum, said outright. "专业不限" is about the major.
 _NO_MINIMUM_EDUCATION = re.compile(
     r"学历\s*(?:要求)?\s*[:：]?\s*(?:不限(?!于)|无要求|没有要求|不作要求|不做要求)|不限学历|(?:无|没有)学历要求"
@@ -121,8 +179,57 @@ _LOCATION_LABEL = re.compile(
 # Where the rest of a location line turns to the interview: "工作地点：深圳；面试地点：北京".
 _INTERVIEW = re.compile(r"面试|笔试")
 _CITY_HEADLINE = re.compile(rf"^(?P<city>{_CITY.pattern})(?:[·・\-|丨/\s]|$)")
-_NO_REMOTE = re.compile(r"不(?:支持|可|能|接受)\s*远程")
-_REMOTE = re.compile(r"(?:可|支持|接受)\s*远程(?:办公|工作|实习)?|远程(?:办公|工作|实习)|居家办公|\bremote\b", re.I)
+# "支持远程面试" is about the interview, not the work.
+_NO_REMOTE = re.compile(r"不(?:支持|可|能|接受)\s*远程(?!\s*面)")
+_REMOTE = re.compile(r"(?:可|支持|接受)\s*远程(?!\s*面)(?:办公|工作|实习)?|远程(?:办公|工作|实习)|居家办公|\bremote\b", re.I)
+
+# The interview (M2-6c): online (线上、视频、电话面试), in person (现场、线下面试, "到公司面试"), or at a
+# place ("面试地点：北京", "面试可在杭州"). Both, with a word of choice in one line ("面试地点：北京，也可视频
+# 面试"), is the candidate's choice; both without one is some rounds in person.
+_ONLINE_WORD = r"(?:线上|视频|电话|远程|网络|在线)"
+_ONSITE_WORD = r"(?:现场|线下)"
+# A round counts as much as 面试 itself: "电话初面", "现场复试", "线下终面".
+_ROUND = r"(?:面试|面谈|复试|初面|终面|一面|二面|三面)"
+_PAIRED = r"\s*(?:或者?|/|／|和|及|与|、|\+|＋)\s*"
+_ONLINE_INTERVIEW = re.compile(rf"{_ONLINE_WORD}\s*{_ROUND}|{_ONLINE_WORD}(?={_PAIRED}{_ONSITE_WORD}\s*{_ROUND})"
+                               rf"|面试\s*(?:方式|形式|地点)\s*[:：为是]?\s*{_ONLINE_WORD}")
+_ONSITE_INTERVIEW = re.compile(rf"(?:{_ONSITE_WORD}|当面|到场)\s*{_ROUND}|(?:到|来)\s*公司\s*{_ROUND}"
+                               rf"|{_ONSITE_WORD}(?={_PAIRED}{_ONLINE_WORD}\s*{_ROUND})"
+                               rf"|面试\s*(?:方式|形式)\s*[:：为是]?\s*{_ONSITE_WORD}")
+# A place for the interview. The label's colon looks past any space or tab for an online word:
+# "面试地点： 线上" is no place.
+_INTERVIEW_PLACE = re.compile(
+    rf"面试\s*(?:地点|城市|地址)\s*[:：](?!\s*{_ONLINE_WORD})\s*[^\n，,。；;（(]{{0,40}}"
+    rf"|面试\s*(?:可|将|需|须)?\s*(?:在|于)\s*(?:{_CITY.pattern})"
+    rf"|(?:在|到|去|赴)\s*(?:{_CITY.pattern})市?\s*(?:参加|进行)?\s*(?:现场|线下)?\s*{_ROUND}"
+    rf"|(?:现场|线下)\s*面试\s*[（(]\s*(?:{_CITY.pattern})"
+)
+_INTERVIEW_CHOICE = re.compile(r"也可|亦可|或者|或|可选|均可|任选|自选")
+# Before the first way named, only a word that offers the choice outright: "可选线上/现场面试".
+_INTERVIEW_CHOICE_BEFORE = re.compile(r"可选|任选|自选")
+# Interviews that are the job's own work, not the candidate's: "协助组织现场面试". "面试安排：" is a label.
+_INTERVIEW_DUTY = re.compile(r"负责|协助|组织|跟进|对接|邀约|筛选|(?<!面试)安排")
+# A way of interviewing the JD rules out: "不支持远程面试", "不接受视频面试".
+_INTERVIEW_REFUSED = re.compile(r"不(?:支持|接受|提供|安排|采用|可|能)")
+
+# When to start (M2-6c): as soon as possible, or by a date - "11月1日前到岗", "2027年7月入职",
+# "入职时间：11月底前". A month alone is its last day. A start from a date on ("11月1日后到岗",
+# "11月起") is no deadline, "11月前" alone could mean October or November, and a date the JD only
+# prefers ("…前到岗者优先") is no requirement: none of these is read.
+_START_WORD = r"(?:到岗|入职|报到|上岗)"
+_START_ASAP = re.compile(rf"(?:尽快|尽早|立即|立刻|马上|随时)\s*(?:能|可以?)?\s*{_START_WORD}"
+                         rf"|{_START_WORD}\s*(?:时间|日期)\s*[:：]?\s*(?:尽快|越快越好|随时)")
+_START_DATE = r"(?:(?P<y>20\d{2})\s*年\s*)?(?P<m>\d{1,2})\s*月(?:\s*(?P<d>\d{1,2})\s*[日号]|\s*份)?\s*(?P<end>底|末)?"
+_START_BY = (
+    re.compile(rf"{_START_DATE}\s*(?P<before>之前|以前|前)?\s*(?:须|需要?|能|可以?)?\s*{_START_WORD}"),
+    re.compile(rf"{_START_WORD}\s*(?:时间|日期)\s*[:：]\s*(?:为\s*)?{_START_DATE}\s*(?P<before>之前|以前|前)?"
+               r"(?!\s*(?:\d|之后|以后|后|起))"),
+)
+# The earliest day, not the latest: "最早11月1日到岗", like "11月1日后到岗".
+_START_EARLIEST = re.compile(r"最早|最快|不早于")
+# Another date sharing the same 到岗 just before a match: "11月1日或12月1日到岗" names two dates.
+_START_OTHER_DATE = re.compile(r"\d{1,2}\s*月(?:\s*\d{1,2}\s*[日号])?\s*(?:底|末)?\s*(?:之前|以前|前)?"
+                               r"\s*(?:或者?|、|/|／|和|至|到|-|－|~|～)\s*$")
 
 _YMD = r"(?P<y>20\d{2})\s*[-/.年]\s*(?P<m>\d{1,2})\s*[-/.月]\s*(?P<d>\d{1,2})\s*日?"
 _PUBLISHED = re.compile(rf"(?:发布时间|发布日期|发布于|更新时间|更新于)\s*[:：]?\s*{_YMD}")
@@ -184,6 +291,21 @@ _MARK_REACH = 15
 _MARK_BREAK = re.compile(r"[和及与并是为]")
 _MAJOR_AFTER = re.compile(r"\s*(?:等)?\s*(?:相关)?\s*专业")
 _MAJOR_BEFORE = re.compile(r"专业\s*[:：]?\s*$")
+# A term is no skill only where the JD asks for a degree subject (H20): a list that ends in 专业, at the
+# clause's end or before what a degree subject takes - "统计学或市场营销相关专业", "统计学专业毕业",
+# "统计学等相关专业优先", "统计学专业本科及以上", "统计学相关专业背景" - or after a 专业 label
+# ("专业：计算机、统计学"). Anything else after 专业 keeps the skill: "统计学专业基础扎实", "具备统计学
+# 专业知识", "Figma专业版". Rather a skill read once too often than a real requirement dropped.
+_MAJOR_WORD = r"[一-鿿A-Za-z]{1,12}?"
+_MAJOR_JOIN = r"\s*(?:、|/|／|或者|或|和|及|与)\s*"
+# "专业背景" asks for a degree subject; "专业背景知识", "专业背景理论" ask for what one knows.
+_MAJOR_DEGREE = (r"(?:的)?\s*(?:毕业|在读|学生|同学|应届|背景(?!\s*(?:知识|理论|能力|基础|技能|素养))|优先|出身|学历"
+                 r"|及以上|以上|大专|专科|本科|学士|硕士|研究生|博士)")
+_MAJOR_TAIL = re.compile(
+    rf"(?:{_MAJOR_JOIN}{_MAJOR_WORD})*\s*(?:等)?\s*(?:相关)?\s*专业\s*"
+    rf"(?=$|[{re.escape(_CLAUSE_END)}]|{_MAJOR_DEGREE}|{_MAJOR_JOIN}{_MAJOR_WORD}\s*(?:等)?\s*(?:相关)?\s*专业)"
+)
+_MAJOR_LEAD = re.compile(rf"专业\s*(?:要求|背景|方向)?\s*(?:为|是|[:：])\s*(?:{_MAJOR_WORD}{_MAJOR_JOIN})*$")
 # A platform name is a skill when the JD asks for it, not when it points the reader at the
 # company's own channel ("欢迎关注我们的公众号", "动态见我们的 B站") or describes the company
 # in its introduction. A follow verb alone is a duty: "关注小红书热点".
@@ -296,6 +418,9 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
     headline = _line_at(text, title_span[0]) if title_span else (lines[0] if lines else "")
     tag, piped = _tag_cells(lines, headline if title_span else None)
     hits = _skill_hits(text, skill_patterns or _builtin_patterns(), skip=title_span)
+    published = _dated(text, (_PUBLISHED,))
+    # A start date without a year is dated from the JD's own publication date, else the import date.
+    reference = date.fromisoformat(published[0] or imported_at[:10])
     record = {
         "schema_version": schema.SCHEMA_VERSION,
         "id": job_id(text),
@@ -313,9 +438,11 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
             "education": cite("requirements.education", _education(text, tag)),
             "skills": cite("requirements.skills", _skills(text, hits)) or [],
             "skill_alternatives": cite("requirements.skill_alternatives", _alternatives(text, hits)) or [],
+            "start": cite("requirements.start", _start(text, reference)),
         },
+        "interview": cite("interview", _interview(text)),
         "return_offer": cite("return_offer", _return_offer(text)),
-        "published_at": cite("published_at", _dated(text, (_PUBLISHED,))),
+        "published_at": cite("published_at", published),
         "deadline": cite("deadline", _dated(text, (_DEADLINE_AFTER, _DEADLINE_BEFORE), same_line=True)),
         "status": "new",
         "evidence": evidence,
@@ -522,6 +649,88 @@ def _remote(text: str):
     return (True, [match.group(0)]) if match else _NOTHING
 
 
+def _interview(text: str):
+    """How the JD interviews: online, in person (and where), either at the candidate's choice, or a mix."""
+    mentions = []  # (kind, match, cities)
+    for kind, pattern in (("online", _ONLINE_INTERVIEW), ("onsite", _ONSITE_INTERVIEW), ("onsite", _INTERVIEW_PLACE)):
+        for match in pattern.finditer(text):
+            left, _ = _clause_bounds(text, match.start(), match.end())
+            if any(stop.search(text, left, match.start()) for stop in (_NEGATION, _INTERVIEW_REFUSED, _INTERVIEW_DUTY)):
+                continue
+            mentions.append((kind, match, _CITY.findall(match.group(0)) if pattern is _INTERVIEW_PLACE else []))
+    if not mentions:
+        return _NOTHING
+    kinds = {kind for kind, _, _ in mentions}
+    mode = kinds.pop() if len(kinds) == 1 else "either" if _offers_a_choice(text, mentions) else "mixed"
+    cities = list(dict.fromkeys(city for _, _, found in mentions for city in found))
+    snippets = [_clause(text, match.start(), match.end()) for _, match, _ in sorted(mentions, key=lambda m: m[1].start())]
+    return {"mode": mode, "cities": cities}, list(dict.fromkeys(snippets))
+
+
+def _offers_a_choice(text: str, mentions: list) -> bool:
+    """Whether one line names both kinds with a word of choice from the first to the end of the last one's clause."""
+    lines = {}
+    for kind, match, _ in mentions:
+        lines.setdefault(text.count("\n", 0, match.start()), []).append((kind, match))
+    for found in lines.values():
+        if {kind for kind, _ in found} == {"online", "onsite"}:
+            start = min(match.start() for _, match in found)
+            last = max((match for _, match in found), key=lambda match: match.end())
+            if _INTERVIEW_CHOICE.search(text, start, _clause_bounds(text, last.start(), last.end())[1]):
+                return True
+            if _INTERVIEW_CHOICE_BEFORE.search(text, _clause_bounds(text, start, start)[0], start):
+                return True
+    return False
+
+
+def _start(text: str, reference: date):
+    """When the JD wants you to start: by a date, as soon as possible, or both. Two different dates: neither."""
+    asap, dates, shared = [], {}, False
+    for match in _START_ASAP.finditer(text):
+        left, _ = _clause_bounds(text, match.start(), match.end())
+        if not _NEGATION.search(text, left, match.start()):
+            asap.append(_clause(text, match.start(), match.end()))
+    for pattern in _START_BY:
+        for match in pattern.finditer(text):
+            left, right = _clause_bounds(text, match.start(), match.end())
+            if (_NEGATION.search(text, left, match.start()) or _PREFERENCE.search(text, left, right)
+                    or _START_EARLIEST.search(text, left, match.start())):
+                continue
+            if _START_OTHER_DATE.search(text[left:match.start()]):
+                shared = True  # two dates for one 到岗: neither
+                continue
+            by = _start_by(match, reference)
+            if by:
+                dates.setdefault(by, _clause(text, match.start(), match.end()))
+    if len(dates) > 1 or shared:
+        dates = {}
+    if not dates and not asap:
+        return _NOTHING
+    return {"by": next(iter(dates), None), "asap": bool(asap)}, list(dict.fromkeys([*dates.values(), *asap]))
+
+
+def _start_by(match, reference: date):
+    """The date a start-by match names; a month is its last day. Without a year, the one nearest the reference.
+
+    Each candidate year is compared by the date it would write - for a month alone, that month's last
+    day - so "1月入职" published on 20 July is 31 January before it (170 days), not after (195).
+    The later date wins a tie.
+    """
+    month, day = int(match["m"]), int(match["d"]) if match["d"] else None
+    if not 1 <= month <= 12 or (day is None and match["before"] and not match["end"]):
+        return None  # "11月前到岗": before November, or by its end?
+    years = [int(match["y"])] if match["y"] else [reference.year - 1, reference.year, reference.year + 1]
+    candidates = []
+    for year in years:
+        try:
+            candidates.append(date(year, month, calendar.monthrange(year, month)[1] if day is None else day))
+        except ValueError:  # 29 February, 31 April
+            continue
+    if not candidates:
+        return None
+    return min(candidates, key=lambda when: (abs((when - reference).days), when < reference)).isoformat()
+
+
 def _employment_type(text: str, headline: str):
     """From the title's own line first ("…实习生", "【校招】…"), then anywhere in the JD."""
     for pattern, kind in ((re.compile("实习"), "internship"), (_CAMPUS, "campus"), (_EXPERIENCED, "experienced")):
@@ -534,21 +743,134 @@ def _employment_type(text: str, headline: str):
     return _NOTHING
 
 
+def _salary_context(text: str, position: int, end: int):
+    """The amount's clause/tag cell, including a preceding line's colon label."""
+    left = text.rfind("\n", 0, position) + 1
+    prefix = text[left:position]
+    if left > 0:
+        previous = _line_at(text, left - 1)
+        if previous.endswith((":", "：")) or _SALARY_PERIOD_HEADER.fullmatch(previous):
+            prefix = previous + prefix
+    # Remove completed asides before finding clause boundaries, so a comma
+    # inside 工资（不含餐补，另有交通补助）does not leave a stray cost label.
+    prefix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", prefix))[-1]
+    right = text.find("\n", end)
+    suffix = text[end:len(text) if right < 0 else right]
+    suffix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", suffix))[0]
+    return prefix, suffix
+
+
+def _non_salary_amount(text: str, position: int, end: int) -> bool:
+    """Reject amounts labelled for non-pay uses, but keep unlabelled pay.
+
+    Inspect both sides of the quote in its clause/tag cell. A colon label on
+    the preceding line also applies through modifiers such as 每人/标准为.
+    Completed asides such as 工资（不含餐补）do not relabel the wage.
+    """
+    prefix, suffix = _salary_context(text, position, end)
+    labels = list(_SALARY_CONTEXT.finditer(prefix))
+    # Use purpose labels following this amount, but not the label introducing
+    # the next amount: 工资8600元/月 交通补贴420元/月 still has a wage of 8600.
+    following_amount = _earliest((pattern for pattern, _, _ in _SALARY), suffix)
+    boundary = following_amount.start("lo") if following_amount else len(suffix)
+    following = list(_SALARY_CONTEXT.finditer(suffix, 0, boundary))
+    if following_amount:
+        next_tail = suffix[following_amount.end():]
+        next_label = _SALARY_CONTEXT.search(next_tail)
+        # In "420元/月交通补贴 8600元/月工资", the next amount already has its
+        # own trailing label, so 交通补贴 belongs to the current amount.
+        next_has_postfix = (next_label is not None
+                            and not _SALARY_ASIDE.search(next_tail[:next_label.start()])
+                            and _earliest((pattern for pattern, _, _ in _SALARY), next_tail) is None)
+        if not next_has_postfix:
+            following = following[:-1]
+    if following:
+        label = following[0]
+        # "含餐补" / "另有交通补贴" describe inclusions or other benefits, not
+        # the purpose of the quoted wage; "600元/月餐补" names its purpose.
+        next_label = _SALARY_CONTEXT.search(suffix, label.end())
+        purpose_end = min(boundary, next_label.start() if next_label else len(suffix))
+        # "餐补另计" / "房补另算" exclude the benefit from this quote even
+        # when the wage itself has no leading 工资/月薪 label.
+        separately_priced = re.search(r"另计|另算", suffix[label.end():purpose_end])
+        if not _SALARY_ASIDE.search(suffix[:label.start()]) and not separately_priced:
+            return label.lastgroup == "cost"
+    return bool(labels and labels[-1].lastgroup == "cost")
+
+
+def _scaled_context(text: str, match):
+    """Local context up to neighbouring amounts; an earlier wage cannot label a later count."""
+    prefix, suffix = _salary_context(text, match.start("lo"), match.end())
+    previous_end = max((other.end() for pattern, _, _ in _SALARY
+                        for other in pattern.finditer(prefix)), default=0)
+    prefix = prefix[previous_end:]
+    following = _earliest((pattern for pattern, _, _ in _SALARY), suffix)
+    if following:
+        suffix = suffix[:following.start()]
+    return prefix, suffix
+
+
+def _scaled_non_salary(prefix: str, suffix: str, quote: str) -> bool:
+    """Reject count/specification phrases bound to the amount, not adjacent duties."""
+    labels = list(_SALARY_CONTEXT.finditer(prefix))
+    # An explicit current wage label wins over earlier task/scale wording.
+    if labels and labels[-1].lastgroup == "pay":
+        prefix = prefix[labels[-1].end():]
+        if not _SCALED_ACTIVITY.search(prefix) and not _SCALED_PURPOSE_BEFORE.search(prefix):
+            return False
+    after = _SALARY_CONTEXT.search(suffix)
+    if after and after.lastgroup == "pay" and not _SCALED_PURPOSE_AFTER.match(suffix[:after.start()]):
+        return False
+    if _SCALED_PURPOSE_BEFORE.search(prefix):
+        return True
+    # /月 and ·14薪 already complete a pay quote; a following duty phrase
+    # (e.g. 客户维护) cannot directly qualify the number. A leading count
+    # label still excludes rates such as 用户数16k/月 above.
+    if _SCALED_PAY_END.search(quote):
+        return False
+    if not _SCALED_PURPOSE_AFTER.match(suffix):
+        return False
+    # "13k 视频剪辑专员" / "视频剪辑专员 13k" are pay beside a role.
+    # "需剪辑 8K 视频" / "系统覆盖 16k 用户" describe the work or its scale.
+    role = suffix
+    if _JOB_WORD.search(role) and not _PROSE.search(role) and not _SCALED_ACTIVITY.search(prefix):
+        return False
+    return True
+
+
 def _salary(text: str):
     best = None
     for pattern, unit, scale in _SALARY:
         for match in pattern.finditer(text):
+            if scale != 1 and (_SCALED_RANGE_BEFORE.search(text[:match.start("lo")])
+                               or _SCALED_RANGE_AFTER.match(text[match.end():])):
+                continue
+            if _non_salary_amount(text, match.start("lo"), match.end()):
+                continue
+            candidate_unit, period_quote = unit, None
+            if scale != 1:
+                prefix, suffix = _scaled_context(text, match)
+                if _scaled_non_salary(prefix, suffix, match.group()):
+                    continue
+                if scale == 1000 and unit == "CNY/month" and not re.search(r"(?:/|每)\s*月", match.group()):
+                    periods = list(_SALARY_PERIOD.finditer(prefix))
+                    if periods and periods[-1].group() == "年薪":
+                        candidate_unit, period_quote = "CNY/year", "年薪"
+                    elif periods and periods[-1].group() in ("日薪", "时薪"):
+                        continue  # unsupported K rate, never fall back to a monthly wage
             low = float(match["lo"])
             high = float(match["hi"]) if match["hi"] else low
             if 0 < low <= high:
                 if best is None or match.start() < best[0].start():
-                    best = (match, unit, scale, low, high)
+                    best = (match, candidate_unit, scale, low, high, period_quote)
                 break
     if best:
-        match, unit, scale, low, high = best
-        months = match.groupdict().get("months")
+        match, unit, scale, low, high, period_quote = best
+        months = match.groupdict().get("months") if unit == "CNY/month" else None
         months = int(months) if months and 12 <= int(months) <= 24 else None
         snippets = [match.group(0).strip()]
+        if period_quote:
+            snippets.insert(0, period_quote)
         if months is None and unit == "CNY/month":
             paid = _pay_months(text, match)
             if paid:
@@ -627,11 +949,24 @@ def _min_months(text: str, tag: list):
 def _education(text: str, tag: list):
     lowest = preferred = None
     snippets = []
+    order = schema.EDUCATION_LEVELS
+    candidates = []  # (start, end, level, snippet): the first one not a preference is the minimum
+    choices = []  # (start, end, level, snippet) of every choice, for the preference too
+    for match in _EDUCATION_CHOICE.finditer(text):
+        level = min((_LEVELS[option.group(1) or option.group(0)] for option in _LEVEL_OPTION.finditer(match.group(0))),
+                    key=order.index)
+        choices.append((match.start(), match.end(), level, match.group(0).strip()))
+        if match["label"] or match["tail"]:
+            candidates.append(choices[-1])
     for match in _EDUCATION_MIN.finditer(text):
-        if _PREFERENCE.search(text[match.end():match.end() + 4]):
+        if not any(start <= match.start() < end for start, end, _, _ in candidates):
+            candidates.append((match.start(), match.end(), _LEVELS[match.group(1) or match.group(2)],
+                               match.group(0).strip()))
+    for _, end, level, snippet in sorted(candidates):
+        if _PREFERENCE.search(text[end:end + 4]):
             continue  # "硕士及以上学历优先" states a preference, not a minimum
-        lowest = _LEVELS[match.group(1) or match.group(2)]
-        snippets.append(match.group(0).strip())
+        lowest = level
+        snippets.append(snippet)
         break
     if lowest is None:
         match = _NO_MINIMUM_EDUCATION.search(text)
@@ -644,13 +979,16 @@ def _education(text: str, tag: list):
                 lowest = _LEVELS[cell]
                 snippets.append(cell)
                 break
-    match = _EDUCATION_PREFERRED.search(text)
-    if match:
-        level = _LEVELS[match.group(1)]
-        order = schema.EDUCATION_LEVELS
+    wanted = [(start, level, text[start:after.end()].strip()) for start, end, level, _ in choices
+              for after in [_PREFERRED_AFTER.match(text, end)] if after]
+    wanted += [(match.start(), _LEVELS[match.group(1)], match.group(0).strip())
+               for match in _EDUCATION_PREFERRED.finditer(text)
+               if not any(start <= match.start() < end for start, end, _, _ in choices)]
+    if wanted:
+        _, level, snippet = min(wanted)
         if lowest in (None, schema.NO_MINIMUM) or order.index(level) >= order.index(lowest):
             preferred = level
-            snippets.append(match.group(0).strip())
+            snippets.append(snippet)
     if lowest is None and preferred is None:
         return _NOTHING
     return {"min": lowest, "preferred": preferred}, snippets
@@ -779,6 +1117,8 @@ def _asked(text: str, term: str, match, intro: list) -> bool:
     left, right = _clause_bounds(text, match.start(), match.end())
     if _NEGATION.search(text, left, match.start()):
         return False
+    if _MAJOR_TAIL.match(text, match.end(), right) or _MAJOR_LEAD.search(text[left:match.start()]):
+        return False  # a major, not a skill
     if term == "PS" and _postscript(text, match):
         return False
     if term in _PLATFORMS:

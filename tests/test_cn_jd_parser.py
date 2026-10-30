@@ -195,6 +195,66 @@ class RepeatedLocation(unittest.TestCase):
 
 # (JD text, field path, expected value). Negative rows pin what a rule must leave alone.
 SEED_CASES = (
+    # H27 second review: purpose after an amount and modified cross-line labels.
+    ("额外发放420元/月交通补贴，固定月薪8600元。", "salary", salary(8600, 8600, "CNY/month")),
+    ("每人享有450元/月餐补，工资面议。", "salary", NEGOTIABLE),
+    ("交通补贴：\n每人按标准发放420元/月；工资面议。", "salary", NEGOTIABLE),
+    ("培训收费：\n标准为26000元/年。薪资面议。", "salary", NEGOTIABLE),
+    ("岗位工资8600元/月，另发420元/月交通补贴", "salary", salary(8600, 8600, "CNY/month")),
+    ("每年收取26000元/年的培训费；工资面议", "salary", NEGOTIABLE),
+    ("薪酬福利：提供450元/月作为餐补，实际工资面议", "salary", NEGOTIABLE),
+    ("交通补贴：\n本岗实际月薪8600元，另发420元/月交通补贴", "salary", salary(8600, 8600, "CNY/month")),
+    ("培训收费：\n岗位工资为8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("岗位工资：\n标准为8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("岗位工资8600元/月含交通补贴", "salary", salary(8600, 8600, "CNY/month")),
+    ("岗位工资8600元/月另有交通补贴", "salary", salary(8600, 8600, "CNY/month")),
+    ("岗位工资8600元/月餐补另计", "salary", salary(8600, 8600, "CNY/month")),
+    ("额外发放420元/月交通补贴 岗位工资8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("额外发放420元/月交通补贴 岗位工资8600元/月另有年终奖", "salary", salary(8600, 8600, "CNY/month")),
+    ("另发420元/月交通补贴 8600元/月工资", "salary", salary(8600, 8600, "CNY/month")),
+    ("8600元/月工资 另发420元/月交通补贴", "salary", salary(8600, 8600, "CNY/month")),
+    ("每人发放450元/月含税餐补，工资面议", "salary", NEGOTIABLE),
+    ("每人享有450元/月餐补另行发放，工资面议", "salary", NEGOTIABLE),
+    ("薪酬福利：450元/月交通补贴和生活补助，实际工资面议", "salary", NEGOTIABLE),
+    # H27 review: separate allowances/fees cannot displace the actual wage.
+    ("另发通勤补贴420元/月，固定月薪8600元。", "salary", salary(8600, 8600, "CNY/month")),
+    ("固定月薪8600元，另发通勤补贴420元/月。", "salary", salary(8600, 8600, "CNY/month")),
+    ("福利有租房补助750元/月；工资面议。", "salary", NEGOTIABLE),
+    ("餐补450元/月；薪酬9500-12500元/月。", "salary", salary(9500, 12500, "CNY/month")),
+    ("薪酬9500-12500元/月；餐补450元/月。", "salary", salary(9500, 12500, "CNY/month")),
+    ("入职培训收费26000元/年，薪资面议。", "salary", NEGOTIABLE),
+    ("薪资面议；培训费26000元/年。", "salary", NEGOTIABLE),
+    ("交通补贴420元/月 岗位工资8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("岗位工资8600元/月 交通补贴420元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("薪酬福利：餐补450元/月，具体工资面议", "salary", NEGOTIABLE),
+    ("报酬含交通补贴的标准：补贴420元/月；实际月薪8600元。", "salary", salary(8600, 8600, "CNY/month")),
+    ("基本工资（另有餐补）8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("工资（不含餐补，另有交通补助）8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("工资（含餐补450元/月）8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("交通补贴：\n420元/月\n工资：\n8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("补贴：\n420元/月\n岗位工资面议", "salary", NEGOTIABLE),
+    ("餐补420元/月｜8600-12600元/月", "salary", salary(8600, 12600, "CNY/month")),
+    # H27: explicit yuan/period suffixes, without a 月薪/年薪 prefix.
+    ("待遇为8500-12500元/月，另有餐补", "salary", salary(8500, 12500, "CNY/month")),
+    ("固定报酬 7600 元 / 月", "salary", salary(7600, 7600, "CNY/month")),
+    ("约定报酬为18000元/月，全年14薪", "salary", salary(18000, 18000, "CNY/month", 14)),
+    ("薪酬区间 12000元 至 18000元每月", "salary", salary(12000, 18000, "CNY/month")),
+    ("项目报酬 65000～95000元/年", "salary", salary(65000, 95000, "CNY/year")),
+    ("约定薪酬 98000 元每年", "salary", salary(98000, 98000, "CNY/year")),
+    ("服务报酬 7500元/年", "salary", salary(7500, 7500, "CNY/year")),
+    ("报酬 120000-180000元/年", "salary", salary(120000, 180000, "CNY/year")),
+    ("短期顾问报酬 1200-1500元/天", "salary", salary(1200, 1500, "CNY/day")),
+    ("专家服务报酬 12000元/日", "salary", salary(12000, 12000, "CNY/day")),
+    ("讲师报酬 1200.50元/小时", "salary", salary(1200.5, 1200.5, "CNY/hour")),
+    ("试用期8500元/月，转正后12000元/月", "salary", salary(8500, 8500, "CNY/month")),
+    ("咨询电话010-87654321，分机8500", "salary", None),
+    ("招聘日期2026-11-05，截止2026/12/10", "salary", None),
+    ("团队规模9000+人，覆盖12000家门店", "salary", None),
+    ("五险一金，年度体检，12000人共享福利", "salary", None),
+    ("福利含五险一金，补贴额度8500-12500元", "salary", None),
+    ("每月处理8500-12500条记录", "salary", None),
+    ("招聘专员 8500-12500元/月\n岗位要求：耐心细致", "title", "招聘专员"),
+    ("招聘专员\n示例远岫科技｜杭州｜8500-12500元/月｜5天/周｜本科", "company", "示例远岫科技"),
     ("薪资：200-300元/天", "salary", salary(200, 300, "CNY/day")),
     ("日薪200元", "salary", salary(200, 200, "CNY/day")),
     ("150-200/天", "salary", salary(150, 200, "CNY/day")),
@@ -245,6 +305,25 @@ SEED_CASES = (
     ("本科及以上学历，专业不限", "requirements.education", {"min": "bachelor", "preferred": None}),
     ("A岗：本科及以上学历；B岗：学历不限", "requirements.education", {"min": "bachelor", "preferred": None}),
     ("专业不限", "requirements.education", None),
+    # H20: levels to choose from - the minimum is the lowest; "X及以上，Y优先" is still X, Y no option.
+    ("本科或硕士及以上学历", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("大专或本科及以上学历", "requirements.education", {"min": "associate", "preferred": None}),
+    ("大专/本科学历", "requirements.education", {"min": "associate", "preferred": None}),
+    ("学历：本科或硕士", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("学历要求：本科/硕士", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("2027届本科、硕士毕业生", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("本科或硕士在读", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("本科、硕士、博士均可", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("硕士研究生或博士学历", "requirements.education", {"min": "master", "preferred": None}),
+    ("本科及以上学历，硕士或博士优先", "requirements.education", {"min": "bachelor", "preferred": "master"}),
+    ("本科或硕士学历优先", "requirements.education", {"min": None, "preferred": "bachelor"}),
+    ("本科或硕士期间有相关项目经历", "requirements.education", None),  # a pair alone asks for nothing
+    ("本科或以上学历", "requirements.education", {"min": "bachelor", "preferred": None}),
+    # #79 review: the 研究生 of 博士研究生 qualifies the doctorate; it is no master's to choose.
+    ("博士研究生或博士及以上学历", "requirements.education", {"min": "phd", "preferred": None}),
+    ("博士或博士研究生及以上学历", "requirements.education", {"min": "phd", "preferred": None}),
+    ("本科或硕士研究生学历", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("研究生或博士学历", "requirements.education", {"min": "master", "preferred": None}),
     ("表现优秀者可转正", "return_offer", True),
     ("有转正机会", "return_offer", True),
     ("不提供转正", "return_offer", False),
@@ -252,6 +331,94 @@ SEED_CASES = (
     ("支持远程实习", "remote", True),
     ("不支持远程办公", "remote", False),
     ("负责远程控制系统开发", "remote", None),
+    ("支持远程面试", "remote", None),  # the interview, not the work (M2-6c)
+    ("不支持远程面试", "remote", None),
+    ("可远程面试，支持远程实习", "remote", True),
+    # M2-6c: how the JD interviews. Online:
+    ("采用线上面试", "interview", {"mode": "online", "cities": []}),
+    ("视频面试", "interview", {"mode": "online", "cities": []}),
+    ("电话面试", "interview", {"mode": "online", "cities": []}),
+    ("支持远程面试", "interview", {"mode": "online", "cities": []}),
+    ("网络面试", "interview", {"mode": "online", "cities": []}),
+    ("在线面试", "interview", {"mode": "online", "cities": []}),
+    ("面试方式：线上", "interview", {"mode": "online", "cities": []}),
+    ("面试地点：线上", "interview", {"mode": "online", "cities": []}),
+    ("面试安排：视频面试", "interview", {"mode": "online", "cities": []}),  # 面试安排： is a label
+    # In person, and where:
+    ("现场面试", "interview", {"mode": "onsite", "cities": []}),
+    ("线下面试", "interview", {"mode": "onsite", "cities": []}),
+    ("当面面试", "interview", {"mode": "onsite", "cities": []}),
+    ("到场面试", "interview", {"mode": "onsite", "cities": []}),
+    ("需到公司面试", "interview", {"mode": "onsite", "cities": []}),
+    ("来公司面试", "interview", {"mode": "onsite", "cities": []}),
+    ("面试方式：现场", "interview", {"mode": "onsite", "cities": []}),
+    ("面试地点：北京", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    ("面试城市：上海", "interview", {"mode": "onsite", "cities": ["上海"]}),
+    ("面试地址：深圳市南山区", "interview", {"mode": "onsite", "cities": ["深圳"]}),
+    ("面试可在杭州进行", "interview", {"mode": "onsite", "cities": ["杭州"]}),
+    ("需到北京面试", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    ("现场面试（广州）", "interview", {"mode": "onsite", "cities": ["广州"]}),
+    ("工作地点：深圳南山区；面试地点：北京", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    # Both: the candidate's choice when one line offers it, else some rounds in person.
+    ("面试地点：广州，也可视频面试", "interview", {"mode": "either", "cities": ["广州"]}),
+    ("线上或现场面试均可", "interview", {"mode": "either", "cities": []}),
+    ("一面电话面试，终面现场面试", "interview", {"mode": "mixed", "cities": []}),
+    ("初试视频面试\n复试需到上海现场面试", "interview", {"mode": "mixed", "cities": ["上海"]}),
+    ("视频面试\n面试地点：北京，也可电话面试", "interview", {"mode": "either", "cities": ["北京"]}),
+    ("线上/线下面试", "interview", {"mode": "mixed", "cities": []}),  # no word of choice: not read as one
+    # #73 review: a space or tab after the label's colon; a word of choice before the ways named.
+    ("面试地点： 线上", "interview", {"mode": "online", "cities": []}),
+    ("面试地点：\t视频面试", "interview", {"mode": "online", "cities": []}),
+    ("面试地点：  北京", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    ("可选线上/现场面试", "interview", {"mode": "either", "cities": []}),
+    ("线上/现场面试可选", "interview", {"mode": "either", "cities": []}),
+    # #73 review (V9): a round in person after an online one, and where it is.
+    ("首轮视频面试；通过后须到成都参加现场复试", "interview", {"mode": "mixed", "cities": ["成都"]}),
+    ("初面电话面试，终面需赴武汉市进行线下终面", "interview", {"mode": "mixed", "cities": ["武汉"]}),
+    ("须到苏州参加现场面试", "interview", {"mode": "onsite", "cities": ["苏州"]}),
+    ("现场复试", "interview", {"mode": "onsite", "cities": []}),
+    ("复试通过后发放录用通知", "interview", None),  # a round, but neither online nor in person
+    # Not the candidate's interview, or ruled out:
+    ("无需现场面试，全程线上", "interview", None),
+    ("不支持远程面试", "interview", None),
+    ("不能视频面试", "interview", None),
+    ("不接受视频面试，需到北京现场面试", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    ("面试地点：北京，不可线上面试", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    ("负责协助组织现场面试", "interview", None),
+    ("负责候选人面试安排", "interview", None),
+    ("公司主营线上业务", "interview", None),
+    ("工作地点：北京", "interview", None),
+    # M2-6c: when to start (dated from NOW, 2026-10-27, when the JD has no publication date).
+    ("尽快到岗", "requirements.start", {"by": None, "asap": True}),
+    ("能尽快到岗", "requirements.start", {"by": None, "asap": True}),
+    ("可立即到岗", "requirements.start", {"by": None, "asap": True}),
+    ("随时到岗", "requirements.start", {"by": None, "asap": True}),
+    ("到岗时间：尽快", "requirements.start", {"by": None, "asap": True}),
+    ("入职时间：随时", "requirements.start", {"by": None, "asap": True}),
+    ("11月1日前到岗", "requirements.start", {"by": "2026-11-01", "asap": False}),
+    ("11月1号之前入职", "requirements.start", {"by": "2026-11-01", "asap": False}),
+    ("12月底前到岗", "requirements.start", {"by": "2026-12-31", "asap": False}),
+    ("入职时间：11月底前", "requirements.start", {"by": "2026-11-30", "asap": False}),
+    ("2027年7月入职", "requirements.start", {"by": "2027-07-31", "asap": False}),
+    ("到岗时间：2027年3月", "requirements.start", {"by": "2027-03-31", "asap": False}),
+    ("1月15日前到岗", "requirements.start", {"by": "2027-01-15", "asap": False}),  # nearest: next January
+    ("尽快到岗，最晚11月15日前到岗", "requirements.start", {"by": "2026-11-15", "asap": True}),
+    ("11月前到岗", "requirements.start", None),  # end of October, or of November?
+    ("11月1日后到岗", "requirements.start", None),  # the earliest day, not a deadline
+    ("11月起到岗", "requirements.start", None),
+    ("11月1日前到岗者优先", "requirements.start", None),  # only preferred
+    ("面试通过后一周内到岗", "requirements.start", None),
+    ("11月1日前到岗，12月1日前入职", "requirements.start", None),  # two dates: neither
+    # #73 review: the earliest day is no deadline; two dates sharing one 到岗 are two dates.
+    ("最早11月1日到岗", "requirements.start", None),
+    ("最早可于11月1日入职", "requirements.start", None),
+    ("不早于12月1日到岗", "requirements.start", None),
+    ("11月1日或12月1日到岗", "requirements.start", None),
+    ("12月1日或11月1日前到岗", "requirements.start", None),
+    ("11月1日至11月15日到岗", "requirements.start", None),
+    ("最晚11月15日前到岗", "requirements.start", {"by": "2026-11-15", "asap": False}),
+    ("无需立即到岗", "requirements.start", None),
+    ("实习3个月以上", "requirements.start", None),
     ("工作地点：广州天河区", "cities", ["广州"]),
     ("base 北京/上海", "cities", ["北京", "上海"]),
     ("工作城市：深圳、杭州", "cities", ["深圳", "杭州"]),
@@ -272,6 +439,40 @@ SEED_CASES = (
     ("公司：示例科技\n岗位职责：负责后端开发", "company", "示例科技"),
     ("加入示例科技有限公司，你将负责后端开发", "company", None),
     ("熟悉Python，了解LangChain、RAG", "requirements.skills", ["Python", "LangChain", "RAG"]),
+    # H20: a term naming a major is no skill; the same term asking for knowledge still is.
+    ("统计学或市场营销相关专业", "requirements.skills", []),
+    ("计算机、统计学、数学等相关专业", "requirements.skills", []),
+    ("统计学专业", "requirements.skills", []),
+    ("专业：计算机、统计学", "requirements.skills", []),
+    ("专业要求：统计学或数学", "requirements.skills", []),
+    ("平面设计、视觉传达等专业，熟练使用Photoshop", "requirements.skills", ["Photoshop"]),
+    ("数据分析相关专业，熟悉SQL", "requirements.skills", ["SQL"]),
+    ("熟悉统计学方法", "requirements.skills", ["统计学"]),
+    ("具备统计学专业知识", "requirements.skills", ["统计学"]),
+    ("统计学、计算机等相关专业，熟悉统计学方法", "requirements.skills", ["统计学"]),
+    ("熟悉数据分析", "requirements.skills", ["数据分析"]),
+    # #79 review: knowledge or an edition after 专业 is a skill, not a major.
+    ("熟悉统计学专业基础知识", "requirements.skills", ["统计学"]),
+    ("掌握统计学专业理论知识", "requirements.skills", ["统计学"]),
+    ("熟练使用Figma专业版", "requirements.skills", ["Figma"]),
+    ("统计学专业毕业", "requirements.skills", []),
+    ("统计学等相关专业优先", "requirements.skills", []),
+    # #79 second review: only a degree subject drops the term; any other wording after 专业 keeps it.
+    ("统计学专业基础扎实", "requirements.skills", ["统计学"]),
+    ("具备扎实的统计学专业基础", "requirements.skills", ["统计学"]),
+    ("熟悉统计学专业相关基础知识", "requirements.skills", ["统计学"]),
+    ("统计学专业在读", "requirements.skills", []),
+    ("统计学专业本科及以上", "requirements.skills", []),
+    ("统计学相关专业背景", "requirements.skills", []),
+    ("统计学专业或数学专业毕业", "requirements.skills", []),
+    ("统计学专业的学生优先", "requirements.skills", []),
+    # #79 third review: 背景 before a knowledge noun asks for what one knows.
+    ("熟悉统计学专业背景知识", "requirements.skills", ["统计学"]),
+    ("掌握统计学专业背景理论", "requirements.skills", ["统计学"]),
+    ("具备统计学专业背景能力", "requirements.skills", ["统计学"]),
+    ("统计学专业背景", "requirements.skills", []),
+    ("具有统计学相关专业背景，熟悉SQL", "requirements.skills", ["SQL"]),
+    ("统计学或市场营销相关专业", ALTERNATIVES, []),
     ("熟悉Go语言，用过Google Cloud和MongoDB", "requirements.skills", ["Go", "MongoDB"]),
     ("精通JavaScript", "requirements.skills", ["JavaScript"]),
     ("熟悉SpringBoot", "requirements.skills", ["Spring Boot"]),
@@ -303,6 +504,15 @@ SEED_CASES = (
     ("技术总监", "title", "技术总监"),
     ("校园招聘 / 市场与品牌", "title", None),
     # Terms added in M2-3, as JDs write them; content forms alone are not skills.
+    # H26: the complete skill term, including when followed by 方法/能力.
+    ("任职要求：能够独立完成统计分析", "requirements.skills", ["统计分析"]),
+    ("掌握统计分析方法，使用SPSS复核结果", "requirements.skills", ["统计分析", "SPSS"]),
+    ("具备统计分析能力和统计学基础", "requirements.skills", ["统计分析", "统计学"]),
+    ("职责：运用数据分析与统计分析支撑决策", "requirements.skills", ["数据分析", "统计分析"]),
+    ("统计分析专员\n岗位职责：整理客户记录", "requirements.skills", []),
+    ("无需统计分析经验，熟悉Excel即可", "requirements.skills", ["Excel"]),
+    ("负责报表汇总，不涉及统计分析", "requirements.skills", []),
+    ("统计报名人数，分析活动安排", "requirements.skills", []),
     ("熟悉 Playwright、Postman，有接口测试和自动化测试经验", "requirements.skills",
      ["Playwright", "Postman", "接口测试", "自动化测试"]),
     ("熟练使用 Excel、PowerPoint，具备市场调研和商务沟通能力", "requirements.skills",
@@ -440,6 +650,289 @@ class SeedCases(unittest.TestCase):
         for text, _, _ in SEED_CASES:
             with self.subTest(text=text):
                 self.assertEqual(schema.validate(parse_one(text)), [])
+
+    def test_benefit_and_cost_amounts_alone_are_not_salary(self):
+        for label in ("交通补贴", "生活补助", "餐补", "房补", "培训收费", "住宿费用", "押金", "培训费", "住宿费", "餐费", "租金"):
+            for amount in ("650元/月", "26000元/年", "30元/天", "12元/小时", "1-2K/月"):
+                with self.subTest(label=label, amount=amount):
+                    record = parse_one(f"福利及费用说明：{label}为{amount}。")
+                    self.assertIsNone(record["salary"])
+                    self.assertNotIn("salary", record["evidence"])
+                    self.assertEqual(schema.validate(record), [])
+
+    def test_selected_salary_evidence_does_not_quote_the_earlier_subsidy(self):
+        record = parse_one("餐补450元/月；薪酬9500-12500元/月，全年13薪。")
+        self.assertEqual(record["salary"], salary(9500, 12500, "CNY/month", 13))
+        self.assertEqual(record["evidence"]["salary"]["text"], ["9500-12500元/月", "全年13薪"])
+
+    def test_separately_priced_benefits_preserve_unlabelled_wages(self):
+        for text, low, high, quote in (
+                ("8-10K 餐补另计", 8000, 10000, "8-10K"),
+                ("12-15K/月 房补另算", 12000, 15000, "12-15K/月"),
+                ("月薪8-10K 餐补另计", 8000, 10000, "8-10K"),
+                ("8-10K，餐补另计", 8000, 10000, "8-10K"),
+                ("12-15K/月，房补另算", 12000, 15000, "12-15K/月"),
+                ("8-10K", 8000, 10000, "8-10K"),
+                ("12-15K/月", 12000, 15000, "12-15K/月")):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(low, high, "CNY/month"))
+                self.assertEqual(record["evidence"]["salary"]["text"], quote)
+                self.assertEqual(schema.validate(record), [])
+        # The same rates labelled as allowances still are not the wage.
+        for text in ("8-10K 餐补", "12-15K/月 房补", "8-10K作为餐补", "12-15K/月作为房补"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertIsNone(record["salary"])
+                self.assertNotIn("salary", record["evidence"])
+                record = parse_one(text + "。工资面议")
+                self.assertEqual(record["salary"], NEGOTIABLE)
+                self.assertEqual(record["evidence"]["salary"]["text"], "工资面议")
+                self.assertEqual(schema.validate(record), [])
+
+    def test_cost_purpose_after_amount_and_header_with_modifiers(self):
+        for label in ("交通补贴", "生活补助", "餐补", "房补", "培训收费", "住宿费用", "押金", "培训费", "住宿费", "餐费", "租金"):
+            for amount in ("650元/月", "26000元/年", "30元/天", "12元/小时", "1-2K/月"):
+                for text in (f"具体项目：{amount}的{label}。工资面议。",
+                             f"{label}：\n每人按标准计算为{amount}。工资面议。"):
+                    with self.subTest(text=text):
+                        record = parse_one(text)
+                        self.assertEqual(record["salary"], NEGOTIABLE)
+                        self.assertEqual(record["evidence"]["salary"]["text"], "工资面议")
+                        self.assertEqual(schema.validate(record), [])
+
+
+class ScaledSalary(unittest.TestCase):
+    """H28: original examples of amounts, periods, evidence and non-pay uses."""
+
+    def test_adjacent_duties_do_not_relabel_salary_as_a_count(self):
+        for text, months, quote in (
+                ("8-10K/月 负责客户维护", None, "8-10K/月"),
+                ("负责客户维护 8-10K/月", None, "8-10K/月"),
+                ("8-10K+14薪 负责用户运营", 14, ["8-10K", "14薪"]),
+                ("9-11K/月 每日维护用户关系", None, "9-11K/月"),
+                ("9-11K/月 客户维护", None, "9-11K/月"),
+                ("9-11K/月 用户关系维护", None, "9-11K/月"),
+                ("9-11K·15薪 客户维护", 15, "9-11K·15薪"),
+                ("需负责客户回访 9-11K/月", None, "9-11K/月"),
+                ("9-11K + 15薪 负责视频剪辑", 15, ["9-11K", "15薪"]),
+                ("用户运营职责 9-11K·15薪", 15, "9-11K·15薪")):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                low, high = (8000, 10000) if "8-10" in text else (9000, 11000)
+                self.assertEqual(record["salary"], salary(low, high, "CNY/month", months))
+                self.assertEqual(record["evidence"]["salary"]["text"], quote)
+                self.assertEqual(schema.validate(record), [])
+
+    def test_counts_bind_to_the_amount_not_other_duties(self):
+        for text in ("每月接待3千位客户", "平台覆盖16k注册用户", "服务1万+ 客户",
+                     "客户总数约16k", "平台用户数量达到16k", "用户数16k/月",
+                     "视频分辨率为8K", "服务16k用户 运营专员"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertIsNone(record["salary"])
+                self.assertNotIn("salary", record["evidence"])
+                self.assertEqual(parse_one(text + "；工资面议")["salary"], NEGOTIABLE)
+                record = parse_one(text + "；9-11K/月 负责客户维护")
+                self.assertEqual(record["salary"], salary(9000, 11000, "CNY/month"))
+                self.assertEqual(record["evidence"]["salary"]["text"], "9-11K/月")
+
+    def test_review_counts_and_video_specs_cannot_displace_wages(self):
+        for text in ("负责剪辑 8K 视频", "本岗需处理8K高清视频素材", "平台覆盖 16k 用户",
+                     "每天接待3千人次", "累计服务16k活跃用户", "账号已有16k 粉丝",
+                     "分辨率：\n8K", "用户数：\n16k", "薪资说明：视频分辨率8K",
+                     "每日接待3千名访客", "需剪辑8K素材"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertIsNone(record["salary"])
+                self.assertNotIn("salary", record["evidence"])
+                record = parse_one(text + "；月薪11k")
+                self.assertEqual(record["salary"], salary(11000, 11000, "CNY/month"))
+                self.assertEqual(record["evidence"]["salary"]["text"], "11k")
+                self.assertEqual(parse_one(text + "；工资面议")["salary"], NEGOTIABLE)
+        for text in ("月薪11k 需剪辑8K视频", "需剪辑8K视频 月薪11k",
+                     "月薪11k 每日服务16k用户", "每日服务16k用户 月薪11k",
+                     "每日服务16k用户 11k工资", "月薪11k 每年组织团建"):
+            with self.subTest(text=text):
+                self.assertEqual(parse_one(text)["salary"], salary(11000, 11000, "CNY/month"))
+        for text in ("11k 视频剪辑专员", "视频剪辑专员 11k", "11k 用户运营专员",
+                     "11k 画质工程师", "11k 人事专员", "用户运营专员 月薪11k",
+                     "用户需求分析师11k", "系统用户分析师11k"):
+            with self.subTest(text=text):
+                self.assertEqual(parse_one(text)["salary"], salary(11000, 11000, "CNY/month"))
+
+    def test_review_yearly_context_survives_modifiers_and_line_break(self):
+        for text in ("年薪约210k", "年薪税前210K", "年薪：\n约210k", "年薪税前：\n预计210k",
+                     "年薪：\n税前约210k", "年薪下限暂按210k", "税前年薪约210k", "年薪约210k，全年15薪",
+                     "年薪\n约210k", "年薪税前\n约210k"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(210000, 210000, "CNY/year"))
+                self.assertIn("年薪", record["evidence"]["salary"]["text"])
+                self.assertEqual(schema.validate(record), [])
+        self.assertEqual(parse_one("月薪约21k")["salary"], salary(21000, 21000, "CNY/month"))
+        self.assertEqual(parse_one("年薪：\n通勤补贴0.6k；工资面议")["salary"], NEGOTIABLE)
+        for text in ("日薪约1k", "时薪约0.2k"):
+            self.assertIsNone(parse_one(text)["salary"])
+
+    def test_review_plus_pay_months_keeps_master_evidence(self):
+        for separator in ("+", " + ", "+ "):
+            with self.subTest(separator=separator):
+                record = parse_one(f"薪资11-17K{separator}15薪")
+                self.assertEqual(record["salary"], salary(11000, 17000, "CNY/month", 15))
+                self.assertEqual(record["evidence"]["salary"]["text"], ["11-17K", "15薪"])
+        for text in ("账号覆盖16k+用户", "账号已有3万+粉丝"):
+            self.assertIsNone(parse_one(text)["salary"])
+
+    def test_scaled_single_values_and_ranges(self):
+        for text, low, high, unit, quote in (
+                ("固定报酬为1.3万/月。", 13000, 13000, "month", "1.3万/月"),
+                ("待遇1.1-1.6万/月。", 11000, 16000, "month", "1.1-1.6万/月"),
+                ("报酬1.1万至1.6万元每月。", 11000, 16000, "month", "1.1万至1.6万元每月"),
+                ("约定1.35w/月。", 13500, 13500, "month", "1.35w/月"),
+                ("月薪 1.4 W。", 14000, 14000, "month", "月薪 1.4 W"),
+                ("月薪：1.3w。", 13000, 13000, "month", "月薪：1.3w"),
+                ("月薪1.1w-1.6万。", 11000, 16000, "month", "月薪1.1w-1.6万"),
+                ("待遇为13k。", 13000, 13000, "month", "13k"),
+                ("约定13 K / 月。", 13000, 13000, "month", "13 K / 月"),
+                ("岗位工资9k-13K。", 9000, 13000, "month", "9k-13K"),
+                ("待遇9-13K/月。", 9000, 13000, "month", "9-13K/月"),
+                ("报酬9千至13千每月。", 9000, 13000, "month", "9千至13千每月"),
+                ("该岗年薪 16-21 万。", 160000, 210000, "year", "年薪 16-21 万"),
+                ("岗位报酬22万/年。", 220000, 220000, "year", "22万/年"),
+                ("年薪 17 W。", 170000, 170000, "year", "年薪 17 W"),
+                ("报酬16w～21w每年。", 160000, 210000, "year", "16w～21w每年"),
+                ("年薪 160-210k。", 160000, 210000, "year", "年薪 160-210k"),
+                ("报酬180k/年。", 180000, 180000, "year", "180k/年"),
+                ("年薪180k。", 180000, 180000, "year", "年薪180k"),
+                ("年薪：180k。", 180000, 180000, "year", "年薪：180k"),
+                ("年薪为180k。", 180000, 180000, "year", "年薪为180k")):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(low, high, "CNY/" + unit))
+                self.assertEqual(record["evidence"]["salary"]["text"], quote)
+                self.assertEqual(schema.validate(record), [])
+
+    def test_scaled_pay_months_preserve_existing_separators(self):
+        for amount, low, high in (("13k", 13000, 13000), ("9-13K", 9000, 13000)):
+            for separator in ("·", "・", "•", "*", "x", "X", "×"):
+                text = f"薪酬{amount}{separator}14薪"
+                with self.subTest(text=text):
+                    record = parse_one(text)
+                    self.assertEqual(record["salary"], salary(low, high, "CNY/month", 14))
+                    self.assertEqual(record["evidence"]["salary"]["text"], text[2:])
+        for text, unit, months, quote in (
+                ("报酬1.3万/月，全年14薪", "month", 14, ["1.3万/月", "全年14薪"]),
+                ("报酬1.3万/年，全年14薪", "year", None, "1.3万/年"),
+                ("报酬1.3万/月，转正后14薪", "month", None, "1.3万/月"),
+                ("报酬1.3万/月\n福利：14薪", "month", None, "1.3万/月")):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(13000, 13000, "CNY/" + unit, months))
+                self.assertEqual(record["evidence"]["salary"]["text"], quote)
+
+    def test_scale_numbers_are_not_pay(self):
+        for text in ("账号已有2万+粉丝", "本轮融资 850 万", "平台服务 11 万用户",
+                     "读者规模13k用户", "账号已有13k粉丝", "目前覆盖13k人", "本轮融资850k",
+                     "开发板编号A13k", "处理13KB报文", "视频分辨率4K", "需剪辑4K视频", "电源功率1.3W",
+                     "薪酬1.3万", "薪酬1.3w", "报酬13K/天", "报酬13K/小时",
+                     "薪酬9k-1.3w/月", "薪酬1.3w-19k/月", "薪酬19-13K/月"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertIsNone(record["salary"])
+                self.assertNotIn("salary", record["evidence"])
+                self.assertEqual(schema.validate(record), [])
+
+    def test_scaled_amounts_keep_benefit_and_cost_ownership(self):
+        for amount in ("0.6k", "0.06万/月", "0.06w/月", "0.8万/年", "0.8w/年", "8k/年"):
+            for label in ("交通补贴", "餐补", "培训费用"):
+                for text in (f"{label}为{amount}", f"{amount}作为{label}",
+                             f"{label}：\n每人按标准发放{amount}"):
+                    with self.subTest(text=text):
+                        record = parse_one(text + "；工资面议。")
+                        self.assertEqual(record["salary"], NEGOTIABLE)
+                        self.assertEqual(record["evidence"]["salary"]["text"], "工资面议")
+        for text in ("交通补贴0.6k，工资1.3万/月", "工资1.3万/月，交通补贴0.6k",
+                     "0.6k交通补贴 工资1.3万/月", "工资1.3万/月 0.6k交通补贴",
+                     "工资1.3万/月含餐补", "工资1.3万/月另有餐补", "1.3万/月 餐补另计",
+                     "1.3万/月 房补另算", "交通补贴：\n实际月薪1.3万/月"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(13000, 13000, "CNY/month"))
+                self.assertEqual(schema.validate(record), [])
+        for text in ("本轮融资850k，岗位工资13k", "本轮融资850k 岗位工资13k", "工资13k，需剪辑4K视频",
+                     "融资经理 13k", "估值分析师 13k", "13k 人事专员", "13k 视频剪辑专员"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertEqual(record["salary"], salary(13000, 13000, "CNY/month"))
+                self.assertEqual(record["evidence"]["salary"]["text"], "13k")
+
+
+class EducationChoiceFilter(unittest.TestCase):
+    """#79 review: a doctorate asked for in either order still rules out the tech sample's master's."""
+
+    def test_a_doctorate_is_not_relaxed_to_a_masters(self):
+        from jobsearch_cn import match
+        tech = json.loads((REPO / "tests" / "fixtures" / "cn" / "profile" / "tech" / "profile.json")
+                          .read_text(encoding="utf-8"))
+        for text in ("博士研究生或博士及以上学历", "博士或博士研究生及以上学历"):
+            with self.subTest(text=text):
+                checks = {c["check"]: c for c in match.filter_job(parse_one(f"算法研究实习生\n{text}"), tech)["checks"]}
+                self.assertEqual(checks["education"]["result"], "conflict", checks["education"]["reason"])
+
+
+class InterviewAndStart(unittest.TestCase):
+    """M2-6c: each value cites its clauses; a start date without a year is dated from the JD's own date."""
+
+    def test_both_kinds_cite_every_clause(self):
+        record = parse_one("面试地点：广州，也可视频面试")
+        self.assertEqual(record["evidence"]["interview"], {"text": ["面试地点：广州", "也可视频面试"], "method": "rule"})
+        record = parse_one("尽快到岗，最晚11月15日前到岗")
+        self.assertEqual(record["evidence"]["requirements.start"]["text"], ["最晚11月15日前到岗", "尽快到岗"])
+
+    def test_nothing_read_nothing_cited(self):
+        record = parse_one("岗位职责：负责后端开发")
+        self.assertIsNone(record["interview"])
+        self.assertIsNone(record["requirements"]["start"])
+        self.assertNotIn("interview", record["evidence"])
+        self.assertNotIn("requirements.start", record["evidence"])
+
+    def start_by(self, text, now=NOW):
+        [record], _ = jd_parser.parse_text(text, now=now)
+        return (record["requirements"]["start"] or {}).get("by")
+
+    def test_a_date_without_a_year_takes_the_year_nearest_the_publication_date(self):
+        self.assertEqual(self.start_by("发布时间：2026-06-01\n1月15日前到岗"), "2026-01-15")
+        self.assertEqual(self.start_by("发布时间：2026-12-20\n1月15日前到岗"), "2027-01-15")
+        self.assertEqual(self.start_by("发布时间：2027-02-01\n12月底前到岗"), "2026-12-31")
+
+    def test_without_a_publication_date_the_import_date(self):
+        self.assertEqual(self.start_by("3月1日前到岗"), "2027-03-01")
+        march = datetime(2027, 2, 10, 10, 0, tzinfo=NOW.tzinfo)
+        self.assertEqual(self.start_by("12月底前到岗", now=march), "2026-12-31")
+        self.assertEqual(self.start_by("3月1日前到岗", now=march), "2027-03-01")
+
+    def test_a_tie_takes_the_later_year(self):
+        # 2027-08-31 is 183 days after 2027-03-01 and 183 before 2028-03-01 (2028 is a leap year).
+        tie = datetime(2027, 8, 31, 10, 0, tzinfo=NOW.tzinfo)
+        self.assertEqual(self.start_by("3月1日前到岗", now=tie), "2028-03-01")
+        # 2026-10-27 is 183 days after 2026-04-27 and 182 before 2027-04-27: no tie, the nearer.
+        self.assertEqual(self.start_by("4月27日前到岗"), "2027-04-27")
+
+    def test_a_stated_year_is_kept(self):
+        self.assertEqual(self.start_by("发布时间：2026-10-20\n2028年7月入职"), "2028-07-31")
+
+    def test_a_month_alone_compares_the_last_day_it_would_write(self):
+        # #73 review: 2026-01-31 is 170 days before 2026-07-20 and 2027-01-31 is 195 after it. Comparing
+        # 15 January instead (186 before, 179 after) took 2027.
+        self.assertEqual(self.start_by("发布时间：2026-07-20\n1月入职"), "2026-01-31")
+        # 2026-08-05: 2026-01-31 is 186 days before, 2027-01-31 179 after.
+        self.assertEqual(self.start_by("发布时间：2026-08-05\n1月入职"), "2027-01-31")
+
+    def test_the_interview_city_is_not_the_work_city(self):
+        record = parse_one("工作地点：上海\n须到苏州参加现场面试")
+        self.assertEqual(record["cities"], ["上海"])
+        self.assertEqual(record["interview"], {"mode": "onsite", "cities": ["苏州"]})
 
 
 class SkillAlternatives(unittest.TestCase):

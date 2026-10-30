@@ -103,6 +103,9 @@ class ReportFromSavedRecords(unittest.TestCase):
         for group, names in score.direction_skills(job, VOCABULARY).items():
             self.assertIn(f"{VOCABULARY.groups[group]['label']}（{group}）{len(names)} 项：{'、'.join(names)}",
                           self.row(dims, "direction"))
+        cities = (job["evidence"].get("cities") or {}).get("text")
+        for snippet in [cities] if isinstance(cities, str) else cities or []:
+            self.assertIn(snippet, self.row(dims, "location"))
 
     def test_the_salary_quote_of_a_known_job(self):
         # Codex B's case in #65: the salary row was empty although the stored job quotes it.
@@ -127,20 +130,43 @@ class ReportFromSavedRecords(unittest.TestCase):
         self.assertIn("熟悉 Golang 或 Java", self.row(self.section(page, job_id), "skills"))
 
     def rescored_with(self, weights: dict, sample="jd/boss_intern.txt") -> tuple:
-        changed = copy.deepcopy(self.profile)
-        changed["target"]["weights"] = weights
-        (self.data / "profile" / "profile.json").write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+        return self.rescored("target.weights", weights, sample)
+
+    def rescored(self, path: str, value, sample="jd/boss_intern.txt") -> tuple:
+        """(record, report section) for one job scored again after one profile field changed."""
+        (self.data / "profile" / "profile.json").write_text(
+            json.dumps(setting(self.profile, path, value), ensure_ascii=False), encoding="utf-8")
         job_id = self.ids[sample]
         record = self.cli("match", "score", job_id, "--save")
         _, page, _ = self.generate(job_id)
         return record, self.section(page, job_id)
+
+    @staticmethod
+    def dimensions_part(part: str) -> str:
+        """The 各维度 table only: 地点 names a hard condition too."""
+        return part[part.index("<h3>各维度</h3>"):part.index("<h3>总分怎么算</h3>")]
+
+    def test_the_location_row_quotes_the_cities_and_the_remote_offer_that_counted(self):
+        # official_site: 杭州 is not one of tech's cities, but the JD offers remote work and tech accepts it.
+        _, page, _ = self.generate()
+        job_id = self.ids["jd/official_site.txt"]
+        self.assertEqual(self.cli("match", "show", job_id)["dimensions"]["location"]["score"], 100)
+        row = self.row(self.dimensions_part(self.section(page, job_id)), "location")
+        self.assertIn("工作地点：杭州", row)
+        self.assertIn("支持远程实习", row)
+        # Not accepting remote work, the score rests on the city alone.
+        record, part = self.rescored("availability.remote_ok", False, "jd/official_site.txt")
+        self.assertEqual(record["dimensions"]["location"]["score"], 0)
+        row = self.row(self.dimensions_part(part), "location")
+        self.assertIn("工作地点：杭州", row)
+        self.assertNotIn("支持远程实习", row)
 
     def test_a_total_near_a_half_is_explained_without_rounding_first(self):
         # Codex B's case in #65: skills 43, direction 100, weights 1.0001 and 1 give 71.498575…, which
         # was shown as 71.50 and then "rounded" to 71. Built by hand so later rule changes cannot move it.
         dimensions = {key: {"score": None, "method": "rule", "reason": "r"} for key in score.DIMENSIONS}
         dimensions["skills"]["score"], dimensions["direction"]["score"] = 43, 100
-        weights = {"skills": 1.0001, "direction": 1, "experience": 0, "salary": 0}
+        weights = {"skills": 1.0001, "direction": 1, "experience": 0, "salary": 0, "location": 0}
         record = {"job_id": "job_0123456789ab", "filter": {"verdict": "eligible", "checks": []}, "gaps": [],
                   "dimensions": dimensions, "weights": weights, "total": score.total(dimensions, weights, "eligible")}
         self.assertEqual(record["total"]["score"], 71)
@@ -152,7 +178,9 @@ class ReportFromSavedRecords(unittest.TestCase):
         self.assertNotIn("71.50", part)
 
     def test_scored_dimensions_that_weigh_nothing(self):
-        record, part = self.rescored_with({"skills": 0, "direction": 0, "experience": 100, "salary": 0})
+        # A job with no experience yet: new weights keep an agent's experience (M2-6d), which would weigh 100 here.
+        record, part = self.rescored_with({"skills": 0, "direction": 0, "experience": 100, "salary": 0, "location": 0},
+                                          "jd/official_site.txt")
         self.assertIsNone(record["total"]["score"])
         self.assertIn("÷ 已评分维度的权重之和 0：已评分维度的权重之和为 0", part)
         self.assertIn("权重大于 0 的维度", part)
@@ -181,6 +209,7 @@ class ReportFromSavedRecords(unittest.TestCase):
                 for key, dimension in record["dimensions"].items():
                     shown = "—" if dimension["score"] is None else dimension["score"]
                     self.assertIn(f"<td>{report.DIMENSIONS[key]}</td><td class=\"num\">{shown}</td>", dims)
+                    self.assertNotIn(f"<td>{key}</td>", part, "every table names a dimension in Chinese")
                     self.assertIn(dimension["reason"], html.unescape(dims))
                     for skill in dimension.get("missing") or []:
                         self.assertIn(skill, html.unescape(dims))
@@ -206,6 +235,34 @@ class ReportFromSavedRecords(unittest.TestCase):
                 if sample in COMPLETED:
                     self.assertEqual(record["dimensions"]["experience"]["method"], "agent")
                     self.assertIn("<td>Agent</td>", part)
+
+    def test_an_unknown_interview_or_start_date_is_no_hard_condition(self):
+        # Codex B's P2-6 in #73: boss_intern passes every hard condition for tech and states neither its
+        # interview nor a start date. As in the filter, the conclusion says it meets the hard conditions;
+        # the two unknowns are listed only under 待确认.
+        _, page, form = self.generate()
+        job_id = self.ids["jd/boss_intern.txt"]
+        record = self.cli("match", "show", job_id)
+        self.assertEqual(record["filter"]["verdict"], "eligible")
+        unknown = {c["check"] for c in record["filter"]["checks"] if c["result"] == "unknown"}
+        self.assertEqual(unknown, {"interview", "start_date"})
+        said = report.conclusion(record)
+        self.assertTrue(said.startswith("符合硬性条件，"), said)
+        self.assertNotIn("面试", said)
+        part = html.unescape(self.section(page, job_id))
+        self.assertIn(f"<strong>结论：</strong>{said}</p>", part)
+        self.assertNotIn("待确认 2 项硬性条件", page)
+        opened = part[part.index("<h3>待确认</h3>"):]
+        for check in record["filter"]["checks"]:
+            if check["check"] in unknown:
+                self.assertIn(check["reason"], opened)
+        rows = {row[0]: row for row in csv.reader(io.StringIO(form.decode("utf-8-sig")))}
+        self.assertEqual(rows[job_id][5], said)
+        # A hard condition still unknown is still counted, beside the two that are only to confirm.
+        record["filter"]["verdict"] = "needs_check"
+        record["filter"]["checks"][0]["result"] = "unknown"
+        first = report.CHECKS[record["filter"]["checks"][0]["check"]]
+        self.assertTrue(report.conclusion(record).startswith(f"待确认 1 项硬性条件（{first}），"))
 
     def test_the_working_gives_the_saved_total(self):
         for job_id in self.ids.values():
@@ -258,8 +315,23 @@ class ReportFromSavedRecords(unittest.TestCase):
         for job_id in self.ids.values():
             # The rule dimensions quote today's job, which may not be what was scored.
             self.assertIn("依据可能已变，请先重新评分", self.section(page, job_id))
+            self.assertIn("这条记录已过期（档案在评分后改过）", self.section(page, job_id))
+            self.assertNotIn(report.WEIGHTS_ONLY, self.section(page, job_id))
         for row in list(csv.reader(io.StringIO(form.decode("utf-8-sig"))))[1:]:
             self.assertTrue(row[5].startswith("已过期，先重新评分。"))
+
+    def test_new_weights_say_so_and_leave_the_grounds_standing(self):
+        # M2-6d: only the total is out of date; scoring again keeps the agent's experience.
+        changed = setting(self.profile, "target.weights", dict(score.DEFAULT_WEIGHTS, location=40))
+        (self.data / "profile" / "profile.json").write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+        result, page, _ = self.generate()
+        self.assertEqual(sorted(result["stale"]), sorted(self.ids.values()))
+        ranking = page[page.index('id="ranking"'):page.index("<section")]
+        self.assertEqual(ranking.count("过期（权重在评分后改过）"), len(SAMPLES))
+        for job_id in self.ids.values():
+            part = self.section(page, job_id)
+            self.assertIn(f"这条记录已过期（权重在评分后改过）：{report.WEIGHTS_ONLY}", part)
+            self.assertNotIn("依据可能已变", part)
 
     def test_named_jobs_only(self):
         job_id = self.ids["jd/official_site.txt"]
@@ -335,13 +407,23 @@ class FormAndPage(unittest.TestCase):
                 [_, row] = list(csv.reader(io.StringIO(text.lstrip("﻿"))))
                 self.assertEqual(row[1], "'" + title)
 
+    def test_a_formula_behind_a_line_break_or_blanks_stays_text(self):
+        # V18 P2-4: an importer may skip leading whitespace and control characters, so the guard looks past them.
+        for title in ("\n=SUM(1,1)", " =1", "\x1b=1", "　+1", "\r\n@x", "\t-1"):
+            with self.subTest(title=title):
+                text = report.feedback_csv([report.entry(self.record(), {"title": title, "company": None}, False)])
+                [_, row] = list(csv.reader(io.StringIO(text.lstrip("﻿"), newline="")))
+                self.assertEqual(row[1], "'" + title)
+        cells = ("\x00=1", "\nplain", "a=1", " 数据分析", "")
+        self.assertEqual([report._cell(v) for v in cells], ["'\x00=1", "'\nplain", "a=1", " 数据分析", ""])
+
     def test_no_cell_starts_a_formula(self):
         # Every column passes the guard, not just the title: the company comes from the JD too.
         job = {"title": "=1+1", "company": "@公司"}
         text = report.feedback_csv([report.entry(self.record(), job, True)])
         for row in csv.reader(io.StringIO(text.lstrip("﻿"))):
             for cell in row:
-                self.assertNotIn(cell[:1], ("=", "+", "-", "@", "\t", "\r"), row)
+                self.assertNotIn(cell[:1], ("=", "+", "-", "@", "\t", "\r", "\n"), row)
         self.assertEqual([report._cell(v) for v in ("-5", "\tx", None, 7)], ["'-5", "'\tx", "", "7"])
 
     def test_the_grade_names_are_the_ones_in_match_md(self):
@@ -386,11 +468,24 @@ class FormAndPage(unittest.TestCase):
             "方向维度": report.FILL_PROFILE,
             "经历维度": report.ASK_AGENT,
             "薪资维度": "问 HR 薪资范围",
+            "地点维度": f"{report.ASK_JD}；{report.FILL_PROFILE}",  # neither side names a city
         })
         unit = {"salary": {"min": 5000, "max": 8000, "unit": "CNY/month", "negotiable": False}}
         wanted = {"target": {"salary_min": {"amount": 150, "unit": "CNY/day"}}}
         self.assertIn("单位", report._settle("salary", unit, wanted))
         self.assertEqual(report._settle("salary", unit, {"target": {}}), report.FILL_PROFILE)
+        acceptable = {"availability": {"cities": [], "acceptable_cities": ["杭州"]}}
+        self.assertEqual(report._settle("location", {"cities": []}, acceptable), report.ASK_JD)
+        self.assertEqual(report._settle("location", {"cities": ["杭州"]}, {"availability": {}}), report.FILL_PROFILE)
+
+    def test_every_dimension_has_a_chinese_name(self):
+        self.assertEqual(list(report.DIMENSIONS), list(score.DIMENSIONS))
+        self.assertEqual(set(report.STALE), set(score.STALE_REASONS), "and every reason a record can be stale")
+        page = report.build([report.entry(self.record(), None, False)], {}, "2026-10-29T09:30:00+08:00", VOCABULARY)
+        for key, name in report.DIMENSIONS.items():
+            with self.subTest(key=key):
+                self.assertEqual(page.count(f"<td>{name}</td>"), 2, "the dimensions and the working of the total")
+                self.assertNotIn(f"<td>{key}</td>", page)
 
     def test_conclusions(self):
         conflict = {"check": "location", "result": "conflict", "reason": "x"}
@@ -424,6 +519,15 @@ class ReasonWording(unittest.TestCase):
         "location": (("cities", []), ("availability.cities", [])),
         "employment_type": (("employment_type", None), ("target.employment_types", [])),
         "exclusions": (("title", None), None),
+        "interview": (("interview", None), None),
+        "start_date": (("requirements.start", None), ("availability.start_date", None)),
+    }
+    # What the JD must state for the profile to be the only gap.
+    STATED = {"start_date": ("requirements.start", {"by": "2026-12-31", "asap": False})}
+    # Unknowns where the JD says something, but not enough: still the JD to read, then HR to ask.
+    VAGUE = {
+        "interview": ("interview", {"mode": "onsite", "cities": []}),
+        "start_date": ("requirements.start", {"by": None, "asap": True}),
     }
 
     def setUp(self):
@@ -455,10 +559,30 @@ class ReasonWording(unittest.TestCase):
             if profile_side is None:
                 continue
             with self.subTest(check=check):
-                reason, how = self.advice(self.job, setting(self.profile, *profile_side), check)
+                job = setting(self.job, *self.STATED[check]) if check in self.STATED else self.job
+                reason, how = self.advice(job, setting(self.profile, *profile_side), check)
                 self.assertIn("档案没写", reason)
                 self.assertNotIn("JD 没写", reason)
                 self.assertEqual(how, report.FILL_PROFILE)
+
+    def test_a_vague_jd_sends_the_user_to_the_jd(self):
+        for check, jd_side in self.VAGUE.items():
+            with self.subTest(check=check):
+                reason, how = self.advice(setting(self.job, *jd_side), self.profile, check)
+                self.assertIn("JD 没写", reason)
+                self.assertNotIn("档案没写", reason)
+                self.assertEqual(how, report.ASK_JD)
+
+    def test_a_null_location_sends_the_user_to_the_side_without_a_city(self):
+        # M2-6b: the location dimension is null when the JD names no city, or the profile neither tier.
+        cases = {"JD 没写工作城市": (setting(self.job, "cities", []), self.profile, report.ASK_JD),
+                 "档案没写意向城市": (self.job, setting(self.profile, "availability.cities", []), report.FILL_PROFILE)}
+        for reason, (job, profile, how) in cases.items():
+            with self.subTest(reason=reason):
+                record = score.score_job(job, profile, VOCABULARY, now=NOW)
+                location = record["dimensions"]["location"]
+                self.assertEqual((location["score"], location["reason"]), (None, reason))
+                self.assertIn(("地点维度", reason, how), report.pending(record, job, profile))
 
 
 if __name__ == "__main__":

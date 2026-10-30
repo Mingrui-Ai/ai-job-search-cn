@@ -1,0 +1,33 @@
+{
+  "fixture": "unrelated_online_testing_intern.txt", "job_schema_version": 1, "site_argument": "other", "method": "agent",
+  "basis": "首次运行前依据原创文本、Job Schema v1 与现行七项过滤契约独立写定；新字段另见 scheduling-oracles.json。",
+  "fields": {
+    "title": {"value": "质量验证实习生", "evidence": ["职位名称：质量验证实习生"]},
+    "company": {"value": "示例沐格系统有限公司", "evidence": ["公司名称：示例沐格系统有限公司"]},
+    "cities": {"value": ["深圳"], "evidence": ["工作地点：深圳"]},
+    "remote": {"value": false, "evidence": ["不支持远程办公"]},
+    "employment_type": {"value": "internship", "evidence": ["质量验证实习生"]},
+    "salary": {"value": {"min": 200, "max": 240, "unit": "CNY/day", "months": null, "negotiable": false}, "evidence": ["薪资：200-240元/天"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": true}, "evidence": ["仅面向2027届"]},
+    "requirements.days_per_week": {"value": 4, "evidence": ["每周至少到岗4天"]},
+    "requirements.min_months": {"value": 3, "evidence": ["连续实习3个月以上"]},
+    "requirements.education": {"value": {"min": "bachelor", "preferred": null}, "evidence": ["本科及以上学历"]},
+    "requirements.skills": {"value": ["Python", "Docker"], "evidence": ["技能要求：熟悉 Python、Docker。"]},
+    "return_offer": {"value": false, "evidence": ["不提供转正机会"]},
+    "published_at": {"value": "2026-10-29", "evidence": ["发布日期：2026-10-29"]},
+    "deadline": {"value": null, "evidence": [], "note": "缺年份的到岗要求不是报名截止日期。"}
+  },
+  "traps": [
+    {"text": "我们的线上业务包含视频课程和电话客服，这是产品介绍", "interpretation": "线上、视频和电话均不描述候选人的面试形式。"},
+    {"text": "面试安排：另行通知", "interpretation": "面试形式和地点未知。"},
+    {"text": "1月10日前到岗", "interpretation": "只给月日，年份未知；不得自动套入发布日期年份、下一年或运行年份。"}
+  ],
+  "human_match": {
+    "tech": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"}, "education": {"result": "match", "reason": "硕士高于本科最低要求。"}, "days_per_week": {"result": "match", "reason": "可4天，达到4天。"}, "min_months": {"result": "match", "reason": "可6个月，达到3个月。"}, "location": {"result": "match", "reason": "深圳在意向城市内。"}, "employment_type": {"result": "match", "reason": "实习在目标类型内。"}, "exclusions": {"result": "match", "reason": "未命中排除项。"}
+    }},
+    "ops": {"verdict": "ineligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"}, "education": {"result": "match", "reason": "本科达到要求。"}, "days_per_week": {"result": "conflict", "reason": "可3天，小于4天。"}, "min_months": {"result": "match", "reason": "可3个月，达到3个月。"}, "location": {"result": "conflict", "reason": "深圳不在意向内，不搬家且岗位不支持远程。"}, "employment_type": {"result": "match", "reason": "实习在目标类型内。"}, "exclusions": {"result": "match", "reason": "未命中排除项。"}
+    }}
+  }
+}

@@ -64,10 +64,11 @@ def normalize_url(url):
 
 class Store:
     def __init__(self, root):
-        self.jobs = Path(root) / "jobs"
+        self.root = Path(root)
+        self.jobs = self.root / "jobs"
 
     def _path(self, job_id: str) -> Path:
-        if not schema._ID.match(job_id or ""):
+        if not schema.is_job_id(job_id):
             raise StoreError(f"not a job id: {job_id!r}")
         return self.jobs / f"{job_id}.json"
 
@@ -135,17 +136,18 @@ class Store:
         return record
 
     def _write(self, record: dict) -> None:
-        _write_json(self.jobs, self._path(record["id"]), record)
+        _write_json(safe_dir(self.root, "jobs"), self._path(record["id"]), record)
 
 
 class MatchStore:
     """Match records (docs/cn/match.md), one JSON file per job under <data dir>/matches/ (D4)."""
 
     def __init__(self, root):
-        self.matches = Path(root) / "matches"
+        self.root = Path(root)
+        self.matches = self.root / "matches"
 
     def _path(self, job_id: str) -> Path:
-        if not schema._ID.match(job_id or ""):
+        if not schema.is_job_id(job_id):
             raise StoreError(f"not a job id: {job_id!r}")
         return self.matches / f"{job_id}.json"
 
@@ -168,19 +170,66 @@ class MatchStore:
         existing = self.get(record["job_id"])
         if existing == record:
             return "unchanged"
-        _write_json(self.matches, self._path(record["job_id"]), record)
+        _write_json(safe_dir(self.root, "matches"), self._path(record["job_id"]), record)
         return "created" if existing is None else "updated"
 
     def write_draft(self, record: dict) -> Path:
         """Write a record for an agent to complete to <data dir>/matches/drafts/<job id>.json; not a saved match."""
-        path = self.matches / "drafts" / self._path(record["job_id"]).name
-        _write_json(path.parent, path, record)
+        directory = safe_dir(self.root, "matches", "drafts")
+        path = directory / self._path(record["job_id"]).name
+        _write_json(directory, path, record)
         return path
 
 
+_REPARSE_POINT = 0x400  # FILE_ATTRIBUTE_REPARSE_POINT: a junction or a symlink on Windows
+
+
+def _is_link(path: Path) -> bool:
+    """A symlink, or a Windows junction (another reparse point that redirects a folder).
+
+    Path.is_junction is new in Python 3.12; the reparse-point attribute finds a junction on any
+    version Windows runs.
+    """
+    if path.is_symlink() or (hasattr(path, "is_junction") and path.is_junction()):
+        return True
+    try:
+        return bool(getattr(os.lstat(path), "st_file_attributes", 0) & _REPARSE_POINT)
+    except OSError:
+        return False
+
+
+def _inside(path: Path, real_root: Path) -> bool:
+    real = path.resolve()
+    return real == real_root or real_root in real.parents
+
+
+def safe_dir(root: Path, *parts: str) -> Path:
+    """root/parts, created if missing, and still inside the data root once resolved (H25b).
+
+    The data root itself is the user's choice (--data-dir, JOBSEARCH_CN_DATA_DIR) and may be a
+    link. Below it, a subfolder that is a link or junction would carry the job store, drafts or
+    reports out of that root without a word, so it is refused rather than followed. Each level
+    is checked before the next is created in it, so a refusal leaves nothing behind outside.
+    Checked just before writing; a link swapped in between check and write is not covered.
+    """
+    root = Path(root)
+    root.mkdir(parents=True, exist_ok=True)
+    real_root, current = root.resolve(), root
+    for part in parts:
+        current = current / part
+        if _is_link(current):
+            raise StoreError(f"{current} is a link or junction; the folders inside the data directory "
+                             "must be real folders, so nothing is written outside it")
+        if current.exists() and not _inside(current, real_root):
+            raise StoreError(f"{current} resolves outside the data directory {root}; nothing written")
+        current.mkdir(exist_ok=True)
+        if not _inside(current, real_root):
+            raise StoreError(f"{current} resolves outside the data directory {root}; nothing written")
+    return current
+
+
 def _write_json(directory: Path, path: Path, record: dict) -> None:
-    """Write atomically, so an interrupted save never leaves half a file."""
-    directory.mkdir(parents=True, exist_ok=True)
+    """Write atomically, so an interrupted save never leaves half a file. The caller checks directory (safe_dir)."""
     text = json.dumps(record, ensure_ascii=False, indent=2) + "\n"
     fd, tmp = tempfile.mkstemp(dir=directory, prefix=".tmp-", suffix=".json")
     try:

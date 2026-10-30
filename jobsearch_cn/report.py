@@ -13,6 +13,7 @@ here; the CLI writes the files.
 import csv
 import html
 import io
+import unicodedata
 from fractions import Fraction
 
 from jobsearch_cn import match, score
@@ -20,8 +21,9 @@ from jobsearch_cn import match, score
 VERDICTS = {match.ELIGIBLE: "符合", match.NEEDS_CHECK: "待确认", match.INELIGIBLE: "不符合"}
 RESULTS = {match.MATCH: "符合", match.CONFLICT: "冲突", match.UNKNOWN: "未知", match.NOT_APPLICABLE: "不适用"}
 CHECKS = {"graduation": "届别", "education": "学历", "days_per_week": "每周到岗", "min_months": "实习时长",
-          "location": "地点", "employment_type": "岗位类型", "exclusions": "排除项"}
-DIMENSIONS = {"skills": "技能", "direction": "方向", "experience": "经历", "salary": "薪资"}
+          "location": "地点", "employment_type": "岗位类型", "exclusions": "排除项",
+          "interview": "面试", "start_date": "到岗时间"}
+DIMENSIONS = {"skills": "技能", "direction": "方向", "experience": "经历", "salary": "薪资", "location": "地点"}
 GRADES = {"strong": "很匹配", "good": "较匹配", "moderate": "一般", "weak": "较弱", "poor": "不匹配",
           score.INELIGIBLE: "不符合硬性条件"}
 METHODS = {"rule": "规则", "agent": "Agent"}
@@ -32,11 +34,21 @@ ASK_JD = "先看 JD 原文（规则可能没读出来），原文也没写就问
 FILL_PROFILE = "补上档案（建档工作流），再重新评分"
 ASK_AGENT = "让 Agent 按评分工作流补充，再生成报告"
 RESCORE = "让 Agent 重新评分（match score），再生成报告"
+# score.STALE_REASONS, as the report names them.
+STALE = {"job": "岗位在评分后改过", "job_gone": "岗位已删除", "profile": "档案在评分后改过",
+         "weights": "权重在评分后改过", "rules": "评分规则更新了"}
+WEIGHTS_ONLY = "各维度的分数仍然有效，重新评分会保留 Agent 补的经历和方向，只按新权重重算总分"
 
 
-def entry(record: dict, job, stale: bool) -> dict:
-    """One job in the report: its saved match record, the stored job (None if gone) and whether it is stale."""
-    return {"record": record, "job": job, "stale": stale}
+def entry(record: dict, job, stale: bool, reasons=()) -> dict:
+    """One job in the report: its saved match record, the stored job (None if gone), whether it is stale and
+    why (score.stale_reasons)."""
+    return {"record": record, "job": job, "stale": stale, "reasons": list(reasons)}
+
+
+def _why_stale(item: dict) -> str:
+    """（权重在评分后改过）, or nothing when the reasons are not known."""
+    return f"（{'、'.join(STALE.get(reason, reason) for reason in item['reasons'])}）" if item["reasons"] else ""
 
 
 def order(entries: list) -> list:
@@ -65,13 +77,16 @@ def conclusion(record: dict, stale: bool = False) -> str:
     total = record.get("total") or {}
 
     def named(result):
-        return "、".join(_label(CHECKS, c.get("check")) for c in _checks(record) if c.get("result") == result)
+        return "、".join(_label(CHECKS, c.get("check")) for c in _checks(record) if c.get("result") == result
+                        and not (result == match.UNKNOWN and c.get("check") in match.TO_CONFIRM))
 
     total_score = "无" if total.get("score") is None else f"{total['score']} 分"
     if verdict == match.INELIGIBLE:
         text = f"不符合硬性条件（冲突：{named(match.CONFLICT)}），各维度加权 {total_score}，仅供参考"
     else:
-        unknown = [c for c in _checks(record) if c.get("result") == match.UNKNOWN]
+        # As in the filter, an unknown interview or start date is only to confirm (pending), no hard condition.
+        unknown = [c for c in _checks(record)
+                   if c.get("result") == match.UNKNOWN and c.get("check") not in match.TO_CONFIRM]
         head = f"待确认 {len(unknown)} 项硬性条件（{named(match.UNKNOWN)}）" if unknown else "符合硬性条件"
         text = f"{head}，{grade_text(total.get('grade'))}，总分 {total_score}"
     if total.get("missing"):
@@ -110,6 +125,11 @@ def _settle(key: str, job, profile: dict) -> str:
         if not target.get("salary_min"):
             return FILL_PROFILE
         return "档案的最低期望薪资改用 JD 的单位（例如实习按天），再重新评分"
+    if key == "location" and job is not None:
+        availability = profile.get("availability") or {}
+        how = ([ASK_JD] if not job.get("cities") else []) + (
+            [] if availability.get("cities") or availability.get("acceptable_cities") else [FILL_PROFILE])
+        return "；".join(how) or "对照理由核对 JD 原文和档案"
     return "对照理由核对 JD 原文和档案"
 
 
@@ -144,9 +164,17 @@ def feedback_csv(entries: list) -> str:
 
 
 def _cell(value) -> str:
-    """Every cell, so no text - least of all the JD's - is read as a formula when the sheet is opened."""
+    """Every cell, so no text - least of all the JD's - is read as a formula when the sheet is opened.
+
+    The text is kept as it is, with a ' in front when it starts with a line break or a tab, or when its first
+    character after leading whitespace and control characters (an importer may skip them) starts a formula.
+    A full-width ＝ or a BOM in front is not looked past yet (V18 P2-4; Excel and WPS were not tried).
+    """
     text = "" if value is None else str(value)
-    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
+    start = 0
+    while start < len(text) and (text[start].isspace() or unicodedata.category(text[start]) == "Cc"):
+        start += 1
+    return "'" + text if text[:1] in ("\t", "\r", "\n") or text[start:start + 1] in ("=", "+", "-", "@") else text
 
 
 # ---------------------------------------------------------------- HTML
@@ -233,8 +261,8 @@ def build(entries: list, profile: dict, generated_at: str, vocabulary) -> str:
         f'<p class="meta">生成于 {_e(generated_at)} · 共 {len(entries)} 个岗位 · 只读取已保存的匹配记录</p>',
     ]
     if stale:
-        out.append(f'<p class="notice">有 {len(stale)} 条记录已过期（岗位或档案在评分后改过，或评分规则更新了），'
-                   f"下面的结论可能不准：{RESCORE}。</p>")
+        out.append(f'<p class="notice">有 {len(stale)} 条记录已过期（岗位、档案或权重在评分后改过，或评分规则更新了，'
+                   f"原因写在各岗位的小节里），下面的结论可能不准：{RESCORE}。</p>")
     out += [
         f"<p>等级按总分划分：{_e(_legend())}。"
         "看完后在同目录的 <code>feedback.csv</code> 里填写“你的等级”“认可”“原因”三列，"
@@ -246,7 +274,7 @@ def build(entries: list, profile: dict, generated_at: str, vocabulary) -> str:
     for rank, item in enumerate(entries, 1):
         record, job = item["record"], item["job"] or {}
         total, verdict = record.get("total") or {}, (record.get("filter") or {}).get("verdict")
-        expired = '<td class="stale">过期</td>' if item["stale"] else "<td></td>"
+        expired = f'<td class="stale">过期{_e(_why_stale(item))}</td>' if item["stale"] else "<td></td>"
         out.append(
             f"<tr><td class=\"num\">{rank}</td>"
             f"<td><a href=\"#{_e(record['job_id'])}\">{_e(job.get('title') or record['job_id'])}</a></td>"
@@ -273,7 +301,8 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
     if job is None:
         out.append('<p class="notice">岗位库里已经没有这个岗位，只能显示匹配记录里保存的内容。</p>')
     if item["stale"]:
-        out.append(f'<p class="notice stale">这条记录已过期：{RESCORE}。</p>')
+        advice = f"{WEIGHTS_ONLY}。{RESCORE}" if item["reasons"] == ["weights"] else RESCORE
+        out.append(f'<p class="notice stale">这条记录已过期{_e(_why_stale(item))}：{advice}。</p>')
     out.append(f"<p><strong>结论：</strong>{_e(conclusion(record))}</p>")
 
     out += ["<h3>硬性条件</h3>",
@@ -294,8 +323,8 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
     out.append("<h3>各维度</h3>")
     if job is None:
         out.append('<p class="notice">岗位已删除，规则给出的维度列不出 JD 原文。</p>')
-    elif item["stale"]:
-        out.append('<p class="notice stale">依据栏里技能、薪资、方向的 JD 原文取自现在的岗位库，'
+    elif item["stale"] and item["reasons"] != ["weights"]:  # new weights leave the grounds as they were scored
+        out.append('<p class="notice stale">依据栏里技能、薪资、方向、地点的 JD 原文取自现在的岗位库，'
                    "这条记录已过期，依据可能已变，请先重新评分。</p>")
     out.append("<table><tr><th>维度</th><th>分数</th><th>权重</th><th>给出方</th><th>理由</th><th>依据</th></tr>")
     for key, dimension in (record.get("dimensions") or {}).items():
@@ -306,7 +335,7 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
                    f"<td class=\"num\">{_e(_decimal(weights[key]) if key in weights else '—')}</td>"
                    f"<td>{_e(_label(METHODS, dimension.get('method')) if value is not None else '—')}</td>"
                    f"<td>{_e(dimension.get('reason'))}</td>"
-                   f"<td>{_grounds(key, dimension, names, job, vocabulary)}</td></tr>")
+                   f"<td>{_grounds(key, dimension, names, job, vocabulary, profile)}</td></tr>")
     out.append("</table>")
 
     rows, numerator, denominator = working(record)
@@ -348,7 +377,7 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
     return out
 
 
-def _grounds(key: str, dimension: dict, names: dict, job, vocabulary) -> str:
+def _grounds(key: str, dimension: dict, names: dict, job, vocabulary, profile: dict) -> str:
     """What a dimension rests on: the JD text from the stored job for the rule dimensions, the agent's evidence."""
     parts = []
     quotes = score.skill_quotes(job, vocabulary) if _has_evidence(job) else {}
@@ -366,6 +395,15 @@ def _grounds(key: str, dimension: dict, names: dict, job, vocabulary) -> str:
         quote = score._quote(job, "salary") if _has_evidence(job) else None
         if quote:
             parts.append("JD：" + _quotes(quote))
+    if key == "location" and _has_evidence(job):
+        # The JD's cities, and its remote offer when that counts for you as a preferred city (score._location).
+        remote = job.get("remote") is True and (profile.get("availability") or {}).get("remote_ok") is True
+        snippets = []
+        for path in ("cities", "remote") if remote else ("cities",):
+            text = (job["evidence"].get(path) or {}).get("text")
+            snippets += [s for s in ([text] if isinstance(text, str) else text or []) if s not in snippets]
+        if snippets:
+            parts.append("JD：" + _quotes(snippets))
     if dimension.get("jd_groups"):
         counted = score.direction_skills(job, vocabulary) if _has_evidence(job) else {}
         for group, count in dimension["jd_groups"].items():
