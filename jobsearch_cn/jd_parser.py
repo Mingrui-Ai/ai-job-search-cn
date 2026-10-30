@@ -297,28 +297,24 @@ _OFFICE_LIST = re.compile(rf"(?<![A-Za-z]){_OFFICE_NAME}(?:{_OFFICE_JOIN}{_OFFIC
 _OFFICE_DISTINCT_NAME = re.compile(r"\b(?:Excel|PowerPoint|PPT|WPS|Visio|Microsoft|MS)\b", re.I)
 _OFFICE_USE_BEFORE = re.compile(
     r"(?:熟悉|熟练(?:使用|操作)?|掌握|精通|(?:会|能)?(?:使用|操作|用)"
-    r"|(?:办公软件|办公套件|软件工具|技能要求|工具要求|技能|软件)\s*[:：]?"
-    r"|\b(?:proficient|skilled)\s+(?:in|with)|\b(?:proficiency|experience|knowledge)\s+(?:in|with|of)"
-    r"|\bfamiliar\s+with|\bskills\s*:|\b(?:use|using))"
+    r"|(?:办公软件|办公套件|软件工具|技能要求|工具要求|技能|软件)\s*[:：]?)"
     rf"\s*(?:{_OFFICE_NAME}{_OFFICE_JOIN})*$", re.I,
 )
-_OFFICE_USE_AFTER = re.compile(
-    r"\s*(?:文档|排版|文字处理|办公软件|办公套件|软件|表格|幻灯片|演示文稿"
-    r"|\b(?:documents?|formatting|software|suite|applications?)\b)", re.I,
-)
-_OFFICE_ORDINARY_AFTER = {
-    "Word": re.compile(r"[\s-]+(?:of\s+mouth|count|limit|choice|meaning|for\s+word|by\s+word|processing"
-                       r"|games?|puzzles?|embeddings?|vectors?|tokens?|level)\b", re.I),
-    "Office": re.compile(r"[\s-]+(?:hours?|space|location|address|building|supplies|environment|attendance|based"
-                         r"|administration|management|operations?|work|duties|equipment|furniture|staff|rent)\b", re.I),
+_OFFICE_USE_AFTER = {
+    "Word": re.compile(r"\s*(?:文档|排版|文字处理|软件|表格|\b(?:documents?|software)\b)", re.I),
+    "Office": re.compile(r"\s*(?:办公软件|办公套件|软件|套件|\bsoftware\b)", re.I),
 }
+_ENGLISH_NOUN_AFTER = re.compile(r"[\s-]+[A-Za-z]")
 _EXCEL_VERB_BEFORE = re.compile(r"\b(?:we|you|they|who|to|can|will|must|should)\s+$", re.I)
 _OFFICE_COMPANY_LABEL = re.compile(r"(?im)^\s*(?:company|employer)\s*:\s*[^\n，,。；;]+")
-_OFFICE_COMPANY_AFTER = re.compile(
-    rf"(?P<name>[ \t]*[{_HAN}A-Za-z0-9&·]{{0,16}}|(?:[ \t]+[A-Za-z&]+){{0,3}})[ \t]*"
-    r"(?:公司|集团|\b(?:Inc|Ltd|LLC|Limited)\b)", re.I,
+# Company references need an entity form, not an arbitrary later "公司".
+_OFFICE_COMPANY_REFERENCE = re.compile(
+    r"(?:加入|来自|任职于|就职于|了解|\bjoin\b)\s*"
+    r"(?P<name>[^\n，,。；;！!？?]{2,60}?(?:有限公司|有限责任公司|集团|\b(?:Inc|Ltd|LLC|Limited)\b))", re.I,
 )
-_OFFICE_COMPANY_PROSE = re.compile(r"为|给|使用|制作|编写|处理|整理|帮助")
+_OFFICE_ENGLISH_COMPANY_LINE = re.compile(
+    r"(?im)^[ \t]*(?:[A-Za-z][A-Za-z0-9&.-]*[ \t]+){1,3}(?:Inc|Ltd|LLC|Limited)\.?[ \t]*$"
+)
 _INTRO = re.compile(r"(?m)^[ \t]*[【\[]?\s*(?:公司介绍|公司简介|企业介绍|企业简介|关于我们|公司概况)\s*[】\]]?\s*(?:[:：]|$)")
 _SECTION = re.compile(
     r"(?m)^[ \t]*[【\[]?\s*(?:职位描述|职位详情|岗位描述|岗位职责|工作职责|职位职责|工作内容|任职要求|岗位要求|职位要求"
@@ -968,10 +964,12 @@ def _skill_hits(text: str, patterns, skip=None, company=None) -> list:
     intro = _intro_spans(text)
     company_names = [match.span("v") for match in _COMPANY_LABEL.finditer(text)]
     company_names += [match.span() for match in _OFFICE_COMPANY_LABEL.finditer(text)]
+    company_names += [match.span("name") for match in _OFFICE_COMPANY_REFERENCE.finditer(text)]
+    company_names += [match.span() for match in _OFFICE_ENGLISH_COMPANY_LINE.finditer(text)]
     if company:
-        # A recognised employer can be a short name in a header tag cell.
+        # A recognised employer can be a standalone name or a header tag cell.
         company_names += [match.span() for match in re.finditer(
-            rf"(?m)^[ \t]*{re.escape(company)}[ \t]*(?=[|｜])", text)]
+            rf"(?m)^[ \t]*{re.escape(company)}[ \t]*(?=$|[|｜·])", text)]
     for term, pattern, key in patterns:
         for match in pattern.finditer(text):
             if any(match.start() < end and start < match.end() for start, end in claimed):
@@ -1070,27 +1068,22 @@ def _office_software(text: str, term: str, match, company_names: list) -> bool:
     if any(start <= match.start() < end for start, end in company_names):
         return False
     left, right = _clause_bounds(text, match.start(), match.end())
-    tail = _OFFICE_COMPANY_AFTER.match(text, match.end(), right)
-    if tail and not _OFFICE_COMPANY_PROSE.search(tail["name"]):
-        return False
     if term == "Excel" and _EXCEL_VERB_BEFORE.search(text[left:match.start()]):
         return False
-    if term not in _OFFICE_ORDINARY_AFTER:
+    if term not in _OFFICE_USE_AFTER:
         return True
-    if _OFFICE_ORDINARY_AFTER[term].match(text, match.end(), right):
-        return False
-    if _OFFICE_USE_BEFORE.search(text[left:match.start()]) or _OFFICE_USE_AFTER.match(text, match.end(), right):
+    if _OFFICE_USE_AFTER[term].match(text, match.end(), right):
+        return True
+    if (_OFFICE_USE_BEFORE.search(text[left:match.start()])
+            and not _ENGLISH_NOUN_AFTER.match(text, match.end(), right)):
         return True
     line_start = text.rfind("\n", 0, match.start()) + 1
     line_end = text.find("\n", match.end())
     line_end = line_end if line_end >= 0 else len(text)
     for run in _OFFICE_LIST.finditer(text, line_start, line_end):
         if run.start() <= match.start() < run.end():
-            # An unlabelled list can stand on its own or name an unambiguous
-            # app too; prose mentioning just "word and office" is insufficient.
-            standalone = (not text[line_start:run.start()].strip()
-                          and not text[run.end():line_end].strip(" \t.。"))
-            if standalone or _OFFICE_DISTINCT_NAME.search(run.group()):
+            # Bare "word and office" is ambiguous even when it is a whole line.
+            if _OFFICE_DISTINCT_NAME.search(run.group()):
                 return True
     return False
 

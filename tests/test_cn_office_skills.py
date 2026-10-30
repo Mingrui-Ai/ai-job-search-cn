@@ -27,7 +27,7 @@ class OfficeSkills(unittest.TestCase):
                 ("熟练使用office。", ["Office"]),
                 ("Word、Excel、PPT", ["Word", "Excel", "PPT"]),
                 ("Word, Excel, PowerPoint", ["Word", "Excel", "PowerPoint"]),
-                ("Word / Office", ["Word", "Office"]),
+                ("熟悉Word / Office", ["Word", "Office"]),
                 ("Proficient in Word and Excel.", ["Word", "Excel"]),
                 ("Experience with Office software is required.", ["Office"]),
                 ("Prepare Word documents for the team.", ["Word"]),
@@ -46,9 +46,40 @@ class OfficeSkills(unittest.TestCase):
                      "We excel at customer support.", "Candidates should excel in teamwork.",
                      "Our Office is downtown.", "Head office is in Shanghai.", "Office supplies are provided.",
                      "password keyword WordPress Office365 MyOffice WPSX VisioPro PowerPointer PPTX Excellent",
-                     "普通正文只有 word 和 office，没有软件要求。"):
+                     "普通正文只有 word 和 office，没有软件要求。", "word / office"):
             with self.subTest(text=text):
                 self.assert_skills(text, [])
+
+    def test_review_english_verbs_do_not_establish_software_meaning(self):
+        for text in ("Experience in word tokenization is required.",
+                     "Use word distributions to cluster text.",
+                     "Knowledge of word matching helps.",
+                     "Familiar with office routines.",
+                     "Experience with office moving projects.",
+                     "Use office facilities efficiently.",
+                     "Prepare office documents for filing.",
+                     "Rent an office suite downtown.",
+                     "熟悉 word tokenization。", "掌握 office procedures。"):
+            with self.subTest(text=text):
+                self.assert_skills(text, [])
+        for text, expected in (("Proficient in Word and Excel.", ["Word", "Excel"]),
+                               ("Prepare Word documents.", ["Word"]),
+                               ("Use Microsoft Word.", ["Microsoft Word"]),
+                               ("办公软件：Word、Office", ["Word", "Office"])):
+            with self.subTest(text=text):
+                self.assert_skills(text, expected)
+
+    def test_review_software_use_for_company_business_is_not_a_company_name(self):
+        for text, expected in (("熟练使用Excel统计公司回款数据。", ["Excel"]),
+                               ("使用Excel维护公司台账。", ["Excel"]),
+                               ("使用PPT演示公司方案。", ["PPT"]),
+                               ("使用PowerPoint呈现公司业务。", ["PowerPoint"]),
+                               ("熟练使用Excel分析公司的销售数据。", ["Excel"]),
+                               ("使用Word汇总公司纪要。", ["Word"])):
+            with self.subTest(text=text):
+                job = self.assert_skills(text, expected)
+                self.assertEqual(job["evidence"]["requirements.skills"]["text"], text.rstrip("。"))
+        self.assert_skills("公司：Excel信息有限公司\n熟练使用Excel。", ["Excel"])
 
     def test_company_names_do_not_supply_skills(self):
         for name in ("Word空间有限公司", "Office咨询有限公司", "Excel信息有限公司", "PPT文化有限公司",

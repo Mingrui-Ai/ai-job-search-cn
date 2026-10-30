@@ -125,8 +125,8 @@ Windows 文件的 CRLF 换行可以正常处理。
 
 **正文里提到也不一定是要求**：
 
-- Word 和 Office 有普通英文含义，需要软件语境：紧邻“熟悉 / 使用 / 技能：”等要求、文档/办公套件等用法，或出现在办公软件列表中。大小写不决定含义；`Every word matters`、`word count`、`word embeddings`、`office hours`、`office administration`、`work from the office` 不算。`We excel at…` 这类把 excel 当动词的表达也不算 Excel 软件。单独的 `Word` 或 `Office` 没有上下文时留给 Agent 确认；
-- 办公软件名出现在公司名称标签（含 `Company:` / `Employer:`）、已识别的公司标签格，或紧跟“公司 / 集团 / Ltd / Inc”等公司名结尾时不算技能。后面真正的技能要求照常读；`WordPress`、`PPTX`、`Excellent` 等单词片段也不算；
+- Word 和 Office 有普通英文含义，需要明确的软件语境：中文技能句（“熟悉 / 使用 / 技能：”等）、和 Excel/PPT 等明确软件名并列，或 `Microsoft Word`、`MS Office`、`Word 文档`、`Word documents`、`Office software` 等写法。英文的 use / experience / familiar / knowledge 等一般动作或经验词本身不够；`word segmentation`、`word frequencies`、`office procedures`、`office relocation` 不靠穷举名词后缀排除。仅有 `word / office` 的无语境列表也留给 Agent 确认。`We excel at…` 这类把 excel 当动词的表达不算 Excel 软件；
+- 办公软件名只在公司名格式中排除：公司名称标签（含 `Company:` / `Employer:`）、已识别的独立公司名称行或公司标签格，以及“加入 / 任职于 / 了解”等引出的完整企业名称。任意后文提到“公司”不算公司名，例如“使用Excel分析公司数据”“使用PPT展示公司产品”照常读出软件；真正公司名后的技能要求也照常读。`WordPress`、`PPTX`、`Excellent` 等单词片段不算；
 
 - 被否定的不算：分句里技能前面有"不要求""无需""不需要""不必""不负责""不涉及""不承担""非必须"等词，例如"无需 SQL 基础""不要求 Rust 或 C++ 经验"；
 - 平台名（公众号、小红书、抖音、微博等）在两种地方不算：分句既有"关注""订阅""扫码""详见""动态见"这类引导词，又有"我们""官方""更多""招聘信息"这类指向公司自己的词（"欢迎关注我们的公众号"）；或者在"公司介绍""公司简介""关于我们"一节里，到下一个"岗位职责""任职要求"之类的小标题为止。只有引导词不算数："关注小红书热点"是工作内容，照常读出；
