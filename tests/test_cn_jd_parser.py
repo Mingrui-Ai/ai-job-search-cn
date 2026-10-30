@@ -705,6 +705,38 @@ class SeedCases(unittest.TestCase):
 class ScaledSalary(unittest.TestCase):
     """H28: original examples of amounts, periods, evidence and non-pay uses."""
 
+    def test_adjacent_duties_do_not_relabel_salary_as_a_count(self):
+        for text, months, quote in (
+                ("8-10K/月 负责客户维护", None, "8-10K/月"),
+                ("负责客户维护 8-10K/月", None, "8-10K/月"),
+                ("8-10K+14薪 负责用户运营", 14, ["8-10K", "14薪"]),
+                ("9-11K/月 每日维护用户关系", None, "9-11K/月"),
+                ("9-11K/月 客户维护", None, "9-11K/月"),
+                ("9-11K/月 用户关系维护", None, "9-11K/月"),
+                ("9-11K·15薪 客户维护", 15, "9-11K·15薪"),
+                ("需负责客户回访 9-11K/月", None, "9-11K/月"),
+                ("9-11K + 15薪 负责视频剪辑", 15, ["9-11K", "15薪"]),
+                ("用户运营职责 9-11K·15薪", 15, "9-11K·15薪")):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                low, high = (8000, 10000) if "8-10" in text else (9000, 11000)
+                self.assertEqual(record["salary"], salary(low, high, "CNY/month", months))
+                self.assertEqual(record["evidence"]["salary"]["text"], quote)
+                self.assertEqual(schema.validate(record), [])
+
+    def test_counts_bind_to_the_amount_not_other_duties(self):
+        for text in ("每月接待3千位客户", "平台覆盖16k注册用户", "服务1万+ 客户",
+                     "客户总数约16k", "平台用户数量达到16k", "用户数16k/月",
+                     "视频分辨率为8K", "服务16k用户 运营专员"):
+            with self.subTest(text=text):
+                record = parse_one(text)
+                self.assertIsNone(record["salary"])
+                self.assertNotIn("salary", record["evidence"])
+                self.assertEqual(parse_one(text + "；工资面议")["salary"], NEGOTIABLE)
+                record = parse_one(text + "；9-11K/月 负责客户维护")
+                self.assertEqual(record["salary"], salary(9000, 11000, "CNY/month"))
+                self.assertEqual(record["evidence"]["salary"]["text"], "9-11K/月")
+
     def test_review_counts_and_video_specs_cannot_displace_wages(self):
         for text in ("负责剪辑 8K 视频", "本岗需处理8K高清视频素材", "平台覆盖 16k 用户",
                      "每天接待3千人次", "累计服务16k活跃用户", "账号已有16k 粉丝",

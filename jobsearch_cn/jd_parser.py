@@ -94,8 +94,17 @@ _SALARY_CONTEXT = re.compile(
     r"|(?P<pay>月薪|年薪|日薪|时薪|工资|薪资|薪酬|薪水|底薪|报酬)"
 )
 _SALARY_ASIDE = re.compile(r"另|额外|含(?!税)|包括|加上|^\s*(?:以及|和|及|并(?:享有|提供|发放|有))")
-_SCALED_PURPOSE = re.compile(rf"粉丝|用户|客户|人次|人数|人员|员工|访客|人流量|人(?![{_HAN}])"
-                              r"|视频|素材|画面|分辨率|画质")
+# A count/specification must bind to this number, not merely occur elsewhere
+# in its clause (e.g. 8-10K/月 负责客户维护).
+_SCALED_PURPOSE_AFTER = re.compile(
+    r"^\s*(?:[+＋]\s*)?(?:[名位个]\s*)?(?:活跃|注册|付费|新增|日活|月活)?\s*"
+    rf"(?:粉丝|用户|客户|人次|人数|人员|员工|访客|人流量|人(?![{_HAN}]))"
+    r"|^\s*(?:高清|超清)?\s*(?:视频|素材|画面|分辨率|画质)")
+_SCALED_PURPOSE_BEFORE = re.compile(
+    r"(?:(?:粉丝|用户|客户|人员|员工|访客)(?:数量|总数|数|规模)"
+    r"|人数|人次|人流量|分辨率|画质)"
+    r"(?:\s*(?:[:：]|为|约|达到|达|至少|超过|不少于|不低于))*\s*$")
+_SCALED_PAY_END = re.compile(r"(?:元|(?:/|每)\s*[月年]|\d{2}\s*薪)\s*$")
 _SCALED_ACTIVITY = re.compile(r"需(?!求)|负责|每日|每天|累计|达到|至少|"
                               r"(?:剪辑|服务|覆盖|接待|处理|播放|支持|拥有|包含)\s*$")
 _SALARY_PERIOD = re.compile(r"年薪|月薪|日薪|时薪")
@@ -801,23 +810,29 @@ def _scaled_context(text: str, match):
     return prefix, suffix
 
 
-def _scaled_non_salary(prefix: str, suffix: str) -> bool:
-    """Counts/specifications use the whole clause, regardless of unit spacing."""
+def _scaled_non_salary(prefix: str, suffix: str, quote: str) -> bool:
+    """Reject count/specification phrases bound to the amount, not adjacent duties."""
     labels = list(_SALARY_CONTEXT.finditer(prefix))
     # An explicit current wage label wins over earlier task/scale wording.
     if labels and labels[-1].lastgroup == "pay":
         prefix = prefix[labels[-1].end():]
-        if not _SCALED_ACTIVITY.search(prefix) and not _SCALED_PURPOSE.search(prefix):
+        if not _SCALED_ACTIVITY.search(prefix) and not _SCALED_PURPOSE_BEFORE.search(prefix):
             return False
     after = _SALARY_CONTEXT.search(suffix)
-    if after and after.lastgroup == "pay" and not _SCALED_PURPOSE.search(suffix[:after.start()]):
+    if after and after.lastgroup == "pay" and not _SCALED_PURPOSE_AFTER.match(suffix[:after.start()]):
         return False
-    purpose = _SCALED_PURPOSE.search(prefix + suffix)
-    if not purpose:
+    if _SCALED_PURPOSE_BEFORE.search(prefix):
+        return True
+    # /月 and ·14薪 already complete a pay quote; a following duty phrase
+    # (e.g. 客户维护) cannot directly qualify the number. A leading count
+    # label still excludes rates such as 用户数16k/月 above.
+    if _SCALED_PAY_END.search(quote):
+        return False
+    if not _SCALED_PURPOSE_AFTER.match(suffix):
         return False
     # "13k 视频剪辑专员" / "视频剪辑专员 13k" are pay beside a role.
     # "需剪辑 8K 视频" / "系统覆盖 16k 用户" describe the work or its scale.
-    role = prefix if purpose.start() < len(prefix) else suffix
+    role = suffix
     if _JOB_WORD.search(role) and not _PROSE.search(role) and not _SCALED_ACTIVITY.search(prefix):
         return False
     return True
@@ -835,7 +850,7 @@ def _salary(text: str):
             candidate_unit, period_quote = unit, None
             if scale != 1:
                 prefix, suffix = _scaled_context(text, match)
-                if _scaled_non_salary(prefix, suffix):
+                if _scaled_non_salary(prefix, suffix, match.group()):
                     continue
                 if scale == 1000 and unit == "CNY/month" and not re.search(r"(?:/|每)\s*月", match.group()):
                     periods = list(_SALARY_PERIOD.finditer(prefix))
