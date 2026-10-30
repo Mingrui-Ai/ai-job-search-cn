@@ -73,12 +73,13 @@ _SALARY = (
     (re.compile(rf"月薪\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
 )
 _NEGOTIABLE = re.compile(r"(?:薪资|薪酬|待遇|工资)?\s*面议")
-# The nearest label before an amount says whether it is pay or a separate
-# benefit/cost. A later explicit pay label starts a new salary context.
+# Pay/cost labels can precede or follow their amount. A later explicit pay
+# label starts a new salary context.
 _SALARY_CONTEXT = re.compile(
     r"(?P<cost>补贴|补助|餐补|房补|收费|费用|押金|培训费|住宿费|餐费|租金)"
     r"|(?P<pay>月薪|年薪|日薪|时薪|工资|薪资|薪酬|薪水|底薪|报酬)"
 )
+_SALARY_ASIDE = re.compile(r"另|额外|含(?!税)|包括|加上|^\s*(?:以及|和|及|并(?:享有|提供|发放|有))")
 # "全年13薪" written apart from a monthly salary; a range ("13-15薪") is left alone.
 _PAY_MONTHS = re.compile(r"(?:全年\s*)?(?<![\d.\-~～－—–至到])(?P<months>\d{2})\s*薪(?![资酬水])")
 
@@ -685,16 +686,16 @@ def _employment_type(text: str, headline: str):
     return _NOTHING
 
 
-def _non_salary_amount(text: str, position: int) -> bool:
+def _non_salary_amount(text: str, position: int, end: int) -> bool:
     """Only reject an amount labelled as a benefit or cost, not unlabelled pay.
 
-    Labels apply within a clause/tag cell, or across a newline immediately
-    after a label ending in a colon. A completed aside such as 工资（不含餐补）
-    does not relabel the following wage as a meal subsidy.
+    Inspect both sides of the quote in its clause/tag cell. A colon label on
+    the preceding line also applies through modifiers such as 每人/标准为.
+    Completed asides such as 工资（不含餐补）do not relabel the wage.
     """
     left = text.rfind("\n", 0, position) + 1
     prefix = text[left:position]
-    if not prefix.strip() and left > 0:
+    if left > 0:
         previous = _line_at(text, left - 1)
         if previous.endswith((":", "：")):
             prefix = previous + prefix
@@ -702,6 +703,34 @@ def _non_salary_amount(text: str, position: int) -> bool:
     # inside 工资（不含餐补，另有交通补助）does not leave a stray cost label.
     prefix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", prefix))[-1]
     labels = list(_SALARY_CONTEXT.finditer(prefix))
+    right = text.find("\n", end)
+    suffix = text[end:len(text) if right < 0 else right]
+    suffix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", suffix))[0]
+    # Use purpose labels following this amount, but not the label introducing
+    # the next amount: 工资8600元/月 交通补贴420元/月 still has a wage of 8600.
+    following_amount = _earliest((pattern for pattern, _, _ in _SALARY), suffix)
+    boundary = following_amount.start("lo") if following_amount else len(suffix)
+    following = list(_SALARY_CONTEXT.finditer(suffix, 0, boundary))
+    if following_amount:
+        next_tail = suffix[following_amount.end():]
+        next_label = _SALARY_CONTEXT.search(next_tail)
+        # In "420元/月交通补贴 8600元/月工资", the next amount already has its
+        # own trailing label, so 交通补贴 belongs to the current amount.
+        next_has_postfix = (next_label is not None
+                            and not _SALARY_ASIDE.search(next_tail[:next_label.start()])
+                            and _earliest((pattern for pattern, _, _ in _SALARY), next_tail) is None)
+        if not next_has_postfix:
+            following = following[:-1]
+    if following:
+        label = following[0]
+        # "含餐补" / "另有交通补贴" describe inclusions or other benefits, not
+        # the purpose of the quoted wage; "600元/月餐补" names its purpose.
+        next_label = _SALARY_CONTEXT.search(suffix, label.end())
+        purpose_end = min(boundary, next_label.start() if next_label else len(suffix))
+        separately_priced = (labels and labels[-1].lastgroup == "pay"
+                             and re.search(r"另计|另算", suffix[label.end():purpose_end]))
+        if not _SALARY_ASIDE.search(suffix[:label.start()]) and not separately_priced:
+            return label.lastgroup == "cost"
     return bool(labels and labels[-1].lastgroup == "cost")
 
 
@@ -709,7 +738,7 @@ def _salary(text: str):
     best = None
     for pattern, unit, scale in _SALARY:
         for match in pattern.finditer(text):
-            if _non_salary_amount(text, match.start("lo")):
+            if _non_salary_amount(text, match.start("lo"), match.end()):
                 continue
             low = float(match["lo"])
             high = float(match["hi"]) if match["hi"] else low

@@ -195,6 +195,27 @@ class RepeatedLocation(unittest.TestCase):
 
 # (JD text, field path, expected value). Negative rows pin what a rule must leave alone.
 SEED_CASES = (
+    # H27 second review: purpose after an amount and modified cross-line labels.
+    ("额外发放420元/月交通补贴，固定月薪8600元。", "salary", salary(8600, 8600, "CNY/month")),
+    ("每人享有450元/月餐补，工资面议。", "salary", NEGOTIABLE),
+    ("交通补贴：\n每人按标准发放420元/月；工资面议。", "salary", NEGOTIABLE),
+    ("培训收费：\n标准为26000元/年。薪资面议。", "salary", NEGOTIABLE),
+    ("岗位工资8600元/月，另发420元/月交通补贴", "salary", salary(8600, 8600, "CNY/month")),
+    ("每年收取26000元/年的培训费；工资面议", "salary", NEGOTIABLE),
+    ("薪酬福利：提供450元/月作为餐补，实际工资面议", "salary", NEGOTIABLE),
+    ("交通补贴：\n本岗实际月薪8600元，另发420元/月交通补贴", "salary", salary(8600, 8600, "CNY/month")),
+    ("培训收费：\n岗位工资为8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("岗位工资：\n标准为8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("岗位工资8600元/月含交通补贴", "salary", salary(8600, 8600, "CNY/month")),
+    ("岗位工资8600元/月另有交通补贴", "salary", salary(8600, 8600, "CNY/month")),
+    ("岗位工资8600元/月餐补另计", "salary", salary(8600, 8600, "CNY/month")),
+    ("额外发放420元/月交通补贴 岗位工资8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("额外发放420元/月交通补贴 岗位工资8600元/月另有年终奖", "salary", salary(8600, 8600, "CNY/month")),
+    ("另发420元/月交通补贴 8600元/月工资", "salary", salary(8600, 8600, "CNY/month")),
+    ("8600元/月工资 另发420元/月交通补贴", "salary", salary(8600, 8600, "CNY/month")),
+    ("每人发放450元/月含税餐补，工资面议", "salary", NEGOTIABLE),
+    ("每人享有450元/月餐补另行发放，工资面议", "salary", NEGOTIABLE),
+    ("薪酬福利：450元/月交通补贴和生活补助，实际工资面议", "salary", NEGOTIABLE),
     # H27 review: separate allowances/fees cannot displace the actual wage.
     ("另发通勤补贴420元/月，固定月薪8600元。", "salary", salary(8600, 8600, "CNY/month")),
     ("固定月薪8600元，另发通勤补贴420元/月。", "salary", salary(8600, 8600, "CNY/month")),
@@ -590,6 +611,17 @@ class SeedCases(unittest.TestCase):
         record = parse_one("餐补450元/月；薪酬9500-12500元/月，全年13薪。")
         self.assertEqual(record["salary"], salary(9500, 12500, "CNY/month", 13))
         self.assertEqual(record["evidence"]["salary"]["text"], ["9500-12500元/月", "全年13薪"])
+
+    def test_cost_purpose_after_amount_and_header_with_modifiers(self):
+        for label in ("交通补贴", "生活补助", "餐补", "房补", "培训收费", "住宿费用", "押金", "培训费", "住宿费", "餐费", "租金"):
+            for amount in ("650元/月", "26000元/年", "30元/天", "12元/小时", "1-2K/月"):
+                for text in (f"具体项目：{amount}的{label}。工资面议。",
+                             f"{label}：\n每人按标准计算为{amount}。工资面议。"):
+                    with self.subTest(text=text):
+                        record = parse_one(text)
+                        self.assertEqual(record["salary"], NEGOTIABLE)
+                        self.assertEqual(record["evidence"]["salary"]["text"], "工资面议")
+                        self.assertEqual(schema.validate(record), [])
 
 
 class InterviewAndStart(unittest.TestCase):
