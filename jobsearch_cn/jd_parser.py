@@ -159,6 +159,33 @@ _INTERVIEW_DUTY = re.compile(r"负责|协助|组织|跟进|对接|邀约|筛选|
 # A way of interviewing the JD rules out: "不支持远程面试", "不接受视频面试".
 _INTERVIEW_REFUSED = re.compile(r"不(?:支持|接受|提供|安排|采用|可|能)")
 
+# Meals (M2-6e): how many a day the job provides - 包三餐 3, 包两餐 or 提供午餐和晚餐 2, 提供午餐 or 工作餐
+# 1, 包吃 or 包食宿 with no count - and a meal allowance with its amount and period ("餐补 20 元/天"). A
+# meal word followed by 补, 费 or 津 is an allowance, not a meal. An allowance without both an amount
+# and a period, "员工食堂" and "不包吃住" are not read.
+_MEAL_GIVE = r"(?:包|提供|免费提供|管|含)"
+_MEAL = r"餐(?!\s*(?:补|费|津))"
+_MEAL_NAME = r"(?:早|午|晚)(?:餐|饭)(?!\s*(?:补|费|津))"
+_MEALS = (
+    (re.compile(rf"{_MEAL_GIVE}\s*(?:一日)?\s*(?:三|3)\s*{_MEAL}|三餐\s*(?:全包|免费|全免)"), 3),
+    (re.compile(rf"{_MEAL_GIVE}\s*(?:一日)?\s*(?:两|二|2)\s*{_MEAL}|{_MEAL_GIVE}\s*(?:早午|午晚|早晚)\s*{_MEAL}"
+                rf"|{_MEAL_GIVE}\s*{_MEAL_NAME}\s*(?:和|及|与|、|/)\s*{_MEAL_NAME}"), 2),
+    (re.compile(rf"(?<![面红书背钱荷])包\s*吃|管\s*吃\s*管?\s*住|管\s*饭|{_MEAL_GIVE}\s*(?:食宿|伙食)"
+                rf"|(?:食宿|吃住)\s*全包"), None),
+    (re.compile(rf"{_MEAL_GIVE}\s*(?:一|1)\s*{_MEAL}|{_MEAL_GIVE}\s*(?:免费)?\s*(?:{_MEAL_NAME}|(?:工作|员工){_MEAL})"
+                rf"|免费\s*(?:{_MEAL_NAME}|(?:工作|员工){_MEAL})"), 1),
+)
+_MEAL_ALLOWANCE_WORD = r"(?:餐补|饭补|饭贴|餐费补贴|餐饮补贴|伙食补贴|午餐补贴)"
+_MEAL_ALLOWANCES = (
+    re.compile(rf"{_MEAL_ALLOWANCE_WORD}\s*[:：为]?\s*(?P<amount>{_N})\s*元?\s*(?:/|每)\s*(?P<per>天|日|月)"),
+    re.compile(rf"(?P<per>每天|每日|每月)\s*(?:有|发|提供)?\s*{_MEAL_ALLOWANCE_WORD}\s*[:：为]?\s*(?P<amount>{_N})\s*元"),
+    re.compile(rf"{_MEAL_ALLOWANCE_WORD}\s*(?P<per>每天|每日|每月)\s*(?P<amount>{_N})\s*元"),
+)
+# What the JD does not give: "不包吃住", "不提供午餐", "无餐补".
+_MEAL_REFUSED = re.compile(r"(?:不|无|没有?|未)\s*$")
+# Most meals first; 包吃 with no count reads as two or more (planner, 2026-10-30).
+_MEAL_RANK = {3: 3, 2: 2, None: 1.5, 1: 1}
+
 # When to start (M2-6c): as soon as possible, or by a date - "11月1日前到岗", "2027年7月入职",
 # "入职时间：11月底前". A month alone is its last day. A start from a date on ("11月1日后到岗",
 # "11月起") is no deadline, "11月前" alone could mean October or November, and a date the JD only
@@ -373,6 +400,7 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
             "start": cite("requirements.start", _start(text, reference)),
         },
         "interview": cite("interview", _interview(text)),
+        "benefits": {"meals": cite("benefits.meals", _meals(text))},
         "return_offer": cite("return_offer", _return_offer(text)),
         "published_at": cite("published_at", published),
         "deadline": cite("deadline", _dated(text, (_DEADLINE_AFTER, _DEADLINE_BEFORE), same_line=True)),
@@ -613,6 +641,29 @@ def _offers_a_choice(text: str, mentions: list) -> bool:
             if _INTERVIEW_CHOICE_BEFORE.search(text, _clause_bounds(text, start, start)[0], start):
                 return True
     return False
+
+
+def _meals(text: str):
+    """The meals the job provides a day and a meal allowance with its amount (M2-6e), or nothing."""
+    counts, cited, allowance = [], [], None
+    for pattern, per_day in _MEALS:
+        for match in pattern.finditer(text):
+            left, _ = _clause_bounds(text, match.start(), match.end())
+            if not _MEAL_REFUSED.search(text, left, match.start()):
+                counts.append(per_day)
+                cited.append(match)
+    paid = [match for pattern in _MEAL_ALLOWANCES for match in pattern.finditer(text)
+            if not _MEAL_REFUSED.search(text, _clause_bounds(text, match.start(), match.end())[0], match.start())]
+    if paid:
+        first = min(paid, key=lambda match: match.start())
+        allowance = {"amount": _amount(float(first["amount"])),
+                     "unit": "CNY/month" if first["per"].endswith("月") else "CNY/day"}
+        cited.append(first)
+    if not counts and allowance is None:
+        return _NOTHING
+    per_day = max(counts, key=_MEAL_RANK.get) if counts else 0  # 0: an allowance and no meals
+    snippets = [_clause(text, match.start(), match.end()) for match in sorted(cited, key=lambda match: match.start())]
+    return {"per_day": per_day, "allowance": allowance}, list(dict.fromkeys(snippets))
 
 
 def _start(text: str, reference: date):
