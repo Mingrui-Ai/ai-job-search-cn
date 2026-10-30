@@ -68,3 +68,18 @@
 3. 报告的推荐改成"生成工具 + 借用的模板"，写清我们自己写哪些部分、借用的部分怎么放进仓库、许可声明放在哪。原来三种做法的对比保留，作为选工具链的依据。
 
 新样张放 `data/m3-0/samples-oss/`，不碰 V16 在核对的 `samples/`。
+
+### 调研和第二轮样张（进行中）
+
+- 用 `gh` 查仓库的许可、最近提交和 Issue（网页抓取这会儿不稳定）。Typst Universe 共 1719 个包，用 git tree 接口取全表（目录接口截断在 1000 项），名字里带简历或中文特征的有几十个。
+- 许可上要排除的：`OrangeX4/Chinese-Resume-in-Typst`（981 星）没有许可证；`NorthSecond/Auto_Typst_Resume_Template` 是 CC BY-NC；`JOYCEQL/magic-resume` 是 Apache-2.0 外加商业限制条款；`xitanggg/open-resume` 是 AGPL-3.0；`posquit0/Awesome-CV` 是 LPPL。
+- 选了三个 MIT 的 Typst 模板出样张，都不用装软件。Typst 用 `--package-cache-path` 把包下到被忽略的 `data/m3-0/oss/packages/`，不写进 AppData：
+  - **RenderCV 的 Typst 包**（`@preview/rendercv:0.3.0`）：不用 pip 装它的 Python 命令行，Typst 包可以直接用；6 个主题都是同一套参数换值。样张取 `classic` 和 `moderncv` 两个主题，参数从官方示例读出，只改 A4、中文字体、语言 `zh`、关掉图标和页脚。依赖 `fontawesome`（MIT）。
+  - **habaneraa-one-page-resume-zh**：中文模板，宋体正文、黑体标题，`element-spaciness` 一个参数调整体间距。依赖的 `nerd-icons` 是 LGPL-3.0，借用时要去掉。
+  - **resume-ng**：中文、高密度，受 hijiangtao/resume 启发，不用图标。`project()` 里字体写死为 `Noto Serif CJK SC`，本机同一款设计叫 `Noto Serif SC`，样张把它的四条设置照抄到主文件，只换字体名。
+- 字体用各模板原本的设计：思源黑体、思源宋体和 Noto Sans SC、Noto Serif SC 是同一款字，Windows 自带。联系方式按纯文本放，不用图标字体（图标是私用区字符，会进文本层）。
+- 结果（脚本 `data/m3-0/scripts/oss.py`）：四份都是一页，文本层完整，没有部首和私用区字符。
+  - resume-ng 的日期范围是数学模式的 en dash，`verify_pdf --ascii-dates` 报了 4 处；项目没有角色时标题后多一个"|"；压力测试里跨页的第一个条目丢了右侧日期（日期用 `place` 放，落在了上一页）。
+  - habaneraa 在压力测试里"荣誉与证书"的标题留在第 1 页底，横线和内容在第 2 页。
+  - RenderCV 两个主题跨页都正常：条目不拆开，标题跟着内容。
+- habaneraa 的一键压页：实习和项目放大 4 倍、5 倍时，二分法分别找到 1.281、1.051，刚好一页，每次编译约 0.1 秒，共试 8 次；放大 7 倍时调到最紧的 0.8 也是 2 页。
