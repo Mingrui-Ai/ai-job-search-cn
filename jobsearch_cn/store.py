@@ -181,9 +181,26 @@ class MatchStore:
         return path
 
 
+_REPARSE_POINT = 0x400  # FILE_ATTRIBUTE_REPARSE_POINT: a junction or a symlink on Windows
+
+
 def _is_link(path: Path) -> bool:
-    """A symlink, or a Windows junction (another reparse point that redirects a folder)."""
-    return path.is_symlink() or (hasattr(path, "is_junction") and path.is_junction())
+    """A symlink, or a Windows junction (another reparse point that redirects a folder).
+
+    Path.is_junction is new in Python 3.12; the reparse-point attribute finds a junction on any
+    version Windows runs.
+    """
+    if path.is_symlink() or (hasattr(path, "is_junction") and path.is_junction()):
+        return True
+    try:
+        return bool(getattr(os.lstat(path), "st_file_attributes", 0) & _REPARSE_POINT)
+    except OSError:
+        return False
+
+
+def _inside(path: Path, real_root: Path) -> bool:
+    real = path.resolve()
+    return real == real_root or real_root in real.parents
 
 
 def safe_dir(root: Path, *parts: str) -> Path:
@@ -191,8 +208,9 @@ def safe_dir(root: Path, *parts: str) -> Path:
 
     The data root itself is the user's choice (--data-dir, JOBSEARCH_CN_DATA_DIR) and may be a
     link. Below it, a subfolder that is a link or junction would carry the job store, drafts or
-    reports out of that root without a word, so it is refused rather than followed. Checked just
-    before writing; a link swapped in between check and write is not covered.
+    reports out of that root without a word, so it is refused rather than followed. Each level
+    is checked before the next is created in it, so a refusal leaves nothing behind outside.
+    Checked just before writing; a link swapped in between check and write is not covered.
     """
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
@@ -202,10 +220,11 @@ def safe_dir(root: Path, *parts: str) -> Path:
         if _is_link(current):
             raise StoreError(f"{current} is a link or junction; the folders inside the data directory "
                              "must be real folders, so nothing is written outside it")
+        if current.exists() and not _inside(current, real_root):
+            raise StoreError(f"{current} resolves outside the data directory {root}; nothing written")
         current.mkdir(exist_ok=True)
-    real = current.resolve()
-    if real != real_root and real_root not in real.parents:
-        raise StoreError(f"{current} resolves outside the data directory {root}; nothing written")
+        if not _inside(current, real_root):
+            raise StoreError(f"{current} resolves outside the data directory {root}; nothing written")
     return current
 
 

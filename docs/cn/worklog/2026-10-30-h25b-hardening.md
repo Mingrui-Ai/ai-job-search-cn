@@ -11,3 +11,12 @@
 - jd-import.md 写明子文件夹必须是真实文件夹。全量测试、`security_guards`、`lint_skills` 通过。
 - 2026-10-30 再暂停：#79 还有一项（专业名的语境）。
 - 开出 PR #85（P2-1、P3-2）。规划者裁定：检查和写入之间被换成链接的竞态记为已知限制，不另立任务，M8-3 发布前的安全复查再看。P2-2、P2-3 在 `fix/cn-h25b-extract` 上另开 PR；两个 PR 都合并后再勾路线图的 H25b。
+
+**第 2 部分**（分支 `fix/cn-h25b-extract`）
+
+- #85 已合并。Codex B 的 P3-1 并进本部分：`Path.is_junction` 从 3.12 才有。`_is_link` 补上 `st_file_attributes` 的 reparse point 检查；`safe_dir` 每建一级先核对解析后的路径，报错前不再在外面建出 `drafts/`。`OlderPython` 两个用例在 #85 的 `store.py` 上都失败。
+- P2-2：`_word_text` 改成显式栈，不再递归。用 4 万棵随机文档树和旧实现对比，输出全部一致。`_parse_document` 用 `iterparse` 边读边数，节点超 20 万、深度超 256 就停；`document.xml` 解压后上限 16 MB，既看 ZIP 头，也用 `read(上限 + 1)` 防头部造假；输入文件上限 50 MB。超限报不含原文的 `ExtractionError`。新增 `Budgets`。
+- P2-3：新增 `_run_tree`，用 Popen 代替 `subprocess.run`。Windows 用 Job Object（`KILL_ON_JOB_CLOSE`），POSIX 用新会话 + `killpg`；超时后回收管道，最多再等 5 秒。`tools/verify_pdf.py` 没改，权限白名单没动。原有 PDF 测试的 mock 从 `subprocess.run` 改到 `_run_tree`，断言不变。
+- `ProcessTree` 用短时合成孙进程回归。对照实测老写法（`subprocess.run`）：0.8 秒超时，2.2 秒才返回，孙进程照样跑完；新写法两点都过。中途有一次对照脚本卡住超过 2 分钟，查下来是我用 stdin 跑 unittest 的方式造成的，不是老代码的行为，已换成独立脚本重测。
+- 已知局限：Windows 上 Job Object 建不出来时退回只杀桥接进程；Popen 和 AssignProcessToJobObject 之间有极短的窗口，桥接是 Python，启动远慢于这一步，实际不会抢先启动 pdftotext。
+- 文档：profile-setup.md 写明上限。

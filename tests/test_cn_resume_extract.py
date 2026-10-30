@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 import zipfile
 from pathlib import Path
@@ -301,6 +302,82 @@ class ResumeExtract(unittest.TestCase):
         with patch.object(resume_extract, "_poppler_available", return_value=True), \
                 patch.object(resume_extract, "_run_tree", return_value=result):
             self.assertEqual(resume_extract.extract_text(path), text)
+
+
+class Budgets(unittest.TestCase):
+    """H25b (V18 P2-2): a crafted DOCX is refused in words that quote none of it, never a traceback."""
+
+    def setUp(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        self.root = Path(temp.name)
+
+    def refused(self, path):
+        with self.assertRaisesRegex(resume_extract.ExtractionError, "过于复杂|超过") as caught:
+            resume_extract.extract_text(path)
+        self.assertNotIn("机密片段", str(caught.exception))
+
+    def test_deep_nesting_is_refused_without_recursion(self):
+        # V18's shape: a few hundred bytes zipped, 1100 nested content controls round one paragraph.
+        path = self.root / "deep.docx"
+        make_docx(path, "<w:sdt>" * 1100 + paragraph("机密片段") + "</w:sdt>" * 1100)
+        self.assertLess(path.stat().st_size, 2000)
+        self.refused(path)
+        env = dict(os.environ, PYTHONPATH=str(REPO), PYTHONIOENCODING="utf-8")
+        result = subprocess.run([sys.executable, "-B", "-m", "jobsearch_cn", "profile", "extract", str(path)],
+                                cwd=self.root, env=env, capture_output=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn(b"Traceback", result.stderr)
+        self.assertNotIn("机密片段", result.stderr.decode("utf-8"))
+        self.assertIn("过于复杂", json.loads(result.stderr.decode("utf-8"))["error"])
+
+    def test_nesting_within_the_budget_reads(self):
+        path = self.root / "nested.docx"
+        make_docx(path, "<w:sdt>" * 200 + paragraph("合成简历") + "</w:sdt>" * 200)
+        self.assertEqual(resume_extract.extract_text(path), "合成简历")
+
+    def test_too_many_nodes(self):
+        path = self.root / "wide.docx"
+        make_docx(path, paragraph("机密片段") * 40)
+        self.assertIn("机密片段", resume_extract.extract_text(path))
+        with patch.object(resume_extract, "_MAX_XML_NODES", 100):
+            self.refused(path)
+
+    def test_too_large_uncompressed(self):
+        path = self.root / "large.docx"
+        make_docx(path, paragraph("机密片段" * 500))
+        with patch.object(resume_extract, "_MAX_XML_BYTES", 4000):
+            self.refused(path)
+
+    def test_too_large_a_file(self):
+        path = self.root / "huge.docx"
+        make_docx(path, paragraph("合成简历"))
+        with patch.object(resume_extract, "_MAX_INPUT_BYTES", 10):
+            self.refused(path)
+
+
+class ProcessTree(unittest.TestCase):
+    """H25b (V18 P2-3): the PDF timeout ends the bridge and whatever it started, pipes and all."""
+
+    def test_a_timeout_ends_the_grandchild_too(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        marker = Path(temp.name) / "grandchild-finished.txt"
+        # The grandchild inherits the pipes, as pdftotext does from the bridge.
+        grandchild = f"import time, pathlib; time.sleep(3); pathlib.Path({str(marker)!r}).write_text('done')"
+        child = (f"import subprocess, sys, time; subprocess.Popen([sys.executable, '-c', {grandchild!r}]); "
+                 "time.sleep(30)")
+        started = time.monotonic()
+        with self.assertRaises(subprocess.TimeoutExpired):
+            resume_extract._run_tree([sys.executable, "-c", child], 0.8)
+        self.assertLess(time.monotonic() - started, 2.5, "the caller waited for the pipes the grandchild held")
+        time.sleep(4)
+        self.assertFalse(marker.exists(), "the grandchild outlived the timeout")
+
+    def test_output_and_exit_code(self):
+        result = resume_extract._run_tree([sys.executable, "-c", "import sys; print('synthetic'); sys.exit(3)"], 30)
+        self.assertEqual(result.returncode, 3)
+        self.assertIn(b"synthetic", result.stdout)
 
 
 if __name__ == "__main__":
