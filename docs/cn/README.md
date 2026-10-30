@@ -56,6 +56,7 @@ python -m jobsearch_cn jd validate job.json          # 按 job-schema.md 校验�
 python -m jobsearch_cn jd parse jd.txt --save        # 解析并保存到本地岗位库 data/jobs/（自动去重）
 python -m jobsearch_cn jd list                       # 列出岗位库；jd show <id>、jd status <id> <状态>
 python -m jobsearch_cn match filter <id>             # 用个人档案过滤一个已保存的岗位（硬性条件）
+python -m jobsearch_cn match report                  # 把已保存的评分生成可读的报告（HTML）和反馈表（CSV），写到 data/reports/
 python -m jobsearch_cn profile validate              # 校验 data/profile/ 下的个人档案；profile show 查看（隐去联系方式）
 ```
 
@@ -108,3 +109,20 @@ git worktree remove ../cn-<名字>                           # 删除（目录�
   - 改代码用编辑工具，不用脚本绕过确认；
   - 请求审核前合入最新 master，跑全量测试、`security_guards`、`lint_skills`；
   - 路线图只改自己那一项（见路线图的"更新规则"）。
+
+### 中断后恢复
+
+会话随时可能中断：额度用完、网络断开、窗口被关掉。master 有分支保护，没做完的改动只会留在各自的分支和工作树里，不会进入 master。下面几条让中断的影响尽量小。
+
+- **随做随记，不留收尾**：开工时就在 `docs/cn/worklog/` 建好这一项的工作记录，有了决定、遇到问题就写一句；PR 描述也随时更新。这样中断以后，新会话读分支上的记录就能接着做，不需要专门收工。
+- **新会话开工先查**（新开或恢复都一样）：
+  1. `git status`、`git log --oneline @{u}..`（有没有没推送的提交），以及有没有进行到一半的合并（`git status` 会提示）；
+  2. 自己的 PR 现在是什么状态、有没有新的审核意见：`gh pr view <号> --comments`；
+  3. 叠在别的分支上的工作（例如在 H16 的分支上做 M2-6b）：基础分支有没有新提交，合并了没有；
+  4. 读自己分支上的工作记录草稿，接着做。拿不准时发消息问规划者。
+- **危险操作**：
+  - 任何工作树里都不运行 `git clean -x` 或 `-X`。它会删掉被 git 忽略的 `data/`，里面有用户的真实档案和岗位，只有这一份；
+  - 不用裸的 `git stash` / `git stash pop`：所有工作树共用一个 stash 栈，可能弹出别人的改动。要暂存，就用临时提交；
+  - 不在别人的工作树里切分支、改文件、重置，也不删除别人的工作树。
+- **规划者中断时**：工作会话照常做手上的任务；PR 开了就等审核，不自己合并；需要裁定的问题写在 PR 评论里，等规划者回来或者新规划者接手。规划者的交接手册和现场记录在本机的协调目录里（不入 git），新规划者从那里接手。
+- **审核者或验证者中断时**（例如 Codex 的 API 出故障）：规划者暂停给它们排消息，审核由规划者代做，或者请一个没参与的 Claude 会话交叉审；没做完的任务原样留在收件箱里。恢复或新开会话后，规划者把这段时间合并了什么、哪些任务已经由别人做完，合成一条消息告诉它（2026-10-29 Codex B 中断时就是这样接上的）。
