@@ -7,7 +7,8 @@ experience dimension - and the direction, where the rules leave it null -
 with a reason and evidence; validate() checks such a record before it is
 saved: the rule part must be what the rules give, agent evidence must quote
 the JD and name experience the profile holds, and the total must follow from
-the dimensions. job_hash and profile_hash tell when a record has gone stale.
+the dimensions. job_hash, profile_hash and the weights tell when a record has
+gone stale; a change of weights alone keeps the agent's work (M2-6d).
 Integer arithmetic throughout (Fraction), so the same input always gives the
 same record, scored_at aside.
 """
@@ -49,8 +50,18 @@ def job_hash(job: dict) -> str:
 
 
 def profile_hash(profile: dict) -> str:
-    """A digest of the profile without its contact details, which no match record holds."""
-    return _digest({key: value for key, value in profile.items() if key != "contact"})
+    """A digest of what the agent's judgments rest on: the profile without its contact details, which no match
+    record holds, and without its weights, which only the total uses and the record keeps itself (M2-6d)."""
+    data = {key: value for key, value in profile.items() if key != "contact"}
+    if isinstance(data.get("target"), dict):
+        data["target"] = {key: value for key, value in data["target"].items() if key != "weights"}
+    return _digest(data)
+
+
+def weights_of(profile: dict) -> dict:
+    """The weights a score uses: the profile's target.weights, or the defaults when it gives none."""
+    weights = (profile.get("target") or {}).get("weights") or DEFAULT_WEIGHTS
+    return {key: weights[key] for key in DIMENSIONS}
 
 
 def _digest(data) -> str:
@@ -58,15 +69,30 @@ def _digest(data) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def stale(record: dict, job, digest: str) -> bool:
-    """The job or the profile (its profile_hash is `digest`) changed since scoring, the job is gone,
-    or other rules scored it: score it again."""
-    return (job is None or record.get("job_hash") != job_hash(job)
-            or record.get("profile_hash") != digest or record.get("rules_version") != RULES_VERSION)
+# Why a saved record no longer stands: the job changed or is gone, the profile changed, the weights
+# changed (only the total: scoring again keeps the agent's work), or other rules scored it.
+STALE_REASONS = ("job", "job_gone", "profile", "weights", "rules")
+
+
+def stale_reasons(record: dict, job, digest: str, weights: dict) -> list:
+    """Why a record is stale, [] if it is not. digest is the profile's profile_hash, weights its weights_of."""
+    reasons = []
+    if job is None:
+        reasons.append("job_gone")
+    elif record.get("job_hash") != job_hash(job):
+        reasons.append("job")
+    if record.get("profile_hash") != digest:
+        reasons.append("profile")
+    if record.get("weights") != weights:
+        reasons.append("weights")
+    if record.get("rules_version") != RULES_VERSION:
+        reasons.append("rules")
+    return reasons
 
 
 def score_job(job: dict, profile: dict, vocabulary, previous=None, now=None) -> dict:
-    """The match record for a job: the rule part, and the agent part of `previous` if neither side changed."""
+    """The match record for a job: the rule part, and the agent part of `previous` if neither side changed
+    (new weights do not count: the judgments do not rest on them, and the total is worked out afresh)."""
     rules = rule_part(job, profile, vocabulary)
     record = {
         "schema_version": SCHEMA_VERSION,
@@ -98,7 +124,6 @@ def rule_part(job: dict, profile: dict, vocabulary) -> dict:
     filtered = match.filter_job(job, profile)
     skills = _skills(job, profile, vocabulary)
     salary = _salary(job, profile)
-    weights = (profile.get("target") or {}).get("weights") or DEFAULT_WEIGHTS
     return {
         "filter": {"verdict": filtered["verdict"], "checks": filtered["checks"]},
         "dimensions": {
@@ -108,7 +133,7 @@ def rule_part(job: dict, profile: dict, vocabulary) -> dict:
             "salary": salary,
             "location": _location(job, profile),
         },
-        "weights": {key: weights[key] for key in DIMENSIONS},
+        "weights": weights_of(profile),
         "gaps": _gaps(job, skills, salary, filtered["checks"], vocabulary),
     }
 
@@ -363,6 +388,25 @@ def total(dimensions: dict, weights: dict, verdict: str) -> dict:
             "missing": [key for key in DIMENSIONS if key not in scored]}
 
 
+def trial_total(record: dict, weights: dict) -> dict:
+    """The total a saved record's dimension scores give under other weights (match list --weights); what
+    scoring again gives once the profile has those weights. A dimension the record lacks counts as null."""
+    dimensions = record.get("dimensions") if isinstance(record.get("dimensions"), dict) else {}
+    scores = {}
+    for key in DIMENSIONS:
+        value = dimensions[key].get("score") if isinstance(dimensions.get(key), dict) else None
+        scores[key] = {"score": value if schema._is_number(value) else None}
+    verdict = record["filter"].get("verdict") if isinstance(record.get("filter"), dict) else None
+    return total(scores, weights, verdict)
+
+
+def shares(weights: dict) -> dict:
+    """Each weight as a percentage of their sum, rounded half up to one decimal place: how much of a total
+    each dimension makes when all five are scored."""
+    whole = sum((_fraction(weights[key]) for key in DIMENSIONS), Fraction(0))
+    return {key: _plain(Fraction(_round(_fraction(weights[key]) * 1000 / whole), 10)) for key in DIMENSIONS}
+
+
 _GRADE_ORDER = [name for name, _ in GRADES] + [INELIGIBLE]
 
 
@@ -405,6 +449,8 @@ def validate(record, job: dict, profile: dict, vocabulary) -> list:
         errors.append("scored_at: must be an ISO 8601 time with an offset")
     if record["job_hash"] != job_hash(job) or record["profile_hash"] != profile_hash(profile):
         errors.append("job_hash/profile_hash: the job or the profile changed since scoring; run match score again")
+    elif record["weights"] != weights_of(profile):
+        errors.append("weights: the profile's weights changed since scoring; run match score again")
     if errors:
         return errors
 
