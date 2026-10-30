@@ -1,0 +1,596 @@
+{
+  "target_commit": "572fe48035eedba123c0706e985b0d06b0c03e25",
+  "baseline_commit": "e99470eab14a2e22aa1139c6cf0c9604394cf580",
+  "manifest_sha256": "009b07fcb5a743fabfd9774a4cddafe95f346dc881ed37bd5a5aa53aaf0d7c5f",
+  "adjudication_sha256": "bf48afca11ef0e847ef7b9d4615e21e394fc38bcb5ed67fe238d0c87345deb37",
+  "archive_sha256": "4f56139f7de1fd0bb7185818dd8b9a6dadd5e34fbd31a7463840aa1cfe8370fc",
+  "profile_adaptations": {
+    "tech": "Add availability.acceptable_cities=[] to the temporary run copy only",
+    "ops": "Add availability.acceptable_cities=[] to the temporary run copy only"
+  },
+  "python_version": "3.12.15",
+  "started_at_utc": "2026-10-30T11:53:46.647128+00:00",
+  "cases": {
+    "console_content_campus": {
+      "field_groups_equal": 14,
+      "differences": {},
+      "changes_from_baseline": {
+        "requirements.skills": {
+          "before": [
+            "内容策划"
+          ],
+          "after": [
+            "Excel",
+            "PowerPoint",
+            "内容策划"
+          ]
+        }
+      },
+      "skills": {
+        "type": "match",
+        "expected": [
+          "Excel",
+          "PowerPoint",
+          "内容策划"
+        ],
+        "actual": [
+          "Excel",
+          "PowerPoint",
+          "内容策划"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "probes": [
+        {
+          "text": "Excel2021",
+          "expected_skill": "Excel",
+          "decision": "must_read",
+          "passed": true
+        },
+        {
+          "text": "PowerPoint2019",
+          "expected_skill": "PowerPoint",
+          "decision": "must_read",
+          "passed": true
+        },
+        {
+          "text": "PS4",
+          "expected_skill": null,
+          "decision": "must_not_map_console_to_photoshop",
+          "passed": true
+        },
+        {
+          "text": "PS5",
+          "expected_skill": null,
+          "decision": "must_not_map_console_to_photoshop",
+          "passed": true
+        }
+      ],
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        },
+        "ops": {
+          "parsed": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        }
+      }
+    },
+    "creative_tools_intern": {
+      "field_groups_equal": 14,
+      "differences": {},
+      "changes_from_baseline": {
+        "requirements.skills": {
+          "before": [
+            "Figma",
+            "剪映",
+            "Photoshop"
+          ],
+          "after": [
+            "Figma",
+            "剪映",
+            "Photoshop",
+            "Vue",
+            "Python"
+          ]
+        }
+      },
+      "skills": {
+        "type": "match",
+        "expected": [
+          "Figma",
+          "剪映",
+          "Photoshop",
+          "Vue",
+          "Python"
+        ],
+        "actual": [
+          "Figma",
+          "剪映",
+          "Photoshop",
+          "Vue",
+          "Python"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "probes": [
+        {
+          "text": "Photoshop 2024",
+          "expected_skill": "Photoshop",
+          "passed": true
+        },
+        {
+          "text": "Vue2.x",
+          "expected_skill": "Vue",
+          "passed": true
+        },
+        {
+          "text": "Pythonv3.11",
+          "expected_skill": "Python",
+          "passed": true
+        }
+      ],
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        },
+        "ops": {
+          "parsed": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        }
+      }
+    },
+    "service_tools_intern": {
+      "field_groups_equal": 14,
+      "differences": {},
+      "changes_from_baseline": {
+        "requirements.skills": {
+          "before": [
+            "SQL"
+          ],
+          "after": [
+            "Python",
+            "Java",
+            "Docker",
+            "SQL"
+          ]
+        }
+      },
+      "skills": {
+        "type": "match",
+        "expected": [
+          "Python",
+          "Java",
+          "Docker",
+          "SQL"
+        ],
+        "actual": [
+          "Python",
+          "Java",
+          "Docker",
+          "SQL"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "probes": [
+        {
+          "text": "Python3.10",
+          "expected_skill": "Python",
+          "decision": "must_read",
+          "passed": true
+        },
+        {
+          "text": "Java8",
+          "expected_skill": "Java",
+          "decision": "must_read",
+          "passed": true
+        },
+        {
+          "text": "Docker24.0",
+          "expected_skill": "Docker",
+          "decision": "must_read",
+          "passed": true
+        }
+      ],
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        },
+        "ops": {
+          "parsed": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        }
+      }
+    },
+    "visual_layout_intern": {
+      "field_groups_equal": 14,
+      "differences": {},
+      "changes_from_baseline": {
+        "requirements.skills": {
+          "before": [
+            "C4D"
+          ],
+          "after": [
+            "Photoshop",
+            "Illustrator",
+            "C4D"
+          ]
+        }
+      },
+      "skills": {
+        "type": "match",
+        "expected": [
+          "Photoshop",
+          "Illustrator",
+          "C4D"
+        ],
+        "actual": [
+          "Photoshop",
+          "Illustrator",
+          "C4D"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "probes": [
+        {
+          "text": "Photoshop2024",
+          "expected_skill": "Photoshop",
+          "decision": "must_read",
+          "passed": true
+        },
+        {
+          "text": "Illustrator28.0",
+          "expected_skill": "Illustrator",
+          "decision": "must_read",
+          "passed": true
+        },
+        {
+          "text": "C4D",
+          "expected_skill": "C4D",
+          "decision": "must_keep_intrinsic_digit",
+          "passed": true
+        }
+      ],
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        },
+        "ops": {
+          "parsed": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        }
+      }
+    },
+    "web_interface_intern": {
+      "field_groups_equal": 14,
+      "differences": {},
+      "changes_from_baseline": {
+        "requirements.skills": {
+          "before": [
+            "JavaScript"
+          ],
+          "after": [
+            "HTML",
+            "CSS",
+            "Vue",
+            "JavaScript"
+          ]
+        }
+      },
+      "skills": {
+        "type": "match",
+        "expected": [
+          "HTML",
+          "CSS",
+          "Vue",
+          "JavaScript"
+        ],
+        "actual": [
+          "HTML",
+          "CSS",
+          "Vue",
+          "JavaScript"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "probes": [
+        {
+          "text": "HTML5",
+          "expected_skill": "HTML",
+          "decision": "must_read",
+          "passed": true
+        },
+        {
+          "text": "CSS3",
+          "expected_skill": "CSS",
+          "decision": "must_read",
+          "passed": true
+        },
+        {
+          "text": "Vue3",
+          "expected_skill": "Vue",
+          "decision": "must_read",
+          "passed": true
+        }
+      ],
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "eligible",
+            "actual_verdict": "eligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        },
+        "ops": {
+          "parsed": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          },
+          "manual": {
+            "expected_verdict": "ineligible",
+            "actual_verdict": "ineligible",
+            "old_check_differences": {},
+            "additional_checks": {
+              "interview": "unknown",
+              "start_date": "unknown"
+            }
+          }
+        }
+      }
+    }
+  },
+  "supplemental_ruling_probes": {
+    "ps-duration-not-console": {
+      "expected": [
+        "PS"
+      ],
+      "actual": [
+        "PS"
+      ],
+      "comparison": {
+        "type": "match",
+        "expected": [
+          "PS"
+        ],
+        "actual": [
+          "PS"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "evidence": {
+        "text": "技能要求：PS 5年以上",
+        "method": "rule"
+      }
+    },
+    "python-duration-not-version": {
+      "expected": [
+        "Python"
+      ],
+      "actual": [
+        "Python"
+      ],
+      "comparison": {
+        "type": "match",
+        "expected": [
+          "Python"
+        ],
+        "actual": [
+          "Python"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "evidence": {
+        "text": "技能要求：Python 3 年以上",
+        "method": "rule"
+      }
+    },
+    "ps5-console": {
+      "expected": [],
+      "actual": [],
+      "comparison": {
+        "type": "match",
+        "expected": [],
+        "actual": [],
+        "missing": [],
+        "extra": []
+      },
+      "evidence": null
+    },
+    "unity3d-out-of-scope": {
+      "expected": [],
+      "actual": [],
+      "comparison": {
+        "type": "match",
+        "expected": [],
+        "actual": [],
+        "missing": [],
+        "extra": []
+      },
+      "evidence": null
+    }
+  },
+  "counts": {
+    "fields_match": 70,
+    "skills_expected": 19,
+    "skills_hit": 19,
+    "skills_missing": 0,
+    "skills_extra": 0,
+    "version_probes_total": 13,
+    "version_probes_passed": 13,
+    "console_probes_total": 2,
+    "console_probes_passed": 2,
+    "evidence_values": 67,
+    "evidence_verbatim": 67,
+    "manual_valid": 5,
+    "manual_saved": 5,
+    "parsed_old_checks_equal": 70,
+    "parsed_verdicts_equal": 10,
+    "manual_old_checks_equal": 70,
+    "manual_verdicts_equal": 10,
+    "intrinsic_digit_probes_total": 1,
+    "intrinsic_digit_probes_passed": 1,
+    "supplemental_probes_total": 4,
+    "supplemental_probes_passed": 4
+  },
+  "successful_cli_calls": 39,
+  "frozen_files_verified": 12,
+  "source_archive_unchanged": true,
+  "finished_at_utc": "2026-10-30T11:53:54.889479+00:00"
+}
