@@ -335,10 +335,11 @@ _COMPANY_HEAD = re.compile(
 # The version is part of the match, so "Python 3.10 或 Java 8" still reads as one choice. It must not run into a
 # letter, so a name with a digit inside ("C4D") is not split; "+" may follow ("Java8+" is 8 or later).
 # A number followed by a time or count unit is no version: "Python 3 年以上" quotes only Python,
-# and "Python3年以上" still reads Python.
+# and "Python3年以上" still reads Python. A version is taken whole or not at all: "Python 3.5年" must not
+# fall back to "Python 3".
 _UNIT = r"[^\S\r\n]*(?:年|个月|月|周|天|小时|人|次|元|[kKwW](?![A-Za-z])|万)"
-_COUNT = rf"[^\S\r\n]*\d+(?:\.\d+)?{_UNIT}"
-_VERSION = rf"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?(?![A-Za-z0-9#])(?!{_UNIT})"
+_COUNT = rf"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?{_UNIT}"
+_VERSION = rf"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?(?![A-Za-z0-9#])(?!\.[\dx])(?!{_UNIT})"
 # One digit after PS is a games console (PS4, PS 5), not Photoshop; a year still is ("PS2024"),
 # and so are a count ("PS 5年以上") and a decimal or ".x" version ("PS 5.1", "PS5.x").
 _CONSOLE = rf"(?![^\S\r\n]*\d(?!\d|\.[\dx])(?!{_UNIT}))"

@@ -47,3 +47,4 @@
 - 数字后面跟时间、数量单位的不当版本号，也不当游戏机型号："Python 3 年以上"只匹配 Python，"Python3年以上"也读出 Python，"PS 5年以上"算 Photoshop。补了读出和不误读的种子用例，`VersionedSkills` 加了匹配范围的测试。`Unity3D` 不处理。
 - `RULES_VERSION` 仍是 7；#90 先合并的话合 master 后改成 8。
 - Codex B 审 `1dd21ac` 的裁定：`PS` 后面跟小数或 `.x`（"PS 5.1""PS5.x"）按版本读出 Photoshop，"PS4""PS 5"仍不读，补了用例；`jd-parse.md` 局限一节删掉"HTML5、CSS3、Vue3 读不出"的旧说法，改写成版本号的边界（时间、数量单位，游戏机和版本，`Unity3D`）。三项检查通过：1340 个测试，跳过 11 个。
+- Codex B 复审 `eb91a9f`：小数版本后面跟单位时正则回退成较短的版本（"Python 3.5年"引成"Python 3"）。版本号后面加否定前瞻，不能紧跟数字或小数点，整个版本号要么全取、要么不取；带 `.x`、多段小数的年限也按单位处理（"Vue2.x年"引 Vue）。补审核表五条和 Python 3.10、Java 8、Vue2.x、PS 5.1 的对照。

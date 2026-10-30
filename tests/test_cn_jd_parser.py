@@ -1004,9 +1004,14 @@ class VersionedSkills(unittest.TestCase):
         record = parse_one("任职要求：熟悉 Python 3 年以上，会 PS 5年")
         self.assertEqual(record["requirements"]["skills"], ["Python", "PS"])
         self.assertEqual(schema.validate(record), [])
-        for term, text in (("Python", "Python 3 年以上"), ("Python", "Python3个月"), ("PS", "PS 5年")):
-            self.assertEqual(jd_parser._skill_pattern(term).search(text).group(), term)
-        self.assertEqual(jd_parser._skill_pattern("Python").search("Python 3.10 版本").group(), "Python 3.10")
+        for term, text in (("Python", "Python 3 年以上"), ("Python", "Python3个月"), ("PS", "PS 5年"),
+                           # A version with a unit after it is not cut short to a shorter version.
+                           ("Python", "Python 3.5年"), ("Python", "Python3.10 个月"), ("PS", "PS5.0年"),
+                           ("PS", "PS 5.1 个月"), ("Vue", "Vue2.x年")):
+            self.assertEqual(jd_parser._skill_pattern(term).search(text).group(), term, text)
+        for term, text, version in (("Python", "Python 3.10 版本", "Python 3.10"), ("Java", "熟悉 Java 8。", "Java 8"),
+                                    ("Vue", "会用 Vue2.x 开发", "Vue2.x"), ("PS", "PS 5.1 修图", "PS 5.1")):
+            self.assertEqual(jd_parser._skill_pattern(term).search(text).group(), version)
 
     def test_a_console_next_to_photoshop_is_not_read(self):
         record = parse_one("岗位要求：熟练使用 Photoshop，热爱游戏，玩过 PS5 优先")
