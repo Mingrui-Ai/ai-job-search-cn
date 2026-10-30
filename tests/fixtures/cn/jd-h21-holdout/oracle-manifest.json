@@ -1,0 +1,58 @@
+{
+  "task": "V15",
+  "base_commit": "e99470eab14a2e22aa1139c6cf0c9604394cf580",
+  "branch": "codex/v15-h21-holdout",
+  "frozen_at_utc": "2026-10-30T03:16:07.284813+00:00",
+  "assignment": "Planner V15 / master roadmap H21: versioned English skills; five independent fictional JDs.",
+  "independence": {
+    "parser_source_read_for_authoring": false,
+    "h21_branch_read": false,
+    "application_run_on_this_batch_before_freeze": false,
+    "prior_exposure": "Previous V13/H22 and parsing validation work; no claim of zero historical exposure. This batch uses only public contracts, profiles, and text semantics."
+  },
+  "policy": "No push before H21 PR exists. Listed files are immutable. Pending rulings and baseline results are added separately.",
+  "oracle_files_lf_sha256": {
+    ".gitattributes": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+    "console_content_campus.expected.json": "95aa05b75372a5bf20a5f9068d2b7b5c0a5c591659db6511b82b4c133dfea5f6",
+    "console_content_campus.txt": "1e1f50645ceb93a11eb74bf90e3549c912eef311ff3ad754e61a723b31fad220",
+    "creative_tools_intern.expected.json": "ad01d9b776bbb5b915debd98a5b72d393e1dfa41dc2779dbedac0a7b090fb0a7",
+    "creative_tools_intern.txt": "093b4b3e0ac04ce1f79ce3ab845f9849be106ae2906875ccc18d2a589e9050b8",
+    "README.md": "7def17054219096958e9c3478789d7ca10ab3025f7528a890e62ab014011979d",
+    "service_tools_intern.expected.json": "b35455f23ef61fb0b5bfc0a10e720c13debd4c936e4705873af1870129eafbb6",
+    "service_tools_intern.txt": "aee5e95558a6730154aa388d9de0d45c77d6235582c0fd7612339c9ee2d336f0",
+    "visual_layout_intern.expected.json": "2d42fabe493e71713adce530daf80c4b83ea15502e244accb5a50031eccd7a92",
+    "visual_layout_intern.txt": "f3106eadb918e70cade4985822767b396b14176ab5ec1a13c2dbf05b0c4d66f0",
+    "web_interface_intern.expected.json": "c448a44eb9c1e280099d4283cd961f10e7685f80e1b3694704f261e1ee8f70a2",
+    "web_interface_intern.txt": "61d615089e247da34bdde39bd46e98d5169184689e7f99a37905de5a799b62b2"
+  },
+  "source_git_blob_sha256": {
+    "docs/cn/roadmap.md": "dec4577e087fa9e2b9f6556ef5178494cfb0b3c259df944ef4f0c580ea79c12d",
+    "docs/cn/job-schema.md": "2b03a5f96f1adbebf00458f17b1d2c16f8537b475e896679b5652c3dcdf3fbe5",
+    "docs/cn/jd-parse.md": "2f4209068f97b29646d2869dfbfe9897adfcd119c954f0c210d5352de76cb8c9",
+    "docs/cn/match.md": "16d73b24863c455936c7b7d3f991dbed7b54bd54dcdf86564c32a9043ddd75a5",
+    "tests/fixtures/cn/profile/tech/profile.json": "735d1da011b41215dd381d1a8eeea42742a3fb247ba8f5557c17c9cf0a35a2d6",
+    "tests/fixtures/cn/profile/ops/profile.json": "4b7639b57a666d4adbd0f2b5aed1e7cc28ad150bac9b1e8e675981ffdb2a5f9c"
+  },
+  "counts": {
+    "jobs": 5,
+    "nontechnical_jobs": 2,
+    "field_groups": 70,
+    "fully_adjudicable_field_groups": 69,
+    "partial_skill_groups": 1,
+    "definite_skills": 16,
+    "positive_version_probes": 10,
+    "intrinsic_digit_probes": 1,
+    "console_negative_probes": 2,
+    "pending_adjudications": 3,
+    "alternative_group_checks": 5,
+    "profile_pairs": 10,
+    "hard_checks": 70,
+    "verbatim_quotes": 94
+  },
+  "static_audit": {
+    "utf8_no_bom_lf": true,
+    "field_and_check_structure": true,
+    "quotes_are_verbatim": true,
+    "human_verdicts_follow_states": true
+  }
+}

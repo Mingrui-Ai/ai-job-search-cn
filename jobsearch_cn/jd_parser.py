@@ -314,6 +314,40 @@ _FOLLOW = re.compile(r"关注|订阅|扫码|详见|动态见|了解更多")
 _OURS = re.compile(r"我们|本公司|官方|更多|招聘(?:信息|通知|动态)")
 # "PS：" opening a line starts a postscript ("PS：简历请注明到岗时间"); that PS is not Photoshop.
 _AFTER_POSTSCRIPT = re.compile(r"[ \t]*[:：]")
+# Office software names share their English spelling with everyday words.
+# Only Word/Office need positive software context; all office terms must stay
+# out of company names. Suite names do not imply proficiency in each app.
+_OFFICE_TERMS = frozenset(("Word", "Microsoft Word", "Excel", "Microsoft Excel", "PPT", "PowerPoint",
+                           "Microsoft PowerPoint", "Office", "Microsoft Office", "MS Office", "WPS",
+                           "WPS Office", "Visio", "Microsoft Visio"))
+_OFFICE_NAME = r"(?:(?:Microsoft|MS|WPS)\s+)?(?:Word|Excel|PowerPoint|PPT|Office|WPS|Visio)"
+_OFFICE_JOIN = r"\s*(?:、|,|，|/|／|&|和|及|与|或者?|or|and)\s*"
+_OFFICE_LIST = re.compile(rf"(?<![A-Za-z]){_OFFICE_NAME}(?:{_OFFICE_JOIN}{_OFFICE_NAME})+(?![A-Za-z])", re.I)
+_OFFICE_DISTINCT_NAME = re.compile(r"\b(?:Excel|PowerPoint|PPT|WPS|Visio|Microsoft|MS)\b", re.I)
+_OFFICE_USE_BEFORE = re.compile(
+    r"(?:熟悉|熟练(?:使用|操作)?|掌握|精通|(?:会|能)?(?:使用|操作|用)"
+    r"|(?:办公软件|办公套件|软件工具|技能要求|工具要求|技能|软件)\s*[:：]?)"
+    rf"\s*(?:{_OFFICE_NAME}{_OFFICE_JOIN})*$", re.I,
+)
+_OFFICE_USE_AFTER = {
+    "Word": re.compile(r"\s*(?:文档|排版|文字处理|软件|表格|\b(?:documents?|software)\b)", re.I),
+    "Office": re.compile(r"\s*(?:办公软件|办公套件|软件|套件|\bsoftware\b)", re.I),
+}
+_ENGLISH_NOUN_AFTER = re.compile(r"[\s-]+[A-Za-z]")
+_EXCEL_VERB_BEFORE = re.compile(r"\b(?:we|you|they|who|to|can|will|must|should)\s+$", re.I)
+_OFFICE_COMPANY_LABEL = re.compile(r"(?im)^\s*(?:company|employer)\s*:\s*[^\n，,。；;]+")
+# Company references need a narrow entity-name form, not an arbitrary phrase
+# that happens to end at "集团" or "公司" after a software requirement.
+_OFFICE_COMPANY_KIND = r"(?:信息|科技|文化|咨询|教育|服务|软件|空间|人才|网络|数据|智能|电子|传媒|实业|贸易|管理|商务|控股|产业|技术|数字|系统)"
+_OFFICE_COMPANY_REFERENCE = re.compile(
+    rf"(?:加入|来自|任职于|就职于|了解|\bjoin\b)\s*"
+    rf"(?P<name>(?:{_OFFICE_NAME})\s*(?:(?:{_OFFICE_COMPANY_KIND})\s*){{1,3}}"
+    rf"(?:股份有限公司|有限责任公司|有限公司|集团|公司)"
+    rf"|(?:{_OFFICE_NAME})\s+(?:[A-Za-z][A-Za-z0-9&.-]*\s+){{1,3}}(?:Inc|Ltd|LLC|Limited)\b)", re.I,
+)
+_OFFICE_ENGLISH_COMPANY_LINE = re.compile(
+    r"(?im)^[ \t]*(?:[A-Za-z][A-Za-z0-9&.-]*[ \t]+){1,3}(?:Inc|Ltd|LLC|Limited)\.?[ \t]*$"
+)
 _INTRO = re.compile(r"(?m)^[ \t]*[【\[]?\s*(?:公司介绍|公司简介|企业介绍|企业简介|关于我们|公司概况)\s*[】\]]?\s*(?:[:：]|$)")
 _SECTION = re.compile(
     r"(?m)^[ \t]*[【\[]?\s*(?:职位描述|职位详情|岗位描述|岗位职责|工作职责|职位职责|工作内容|任职要求|岗位要求|职位要求"
@@ -417,7 +451,8 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
     title = cite("title", found_title)
     headline = _line_at(text, title_span[0]) if title_span else (lines[0] if lines else "")
     tag, piped = _tag_cells(lines, headline if title_span else None)
-    hits = _skill_hits(text, skill_patterns or _builtin_patterns(), skip=title_span)
+    company = _company(text, lines, tag if piped else [])
+    hits = _skill_hits(text, skill_patterns or _builtin_patterns(), skip=title_span, company=company[0])
     published = _dated(text, (_PUBLISHED,))
     # A start date without a year is dated from the JD's own publication date, else the import date.
     reference = date.fromisoformat(published[0] or imported_at[:10])
@@ -426,7 +461,7 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
         "id": job_id(text),
         "source": {"type": source_type, "site": site, "url": url, "imported_at": imported_at},
         "title": title,
-        "company": cite("company", _company(text, lines, tag if piped else [])),
+        "company": cite("company", company),
         "cities": cite("cities", _cities(text, lines, tag)) or [],
         "remote": cite("remote", _remote(text)),
         "employment_type": cite("employment_type", _employment_type(text, headline)),
@@ -1018,15 +1053,26 @@ def _dated(text: str, patterns, *, same_line=False):
     return _NOTHING
 
 
-def _skill_hits(text: str, patterns, skip=None) -> list:
+def _skill_hits(text: str, patterns, skip=None, company=None) -> list:
     """(match, term, key) wherever the JD asks for a vocabulary term, in text order; none in skip (the title)."""
     claimed, hits = ([skip] if skip else []), []
     intro = _intro_spans(text)
+    company_names = [match.span("v") for match in _COMPANY_LABEL.finditer(text)]
+    company_names += [match.span() for match in _OFFICE_COMPANY_LABEL.finditer(text)]
+    company_names += [match.span("name") for match in _OFFICE_COMPANY_REFERENCE.finditer(text)]
+    company_names += [match.span() for match in _OFFICE_ENGLISH_COMPANY_LINE.finditer(text)]
+    if company:
+        # A recognised employer can be a standalone name or a header tag cell.
+        company_names += [match.span() for match in re.finditer(
+            rf"(?m)^[ \t]*{re.escape(company)}[ \t]*(?=$|[|｜·])", text)]
     for term, pattern, key in patterns:
         for match in pattern.finditer(text):
             if any(match.start() < end and start < match.end() for start, end in claimed):
                 continue
             claimed.append((match.start(), match.end()))
+            if (term in _OFFICE_TERMS
+                    and not _office_software(text, term, match, company_names)):
+                continue
             if _asked(text, term, match, intro):
                 hits.append((match, term, key))
     return sorted(hits, key=lambda hit: hit[0].start())
@@ -1109,6 +1155,31 @@ def _offered_as_choice(text: str, run: list) -> bool:
             continue
         if len(gap) <= _MARK_REACH and not _MARK_BREAK.search(gap):
             return True
+    return False
+
+
+def _office_software(text: str, term: str, match, company_names: list) -> bool:
+    """Accept software uses, not a company name or the ordinary Word/Office nouns."""
+    if any(start <= match.start() < end for start, end in company_names):
+        return False
+    left, right = _clause_bounds(text, match.start(), match.end())
+    if term == "Excel" and _EXCEL_VERB_BEFORE.search(text[left:match.start()]):
+        return False
+    if term not in _OFFICE_USE_AFTER:
+        return True
+    if _OFFICE_USE_AFTER[term].match(text, match.end(), right):
+        return True
+    if (_OFFICE_USE_BEFORE.search(text[left:match.start()])
+            and not _ENGLISH_NOUN_AFTER.match(text, match.end(), right)):
+        return True
+    line_start = text.rfind("\n", 0, match.start()) + 1
+    line_end = text.find("\n", match.end())
+    line_end = line_end if line_end >= 0 else len(text)
+    for run in _OFFICE_LIST.finditer(text, line_start, line_end):
+        if run.start() <= match.start() < run.end():
+            # Bare "word and office" is ambiguous even when it is a whole line.
+            if _OFFICE_DISTINCT_NAME.search(run.group()):
+                return True
     return False
 
 
