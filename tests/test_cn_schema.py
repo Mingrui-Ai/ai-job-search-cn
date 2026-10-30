@@ -146,6 +146,15 @@ class Shape(SchemaCase):
             with self.subTest(path=path, value=value):
                 self.assert_error(with_value(minimal_record(), path, value), f"{path}: must be")
 
+    def test_an_id_with_anything_around_it_is_invalid(self):
+        # V18 P3-1: "$" with re.match let a trailing newline through; the store uses the same check.
+        for value in ("job_123456789abc\n", "job_123456789abc\r", "job_123456789abc\r\n", " job_123456789abc",
+                      "job_123456789abc ", "job_123456789abc/x", "../job_123456789abc", "job_12345678\\abc"):
+            with self.subTest(value=value):
+                self.assertFalse(schema.is_job_id(value))
+                self.assert_error(with_value(minimal_record(), "id", value), "id: must be")
+        self.assertTrue(schema.is_job_id("job_123456789abc"))
+
     def test_enum_fields(self):
         for path, value in (
             ("employment_type", "intern"), ("status", None), ("source.site", "weibo"), ("source.type", None),

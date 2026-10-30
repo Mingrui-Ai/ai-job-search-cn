@@ -68,7 +68,7 @@ class Store:
         self.jobs = self.root / "jobs"
 
     def _path(self, job_id: str) -> Path:
-        if not schema._ID.match(job_id or ""):
+        if not schema.is_job_id(job_id):
             raise StoreError(f"not a job id: {job_id!r}")
         return self.jobs / f"{job_id}.json"
 
@@ -147,7 +147,7 @@ class MatchStore:
         self.matches = self.root / "matches"
 
     def _path(self, job_id: str) -> Path:
-        if not schema._ID.match(job_id or ""):
+        if not schema.is_job_id(job_id):
             raise StoreError(f"not a job id: {job_id!r}")
         return self.matches / f"{job_id}.json"
 
