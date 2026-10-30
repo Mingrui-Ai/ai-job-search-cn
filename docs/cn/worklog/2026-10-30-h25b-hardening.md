@@ -12,7 +12,7 @@
 - 2026-10-30 再暂停：#79 还有一项（专业名的语境）。
 - 开出 PR #85（P2-1、P3-2）。规划者裁定：检查和写入之间被换成链接的竞态记为已知限制，不另立任务，M8-3 发布前的安全复查再看。P2-2、P2-3 在 `fix/cn-h25b-extract` 上另开 PR；两个 PR 都合并后再勾路线图的 H25b。
 
-**第 2 部分**（分支 `fix/cn-h25b-extract`）
+**第 2 部分**（分支 `fix/cn-h25b-extract`，PR #88）
 
 - #85 已合并。Codex B 的 P3-1 并进本部分：`Path.is_junction` 从 3.12 才有。`_is_link` 补上 `st_file_attributes` 的 reparse point 检查；`safe_dir` 每建一级先核对解析后的路径，报错前不再在外面建出 `drafts/`。`OlderPython` 两个用例在 #85 的 `store.py` 上都失败。
 - P2-2：`_word_text` 改成显式栈，不再递归。用 4 万棵随机文档树和旧实现对比，输出全部一致。`_parse_document` 用 `iterparse` 边读边数，节点超 20 万、深度超 256 就停；`document.xml` 解压后上限 16 MB，既看 ZIP 头，也用 `read(上限 + 1)` 防头部造假；输入文件上限 50 MB。超限报不含原文的 `ExtractionError`。新增 `Budgets`。
