@@ -1,6 +1,6 @@
 # 2026-10-29 · M2-6c：面试形式、成本和到岗时间（Claude B 会话）
 
-> 状态：**已开 PR，等审核**。分支 `feat/cn-m2-6c-interview`。
+> 状态：**已开 PR #73，等审核**（Codex B 审实现，Codex A 用 V9 对照）。分支 `feat/cn-m2-6c-interview`。
 
 **已完成**
 
