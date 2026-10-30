@@ -1,0 +1,50 @@
+{
+  "task": "V10",
+  "base_commit": "c6055cc7aee16ce0ca956e948c3c654e1ae40334",
+  "branch": "codex/v10-h20-holdout",
+  "frozen_at_utc": "2026-10-29T09:35:14.442991+00:00",
+  "assignment": "Planner inbox task 6 (2026-10-29), H20 holdout; roadmap task not yet on master.",
+  "independence": {
+    "parser_source_read_for_authoring": false,
+    "h20_branch_read": false,
+    "application_run_on_this_batch_before_freeze": false,
+    "prior_exposure": "Public V8 results and planner ruling; previous privacy scanner mechanically matched source strings without exposing implementation to the agent."
+  },
+  "policy": "No push before H20 PR exists. Do not change any listed frozen input. Add later results separately.",
+  "oracle_files_lf_sha256": {
+    ".gitattributes": "14877c66ad0ce8e2a1d7f3b6ab19fb0696d4e7f4ca557b4633a4f4091d310c2d",
+    "data_platform_intern.expected.json": "9cb97082b52414e77a042a549f0e037a30beb95080b4b49588b139019326b61c",
+    "data_platform_intern.txt": "b2fcb09a1e169b3ea51a864b388aa8d3b4d5cd86f6fc61f812cab474a995d918",
+    "market_planning_campus.expected.json": "a67aa495ee4ae4a28c0799bdb01de60aa2cfb4f4ad71d077bdb392588963f668",
+    "market_planning_campus.txt": "b153dab1042c4cd55a6a3224c0680c7ff89c9c4e8434139f83732aabf863ef66",
+    "operations_analysis_intern.expected.json": "1aad0196388bf4f095aad447f0cc1bcfd2865d192a98e87893e88dd288b63b62",
+    "operations_analysis_intern.txt": "c346c72b3c55ad330053a4478b69b38d9ae16d9350eacb40598098bd084aac53",
+    "README.md": "17f3012b74ae949843a2892550c55fb01007a80b2f6c9b804175f90556a64752",
+    "service_quality_intern.expected.json": "8a68e0f1e6f3bc48d7ff75ff37e8a9ac62fb742b4c462cb8eceeff8b3ab575fe",
+    "service_quality_intern.txt": "e65fdfdd95f88284115dae6ffb742845782c2c9d62469c434c82dc0d1b9dc261",
+    "statistics_research_intern.expected.json": "7ed1598f93a45fbe2247b0759fa17388d32dea71444f190e2938b027fdc852e9",
+    "statistics_research_intern.txt": "a3b0c8482c546a2d3fc058297bf75e3b97785f86ee6fd7de2f1f83e146ede98b"
+  },
+  "source_files_lf_sha256": {
+    "docs/cn/job-schema.md": "9bbcfaec1ab29318cd283f903b6b3ed4f68d9222172b93f835cba937d7ffbe13",
+    "docs/cn/match.md": "22fd758da1eacb43d08c742fba497a176b670d99a59ec1db4387bbbf53eb412f",
+    "docs/cn/roadmap.md": "2bf84c7b88b9ba8ff78da28834cd6b89102b1c1e45e110f45d8b84999bf2f15b",
+    "tests/fixtures/cn/profile/tech/profile.json": "735d1da011b41215dd381d1a8eeea42742a3fb247ba8f5557c17c9cf0a35a2d6",
+    "tests/fixtures/cn/profile/ops/profile.json": "4b7639b57a666d4adbd0f2b5aed1e7cc28ad150bac9b1e8e675981ffdb2a5f9c"
+  },
+  "counts": {
+    "jobs": 5,
+    "nontechnical_jobs": 4,
+    "field_groups": 70,
+    "skills": 12,
+    "profile_pairs": 10,
+    "hard_checks": 70,
+    "verbatim_quotes": 75
+  },
+  "static_audit": {
+    "utf8_no_bom_lf": true,
+    "field_and_check_structure": true,
+    "quotes_are_verbatim": true,
+    "human_verdicts_follow_states": true
+  }
+}
