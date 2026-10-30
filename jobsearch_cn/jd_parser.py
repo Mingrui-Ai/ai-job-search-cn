@@ -320,10 +320,10 @@ _AFTER_POSTSCRIPT = re.compile(r"[ \t]*[:：]")
 _OFFICE_TERMS = frozenset(("Word", "Microsoft Word", "Excel", "Microsoft Excel", "PPT", "PowerPoint",
                            "Microsoft PowerPoint", "Office", "Microsoft Office", "MS Office", "WPS",
                            "WPS Office", "Visio", "Microsoft Visio"))
-_OFFICE_NAME = r"(?:(?:Microsoft|MS|WPS)\s+)?(?:Word|Excel|PowerPoint|PPT|Office|WPS|Visio)"
+_OFFICE_NAME = r"(?:(?:Microsoft|MS|WPS)\s+)?(?:Word|Excel|PowerPoint|PPT|Office|WPS|Visio)(?:\s*v?\d+(?:\.\d+)*(?:\.x)?)?"  # H21: a version stays in the list
 _OFFICE_JOIN = r"\s*(?:、|,|，|/|／|&|和|及|与|或者?|or|and)\s*"
 _OFFICE_LIST = re.compile(rf"(?<![A-Za-z]){_OFFICE_NAME}(?:{_OFFICE_JOIN}{_OFFICE_NAME})+(?![A-Za-z])", re.I)
-_OFFICE_DISTINCT_NAME = re.compile(r"\b(?:Excel|PowerPoint|PPT|WPS|Visio|Microsoft|MS)\b", re.I)
+_OFFICE_DISTINCT_NAME = re.compile(r"(?<![A-Za-z])(?:Excel|PowerPoint|PPT|WPS|Visio|Microsoft|MS)(?![A-Za-z])", re.I)
 _OFFICE_USE_BEFORE = re.compile(
     r"(?:熟悉|熟练(?:使用|操作)?|掌握|精通|(?:会|能)?(?:使用|操作|用)"
     r"|(?:办公软件|办公套件|软件工具|技能要求|工具要求|技能|软件)\s*[:：]?)"
@@ -364,10 +364,26 @@ _COMPANY_HEAD = re.compile(
 )
 
 
+# A version right after an English term still names the term (H21): glued or after a space, digits and dots,
+# maybe a "v" in front and ".x" at the end: "HTML5", "Vue2.x", "Python 3.10", "Pythonv3.11", "Photoshop 2024".
+# The version is part of the match, so "Python 3.10 或 Java 8" still reads as one choice. It must not run into a
+# letter, so a name with a digit inside ("C4D") is not split; "+" may follow ("Java8+" is 8 or later).
+# A number followed by a time or count unit is no version: "Python 3 年以上" quotes only Python,
+# and "Python3年以上" still reads Python. A version is taken whole or not at all: "Python 3.5年" must not
+# fall back to "Python 3".
+_UNIT = r"[^\S\r\n]*(?:年|个月|月|周|天|小时|人|次|元|[kKwW](?![A-Za-z])|万)"
+_COUNT = rf"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?{_UNIT}"
+_VERSION = rf"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?(?![A-Za-z0-9#])(?!\.[\dx])(?!{_UNIT})"
+# One digit after PS is a games console (PS4, PS 5), not Photoshop; a year still is ("PS2024"),
+# and so are a count ("PS 5年以上") and a decimal or ".x" version ("PS 5.1", "PS5.x").
+_CONSOLE = rf"(?![^\S\r\n]*\d(?!\d|\.[\dx])(?!{_UNIT}))"
+
+
 def _skill_pattern(term: str) -> re.Pattern:
     escaped = re.escape(term).replace(r"\ ", r"\s*")
     if term.isascii():
-        escaped = rf"(?<![A-Za-z0-9+#.]){escaped}(?![A-Za-z0-9+#])"
+        console = _CONSOLE if term.casefold() == "ps" else ""
+        escaped = rf"(?<![A-Za-z0-9+#.]){escaped}{console}(?:{_VERSION}|(?![A-Za-z0-9+#])|(?={_COUNT}))"
     return re.compile(escaped, re.I)
 
 
