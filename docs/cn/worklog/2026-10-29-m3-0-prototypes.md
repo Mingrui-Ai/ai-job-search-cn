@@ -28,3 +28,21 @@
 - DOCX 字体选微软雅黑（HR 电脑上通常有），PDF（B、C）选 Noto Sans SC（OFL）。两者字形不同，Word 和 PDF 看起来会略有差别。是否要求两份用同一款字体，等看完样张再提。
 - 没有 Word 的电脑（macOS 或只有 WPS）上，做法 A 的 PDF 怎么出：LibreOffice 能替代，但用户没同意装，只能按资料写。
 - 示例档案内容少，一页肯定放得下；"能不能放进一页"主要靠 `--long` 压力测试判断。
+
+## 2026-10-30 继续（规划者换成 cn-de）
+
+- 开工检查：工作树干净，没有未推送的提交；脚本的 SHA-256 和上面记的一致。#65 由规划者复审，不等它。
+- 脚本先改了三处：求职意向写成"后端开发、大模型应用开发（实习）"（原来"实习"只挂在最后一个方向上）；项目没有角色时留空，不编"项目"二字；DOCX 加 `word/settings.xml`（`compatibilityMode` 15），否则 Word 以兼容模式打开。
+- 看 PDF 页面：Read 工具渲染 PDF 要 `pdftoppm`，本机没有。改用 Windows 自带的 `Windows.Data.Pdf` 接口（PowerShell 脚本 `data/m3-0/scripts/render.ps1`）把每页渲染成 PNG，不用装东西。
+
+### 跑出来的问题
+
+1. **A：汉字其实是等线，不是微软雅黑。** PDF 的字体列表里汉字全在 DengXian 里，只有英文和数字是微软雅黑。让 Word 另存一份看它怎么理解：它把 `docDefaults` 里的东亚字体换成了主题字体 `minorEastAsia`（包里没有主题，就用中文版 Office 的默认主题，即等线）。写中文名"微软雅黑"或英文名都一样。把字体也写到 Normal 样式上就好了（中文名、英文名都行），三份字体子集都是微软雅黑。**教训：DOCX 的字体不能只写在 `docDefaults`；生成后要看导出 PDF 的字体列表。**
+2. **B：用 Noto Sans SC 时，PDF 文本层有 16 个字是康熙部首。** 例如"大"存成 U+2F24"⼤"、"示"存成 U+2F70"⽰"，页面上一模一样，复制出来或按"示例理工大学"搜索就对不上。原因：本机的 Noto Sans SC 是可变字体（`NotoSansSC-VF.ttf`），Edge 把它嵌成了 81 个 Type 3 字体（矢量字形，没有字体名，PDF 390 KB），反查 cmap 生成 ToUnicode 时，同一个字形先查到了部首的码位。换成微软雅黑就是正常的 CID 字体，没有部首，104 KB。
+   - `verify_pdf` 发现不了：它只做 NFC，pypdf 读出的部首原样保留，但它不检查；而 `pdftotext` 会把部首折回正常汉字，用它读反而看不出问题。M3-2 的检查要单独查 U+2E80–U+2FDF。
+   - 同一份 PDF 用 `pdftotext -layout` 读，相邻两条要点的字会交错成一行（"G主P修A 课3.6程…"）。换微软雅黑后也没有了。
+3. **C：嵌入的字体名叫 `NotoSansSC-Thin`，但页面粗细正常。** 这是字体文件自己的 PostScript 名（name 表 ID 6 就是 `NotoSansSC-Thin`），Typst 0.15 实际按常规和粗体排的。另外 Noto 的"•"和"·"共用一个字形，文本层里列表圆点都记成了"·"；换微软雅黑没有这个问题。第一次编译 6 秒（建系统字体缓存），之后每次约 0.15 秒。
+4. **压力测试**：实习和项目放大 3 倍时五份都还是一页，改成 5 倍。5 倍时 A（Word）2 页，B、C 都是 1 页，原因是 A 的行距（1.15 倍单倍行距，雅黑约合 15.2 pt）比 B、C 的 14.5 pt 松。A 的第 2 页开头是一条孤立的项目要点，标题留在第 1 页底部，要加"与下段同页"。
+   - **B、C 的 DOCX 就是 A 的那份**：同样的内容，PDF 1 页，DOCX 在 Word 里 2 页。B、C 的 Word 版和 PDF 由两套引擎排版，页数可能不一致，没有 Word（或 LibreOffice）就量不出 DOCX 的页数。
+- 本机的 Noto Sans SC 是系统字体：注册在 HKLM，文件和微软雅黑一样由 Windows 组件仓库硬链接，版本 2.04，OFL，`fsType` 0。
+- 做法 B、C 各加了一个微软雅黑的变体（`B-edge-yahei`、`C-typst-yahei`），也用来回答"Word 和 PDF 用不用同一款字体"。
