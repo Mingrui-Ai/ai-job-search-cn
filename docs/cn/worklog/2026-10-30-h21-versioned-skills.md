@@ -36,3 +36,8 @@
   - 词条后面隔一个空格的数字都并进匹配范围，例如"Python 3 年以上"里的 3。读出的技能不变，只是出处片段的范围包括这个数字；
   - "Unity3D"这类"数字加字母"的写法仍读不出。词表里本来也没有 Unity。
 - 全量测试通过：1338 个，跳过 11 个，含 V2、V4、V6、V7、V8 的对照测试；`security_guards`、`lint_skills` OK。路线图已勾 H25a，H21 写了实际做法。下一步：合 master，开 PR。
+
+## 收尾（2026-10-30）
+
+- 已和最新 master 同步（master 上 `RULES_VERSION` 为 6，本分支 7）。路线图勾上 H21。
+- 三项检查：全量测试 1339 个通过、跳过 11 个；`security_guards` OK；`lint_skills` OK。开 PR，发给规划者。
