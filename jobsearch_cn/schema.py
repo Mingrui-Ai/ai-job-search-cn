@@ -87,9 +87,14 @@ ALTERNATIVES = "requirements.skill_alternatives"
 MAX_RAW_TEXT = 50_000
 MAX_NAME = 200
 
-_ID = re.compile(r"^job_[0-9a-f]{12}$")
+_ID = re.compile(r"job_[0-9a-f]{12}")
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _FOLDED_AWAY = re.compile(r"[\s\u200b-\u200d\u2060\ufeff]+")
+
+
+def is_job_id(value) -> bool:
+    """job_ and 12 hex digits, nothing around them: fullmatch, since "$" would let a trailing newline through."""
+    return isinstance(value, str) and _ID.fullmatch(value) is not None
 
 
 def normalize_for_match(text: str) -> str:
@@ -122,7 +127,7 @@ def validate(record) -> list[str]:
         version = record["schema_version"]
         if not _is_int(version) or version != SCHEMA_VERSION:
             errors.append(f"schema_version: must be {SCHEMA_VERSION}")
-    if "id" in record and not (isinstance(record["id"], str) and _ID.match(record["id"])):
+    if "id" in record and not is_job_id(record["id"]):
         errors.append("id: must be job_ followed by 12 lowercase hex digits")
     if "source" in record:
         _check_source(record["source"], errors)

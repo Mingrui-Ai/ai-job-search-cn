@@ -13,6 +13,7 @@ here; the CLI writes the files.
 import csv
 import html
 import io
+import unicodedata
 from fractions import Fraction
 
 from jobsearch_cn import match, score
@@ -167,9 +168,17 @@ def feedback_csv(entries: list) -> str:
 
 
 def _cell(value) -> str:
-    """Every cell, so no text - least of all the JD's - is read as a formula when the sheet is opened."""
+    """Every cell, so no text - least of all the JD's - is read as a formula when the sheet is opened.
+
+    The text is kept as it is, with a ' in front when it starts with a line break or a tab, or when its first
+    character after leading whitespace and control characters (an importer may skip them) starts a formula.
+    A full-width ＝ or a BOM in front is not looked past yet (V18 P2-4; Excel and WPS were not tried).
+    """
     text = "" if value is None else str(value)
-    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
+    start = 0
+    while start < len(text) and (text[start].isspace() or unicodedata.category(text[start]) == "Cc"):
+        start += 1
+    return "'" + text if text[:1] in ("\t", "\r", "\n") or text[start:start + 1] in ("=", "+", "-", "@") else text
 
 
 # ---------------------------------------------------------------- HTML

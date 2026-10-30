@@ -22,7 +22,7 @@ DOC = REPO / "docs" / "cn" / "profile.md"
 FIXTURES = REPO / "tests" / "fixtures" / "cn" / "profile"
 
 sys.path.insert(0, str(REPO))
-from jobsearch_cn import profile, schema, store  # noqa: E402
+from jobsearch_cn import jd_parser, match, profile, schema, score, store, vocab  # noqa: E402
 
 
 def documented_example() -> dict:
@@ -128,6 +128,8 @@ class Validate(unittest.TestCase):
         data["experience"].append(copy.deepcopy(data["experience"][0]))
         self.assert_error(data, "duplicate id 'exp-1'")
         self.assert_error(with_value(self.example, "experience.0.id", "Exp 1"), "experience[0].id")
+        # "$" with re.match let a trailing newline through (V18 P3-1 found it in job ids).
+        self.assert_error(with_value(self.example, "experience.0.id", "exp-1\n"), "experience[0].id")
 
     def test_duplicate_skills_fold_case_and_width(self):
         data = copy.deepcopy(self.example)
@@ -198,7 +200,7 @@ class Validate(unittest.TestCase):
         self.assert_error(older, "target.one_meal_points: missing")
 
     def test_cities_without_an_answer_on_remote_or_moving_is_a_warning(self):
-        # Valid either way; but every job outside the cities would be location unknown.
+        # Valid either way; but some jobs outside the cities would be location unknown (see the next test).
         self.assertEqual(profile.warnings(self.example), [])
         open_remote = with_value(self.example, "availability.remote_ok", None)
         self.assertEqual(profile.validate(open_remote), [])
@@ -209,6 +211,34 @@ class Validate(unittest.TestCase):
         no_preferred = with_value(both, "availability.cities", [])
         self.assertEqual(len(profile.warnings(no_preferred)), 2, "acceptable cities alone ask the same question")
         self.assertEqual(profile.warnings(with_value(no_preferred, "availability.acceptable_cities", [])), [])
+
+    def test_each_warning_says_what_leaving_it_open_costs(self):
+        # Codex B's audit (H23): the warnings once said every job elsewhere would be location unknown. Each field
+        # left open leaves some such jobs settled; check the wording against the filter and the location score.
+        [job], _ = jd_parser.parse_text((REPO / "tests" / "fixtures" / "cn" / "jd" / "boss_intern.txt")
+                                        .read_text(encoding="utf-8"))
+        elsewhere = dict(job, cities=["北京"])  # in neither tier of the example's cities
+
+        def outcome(remote, remote_ok, relocate):
+            data = with_value(with_value(self.example, "availability.remote_ok", remote_ok),
+                              "availability.relocate", relocate)
+            posting = dict(elsewhere, remote=remote)
+            check = next(c for c in match.filter_job(posting, data)["checks"] if c["check"] == "location")
+            return check["result"], score.score_job(posting, data, vocab.load())["dimensions"]["location"]["score"]
+
+        # remote_ok open: a remote job elsewhere scores on its city, and only moving settles its check.
+        self.assertEqual(outcome(True, None, True), ("match", 30))
+        self.assertEqual(outcome(True, None, False), ("unknown", 0))
+        # relocate open: 0 and unknown, unless the job is remote and you accept that.
+        self.assertEqual(outcome(True, True, None), ("match", 100))
+        self.assertEqual(outcome(None, True, None), ("unknown", 0))
+        self.assertEqual(outcome(False, False, None), ("unknown", 0))
+        both = with_value(with_value(self.example, "availability.remote_ok", None), "availability.relocate", None)
+        remote_ok, relocate = profile.warnings(both)
+        self.assertTrue(remote_ok.startswith("availability.remote_ok:"), remote_ok)
+        self.assertIn("it scores on its city, and unless you will move (relocate true)", remote_ok)
+        self.assertTrue(relocate.startswith("availability.relocate:"), relocate)
+        self.assertIn("unless a job elsewhere is remote and you accept that (remote_ok true), it scores 0", relocate)
 
     def test_acceptable_cities_are_a_list_apart_from_the_preferred(self):
         # M2-6b: preferred cities stay in availability.cities; acceptable ones are the next best.
@@ -251,6 +281,32 @@ class Validate(unittest.TestCase):
         self.assertIsNone(shown["contact"]["github"])
         self.assertEqual(shown["skills"], self.example["skills"])
         self.assertEqual(self.example["contact"]["name"], "张三", "redaction must not touch the original")
+
+    def test_redaction_masks_a_malformed_contact_too(self):
+        # V18 P1-1: a contact that was not an object came out as it was; Codex B on #86: so did a
+        # detail typed as a field name, and a field that strayed out of contact.
+        phone, email = "13900001111", "canary@example.com"
+        cases = [dict(self.example, contact=contact) for contact in (
+            f"{phone} {email}", [phone], {"phone": [phone], "wechat": phone}, 13900001111, {email: phone, "name": None})]
+        cases.append(dict(self.example, phone=phone, email=email))
+        for data in cases:
+            with self.subTest(data=data.get("contact"), stray="phone" in data):
+                shown = json.dumps(profile.redacted(data), ensure_ascii=False)
+                self.assertNotIn(phone, shown)
+                self.assertNotIn(email, shown)
+                self.assertEqual(profile.redacted(data)["skills"], self.example["skills"])
+        shown = profile.redacted(dict(self.example, contact={email: phone, "phone": "x", "name": None}))
+        self.assertEqual(shown["contact"], {"phone": "***", "name": None, "unknown_fields": 1})
+        self.assertIsNone(profile.redacted(dict(self.example, contact=None))["contact"])
+
+    def test_an_unknown_contact_field_is_counted_not_named(self):
+        # Codex B on #86: the error repeated a phone number or email typed as a field name.
+        data = with_value(self.example, "contact", {"canary@example.com": "13900001111", **self.example["contact"]})
+        errors = profile.validate(data)
+        self.assertIn("contact: 1 unknown field(s), not named here; only name, phone, email, github, website belong",
+                      errors)
+        self.assertNotIn("canary@example.com", " ".join(errors))
+        self.assert_error(dict(self.example, hobbies=[]), "hobbies: unknown field")  # elsewhere names still help
 
 
 def run_cli(*args, data_dir):
@@ -302,6 +358,36 @@ class Commands(unittest.TestCase):
         self.assertNotIn("13800000000", hidden)
         self.assertNotIn("a@example.com", hidden)
         self.assertIn("13800000000", run_cli("profile", "show", "--contact", data_dir=self.data).stdout.decode("utf-8"))
+
+    def test_a_malformed_contact_stays_hidden_everywhere(self):
+        # V18 P1-1: show printed a string or list contact as it was; Codex B on #86: and a detail typed as
+        # a field name, which validate and match also repeated. --contact still shows whatever is there.
+        phone, email = "13900001111", "canary@example.com"
+        profiles = [dict(documented_example(), contact=contact) for contact in (
+            f"{phone} {email}", [phone], None, {"phone": phone, "wechat": email}, {email: phone})]
+        profiles.append(dict(documented_example(), phone=phone, email=email))  # strayed out of contact
+        for data in profiles:
+            with self.subTest(contact=data.get("contact"), stray="phone" in data):
+                self.write(data)
+                shown = run_cli("profile", "show", data_dir=self.data)
+                self.assertEqual(shown.returncode, 0, shown.stderr.decode("utf-8", "replace"))
+                report = run_cli("match", "report", "--profile", str(self.root / "profile.json"), data_dir=self.data)
+                self.assertEqual(report.returncode, 1, "the profile is invalid, so match stops before reading jobs")
+                for proc in (shown, run_cli("profile", "validate", data_dir=self.data), report):
+                    output = (proc.stdout + proc.stderr).decode("utf-8", "replace")
+                    self.assertNotIn(phone, output)
+                    self.assertNotIn(email, output)
+                if data.get("contact") is not None or "phone" in data:
+                    explicit = run_cli("profile", "show", "--contact", data_dir=self.data)
+                    self.assertIn(phone, explicit.stdout.decode("utf-8"))
+
+    def test_show_refuses_a_profile_that_is_not_an_object(self):
+        # Nothing to mask the contact details in, so say so without echoing the file.
+        (self.root / "profile.json").write_text(json.dumps(["13900001111"]), encoding="utf-8")
+        proc = run_cli("profile", "show", data_dir=self.data)
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("JSON object", proc.stderr.decode("utf-8"))
+        self.assertNotIn("13900001111", (proc.stdout + proc.stderr).decode("utf-8", "replace"))
 
     def test_an_explicit_file(self):
         other = self.data / "draft.json"

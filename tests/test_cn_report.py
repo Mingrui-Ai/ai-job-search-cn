@@ -407,13 +407,23 @@ class FormAndPage(unittest.TestCase):
                 [_, row] = list(csv.reader(io.StringIO(text.lstrip("﻿"))))
                 self.assertEqual(row[1], "'" + title)
 
+    def test_a_formula_behind_a_line_break_or_blanks_stays_text(self):
+        # V18 P2-4: an importer may skip leading whitespace and control characters, so the guard looks past them.
+        for title in ("\n=SUM(1,1)", " =1", "\x1b=1", "　+1", "\r\n@x", "\t-1"):
+            with self.subTest(title=title):
+                text = report.feedback_csv([report.entry(self.record(), {"title": title, "company": None}, False)])
+                [_, row] = list(csv.reader(io.StringIO(text.lstrip("﻿"), newline="")))
+                self.assertEqual(row[1], "'" + title)
+        cells = ("\x00=1", "\nplain", "a=1", " 数据分析", "")
+        self.assertEqual([report._cell(v) for v in cells], ["'\x00=1", "'\nplain", "a=1", " 数据分析", ""])
+
     def test_no_cell_starts_a_formula(self):
         # Every column passes the guard, not just the title: the company comes from the JD too.
         job = {"title": "=1+1", "company": "@公司"}
         text = report.feedback_csv([report.entry(self.record(), job, True)])
         for row in csv.reader(io.StringIO(text.lstrip("﻿"))):
             for cell in row:
-                self.assertNotIn(cell[:1], ("=", "+", "-", "@", "\t", "\r"), row)
+                self.assertNotIn(cell[:1], ("=", "+", "-", "@", "\t", "\r", "\n"), row)
         self.assertEqual([report._cell(v) for v in ("-5", "\tx", None, 7)], ["'-5", "'\tx", "", "7"])
 
     def test_the_grade_names_are_the_ones_in_match_md(self):
