@@ -15,6 +15,8 @@ alone, and only a start date the user cannot make rules a job out. Scoring and
 salary comparison are not here (M2-4); nothing is stored.
 """
 
+import re
+
 from jobsearch_cn import schema
 
 MATCH, CONFLICT, UNKNOWN, NOT_APPLICABLE = "match", "conflict", "unknown", "not_applicable"
@@ -285,12 +287,14 @@ def _start_date(job, profile):
 
 
 def _asked_by(job, by: str) -> str:
-    """The start-by date, saying so when the JD gave no year and the year was inferred (jd_parser._nearest_year)."""
+    """The start-by date, saying so when the JD gave no year with it and the year was inferred
+    (jd_parser._start_by). Only a year written with the date counts: "2026届" elsewhere is no year for it."""
     text = (job["evidence"].get("requirements.start") or {}).get("text")
     snippets = [text] if isinstance(text, str) else [s for s in text or [] if isinstance(s, str)]
-    if not snippets or any(by[:4] in snippet for snippet in snippets):
+    stated = re.compile(rf"{by[:4]}\s*[年\-/.－]\s*0?{int(by[5:7])}(?!\d)")
+    if not snippets or any(stated.search(snippet) for snippet in snippets):
         return f"JD 要求 {by} 前到岗"
-    month = f"{int(by[5:7])}月"
-    quoted = next((snippet for snippet in snippets if month in snippet), snippets[0])
+    month = re.compile(rf"(?<!\d){int(by[5:7])}\s*月")
+    quoted = next((snippet for snippet in snippets if month.search(snippet)), snippets[0])
     basis = "发布日期" if job.get("published_at") else "导入日期"
     return f"JD 写“{quoted}”，没写年份，按{basis}推断为 {by} 前到岗"

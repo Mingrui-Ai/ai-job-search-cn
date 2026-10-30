@@ -358,6 +358,12 @@ class StartDate(CheckCase):
         item = self.assert_result(MATCH, job=self.cited("2027-07-31", "2027年7月入职", "2026-10-20"))
         self.assertEqual(item["reason"], "JD 要求 2027-07-31 前到岗，你 2026-11-15 就能到岗")
 
+    def test_another_year_in_the_snippet_is_no_year_for_the_date(self):
+        # #73 review: 2026届 names a class, not the year of 11月1日.
+        item = self.assert_result(CONFLICT, job=self.cited("2026-11-01", "面向2026届学生11月1日前到岗"))
+        self.assertEqual(item["reason"], "JD 写“面向2026届学生11月1日前到岗”，没写年份，按导入日期推断为 2026-11-01 前到岗，"
+                                         "你 2026-11-15 才能到岗")
+
     def test_an_unknown_says_which_side_is_silent(self):
         silent_job, silent_profile = setting(self.job, "requirements.start", None), setting(
             self.profile, "availability.start_date", None)

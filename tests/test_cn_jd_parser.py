@@ -287,6 +287,18 @@ SEED_CASES = (
     ("初试视频面试\n复试需到上海现场面试", "interview", {"mode": "mixed", "cities": ["上海"]}),
     ("视频面试\n面试地点：北京，也可电话面试", "interview", {"mode": "either", "cities": ["北京"]}),
     ("线上/线下面试", "interview", {"mode": "mixed", "cities": []}),  # no word of choice: not read as one
+    # #73 review: a space or tab after the label's colon; a word of choice before the ways named.
+    ("面试地点： 线上", "interview", {"mode": "online", "cities": []}),
+    ("面试地点：\t视频面试", "interview", {"mode": "online", "cities": []}),
+    ("面试地点：  北京", "interview", {"mode": "onsite", "cities": ["北京"]}),
+    ("可选线上/现场面试", "interview", {"mode": "either", "cities": []}),
+    ("线上/现场面试可选", "interview", {"mode": "either", "cities": []}),
+    # #73 review (V9): a round in person after an online one, and where it is.
+    ("首轮视频面试；通过后须到成都参加现场复试", "interview", {"mode": "mixed", "cities": ["成都"]}),
+    ("初面电话面试，终面需赴武汉市进行线下终面", "interview", {"mode": "mixed", "cities": ["武汉"]}),
+    ("须到苏州参加现场面试", "interview", {"mode": "onsite", "cities": ["苏州"]}),
+    ("现场复试", "interview", {"mode": "onsite", "cities": []}),
+    ("复试通过后发放录用通知", "interview", None),  # a round, but neither online nor in person
     # Not the candidate's interview, or ruled out:
     ("无需现场面试，全程线上", "interview", None),
     ("不支持远程面试", "interview", None),
@@ -318,6 +330,14 @@ SEED_CASES = (
     ("11月1日前到岗者优先", "requirements.start", None),  # only preferred
     ("面试通过后一周内到岗", "requirements.start", None),
     ("11月1日前到岗，12月1日前入职", "requirements.start", None),  # two dates: neither
+    # #73 review: the earliest day is no deadline; two dates sharing one 到岗 are two dates.
+    ("最早11月1日到岗", "requirements.start", None),
+    ("最早可于11月1日入职", "requirements.start", None),
+    ("不早于12月1日到岗", "requirements.start", None),
+    ("11月1日或12月1日到岗", "requirements.start", None),
+    ("12月1日或11月1日前到岗", "requirements.start", None),
+    ("11月1日至11月15日到岗", "requirements.start", None),
+    ("最晚11月15日前到岗", "requirements.start", {"by": "2026-11-15", "asap": False}),
     ("无需立即到岗", "requirements.start", None),
     ("实习3个月以上", "requirements.start", None),
     ("工作地点：广州天河区", "cities", ["广州"]),
@@ -550,6 +570,18 @@ class InterviewAndStart(unittest.TestCase):
 
     def test_a_stated_year_is_kept(self):
         self.assertEqual(self.start_by("发布时间：2026-10-20\n2028年7月入职"), "2028-07-31")
+
+    def test_a_month_alone_compares_the_last_day_it_would_write(self):
+        # #73 review: 2026-01-31 is 170 days before 2026-07-20 and 2027-01-31 is 195 after it. Comparing
+        # 15 January instead (186 before, 179 after) took 2027.
+        self.assertEqual(self.start_by("发布时间：2026-07-20\n1月入职"), "2026-01-31")
+        # 2026-08-05: 2026-01-31 is 186 days before, 2027-01-31 179 after.
+        self.assertEqual(self.start_by("发布时间：2026-08-05\n1月入职"), "2027-01-31")
+
+    def test_the_interview_city_is_not_the_work_city(self):
+        record = parse_one("工作地点：上海\n须到苏州参加现场面试")
+        self.assertEqual(record["cities"], ["上海"])
+        self.assertEqual(record["interview"], {"mode": "onsite", "cities": ["苏州"]})
 
 
 class SkillAlternatives(unittest.TestCase):
