@@ -66,13 +66,16 @@ def conclusion(record: dict, stale: bool = False) -> str:
     total = record.get("total") or {}
 
     def named(result):
-        return "、".join(_label(CHECKS, c.get("check")) for c in _checks(record) if c.get("result") == result)
+        return "、".join(_label(CHECKS, c.get("check")) for c in _checks(record) if c.get("result") == result
+                        and not (result == match.UNKNOWN and c.get("check") in match.TO_CONFIRM))
 
     total_score = "无" if total.get("score") is None else f"{total['score']} 分"
     if verdict == match.INELIGIBLE:
         text = f"不符合硬性条件（冲突：{named(match.CONFLICT)}），各维度加权 {total_score}，仅供参考"
     else:
-        unknown = [c for c in _checks(record) if c.get("result") == match.UNKNOWN]
+        # As in the filter, an unknown interview or start date is only to confirm (pending), no hard condition.
+        unknown = [c for c in _checks(record)
+                   if c.get("result") == match.UNKNOWN and c.get("check") not in match.TO_CONFIRM]
         head = f"待确认 {len(unknown)} 项硬性条件（{named(match.UNKNOWN)}）" if unknown else "符合硬性条件"
         text = f"{head}，{grade_text(total.get('grade'))}，总分 {total_score}"
     if total.get("missing"):
