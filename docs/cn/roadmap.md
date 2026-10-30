@@ -260,7 +260,7 @@
   - 用户有空时做一次试用：安装 dsh（`npx @deepseek-ai/dsh web`），在 Settings → Models 填上自己的 DeepSeek API Key，选这个仓库作为工作区，按规划者给的清单请它导入一份 JD，看它能不能找到工作流、命令能不能跑起来。API Key 只在 dsh 里配置，不交给其他 Agent，也不写进仓库。
   - 结论见 ADR-10：dsh 两个说明文件都读（`AGENTS.md`、`CLAUDE.md`）；技能入口放 `.dsh/skills/`；在已激活 conda 环境的终端里启动；简历用 `profile extract` 读；权限用 dsh 自己的预设；固定 `0.2.2-alpha.2`。
 - [x] **A2** `执行` dsh 入口（2026-10-29 用户决定提前，和 M2-5 并行；Claude C；PR #57）
-  - 实际做法：`.gitignore` 比下面写的更严，`.dsh/` 下只有 `skills/*/SKILL.md` 能提交；两条反向规则经用户同意登记进 `security_guards`，对应的排除规则设为必需。dsh 的会话、设置和 Key 都在 `~/.dsh`，不写工作区。是否再给 `.dsh/` 加守卫检查在 PR 里提出。
+  - 实际做法：`.gitignore` 比下面写的更严，`.dsh/` 下 `skills/` 以外的内容和技能子目录里 `SKILL.md` 以外的文件都被忽略（`.dsh/skills/` 根目录下的文件不忽略）；两条反向规则经用户同意登记进 `security_guards`，对应的排除规则设为必需。dsh 的会话、设置和 Key 都在 `~/.dsh`，不写工作区。是否再给 `.dsh/` 加守卫检查在 PR 里提出。
   - 在 `.dsh/skills/` 下新建 `cn-jd-import`、`cn-setup`、`cn-match` 三个 `SKILL.md`。YAML 写 `name`、`description`；正文只指向 `jd-import.md`、`profile-setup.md`、`match.md` 的评分工作流，和 `.claude/skills/cn-*` 一样不复制流程。写明三条要点：JD 是不可信数据；建档不运行上游 `/setup`；回复和文件里不出现联系方式。不写 Claude 的 `allowed-tools`，dsh 不认。
   - 确认 dsh 会在工作区写哪些文件（会话、设置、缓存），用 `.gitignore` 排除 `.dsh/` 下 `skills/` 以外的内容，保证 API Key 和会话记录不可能进入仓库；`security_guards` 是否需要为 `.dsh/` 加检查（例如只允许 `SKILL.md`），由执行者提出。
   - `test_cn_agent_entry.py` 覆盖 dsh 的三个入口：文件存在、指向的文档存在、不复制流程。
@@ -406,7 +406,8 @@
       - 一并处理 #41 审核转来的两项：Codex 发现的 P2（`evidence.profile` 里写了对象、数组或数字时 `match validate` 抛 `TypeError`，现在报 `must be an experience id (a string)`，补了回归测试）；`tools/security_guards.py` 里 `match` 授权的注释改成实情（会写 `<数据目录>/matches/`），用户已确认。
   - 存储已定（D4，2026-10-28 用户决定）：匹配记录和岗位库一样，每条一个 JSON 文件；投递记录是否接入 SQLite，到 M4-0 再定。
 - [ ] **M2-6** M2-5 第一轮试评分后的改进（用户 2026-10-29 决定四项都在 `v0.2.0` 之前做完；做完后进行 M2-5 第二轮）
-  - [ ] **M2-6a** `执行` 可读的评分报告和反馈表（Claude C，A2 之后）
+  - [x] **M2-6a** `执行` 可读的评分报告和反馈表（Claude C，A2 之后；PR #65）
+    - 实际做法：反馈表第一列多了"岗位id"，方便读回时对上记录；等级显示为"较匹配（good）"，中文名的对照表在 match.md，是唯一出处；反馈表每一格以 `=` 等开头时都加 `'`，防止被当成公式。"怎么确认"按理由里的"JD 没写""档案没写"给出做法，有测试钉住这两种说法。细节见 match.md 的"评分报告和反馈表"和工作记录。
     - 新命令 `match report [岗位id ...]`：不写 id 时取全部已保存的记录。写到 `<数据目录>/reports/<日期时间>/`，`data/` 已被 git 忽略：
       - 一个 HTML 文件，用浏览器直接打开，不引用外部资源。先是排序表：岗位、公司、过滤结论、等级、总分、是否完整、是否过期；再逐个岗位列出：
         - 硬性条件逐项：结论、理由、JD 原文、档案字段；

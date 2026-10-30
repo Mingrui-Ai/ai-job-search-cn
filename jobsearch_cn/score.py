@@ -58,6 +58,13 @@ def _digest(data) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def stale(record: dict, job, digest: str) -> bool:
+    """The job or the profile (its profile_hash is `digest`) changed since scoring, the job is gone,
+    or other rules scored it: score it again."""
+    return (job is None or record.get("job_hash") != job_hash(job)
+            or record.get("profile_hash") != digest or record.get("rules_version") != RULES_VERSION)
+
+
 def score_job(job: dict, profile: dict, vocabulary, previous=None, now=None) -> dict:
     """The match record for a job: the rule part, and the agent part of `previous` if neither side changed."""
     rules = rule_part(job, profile, vocabulary)
@@ -186,12 +193,19 @@ def _skills(job, profile, vocabulary) -> dict:
             "reason": reason, "matched": matched, "missing": missing}
 
 
-def _direction(job, profile, vocabulary) -> dict:
+def direction_skills(job: dict, vocabulary) -> dict:
+    """What the direction dimension counts, by group (general left out): each requirement once for each
+    direction it offers, a choice under its label ("Golang 或 Java")."""
     groups = {}
     for item in _requirements(job, vocabulary):  # a choice counts once for each direction it offers
         for group in dict.fromkeys(vocabulary.group_of(name) for name in item):
             if group and group != vocab.GENERAL:
-                groups[group] = groups.get(group, 0) + 1
+                groups.setdefault(group, []).append(_label(item))
+    return groups
+
+
+def _direction(job, profile, vocabulary) -> dict:
+    groups = {group: len(items) for group, items in direction_skills(job, vocabulary).items()}
     wanted = (profile.get("target") or {}).get("directions") or []
 
     def result(score, reason):
@@ -249,8 +263,7 @@ def _gaps(job, skills, salary, checks, vocabulary) -> list:
     gaps = []
     for item in _requirements(job, vocabulary):
         if _label(item) in skills["missing"]:
-            quote = _choice_quote(job, item, vocabulary) if len(item) > 1 else _quote(job, "requirements.skills", item)
-            gaps.append({"kind": "skill", "item": _label(item), "jd": quote})
+            gaps.append({"kind": "skill", "item": _label(item), "jd": _skill_quote(job, item, vocabulary)})
     if salary["score"] == 0:
         gaps.append({"kind": "salary", "item": salary["reason"], "jd": _quote(job, "salary")})
     for check in checks:
@@ -259,6 +272,16 @@ def _gaps(job, skills, salary, checks, vocabulary) -> list:
             gaps.append({"kind": "filter", "item": check["check"], "result": check["result"],
                          "reason": check["reason"], "jd": quote})
     return gaps
+
+
+def _skill_quote(job: dict, item: list, vocabulary):
+    """The JD text a requirement rests on: the snippet offering a choice, or the one naming the skill."""
+    return _choice_quote(job, item, vocabulary) if len(item) > 1 else _quote(job, "requirements.skills", item)
+
+
+def skill_quotes(job: dict, vocabulary) -> dict:
+    """Each requirement's label ("Go", "Golang 或 Java") with the JD text it rests on, as the gaps quote it."""
+    return {_label(item): _skill_quote(job, item, vocabulary) for item in _requirements(job, vocabulary)}
 
 
 def _choice_quote(job: dict, item: list, vocabulary):
