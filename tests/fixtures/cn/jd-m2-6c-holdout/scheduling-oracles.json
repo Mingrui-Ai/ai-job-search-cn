@@ -1,0 +1,51 @@
+{
+  "purpose": "在实现结构确定前冻结面试形式、面试城市、到岗时间及出处。字段名仅用于描述语义，不要求实现采用此结构。",
+  "unknown_policy": "null表示文本没有给出或无法确定，[]表示明确没有现场面试地点；未实现和原文未知分别记录，不混算正确率。",
+  "fixtures": {
+    "online_backend_intern.txt": {
+      "interview": {"forms": ["remote"], "channels": ["video"], "onsite_cities": [], "process": "all_remote", "evidence": ["面试安排：全程线上视频面试，不安排现场面试。"]},
+      "arrival": {"kind": "by_date", "year": 2026, "month": 11, "day": 20, "inclusive": true, "exact_start_date": null, "latest_date": "2026-11-20", "evidence": ["到岗要求：2026年11月20日前到岗（含当日）。"]},
+      "human_new_checks": {
+        "tech": {"interview": {"result": "match", "reason": "冻结场景接受视频面试，无现场要求。"}, "arrival": {"result": "match", "reason": "最早11月15日可到岗，不晚于11月20日。"}, "combined_verdict": "eligible"},
+        "ops": {"interview": {"result": "match", "reason": "虽不接受远程办公，冻结场景明确接受视频面试。"}, "arrival": {"result": "conflict", "reason": "最早12月1日可到岗，晚于11月20日。"}, "combined_verdict": "ineligible"}
+      },
+      "must_not_infer": ["线上面试不代表远程办公", "否定的现场面试不应收录", "到岗期限不能写进报名deadline"]
+    },
+    "onsite_finance_intern.txt": {
+      "interview": {"forms": ["onsite"], "channels": [], "onsite_cities": ["南京"], "process": "onsite_required", "evidence": ["面试安排：须到南京参加现场面试，面试地点不是入职后的工作地点。"]},
+      "arrival": {"kind": "asap", "negotiable": true, "exact_start_date": null, "latest_date": null, "evidence": ["到岗安排：尽快到岗，具体日期可协商。"]},
+      "human_new_checks": {
+        "tech": {"interview": {"result": "conflict", "reason": "南京不在明确接受的现场面试城市内且不接受其他城市面试出行。"}, "arrival": {"result": "unknown", "reason": "尽快没有客观最晚日期，需要确认。"}, "combined_verdict": "ineligible"},
+        "ops": {"interview": {"result": "conflict", "reason": "只接受上海现场面试，南京现场要求冲突。"}, "arrival": {"result": "unknown", "reason": "尽快和可协商不足以比较具体日期。"}, "combined_verdict": "ineligible"}
+      },
+      "must_not_infer": ["南京不属于工作城市", "尽快不能换成今天或固定天数"]
+    },
+    "mixed_recruiting_intern.txt": {
+      "interview": {"forms": ["remote", "onsite"], "channels": ["phone"], "onsite_cities": ["杭州"], "process": "both_required_in_order", "steps": [{"form": "remote", "channel": "phone"}, {"form": "onsite", "city": "杭州"}], "evidence": ["面试流程：第一轮为电话面试；通过后必须到杭州参加现场复试，两轮均需完成。"]},
+      "arrival": {"kind": "within_month", "year": 2026, "month": 12, "day": null, "window_start": "2026-12-01", "window_end": "2026-12-31", "exact_start_date": null, "evidence": ["到岗安排：2026年12月入职，具体日期在该月内商定。"]},
+      "human_new_checks": {
+        "tech": {"interview": {"result": "conflict", "reason": "电话轮可行，但必需的杭州现场轮不符合冻结面试偏好。"}, "arrival": {"result": "match", "reason": "11月15日起可到岗，可在12月内安排。"}, "combined_verdict": "ineligible"},
+        "ops": {"interview": {"result": "conflict", "reason": "电话轮可行，但杭州现场轮不是可跳过的任选项。"}, "arrival": {"result": "match", "reason": "12月1日起可到岗，位于指定月份。"}, "combined_verdict": "ineligible"}
+      },
+      "must_not_infer": ["电话首轮不能掩盖必需现场复试", "杭州不是工作地点", "月份不等于精确入职日或实习时长"]
+    },
+    "relative_content_intern.txt": {
+      "interview": {"forms": ["remote"], "channels": ["phone", "video"], "onsite_cities": [], "process": "choose_one_channel", "evidence": ["面试安排：仅需电话面试或视频面试，任选一种，无需现场面试。"]},
+      "arrival": {"kind": "relative_to_event", "anchor_event": "interview_passed", "anchor_date": null, "within_days": 7, "exact_start_date": null, "latest_date": null, "evidence": ["到岗要求：面试通过后一周内到岗，通过日期以实际通知为准。"]},
+      "human_new_checks": {
+        "tech": {"interview": {"result": "match", "reason": "电话和视频均接受，任选一种可行。"}, "arrival": {"result": "unknown", "reason": "面试通过日期未知，不能与可到岗日作确定比较。"}, "combined_verdict": "needs_check"},
+        "ops": {"interview": {"result": "match", "reason": "冻结场景接受电话和视频。"}, "arrival": {"result": "unknown", "reason": "报名截止日不是面试通过日期，不能代入。"}, "combined_verdict": "needs_check"}
+      },
+      "must_not_infer": ["无需现场为否定", "不得用发布、报名截止或当前日期加七天"]
+    },
+    "unrelated_online_testing_intern.txt": {
+      "interview": {"forms": null, "channels": null, "onsite_cities": null, "process": null, "evidence": ["面试安排：另行通知。"]},
+      "arrival": {"kind": "month_day_without_year", "year": null, "month": 1, "day": 10, "relation": "before", "exact_start_date": null, "latest_date": null, "evidence": ["到岗要求：1月10日前到岗。"]},
+      "human_new_checks": {
+        "tech": {"interview": {"result": "unknown", "reason": "没有给面试形式和地点，产品介绍不能替代。"}, "arrival": {"result": "unknown", "reason": "年份没有给出，不由发布或运行年份推断。"}, "combined_verdict": "needs_check"},
+        "ops": {"interview": {"result": "unknown", "reason": "公司线上业务不等于候选人线上面试。"}, "arrival": {"result": "unknown", "reason": "缺少年份，不能确定是否晚于可到岗日。"}, "combined_verdict": "ineligible"}
+      },
+      "must_not_infer": ["线上业务、视频课程、电话客服均不是面试安排", "不能将到岗月日用作招聘截止日", "不能猜测年份"]
+    }
+  }
+}
