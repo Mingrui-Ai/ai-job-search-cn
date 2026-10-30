@@ -22,7 +22,7 @@ DOC = REPO / "docs" / "cn" / "profile.md"
 FIXTURES = REPO / "tests" / "fixtures" / "cn" / "profile"
 
 sys.path.insert(0, str(REPO))
-from jobsearch_cn import profile, schema, store  # noqa: E402
+from jobsearch_cn import jd_parser, match, profile, schema, score, store, vocab  # noqa: E402
 
 
 def documented_example() -> dict:
@@ -170,7 +170,7 @@ class Validate(unittest.TestCase):
                          ["--weights.location: missing; name all five (skills, direction, experience, salary, location)"])
 
     def test_cities_without_an_answer_on_remote_or_moving_is_a_warning(self):
-        # Valid either way; but every job outside the cities would be location unknown.
+        # Valid either way; but some jobs outside the cities would be location unknown (see the next test).
         self.assertEqual(profile.warnings(self.example), [])
         open_remote = with_value(self.example, "availability.remote_ok", None)
         self.assertEqual(profile.validate(open_remote), [])
@@ -181,6 +181,34 @@ class Validate(unittest.TestCase):
         no_preferred = with_value(both, "availability.cities", [])
         self.assertEqual(len(profile.warnings(no_preferred)), 2, "acceptable cities alone ask the same question")
         self.assertEqual(profile.warnings(with_value(no_preferred, "availability.acceptable_cities", [])), [])
+
+    def test_each_warning_says_what_leaving_it_open_costs(self):
+        # Codex B's audit (H23): the warnings once said every job elsewhere would be location unknown. Each field
+        # left open leaves some such jobs settled; check the wording against the filter and the location score.
+        [job], _ = jd_parser.parse_text((REPO / "tests" / "fixtures" / "cn" / "jd" / "boss_intern.txt")
+                                        .read_text(encoding="utf-8"))
+        elsewhere = dict(job, cities=["北京"])  # in neither tier of the example's cities
+
+        def outcome(remote, remote_ok, relocate):
+            data = with_value(with_value(self.example, "availability.remote_ok", remote_ok),
+                              "availability.relocate", relocate)
+            posting = dict(elsewhere, remote=remote)
+            check = next(c for c in match.filter_job(posting, data)["checks"] if c["check"] == "location")
+            return check["result"], score.score_job(posting, data, vocab.load())["dimensions"]["location"]["score"]
+
+        # remote_ok open: a remote job elsewhere scores on its city, and only moving settles its check.
+        self.assertEqual(outcome(True, None, True), ("match", 30))
+        self.assertEqual(outcome(True, None, False), ("unknown", 0))
+        # relocate open: 0 and unknown, unless the job is remote and you accept that.
+        self.assertEqual(outcome(True, True, None), ("match", 100))
+        self.assertEqual(outcome(None, True, None), ("unknown", 0))
+        self.assertEqual(outcome(False, False, None), ("unknown", 0))
+        both = with_value(with_value(self.example, "availability.remote_ok", None), "availability.relocate", None)
+        remote_ok, relocate = profile.warnings(both)
+        self.assertTrue(remote_ok.startswith("availability.remote_ok:"), remote_ok)
+        self.assertIn("it scores on its city, and unless you will move (relocate true)", remote_ok)
+        self.assertTrue(relocate.startswith("availability.relocate:"), relocate)
+        self.assertIn("unless a job elsewhere is remote and you accept that (remote_ok true), it scores 0", relocate)
 
     def test_acceptable_cities_are_a_list_apart_from_the_preferred(self):
         # M2-6b: preferred cities stay in availability.cities; acceptable ones are the next best.
