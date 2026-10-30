@@ -21,7 +21,8 @@ Conventions:
   tests' job, not this module's.
 * requirements.skill_alternatives joined v1 after records had been stored
   (H16); upgrade() adds it, empty, to a record read back from the store. So did
-  interview and requirements.start (M2-6c), which upgrade() adds as null.
+  interview and requirements.start (M2-6c), which upgrade() adds as null, and
+  benefits (M2-6e), which it adds with its meals null.
 """
 
 import math
@@ -49,10 +50,12 @@ EVIDENCE_METHODS = ("rule", "agent", "user")
 GUARD_VERDICTS = ("clean", "warn")
 # Online only; in person only; either, the candidate's choice; mixed, some rounds in person.
 INTERVIEW_MODES = ("online", "onsite", "either", "mixed")
+# A meal allowance is paid by the day or by the month (M2-6e).
+MEAL_ALLOWANCE_UNITS = ("CNY/day", "CNY/month")
 
 TOP_LEVEL_KEYS = (
     "schema_version", "id", "source", "title", "company", "cities", "remote",
-    "employment_type", "salary", "requirements", "interview", "return_offer", "published_at",
+    "employment_type", "salary", "requirements", "interview", "benefits", "return_offer", "published_at",
     "deadline", "status", "evidence", "guard", "raw_text",
 )
 SOURCE_KEYS = ("type", "site", "url", "imported_at")
@@ -62,6 +65,9 @@ GRADUATION_KEYS = ("years", "strict")
 EDUCATION_KEYS = ("min", "preferred")
 START_KEYS = ("by", "asap")
 INTERVIEW_KEYS = ("mode", "cities")
+BENEFIT_KEYS = ("meals",)
+MEAL_KEYS = ("per_day", "allowance")
+ALLOWANCE_KEYS = ("amount", "unit")
 EVIDENCE_KEYS = ("text", "method")
 GUARD_KEYS = ("verdict", "counts")
 
@@ -70,8 +76,8 @@ EVIDENCE_FIELDS = (
     "title", "company", "cities", "remote", "employment_type", "salary",
     "requirements.graduation", "requirements.days_per_week",
     "requirements.min_months", "requirements.education", "requirements.skills",
-    "requirements.skill_alternatives", "requirements.start", "interview", "return_offer", "published_at",
-    "deadline",
+    "requirements.skill_alternatives", "requirements.start", "interview", "benefits.meals", "return_offer",
+    "published_at", "deadline",
 )
 # List fields whose every item must appear in the field's own evidence.
 ITEMIZED_FIELDS = ("cities", "requirements.skills")
@@ -95,6 +101,9 @@ def upgrade(record):
     """A stored record with the fields v1 gained since it was saved, empty; changed in place and returned."""
     if isinstance(record, dict):
         record.setdefault("interview", None)
+        record.setdefault("benefits", {"meals": None})
+        if isinstance(record["benefits"], dict):
+            record["benefits"].setdefault("meals", None)
     requirements = record.get("requirements") if isinstance(record, dict) else None
     if isinstance(requirements, dict):
         requirements.setdefault("skill_alternatives", [])
@@ -133,6 +142,8 @@ def validate(record) -> list[str]:
         _check_requirements(record["requirements"], errors)
     if "interview" in record:
         _check_interview(record["interview"], errors)
+    if "benefits" in record:
+        _check_benefits(record["benefits"], errors)
     for key in ("published_at", "deadline"):
         if key in record:
             _check_date(record[key], key, errors)
@@ -342,6 +353,40 @@ def _check_interview(interview, errors: list) -> None:
         _check_text_list(interview["cities"], "interview.cities", errors)
         if interview.get("mode") == "online" and interview["cities"]:
             errors.append("interview.cities: an online interview has no city; use [] or another mode")
+
+
+def _check_benefits(benefits, errors: list) -> None:
+    """What the job gives besides its pay (M2-6e): for now, meals.
+
+    benefits.meals is null when the JD offers no meals and no allowance with an amount; else per_day
+    counts the meals it provides a day - 0 when it gives only an allowance, null when it provides them
+    (包吃) without saying how many - and allowance is the meal allowance it names an amount for.
+    """
+    if not isinstance(benefits, dict):
+        errors.append("benefits: must be an object")
+        return
+    _check_keys(benefits, BENEFIT_KEYS, "benefits", errors)
+    meals, path = benefits.get("meals"), "benefits.meals"
+    if meals is None:
+        return
+    if not isinstance(meals, dict):
+        errors.append(f"{path}: must be null or an object")
+        return
+    _check_keys(meals, MEAL_KEYS, path, errors)
+    per_day, allowance = meals.get("per_day"), meals.get("allowance")
+    if per_day is not None and not (_is_int(per_day) and 0 <= per_day <= 3):
+        errors.append(f"{path}.per_day: must be 0, 1, 2, 3, or null when the JD provides meals without a count")
+    if allowance is not None:
+        if not isinstance(allowance, dict):
+            errors.append(f"{path}.allowance: must be null or an object")
+            return
+        _check_keys(allowance, ALLOWANCE_KEYS, f"{path}.allowance", errors)
+        if "amount" in allowance and not (_is_number(allowance["amount"]) and allowance["amount"] > 0):
+            errors.append(f"{path}.allowance.amount: must be a positive number")
+        if "unit" in allowance:
+            _check_enum(allowance["unit"], MEAL_ALLOWANCE_UNITS, f"{path}.allowance.unit", errors, nullable=False)
+    elif per_day == 0 and "allowance" in meals:
+        errors.append(f"{path}: per_day 0 means an allowance and no meals; use null when the JD offers neither")
 
 
 def _check_alternatives(requirements: dict, errors: list) -> None:
