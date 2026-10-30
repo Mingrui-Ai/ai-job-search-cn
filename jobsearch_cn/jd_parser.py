@@ -63,12 +63,23 @@ _SALARY = (
     (re.compile(rf"月薪\s*(?P<lo>{_N})\s*万?(?:{_TO}(?P<hi>{_N}))?\s*万"), "CNY/month", 10000),
     (re.compile(rf"年薪\s*(?P<lo>{_N})\s*万?(?:{_TO}(?P<hi>{_N}))?\s*万"), "CNY/year", 10000),
     (re.compile(rf"(?P<lo>{_N})\s*万?{_TO}(?P<hi>{_N})\s*万\s*元?\s*(?:/|每)\s*年"), "CNY/year", 10000),
+    # Unscaled monthly/yearly amounts need an explicit 元 and period; bare
+    # numbers also occur in dates, phone numbers and company headcounts.
+    (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*月"), "CNY/month", 1),
+    (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*年"), "CNY/year", 1),
     (re.compile(rf"(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元?\s*(?:/|每)\s*(?:天|日)"), "CNY/day", 1),
     (re.compile(rf"(?:日薪|每天|每日)\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/day", 1),
     (re.compile(rf"(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元?\s*(?:/|每)\s*(?:小时|时)"), "CNY/hour", 1),
     (re.compile(rf"月薪\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
 )
 _NEGOTIABLE = re.compile(r"(?:薪资|薪酬|待遇|工资)?\s*面议")
+# Pay/cost labels can precede or follow their amount. A later explicit pay
+# label starts a new salary context.
+_SALARY_CONTEXT = re.compile(
+    r"(?P<cost>补贴|补助|餐补|房补|收费|费用|押金|培训费|住宿费|餐费|租金)"
+    r"|(?P<pay>月薪|年薪|日薪|时薪|工资|薪资|薪酬|薪水|底薪|报酬)"
+)
+_SALARY_ASIDE = re.compile(r"另|额外|含(?!税)|包括|加上|^\s*(?:以及|和|及|并(?:享有|提供|发放|有))")
 # "全年13薪" written apart from a monthly salary; a range ("13-15薪") is left alone.
 _PAY_MONTHS = re.compile(r"(?:全年\s*)?(?<![\d.\-~～－—–至到])(?P<months>\d{2})\s*薪(?![资酬水])")
 
@@ -103,6 +114,19 @@ _EDUCATION_MIN = re.compile(
 _EDUCATION_PREFERRED = re.compile(
     rf"{_LEVEL_WORD}(?:研究生)?\s*(?:及以上)?\s*(?:学历)?\s*者?\s*(?:优先|为佳)"
 )
+# Two levels or more to choose from (H20): "本科或硕士及以上学历", "大专/本科学历", "学历：本科或硕士". The
+# minimum is the lowest. A bare pair needs a label before it or a qualifier after it, as a single level
+# does: "本科或硕士期间的项目经历" asks for nothing.
+_LEVEL_ANY = "(?:大专|专科|本科|学士|硕士|研究生|博士)"
+# One option of a choice: "博士研究生" is one, a doctorate - its 研究生 qualifies it, and is no master's.
+_LEVEL_OPTION = re.compile(r"(博士|硕士)研究生|大专|专科|本科|学士|硕士|研究生|博士")
+_EDUCATION_CHOICE = re.compile(
+    rf"(?P<label>学历\s*(?:要求)?\s*[:：]\s*)?{_LEVEL_ANY}(?:研究生)?"
+    rf"(?:\s*(?:或者?|/|／|、)\s*{_LEVEL_ANY}(?:研究生)?)+"
+    r"(?P<tail>\s*(?:学历\s*)?(?:及|或)?\s*以上|\s*(?:学历|在读|应届|毕业|学生)|\s*(?:均可|皆可|都可以?))?"
+)
+# A choice the JD prefers: "硕士或博士优先" prefers a master's, the lowest of them.
+_PREFERRED_AFTER = re.compile(r"\s*(?:及以上)?\s*(?:学历)?\s*者?\s*(?:优先|为佳)")
 # "学历不限", "不设最低学历门槛": no minimum, said outright. "专业不限" is about the major.
 _NO_MINIMUM_EDUCATION = re.compile(
     r"学历\s*(?:要求)?\s*[:：]?\s*(?:不限(?!于)|无要求|没有要求|不作要求|不做要求)|不限学历|(?:无|没有)学历要求"
@@ -265,6 +289,21 @@ _MARK_REACH = 15
 _MARK_BREAK = re.compile(r"[和及与并是为]")
 _MAJOR_AFTER = re.compile(r"\s*(?:等)?\s*(?:相关)?\s*专业")
 _MAJOR_BEFORE = re.compile(r"专业\s*[:：]?\s*$")
+# A term is no skill only where the JD asks for a degree subject (H20): a list that ends in 专业, at the
+# clause's end or before what a degree subject takes - "统计学或市场营销相关专业", "统计学专业毕业",
+# "统计学等相关专业优先", "统计学专业本科及以上", "统计学相关专业背景" - or after a 专业 label
+# ("专业：计算机、统计学"). Anything else after 专业 keeps the skill: "统计学专业基础扎实", "具备统计学
+# 专业知识", "Figma专业版". Rather a skill read once too often than a real requirement dropped.
+_MAJOR_WORD = r"[一-鿿A-Za-z]{1,12}?"
+_MAJOR_JOIN = r"\s*(?:、|/|／|或者|或|和|及|与)\s*"
+# "专业背景" asks for a degree subject; "专业背景知识", "专业背景理论" ask for what one knows.
+_MAJOR_DEGREE = (r"(?:的)?\s*(?:毕业|在读|学生|同学|应届|背景(?!\s*(?:知识|理论|能力|基础|技能|素养))|优先|出身|学历"
+                 r"|及以上|以上|大专|专科|本科|学士|硕士|研究生|博士)")
+_MAJOR_TAIL = re.compile(
+    rf"(?:{_MAJOR_JOIN}{_MAJOR_WORD})*\s*(?:等)?\s*(?:相关)?\s*专业\s*"
+    rf"(?=$|[{re.escape(_CLAUSE_END)}]|{_MAJOR_DEGREE}|{_MAJOR_JOIN}{_MAJOR_WORD}\s*(?:等)?\s*(?:相关)?\s*专业)"
+)
+_MAJOR_LEAD = re.compile(rf"专业\s*(?:要求|背景|方向)?\s*(?:为|是|[:：])\s*(?:{_MAJOR_WORD}{_MAJOR_JOIN})*$")
 # A platform name is a skill when the JD asks for it, not when it points the reader at the
 # company's own channel ("欢迎关注我们的公众号", "动态见我们的 B站") or describes the company
 # in its introduction. A follow verb alone is a duty: "关注小红书热点".
@@ -726,10 +765,61 @@ def _employment_type(text: str, headline: str):
     return _NOTHING
 
 
+def _non_salary_amount(text: str, position: int, end: int) -> bool:
+    """Only reject an amount labelled as a benefit or cost, not unlabelled pay.
+
+    Inspect both sides of the quote in its clause/tag cell. A colon label on
+    the preceding line also applies through modifiers such as 每人/标准为.
+    Completed asides such as 工资（不含餐补）do not relabel the wage.
+    """
+    left = text.rfind("\n", 0, position) + 1
+    prefix = text[left:position]
+    if left > 0:
+        previous = _line_at(text, left - 1)
+        if previous.endswith((":", "：")):
+            prefix = previous + prefix
+    # Remove completed asides before finding clause boundaries, so a comma
+    # inside 工资（不含餐补，另有交通补助）does not leave a stray cost label.
+    prefix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", prefix))[-1]
+    labels = list(_SALARY_CONTEXT.finditer(prefix))
+    right = text.find("\n", end)
+    suffix = text[end:len(text) if right < 0 else right]
+    suffix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", suffix))[0]
+    # Use purpose labels following this amount, but not the label introducing
+    # the next amount: 工资8600元/月 交通补贴420元/月 still has a wage of 8600.
+    following_amount = _earliest((pattern for pattern, _, _ in _SALARY), suffix)
+    boundary = following_amount.start("lo") if following_amount else len(suffix)
+    following = list(_SALARY_CONTEXT.finditer(suffix, 0, boundary))
+    if following_amount:
+        next_tail = suffix[following_amount.end():]
+        next_label = _SALARY_CONTEXT.search(next_tail)
+        # In "420元/月交通补贴 8600元/月工资", the next amount already has its
+        # own trailing label, so 交通补贴 belongs to the current amount.
+        next_has_postfix = (next_label is not None
+                            and not _SALARY_ASIDE.search(next_tail[:next_label.start()])
+                            and _earliest((pattern for pattern, _, _ in _SALARY), next_tail) is None)
+        if not next_has_postfix:
+            following = following[:-1]
+    if following:
+        label = following[0]
+        # "含餐补" / "另有交通补贴" describe inclusions or other benefits, not
+        # the purpose of the quoted wage; "600元/月餐补" names its purpose.
+        next_label = _SALARY_CONTEXT.search(suffix, label.end())
+        purpose_end = min(boundary, next_label.start() if next_label else len(suffix))
+        # "餐补另计" / "房补另算" exclude the benefit from this quote even
+        # when the wage itself has no leading 工资/月薪 label.
+        separately_priced = re.search(r"另计|另算", suffix[label.end():purpose_end])
+        if not _SALARY_ASIDE.search(suffix[:label.start()]) and not separately_priced:
+            return label.lastgroup == "cost"
+    return bool(labels and labels[-1].lastgroup == "cost")
+
+
 def _salary(text: str):
     best = None
     for pattern, unit, scale in _SALARY:
         for match in pattern.finditer(text):
+            if _non_salary_amount(text, match.start("lo"), match.end()):
+                continue
             low = float(match["lo"])
             high = float(match["hi"]) if match["hi"] else low
             if 0 < low <= high:
@@ -819,11 +909,24 @@ def _min_months(text: str, tag: list):
 def _education(text: str, tag: list):
     lowest = preferred = None
     snippets = []
+    order = schema.EDUCATION_LEVELS
+    candidates = []  # (start, end, level, snippet): the first one not a preference is the minimum
+    choices = []  # (start, end, level, snippet) of every choice, for the preference too
+    for match in _EDUCATION_CHOICE.finditer(text):
+        level = min((_LEVELS[option.group(1) or option.group(0)] for option in _LEVEL_OPTION.finditer(match.group(0))),
+                    key=order.index)
+        choices.append((match.start(), match.end(), level, match.group(0).strip()))
+        if match["label"] or match["tail"]:
+            candidates.append(choices[-1])
     for match in _EDUCATION_MIN.finditer(text):
-        if _PREFERENCE.search(text[match.end():match.end() + 4]):
+        if not any(start <= match.start() < end for start, end, _, _ in candidates):
+            candidates.append((match.start(), match.end(), _LEVELS[match.group(1) or match.group(2)],
+                               match.group(0).strip()))
+    for _, end, level, snippet in sorted(candidates):
+        if _PREFERENCE.search(text[end:end + 4]):
             continue  # "硕士及以上学历优先" states a preference, not a minimum
-        lowest = _LEVELS[match.group(1) or match.group(2)]
-        snippets.append(match.group(0).strip())
+        lowest = level
+        snippets.append(snippet)
         break
     if lowest is None:
         match = _NO_MINIMUM_EDUCATION.search(text)
@@ -836,13 +939,16 @@ def _education(text: str, tag: list):
                 lowest = _LEVELS[cell]
                 snippets.append(cell)
                 break
-    match = _EDUCATION_PREFERRED.search(text)
-    if match:
-        level = _LEVELS[match.group(1)]
-        order = schema.EDUCATION_LEVELS
+    wanted = [(start, level, text[start:after.end()].strip()) for start, end, level, _ in choices
+              for after in [_PREFERRED_AFTER.match(text, end)] if after]
+    wanted += [(match.start(), _LEVELS[match.group(1)], match.group(0).strip())
+               for match in _EDUCATION_PREFERRED.finditer(text)
+               if not any(start <= match.start() < end for start, end, _, _ in choices)]
+    if wanted:
+        _, level, snippet = min(wanted)
         if lowest in (None, schema.NO_MINIMUM) or order.index(level) >= order.index(lowest):
             preferred = level
-            snippets.append(match.group(0).strip())
+            snippets.append(snippet)
     if lowest is None and preferred is None:
         return _NOTHING
     return {"min": lowest, "preferred": preferred}, snippets
@@ -971,6 +1077,8 @@ def _asked(text: str, term: str, match, intro: list) -> bool:
     left, right = _clause_bounds(text, match.start(), match.end())
     if _NEGATION.search(text, left, match.start()):
         return False
+    if _MAJOR_TAIL.match(text, match.end(), right) or _MAJOR_LEAD.search(text[left:match.start()]):
+        return False  # a major, not a skill
     if term == "PS" and _postscript(text, match):
         return False
     if term in _PLATFORMS:
