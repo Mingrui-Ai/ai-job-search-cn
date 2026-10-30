@@ -305,16 +305,21 @@ _COMPANY_HEAD = re.compile(
 # maybe a "v" in front and ".x" at the end: "HTML5", "Vue2.x", "Python 3.10", "Pythonv3.11", "Photoshop 2024".
 # The version is part of the match, so "Python 3.10 或 Java 8" still reads as one choice. It must not run into a
 # letter, so a name with a digit inside ("C4D") is not split; "+" may follow ("Java8+" is 8 or later).
-_VERSION = r"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?(?![A-Za-z0-9#])"
-# One digit after PS is a games console (PS4, PS 5), not Photoshop; a year still is ("PS2024").
-_CONSOLE = r"(?![^\S\r\n]*\d(?!\d))"
+# A number followed by a time or count unit is no version: "Python 3 年以上" quotes only Python,
+# and "Python3年以上" still reads Python.
+_UNIT = r"[^\S\r\n]*(?:年|个月|月|周|天|小时|人|次|元|[kKwW](?![A-Za-z])|万)"
+_COUNT = rf"[^\S\r\n]*\d+(?:\.\d+)?{_UNIT}"
+_VERSION = rf"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?(?![A-Za-z0-9#])(?!{_UNIT})"
+# One digit after PS is a games console (PS4, PS 5), not Photoshop; a year still is ("PS2024"),
+# and so is a count ("PS 5年以上").
+_CONSOLE = rf"(?![^\S\r\n]*\d(?!\d)(?!{_UNIT}))"
 
 
 def _skill_pattern(term: str) -> re.Pattern:
     escaped = re.escape(term).replace(r"\ ", r"\s*")
     if term.isascii():
         console = _CONSOLE if term.casefold() == "ps" else ""
-        escaped = rf"(?<![A-Za-z0-9+#.]){escaped}{console}(?:{_VERSION}|(?![A-Za-z0-9+#]))"
+        escaped = rf"(?<![A-Za-z0-9+#.]){escaped}{console}(?:{_VERSION}|(?![A-Za-z0-9+#])|(?={_COUNT}))"
     return re.compile(escaped, re.I)
 
 

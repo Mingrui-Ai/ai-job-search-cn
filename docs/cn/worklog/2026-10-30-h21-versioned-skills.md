@@ -41,3 +41,8 @@
 
 - 已和最新 master 同步（master 上 `RULES_VERSION` 为 6，本分支 7）。路线图勾上 H21。
 - 三项检查：全量测试 1339 个通过、跳过 11 个；`security_guards` OK；`lint_skills` OK。开 PR，发给规划者。
+
+## 规划者裁定后（#91）
+
+- 数字后面跟时间、数量单位的不当版本号，也不当游戏机型号："Python 3 年以上"只匹配 Python，"Python3年以上"也读出 Python，"PS 5年以上"算 Photoshop。补了读出和不误读的种子用例，`VersionedSkills` 加了匹配范围的测试。`Unity3D` 不处理。
+- `RULES_VERSION` 仍是 7；#90 先合并的话合 master 后改成 8。

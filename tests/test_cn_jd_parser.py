@@ -556,6 +556,9 @@ SEED_CASES = (
     ("熟悉Python3D渲染", "requirements.skills", []),
     ("有 3 年以上 Python 开发经验，熟悉Python3。", "requirements.skills", ["Python"]),
     ("熟悉 Python 3.10 或 Java 8（任选其一）", ALTERNATIVES, [["Python", "Java"]]),
+    # ... and a number with a time or count unit is neither a version nor a console: PS 5年 is Photoshop.
+    ("PS 5年以上经验，玩过 PS5", "requirements.skills", ["PS"]),
+    ("Python3年以上，Java 2 个月实习，Excel 10w 行数据", "requirements.skills", ["Python", "Java", "Excel"]),
     ("熟悉 Vue2.x 或 React", ALTERNATIVES, [["Vue", "React"]]),
     ("样式用SCSS编写，模板见 docs/index.html，兼容XHTML", "requirements.skills", []),
     # The interview or written-test city on a location line is not a work city.
@@ -826,6 +829,14 @@ class VersionedSkills(unittest.TestCase):
         self.assertIn("HTML5、CSS3", self.snippets(record, "requirements.skills"))
         self.assertIn("Python 3.10 或 Java 8", self.snippets(record, ALTERNATIVES))
         self.assertEqual(schema.validate(record), [])
+
+    def test_a_number_with_a_unit_stays_out_of_the_evidence(self):
+        record = parse_one("任职要求：熟悉 Python 3 年以上，会 PS 5年")
+        self.assertEqual(record["requirements"]["skills"], ["Python", "PS"])
+        self.assertEqual(schema.validate(record), [])
+        for term, text in (("Python", "Python 3 年以上"), ("Python", "Python3个月"), ("PS", "PS 5年")):
+            self.assertEqual(jd_parser._skill_pattern(term).search(text).group(), term)
+        self.assertEqual(jd_parser._skill_pattern("Python").search("Python 3.10 版本").group(), "Python 3.10")
 
     def test_a_console_next_to_photoshop_is_not_read(self):
         record = parse_one("岗位要求：熟练使用 Photoshop，热爱游戏，玩过 PS5 优先")
