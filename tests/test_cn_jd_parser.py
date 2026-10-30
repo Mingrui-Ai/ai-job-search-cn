@@ -541,6 +541,22 @@ SEED_CASES = (
     ("熟悉GPS定位，能输出PSD切图", "requirements.skills", []),
     # H18: HTML, CSS and SVN, which V8 found unread; a file name, SCSS or XHTML is not them.
     ("熟悉 HTML/CSS/JavaScript，版本工具用 Git、SVN", "requirements.skills", ["HTML", "CSS", "JavaScript", "Git", "SVN"]),
+    # H21: a version right after an English term still names it, glued or a space away, with dots, a "v"
+    # in front or ".x" at the end ...
+    ("熟悉 HTML5、CSS3 和 Vue3，会 Python3、Java8", "requirements.skills", ["HTML", "CSS", "Vue", "Python", "Java"]),
+    ("熟练使用 Python 3.10，了解 Pythonv3.11", "requirements.skills", ["Python"]),
+    ("熟悉 Python v3.11 和 Vue2.x", "requirements.skills", ["Python", "Vue"]),
+    ("熟练使用 Photoshop 2024 和 Excel 2016", "requirements.skills", ["Photoshop", "Excel"]),
+    ("熟悉 Java8+、C++11/14、MySQL8.0 和 Golang1.21", "requirements.skills", ["Java", "C++", "MySQL", "Golang"]),
+    ("熟练使用 PS2024 和 Figma", "requirements.skills", ["PS", "Figma"]),
+    # ... but a name with a digit inside stays whole, a version must not run into letters, one digit
+    # after PS is a games console, and a number further off is no version.
+    ("会用 C4D 建模", "requirements.skills", ["C4D"]),
+    ("玩过 PS4、PS5 和 PS 5，会用 Figma", "requirements.skills", ["Figma"]),
+    ("熟悉Python3D渲染", "requirements.skills", []),
+    ("有 3 年以上 Python 开发经验，熟悉Python3。", "requirements.skills", ["Python"]),
+    ("熟悉 Python 3.10 或 Java 8（任选其一）", ALTERNATIVES, [["Python", "Java"]]),
+    ("熟悉 Vue2.x 或 React", ALTERNATIVES, [["Vue", "React"]]),
     ("样式用SCSS编写，模板见 docs/index.html，兼容XHTML", "requirements.skills", []),
     # The interview or written-test city on a location line is not a work city.
     ("工作地点：深圳南山区；面试地点：北京。", "cities", ["深圳"]),
@@ -793,6 +809,28 @@ class SkillAlternatives(unittest.TestCase):
         record = parse_one("熟悉 Docker 并能在高并发、大流量的复杂业务场景下持续优化性能与稳定性的同时用 Python 或 SQL 做数据分析")
         self.assertEqual(record["evidence"][ALTERNATIVES]["text"], "Python 或 SQL")
         self.assertEqual(record["requirements"]["skill_alternatives"], [["Python", "SQL"]])
+
+
+class VersionedSkills(unittest.TestCase):
+    """H21: a version after an English term is part of the match, so the evidence and a choice still hold."""
+
+    @staticmethod
+    def snippets(record: dict, path: str) -> str:
+        text = record["evidence"][path]["text"]
+        return "\n".join(text) if isinstance(text, list) else text
+
+    def test_the_evidence_quotes_the_versioned_spelling_and_the_record_is_valid(self):
+        record = parse_one("任职要求：\n1. 熟悉 HTML5、CSS3，会 Vue2.x；\n2. 熟悉 Python 3.10 或 Java 8，二选一。")
+        self.assertEqual(record["requirements"]["skills"], ["HTML", "CSS", "Vue", "Python", "Java"])
+        self.assertEqual(record["requirements"]["skill_alternatives"], [["Python", "Java"]])
+        self.assertIn("HTML5、CSS3", self.snippets(record, "requirements.skills"))
+        self.assertIn("Python 3.10 或 Java 8", self.snippets(record, ALTERNATIVES))
+        self.assertEqual(schema.validate(record), [])
+
+    def test_a_console_next_to_photoshop_is_not_read(self):
+        record = parse_one("岗位要求：熟练使用 Photoshop，热爱游戏，玩过 PS5 优先")
+        self.assertEqual(record["requirements"]["skills"], ["Photoshop"])
+        self.assertNotIn("PS5", self.snippets(record, "requirements.skills"))
 
 
 INJECTIONS = (
