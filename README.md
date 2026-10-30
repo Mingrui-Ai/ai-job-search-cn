@@ -262,7 +262,7 @@ python -m unittest discover -s tests -t . -p "test_cn_*.py" -v  # 只跑 CN 测�
 
 - 上游项目 [ai-job-search](https://github.com/ai-job-search-dev/ai-job-search)（原作者 Mads Lorentzen），MIT 许可。
 - 本项目是独立的个人项目，与 Anthropic、OpenAI 没有关联；提到 Claude Code 和 Codex 只是为了说明所用的工具。
-- 许可证：[MIT](LICENSE)。
+- 许可证：[MIT](LICENSE)。第三方组件见 [THIRD_PARTY.md](THIRD_PARTY.md)。
 
 ---
 

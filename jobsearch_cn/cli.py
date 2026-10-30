@@ -14,7 +14,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import __version__, jd_parser, match, profile, report, resume_extract, schema, score, store, vocab
+from jobsearch_cn import __version__, jd_parser, match, profile, report, resume_extract, resume_pdf, schema, score, store, vocab
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -517,6 +517,24 @@ def cmd_match_report(args) -> int:
     return 0
 
 
+def cmd_resume_sample(args) -> int:
+    try:
+        directory = store.safe_dir(store.data_dir(args.data_dir), "resumes")
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
+    output, content = directory / "sample.pdf", resume_pdf.sample()
+    if output.is_symlink():
+        raise InputError(f"{output} is a link; nothing is written through it")
+    try:
+        result = resume_pdf.render(content, output, args.typst)
+    except resume_pdf.ResumeError as exc:
+        _emit({"error": str(exc)}, sys.stderr)
+        return 1
+    problems = resume_pdf.check(output, resume_pdf.fields_of(content))
+    _emit({**result, "problems": problems})
+    return 1 if problems else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m jobsearch_cn",
@@ -665,6 +683,17 @@ def build_parser() -> argparse.ArgumentParser:
     match_report.add_argument("ids", nargs="*", metavar="id", help="岗位 id；省略时包括所有已保存的记录")
     match_report.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     match_report.set_defaults(handler=cmd_match_report)
+
+    resume = commands.add_parser("resume", help="简历生成相关命令", description="简历生成相关命令")
+    resume.set_defaults(help_parser=resume)
+    resume_commands = resume.add_subparsers(dest="resume_command", metavar="<resume-command>")
+    resume_sample = resume_commands.add_parser(
+        "sample", parents=[stored], help="用固定的虚构内容生成一页 PDF，验证 Typst 和字体装好了",
+        description="用固定的虚构内容生成 <数据目录>/resumes/sample.pdf 并检查，输出间距、字体和发现的问题。"
+                    "Typst 的安装方法见 docs/cn/resume-pdf.md。",
+    )
+    resume_sample.add_argument("--typst", help=f"Typst 程序的路径；默认为环境变量 {resume_pdf.TYPST_ENV}，再找 PATH 里的 typst")
+    resume_sample.set_defaults(handler=cmd_resume_sample)
     return parser
 
 
