@@ -10,3 +10,4 @@
 - 测试 `test_cn_store_links.py`（链接和目标都在临时目录里；不能建符号链接时用 `_winapi.CreateJunction`）：jobs、matches、drafts、reports 四处链接都拒绝且外面没有文件，`jd parse --save` 走 CLI 得到退出码 2 和结构化错误；真实文件夹、链接的数据根、不存在的数据根照常写。5 个拒绝用例在 master 的代码上都失败。
 - jd-import.md 写明子文件夹必须是真实文件夹。全量测试、`security_guards`、`lint_skills` 通过。
 - 2026-10-30 再暂停：#79 还有一项（专业名的语境）。
+- 开出 PR #85（P2-1、P3-2）。规划者裁定：检查和写入之间被换成链接的竞态记为已知限制，不另立任务，M8-3 发布前的安全复查再看。P2-2、P2-3 在 `fix/cn-h25b-extract` 上另开 PR；两个 PR 都合并后再勾路线图的 H25b。
