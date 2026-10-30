@@ -22,3 +22,16 @@
 2. 解析器测试：读出和不误读的种子用例、版本号写法的出处和 schema 校验；
 3. 跑全量测试，确认 V2、V4、V6、V7、V8 的对照测试不退步；
 4. 路线图勾上 H25a（#86 已合并）；合 master，开 PR，告诉规划者。
+
+## 存档（2026-10-30 傍晚，会话可能被压缩或重开）
+
+- **已完成并推送**：解析改动 `94afcfd`；`RULES_VERSION` 7 和 `match.md` 版本说明 `4930909`；`jd-parse.md` 规则说明 `ae02720`；解析器测试 `3e24ca8`（种子用例加了读出和不误读两组，新测试类 `VersionedSkills` 查出处和 schema 校验；换回 master 的解析器，8 处失败）。已合 master `4463572`。
+- **进行中**：全量测试在后台跑，结果未知。新会话先重跑：`D:/05_Software/Anaconda3/envs/ai-job-search-cn/python.exe -X utf8 -m unittest discover -s tests -t .`，再跑 `tools/security_guards.py`、`tools/lint_skills.py`，重点看 V2、V4、V6、V7、V8 的对照测试有没有退步。
+- **下一步**：
+  1. 路线图勾上 H25a（#86 已合并），H21 的条目写实际做法；
+  2. 合最新 master：冲突两边保留；`RULES_VERSION` 在合并时的 master 基础上加 1，现在是 7，master 上是 6；
+  3. 开 PR，告诉规划者（消息写短）。V15 是留出样例，PR 开出前不看 `cn-codex` 和 `codex/v15-*`。
+- **未决，在 PR 里请规划者确认**：
+  - "PS 5"（PS 和数字之间有空格）也当游戏机，不读。旧代码会把它读成 Photoshop；
+  - 词条后面隔一个空格的数字都并进匹配范围，例如"Python 3 年以上"里的 3。读出的技能不变，只是出处片段的范围包括这个数字；
+  - "Unity3D"这类"数字加字母"的写法仍读不出。词表里本来也没有 Unity。
