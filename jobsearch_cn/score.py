@@ -27,7 +27,8 @@ SCHEMA_VERSION = 1
 # 2: new same_as synonyms 大模型 / LLM / 大语言模型, 提示词工程 / Prompt, Photoshop / PS (H18).
 # 3: skills the JD offers a choice between count as one requirement (H16).
 # 4: the location dimension and its default weight (M2-6b).
-RULES_VERSION = 4
+# 5: the filter checks the interview and the start date; their unknowns are gaps to confirm (M2-6c).
+RULES_VERSION = 5
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary, location
 DEFAULT_WEIGHTS = {"skills": 30, "direction": 25, "experience": 25, "salary": 10, "location": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.

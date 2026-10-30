@@ -193,7 +193,8 @@ class Choices(Case):
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
 
     def test_a_new_rules_version_marks_older_records_stale(self):
-        self.assertEqual(score.RULES_VERSION, 4)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location
+        self.assertEqual(score.RULES_VERSION, 5)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
+        # 5: M2-6c's two checks
         old = setting(scored(self.job, self.tech), "rules_version", 3)
         errors = score.validate(old, self.job, self.tech, VOCABULARY)
         self.assertTrue(any(e.startswith("rules_version: scored by other rules") for e in errors), errors)
@@ -367,8 +368,11 @@ class Gaps(Case):
         gaps = scored(self.job, profile)["gaps"]
         self.assertIn({"kind": "skill", "item": "Redis", "jd": "参与 MySQL、Redis 等存储方案的设计与优化"}, gaps)
         self.assertIn({"kind": "salary", "item": "JD 上限 250 元/天，低于你的最低期望 300 元/天", "jd": "200-250元/天"}, gaps)
-        [days] = [gap for gap in gaps if gap["kind"] == "filter"]
-        self.assertEqual((days["item"], days["result"], days["jd"]), ("days_per_week", "conflict", "4天/周"))
+        filters = {gap["item"]: gap for gap in gaps if gap["kind"] == "filter"}
+        self.assertEqual((filters["days_per_week"]["result"], filters["days_per_week"]["jd"]), ("conflict", "4天/周"))
+        # The JD says nothing of the interview or the start date: both are listed to confirm (M2-6c).
+        self.assertEqual(sorted(filters), ["days_per_week", "interview", "start_date"])
+        self.assertEqual({filters[key]["result"] for key in ("interview", "start_date")}, {"unknown"})
 
     def test_an_unknown_check_is_a_gap_too(self):
         job = setting(self.job, "requirements.graduation", None)

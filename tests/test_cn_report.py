@@ -234,6 +234,34 @@ class ReportFromSavedRecords(unittest.TestCase):
                     self.assertEqual(record["dimensions"]["experience"]["method"], "agent")
                     self.assertIn("<td>Agent</td>", part)
 
+    def test_an_unknown_interview_or_start_date_is_no_hard_condition(self):
+        # Codex B's P2-6 in #73: boss_intern passes every hard condition for tech and states neither its
+        # interview nor a start date. As in the filter, the conclusion says it meets the hard conditions;
+        # the two unknowns are listed only under 待确认.
+        _, page, form = self.generate()
+        job_id = self.ids["jd/boss_intern.txt"]
+        record = self.cli("match", "show", job_id)
+        self.assertEqual(record["filter"]["verdict"], "eligible")
+        unknown = {c["check"] for c in record["filter"]["checks"] if c["result"] == "unknown"}
+        self.assertEqual(unknown, {"interview", "start_date"})
+        said = report.conclusion(record)
+        self.assertTrue(said.startswith("符合硬性条件，"), said)
+        self.assertNotIn("面试", said)
+        part = html.unescape(self.section(page, job_id))
+        self.assertIn(f"<strong>结论：</strong>{said}</p>", part)
+        self.assertNotIn("待确认 2 项硬性条件", page)
+        opened = part[part.index("<h3>待确认</h3>"):]
+        for check in record["filter"]["checks"]:
+            if check["check"] in unknown:
+                self.assertIn(check["reason"], opened)
+        rows = {row[0]: row for row in csv.reader(io.StringIO(form.decode("utf-8-sig")))}
+        self.assertEqual(rows[job_id][5], said)
+        # A hard condition still unknown is still counted, beside the two that are only to confirm.
+        record["filter"]["verdict"] = "needs_check"
+        record["filter"]["checks"][0]["result"] = "unknown"
+        first = report.CHECKS[record["filter"]["checks"][0]["check"]]
+        self.assertTrue(report.conclusion(record).startswith(f"待确认 1 项硬性条件（{first}），"))
+
     def test_the_working_gives_the_saved_total(self):
         for job_id in self.ids.values():
             record = self.cli("match", "show", job_id)
@@ -463,6 +491,15 @@ class ReasonWording(unittest.TestCase):
         "location": (("cities", []), ("availability.cities", [])),
         "employment_type": (("employment_type", None), ("target.employment_types", [])),
         "exclusions": (("title", None), None),
+        "interview": (("interview", None), None),
+        "start_date": (("requirements.start", None), ("availability.start_date", None)),
+    }
+    # What the JD must state for the profile to be the only gap.
+    STATED = {"start_date": ("requirements.start", {"by": "2026-12-31", "asap": False})}
+    # Unknowns where the JD says something, but not enough: still the JD to read, then HR to ask.
+    VAGUE = {
+        "interview": ("interview", {"mode": "onsite", "cities": []}),
+        "start_date": ("requirements.start", {"by": None, "asap": True}),
     }
 
     def setUp(self):
@@ -494,10 +531,19 @@ class ReasonWording(unittest.TestCase):
             if profile_side is None:
                 continue
             with self.subTest(check=check):
-                reason, how = self.advice(self.job, setting(self.profile, *profile_side), check)
+                job = setting(self.job, *self.STATED[check]) if check in self.STATED else self.job
+                reason, how = self.advice(job, setting(self.profile, *profile_side), check)
                 self.assertIn("档案没写", reason)
                 self.assertNotIn("JD 没写", reason)
                 self.assertEqual(how, report.FILL_PROFILE)
+
+    def test_a_vague_jd_sends_the_user_to_the_jd(self):
+        for check, jd_side in self.VAGUE.items():
+            with self.subTest(check=check):
+                reason, how = self.advice(setting(self.job, *jd_side), self.profile, check)
+                self.assertIn("JD 没写", reason)
+                self.assertNotIn("档案没写", reason)
+                self.assertEqual(how, report.ASK_JD)
 
     def test_a_null_location_sends_the_user_to_the_side_without_a_city(self):
         # M2-6b: the location dimension is null when the JD names no city, or the profile neither tier.

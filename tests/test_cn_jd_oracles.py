@@ -31,6 +31,8 @@ sys.path.insert(0, str(REPO))
 from jobsearch_cn import jd_parser, match, schema  # noqa: E402
 
 NOW = datetime(2026, 10, 27, 10, 0, tzinfo=timezone(timedelta(hours=8)))
+# Fields added after the expectations were frozen (H16, M2-6c).
+LATER_FIELDS = (schema.ALTERNATIVES, "requirements.start", "interview")
 
 
 def profile(name: str) -> dict:
@@ -70,11 +72,12 @@ class Oracles:
         self.assertEqual(len(samples), 5)
         for expected in samples:
             with self.subTest(sample=expected["fixture"]):
-                # Frozen before H16 added requirements.skill_alternatives, which they do not compare.
-                self.assertCountEqual(expected["fields"], [f for f in schema.EVIDENCE_FIELDS if f != schema.ALTERNATIVES])
+                # Frozen before H16 added requirements.skill_alternatives, and M2-6c the interview and
+                # the start date with their checks: the expectations do not compare those.
+                self.assertCountEqual(expected["fields"], [f for f in schema.EVIDENCE_FIELDS if f not in LATER_FIELDS])
                 self.assertCountEqual(expected["human_match"], ["tech", "ops"])
                 for judged in expected["human_match"].values():
-                    self.assertCountEqual(judged["checks"], match.CHECKS)
+                    self.assertCountEqual(judged["checks"], [c for c in match.CHECKS if c not in match.TO_CONFIRM])
 
     def test_every_exception_departs_from_a_frozen_value_and_says_why(self):
         # A stale exception - one the code no longer needs, or one naming nothing - fails here.
