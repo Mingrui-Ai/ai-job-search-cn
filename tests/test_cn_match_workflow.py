@@ -232,10 +232,10 @@ class TrialWeights(unittest.TestCase):
     as writing those weights to the profile and scoring every job again does, total for total, and scoring
     again keeps the agent's experience."""
 
-    # What a user might say, in the workflow's conversion: location most, salary most, experience most, one only.
-    WEIGHTS = (dict(score.DEFAULT_WEIGHTS, location=40), dict(score.DEFAULT_WEIGHTS, salary=40),
-               dict(score.DEFAULT_WEIGHTS, experience=40, skills=15),
-               {"skills": 0, "direction": 0, "experience": 1, "salary": 0, "location": 0})
+    # match.md's conversions on the default weights (location most; salary most, location next; location most
+    # with direction kept; salary not at all), and one dimension alone.
+    WEIGHTS = tuple(dict(zip(score.DIMENSIONS, values)) for values in (
+        (24, 19, 19, 8, 30), (18, 16, 16, 30, 20), (21, 25, 17, 7, 30), (33, 28, 28, 0, 11), (0, 0, 1, 0, 0)))
 
     @staticmethod
     def in_list_order(rows: list) -> list:
