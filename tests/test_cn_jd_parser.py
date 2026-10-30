@@ -305,6 +305,25 @@ SEED_CASES = (
     ("本科及以上学历，专业不限", "requirements.education", {"min": "bachelor", "preferred": None}),
     ("A岗：本科及以上学历；B岗：学历不限", "requirements.education", {"min": "bachelor", "preferred": None}),
     ("专业不限", "requirements.education", None),
+    # H20: levels to choose from - the minimum is the lowest; "X及以上，Y优先" is still X, Y no option.
+    ("本科或硕士及以上学历", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("大专或本科及以上学历", "requirements.education", {"min": "associate", "preferred": None}),
+    ("大专/本科学历", "requirements.education", {"min": "associate", "preferred": None}),
+    ("学历：本科或硕士", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("学历要求：本科/硕士", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("2027届本科、硕士毕业生", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("本科或硕士在读", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("本科、硕士、博士均可", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("硕士研究生或博士学历", "requirements.education", {"min": "master", "preferred": None}),
+    ("本科及以上学历，硕士或博士优先", "requirements.education", {"min": "bachelor", "preferred": "master"}),
+    ("本科或硕士学历优先", "requirements.education", {"min": None, "preferred": "bachelor"}),
+    ("本科或硕士期间有相关项目经历", "requirements.education", None),  # a pair alone asks for nothing
+    ("本科或以上学历", "requirements.education", {"min": "bachelor", "preferred": None}),
+    # #79 review: the 研究生 of 博士研究生 qualifies the doctorate; it is no master's to choose.
+    ("博士研究生或博士及以上学历", "requirements.education", {"min": "phd", "preferred": None}),
+    ("博士或博士研究生及以上学历", "requirements.education", {"min": "phd", "preferred": None}),
+    ("本科或硕士研究生学历", "requirements.education", {"min": "bachelor", "preferred": None}),
+    ("研究生或博士学历", "requirements.education", {"min": "master", "preferred": None}),
     ("表现优秀者可转正", "return_offer", True),
     ("有转正机会", "return_offer", True),
     ("不提供转正", "return_offer", False),
@@ -420,6 +439,40 @@ SEED_CASES = (
     ("公司：示例科技\n岗位职责：负责后端开发", "company", "示例科技"),
     ("加入示例科技有限公司，你将负责后端开发", "company", None),
     ("熟悉Python，了解LangChain、RAG", "requirements.skills", ["Python", "LangChain", "RAG"]),
+    # H20: a term naming a major is no skill; the same term asking for knowledge still is.
+    ("统计学或市场营销相关专业", "requirements.skills", []),
+    ("计算机、统计学、数学等相关专业", "requirements.skills", []),
+    ("统计学专业", "requirements.skills", []),
+    ("专业：计算机、统计学", "requirements.skills", []),
+    ("专业要求：统计学或数学", "requirements.skills", []),
+    ("平面设计、视觉传达等专业，熟练使用Photoshop", "requirements.skills", ["Photoshop"]),
+    ("数据分析相关专业，熟悉SQL", "requirements.skills", ["SQL"]),
+    ("熟悉统计学方法", "requirements.skills", ["统计学"]),
+    ("具备统计学专业知识", "requirements.skills", ["统计学"]),
+    ("统计学、计算机等相关专业，熟悉统计学方法", "requirements.skills", ["统计学"]),
+    ("熟悉数据分析", "requirements.skills", ["数据分析"]),
+    # #79 review: knowledge or an edition after 专业 is a skill, not a major.
+    ("熟悉统计学专业基础知识", "requirements.skills", ["统计学"]),
+    ("掌握统计学专业理论知识", "requirements.skills", ["统计学"]),
+    ("熟练使用Figma专业版", "requirements.skills", ["Figma"]),
+    ("统计学专业毕业", "requirements.skills", []),
+    ("统计学等相关专业优先", "requirements.skills", []),
+    # #79 second review: only a degree subject drops the term; any other wording after 专业 keeps it.
+    ("统计学专业基础扎实", "requirements.skills", ["统计学"]),
+    ("具备扎实的统计学专业基础", "requirements.skills", ["统计学"]),
+    ("熟悉统计学专业相关基础知识", "requirements.skills", ["统计学"]),
+    ("统计学专业在读", "requirements.skills", []),
+    ("统计学专业本科及以上", "requirements.skills", []),
+    ("统计学相关专业背景", "requirements.skills", []),
+    ("统计学专业或数学专业毕业", "requirements.skills", []),
+    ("统计学专业的学生优先", "requirements.skills", []),
+    # #79 third review: 背景 before a knowledge noun asks for what one knows.
+    ("熟悉统计学专业背景知识", "requirements.skills", ["统计学"]),
+    ("掌握统计学专业背景理论", "requirements.skills", ["统计学"]),
+    ("具备统计学专业背景能力", "requirements.skills", ["统计学"]),
+    ("统计学专业背景", "requirements.skills", []),
+    ("具有统计学相关专业背景，熟悉SQL", "requirements.skills", ["SQL"]),
+    ("统计学或市场营销相关专业", ALTERNATIVES, []),
     ("熟悉Go语言，用过Google Cloud和MongoDB", "requirements.skills", ["Go", "MongoDB"]),
     ("精通JavaScript", "requirements.skills", ["JavaScript"]),
     ("熟悉SpringBoot", "requirements.skills", ["Spring Boot"]),
@@ -659,6 +712,7 @@ class ScaledSalary(unittest.TestCase):
                 ("报酬1.1万至1.6万元每月。", 11000, 16000, "month", "1.1万至1.6万元每月"),
                 ("约定1.35w/月。", 13500, 13500, "month", "1.35w/月"),
                 ("月薪 1.4 W。", 14000, 14000, "month", "月薪 1.4 W"),
+                ("月薪：1.3w。", 13000, 13000, "month", "月薪：1.3w"),
                 ("月薪1.1w-1.6万。", 11000, 16000, "month", "月薪1.1w-1.6万"),
                 ("待遇为13k。", 13000, 13000, "month", "13k"),
                 ("约定13 K / 月。", 13000, 13000, "month", "13 K / 月"),
@@ -671,7 +725,9 @@ class ScaledSalary(unittest.TestCase):
                 ("报酬16w～21w每年。", 160000, 210000, "year", "16w～21w每年"),
                 ("年薪 160-210k。", 160000, 210000, "year", "年薪 160-210k"),
                 ("报酬180k/年。", 180000, 180000, "year", "180k/年"),
-                ("年薪180k。", 180000, 180000, "year", "年薪180k")):
+                ("年薪180k。", 180000, 180000, "year", "年薪180k"),
+                ("年薪：180k。", 180000, 180000, "year", "年薪：180k"),
+                ("年薪为180k。", 180000, 180000, "year", "年薪为180k")):
             with self.subTest(text=text):
                 record = parse_one(text)
                 self.assertEqual(record["salary"], salary(low, high, "CNY/" + unit))
@@ -731,6 +787,19 @@ class ScaledSalary(unittest.TestCase):
                 record = parse_one(text)
                 self.assertEqual(record["salary"], salary(13000, 13000, "CNY/month"))
                 self.assertEqual(record["evidence"]["salary"]["text"], "13k")
+
+
+class EducationChoiceFilter(unittest.TestCase):
+    """#79 review: a doctorate asked for in either order still rules out the tech sample's master's."""
+
+    def test_a_doctorate_is_not_relaxed_to_a_masters(self):
+        from jobsearch_cn import match
+        tech = json.loads((REPO / "tests" / "fixtures" / "cn" / "profile" / "tech" / "profile.json")
+                          .read_text(encoding="utf-8"))
+        for text in ("博士研究生或博士及以上学历", "博士或博士研究生及以上学历"):
+            with self.subTest(text=text):
+                checks = {c["check"]: c for c in match.filter_job(parse_one(f"算法研究实习生\n{text}"), tech)["checks"]}
+                self.assertEqual(checks["education"]["result"], "conflict", checks["education"]["reason"])
 
 
 class InterviewAndStart(unittest.TestCase):
