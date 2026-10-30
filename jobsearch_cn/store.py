@@ -215,7 +215,8 @@ def merge_same_text(old: dict, new: dict) -> dict:
     both when clearing it and on later imports. Only equal or higher evidence
     priority can replace a known value: user > agent > rule. Evidence follows
     the winning value, even when the two values are equal. Status and first
-    import time stay unchanged.
+    import time stay unchanged. An explicit skills clear that would strand
+    protected groups is rejected before H16's normal consistency fallback.
     """
     merged = json.loads(json.dumps(old))
     for path in schema.EVIDENCE_FIELDS:
@@ -232,6 +233,7 @@ def merge_same_text(old: dict, new: dict) -> dict:
                 continue
         _set_field(merged, path, value)
         merged["evidence"][path] = new_evidence
+    _reject_protected_group_clear(merged, old, new)
     _fit_alternatives(merged, old, new)
     source = merged["source"]
     for key in ("site", "url"):
@@ -239,6 +241,38 @@ def merge_same_text(old: dict, new: dict) -> dict:
             source[key] = new["source"][key]
     merged["guard"] = new["guard"]
     return merged
+
+
+def _reject_protected_group_clear(merged: dict, old: dict, new: dict) -> None:
+    """Reject an accepted incoming skills clear if group protections kept groups.
+
+    Each input was validated, so an incoming empty skills list has no groups.
+    Any groups still present after the field merge were retained from old.
+    Check the incoming clear, not just the merged empty list: an ordinary
+    re-import beside previously cleared skills still uses H16's normal fit.
+    """
+    skills = "requirements.skills"
+    if (schema._field(merged, skills) != []
+            or not _is_explicit_list_clear(schema._field(new, skills), new["evidence"].get(skills))):
+        return
+    path = schema.ALTERNATIVES
+    groups = schema._field(merged, path)
+    if not groups:
+        return
+    old_method = (old["evidence"].get(path) or {}).get("method", "rule")
+    evidence = new["evidence"].get(path)
+    new_method = (evidence or {}).get("method")
+    reasons = []
+    if not _is_explicit_list_clear(schema._field(new, path), evidence):
+        reasons.append(f"{path} is missing a user/agent clearing reason")
+    if _EVIDENCE_PRIORITY.get(new_method, 0) < _EVIDENCE_PRIORITY.get(old_method, 0):
+        reasons.append(f"{path} source {new_method!r} has lower priority than stored {old_method!r}")
+    retained = ", ".join(f"{path}[{index}] {group!r}" for index, group in enumerate(groups))
+    minimum = "user" if old_method == "user" else "agent"
+    raise StoreError(f"cannot clear {skills}: retained {retained} would lose its skills; "
+                     + "; ".join(reasons)
+                     + f"; clear both fields with a non-empty clearing reason for each, "
+                       f"using group evidence from {minimum!r} or higher priority")
 
 
 def _fit_alternatives(merged: dict, old: dict, new: dict) -> None:
