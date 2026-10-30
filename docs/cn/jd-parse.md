@@ -104,7 +104,7 @@ Windows 文件的 CRLF 换行可以正常处理。
 | 分组 | 名称 | 例子 |
 | --- | --- | --- |
 | `tech` | 技术 | Python、Go、Spring Boot、LangChain、RAG、大模型、Docker、Playwright、接口测试、自动化测试 |
-| `data` | 数据 | SQL、Tableau、Power BI、Pandas、数据分析、数据清洗、A/B测试 |
+| `data` | 数据 | SQL、Tableau、Power BI、Pandas、数据分析、数据清洗、统计分析、A/B测试 |
 | `product` | 产品 | PRD、Axure、墨刀、原型设计、需求分析、用户访谈 |
 | `ops` | 运营 | 新媒体运营、内容运营、内容策划、文案写作、短视频运营、数据复盘、公众号、秀米、剪映 |
 | `design` | 设计 | Figma、Photoshop、Illustrator、C4D、UI设计、交互设计、设计规范 |
@@ -114,6 +114,8 @@ Windows 文件的 CRLF 换行可以正常处理。
 | `general` | 通用 | Excel、PowerPoint、PPT（各个方向都用的办公软件） |
 
 词条用 JD 里技能的完整写法：是"文案写作"，不是"文案"。"短视频""直播"是内容形式，单独出现时不算技能；词表里收的是"短视频运营""直播运营"。
+
+“统计分析”属于数据组，“统计分析方法”“统计分析能力”也可读出这个词。“统计学”是学科/知识，“数据分析”范围更广，与“统计分析”分别保留，不作为同义词合并，也不推断掌握其中一个就掌握另外一个。
 
 **同义词**（`same_as`）：同一个技能的不同写法列成一组，内置的有 Go / Golang、JavaScript / JS、Kubernetes / K8s、自然语言处理 / NLP、文案写作 / 文案撰写、PowerPoint / PPT、大模型 / LLM / 大语言模型、提示词工程 / Prompt、Photoshop / PS。解析结果保留 JD 原文的写法（JD 写"K8s"就记"K8s"）；评分比较技能时，同一组的写法算同一个技能。相关但不是同一个技能的不并组，例如 RAG、LangChain 和"大模型"；"AI"多指人工智能，不收作 Adobe Illustrator 的写法。
 
