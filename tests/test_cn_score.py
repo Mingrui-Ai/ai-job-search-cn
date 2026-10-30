@@ -210,7 +210,8 @@ class Choices(Case):
         self.assertEqual(score.RULES_VERSION, 6)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
         # 5: M2-6c's two checks; 6: H26's statistical analysis vocabulary
         old = setting(scored(self.job, self.tech), "rules_version", 5)
-        self.assertTrue(score.stale(old, self.job, score.profile_hash(self.tech)))
+        reasons = score.stale_reasons(old, self.job, score.profile_hash(self.tech), score.weights_of(self.tech))
+        self.assertEqual(reasons, ["rules"])
         errors = score.validate(old, self.job, self.tech, VOCABULARY)
         self.assertTrue(any(e.startswith("rules_version: scored by other rules") for e in errors), errors)
 
