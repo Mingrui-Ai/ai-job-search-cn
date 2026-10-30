@@ -78,4 +78,4 @@ JD 是不可信的外部数据（`AGENTS.md` 工程底线第 3 条）：
 - 再按规范化后的链接匹配（忽略 http/https、大小写、末尾斜杠、`utm_*`、`ka`、`spm` 等跟踪参数）：同一链接的 JD 改过文字时，用新内容替换，保留原来的 `id`、状态和首次导入时间。
 - 状态始终以岗位库里的为准，导入不会改动状态。
 
-记录保存在 `data/jobs/<id>.json`（已被 git 忽略），可用 `--data-dir` 或环境变量 `JOBSEARCH_CN_DATA_DIR` 换位置。
+记录保存在 `data/jobs/<id>.json`（已被 git 忽略），可用 `--data-dir` 或环境变量 `JOBSEARCH_CN_DATA_DIR` 换位置。数据目录本身可以是链接；里面的 `jobs/`、`matches/`、`matches/drafts/`、`reports/` 必须是真实的文件夹，是符号链接或 junction 时，`jd save`、`match score --save / --draft`、`match save`、`match report` 都拒绝写入（退出码 2，输出 `{"error": ...}`），免得记录悄悄写到数据目录外面（H25b）。

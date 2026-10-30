@@ -227,6 +227,10 @@ REQUIRED_IGNORE_RULES = [
     # are the excluding halves of the two .dsh negations below.
     "/.dsh/*",
     "/.dsh/skills/*/*",
+    # CN fork: the local data directory - the job store, match records and
+    # drafts, reports and feedback forms, the candidate profile and its source
+    # resumes (docs/cn/profile.md). Its own rule, so dropping it fails here.
+    "/data/",
 ]
 
 # Negation (re-include) rules the template legitimately ships. .gitignore is
