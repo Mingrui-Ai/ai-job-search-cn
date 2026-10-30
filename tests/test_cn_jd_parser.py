@@ -195,6 +195,24 @@ class RepeatedLocation(unittest.TestCase):
 
 # (JD text, field path, expected value). Negative rows pin what a rule must leave alone.
 SEED_CASES = (
+    # H27 review: separate allowances/fees cannot displace the actual wage.
+    ("另发通勤补贴420元/月，固定月薪8600元。", "salary", salary(8600, 8600, "CNY/month")),
+    ("固定月薪8600元，另发通勤补贴420元/月。", "salary", salary(8600, 8600, "CNY/month")),
+    ("福利有租房补助750元/月；工资面议。", "salary", NEGOTIABLE),
+    ("餐补450元/月；薪酬9500-12500元/月。", "salary", salary(9500, 12500, "CNY/month")),
+    ("薪酬9500-12500元/月；餐补450元/月。", "salary", salary(9500, 12500, "CNY/month")),
+    ("入职培训收费26000元/年，薪资面议。", "salary", NEGOTIABLE),
+    ("薪资面议；培训费26000元/年。", "salary", NEGOTIABLE),
+    ("交通补贴420元/月 岗位工资8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("岗位工资8600元/月 交通补贴420元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("薪酬福利：餐补450元/月，具体工资面议", "salary", NEGOTIABLE),
+    ("报酬含交通补贴的标准：补贴420元/月；实际月薪8600元。", "salary", salary(8600, 8600, "CNY/month")),
+    ("基本工资（另有餐补）8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("工资（不含餐补，另有交通补助）8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("工资（含餐补450元/月）8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("交通补贴：\n420元/月\n工资：\n8600元/月", "salary", salary(8600, 8600, "CNY/month")),
+    ("补贴：\n420元/月\n岗位工资面议", "salary", NEGOTIABLE),
+    ("餐补420元/月｜8600-12600元/月", "salary", salary(8600, 12600, "CNY/month")),
     # H27: explicit yuan/period suffixes, without a 月薪/年薪 prefix.
     ("待遇为8500-12500元/月，另有餐补", "salary", salary(8500, 12500, "CNY/month")),
     ("固定报酬 7600 元 / 月", "salary", salary(7600, 7600, "CNY/month")),
@@ -558,6 +576,20 @@ class SeedCases(unittest.TestCase):
         for text, _, _ in SEED_CASES:
             with self.subTest(text=text):
                 self.assertEqual(schema.validate(parse_one(text)), [])
+
+    def test_benefit_and_cost_amounts_alone_are_not_salary(self):
+        for label in ("交通补贴", "生活补助", "餐补", "房补", "培训收费", "住宿费用", "押金", "培训费", "住宿费", "餐费", "租金"):
+            for amount in ("650元/月", "26000元/年", "30元/天", "12元/小时", "1-2K/月"):
+                with self.subTest(label=label, amount=amount):
+                    record = parse_one(f"福利及费用说明：{label}为{amount}。")
+                    self.assertIsNone(record["salary"])
+                    self.assertNotIn("salary", record["evidence"])
+                    self.assertEqual(schema.validate(record), [])
+
+    def test_selected_salary_evidence_does_not_quote_the_earlier_subsidy(self):
+        record = parse_one("餐补450元/月；薪酬9500-12500元/月，全年13薪。")
+        self.assertEqual(record["salary"], salary(9500, 12500, "CNY/month", 13))
+        self.assertEqual(record["evidence"]["salary"]["text"], ["9500-12500元/月", "全年13薪"])
 
 
 class InterviewAndStart(unittest.TestCase):

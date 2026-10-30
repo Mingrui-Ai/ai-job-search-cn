@@ -73,6 +73,12 @@ _SALARY = (
     (re.compile(rf"月薪\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
 )
 _NEGOTIABLE = re.compile(r"(?:薪资|薪酬|待遇|工资)?\s*面议")
+# The nearest label before an amount says whether it is pay or a separate
+# benefit/cost. A later explicit pay label starts a new salary context.
+_SALARY_CONTEXT = re.compile(
+    r"(?P<cost>补贴|补助|餐补|房补|收费|费用|押金|培训费|住宿费|餐费|租金)"
+    r"|(?P<pay>月薪|年薪|日薪|时薪|工资|薪资|薪酬|薪水|底薪|报酬)"
+)
 # "全年13薪" written apart from a monthly salary; a range ("13-15薪") is left alone.
 _PAY_MONTHS = re.compile(r"(?:全年\s*)?(?<![\d.\-~～－—–至到])(?P<months>\d{2})\s*薪(?![资酬水])")
 
@@ -679,10 +685,32 @@ def _employment_type(text: str, headline: str):
     return _NOTHING
 
 
+def _non_salary_amount(text: str, position: int) -> bool:
+    """Only reject an amount labelled as a benefit or cost, not unlabelled pay.
+
+    Labels apply within a clause/tag cell, or across a newline immediately
+    after a label ending in a colon. A completed aside such as 工资（不含餐补）
+    does not relabel the following wage as a meal subsidy.
+    """
+    left = text.rfind("\n", 0, position) + 1
+    prefix = text[left:position]
+    if not prefix.strip() and left > 0:
+        previous = _line_at(text, left - 1)
+        if previous.endswith((":", "：")):
+            prefix = previous + prefix
+    # Remove completed asides before finding clause boundaries, so a comma
+    # inside 工资（不含餐补，另有交通补助）does not leave a stray cost label.
+    prefix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", prefix))[-1]
+    labels = list(_SALARY_CONTEXT.finditer(prefix))
+    return bool(labels and labels[-1].lastgroup == "cost")
+
+
 def _salary(text: str):
     best = None
     for pattern, unit, scale in _SALARY:
         for match in pattern.finditer(text):
+            if _non_salary_amount(text, match.start("lo")):
+                continue
             low = float(match["lo"])
             high = float(match["hi"]) if match["hi"] else low
             if 0 < low <= high:
