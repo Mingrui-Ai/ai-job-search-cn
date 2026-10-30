@@ -55,14 +55,26 @@ CITIES = (
 
 _N = r"\d+(?:\.\d+)?"
 _TO = r"\s*(?:-|~|～|－|—|–|至|到)\s*"
+_SCALED_START = r"(?<![\d.A-Za-z_])"
+# Token edges only: whether this is a wage, a count or a video format is
+# decided from its clause. Preserve both Kx14薪 and the existing K+14薪.
+_SCALED_END = r"(?:(?![A-Za-z\d+])|(?=[xX+]\s*\d{2}\s*薪))"
+_K_AMOUNT = rf"(?P<lo>{_N})\s*(?:[kK千]?{_TO}(?P<hi>{_N})\s*)?[kK千]{_SCALED_END}"
+_WAN_AMOUNT = rf"(?P<lo>{_N})\s*(?:[万wW]?{_TO}(?P<hi>{_N})\s*)?[万wW]{_SCALED_END}"
+# Never salvage one endpoint of a range whose units the pattern cannot read.
+_SCALED_RANGE_BEFORE = re.compile(rf"{_N}\s*[kK千万wW]?{_TO}$")
+_SCALED_RANGE_AFTER = re.compile(rf"{_TO}{_N}(?![\d.])(?!\s*薪)")
 # (pattern, unit, multiplier). Every pattern names its amounts lo and hi.
 _SALARY = (
-    (re.compile(rf"(?P<lo>{_N})\s*[kK千]?{_TO}(?P<hi>{_N})\s*[kK千](?:\s*/\s*月)?"
+    (re.compile(rf"{_SCALED_START}{_K_AMOUNT}(?:\s*元)?(?:\s*(?:/|每)\s*月)?"
+                rf"(?!\s*/)(?!\s*每\s*(?:年|周|天|日|小时|时)(?![{_HAN}]))"
                 rf"(?:\s*[·・•*xX×]\s*(?P<months>\d{{2}})\s*薪)?"), "CNY/month", 1000),
-    (re.compile(rf"(?P<lo>{_N})\s*万?{_TO}(?P<hi>{_N})\s*万\s*元?\s*(?:/|每)\s*月"), "CNY/month", 10000),
-    (re.compile(rf"月薪\s*(?P<lo>{_N})\s*万?(?:{_TO}(?P<hi>{_N}))?\s*万"), "CNY/month", 10000),
-    (re.compile(rf"年薪\s*(?P<lo>{_N})\s*万?(?:{_TO}(?P<hi>{_N}))?\s*万"), "CNY/year", 10000),
-    (re.compile(rf"(?P<lo>{_N})\s*万?{_TO}(?P<hi>{_N})\s*万\s*元?\s*(?:/|每)\s*年"), "CNY/year", 10000),
+    (re.compile(rf"{_SCALED_START}{_WAN_AMOUNT}\s*元?\s*(?:/|每)\s*月"), "CNY/month", 10000),
+    (re.compile(rf"月薪\s*[:：为]?\s*{_WAN_AMOUNT}"), "CNY/month", 10000),
+    (re.compile(rf"年薪\s*[:：为]?\s*{_WAN_AMOUNT}"), "CNY/year", 10000),
+    (re.compile(rf"{_SCALED_START}{_WAN_AMOUNT}\s*元?\s*(?:/|每)\s*年"), "CNY/year", 10000),
+    (re.compile(rf"年薪\s*[:：为]?\s*{_K_AMOUNT}"), "CNY/year", 1000),
+    (re.compile(rf"{_SCALED_START}{_K_AMOUNT}\s*元?\s*(?:/\s*年|每\s*年(?![{_HAN}]))"), "CNY/year", 1000),
     # Unscaled monthly/yearly amounts need an explicit 元 and period; bare
     # numbers also occur in dates, phone numbers and company headcounts.
     (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*月"), "CNY/month", 1),
@@ -73,13 +85,30 @@ _SALARY = (
     (re.compile(rf"月薪\s*(?P<lo>{_N})(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
 )
 _NEGOTIABLE = re.compile(r"(?:薪资|薪酬|待遇|工资)?\s*面议")
-# Pay/cost labels can precede or follow their amount. A later explicit pay
+# Pay/non-pay labels can precede or follow their amount. A later explicit pay
 # label starts a new salary context.
 _SALARY_CONTEXT = re.compile(
-    r"(?P<cost>补贴|补助|餐补|房补|收费|费用|押金|培训费|住宿费|餐费|租金)"
+    r"(?P<cost>补贴|补助|餐补|房补|收费|费用|押金|培训费|住宿费|餐费|租金"
+    # Finance job names (融资经理 / 估值分析师) are not amount labels.
+    r"|(?:融资|估值|注册资本|注册资金)(?=\s*(?:金额|规模|总额|为|约|达|[:：]|\d|$)))"
     r"|(?P<pay>月薪|年薪|日薪|时薪|工资|薪资|薪酬|薪水|底薪|报酬)"
 )
 _SALARY_ASIDE = re.compile(r"另|额外|含(?!税)|包括|加上|^\s*(?:以及|和|及|并(?:享有|提供|发放|有))")
+# A count/specification must bind to this number, not merely occur elsewhere
+# in its clause (e.g. 8-10K/月 负责客户维护).
+_SCALED_PURPOSE_AFTER = re.compile(
+    r"^\s*(?:[+＋]\s*)?(?:[名位个]\s*)?(?:活跃|注册|付费|新增|日活|月活)?\s*"
+    rf"(?:粉丝|用户|客户|人次|人数|人员|员工|访客|人流量|人(?![{_HAN}]))"
+    r"|^\s*(?:高清|超清)?\s*(?:视频|素材|画面|分辨率|画质)")
+_SCALED_PURPOSE_BEFORE = re.compile(
+    r"(?:(?:粉丝|用户|客户|人员|员工|访客)(?:数量|总数|数|规模)"
+    r"|人数|人次|人流量|分辨率|画质)"
+    r"(?:\s*(?:[:：]|为|约|达到|达|至少|超过|不少于|不低于))*\s*$")
+_SCALED_PAY_END = re.compile(r"(?:元|(?:/|每)\s*[月年]|\d{2}\s*薪)\s*$")
+_SCALED_ACTIVITY = re.compile(r"需(?!求)|负责|每日|每天|累计|达到|至少|"
+                              r"(?:剪辑|服务|覆盖|接待|处理|播放|支持|拥有|包含)\s*$")
+_SALARY_PERIOD = re.compile(r"年薪|月薪|日薪|时薪")
+_SALARY_PERIOD_HEADER = re.compile(r"(?:年薪|月薪|日薪|时薪)[^\d，,。；;！!？?]*")
 # "全年13薪" written apart from a monthly salary; a range ("13-15薪") is left alone.
 _PAY_MONTHS = re.compile(r"(?:全年\s*)?(?<![\d.\-~～－—–至到])(?P<months>\d{2})\s*薪(?![资酬水])")
 
@@ -729,26 +758,32 @@ def _employment_type(text: str, headline: str):
     return _NOTHING
 
 
+def _salary_context(text: str, position: int, end: int):
+    """The amount's clause/tag cell, including a preceding line's colon label."""
+    left = text.rfind("\n", 0, position) + 1
+    prefix = text[left:position]
+    if left > 0:
+        previous = _line_at(text, left - 1)
+        if previous.endswith((":", "：")) or _SALARY_PERIOD_HEADER.fullmatch(previous):
+            prefix = previous + prefix
+    # Remove completed asides before finding clause boundaries, so a comma
+    # inside 工资（不含餐补，另有交通补助）does not leave a stray cost label.
+    prefix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", prefix))[-1]
+    right = text.find("\n", end)
+    suffix = text[end:len(text) if right < 0 else right]
+    suffix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", suffix))[0]
+    return prefix, suffix
+
+
 def _non_salary_amount(text: str, position: int, end: int) -> bool:
-    """Only reject an amount labelled as a benefit or cost, not unlabelled pay.
+    """Reject amounts labelled for non-pay uses, but keep unlabelled pay.
 
     Inspect both sides of the quote in its clause/tag cell. A colon label on
     the preceding line also applies through modifiers such as 每人/标准为.
     Completed asides such as 工资（不含餐补）do not relabel the wage.
     """
-    left = text.rfind("\n", 0, position) + 1
-    prefix = text[left:position]
-    if left > 0:
-        previous = _line_at(text, left - 1)
-        if previous.endswith((":", "：")):
-            prefix = previous + prefix
-    # Remove completed asides before finding clause boundaries, so a comma
-    # inside 工资（不含餐补，另有交通补助）does not leave a stray cost label.
-    prefix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", prefix))[-1]
+    prefix, suffix = _salary_context(text, position, end)
     labels = list(_SALARY_CONTEXT.finditer(prefix))
-    right = text.find("\n", end)
-    suffix = text[end:len(text) if right < 0 else right]
-    suffix = re.split(rf"[{_CLAUSE_END}|｜]", _BRACKETED.sub("", suffix))[0]
     # Use purpose labels following this amount, but not the label introducing
     # the next amount: 工资8600元/月 交通补贴420元/月 still has a wage of 8600.
     following_amount = _earliest((pattern for pattern, _, _ in _SALARY), suffix)
@@ -778,23 +813,79 @@ def _non_salary_amount(text: str, position: int, end: int) -> bool:
     return bool(labels and labels[-1].lastgroup == "cost")
 
 
+def _scaled_context(text: str, match):
+    """Local context up to neighbouring amounts; an earlier wage cannot label a later count."""
+    prefix, suffix = _salary_context(text, match.start("lo"), match.end())
+    previous_end = max((other.end() for pattern, _, _ in _SALARY
+                        for other in pattern.finditer(prefix)), default=0)
+    prefix = prefix[previous_end:]
+    following = _earliest((pattern for pattern, _, _ in _SALARY), suffix)
+    if following:
+        suffix = suffix[:following.start()]
+    return prefix, suffix
+
+
+def _scaled_non_salary(prefix: str, suffix: str, quote: str) -> bool:
+    """Reject count/specification phrases bound to the amount, not adjacent duties."""
+    labels = list(_SALARY_CONTEXT.finditer(prefix))
+    # An explicit current wage label wins over earlier task/scale wording.
+    if labels and labels[-1].lastgroup == "pay":
+        prefix = prefix[labels[-1].end():]
+        if not _SCALED_ACTIVITY.search(prefix) and not _SCALED_PURPOSE_BEFORE.search(prefix):
+            return False
+    after = _SALARY_CONTEXT.search(suffix)
+    if after and after.lastgroup == "pay" and not _SCALED_PURPOSE_AFTER.match(suffix[:after.start()]):
+        return False
+    if _SCALED_PURPOSE_BEFORE.search(prefix):
+        return True
+    # /月 and ·14薪 already complete a pay quote; a following duty phrase
+    # (e.g. 客户维护) cannot directly qualify the number. A leading count
+    # label still excludes rates such as 用户数16k/月 above.
+    if _SCALED_PAY_END.search(quote):
+        return False
+    if not _SCALED_PURPOSE_AFTER.match(suffix):
+        return False
+    # "13k 视频剪辑专员" / "视频剪辑专员 13k" are pay beside a role.
+    # "需剪辑 8K 视频" / "系统覆盖 16k 用户" describe the work or its scale.
+    role = suffix
+    if _JOB_WORD.search(role) and not _PROSE.search(role) and not _SCALED_ACTIVITY.search(prefix):
+        return False
+    return True
+
+
 def _salary(text: str):
     best = None
     for pattern, unit, scale in _SALARY:
         for match in pattern.finditer(text):
+            if scale != 1 and (_SCALED_RANGE_BEFORE.search(text[:match.start("lo")])
+                               or _SCALED_RANGE_AFTER.match(text[match.end():])):
+                continue
             if _non_salary_amount(text, match.start("lo"), match.end()):
                 continue
+            candidate_unit, period_quote = unit, None
+            if scale != 1:
+                prefix, suffix = _scaled_context(text, match)
+                if _scaled_non_salary(prefix, suffix, match.group()):
+                    continue
+                if scale == 1000 and unit == "CNY/month" and not re.search(r"(?:/|每)\s*月", match.group()):
+                    periods = list(_SALARY_PERIOD.finditer(prefix))
+                    if periods and periods[-1].group() == "年薪":
+                        candidate_unit, period_quote = "CNY/year", "年薪"
+                    elif periods and periods[-1].group() in ("日薪", "时薪"):
+                        continue  # unsupported K rate, never fall back to a monthly wage
             low = float(match["lo"])
             high = float(match["hi"]) if match["hi"] else low
             if 0 < low <= high:
                 if best is None or match.start() < best[0].start():
-                    best = (match, unit, scale, low, high)
+                    best = (match, candidate_unit, scale, low, high, period_quote)
                 break
     if best:
-        match, unit, scale, low, high = best
-        months = match.groupdict().get("months")
+        match, unit, scale, low, high, period_quote = best
+        months = match.groupdict().get("months") if unit == "CNY/month" else None
         months = int(months) if months and 12 <= int(months) <= 24 else None
         snippets = [match.group(0).strip()]
+        if period_quote:
+            snippets.insert(0, period_quote)
         if months is None and unit == "CNY/month":
             paid = _pay_months(text, match)
             if paid:
