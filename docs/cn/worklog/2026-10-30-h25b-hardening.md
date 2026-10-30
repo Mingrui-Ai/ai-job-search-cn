@@ -27,3 +27,10 @@
 - 规划者裁定加启动握手：`_run_tree` 用 stdin 管道，Job 分配成功后才写 `GO_AHEAD`（POSIX 的新会话在 exec 时就建好了）；`_PDF_BRIDGE` 的第一件事是读这个字节，读不到就退出 3，什么都不启动。分配失败时照常发信号，按已裁定的退路处理。
 - 测试：`ProcessTree` 的子进程都先等握手。新增 `test_the_child_waits_for_the_job_even_when_the_parent_is_slow`，在分配 Job 之前人为等 1.5 秒，孙进程仍被回收；另两项核对桥接没有握手时什么都不做，以及子进程不读 stdin 时也能跑完。
 - 变异：把分配挪到发信号之后，延迟用例失败，报"孙进程超时后仍在运行"，正好是 Codex B 复现的情况。
+
+**CI 在 Linux 上失败（`08192b7`）的修复**
+
+- `ProcessTree` 4 项 ERROR：我在 `communicate()` 之前手动写入并关闭了 stdin，POSIX 版的 `communicate` 还要 flush 它，报 `ValueError: flush of closed file`。Windows 版不 flush，所以本机能过。改成 Job 分配之后用 `communicate(input=GO_AHEAD)`，写入和关闭都交给它。
+- `test_pdf_without_either_backend…` 是同一个原因的连带：没接住的 ValueError 让 CLI 退出码变成 1。
+- 延迟用例用了 `TestCase.enterContext`，它从 3.11 才有，CI 的 3.10 没有；改成 `patcher.start()` 加 `addCleanup`。
+- 本机没有可用的 Linux（Docker 守护进程没开），靠 CI 的 Python 3.10–3.14 验证。

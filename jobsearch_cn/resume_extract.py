@@ -239,12 +239,9 @@ def _run_tree(command: list, timeout: float) -> subprocess.CompletedProcess:
     job = None
     try:
         job = _windows_job(process) if os.name == "nt" else None
-        try:
-            process.stdin.write(GO_AHEAD)
-            process.stdin.close()
-        except OSError:
-            pass  # It has already exited; its exit code says why.
-        stdout, stderr = process.communicate(timeout=timeout)
+        # communicate writes the go-ahead and closes stdin itself, a child that has already
+        # exited included; writing and closing it here first breaks communicate on POSIX.
+        stdout, stderr = process.communicate(input=GO_AHEAD, timeout=timeout)
         return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
     except BaseException:
         _kill_tree(process, job)

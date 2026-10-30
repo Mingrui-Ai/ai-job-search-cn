@@ -377,7 +377,9 @@ class ProcessTree(unittest.TestCase):
                 time.sleep(delay_before_job)
                 return real(process)
 
-            self.enterContext(patch.object(resume_extract, "_windows_job", late))
+            patcher = patch.object(resume_extract, "_windows_job", late)  # enterContext is 3.11+
+            patcher.start()
+            self.addCleanup(patcher.stop)
         return [sys.executable, "-c", child]
 
     def assert_tree_ended(self, command, timeout, within):
