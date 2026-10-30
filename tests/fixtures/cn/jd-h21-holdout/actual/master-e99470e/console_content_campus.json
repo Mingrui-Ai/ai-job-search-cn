@@ -1,0 +1,1098 @@
+{
+  "parse": {
+    "jobs": [
+      {
+        "schema_version": 1,
+        "id": "job_ec85728a1e37",
+        "source": {
+          "type": "file",
+          "site": "official",
+          "url": null,
+          "imported_at": "2026-10-30T11:26:54+08:00"
+        },
+        "title": "游戏栏目运营校招专员",
+        "company": "示例弦舟文化有限公司",
+        "cities": [
+          "上海"
+        ],
+        "remote": false,
+        "employment_type": "campus",
+        "salary": {
+          "min": 10000,
+          "max": 14000,
+          "unit": "CNY/month",
+          "months": 13,
+          "negotiable": false
+        },
+        "requirements": {
+          "graduation": {
+            "years": [
+              2027
+            ],
+            "strict": true
+          },
+          "days_per_week": null,
+          "min_months": null,
+          "education": {
+            "min": "bachelor",
+            "preferred": null
+          },
+          "skills": [
+            "内容策划"
+          ],
+          "skill_alternatives": []
+        },
+        "return_offer": null,
+        "published_at": "2026-10-30",
+        "deadline": "2026-11-28",
+        "status": "new",
+        "evidence": {
+          "title": {
+            "text": "游戏栏目运营校招专员",
+            "method": "rule"
+          },
+          "company": {
+            "text": "示例弦舟文化有限公司",
+            "method": "rule"
+          },
+          "cities": {
+            "text": "工作地点：上海",
+            "method": "rule"
+          },
+          "remote": {
+            "text": "不支持远程",
+            "method": "rule"
+          },
+          "employment_type": {
+            "text": "游戏栏目运营校招专员",
+            "method": "rule"
+          },
+          "salary": {
+            "text": [
+              "10-14K/月",
+              "全年13薪"
+            ],
+            "method": "rule"
+          },
+          "requirements.graduation": {
+            "text": "招聘对象：仅招2027届",
+            "method": "rule"
+          },
+          "requirements.education": {
+            "text": "本科及以上",
+            "method": "rule"
+          },
+          "requirements.skills": {
+            "text": "负责内容策划",
+            "method": "rule"
+          },
+          "published_at": {
+            "text": "发布日期：2026-10-30",
+            "method": "rule"
+          },
+          "deadline": {
+            "text": "投递截止：2026-11-28",
+            "method": "rule"
+          }
+        },
+        "guard": {
+          "verdict": "clean",
+          "counts": {}
+        },
+        "raw_text": "游戏栏目运营校招专员\n公司名称：示例弦舟文化有限公司\n工作地点：上海\n岗位类型：校招\n薪资：10-14K/月，全年13薪\n学历要求：本科及以上\n招聘对象：仅招2027届\n办公方式：不支持远程办公\n岗位职责：\n围绕PS4/PS5游戏机整理栏目素材，撰写平台内容。\n熟悉Excel2021/PowerPoint2019，负责内容策划，两种办公软件都要会。\n发布日期：2026-10-30\n投递截止：2026-11-28"
+      }
+    ],
+    "warnings": [],
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_ec85728a1e37",
+        "title": "游戏栏目运营校招专员",
+        "company": "示例弦舟文化有限公司",
+        "cities": [
+          "上海"
+        ],
+        "status": "new"
+      }
+    ]
+  },
+  "manual_fields_job": {
+    "schema_version": 1,
+    "id": "job_ec85728a1e37",
+    "source": {
+      "type": "file",
+      "site": "official",
+      "url": null,
+      "imported_at": "2026-10-30T11:26:54+08:00"
+    },
+    "title": "游戏栏目运营校招专员",
+    "company": "示例弦舟文化有限公司",
+    "cities": [
+      "上海"
+    ],
+    "remote": false,
+    "employment_type": "campus",
+    "salary": {
+      "min": 10000,
+      "max": 14000,
+      "unit": "CNY/month",
+      "months": 13,
+      "negotiable": false
+    },
+    "requirements": {
+      "graduation": {
+        "years": [
+          2027
+        ],
+        "strict": true
+      },
+      "days_per_week": null,
+      "min_months": null,
+      "education": {
+        "min": "bachelor",
+        "preferred": null
+      },
+      "skills": [
+        "Excel",
+        "PowerPoint",
+        "内容策划"
+      ],
+      "skill_alternatives": []
+    },
+    "return_offer": null,
+    "published_at": "2026-10-30",
+    "deadline": "2026-11-28",
+    "status": "new",
+    "evidence": {
+      "title": {
+        "text": [
+          "游戏栏目运营校招专员"
+        ],
+        "method": "agent"
+      },
+      "company": {
+        "text": [
+          "公司名称：示例弦舟文化有限公司"
+        ],
+        "method": "agent"
+      },
+      "cities": {
+        "text": [
+          "工作地点：上海"
+        ],
+        "method": "agent"
+      },
+      "remote": {
+        "text": [
+          "不支持远程办公"
+        ],
+        "method": "agent"
+      },
+      "employment_type": {
+        "text": [
+          "岗位类型：校招"
+        ],
+        "method": "agent"
+      },
+      "salary": {
+        "text": [
+          "薪资：10-14K/月，全年13薪"
+        ],
+        "method": "agent"
+      },
+      "requirements.graduation": {
+        "text": [
+          "仅招2027届"
+        ],
+        "method": "agent"
+      },
+      "requirements.education": {
+        "text": [
+          "学历要求：本科及以上"
+        ],
+        "method": "agent"
+      },
+      "requirements.skills": {
+        "text": [
+          "熟悉Excel2021/PowerPoint2019，负责内容策划，两种办公软件都要会。"
+        ],
+        "method": "agent"
+      },
+      "published_at": {
+        "text": [
+          "发布日期：2026-10-30"
+        ],
+        "method": "agent"
+      },
+      "deadline": {
+        "text": [
+          "投递截止：2026-11-28"
+        ],
+        "method": "agent"
+      }
+    },
+    "guard": {
+      "verdict": "clean",
+      "counts": {}
+    },
+    "raw_text": "游戏栏目运营校招专员\n公司名称：示例弦舟文化有限公司\n工作地点：上海\n岗位类型：校招\n薪资：10-14K/月，全年13薪\n学历要求：本科及以上\n招聘对象：仅招2027届\n办公方式：不支持远程办公\n岗位职责：\n围绕PS4/PS5游戏机整理栏目素材，撰写平台内容。\n熟悉Excel2021/PowerPoint2019，负责内容策划，两种办公软件都要会。\n发布日期：2026-10-30\n投递截止：2026-11-28"
+  },
+  "manual_validate": {
+    "valid": true,
+    "errors": []
+  },
+  "manual_save": {
+    "saved": [
+      {
+        "action": "created",
+        "id": "job_ec85728a1e37",
+        "title": "游戏栏目运营校招专员",
+        "company": "示例弦舟文化有限公司",
+        "cities": [
+          "上海"
+        ],
+        "status": "new"
+      }
+    ],
+    "invalid": []
+  },
+  "profiles": {
+    "tech": {
+      "filter": {
+        "job_id": "job_ec85728a1e37",
+        "title": "游戏栏目运营校招专员",
+        "company": "示例弦舟文化有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "招聘对象：仅招2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写每周到岗，不适用",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": "游戏栏目运营校招专员"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写实习时长，不适用",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": "游戏栏目运营校招专员"
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "conflict",
+            "reason": "这是校招岗位，你找的是实习",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": "游戏栏目运营校招专员"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "游戏栏目运营校招专员",
+                "evidence": "游戏栏目运营校招专员"
+              },
+              "company": {
+                "value": "示例弦舟文化有限公司",
+                "evidence": "示例弦舟文化有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "manual_fields_filter": {
+        "job_id": "job_ec85728a1e37",
+        "title": "游戏栏目运营校招专员",
+        "company": "示例弦舟文化有限公司",
+        "verdict": "ineligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历硕士，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "学历要求：本科及以上"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "master",
+                  "school": "示例理工大学",
+                  "major": "计算机科学与技术",
+                  "start": "2025-09",
+                  "end": "2027-06",
+                  "gpa": "3.6/4.0",
+                  "rank": "专业前15%",
+                  "courses": [
+                    "机器学习",
+                    "分布式系统",
+                    "数据库系统"
+                  ],
+                  "source": "resume.txt"
+                },
+                {
+                  "level": "bachelor",
+                  "school": "示例师范大学",
+                  "major": "软件工程",
+                  "start": "2021-09",
+                  "end": "2025-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写每周到岗，不适用",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "岗位类型：校招"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 4
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写实习时长，不适用",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "岗位类型：校招"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 6
+            }
+          },
+          {
+            "check": "location",
+            "result": "conflict",
+            "reason": "上海不在意向城市内，且不能远程、不搬家",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "深圳",
+                "广州"
+              ],
+              "availability.remote_ok": true,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "conflict",
+            "reason": "这是校招岗位，你找的是实习",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "岗位类型：校招"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "游戏栏目运营校招专员",
+                "evidence": [
+                  "游戏栏目运营校招专员"
+                ]
+              },
+              "company": {
+                "value": "示例弦舟文化有限公司",
+                "evidence": [
+                  "公司名称：示例弦舟文化有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "外包",
+                  "销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "comparison": {
+        "parsed": {
+          "verdict_equal": true,
+          "check_differences": {}
+        },
+        "manual": {
+          "verdict_equal": true,
+          "check_differences": {}
+        }
+      }
+    },
+    "ops": {
+      "filter": {
+        "job_id": "job_ec85728a1e37",
+        "title": "游戏栏目运营校招专员",
+        "company": "示例弦舟文化有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": "招聘对象：仅招2027届"
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": "本科及以上"
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写每周到岗，不适用",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": "游戏栏目运营校招专员"
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写实习时长，不适用",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": "游戏栏目运营校招专员"
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              },
+              "remote": {
+                "value": false,
+                "evidence": "不支持远程"
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "校招岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": "游戏栏目运营校招专员"
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "游戏栏目运营校招专员",
+                "evidence": "游戏栏目运营校招专员"
+              },
+              "company": {
+                "value": "示例弦舟文化有限公司",
+                "evidence": "示例弦舟文化有限公司"
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": "工作地点：上海"
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "manual_fields_filter": {
+        "job_id": "job_ec85728a1e37",
+        "title": "游戏栏目运营校招专员",
+        "company": "示例弦舟文化有限公司",
+        "verdict": "eligible",
+        "checks": [
+          {
+            "check": "graduation",
+            "result": "match",
+            "reason": "2027 届在要求范围内",
+            "jd": {
+              "requirements.graduation": {
+                "value": {
+                  "years": [
+                    2027
+                  ],
+                  "strict": true
+                },
+                "evidence": [
+                  "仅招2027届"
+                ]
+              }
+            },
+            "profile": {
+              "graduation.year": 2027
+            }
+          },
+          {
+            "check": "education",
+            "result": "match",
+            "reason": "最高学历本科，满足本科及以上",
+            "jd": {
+              "requirements.education": {
+                "value": {
+                  "min": "bachelor",
+                  "preferred": null
+                },
+                "evidence": [
+                  "学历要求：本科及以上"
+                ]
+              }
+            },
+            "profile": {
+              "education": [
+                {
+                  "level": "bachelor",
+                  "school": "示例财经大学",
+                  "major": "市场营销",
+                  "start": "2023-09",
+                  "end": "2027-06",
+                  "gpa": null,
+                  "rank": null,
+                  "courses": [],
+                  "source": "resume.txt"
+                }
+              ]
+            }
+          },
+          {
+            "check": "days_per_week",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写每周到岗，不适用",
+            "jd": {
+              "requirements.days_per_week": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "岗位类型：校招"
+                ]
+              }
+            },
+            "profile": {
+              "availability.days_per_week": 3
+            }
+          },
+          {
+            "check": "min_months",
+            "result": "not_applicable",
+            "reason": "校招岗位，JD 没写实习时长，不适用",
+            "jd": {
+              "requirements.min_months": {
+                "value": null,
+                "evidence": null
+              },
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "岗位类型：校招"
+                ]
+              }
+            },
+            "profile": {
+              "availability.months": 3
+            }
+          },
+          {
+            "check": "location",
+            "result": "match",
+            "reason": "工作城市上海在你的意向内",
+            "jd": {
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              },
+              "remote": {
+                "value": false,
+                "evidence": [
+                  "不支持远程办公"
+                ]
+              }
+            },
+            "profile": {
+              "availability.cities": [
+                "上海"
+              ],
+              "availability.remote_ok": false,
+              "availability.relocate": false
+            }
+          },
+          {
+            "check": "employment_type",
+            "result": "match",
+            "reason": "校招岗位在你的求职方向内",
+            "jd": {
+              "employment_type": {
+                "value": "campus",
+                "evidence": [
+                  "岗位类型：校招"
+                ]
+              }
+            },
+            "profile": {
+              "target.employment_types": [
+                "internship",
+                "campus"
+              ]
+            }
+          },
+          {
+            "check": "exclusions",
+            "result": "match",
+            "reason": "没有命中排除项",
+            "jd": {
+              "title": {
+                "value": "游戏栏目运营校招专员",
+                "evidence": [
+                  "游戏栏目运营校招专员"
+                ]
+              },
+              "company": {
+                "value": "示例弦舟文化有限公司",
+                "evidence": [
+                  "公司名称：示例弦舟文化有限公司"
+                ]
+              },
+              "cities": {
+                "value": [
+                  "上海"
+                ],
+                "evidence": [
+                  "工作地点：上海"
+                ]
+              }
+            },
+            "profile": {
+              "exclusions": {
+                "cities": [],
+                "companies": [],
+                "keywords": [
+                  "电话销售"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "comparison": {
+        "parsed": {
+          "verdict_equal": true,
+          "check_differences": {}
+        },
+        "manual": {
+          "verdict_equal": true,
+          "check_differences": {}
+        }
+      }
+    }
+  },
+  "comparison": {
+    "field_groups": {
+      "equal": 13,
+      "total": 14
+    },
+    "differences": {
+      "requirements.skills": {
+        "expected": [
+          "Excel",
+          "PowerPoint",
+          "内容策划"
+        ],
+        "actual": [
+          "内容策划"
+        ]
+      }
+    },
+    "skills": {
+      "expected": [
+        "excel",
+        "powerpoint",
+        "内容策划"
+      ],
+      "actual": [
+        "内容策划"
+      ],
+      "missing": [
+        "excel",
+        "powerpoint"
+      ],
+      "extra": []
+    },
+    "pending_adjudication": [],
+    "version_probes": [
+      {
+        "text": "Excel2021",
+        "expected_skill": "Excel",
+        "decision": "must_read",
+        "passed": false
+      },
+      {
+        "text": "PowerPoint2019",
+        "expected_skill": "PowerPoint",
+        "decision": "must_read",
+        "passed": false
+      },
+      {
+        "text": "PS4",
+        "expected_skill": null,
+        "decision": "must_not_map_console_to_photoshop",
+        "passed": true
+      },
+      {
+        "text": "PS5",
+        "expected_skill": null,
+        "decision": "must_not_map_console_to_photoshop",
+        "passed": true
+      }
+    ],
+    "forbidden_traps": [
+      {
+        "text": "PS4/PS5游戏机",
+        "forbidden_hits": []
+      }
+    ],
+    "alternative_groups": [],
+    "profiles": {
+      "tech": {
+        "parsed": {
+          "verdict_equal": true,
+          "check_differences": {}
+        },
+        "manual": {
+          "verdict_equal": true,
+          "check_differences": {}
+        }
+      },
+      "ops": {
+        "parsed": {
+          "verdict_equal": true,
+          "check_differences": {}
+        },
+        "manual": {
+          "verdict_equal": true,
+          "check_differences": {}
+        }
+      }
+    }
+  }
+}
