@@ -320,7 +320,7 @@ _AFTER_POSTSCRIPT = re.compile(r"[ \t]*[:：]")
 _OFFICE_TERMS = frozenset(("Word", "Microsoft Word", "Excel", "Microsoft Excel", "PPT", "PowerPoint",
                            "Microsoft PowerPoint", "Office", "Microsoft Office", "MS Office", "WPS",
                            "WPS Office", "Visio", "Microsoft Visio"))
-_OFFICE_NAME = r"(?:(?:Microsoft|MS|WPS)\s+)?(?:Word|Excel|PowerPoint|PPT|Office|WPS|Visio)(?:\s*v?\d+(?:\.\d+)*(?:\.x)?)?"  # H21: a version stays in the list
+_OFFICE_NAME = r"(?:(?:Microsoft|MS|WPS)\s+)?(?:Word|Excel|PowerPoint|PPT|Office|WPS|Visio)(?:\s*v?\d+(?:\.\d+)*(?:\.x)?\+?)?"  # H21: a version, "+" too, stays in the list
 _OFFICE_JOIN = r"\s*(?:、|,|，|/|／|&|和|及|与|或者?|or|and)\s*"
 _OFFICE_LIST = re.compile(rf"(?<![A-Za-z]){_OFFICE_NAME}(?:{_OFFICE_JOIN}{_OFFICE_NAME})+(?![A-Za-z])", re.I)
 _OFFICE_DISTINCT_NAME = re.compile(r"(?<![A-Za-z])(?:Excel|PowerPoint|PPT|WPS|Visio|Microsoft|MS)(?![A-Za-z])", re.I)

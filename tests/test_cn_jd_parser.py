@@ -561,6 +561,15 @@ SEED_CASES = (
     ("熟悉 Word 2019 和 Office 2016", "requirements.skills", ["Word", "Office"]),
     ("Excel2016、Word2019", "requirements.skills", ["Excel", "Word"]),
     ("熟练使用 Excel 2016、WPS 2019", "requirements.skills", ["Excel", "WPS"]),
+    # ... and neither does a "+" after the version, with or without one.
+    ("熟悉 Office 365 和 Word 2019", "requirements.skills", ["Office", "Word"]),
+    ("熟悉 Office 365+ 和 Word 2019", "requirements.skills", ["Office", "Word"]),
+    ("熟悉 Excel 2016 和 Word 2019", "requirements.skills", ["Excel", "Word"]),
+    ("熟悉 Excel 2016+ 和 Word 2019", "requirements.skills", ["Excel", "Word"]),
+    ("熟悉 WPS 2019 和 Office 2016", "requirements.skills", ["WPS", "Office"]),
+    ("熟悉 WPS 2019+ 和 Office 2016", "requirements.skills", ["WPS", "Office"]),
+    ("熟悉 Word 2019 和 Office 2016", "requirements.skills", ["Word", "Office"]),
+    ("熟悉 Word 2019+ 和 Office 2016", "requirements.skills", ["Word", "Office"]),
     ("word 2019 and office 2016", "requirements.skills", []),
     ("Experience with office 2016 relocation", "requirements.skills", []),
     # ... and a number with a time or count unit is neither a version nor a console: PS 5年 is Photoshop.
