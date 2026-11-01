@@ -34,7 +34,7 @@ MAX_TEXT = profile_mod.MAX_BULLET
 _HIGH_LEVELS = ("proficient", "expert")
 
 # Numbers in figures, with a magnitude (2万) or a percent sign; 1,200 is one number.
-_FIGURE = re.compile(r"(?<![\d.])(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*(万|千|亿)?")
+_FIGURE = re.compile(r"(?<![\d.])(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*(万|千|亿)?\s*[%％]?")
 _CN_DIGITS = {"零": 0, "〇": 0, "一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5,
               "六": 6, "七": 7, "八": 8, "九": 9}
 _CN_UNITS = {"十": 10, "百": 100, "千": 1000}
@@ -48,6 +48,8 @@ _MAGNITUDE = {"万": 10_000, "千": 1000, "亿": 100_000_000}
 
 def _chinese_value(run: str):
     """The value of a run of Chinese numerals such as 一百二十 or 两万, or None if it is not one number."""
+    if run[0] in _CN_BIG:
+        return None  # 万一 is a word, not a count of ten thousand
     total, section, digit = 0, 0, None
     for char in run:
         if char in _CN_DIGITS:
@@ -148,7 +150,8 @@ def validate(material, profile: dict, vocabulary, job: dict = None) -> tuple[lis
             if section == "experience":
                 checker.bullets(item.get("bullets"), item["ref"], where)
 
-    _skills(material.get("skills"), profile, vocabulary, errors)
+    if "skills" in material:  # a missing key is already reported
+        _skills(material["skills"], profile, vocabulary, errors)
     if not errors:
         warnings = _warnings(material, profile, vocabulary, job)
     return errors, warnings
@@ -278,8 +281,6 @@ def _courses(value, entry: dict, where: str, errors: list) -> None:
 
 
 def _skills(value, profile: dict, vocabulary, errors: list) -> None:
-    if value is None and "skills" not in ():
-        pass
     if not isinstance(value, list):
         errors.append("skills: must be a list ([] when there is nothing)")
         return
