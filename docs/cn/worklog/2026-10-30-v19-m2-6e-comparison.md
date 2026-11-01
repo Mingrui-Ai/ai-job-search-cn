@@ -19,9 +19,9 @@
 - `verify_oracle.py` 运行前后均通过：9 份样例、19 条出处、15 个冻结文件和手写算术完整。
 - 对照脚本不导入 `score.py`，从解析结构按公开公式独立复算；所有产品薪资分均与独立值相等。
 - 目标提交、冻结提交、清单哈希、命令返回码、逐份解析和评分均写入结果；本机路径在写入前替换为占位符。
-- 待在合入最新 `origin/master` 后运行全量 unittest、`security_guards`、`lint_skills` 和 `git diff --check`，再推送、开 PR、回评 #93。
+- 已合入最新 `origin/master@6341c25`，无冲突。conda `ai-job-search-cn` 全量 unittest 1387 项通过、12 项按预期跳过；`security_guards`、`lint_skills`、`verify_oracle.py` 和 `git diff --check` 均通过。
 
 ## 下一步
 
-- 完成 V19 的 master 同步、全量检查和公开交付。
+- 推送并开验证 PR，在 #93 回评结果。
 - 删除本项临时 worktree，然后按收件箱继续 V21 隐私增量扫描。
