@@ -17,8 +17,7 @@ name: CN resume PDF
 
 on:
   push:
-    # TEMP (H31): feat/cn-h31-ci-typst runs the job before its PR exists; removed before the PR.
-    branches: [master, feat/cn-h31-ci-typst]
+    branches: [master]
   pull_request:
   workflow_dispatch:
 
