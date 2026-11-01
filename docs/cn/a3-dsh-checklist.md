@@ -84,7 +84,7 @@ Node.js 应不低于 24.9.0；本项目使用 conda `ai-job-search-cn` 的 Pytho
 
 新对话发送范围约定和附录简历：
 
-> 我要用这份虚构简历建立个人档案。请先找到本项目的建档流程，把原文放在 data/a3-dsh/run-01/profile/sources/resume.txt，逐节向我确认，偏好等你问到时我再回答。确认前只写本轮 profile/drafts/，不要提前保存最终档案。
+> 我要用这份虚构简历建立个人档案。请先找到本项目的建档流程，将源材料保存到 data/a3-dsh/run-01/profile/sources/resume.txt，再逐节向我确认，偏好等你问到时我再回答。确认前，档案草稿只写入本轮 profile/drafts/，不要提前保存最终档案。
 
 | 编号 | 用户操作 | 应看到的结果与文件 |
 | --- | --- | --- |
