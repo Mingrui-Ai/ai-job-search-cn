@@ -227,11 +227,14 @@ class Numbers(unittest.TestCase):
                 self.assertEqual(self.values(text), [value])
 
     def test_qianwan_before_an_imperative_is_no_number(self):
-        for text in ("千万不要改数字", "千万别漏写", "千万要核对"):
+        for text in ("千万不要改数字", "千万别漏写", "千万要核对", "千万记得核对", "千万记住", "千万务必核对",
+                     "千万莫改", "千万勿改", "千万注意", "千万小心", "千万当心"):
             with self.subTest(text=text):
                 self.assertEqual(material.numbers(text), [])
-        self.assertEqual(self.values("千万级用户"), [10_000_000])
-        self.assertEqual(self.values("日活过千万"), [10_000_000])
+        # The words, not their first character: 记录 and 务工 do not make 千万 an imperative.
+        for text in ("处理千万记录", "服务千万务工人员", "千万级用户", "日活过千万", "千万得到"):
+            with self.subTest(text=text):
+                self.assertEqual(self.values(text), [10_000_000])
 
     def test_words_with_numerals_are_not_numbers(self):
         for text in ("统一接口", "一线城市", "三方支付", "百度", "十分熟悉", "千兆网络", "万一失败", "零基础",

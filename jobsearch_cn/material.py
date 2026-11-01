@@ -46,7 +46,7 @@ _CN_NUMBER = re.compile(rf"(?P<percent>百分之)(?P<pct>{_CN_RUN})|(?P<run>{_CN
 _MAGNITUDE = {"万": 10_000, "千": 1000, "亿": 100_000_000}
 _ZEROS = "零〇"
 # 千万 before an imperative is "by all means" (千万不要, 千万别), not ten million.
-_NOT_A_COUNT_AFTER = {"千万": "不别要莫勿记得务"}
+_NOT_A_COUNT_AFTER = {"千万": ("不", "别", "要", "莫", "勿", "记得", "记住", "务必", "注意", "小心", "当心")}
 
 
 def _chinese_value(run: str):
@@ -110,8 +110,8 @@ def numbers(text: str) -> list:
             continue
         if plain and run in ("万", "千", "百", "十", "亿"):
             continue
-        following = text[match.end():match.end() + 1]
-        if plain and following and following in _NOT_A_COUNT_AFTER.get(run, ""):
+        # Whole words: 千万记得 is "be sure to remember", 千万记录 ten million records.
+        if plain and text.startswith(_NOT_A_COUNT_AFTER.get(run, ()), match.end()):
             continue
         value = _chinese_value(run)
         if value is None:
