@@ -47,4 +47,3 @@
 - 命令：`python tests/fixtures/cn/match-m2-6e-holdout/run_comparison.py --repo <目标检出>`；共 19 次 CLI 调用，均为 0 返回码且 stderr 为空。
 - 独立复算只读取解析后的结构化字段，未导入 `score.py`；每份产品分数都同时对照公开契约期望和独立复算值。
 - `verify_oracle.py` 在运行前后均通过；结果文件另有 `output-manifest.json`，不覆盖既有基线。
-
