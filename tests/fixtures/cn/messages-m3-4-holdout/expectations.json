@@ -1,0 +1,548 @@
+{
+  "oracle_version": 1,
+  "basis": "Planner's V23 assignment on 2026-11-01; no M3-4 implementation observed",
+  "length_limits": {
+    "greeting_body": 150,
+    "email_subject": 40,
+    "email_body": 600,
+    "referral_body": 300
+  },
+  "cases": [
+    {
+      "id": "length-greeting_body-149",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "长度未超过上限",
+      "rendered_codepoints": {
+        "body": 149
+      },
+      "limit": 150,
+      "template_before_substitution_codepoints": 13
+    },
+    {
+      "id": "length-greeting_body-150",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "长度未超过上限",
+      "rendered_codepoints": {
+        "body": 150
+      },
+      "limit": 150,
+      "template_before_substitution_codepoints": 13
+    },
+    {
+      "id": "length-greeting_body-151",
+      "outcome": "reject",
+      "required_error_categories": [
+        "length_exceeded"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "length_exceeded",
+      "rendered_codepoints": {
+        "body": 151
+      },
+      "limit": 150,
+      "template_before_substitution_codepoints": 13
+    },
+    {
+      "id": "length-email_subject-39",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "长度未超过上限",
+      "rendered_codepoints": {
+        "subject": 39
+      },
+      "limit": 40,
+      "template_before_substitution_codepoints": 13
+    },
+    {
+      "id": "length-email_subject-40",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "长度未超过上限",
+      "rendered_codepoints": {
+        "subject": 40
+      },
+      "limit": 40,
+      "template_before_substitution_codepoints": 13
+    },
+    {
+      "id": "length-email_subject-41",
+      "outcome": "reject",
+      "required_error_categories": [
+        "length_exceeded"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "length_exceeded",
+      "rendered_codepoints": {
+        "subject": 41
+      },
+      "limit": 40,
+      "template_before_substitution_codepoints": 13
+    },
+    {
+      "id": "length-email_body-599",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "长度未超过上限",
+      "rendered_codepoints": {
+        "body": 599
+      },
+      "limit": 600,
+      "template_before_substitution_codepoints": 55
+    },
+    {
+      "id": "length-email_body-600",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "长度未超过上限",
+      "rendered_codepoints": {
+        "body": 600
+      },
+      "limit": 600,
+      "template_before_substitution_codepoints": 52
+    },
+    {
+      "id": "length-email_body-601",
+      "outcome": "reject",
+      "required_error_categories": [
+        "length_exceeded"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "length_exceeded",
+      "rendered_codepoints": {
+        "body": 601
+      },
+      "limit": 600,
+      "template_before_substitution_codepoints": 53
+    },
+    {
+      "id": "length-referral_body-299",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "长度未超过上限",
+      "rendered_codepoints": {
+        "body": 299
+      },
+      "limit": 300,
+      "template_before_substitution_codepoints": 27
+    },
+    {
+      "id": "length-referral_body-300",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "长度未超过上限",
+      "rendered_codepoints": {
+        "body": 300
+      },
+      "limit": 300,
+      "template_before_substitution_codepoints": 26
+    },
+    {
+      "id": "length-referral_body-301",
+      "outcome": "reject",
+      "required_error_categories": [
+        "length_exceeded"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "length_exceeded",
+      "rendered_codepoints": {
+        "body": 301
+      },
+      "limit": 300,
+      "template_before_substitution_codepoints": 27
+    },
+    {
+      "id": "length-greeting-mixed-han-ascii",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "按字符计数，不按 UTF-8 字节计数",
+      "rendered_codepoints": {
+        "body": 150
+      },
+      "rendered_utf8_bytes": {
+        "body": 302
+      },
+      "limit": 150
+    },
+    {
+      "id": "valid-supported-number",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "数字 8 来自已引用项目。"
+    },
+    {
+      "id": "valid-supported-skill",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "Python 同时在档案技能和已引用项目中。"
+    },
+    {
+      "id": "valid-contact-from-profile",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "联系方式经档案引用代入，不是在模板中手写。"
+    },
+    {
+      "id": "valid-recorded-availability",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "到岗日期、每周天数及月数均来自档案的确定值。"
+    },
+    {
+      "id": "valid-unknown-availability-omitted",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "档案没有到岗信息，正文没有补造承诺。"
+    },
+    {
+      "id": "valid-supported-fact-slot",
+      "outcome": "accept",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "代入文本保留档案原文中的技能和数字。"
+    },
+    {
+      "id": "reject-unfilled-greeting",
+      "outcome": "reject",
+      "required_error_categories": [
+        "unfilled_placeholder"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "正文中还留着未代入的岗位槽位。",
+      "offending_text": "{{unfilled_role}}"
+    },
+    {
+      "id": "reject-unfilled-email-subject",
+      "outcome": "reject",
+      "required_error_categories": [
+        "unfilled_placeholder"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "即使正文干净，标题中的占位符也必须拒绝。",
+      "offending_text": "{{unfilled_role}}"
+    },
+    {
+      "id": "reject-unfilled-after-substitution",
+      "outcome": "reject",
+      "required_error_categories": [
+        "unfilled_placeholder"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "替换值自身仍含占位符；必须检查最终文本，不能只扫描原模板。",
+      "offending_text": "{{unfilled_title}}"
+    },
+    {
+      "id": "reject-literal-email-equals-profile",
+      "outcome": "reject",
+      "required_error_categories": [
+        "handwritten_contact"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "邮箱即使等于档案值，手写到模板里仍应被拒绝。",
+      "offending_text": "v23-tech@example.invalid"
+    },
+    {
+      "id": "reject-literal-phone",
+      "outcome": "reject",
+      "required_error_categories": [
+        "handwritten_contact"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "正文直接写入虚构电话号码。",
+      "offending_text": "19900000000"
+    },
+    {
+      "id": "reject-literal-wechat",
+      "outcome": "reject",
+      "required_error_categories": [
+        "handwritten_contact"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "正文直接写入虚构微信号。",
+      "offending_text": "v23_fake_only"
+    },
+    {
+      "id": "reject-mixed-contact-reference-and-literal",
+      "outcome": "reject",
+      "required_error_categories": [
+        "handwritten_contact"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "一个合法联系槽位不能放行另一个手写联系方式。",
+      "offending_text": "v23-alt@example.invalid"
+    },
+    {
+      "id": "reject-contact-in-email-subject",
+      "outcome": "reject",
+      "required_error_categories": [
+        "handwritten_contact"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "联系方式限制也应覆盖邮件标题。",
+      "offending_text": "v23-tech@example.invalid"
+    },
+    {
+      "id": "reject-sensitive-id",
+      "outcome": "reject",
+      "required_error_categories": [
+        "sensitive_personal_information"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "身份证字段为敏感个人信息；这是无效的合成证件串，不对应真实身份证。",
+      "offending_text": "110000200001010000"
+    },
+    {
+      "id": "reject-sensitive-home-address",
+      "outcome": "reject",
+      "required_error_categories": [
+        "sensitive_personal_information"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "家庭详细地址为敏感信息，文本全为虚构。",
+      "offending_text": "示例市虚构路测试小区甲栋"
+    },
+    {
+      "id": "reject-sensitive-marital",
+      "outcome": "reject",
+      "required_error_categories": [
+        "sensitive_personal_information"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "婚育信息应拒绝。",
+      "offending_text": "未婚未育"
+    },
+    {
+      "id": "reject-sensitive-health",
+      "outcome": "reject",
+      "required_error_categories": [
+        "sensitive_personal_information"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "医疗健康信息应拒绝，即使疾病名为虚构。",
+      "offending_text": "病史"
+    },
+    {
+      "id": "reject-sensitive-birthday",
+      "outcome": "reject",
+      "required_error_categories": [
+        "sensitive_personal_information"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "出生日期应拒绝；与作为工作安排的到岗日期区分。",
+      "offending_text": "2004-02-03"
+    },
+    {
+      "id": "reject-invented-arabic-number",
+      "outcome": "reject",
+      "required_error_categories": [
+        "fabricated_number"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "所引项目只有 8 项，没有 99 项。",
+      "offending_text": "99"
+    },
+    {
+      "id": "reject-invented-chinese-number",
+      "outcome": "reject",
+      "required_error_categories": [
+        "fabricated_number"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "同一个无依据的 99 改成中文数字仍应拒绝。",
+      "offending_text": "九十九"
+    },
+    {
+      "id": "reject-number-borrowed-from-job",
+      "outcome": "reject",
+      "required_error_categories": [
+        "fabricated_number"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "JD 的 180 是岗位日薪，不是候选人完成的项目数量；引用项目只有 8。",
+      "offending_text": "180"
+    },
+    {
+      "id": "reject-skill-only-in-job",
+      "outcome": "reject",
+      "required_error_categories": [
+        "fabricated_skill"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "岗位要求含 Rust，但候选人的技能与项目都只有 Python；不能把要求写成个人能力。",
+      "offending_text": "Rust"
+    },
+    {
+      "id": "reject-skill-absent-everywhere",
+      "outcome": "reject",
+      "required_error_categories": [
+        "fabricated_skill"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "档案技能、引用项目和 JD 均不含 Docker。",
+      "offending_text": "Docker"
+    },
+    {
+      "id": "reject-availability-unknown",
+      "outcome": "reject",
+      "required_error_categories": [
+        "unsupported_availability"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "data 档案三项到岗信息均为 null，不能据此承诺随时到岗。",
+      "offending_text": "随时可以到岗"
+    },
+    {
+      "id": "reject-availability-earlier-date",
+      "outcome": "reject",
+      "required_error_categories": [
+        "unsupported_availability"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "冻结观察日期为 2026-11-01，档案最早到岗为 2026-12-07；相对日期承诺没有依据。",
+      "offending_text": "明天即可到岗"
+    },
+    {
+      "id": "reject-availability-more-days",
+      "outcome": "reject",
+      "required_error_categories": [
+        "unsupported_availability"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "档案每周只有 4 天，不能写成 5 天。",
+      "offending_text": "5 天"
+    },
+    {
+      "id": "reject-availability-more-months",
+      "outcome": "reject",
+      "required_error_categories": [
+        "unsupported_availability"
+      ],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "allow_additional_errors": true,
+      "rationale": "档案只有 3 个月，不能写成 6 个月。",
+      "offending_text": "6 个月"
+    },
+    {
+      "id": "warn-cliche-greeting",
+      "outcome": "warn",
+      "required_error_categories": [],
+      "required_warning_categories": [
+        "cliche"
+      ],
+      "allow_additional_warnings": true,
+      "rationale": "cliche"
+    },
+    {
+      "id": "warn-cliche-email",
+      "outcome": "warn",
+      "required_error_categories": [],
+      "required_warning_categories": [
+        "cliche"
+      ],
+      "allow_additional_warnings": true,
+      "rationale": "cliche"
+    },
+    {
+      "id": "warn-referral-salary",
+      "outcome": "warn",
+      "required_error_categories": [],
+      "required_warning_categories": [
+        "salary_in_referral"
+      ],
+      "allow_additional_warnings": true,
+      "rationale": "salary_in_referral"
+    },
+    {
+      "id": "warn-referral-salary-and-cliche",
+      "outcome": "warn",
+      "required_error_categories": [],
+      "required_warning_categories": [
+        "salary_in_referral",
+        "cliche"
+      ],
+      "allow_additional_warnings": true,
+      "rationale": "salary_in_referral"
+    }
+  ]
+}

@@ -1,0 +1,860 @@
+{
+  "fixture_version": 1,
+  "baseline": "507e499",
+  "as_of": "2026-11-01T08:00:00+08:00",
+  "synthetic_only": true,
+  "placeholder_notation": "{{slot_name}} is oracle notation, to be mapped to the published PR grammar without changing rendered text",
+  "cases": [
+    {
+      "id": "length-greeting_body-149",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "{{job_title}}",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "greeting_body"
+    },
+    {
+      "id": "length-greeting_body-150",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "{{job_title}}",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "greeting_body"
+    },
+    {
+      "id": "length-greeting_body-151",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "{{job_title}}",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "greeting_body"
+    },
+    {
+      "id": "length-email_subject-39",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "{{job_title}}",
+      "body": "您好，烦请查阅申请材料。",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "email_subject"
+    },
+    {
+      "id": "length-email_subject-40",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "{{job_title}}",
+      "body": "您好，烦请查阅申请材料。",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "email_subject"
+    },
+    {
+      "id": "length-email_subject-41",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "{{job_title}}",
+      "body": "您好，烦请查阅申请材料。",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "email_subject"
+    },
+    {
+      "id": "length-email_body-599",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "岗位申请",
+      "body": "{{job_title}}{{job_title}}{{job_title}}{{job_title}}岗岗岗",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "email_body"
+    },
+    {
+      "id": "length-email_body-600",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "岗位申请",
+      "body": "{{job_title}}{{job_title}}{{job_title}}{{job_title}}",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "email_body"
+    },
+    {
+      "id": "length-email_body-601",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "岗位申请",
+      "body": "{{job_title}}{{job_title}}{{job_title}}{{job_title}}岗",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "email_body"
+    },
+    {
+      "id": "length-referral_body-299",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "{{job_title}}{{job_title}}岗",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "referral_body"
+    },
+    {
+      "id": "length-referral_body-300",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "{{job_title}}{{job_title}}",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "referral_body"
+    },
+    {
+      "id": "length-referral_body-301",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "{{job_title}}{{job_title}}岗",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": [],
+      "focus_field": "referral_body"
+    },
+    {
+      "id": "length-greeting-mixed-han-ascii",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "{{job_title}}",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉汉"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉汉"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉A汉汉\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": []
+    },
+    {
+      "id": "valid-supported-number",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "我整理了 8 项检索校验记录，希望了解岗位的具体工作。",
+      "slots": {},
+      "overrides": [],
+      "refs": [
+        "proj-v23"
+      ]
+    },
+    {
+      "id": "valid-supported-skill",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "后端检索岗位申请",
+      "body": "您好，我在项目中使用 Python 整理检索校验记录，希望交流岗位工作。",
+      "slots": {},
+      "overrides": [],
+      "refs": [
+        "proj-v23"
+      ]
+    },
+    {
+      "id": "valid-contact-from-profile",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "岗位申请",
+      "body": "您好，我是{{contact_name}}，希望了解岗位工作。联系邮箱：{{contact_email}}。",
+      "slots": {
+        "contact_name": {
+          "record": "profile",
+          "pointer": "/contact/name"
+        },
+        "contact_email": {
+          "record": "profile",
+          "pointer": "/contact/email"
+        }
+      },
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "valid-recorded-availability",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "您好，我从{{start_date}}起可到岗，每周{{days}}天，持续{{months}}个月。方便时烦请告知申请方式。",
+      "slots": {
+        "start_date": {
+          "record": "profile",
+          "pointer": "/availability/start_date"
+        },
+        "days": {
+          "record": "profile",
+          "pointer": "/availability/days_per_week"
+        },
+        "months": {
+          "record": "profile",
+          "pointer": "/availability/months"
+        }
+      },
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "valid-unknown-availability-omitted",
+      "operation": "validate_candidate",
+      "context": "data",
+      "kind": "greeting",
+      "subject": null,
+      "body": "您好，我做过数据字段核对，希望了解岗位安排。到岗安排尚待确认。",
+      "slots": {},
+      "overrides": [],
+      "refs": [
+        "proj-v23"
+      ]
+    },
+    {
+      "id": "valid-supported-fact-slot",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "您好，{{project_fact}}方便时烦请告知申请方式。",
+      "slots": {
+        "project_fact": {
+          "record": "profile",
+          "pointer": "/experience/0/bullets/0"
+        }
+      },
+      "overrides": [],
+      "refs": [
+        "proj-v23"
+      ]
+    },
+    {
+      "id": "reject-unfilled-greeting",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "您好，我想申请{{unfilled_role}}。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-unfilled-email-subject",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "应聘{{unfilled_role}}",
+      "body": "您好，烦请查看申请材料。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-unfilled-after-substitution",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "您好，想了解{{job_title}}的申请方式。",
+      "slots": {
+        "job_title": {
+          "record": "job",
+          "pointer": "/title"
+        }
+      },
+      "overrides": [
+        {
+          "record": "job",
+          "pointer": "/title",
+          "value": "示例{{unfilled_title}}岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/evidence/title/text",
+          "value": "示例{{unfilled_title}}岗位"
+        },
+        {
+          "record": "job",
+          "pointer": "/raw_text",
+          "value": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：示例{{unfilled_title}}岗位\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+        }
+      ],
+      "refs": []
+    },
+    {
+      "id": "reject-literal-email-equals-profile",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "岗位申请",
+      "body": "您好，联系邮箱：v23-tech@example.invalid。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-literal-phone",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "您好，联系电话：19900000000。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-literal-wechat",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "您好，微信号：v23_fake_only，方便时烦请告知申请方式。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-mixed-contact-reference-and-literal",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "岗位申请",
+      "body": "您好，邮箱：{{contact_email}}，另一个邮箱是 v23-alt@example.invalid。",
+      "slots": {
+        "contact_email": {
+          "record": "profile",
+          "pointer": "/contact/email"
+        }
+      },
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-contact-in-email-subject",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "联系 v23-tech@example.invalid",
+      "body": "您好，烦请查看申请材料。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-sensitive-id",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "岗位申请",
+      "body": "您好，我的身份证号是 110000200001010000。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-sensitive-home-address",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "您好，我的家庭住址是示例市虚构路测试小区甲栋。烦请告知申请方式。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-sensitive-marital",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "您好，本人未婚未育，希望了解岗位。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-sensitive-health",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "岗位申请",
+      "body": "您好，我的病史是测试用虚构疾病，希望了解岗位。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-sensitive-birthday",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "您好，我的出生日期是 2004-02-03。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-invented-arabic-number",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "我整理了 99 项检索校验记录。",
+      "slots": {},
+      "overrides": [],
+      "refs": [
+        "proj-v23"
+      ]
+    },
+    {
+      "id": "reject-invented-chinese-number",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "您好，我整理了九十九项检索校验记录，烦请告知申请方式。",
+      "slots": {},
+      "overrides": [],
+      "refs": [
+        "proj-v23"
+      ]
+    },
+    {
+      "id": "reject-number-borrowed-from-job",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "后端检索岗位申请",
+      "body": "您好，我整理了 180 项检索校验记录，希望交流。",
+      "slots": {},
+      "overrides": [],
+      "refs": [
+        "proj-v23"
+      ]
+    },
+    {
+      "id": "reject-skill-only-in-job",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "您好，我熟练使用 Rust，希望了解后端检索岗位。",
+      "slots": {},
+      "overrides": [],
+      "refs": [
+        "proj-v23"
+      ]
+    },
+    {
+      "id": "reject-skill-absent-everywhere",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "后端检索岗位申请",
+      "body": "您好，我熟练使用 Docker，希望交流岗位工作。",
+      "slots": {},
+      "overrides": [],
+      "refs": [
+        "proj-v23"
+      ]
+    },
+    {
+      "id": "reject-availability-unknown",
+      "operation": "validate_candidate",
+      "context": "data",
+      "kind": "greeting",
+      "subject": null,
+      "body": "您好，我随时可以到岗。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-availability-earlier-date",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "岗位申请",
+      "body": "您好，我明天即可到岗。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-availability-more-days",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "您好，我每周可以到岗 5 天，烦请告知申请方式。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "reject-availability-more-months",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "您好，我可以连续实习 6 个月。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "warn-cliche-greeting",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "greeting",
+      "subject": null,
+      "body": "您好，本人吃苦耐劳，抗压能力强，希望了解岗位。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "warn-cliche-email",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "email",
+      "subject": "岗位申请",
+      "body": "您好，本人具有良好的团队合作精神和沟通能力，希望贵司给我机会。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "warn-referral-salary",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "您好，想了解内推申请方式，也想先问问薪资待遇。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    },
+    {
+      "id": "warn-referral-salary-and-cliche",
+      "operation": "validate_candidate",
+      "context": "tech",
+      "kind": "referral",
+      "subject": null,
+      "body": "您好，本人吃苦耐劳，抗压能力强。想了解内推方式，也想问问薪资待遇。",
+      "slots": {},
+      "overrides": [],
+      "refs": []
+    }
+  ]
+}

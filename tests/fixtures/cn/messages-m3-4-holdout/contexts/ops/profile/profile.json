@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "contact": {
+    "name": "示例候选丁",
+    "phone": "00000000000",
+    "email": "v23-ops@example.invalid",
+    "github": null,
+    "website": null
+  },
+  "graduation": {
+    "year": 2027,
+    "month": 6
+  },
+  "education": [
+    {
+      "id": "edu-v23",
+      "level": "bachelor",
+      "school": "示例留出测试大学",
+      "major": "传播学",
+      "start": "2023-09",
+      "end": "2027-06",
+      "gpa": null,
+      "rank": null,
+      "courses": [],
+      "source": "resume.txt"
+    }
+  ],
+  "availability": {
+    "start_date": "2026-12-07",
+    "days_per_week": 4,
+    "months": 3,
+    "cities": [
+      "广州"
+    ],
+    "acceptable_cities": [],
+    "remote_ok": false,
+    "relocate": false,
+    "interview_travel": null
+  },
+  "target": {
+    "employment_types": [
+      "internship"
+    ],
+    "roles": [
+      "内容运营实习生"
+    ],
+    "industries": [],
+    "salary_min": null,
+    "salary_ideal": null,
+    "salary_step": null,
+    "meal_value": null,
+    "salary_days_per_week": null,
+    "one_meal_points": null,
+    "directions": [
+      "ops"
+    ],
+    "weights": null
+  },
+  "skills": [
+    {
+      "name": "新媒体运营",
+      "level": "working",
+      "used_in": [
+        "proj-v23"
+      ],
+      "source": "resume.txt"
+    }
+  ],
+  "experience": [
+    {
+      "id": "proj-v23",
+      "type": "project",
+      "name": "虚构内容编排项目",
+      "org": null,
+      "role": "记录整理成员",
+      "start": "2026-04",
+      "end": "2026-07",
+      "bullets": [
+        "围绕新媒体运营整理了 12 份内容草稿。"
+      ],
+      "source": "resume.txt"
+    }
+  ],
+  "awards": [],
+  "certificates": [],
+  "languages": [],
+  "exclusions": {
+    "cities": [],
+    "companies": [],
+    "keywords": []
+  }
+}
