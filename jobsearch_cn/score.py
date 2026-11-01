@@ -34,7 +34,9 @@ SCHEMA_VERSION = 1
 # 8: a version right after an English term reads as the term: HTML5, Vue2.x, Python 3.10 (H21).
 # 9: salary in tiers from target.salary_ideal and salary_step; pay turned into the profile's unit, meals
 #    added; the JD's job record gains benefits.meals (M2-6e).
-RULES_VERSION = 9
+# 10: an interview only on site outside the wanted cities is unknown, not a match, when the profile's
+#     availability.interview_travel is false (M2-6f).
+RULES_VERSION = 10
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary, location
 DEFAULT_WEIGHTS = {"skills": 30, "direction": 25, "experience": 25, "salary": 10, "location": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.

@@ -224,9 +224,9 @@ class Choices(Case):
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
 
     def test_a_new_rules_version_marks_older_records_stale(self):
-        self.assertEqual(score.RULES_VERSION, 9)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
+        self.assertEqual(score.RULES_VERSION, 10)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
         # 5: M2-6c's two checks; 6: H26's statistical analysis; 7: H29's office vocabulary;
-        # 8: H21's versioned skills; 9: M2-6e's salary tiers
+        # 8: H21's versioned skills; 9: M2-6e's salary tiers; 10: M2-6f's interview travel
         old = setting(scored(self.job, self.tech), "rules_version", 7)
         reasons = score.stale_reasons(old, self.job, score.profile_hash(self.tech), score.weights_of(self.tech))
         self.assertEqual(reasons, ["rules"])

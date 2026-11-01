@@ -17,11 +17,13 @@
 | [jd-import.md](jd-import.md) | JD 导入工作流（Codex 与 Claude Code 共用）：解析、补全、校验、保存、去重、查询 |
 | [profile.md](profile.md) | 个人档案格式（Profile v1）：字段、来源规则、与 JD 硬性条件的对照 |
 | [profile-setup.md](profile-setup.md) | 建档工作流 cn-setup（Codex 与 Claude Code 共用） |
+| [material.md](material.md) | 求职材料格式（M3-1）：简历材料怎么引用档案条目 id，`material validate` 的检查项 |
 | [match.md](match.md) | 匹配：评分工作流 cn-match（三个 Agent 共用）；`match filter` 硬性条件过滤（符合 / 冲突 / 未知 及依据）；可解释评分 `match score / validate / save / show / list` 和匹配记录 |
 | [jd-parse.md](jd-parse.md) | `jd parse`：用法、编码处理、各字段能识别的写法、补全流程、防注入检查 |
 | [baseline-report.md](baseline-report.md) | Day 0 环境、测试基线、已知问题与 Windows 兼容性记录 |
 | [oss-privacy-review.md](oss-privacy-review.md) | 开源前隐私审查（2026-10-28）：公开范围、各类扫描结果和处理结论、转为公开前的操作 |
 | [resume-pdf.md](resume-pdf.md) | 生成 PDF 简历：安装 Typst（便携版）、字体、`resume sample`、压成一页和检查 |
+| [m2-5-round2-checklist.md](m2-5-round2-checklist.md) | M2-5 第二轮的操作清单：用 cn-setup 补档案的哪几项（薪资分档、可以接受的城市、去外地面试），以及重新导入、重新评分、调权重、出报告的顺序和命令 |
 | [m3-0-resume-prototypes.md](m3-0-resume-prototypes.md) | M3-0 简历生成方式的原型对比（2026-10-30）：三种同时出 Word 和 PDF 的做法、开源简历模板的调研和许可、推荐方案和 M3-2 的检查清单 |
 | [plan/kickoff-guide-v0.1.md](plan/kickoff-guide-v0.1.md) | 原始文件《AI_Job_Search_CN_项目启动指导_v0.1.md》（存档） |
 | [plan/initial-guidelines.md](plan/initial-guidelines.md) | 原始文件《初步guidelines.md》（存档） |
@@ -113,7 +115,8 @@ git worktree remove ../cn-<名字>                           # 删除（目录�
   - 改 `tools/security_guards.py`（哪怕只是注释）之前，先征得用户本人同意；
   - 改代码用编辑工具，不用脚本绕过确认；
   - 请求审核前合入最新 master，跑全量测试、`security_guards`、`lint_skills`；
-  - 路线图只改自己那一项（见路线图的"更新规则"）。
+  - 路线图只改自己那一项（见路线图的"更新规则"）；
+  - 中文写进文件、PR 描述、评论或消息时，偶尔会有字变成替换符 U+FFFD（2026-11-01 几个会话都遇到过）。提交、发出之前先查一遍，查到就改。
 
 ### 中断后恢复
 
