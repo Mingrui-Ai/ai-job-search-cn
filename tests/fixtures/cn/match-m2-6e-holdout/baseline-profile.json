@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "contact": {"name": "V19虚构候选人", "phone": null, "email": null, "github": null, "website": null},
+  "graduation": {"year": null, "month": null},
+  "education": [],
+  "availability": {
+    "start_date": null,
+    "days_per_week": 4,
+    "months": 3,
+    "cities": [],
+    "acceptable_cities": [],
+    "remote_ok": null,
+    "relocate": null
+  },
+  "target": {
+    "employment_types": [],
+    "roles": [],
+    "industries": [],
+    "salary_min": {"amount": 4500, "unit": "CNY/month"},
+    "directions": [],
+    "weights": null
+  },
+  "skills": [],
+  "experience": [],
+  "awards": [],
+  "certificates": [],
+  "languages": [],
+  "exclusions": {"cities": [], "companies": [], "keywords": []}
+}

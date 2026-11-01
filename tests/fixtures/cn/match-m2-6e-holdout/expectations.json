@@ -1,0 +1,150 @@
+{
+  "task": "V19",
+  "method": "manual_semantic_oracle_before_first_product_run",
+  "schema_note": "salary沿用已公开结构；其余键只是语义断言，不要求实现使用这些字段名",
+  "contract": {
+    "range": "取上下限的算术平均，不取上限或下限",
+    "daily": "中间值 × 4 × 52 ÷ 12；两份日薪JD也明确写每周4天，没有天数来源冲突",
+    "annual": "中间值 ÷ 12",
+    "hourly": "不折算，月薪和薪资分数保持未知；即使另有可确定的月餐补，也不能把餐补当成全部薪资",
+    "meal_credit": "两餐或三餐均加600元/月，一餐不加；现金餐补按明确的月金额加；未写金额不加",
+    "score": "M < 4500 时0；4500 <= M <= 6500 时50；M > 6500 时 min(100, 50 + (M - 6500) / 800 * 10)",
+    "endpoints_basis": "低于最低才为0、高于理想才加分，因此等于最低和等于理想均为50",
+    "rounding": "数学值独立记录；任务未规定非整数分的存储/取整方式，见R2"
+  },
+  "cases": [
+    {
+      "id": "v19-01", "fixture": "v19-01-daily-range-three-meals.txt", "direction": "tech",
+      "salary": {"min": 150, "max": 180, "unit": "CNY/day", "months": null, "negotiable": false},
+      "salary_evidence": "报酬：150-180元/天。",
+      "meals_per_day": 3, "board_and_lodging_stated": false,
+      "cash_subsidy": {"status": "not_stated", "amount": null, "unit": null},
+      "benefit_evidence": ["福利：工作日包三餐，另有通勤班车。"],
+      "salary_midpoint": 165, "base_monthly": 2860,
+      "meal_credit_monthly": 600, "cash_subsidy_monthly": 0, "comparable_monthly": 3460,
+      "calculation": "(150 + 180) / 2 * 4 * 52 / 12 + 600 = 3460 < 4500",
+      "score_status": "fixed", "score": 0, "exact_capped_score": 0,
+      "must_not": ["按30天计算日薪", "按上限180计算", "三餐把600重复乘3", "给班车臆造补贴"]
+    },
+    {
+      "id": "v19-02", "fixture": "v19-02-daily-single-two-meals.txt", "direction": "tech",
+      "salary": {"min": 225, "max": 225, "unit": "CNY/day", "months": null, "negotiable": false},
+      "salary_evidence": "待遇：日薪225元。",
+      "meals_per_day": 2, "board_and_lodging_stated": false,
+      "cash_subsidy": {"status": "not_stated", "amount": null, "unit": null},
+      "benefit_evidence": ["福利：工作日包两餐（午餐和晚餐）。"],
+      "salary_midpoint": 225, "base_monthly": 3900,
+      "meal_credit_monthly": 600, "cash_subsidy_monthly": 0, "comparable_monthly": 4500,
+      "calculation": "225 * 4 * 52 / 12 + 600 = 4500，恰好达到最低期望",
+      "score_status": "fixed", "score": 50, "exact_capped_score": 50,
+      "must_not": ["包两餐不计入", "把包两餐只折算400", "等于最低时记0"]
+    },
+    {
+      "id": "v19-03", "fixture": "v19-03-monthly-range-lunch.txt", "direction": "design",
+      "salary": {"min": 5000, "max": 8000, "unit": "CNY/month", "months": null, "negotiable": false},
+      "salary_evidence": "薪酬：5-8K/月。",
+      "meals_per_day": 1, "board_and_lodging_stated": false,
+      "cash_subsidy": {"status": "not_stated", "amount": null, "unit": null},
+      "benefit_evidence": ["福利：包午餐；晚餐自行安排。"],
+      "salary_midpoint": 6500, "base_monthly": 6500,
+      "meal_credit_monthly": 0, "cash_subsidy_monthly": 0, "comparable_monthly": 6500,
+      "calculation": "(5000 + 8000) / 2 = 6500，等于理想值；只有午餐不加600",
+      "score_status": "fixed", "score": 50, "exact_capped_score": 50,
+      "must_not": ["取区间上限8000", "见到包餐关键词就加600", "等于理想时直接记100"]
+    },
+    {
+      "id": "v19-04", "fixture": "v19-04-annual-cash-meals.txt", "direction": "market",
+      "salary": {"min": 120000, "max": 120000, "unit": "CNY/year", "months": null, "negotiable": false},
+      "salary_evidence": "薪资：年薪12万，固定薪资不含以下补助。",
+      "meals_per_day": null, "board_and_lodging_stated": false,
+      "cash_subsidy": {"status": "stated_amount", "amount": 600, "unit": "CNY/month"},
+      "benefit_evidence": ["福利：餐补600元/月，另有节日礼盒。"],
+      "salary_midpoint": 120000, "base_monthly": 10000,
+      "meal_credit_monthly": 0, "cash_subsidy_monthly": 600, "comparable_monthly": 10600,
+      "calculation": "120000 / 12 + 600 = 10600；50 + (10600 - 6500) / 800 * 10 = 101.25，封顶100",
+      "score_status": "fixed", "score": 100, "exact_capped_score": 100,
+      "must_not": ["把600月餐补再除12", "把餐补当成岗位本薪", "把礼盒折成金额", "分数超过100"]
+    },
+    {
+      "id": "v19-05", "fixture": "v19-05-monthly-unspecified-subsidy.txt", "direction": "ops",
+      "salary": {"min": 6900, "max": 6900, "unit": "CNY/month", "months": null, "negotiable": false},
+      "salary_evidence": "待遇：月薪6900元。",
+      "meals_per_day": null, "board_and_lodging_stated": false,
+      "cash_subsidy": {"status": "unspecified_amount", "amount": null, "unit": null},
+      "benefit_evidence": ["福利：五险一金、餐补、带薪培训，餐补金额入职后另行说明。"],
+      "salary_midpoint": 6900, "base_monthly": 6900,
+      "meal_credit_monthly": 0, "cash_subsidy_monthly": 0, "comparable_monthly": 6900,
+      "calculation": "50 + (6900 - 6500) / 800 * 10 = 55，半步长加5分",
+      "score_status": "fixed", "score": 55, "exact_capped_score": 55,
+      "must_not": ["餐补金额未知就套用包餐600", "必须满一个步长才加分", "半步长向上记10分"]
+    },
+    {
+      "id": "v19-06", "fixture": "v19-06-monthly-board-lodging.txt", "direction": "operations_nontech",
+      "salary": {"min": 6500, "max": 6500, "unit": "CNY/month", "months": null, "negotiable": false},
+      "salary_evidence": "待遇：月薪6500元。",
+      "meals_per_day": null, "board_and_lodging_stated": true,
+      "cash_subsidy": {"status": "not_stated", "amount": null, "unit": null},
+      "benefit_evidence": ["福利：包吃住，工作服由公司提供。"],
+      "salary_midpoint": 6500, "base_monthly": 6500,
+      "meal_credit_monthly": null, "cash_subsidy_monthly": 0, "comparable_monthly": null,
+      "calculation": "本薪6500可确定；包吃住没写几餐，是否触发包餐折合待R1",
+      "score_status": "pending_ruling", "score": null, "exact_capped_score": null,
+      "pending": ["R1", "R2若R1裁定加600"],
+      "conditional_outcomes": [
+        {"condition": "未写两/三餐不触发折合", "meal_credit_monthly": 0, "comparable_monthly": 6500, "exact_capped_score": 50},
+        {"condition": "包吃住等同可折合的包餐", "meal_credit_monthly": 600, "comparable_monthly": 7100, "exact_capped_score": 57.5}
+      ],
+      "must_not": ["把包吃住写成原文明说三餐", "擅自给住宿或工作服估价", "把未裁定当成金额为0的既定规则"]
+    },
+    {
+      "id": "v19-07", "fixture": "v19-07-negotiable-snacks-canteen.txt", "direction": "events_nontech",
+      "salary": {"min": null, "max": null, "unit": null, "months": null, "negotiable": true},
+      "salary_evidence": "薪资面议。",
+      "meals_per_day": null, "board_and_lodging_stated": false,
+      "cash_subsidy": {"status": "not_stated", "amount": null, "unit": null},
+      "benefit_evidence": ["公司提供免费零食；园区有食堂，就餐费用自理。"],
+      "salary_midpoint": null, "base_monthly": null,
+      "meal_credit_monthly": 0, "cash_subsidy_monthly": 0, "comparable_monthly": null,
+      "calculation": "面议没有可换算金额；免费零食、可自费就餐的食堂不证明包两/三餐",
+      "score_status": "unknown", "score": null, "exact_capped_score": null,
+      "must_not": ["面议记0分", "把零食当包餐", "有食堂就折合600"]
+    },
+    {
+      "id": "v19-08", "fixture": "v19-08-hourly-catering-industry.txt", "direction": "service_nontech",
+      "salary": {"min": 35, "max": 45, "unit": "CNY/hour", "months": null, "negotiable": false},
+      "salary_evidence": "薪酬：35-45元/小时。",
+      "meals_per_day": null, "board_and_lodging_stated": false,
+      "cash_subsidy": {"status": "stated_amount", "amount": 300, "unit": "CNY/month"},
+      "benefit_evidence": ["工作内容：核验餐饮行业客户的门店资料，不参与餐食制作。", "福利：餐补300元/月，此项在时薪之外单独发放。"],
+      "salary_midpoint": 40, "base_monthly": null,
+      "meal_credit_monthly": 0, "cash_subsidy_monthly": 300, "comparable_monthly": null,
+      "calculation": "(35 + 45) / 2 = 40元/小时；小时不换算，不假设每天8小时；300月餐补可读出但总月薪仍未知",
+      "score_status": "unknown", "score": null, "exact_capped_score": null,
+      "must_not": ["餐饮行业被当成包餐", "按每天8小时擅自折月薪", "只拿300餐补计算薪资分", "把时薪和月餐补直接相加"]
+    },
+    {
+      "id": "v19-09", "fixture": "v19-09-monthly-fractional-step.txt", "direction": "education_nontech",
+      "salary": {"min": 6700, "max": 6700, "unit": "CNY/month", "months": null, "negotiable": false},
+      "salary_evidence": "固定薪酬：月薪6700元。",
+      "meals_per_day": null, "board_and_lodging_stated": false,
+      "cash_subsidy": {"status": "explicitly_denied", "amount": null, "unit": null},
+      "benefit_evidence": ["本岗不包餐，也不发餐补。"],
+      "salary_midpoint": 6700, "base_monthly": 6700,
+      "meal_credit_monthly": 0, "cash_subsidy_monthly": 0, "comparable_monthly": 6700,
+      "calculation": "50 + (6700 - 6500) / 800 * 10 = 52.5；任务未规定最后是否取整",
+      "score_status": "pending_rounding", "score": null, "exact_capped_score": 52.5,
+      "pending": ["R2"],
+      "must_not": ["忽略否定并加包餐金额", "没满一步长就记50", "把存储分数的取整方式冒充任务已定规则"]
+    }
+  ],
+  "pending_rulings": [
+    {
+      "id": "R1", "case_ids": ["v19-06"],
+      "question": "包吃住未明确几餐，是否算可加档案包餐折合额的包餐？不管如何裁定，都不能伪造原文明示的餐数或给住宿另行估价。"
+    },
+    {
+      "id": "R2", "case_ids": ["v19-09", "v19-06若R1同意折合"],
+      "question": "按比例计算得到52.5等非整数时，薪资维度保留小数还是取整？如取整，在哪一步、按什么规则？当前只冻结精确数学值。"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "jobs": [
+    {
+      "schema_version": 1,
+      "id": "job_efda6dffe821",
+      "source": {
+        "type": "file",
+        "site": "other",
+        "url": null,
+        "imported_at": "2026-11-01T12:09:06+08:00"
+      },
+      "title": "培训班务协调员",
+      "company": "示例栖弦教育有限公司",
+      "cities": [
+        "济南"
+      ],
+      "remote": null,
+      "employment_type": "experienced",
+      "salary": {
+        "min": 6700,
+        "max": 6700,
+        "unit": "CNY/month",
+        "months": null,
+        "negotiable": false
+      },
+      "requirements": {
+        "graduation": null,
+        "days_per_week": null,
+        "min_months": null,
+        "education": null,
+        "skills": [],
+        "skill_alternatives": [],
+        "start": null
+      },
+      "interview": null,
+      "benefits": {
+        "meals": null
+      },
+      "return_offer": null,
+      "published_at": null,
+      "deadline": null,
+      "status": "new",
+      "evidence": {
+        "title": {
+          "text": "培训班务协调员",
+          "method": "rule"
+        },
+        "company": {
+          "text": "示例栖弦教育有限公司",
+          "method": "rule"
+        },
+        "cities": {
+          "text": "工作地点：济南",
+          "method": "rule"
+        },
+        "employment_type": {
+          "text": "社会招聘",
+          "method": "rule"
+        },
+        "salary": {
+          "text": "月薪6700元",
+          "method": "rule"
+        }
+      },
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      },
+      "raw_text": "职位名称：培训班务协调员\n公司：示例栖弦教育有限公司\n工作地点：济南\n招聘类别：社会招聘。\n工作内容：编排教室日程，归档学员签到表。\n固定薪酬：月薪6700元。\n本岗不包餐，也不发餐补。\n本招聘文本为V19原创虚构样例。"
+    }
+  ],
+  "warnings": [],
+  "saved": [
+    {
+      "action": "created",
+      "id": "job_efda6dffe821",
+      "title": "培训班务协调员",
+      "company": "示例栖弦教育有限公司",
+      "cities": [
+        "济南"
+      ],
+      "status": "new"
+    }
+  ]
+}
