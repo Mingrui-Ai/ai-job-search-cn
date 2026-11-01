@@ -1,0 +1,67 @@
+{
+  "target_commit": "50b383e95a7c18c824ad9d4f8d036b22986148d1",
+  "source": "#93 的公开契约与 V19 冻结语义期望之间的独立映射；不修改冻结文件",
+  "profile_additions": {
+    "salary_ideal": {"amount": 6500, "unit": "CNY/month"},
+    "salary_step": 800,
+    "meal_value": {"amount": 600, "unit": "CNY/month"},
+    "salary_days_per_week": 4,
+    "one_meal_points": 7
+  },
+  "one_meal_points_note": "冻结任务单没有这个后来新增的参数；7 是本次另行选取的虚构值，只用于验证固定加分。",
+  "public_contract_changes": [
+    "薪资区间取最低值，不取冻结任务单中的中间值",
+    "低于最低期望时从 50 分按步长比例扣分，不直接记 0",
+    "日薪优先使用 JD 写的每周天数，JD 未写才使用档案参数",
+    "只包一餐在分档分数上加 one_meal_points",
+    "包吃未写餐数也加入 meal_value",
+    "最终分数四舍五入为整数"
+  ],
+  "cases": {
+    "v19-01": {
+      "meals": {"per_day": 3, "allowance": null},
+      "comparable_monthly": 3200,
+      "score": 34
+    },
+    "v19-02": {
+      "meals": {"per_day": 2, "allowance": null},
+      "comparable_monthly": 4500,
+      "score": 50
+    },
+    "v19-03": {
+      "meals": {"per_day": 1, "allowance": null},
+      "comparable_monthly": 5000,
+      "score": 57
+    },
+    "v19-04": {
+      "meals": {"per_day": 0, "allowance": {"amount": 600, "unit": "CNY/month"}},
+      "comparable_monthly": 10600,
+      "score": 100
+    },
+    "v19-05": {
+      "meals": null,
+      "comparable_monthly": 6900,
+      "score": 55
+    },
+    "v19-06": {
+      "meals": {"per_day": null, "allowance": null},
+      "comparable_monthly": 7100,
+      "score": 58
+    },
+    "v19-07": {
+      "meals": null,
+      "comparable_monthly": null,
+      "score": null
+    },
+    "v19-08": {
+      "meals": {"per_day": 0, "allowance": {"amount": 300, "unit": "CNY/month"}},
+      "comparable_monthly": null,
+      "score": null
+    },
+    "v19-09": {
+      "meals": null,
+      "comparable_monthly": 6700,
+      "score": 53
+    }
+  }
+}

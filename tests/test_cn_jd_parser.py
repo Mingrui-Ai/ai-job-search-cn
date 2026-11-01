@@ -541,6 +541,45 @@ SEED_CASES = (
     ("熟悉GPS定位，能输出PSD切图", "requirements.skills", []),
     # H18: HTML, CSS and SVN, which V8 found unread; a file name, SCSS or XHTML is not them.
     ("熟悉 HTML/CSS/JavaScript，版本工具用 Git、SVN", "requirements.skills", ["HTML", "CSS", "JavaScript", "Git", "SVN"]),
+    # H21: a version right after an English term still names it, glued or a space away, with dots, a "v"
+    # in front or ".x" at the end ...
+    ("熟悉 HTML5、CSS3 和 Vue3，会 Python3、Java8", "requirements.skills", ["HTML", "CSS", "Vue", "Python", "Java"]),
+    ("熟练使用 Python 3.10，了解 Pythonv3.11", "requirements.skills", ["Python"]),
+    ("熟悉 Python v3.11 和 Vue2.x", "requirements.skills", ["Python", "Vue"]),
+    ("熟练使用 Photoshop 2024 和 Excel 2016", "requirements.skills", ["Photoshop", "Excel"]),
+    ("熟悉 Java8+、C++11/14、MySQL8.0 和 Golang1.21", "requirements.skills", ["Java", "C++", "MySQL", "Golang"]),
+    ("熟练使用 PS2024 和 Figma", "requirements.skills", ["PS", "Figma"]),
+    # ... but a name with a digit inside stays whole, a version must not run into letters, one digit
+    # after PS is a games console, and a number further off is no version.
+    ("会用 C4D 建模", "requirements.skills", ["C4D"]),
+    ("玩过 PS4、PS5 和 PS 5，会用 Figma", "requirements.skills", ["Figma"]),
+    ("熟悉Python3D渲染", "requirements.skills", []),
+    ("有 3 年以上 Python 开发经验，熟悉Python3。", "requirements.skills", ["Python"]),
+    ("熟悉 Python 3.10 或 Java 8（任选其一）", ALTERNATIVES, [["Python", "Java"]]),
+    # H21 with H29: a version does not break a list of office software, nor make plain words software.
+    ("熟悉 Office 2016 和 Word 2019", "requirements.skills", ["Office", "Word"]),
+    ("熟悉 Word 2019 和 Office 2016", "requirements.skills", ["Word", "Office"]),
+    ("Excel2016、Word2019", "requirements.skills", ["Excel", "Word"]),
+    ("熟练使用 Excel 2016、WPS 2019", "requirements.skills", ["Excel", "WPS"]),
+    # ... and neither does a "+" after the version, with or without one.
+    ("熟悉 Office 365 和 Word 2019", "requirements.skills", ["Office", "Word"]),
+    ("熟悉 Office 365+ 和 Word 2019", "requirements.skills", ["Office", "Word"]),
+    ("熟悉 Excel 2016 和 Word 2019", "requirements.skills", ["Excel", "Word"]),
+    ("熟悉 Excel 2016+ 和 Word 2019", "requirements.skills", ["Excel", "Word"]),
+    ("熟悉 WPS 2019 和 Office 2016", "requirements.skills", ["WPS", "Office"]),
+    ("熟悉 WPS 2019+ 和 Office 2016", "requirements.skills", ["WPS", "Office"]),
+    ("熟悉 Word 2019 和 Office 2016", "requirements.skills", ["Word", "Office"]),
+    ("熟悉 Word 2019+ 和 Office 2016", "requirements.skills", ["Word", "Office"]),
+    ("word 2019 and office 2016", "requirements.skills", []),
+    ("Experience with office 2016 relocation", "requirements.skills", []),
+    # ... and a number with a time or count unit is neither a version nor a console: PS 5年 is Photoshop.
+    ("PS 5年以上经验，玩过 PS5", "requirements.skills", ["PS"]),
+    # A decimal or ".x" after PS is a Photoshop version, not a console.
+    ("熟练使用 PS 5.1", "requirements.skills", ["PS"]),
+    ("熟练使用 PS5.x 和 Figma", "requirements.skills", ["PS", "Figma"]),
+    ("玩过 PS4 和 PS 5。会用 Figma", "requirements.skills", ["Figma"]),
+    ("Python3年以上，Java 2 个月实习，Excel 10w 行数据", "requirements.skills", ["Python", "Java", "Excel"]),
+    ("熟悉 Vue2.x 或 React", ALTERNATIVES, [["Vue", "React"]]),
     ("样式用SCSS编写，模板见 docs/index.html，兼容XHTML", "requirements.skills", []),
     # The interview or written-test city on a location line is not a work city.
     ("工作地点：深圳南山区；面试地点：北京。", "cities", ["深圳"]),
@@ -637,6 +676,42 @@ SEED_CASES = (
     ("不要求 Rust 或 C++ 经验", ALTERNATIVES, []),
     ("熟悉 Go 或 Golang", ALTERNATIVES, []),
     ("熟悉 Java 或 Go；Java 或 Go 至少精通一门", ALTERNATIVES, [["Java", "Go"]]),
+    # M2-6e: the meals a day the job provides, and a meal allowance with its amount and period.
+    ("包三餐", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("提供一日三餐", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("三餐全包", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("包两餐", "benefits.meals", {"per_day": 2, "allowance": None}),
+    ("提供午餐和晚餐", "benefits.meals", {"per_day": 2, "allowance": None}),
+    ("包午晚餐", "benefits.meals", {"per_day": 2, "allowance": None}),
+    # #93 review: three meals named one by one are three, not the two of their first pair; two named stay two.
+    ("提供早餐、午餐和晚餐", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("提供早餐、午餐及晚餐", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("包早中晚三餐", "benefits.meals", {"per_day": 3, "allowance": None}),
+    ("提供早餐、午餐", "benefits.meals", {"per_day": 2, "allowance": None}),
+    ("提供早餐和午餐", "benefits.meals", {"per_day": 2, "allowance": None}),
+    ("包吃住", "benefits.meals", {"per_day": None, "allowance": None}),
+    ("包吃不包住", "benefits.meals", {"per_day": None, "allowance": None}),
+    ("提供食宿", "benefits.meals", {"per_day": None, "allowance": None}),
+    ("管吃管住", "benefits.meals", {"per_day": None, "allowance": None}),
+    ("提供午餐", "benefits.meals", {"per_day": 1, "allowance": None}),
+    ("免费工作餐", "benefits.meals", {"per_day": 1, "allowance": None}),
+    ("包一餐", "benefits.meals", {"per_day": 1, "allowance": None}),
+    ("餐补 25 元/天", "benefits.meals", {"per_day": 0, "allowance": {"amount": 25, "unit": "CNY/day"}}),
+    ("每天餐补30元", "benefits.meals", {"per_day": 0, "allowance": {"amount": 30, "unit": "CNY/day"}}),
+    ("餐补每月 500 元", "benefits.meals", {"per_day": 0, "allowance": {"amount": 500, "unit": "CNY/month"}}),
+    ("餐补：480元/月", "benefits.meals", {"per_day": 0, "allowance": {"amount": 480, "unit": "CNY/month"}}),
+    # A meal word with 补贴 after it is an allowance, not a meal.
+    ("提供午餐补贴 22 元/天", "benefits.meals", {"per_day": 0, "allowance": {"amount": 22, "unit": "CNY/day"}}),
+    ("包午餐，另有餐补 12 元/天", "benefits.meals", {"per_day": 1, "allowance": {"amount": 12, "unit": "CNY/day"}}),
+    # Not read: what the JD refuses, an allowance without an amount or a period, a canteen, no meal at all.
+    ("包住不包吃", "benefits.meals", None),
+    ("不包吃住", "benefits.meals", None),
+    ("不提供三餐", "benefits.meals", None),
+    ("无餐补", "benefits.meals", None),
+    ("有餐补", "benefits.meals", None),
+    ("餐补300元", "benefits.meals", None),
+    ("员工食堂", "benefits.meals", None),
+    ("背包吃饭", "benefits.meals", None),
 )
 
 
@@ -890,6 +965,16 @@ class InterviewAndStart(unittest.TestCase):
         record = parse_one("尽快到岗，最晚11月15日前到岗")
         self.assertEqual(record["evidence"]["requirements.start"]["text"], ["最晚11月15日前到岗", "尽快到岗"])
 
+    def test_meals_cite_each_clause_and_count_the_most(self):
+        # M2-6e: a meal and an allowance cite both clauses; 包吃 with no count and 包三餐 is three meals.
+        record = parse_one("包午餐，另有餐补 12 元/天")
+        self.assertEqual(record["evidence"]["benefits.meals"], {"text": ["包午餐", "另有餐补 12 元/天"], "method": "rule"})
+        self.assertEqual(parse_one("包吃住，提供一日三餐")["benefits"]["meals"]["per_day"], 3)
+        self.assertEqual(parse_one("提供午餐；包吃包住")["benefits"]["meals"]["per_day"], None)
+        record = parse_one("岗位职责：负责后端开发")
+        self.assertEqual(record["benefits"], {"meals": None})
+        self.assertNotIn("benefits.meals", record["evidence"])
+
     def test_nothing_read_nothing_cited(self):
         record = parse_one("岗位职责：负责后端开发")
         self.assertIsNone(record["interview"])
@@ -959,6 +1044,41 @@ class SkillAlternatives(unittest.TestCase):
         record = parse_one("熟悉 Docker 并能在高并发、大流量的复杂业务场景下持续优化性能与稳定性的同时用 Python 或 SQL 做数据分析")
         self.assertEqual(record["evidence"][ALTERNATIVES]["text"], "Python 或 SQL")
         self.assertEqual(record["requirements"]["skill_alternatives"], [["Python", "SQL"]])
+
+
+class VersionedSkills(unittest.TestCase):
+    """H21: a version after an English term is part of the match, so the evidence and a choice still hold."""
+
+    @staticmethod
+    def snippets(record: dict, path: str) -> str:
+        text = record["evidence"][path]["text"]
+        return "\n".join(text) if isinstance(text, list) else text
+
+    def test_the_evidence_quotes_the_versioned_spelling_and_the_record_is_valid(self):
+        record = parse_one("任职要求：\n1. 熟悉 HTML5、CSS3，会 Vue2.x；\n2. 熟悉 Python 3.10 或 Java 8，二选一。")
+        self.assertEqual(record["requirements"]["skills"], ["HTML", "CSS", "Vue", "Python", "Java"])
+        self.assertEqual(record["requirements"]["skill_alternatives"], [["Python", "Java"]])
+        self.assertIn("HTML5、CSS3", self.snippets(record, "requirements.skills"))
+        self.assertIn("Python 3.10 或 Java 8", self.snippets(record, ALTERNATIVES))
+        self.assertEqual(schema.validate(record), [])
+
+    def test_a_number_with_a_unit_stays_out_of_the_evidence(self):
+        record = parse_one("任职要求：熟悉 Python 3 年以上，会 PS 5年")
+        self.assertEqual(record["requirements"]["skills"], ["Python", "PS"])
+        self.assertEqual(schema.validate(record), [])
+        for term, text in (("Python", "Python 3 年以上"), ("Python", "Python3个月"), ("PS", "PS 5年"),
+                           # A version with a unit after it is not cut short to a shorter version.
+                           ("Python", "Python 3.5年"), ("Python", "Python3.10 个月"), ("PS", "PS5.0年"),
+                           ("PS", "PS 5.1 个月"), ("Vue", "Vue2.x年")):
+            self.assertEqual(jd_parser._skill_pattern(term).search(text).group(), term, text)
+        for term, text, version in (("Python", "Python 3.10 版本", "Python 3.10"), ("Java", "熟悉 Java 8。", "Java 8"),
+                                    ("Vue", "会用 Vue2.x 开发", "Vue2.x"), ("PS", "PS 5.1 修图", "PS 5.1")):
+            self.assertEqual(jd_parser._skill_pattern(term).search(text).group(), version)
+
+    def test_a_console_next_to_photoshop_is_not_read(self):
+        record = parse_one("岗位要求：熟练使用 Photoshop，热爱游戏，玩过 PS5 优先")
+        self.assertEqual(record["requirements"]["skills"], ["Photoshop"])
+        self.assertNotIn("PS5", self.snippets(record, "requirements.skills"))
 
 
 INJECTIONS = (

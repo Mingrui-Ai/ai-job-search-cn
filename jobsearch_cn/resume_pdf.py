@@ -149,6 +149,22 @@ def _build_folder(temp: str, content: dict) -> Path:
     return folder
 
 
+def _replace(output: Path, data: bytes) -> None:
+    """Write beside output, then rename over it, as store._write_json does.
+
+    Nothing is written through what is at output: a hard link there keeps the file it shares,
+    and an interrupted write leaves the old PDF rather than half a new one.
+    """
+    fd, temp = tempfile.mkstemp(dir=output.parent, prefix=".tmp-", suffix=".pdf")
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(data)
+        os.replace(temp, output)
+    except BaseException:
+        Path(temp).unlink(missing_ok=True)
+        raise
+
+
 def render(content: dict, output: Path, typst: str | None = None) -> dict:
     """Write content to output as a one-page PDF; nothing is written when it does not fit."""
     program = find_typst(typst)
@@ -156,7 +172,7 @@ def render(content: dict, output: Path, typst: str | None = None) -> dict:
     with tempfile.TemporaryDirectory(prefix="jobsearch-cn-resume-") as temp:
         folder = _build_folder(temp, content)
         spaciness, data = _fit(lambda value: _compile(folder, program, fonts, value))
-    output.write_bytes(data)
+    _replace(output, data)
     return {"pdf": str(output), "spaciness": spaciness, "fonts": fonts}
 
 
