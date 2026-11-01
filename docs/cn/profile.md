@@ -81,6 +81,7 @@ data/profile/
 | `skills[]` | `level`：`familiar`（了解）、`working`（熟悉）、`proficient`（熟练）、`expert`（精通）。`used_in` 指向用到它的经历或项目的 `id`，写简历时据此给出事实依据。收录范围见下方"填写约定" |
 | `experience[]` | 实习、项目、科研、竞赛、校园经历都放这里，用 `type` 区分：`internship` / `project` / `research` / `competition` / `campus` / `work`。`name`、`org`、`role` 的分工见下方"填写约定" |
 | `awards[]`、`certificates[]`、`languages[]` | 奖项、证书、语言 |
+| `id`（条目） | 经历的 `id` 必填；`education[]`、`awards[]`、`certificates[]`、`languages[]` 的条目可以带 `id`（M3-1），简历材料靠它引用条目，见 [material.md](material.md)。写法同经历：小写字母、数字和连字符，例如 `edu-1`、`award-1`、`cert-1`、`lang-1`（前缀只是约定）。整份档案里不能重复，跨表也不行。旧档案没有这些 `id` 照样合法，`profile validate` 不提示；要写简历时由 cn-setup 补上 |
 | `exclusions` | 硬性排除：不去的城市（岗位的工作城市全部在其中时才排除）、不考虑的公司、标题中出现即排除的关键词（只看标题，不看正文，见 [match.md](match.md#各项条件)） |
 
 **填写约定**（2026-10-27 起，H7；两个 Agent 对同一份简历必须填得一样）：
@@ -100,7 +101,7 @@ data/profile/
 **校验规则**（`profile validate`）：
 
 - 日期格式为 `YYYY-MM` 或 `YYYY-MM-DD`，开始不晚于结束；
-- 枚举值合法；`used_in` 指向的 `id` 必须存在；`id` 不能重复；
+- 枚举值合法；`used_in` 指向的 `id` 必须存在，并且是经历的 `id`；`id` 在整份档案里不能重复；
 - `source` 是 `user`，或者是 `sources/` 下确实存在的文件；
 - 每周天数 1–7，月数 1–24，毕业年份在合理范围内。
 
