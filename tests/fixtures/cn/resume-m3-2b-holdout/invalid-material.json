@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "kind": "resume",
+  "job_id": "job_v22_invalid",
+  "profile_hash": "670f4cbd7fcb8de44ed4c1b65cb0f884e93984d6a5c55afa2e255a94cb7206a2",
+  "created": "2026-11-01T14:30:00+08:00",
+  "summary": null,
+  "education": [{"ref": "edu-a1", "courses": []}],
+  "experience": [
+    {"ref": "intern-a1", "bullets": [
+      {"text": "使用 Go 和 Docker 维护订单服务，连续 99 周整理发布记录", "refs": ["intern-a1"]}
+    ]}
+  ],
+  "skills": ["Go", "Docker"],
+  "awards": [],
+  "certificates": [],
+  "languages": []
+}

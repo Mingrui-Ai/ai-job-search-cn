@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "contact": {
+    "name": "示例候选人丙",
+    "phone": "13900000000",
+    "email": null,
+    "github": "github.com/example-candidate-c",
+    "website": null
+  },
+  "graduation": {"year": 2027, "month": 6},
+  "education": [
+    {
+      "id": "edu-c1",
+      "level": "bachelor",
+      "school": "示例青丘学院",
+      "major": "统计学",
+      "start": "2023-09",
+      "end": "2027-06",
+      "gpa": null,
+      "rank": null,
+      "courses": ["统计建模", "数据可视化"],
+      "source": "resume.txt"
+    }
+  ],
+  "availability": {
+    "start_date": "2027-01-15",
+    "days_per_week": 4,
+    "months": 5,
+    "cities": ["成都"],
+    "acceptable_cities": [],
+    "remote_ok": true,
+    "relocate": false
+  },
+  "target": {
+    "employment_types": ["internship"],
+    "roles": ["数据分析"],
+    "industries": ["零售"],
+    "salary_min": null,
+    "salary_ideal": null,
+    "salary_step": null,
+    "meal_value": null,
+    "salary_days_per_week": null,
+    "one_meal_points": null,
+    "directions": ["data"],
+    "weights": null
+  },
+  "skills": [
+    {"name": "Tableau", "level": "expert", "used_in": ["project-c2"], "source": "resume.txt"},
+    {"name": "Python", "level": "proficient", "used_in": ["intern-c1", "project-c1"], "source": "resume.txt"},
+    {"name": "Excel", "level": "working", "used_in": ["project-c2"], "source": "resume.txt"},
+    {"name": "SQL", "level": null, "used_in": ["intern-c1"], "source": "resume.txt"},
+    {"name": "Git", "level": "familiar", "used_in": [], "source": "resume.txt"}
+  ],
+  "experience": [
+    {
+      "id": "project-c2",
+      "type": "project",
+      "name": "门店客流看板",
+      "org": null,
+      "role": null,
+      "start": "2026-02",
+      "end": null,
+      "bullets": ["使用 Tableau 和 Excel 制作 24 张客流图表"],
+      "source": "resume.txt"
+    },
+    {
+      "id": "intern-c1",
+      "type": "internship",
+      "name": null,
+      "org": "示例杉原零售有限公司",
+      "role": "数据分析实习生",
+      "start": "2026-06",
+      "end": "2026-09",
+      "bullets": ["使用 Python 和 SQL 清洗 5000 条门店记录"],
+      "source": "resume.txt"
+    },
+    {
+      "id": "project-c1",
+      "type": "project",
+      "name": "课程成绩分析",
+      "org": null,
+      "role": null,
+      "start": "2025-10",
+      "end": "2025-12",
+      "bullets": ["使用 Python 分析 300 份课程成绩"],
+      "source": "resume.txt"
+    }
+  ],
+  "awards": [],
+  "certificates": [
+    {"id": "cert-c1", "name": "Tableau Desktop Specialist", "detail": "Demo-2026", "date": null, "source": "resume.txt"}
+  ],
+  "languages": [
+    {"id": "lang-c1", "name": "英语", "level": "CET-4 520", "source": "resume.txt"}
+  ],
+  "exclusions": {"cities": [], "companies": [], "keywords": []}
+}
