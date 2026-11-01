@@ -1,0 +1,294 @@
+[
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "profile",
+      "validate",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\match-m2-6e-holdout\\v19-01-daily-range-three-meals.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "score",
+      "job_3229a1d1e837",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\match-m2-6e-holdout\\v19-02-daily-single-two-meals.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "score",
+      "job_5b3f688e8610",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\match-m2-6e-holdout\\v19-03-monthly-range-lunch.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "score",
+      "job_bb0e4b2af4b5",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\match-m2-6e-holdout\\v19-04-annual-cash-meals.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "score",
+      "job_9f1dc3e701ce",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\match-m2-6e-holdout\\v19-05-monthly-unspecified-subsidy.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "score",
+      "job_f62c1cb6743d",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\match-m2-6e-holdout\\v19-06-monthly-board-lodging.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "score",
+      "job_2597364e6fff",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\match-m2-6e-holdout\\v19-07-negotiable-snacks-canteen.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "score",
+      "job_1f5011dd336a",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\match-m2-6e-holdout\\v19-08-hourly-catering-industry.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "score",
+      "job_b5a3b7122b1e",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\match-m2-6e-holdout\\v19-09-monthly-fractional-step.txt",
+      "--site",
+      "other",
+      "--save",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "score",
+      "job_efda6dffe821",
+      "--data-dir",
+      "<data-dir>"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  }
+]

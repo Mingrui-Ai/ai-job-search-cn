@@ -1,0 +1,82 @@
+{
+  "jobs": [
+    {
+      "schema_version": 1,
+      "id": "job_1f5011dd336a",
+      "source": {
+        "type": "file",
+        "site": "other",
+        "url": null,
+        "imported_at": "2026-10-30T15:16:14+08:00"
+      },
+      "title": "活动执行助理",
+      "company": "示例晴帆会展有限公司",
+      "cities": [
+        "厦门"
+      ],
+      "remote": null,
+      "employment_type": "campus",
+      "salary": {
+        "min": null,
+        "max": null,
+        "unit": null,
+        "months": null,
+        "negotiable": true
+      },
+      "requirements": {
+        "graduation": null,
+        "days_per_week": null,
+        "min_months": null,
+        "education": null,
+        "skills": [],
+        "skill_alternatives": [],
+        "start": null
+      },
+      "interview": null,
+      "return_offer": null,
+      "published_at": null,
+      "deadline": null,
+      "status": "new",
+      "evidence": {
+        "title": {
+          "text": "活动执行助理",
+          "method": "rule"
+        },
+        "company": {
+          "text": "示例晴帆会展有限公司",
+          "method": "rule"
+        },
+        "cities": {
+          "text": "工作地点：厦门",
+          "method": "rule"
+        },
+        "employment_type": {
+          "text": "校园招聘",
+          "method": "rule"
+        },
+        "salary": {
+          "text": "薪资面议",
+          "method": "rule"
+        }
+      },
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      },
+      "raw_text": "职位名称：活动执行助理\n公司：示例晴帆会展有限公司\n工作地点：厦门\n招聘类别：校园招聘。\n工作内容：核对会务物料，整理场地记录。\n薪资面议。\n公司提供免费零食；园区有食堂，就餐费用自理。\n本招聘文本为V19原创虚构样例。"
+    }
+  ],
+  "warnings": [],
+  "saved": [
+    {
+      "action": "created",
+      "id": "job_1f5011dd336a",
+      "title": "活动执行助理",
+      "company": "示例晴帆会展有限公司",
+      "cities": [
+        "厦门"
+      ],
+      "status": "new"
+    }
+  ]
+}

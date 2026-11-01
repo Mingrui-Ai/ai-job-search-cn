@@ -1,0 +1,180 @@
+{
+  "code_commit": "d8ec9adeff7dfc7ade1c8057f468bfc7e7104510",
+  "input_commit": "f6f87bb8d20c2bbc7c02844c82a42f3fce3a6145",
+  "manifest_sha256": "616aecd87d096684f633874cc26735d9de61d85dac1a2a5128538a28984ae032",
+  "python_version": "3.12.15",
+  "started_at_utc": "2026-10-30T07:16:11.843108+00:00",
+  "scope": "旧schema投影与旧评分行为；未把新参数或新福利字段伪装成已支持",
+  "profile_compatibility": "冻结baseline-profile的未知graduation对象机械映射为null；不修改冻结文件或薪资参数",
+  "new_contract_comparison": "not_executed_before_m2_6e_pr",
+  "cases": [
+    {
+      "id": "v19-01",
+      "parsed_salary": {
+        "min": 150,
+        "max": 180,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "salary_matches_manual_raw_amount": true,
+      "salary_dimension": {
+        "score": null,
+        "method": "rule",
+        "reason": "JD 按元/天、你按元/月计，单位不同，不换算"
+      },
+      "future_score_status": "fixed",
+      "future_score": 0
+    },
+    {
+      "id": "v19-02",
+      "parsed_salary": {
+        "min": 225,
+        "max": 225,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "salary_matches_manual_raw_amount": true,
+      "salary_dimension": {
+        "score": null,
+        "method": "rule",
+        "reason": "JD 按元/天、你按元/月计，单位不同，不换算"
+      },
+      "future_score_status": "fixed",
+      "future_score": 50
+    },
+    {
+      "id": "v19-03",
+      "parsed_salary": {
+        "min": 5000,
+        "max": 8000,
+        "unit": "CNY/month",
+        "months": null,
+        "negotiable": false
+      },
+      "salary_matches_manual_raw_amount": true,
+      "salary_dimension": {
+        "score": 100,
+        "method": "rule",
+        "reason": "JD 上限 8000 元/月，达到你的最低期望 4500 元/月"
+      },
+      "future_score_status": "fixed",
+      "future_score": 50
+    },
+    {
+      "id": "v19-04",
+      "parsed_salary": {
+        "min": 120000,
+        "max": 120000,
+        "unit": "CNY/year",
+        "months": null,
+        "negotiable": false
+      },
+      "salary_matches_manual_raw_amount": true,
+      "salary_dimension": {
+        "score": null,
+        "method": "rule",
+        "reason": "JD 按元/年、你按元/月计，单位不同，不换算"
+      },
+      "future_score_status": "fixed",
+      "future_score": 100
+    },
+    {
+      "id": "v19-05",
+      "parsed_salary": {
+        "min": 6900,
+        "max": 6900,
+        "unit": "CNY/month",
+        "months": null,
+        "negotiable": false
+      },
+      "salary_matches_manual_raw_amount": true,
+      "salary_dimension": {
+        "score": 100,
+        "method": "rule",
+        "reason": "JD 上限 6900 元/月，达到你的最低期望 4500 元/月"
+      },
+      "future_score_status": "fixed",
+      "future_score": 55
+    },
+    {
+      "id": "v19-06",
+      "parsed_salary": {
+        "min": 6500,
+        "max": 6500,
+        "unit": "CNY/month",
+        "months": null,
+        "negotiable": false
+      },
+      "salary_matches_manual_raw_amount": true,
+      "salary_dimension": {
+        "score": 100,
+        "method": "rule",
+        "reason": "JD 上限 6500 元/月，达到你的最低期望 4500 元/月"
+      },
+      "future_score_status": "pending_ruling",
+      "future_score": null
+    },
+    {
+      "id": "v19-07",
+      "parsed_salary": {
+        "min": null,
+        "max": null,
+        "unit": null,
+        "months": null,
+        "negotiable": true
+      },
+      "salary_matches_manual_raw_amount": true,
+      "salary_dimension": {
+        "score": null,
+        "method": "rule",
+        "reason": "JD 薪资面议"
+      },
+      "future_score_status": "unknown",
+      "future_score": null
+    },
+    {
+      "id": "v19-08",
+      "parsed_salary": {
+        "min": 35,
+        "max": 45,
+        "unit": "CNY/hour",
+        "months": null,
+        "negotiable": false
+      },
+      "salary_matches_manual_raw_amount": true,
+      "salary_dimension": {
+        "score": null,
+        "method": "rule",
+        "reason": "JD 按元/小时、你按元/月计，单位不同，不换算"
+      },
+      "future_score_status": "unknown",
+      "future_score": null
+    },
+    {
+      "id": "v19-09",
+      "parsed_salary": {
+        "min": 6700,
+        "max": 6700,
+        "unit": "CNY/month",
+        "months": null,
+        "negotiable": false
+      },
+      "salary_matches_manual_raw_amount": true,
+      "salary_dimension": {
+        "score": 100,
+        "method": "rule",
+        "reason": "JD 上限 6700 元/月，达到你的最低期望 4500 元/月"
+      },
+      "future_score_status": "pending_rounding",
+      "future_score": null
+    }
+  ],
+  "raw_salary_equal": 9,
+  "baseline_score_counts": {
+    "None": 5,
+    "100": 4
+  },
+  "commands": 19
+}
