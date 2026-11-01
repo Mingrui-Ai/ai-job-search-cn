@@ -13,6 +13,11 @@ FIX = Path(__file__).resolve().parent
 SLOT = re.compile(r"\{\{([a-z_]+)\}\}")
 LIMITS = {"greeting_body": 150, "email_subject": 40,
           "email_body": 600, "referral_body": 300}
+TEMPLATE_BY_DIRECTION = {
+    "tech": "tech", "data": "data", "product": "product", "ops": "ops",
+    "default": "default", "design": "default", "market": "default",
+    "finance": "default", "hr": "default", "general": "default",
+}
 
 
 def load(path):
@@ -58,6 +63,8 @@ def main():
     args = parser.parse_args()
     inputs, oracle = load("inputs.json"), load("expectations.json")
     assert oracle["length_limits"] == LIMITS
+    assert oracle["template_by_direction"] == TEMPLATE_BY_DIRECTION
+    assert oracle["template_families"] == ["tech", "data", "product", "ops", "default"]
     actual_paths = set()
     for path in sorted(FIX.rglob("*")):
         if path.is_dir():
@@ -108,7 +115,12 @@ def main():
         assert bool(want["required_error_categories"]) == (want["outcome"] == "reject")
         assert bool(want["required_warning_categories"]) == (want["outcome"] == "warn")
         if case["operation"] == "select_template":
-            selection_pairs.add((want["template_family"], case["kind"]))
+            direction = case["requested_direction"]
+            selection_pairs.add((direction, case["kind"]))
+            assert want["template_family"] == TEMPLATE_BY_DIRECTION[direction]
+            assert want["template_kind"] == case["kind"]
+            assert case["context"] == (direction if direction in {"tech", "data", "product", "ops"}
+                                       else "default")
             assert want["outcome"] == "accept"
             continue
         profile_ids = {entry["id"] for entry in contexts[case["context"]]["profile"]["experience"]}
@@ -131,14 +143,14 @@ def main():
             assert case["subject"] is None
 
     assert boundary_pairs == {(key, offset) for key in LIMITS for offset in (-1, 0, 1)}
-    if not args.pre_freeze:
-        assert selection_pairs == {(direction, kind) for direction in oracle["template_families"]
-                                   for kind in ("greeting", "email", "referral")}
-        assert len(oracle["template_families"]) == 5
+    assert selection_pairs == {(direction, kind) for direction in TEMPLATE_BY_DIRECTION
+                               for kind in ("greeting", "email", "referral")}
+    assert Counter(case["operation"] for case in cases) == {
+        "select_template": 30, "validate_candidate": 45}
     summary = {"contexts": len(contexts), "cases": len(cases),
                "outcomes": dict(Counter(case["outcome"] for case in expected)),
                "selection_cases": len(selection_pairs), "boundary_cases": len(boundary_pairs),
-               "frozen_files": len(actual_paths) - ("oracle-manifest.json" in actual_paths),
+               "corpus_files": len(actual_paths) - ("oracle-manifest.json" in actual_paths),
                "manifest_checked": not args.pre_freeze}
     print(json.dumps(summary, ensure_ascii=False))
 

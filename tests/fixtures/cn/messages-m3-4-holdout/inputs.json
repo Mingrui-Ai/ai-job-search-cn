@@ -6,6 +6,216 @@
   "placeholder_notation": "{{slot_name}} is oracle notation, to be mapped to the published PR grammar without changing rendered text",
   "cases": [
     {
+      "id": "select-tech-greeting",
+      "operation": "select_template",
+      "context": "tech",
+      "requested_direction": "tech",
+      "kind": "greeting"
+    },
+    {
+      "id": "select-tech-email",
+      "operation": "select_template",
+      "context": "tech",
+      "requested_direction": "tech",
+      "kind": "email"
+    },
+    {
+      "id": "select-tech-referral",
+      "operation": "select_template",
+      "context": "tech",
+      "requested_direction": "tech",
+      "kind": "referral"
+    },
+    {
+      "id": "select-data-greeting",
+      "operation": "select_template",
+      "context": "data",
+      "requested_direction": "data",
+      "kind": "greeting"
+    },
+    {
+      "id": "select-data-email",
+      "operation": "select_template",
+      "context": "data",
+      "requested_direction": "data",
+      "kind": "email"
+    },
+    {
+      "id": "select-data-referral",
+      "operation": "select_template",
+      "context": "data",
+      "requested_direction": "data",
+      "kind": "referral"
+    },
+    {
+      "id": "select-product-greeting",
+      "operation": "select_template",
+      "context": "product",
+      "requested_direction": "product",
+      "kind": "greeting"
+    },
+    {
+      "id": "select-product-email",
+      "operation": "select_template",
+      "context": "product",
+      "requested_direction": "product",
+      "kind": "email"
+    },
+    {
+      "id": "select-product-referral",
+      "operation": "select_template",
+      "context": "product",
+      "requested_direction": "product",
+      "kind": "referral"
+    },
+    {
+      "id": "select-ops-greeting",
+      "operation": "select_template",
+      "context": "ops",
+      "requested_direction": "ops",
+      "kind": "greeting"
+    },
+    {
+      "id": "select-ops-email",
+      "operation": "select_template",
+      "context": "ops",
+      "requested_direction": "ops",
+      "kind": "email"
+    },
+    {
+      "id": "select-ops-referral",
+      "operation": "select_template",
+      "context": "ops",
+      "requested_direction": "ops",
+      "kind": "referral"
+    },
+    {
+      "id": "select-default-greeting",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "default",
+      "kind": "greeting"
+    },
+    {
+      "id": "select-default-email",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "default",
+      "kind": "email"
+    },
+    {
+      "id": "select-default-referral",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "default",
+      "kind": "referral"
+    },
+    {
+      "id": "select-design-greeting",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "design",
+      "kind": "greeting"
+    },
+    {
+      "id": "select-design-email",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "design",
+      "kind": "email"
+    },
+    {
+      "id": "select-design-referral",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "design",
+      "kind": "referral"
+    },
+    {
+      "id": "select-market-greeting",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "market",
+      "kind": "greeting"
+    },
+    {
+      "id": "select-market-email",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "market",
+      "kind": "email"
+    },
+    {
+      "id": "select-market-referral",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "market",
+      "kind": "referral"
+    },
+    {
+      "id": "select-finance-greeting",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "finance",
+      "kind": "greeting"
+    },
+    {
+      "id": "select-finance-email",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "finance",
+      "kind": "email"
+    },
+    {
+      "id": "select-finance-referral",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "finance",
+      "kind": "referral"
+    },
+    {
+      "id": "select-hr-greeting",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "hr",
+      "kind": "greeting"
+    },
+    {
+      "id": "select-hr-email",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "hr",
+      "kind": "email"
+    },
+    {
+      "id": "select-hr-referral",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "hr",
+      "kind": "referral"
+    },
+    {
+      "id": "select-general-greeting",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "general",
+      "kind": "greeting"
+    },
+    {
+      "id": "select-general-email",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "general",
+      "kind": "email"
+    },
+    {
+      "id": "select-general-referral",
+      "operation": "select_template",
+      "context": "default",
+      "requested_direction": "general",
+      "kind": "referral"
+    },
+    {
       "id": "length-greeting_body-149",
       "operation": "validate_candidate",
       "context": "tech",

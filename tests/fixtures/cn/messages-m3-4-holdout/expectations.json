@@ -9,6 +9,306 @@
   },
   "cases": [
     {
+      "id": "select-tech-greeting",
+      "outcome": "accept",
+      "template_family": "tech",
+      "template_kind": "greeting",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 tech 的 greeting 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-tech-email",
+      "outcome": "accept",
+      "template_family": "tech",
+      "template_kind": "email",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 tech 的 email 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-tech-referral",
+      "outcome": "accept",
+      "template_family": "tech",
+      "template_kind": "referral",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 tech 的 referral 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-data-greeting",
+      "outcome": "accept",
+      "template_family": "data",
+      "template_kind": "greeting",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 data 的 greeting 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-data-email",
+      "outcome": "accept",
+      "template_family": "data",
+      "template_kind": "email",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 data 的 email 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-data-referral",
+      "outcome": "accept",
+      "template_family": "data",
+      "template_kind": "referral",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 data 的 referral 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-product-greeting",
+      "outcome": "accept",
+      "template_family": "product",
+      "template_kind": "greeting",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 product 的 greeting 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-product-email",
+      "outcome": "accept",
+      "template_family": "product",
+      "template_kind": "email",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 product 的 email 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-product-referral",
+      "outcome": "accept",
+      "template_family": "product",
+      "template_kind": "referral",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 product 的 referral 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-ops-greeting",
+      "outcome": "accept",
+      "template_family": "ops",
+      "template_kind": "greeting",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 ops 的 greeting 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-ops-email",
+      "outcome": "accept",
+      "template_family": "ops",
+      "template_kind": "email",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 ops 的 email 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-ops-referral",
+      "outcome": "accept",
+      "template_family": "ops",
+      "template_kind": "referral",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 ops 的 referral 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-default-greeting",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "greeting",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 default 的 greeting 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-default-email",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "email",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 default 的 email 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-default-referral",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "referral",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "明确请求 default 的 referral 模板，应选择对应模板族。"
+    },
+    {
+      "id": "select-design-greeting",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "greeting",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 design 第一版没有模板，greeting 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-design-email",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "email",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 design 第一版没有模板，email 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-design-referral",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "referral",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 design 第一版没有模板，referral 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-market-greeting",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "greeting",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 market 第一版没有模板，greeting 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-market-email",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "email",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 market 第一版没有模板，email 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-market-referral",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "referral",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 market 第一版没有模板，referral 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-finance-greeting",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "greeting",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 finance 第一版没有模板，greeting 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-finance-email",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "email",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 finance 第一版没有模板，email 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-finance-referral",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "referral",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 finance 第一版没有模板，referral 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-hr-greeting",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "greeting",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 hr 第一版没有模板，greeting 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-hr-email",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "email",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 hr 第一版没有模板，email 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-hr-referral",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "referral",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 hr 第一版没有模板，referral 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-general-greeting",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "greeting",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 general 第一版没有模板，greeting 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-general-email",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "email",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 general 第一版没有模板，email 应回退 default，不报不支持方向错误。"
+    },
+    {
+      "id": "select-general-referral",
+      "outcome": "accept",
+      "template_family": "default",
+      "template_kind": "referral",
+      "required_error_categories": [],
+      "required_warning_categories": [],
+      "allow_additional_warnings": true,
+      "rationale": "规划者已确认 general 第一版没有模板，referral 应回退 default，不报不支持方向错误。"
+    },
+    {
       "id": "length-greeting_body-149",
       "outcome": "accept",
       "required_error_categories": [],
@@ -544,5 +844,25 @@
       "allow_additional_warnings": true,
       "rationale": "salary_in_referral"
     }
-  ]
+  ],
+  "template_families": [
+    "tech",
+    "data",
+    "product",
+    "ops",
+    "default"
+  ],
+  "template_by_direction": {
+    "tech": "tech",
+    "data": "data",
+    "product": "product",
+    "ops": "ops",
+    "default": "default",
+    "design": "default",
+    "market": "default",
+    "finance": "default",
+    "hr": "default",
+    "general": "default"
+  },
+  "direction_decision": "Planner cn-83 confirmed tech/data/product/ops plus default; design/market/finance/hr/general fall back to default on 2026-11-01."
 }
