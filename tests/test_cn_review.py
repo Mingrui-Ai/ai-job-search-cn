@@ -1,0 +1,275 @@
+"""Tests for jobsearch_cn/review.py and the `review` commands (M3-3 part 2).
+
+A review is the reviewer agent's verdict on one version of one material. These pin: a well-formed review
+passes; each finding names a checklist item and a place that exists in the material; a pass carries no
+'must' finding; a review of an older version of the material, or of another job's material, fails; at
+most two rounds; a self-review passes with a warning. The machine draft sorts the JD's skills into covered
+in the JD's wording, covered by another spelling, and gaps; the style rules are warnings only. The
+commands find the material next to the review, render Markdown, and exit 0, 1 or 2.
+"""
+import copy
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+SAMPLE = REPO / "tests" / "fixtures" / "cn" / "material" / "tech-m3"
+
+sys.path.insert(0, str(REPO))
+from jobsearch_cn import review, store, vocab  # noqa: E402
+
+VOCABULARY = vocab.load()
+
+
+def load(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+PROFILE = load(SAMPLE / "profile" / "profile.json")
+MATERIAL = load(SAMPLE / "resume-1.json")
+JOB = {"requirements": {"skills": ["Golang", "Python", "Docker", "Rust", "langchain"]}}
+
+
+def make_review(**changes) -> dict:
+    data = {
+        "schema_version": 1, "kind": "resume-review", "job_id": MATERIAL["job_id"],
+        "material": "resume-1.json", "material_hash": review.material_hash(MATERIAL),
+        "round": 1, "mode": "independent", "created": "2026-11-01T12:00:00+08:00", "verdict": "revise",
+        "findings": [{"item": "B1", "path": "experience[0].bullets[1].text", "severity": "must",
+                      "reason": "原文是参与，这里写成了负责", "suggestion": None}],
+        "coverage": [{"requirement": "Docker", "status": "gap", "where": [], "note": "档案里有，材料没写"},
+                     {"requirement": "Python", "status": "covered", "where": ["skills[0]"], "note": None}],
+    }
+    data.update(changes)
+    return data
+
+
+def errors_of(data, material=MATERIAL) -> list:
+    return review.validate(data, material)[0]
+
+
+class Validate(unittest.TestCase):
+    def test_a_well_formed_review_is_valid(self):
+        self.assertEqual(review.validate(make_review(), MATERIAL), ([], []))
+
+    def test_a_pass_has_no_must_finding(self):
+        self.assertIn("verdict: 'pass' with 1 'must' finding(s); a pass has none",
+                      errors_of(make_review(verdict="pass")))
+        suggestion = make_review(verdict="pass")
+        suggestion["findings"][0]["severity"] = "suggest"
+        self.assertEqual(errors_of(suggestion), [])
+
+    def test_revise_without_a_must_finding_warns(self):
+        data = make_review(findings=[])
+        self.assertEqual(review.validate(data, MATERIAL)[1],
+                         ["verdict: 'revise' without a 'must' finding; is it a pass with suggestions?"])
+
+    def test_a_self_review_passes_with_a_warning(self):
+        errors, warnings = review.validate(make_review(mode="self"), MATERIAL)
+        self.assertEqual(errors, [])
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("self-review", warnings[0])
+        self.assertIn("mode: must be one of", errors_of(make_review(mode="peer"))[0])
+
+    def test_findings_name_a_checklist_item_and_a_real_place(self):
+        data = make_review()
+        data["findings"][0].update(item="G1", path="experience[5].bullets[0]", severity="meh", reason=" ")
+        self.assertEqual(errors_of(data), [
+            "findings[0].item: 'G1' is not a checklist item (A1-F4)",
+            "findings[0].path: 'experience[5].bullets[0]' is not a place in the material",
+            "findings[0].severity: must be one of must, suggest",
+            "findings[0].reason: must be a non-empty string",
+        ])
+
+    def test_a_finding_about_the_whole_material_has_no_path(self):
+        data = make_review()
+        data["findings"][0].update(item="D1", path=None)
+        self.assertEqual(errors_of(data), [])
+
+    def test_the_checklist_items(self):
+        self.assertEqual(len(review.ITEMS), 33)
+        self.assertEqual((review.ITEMS[0], review.ITEMS[-1]), ("A1", "F4"))
+        self.assertNotIn("A6", review.ITEMS)
+
+    def test_paths(self):
+        for path in ("summary", "summary.text", "skills[2]", "experience[1].bullets[0].text", "education[0].courses[1]"):
+            self.assertTrue(review.resolve(MATERIAL, path), path)
+        for path in ("", "nope", "skills[99]", "experience.bullets", "[0]", "skills[0].x", "skills[-1]",
+                     "experience[0]bullets", "summary..text"):
+            self.assertFalse(review.resolve(MATERIAL, path), path)
+
+    def test_a_review_of_an_older_material_fails(self):
+        changed = copy.deepcopy(MATERIAL)
+        changed["skills"].pop()
+        self.assertEqual(errors_of(make_review(), changed),
+                         ["material_hash: the material has changed since this review; review the current version"])
+
+    def test_a_review_of_another_jobs_material_fails(self):
+        self.assertIn("job_id: 'job_000000000002' is not the material's job",
+                      errors_of(make_review(job_id="job_000000000002"))[0])
+
+    def test_at_most_two_rounds(self):
+        self.assertEqual(errors_of(make_review(round=2)), [])
+        for value in (0, 3, True, "1"):
+            self.assertEqual(errors_of(make_review(round=value)), ["round: must be 1 or 2 (at most 2 rounds)"])
+
+    def test_coverage_rows(self):
+        data = make_review(coverage=[
+            {"requirement": "Docker", "status": "gap", "where": ["skills[0]"], "note": None},
+            {"requirement": "Python", "status": "covered", "where": [], "note": None},
+            {"requirement": "Go", "status": "maybe", "where": ["skills[9]"], "note": ""},
+        ])
+        self.assertEqual(errors_of(data), [
+            "coverage[0].where: a gap has no place in the material",
+            "coverage[1].where: say where the material covers it",
+            "coverage[2].status: must be one of covered, synonym, gap",
+            "coverage[2].note: must be a non-empty string or null",
+            "coverage[2].where[0]: 'skills[9]' is not a place in the material",
+        ])
+
+    def test_fields_are_all_required_and_nothing_extra(self):
+        data = make_review(extra=1)
+        del data["coverage"]
+        errors = errors_of(data)
+        self.assertTrue(any("coverage" in e for e in errors), errors)
+        self.assertTrue(any("extra" in e for e in errors), errors)
+        self.assertEqual(errors_of([]), ["review: must be a JSON object"])
+        self.assertIn("material: must be a non-empty string", errors_of(make_review(material=None)))
+
+
+class Draft(unittest.TestCase):
+    def test_coverage_sorts_the_jds_skills(self):
+        rows = {row["requirement"]: row for row in review.coverage(MATERIAL, PROFILE, JOB, VOCABULARY)}
+        self.assertEqual(list(rows), JOB["requirements"]["skills"])
+        self.assertEqual(rows["Python"]["status"], "covered")
+        self.assertEqual(rows["Python"]["where"][0], "skills[0]")
+        self.assertEqual(rows["langchain"]["status"], "covered")  # case alone is E2's business
+        self.assertEqual(rows["Golang"]["status"], "synonym")
+        self.assertIn("材料写作 Go，JD 写作 Golang", rows["Golang"]["note"])
+        self.assertEqual(rows["Docker"], {"requirement": "Docker", "status": "gap", "where": [],
+                                          "note": "档案里有，材料没写"})
+        self.assertEqual(rows["Rust"]["note"], "档案里没有")
+
+    def test_draft_coverage_is_a_valid_review_coverage(self):
+        data = make_review(coverage=review.coverage(MATERIAL, PROFILE, JOB, VOCABULARY))
+        self.assertEqual(errors_of(data), [])
+
+    def test_no_stored_job_means_no_rows(self):
+        self.assertEqual(review.coverage(MATERIAL, PROFILE, None, VOCABULARY), [])
+
+    def test_a_skill_the_jd_lists_twice_is_one_row(self):
+        job = {"requirements": {"skills": ["Go", "Golang"]}}
+        self.assertEqual(len(review.coverage(MATERIAL, PROFILE, job, VOCABULARY)), 1)
+
+    def test_style_warnings(self):
+        data = copy.deepcopy(MATERIAL)
+        data["summary"]["text"] = "后端开发实习一段。"
+        data["experience"][0]["bullets"] = [
+            {"text": "用Go重构订单查询接口。", "refs": ["exp-1"]},
+            {"text": "接口重构,延迟下降", "refs": ["exp-1"]},
+            {"text": "用 Go 重构订单查询接口", "refs": ["exp-1"]},
+        ]
+        data["experience"][1]["bullets"] = [{"text": "用Python写评测脚本", "refs": ["proj-1"]}]
+        self.assertEqual(review.style(data), [
+            "experience[0].bullets[0].text: E1 ends with a full stop; bullets end without one",
+            "experience[0].bullets[1].text: E1 use full-width punctuation (，；：) in Chinese text",
+            "experience[0].bullets[2].text: E3 no space between Chinese and English or numbers",
+        ])
+
+
+class Markdown(unittest.TestCase):
+    def test_the_markdown_shows_the_verdict_findings_and_coverage(self):
+        data = make_review(mode="self")
+        data["findings"].insert(0, {"item": "E4", "path": None, "severity": "suggest",
+                                    "reason": "要点用动词开头", "suggestion": "实现……"})
+        text = review.markdown(data)
+        self.assertIn("- 结论：需修改", text)
+        self.assertIn("自审", text)
+        self.assertLess(text.index("**必改** B1"), text.index("**建议** E4"))
+        self.assertIn("  - 建议改成：实现……", text)
+        self.assertIn("| Docker | 缺口 | - | 档案里有，材料没写 |", text)
+
+
+def run_cli(*args, data_dir):
+    env = dict(os.environ, PYTHONIOENCODING="utf-8", **{store.DATA_DIR_ENV: str(data_dir)})
+    return subprocess.run([sys.executable, "-m", "jobsearch_cn", *args], cwd=REPO, env=env, capture_output=True)
+
+
+class Command(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.data = Path(directory.name)
+        shutil.copytree(SAMPLE / "profile", self.data / "profile")
+        self.folder = self.data / "materials" / MATERIAL["job_id"]
+        self.folder.mkdir(parents=True)
+        self.material = self.folder / "resume-1.json"
+        self.material.write_text(json.dumps(MATERIAL, ensure_ascii=False), encoding="utf-8")
+        self.review = self.folder / "review-1-r1.json"
+
+    def write_review(self, data) -> None:
+        self.review.write_text(data if isinstance(data, str) else json.dumps(data, ensure_ascii=False),
+                               encoding="utf-8")
+
+    def test_draft_reads_the_stored_job(self):
+        jobs = self.data / "jobs"
+        jobs.mkdir()
+        (jobs / f"{MATERIAL['job_id']}.json").write_text(json.dumps(JOB), encoding="utf-8")
+        proc = run_cli("review", "draft", str(self.material), data_dir=self.data)
+        self.assertEqual(proc.returncode, 0, proc.stderr.decode("utf-8"))
+        result = json.loads(proc.stdout)
+        self.assertEqual(result["material_hash"], review.material_hash(MATERIAL))
+        self.assertTrue(result["job_found"])
+        self.assertEqual([row["status"] for row in result["coverage"]],
+                         ["synonym", "covered", "gap", "gap", "covered"])
+        self.assertEqual(len(result["style"]), 4)  # the sample spaces Chinese from English
+
+    def test_draft_without_a_stored_job_and_of_an_invalid_material(self):
+        result = json.loads(run_cli("review", "draft", str(self.material), data_dir=self.data).stdout)
+        self.assertEqual((result["job_found"], result["coverage"]), (False, []))
+        broken = copy.deepcopy(MATERIAL)
+        broken["skills"].append("Rust")
+        self.material.write_text(json.dumps(broken), encoding="utf-8")
+        self.assertEqual(run_cli("review", "draft", str(self.material), data_dir=self.data).returncode, 1)
+
+    def test_validate_finds_the_material_next_to_the_review(self):
+        self.write_review(make_review())
+        proc = run_cli("review", "validate", str(self.review), data_dir=self.data)
+        self.assertEqual(proc.returncode, 0, proc.stderr.decode("utf-8"))
+        self.assertEqual(json.loads(proc.stdout), {"valid": True, "errors": [], "warnings": []})
+
+    def test_the_material_field_is_only_a_file_name(self):
+        elsewhere = self.data / "other.json"
+        changed = copy.deepcopy(MATERIAL)
+        changed["skills"].pop()
+        elsewhere.write_text(json.dumps(changed), encoding="utf-8")
+        self.write_review(make_review(material="../../other.json"))
+        # The directory part is dropped, so it looks for <review folder>/other.json, which does not exist.
+        self.assertEqual(run_cli("review", "validate", str(self.review), data_dir=self.data).returncode, 2)
+        proc = run_cli("review", "validate", str(self.review), "--material", str(elsewhere), data_dir=self.data)
+        self.assertEqual(proc.returncode, 1)
+
+    def test_show_renders_markdown_or_lists_errors(self):
+        self.write_review(make_review())
+        proc = run_cli("review", "show", str(self.review), data_dir=self.data)
+        self.assertEqual(proc.returncode, 0, proc.stderr.decode("utf-8"))
+        self.assertTrue(proc.stdout.decode("utf-8").startswith("# 审核结果：resume-1.json（第 1 轮）"))
+        self.write_review(make_review(verdict="pass"))
+        proc = run_cli("review", "show", str(self.review), data_dir=self.data)
+        self.assertEqual(proc.returncode, 1)
+        self.assertFalse(json.loads(proc.stdout)["valid"])
+
+    def test_unreadable_input_exits_2(self):
+        self.write_review("{not json")
+        self.assertEqual(run_cli("review", "validate", str(self.review), data_dir=self.data).returncode, 2)
+        self.assertEqual(run_cli("review", "validate", str(self.folder / "absent.json"),
+                                 data_dir=self.data).returncode, 2)
+
+
+if __name__ == "__main__":
+    unittest.main()

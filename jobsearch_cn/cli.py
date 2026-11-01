@@ -14,8 +14,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import (__version__, jd_parser, match, material, profile, report, resume_extract, resume_pdf, schema,
-                          score, store, vocab)
+from jobsearch_cn import (__version__, jd_parser, match, material, profile, report, resume_extract, resume_pdf, review,
+                          schema, score, store, vocab)
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -354,26 +354,80 @@ def cmd_match_validate(args) -> int:
 
 
 def cmd_material_validate(args) -> int:
-    text = _read_json_text(args.file)
-    try:
-        record = json.loads(text)
-    except json.JSONDecodeError as exc:
-        name = "stdin" if args.file == "-" else args.file
-        raise InputError(f"{name} is not valid JSON: {exc}") from None
+    record = _load_json_file(args.file)
     data = _match_profile(args)
     if data is None:
         return 1
-    # The JD only adds warnings, so a material whose job is not stored is still checked.
-    job_id = record.get("job_id") if isinstance(record, dict) else None
-    job = None
-    if isinstance(job_id, str) and job_id:
-        try:
-            job = _store(args).get(job_id)
-        except store.StoreError:
-            pass  # not a job id the store can look up: the warnings skip the JD
-    errors, warnings = material.validate(record, data, _vocabulary(args), job)
+    errors, warnings = material.validate(record, data, _vocabulary(args), _material_job(args, record))
     _emit({"valid": not errors, "errors": errors, "warnings": warnings})
     return 1 if errors else 0
+
+
+def _load_json_file(source: str):
+    text = _read_json_text(source)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        name = "stdin" if source == "-" else source
+        raise InputError(f"{name} is not valid JSON: {exc}") from None
+
+
+def _material_job(args, record):
+    """The stored JD a material is for, or None: the JD only adds warnings and coverage rows."""
+    job_id = record.get("job_id") if isinstance(record, dict) else None
+    if isinstance(job_id, str) and job_id:
+        try:
+            return _store(args).get(job_id)
+        except store.StoreError:
+            pass  # not a job id the store can look up
+    return None
+
+
+def cmd_review_draft(args) -> int:
+    record = _load_json_file(args.file)
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    vocabulary = _vocabulary(args)
+    errors, _ = material.validate(record, data, vocabulary)
+    if errors:
+        _emit({"error": "the material is invalid; run material validate first", "errors": errors}, sys.stderr)
+        return 1
+    job = _material_job(args, record)
+    result = review.draft(record, data, job, vocabulary)
+    result = {"material_hash": review.material_hash(record), "job_found": job is not None, **result}
+    _emit(result)
+    return 0
+
+
+def _checked_review(args):
+    """(review, errors, warnings) for a review file, checked against the material it names."""
+    record = _load_json_file(args.file)
+    if args.material:
+        material_path = Path(args.material)
+    elif isinstance(record, dict) and isinstance(record.get("material"), str) and args.file != "-":
+        # Only a bare file name next to the review: a review never points elsewhere.
+        material_path = Path(args.file).parent / Path(record["material"]).name
+    else:
+        raise InputError("cannot tell which material this review is of; pass --material")
+    target = _load_json_file(str(material_path))
+    errors, warnings = review.validate(record, target)
+    return record, errors, warnings
+
+
+def cmd_review_validate(args) -> int:
+    _, errors, warnings = _checked_review(args)
+    _emit({"valid": not errors, "errors": errors, "warnings": warnings})
+    return 1 if errors else 0
+
+
+def cmd_review_show(args) -> int:
+    record, errors, warnings = _checked_review(args)
+    if errors:
+        _emit({"valid": False, "errors": errors, "warnings": warnings})
+        return 1
+    print(review.markdown(record), end="")
+    return 0
 
 
 def cmd_match_save(args) -> int:
@@ -731,6 +785,27 @@ def build_parser() -> argparse.ArgumentParser:
     material_validate.add_argument("file", help="材料文件；- 表示标准输入")
     material_validate.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     material_validate.set_defaults(handler=cmd_material_validate)
+
+    review_parser = commands.add_parser("review", help="材料审核相关命令（起草 + 审核工作流）",
+                                        description="材料审核相关命令，格式见 docs/cn/review-format.md，"
+                                                    "清单见 docs/cn/review-checklist.md")
+    review_parser.set_defaults(help_parser=review_parser)
+    review_commands = review_parser.add_subparsers(dest="review_command", metavar="<review-command>")
+    review_draft = review_commands.add_parser(
+        "draft", parents=[stored], help="给审核者的机器初稿：岗位技能的覆盖情况和标点、空格的警告",
+        description="对一份通过检查的材料，列出 JD 要求的每项技能是用 JD 的写法覆盖了、用别的写法覆盖了，"
+                    "还是缺口，以及清单 E1、E3 的警告。只输出，不写文件。",
+    )
+    review_draft.add_argument("file", help="材料文件；- 表示标准输入")
+    review_draft.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    review_draft.set_defaults(handler=cmd_review_draft)
+    for name, handler, summary in (
+            ("validate", cmd_review_validate, "检查一份审核结果的格式，以及它审的是不是材料的当前版本"),
+            ("show", cmd_review_show, "把一份审核结果显示成 Markdown（先检查，不通过就列出错误）")):
+        sub = review_commands.add_parser(name, help=summary, description=summary + "。通过时退出码 0，不通过时退出码 1。")
+        sub.add_argument("file", help="审核结果文件（data/materials/<岗位id>/review-<n>-r<轮次>.json）")
+        sub.add_argument("--material", help="审核的材料文件；默认为审核结果同目录下 material 字段写的文件")
+        sub.set_defaults(handler=handler)
     return parser
 
 
