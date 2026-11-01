@@ -44,25 +44,49 @@ _CN_RUN = "[零〇一二两三四五六七八九十百千万亿]+"
 # 一 or 三 is left alone, since 统一, 一线 and 三方 are words, not counts.
 _CN_NUMBER = re.compile(rf"(?P<percent>百分之)(?P<pct>{_CN_RUN})|(?P<run>{_CN_RUN})(?P<suffix>成|倍)?")
 _MAGNITUDE = {"万": 10_000, "千": 1000, "亿": 100_000_000}
+_ZEROS = "零〇"
+# 千万 before an imperative is "by all means" (千万不要, 千万别), not ten million.
+_NOT_A_COUNT_AFTER = {"千万": "不别要莫勿记得务"}
 
 
 def _chinese_value(run: str):
-    """The value of a run of Chinese numerals such as 一百二十 or 两万, or None if it is not one number."""
+    """The value of a run of Chinese numerals, or None if it is not one number.
+
+    一百零二 is 102 and 一千零二十 1020 (零 holds an empty place); 一亿二千万 is 120000000 (万 groups what
+    comes after 亿); 一万二 is 12000 and 三百五 350 (a last digit right after 百 or more counts one place
+    down); 二〇二六, digits alone with a zero among them, reads digit by digit as 2026.
+    """
     if run[0] in _CN_BIG:
         return None  # 万一 is a word, not a count of ten thousand
-    total, section, digit = 0, 0, None
+    if not any(char in _CN_UNITS or char in _CN_BIG for char in run):
+        return int("".join(str(_CN_DIGITS[char]) for char in run))
+    total, myriads, section, digit, zero, unit = 0, 0, 0, None, False, None
     for char in run:
-        if char in _CN_DIGITS:
+        if char in _ZEROS:
+            if digit is not None:
+                return None  # 二零 in a number with units is two numbers
+            zero = True
+        elif char in _CN_DIGITS:
             if digit is not None:
                 return None  # 一二 reads as two numbers
             digit = _CN_DIGITS[char]
         elif char in _CN_UNITS:
             section += (1 if digit is None else digit) * _CN_UNITS[char]
-            digit = None
+            digit, zero, unit = None, False, _CN_UNITS[char]
         else:
-            total = (total + section + (digit or 0)) * _CN_BIG[char]
-            section, digit = 0, None
-    return total + section + (digit or 0)
+            part = section + (digit or 0)
+            if char == "万":
+                if not part:
+                    return None  # 亿万 is a figure of speech
+                myriads = part * _CN_BIG[char]
+            else:
+                total = (total + myriads + part) * _CN_BIG[char]
+                myriads = 0
+            section, digit, zero, unit = 0, None, False, _CN_BIG[char]
+    tail = digit or 0
+    if digit is not None and not zero and unit and unit >= 100:
+        tail = digit * unit // 10
+    return total + myriads + section + tail
 
 
 def numbers(text: str) -> list:
@@ -79,10 +103,15 @@ def numbers(text: str) -> list:
             continue
         run = match.group("pct") or match.group("run")
         plain = not (match.group("percent") or match.group("suffix"))
-        # A bare run counts only when it has a unit in it (三十, 两万); 一 or 三 alone is part of a word.
-        if plain and not any(char in _CN_UNITS or char in _CN_BIG for char in run):
+        # A bare run counts only when it has a unit in it (三十, 两万) or is digits with a zero among them
+        # (二〇二六); 一 or 三 alone is part of a word, and so is 零 in 零基础.
+        if plain and not any(char in _CN_UNITS or char in _CN_BIG for char in run) \
+                and not (len(run) > 1 and any(char in _ZEROS for char in run)):
             continue
         if plain and run in ("万", "千", "百", "十", "亿"):
+            continue
+        following = text[match.end():match.end() + 1]
+        if plain and following and following in _NOT_A_COUNT_AFTER.get(run, ""):
             continue
         value = _chinese_value(run)
         if value is None:
@@ -109,8 +138,7 @@ def validate(material, profile: dict, vocabulary, job: dict = None) -> tuple[lis
         errors.append(f"kind: must be one of {', '.join(KINDS)}")
     for key in ("job_id", "profile_hash"):
         schema._check_text(material.get(key), key, errors)
-    if not isinstance(material.get("created"), str) or not material.get("created", "").strip():
-        errors.append("created: must be a non-empty string (an ISO 8601 time)")
+    schema._check_timestamp(material.get("created"), "created", errors)
 
     entries = _entries(profile)
     checker = _Citations(errors, entries, profile, vocabulary)

@@ -140,7 +140,7 @@ class Citations(unittest.TestCase):
         cases = {
             "schema_version": (2, "schema_version: must be 1"),
             "kind": ("greeting", "kind: must be one of resume"),
-            "created": ("", "created: must be a non-empty string"),
+            "created": ("", "created: must be an ISO 8601 time with a UTC offset"),
             "extra": (1, "extra: unknown field"),
         }
         for key, (value, expected) in cases.items():
@@ -156,6 +156,18 @@ class Citations(unittest.TestCase):
     def test_a_text_too_long(self):
         self.assertError(bullet("重构订单查询接口" * 50), "experience[0].bullets[0].text: longer than")
 
+    def test_created_must_be_a_real_time_with_an_offset(self):
+        for value in ("not-a-time", "2026-13-99", "2026-11-01T25:00:00+08:00", "2026-11-01T10:00:00", None, 20261101):
+            with self.subTest(created=value):
+                data = copy.deepcopy(MATERIAL)
+                data["created"] = value
+                self.assertError(data, "created: must be an ISO 8601 time with a UTC offset")
+        for value in ("2026-11-01T10:00:00+08:00", "2026-11-01T02:00:00Z"):
+            with self.subTest(created=value):
+                data = copy.deepcopy(MATERIAL)
+                data["created"] = value
+                self.assertEqual(errors_of(data), [])
+
 
 class RewrittenText(unittest.TestCase):
     def test_numbers_from_the_cited_entries_pass_in_any_writing(self):
@@ -167,7 +179,9 @@ class RewrittenText(unittest.TestCase):
     def test_a_number_not_in_the_cited_entries_fails(self):
         for text, quote in (("P99 延迟降低 62%", "62%"), ("延迟降低六成", "六成"), ("查询快了三倍", "三倍"),
                             ("日均处理两万次查询", "两万"), ("延迟降低百分之三十", "百分之三十"),
-                            ("覆盖 1,200 条测试问题", "1,200"), ("覆盖 2万 条测试问题", "2万")):
+                            ("覆盖 1,200 条测试问题", "1,200"), ("覆盖 2万 条测试问题", "2万"),
+                            ("处理一百零二个请求", "一百零二"), ("处理一千零二十个请求", "一千零二十"),
+                            ("日均一亿二千万次查询", "一亿二千万"), ("于二〇二六年上线", "二〇二六")):
             with self.subTest(text=text):
                 self.assertTrue(any(f"the number {quote!r} is not in the cited entries (exp-1)" in error
                                     for error in errors_of(bullet(text))), errors_of(bullet(text)))
@@ -205,8 +219,23 @@ class Numbers(unittest.TestCase):
         self.assertEqual(self.values("2万"), self.values("两万"))
         self.assertEqual(self.values("60%"), self.values("六成"))
 
+    def test_chinese_with_zeros_and_two_magnitudes(self):
+        cases = {"一百零二": 102, "一千零二十": 1020, "一亿二千万": 120_000_000, "三十万零五": 300_005,
+                 "一万二": 12000, "三百五": 350, "一万零二": 10002, "二〇二六": 2026, "两千万": 20_000_000}
+        for text, value in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(self.values(text), [value])
+
+    def test_qianwan_before_an_imperative_is_no_number(self):
+        for text in ("千万不要改数字", "千万别漏写", "千万要核对"):
+            with self.subTest(text=text):
+                self.assertEqual(material.numbers(text), [])
+        self.assertEqual(self.values("千万级用户"), [10_000_000])
+        self.assertEqual(self.values("日活过千万"), [10_000_000])
+
     def test_words_with_numerals_are_not_numbers(self):
-        for text in ("统一接口", "一线城市", "三方支付", "百度", "十分熟悉", "千兆网络", "万一失败"):
+        for text in ("统一接口", "一线城市", "三方支付", "百度", "十分熟悉", "千兆网络", "万一失败", "零基础",
+                     "亿万网民"):
             with self.subTest(text=text):
                 self.assertEqual(material.numbers(text), [])
 
