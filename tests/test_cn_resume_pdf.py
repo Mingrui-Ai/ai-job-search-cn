@@ -13,7 +13,7 @@ import sys
 import tempfile
 import unittest
 import zlib
-from contextlib import redirect_stderr, redirect_stdout
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest import mock
 
@@ -46,6 +46,15 @@ def char_map(*chars: str) -> str:
 
 def pdf_with_pages(pages: int, spaciness=None) -> bytes:
     return b"<</Type/Pages/Count %d>>" % pages + b"<</Type/Page>>" * pages + str(spaciness).encode()
+
+
+@contextmanager
+def faked_typst(pdf: bytes):
+    """render's own steps with the Typst calls faked: every compile returns pdf."""
+    with mock.patch.object(resume_pdf, "find_typst", return_value="typst"), \
+            mock.patch.object(resume_pdf, "_fonts", return_value={"serif": "S", "sans": "S"}), \
+            mock.patch.object(resume_pdf, "_compile", return_value=pdf):
+        yield
 
 
 class TemplateIsPackageData(unittest.TestCase):
@@ -323,6 +332,38 @@ class Command(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertIn("link", json.loads(err)["error"])
             self.assertEqual(outside.read_bytes(), b"keep")
+
+    def test_a_hard_link_for_the_output_is_replaced_and_the_file_it_shared_is_kept(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root, outside = Path(temp) / "data", Path(temp) / "outside.pdf"
+            output = root / "resumes" / "sample.pdf"
+            output.parent.mkdir(parents=True)
+            outside.write_bytes(b"keep")
+            try:
+                os.link(outside, output)
+            except OSError:
+                self.skipTest("this file system has no hard links")
+            with faked_typst(pdf_with_pages(1)), mock.patch.object(resume_pdf, "check", return_value=[]):
+                code, _, _ = self.run_cli("resume", "sample", "--data-dir", str(root))
+            self.assertEqual(code, 0)
+            self.assertEqual(outside.read_bytes(), b"keep")
+            self.assertEqual(output.read_bytes(), pdf_with_pages(1))
+            self.assertFalse(os.path.samefile(outside, output))
+
+
+class ReplaceOutput(unittest.TestCase):
+    def test_a_failed_write_keeps_the_old_pdf_and_leaves_no_temporary_file(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "sample.pdf"
+            output.write_bytes(b"old")
+            with faked_typst(pdf_with_pages(1)), \
+                    mock.patch.object(resume_pdf.os, "replace", side_effect=OSError("disk full")) as replace:
+                with self.assertRaises(OSError):
+                    resume_pdf.render(resume_pdf.sample(), output)
+            self.assertEqual(output.read_bytes(), b"old")
+            self.assertEqual(os.listdir(temp), ["sample.pdf"])
+            # Beside the output, inside the folder safe_dir checked, so the rename stays on one disk.
+            self.assertEqual(Path(replace.call_args.args[0]).parent, output.parent)
 
 
 def page_texts(path: Path) -> list:
