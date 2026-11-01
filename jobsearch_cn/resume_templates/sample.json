@@ -1,0 +1,46 @@
+{
+  "name": "李明",
+  "contact": "13800000000 | liming@example.com | github.com/example",
+  "intent": "求职意向：后端开发、大模型应用开发（实习） · 深圳、广州 · 每周 4 天，可实习 6 个月 · 2026.11.15 起可到岗",
+  "sections": [
+    {
+      "title": "教育经历",
+      "entries": [
+        {"left": "示例理工大学", "middle": "计算机科学与技术 · 硕士", "right": "2025.09 - 2027.06",
+         "bullets": ["GPA 3.6/4.0，专业前15%", "主修课程：机器学习、分布式系统、数据库系统"]},
+        {"left": "示例师范大学", "middle": "软件工程 · 本科", "right": "2021.09 - 2025.06", "bullets": []}
+      ]
+    },
+    {
+      "title": "实习经历",
+      "entries": [
+        {"left": "示例网络科技有限公司", "middle": "后端开发实习生", "right": "2026.03 - 2026.08",
+         "bullets": ["使用 Go 重构订单查询接口，P99 延迟从 120ms 降至 45ms",
+                     "为内部 RAG 问答服务编写检索评测脚本（Python），覆盖 300 条测试问题"]}
+      ]
+    },
+    {
+      "title": "项目经历",
+      "entries": [
+        {"left": "课程助手问答系统", "middle": "", "right": "2025.10 - 2026.01",
+         "bullets": ["基于 LangChain 和 MySQL 搭建课程资料问答，支持 20 门课程的资料检索"]}
+      ]
+    },
+    {
+      "title": "专业技能",
+      "lines": [
+        {"label": "熟练", "rest": "Python、Go"},
+        {"label": "熟悉", "rest": "MySQL、LangChain、Docker"},
+        {"label": "项目中使用", "rest": "RAG"},
+        {"label": "了解", "rest": "PyTorch"}
+      ]
+    },
+    {
+      "title": "荣誉与证书",
+      "lines": [
+        {"label": "", "rest": "全国大学生数学建模竞赛 省级一等奖（2024.10）"},
+        {"label": "", "rest": "CET-6 552"}
+      ]
+    }
+  ]
+}
