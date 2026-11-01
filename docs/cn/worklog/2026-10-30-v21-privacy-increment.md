@@ -21,7 +21,7 @@
 - API 覆盖 26 个 PR、147 段文字：26 份标题/描述、92 条评论、28 个编辑版本、1 次标题重命名；无新增审核评审、行内审核评论或 force push 事件。
 - 档案姓名、真实手机号、学校、经历片段、真实 JD 正文和链接、本机用户名、密钥、敏感路径均为 0；私有来源文件前后哈希一致，15 类正向控制通过。
 - 初扫 40 个格式候选全部归为测试夹具：#86 审核评论 4 次，`tests/test_cn_profile.py` 35 次，`tests/test_security_guards.py` 1 次；精确私有匹配为 0，最终待处理项为 0。
-- 最终合入 `origin/master@d2cac37`；全量 unittest 1390 项通过、12 项按预期跳过，`security_guards`、`lint_skills`、`git diff --check` 均通过。报告、工作记录和 PR 文案的内存反扫为 0 命中；分支将新增公开的 6 个提交和 8 个 blob 也已扫描，待核对项为 0。
+- 最终合入 `origin/master@d2cac37`；全量 unittest 1390 项通过、12 项按预期跳过，`security_guards`、`lint_skills`、`git diff --check` 均通过。报告、工作记录和 PR 文案的内存反扫为 0 命中；分支将新增公开的全部提交和 blob 也已扫描，待核对项为 0。
 
 ## 遗留问题
 
