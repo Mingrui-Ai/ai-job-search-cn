@@ -31,7 +31,7 @@ SCHEMA_VERSION = 1
 # 5: the filter checks the interview and the start date; their unknowns are gaps to confirm (M2-6c).
 # 6: 统计分析 joins the skill vocabulary's data group (H26).
 # 7: office software vocabulary and synonyms, with Word/Office context checks (H29).
-# 8: left for H21's versioned skill names (#91), due to merge first.
+# 8: a version right after an English term reads as the term: HTML5, Vue2.x, Python 3.10 (H21).
 # 9: salary in tiers from target.salary_ideal and salary_step; pay turned into the profile's unit, meals
 #    added; the JD's job record gains benefits.meals (M2-6e).
 RULES_VERSION = 9

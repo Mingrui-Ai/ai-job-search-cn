@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "job_id": "job_b5a3b7122b1e",
+  "rules_version": 5,
+  "scored_at": "2026-10-30T15:16:14+08:00",
+  "job_hash": "1c35c7aa466f9b840c437f9add5cce6c53fa2a05191c5e92ba2e9f92e1d83f67",
+  "profile_hash": "feaa757e6215ef3277888d54dc3b7c174cdecc3a46e72c162ae045449012852e",
+  "filter": {
+    "verdict": "needs_check",
+    "checks": [
+      {
+        "check": "graduation",
+        "result": "unknown",
+        "reason": "JD 没写届别；档案没写毕业时间",
+        "jd": {
+          "requirements.graduation": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "graduation.year": null
+        }
+      },
+      {
+        "check": "education",
+        "result": "unknown",
+        "reason": "JD 没写最低学历（优先学历不作要求）",
+        "jd": {
+          "requirements.education": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "education": []
+        }
+      },
+      {
+        "check": "days_per_week",
+        "result": "unknown",
+        "reason": "JD 没写每周到岗要求；你每周能到岗 4 天",
+        "jd": {
+          "requirements.days_per_week": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.days_per_week": 4
+        }
+      },
+      {
+        "check": "min_months",
+        "result": "unknown",
+        "reason": "JD 没写实习时长要求；你能实习 3 个月",
+        "jd": {
+          "requirements.min_months": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.months": 3
+        }
+      },
+      {
+        "check": "location",
+        "result": "unknown",
+        "reason": "档案没写意向城市",
+        "jd": {
+          "cities": {
+            "value": [
+              "青岛"
+            ],
+            "evidence": "工作地点：青岛"
+          },
+          "remote": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.cities": [],
+          "availability.acceptable_cities": [],
+          "availability.remote_ok": null,
+          "availability.relocate": null
+        }
+      },
+      {
+        "check": "employment_type",
+        "result": "unknown",
+        "reason": "JD 没写岗位类型；档案没写想找的岗位类型",
+        "jd": {
+          "employment_type": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "target.employment_types": []
+        }
+      },
+      {
+        "check": "exclusions",
+        "result": "match",
+        "reason": "没有命中排除项",
+        "jd": {
+          "title": {
+            "value": "门店资料审核员",
+            "evidence": "门店资料审核员"
+          },
+          "company": {
+            "value": "示例樟汐服务有限公司",
+            "evidence": "示例樟汐服务有限公司"
+          },
+          "cities": {
+            "value": [
+              "青岛"
+            ],
+            "evidence": "工作地点：青岛"
+          }
+        },
+        "profile": {
+          "exclusions": {
+            "cities": [],
+            "companies": [],
+            "keywords": []
+          }
+        }
+      },
+      {
+        "check": "interview",
+        "result": "unknown",
+        "reason": "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试",
+        "jd": {
+          "interview": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.cities": [],
+          "availability.acceptable_cities": []
+        }
+      },
+      {
+        "check": "start_date",
+        "result": "unknown",
+        "reason": "JD 没写到岗时间；档案没写可到岗日期",
+        "jd": {
+          "requirements.start": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.start_date": null
+        }
+      }
+    ]
+  },
+  "dimensions": {
+    "skills": {
+      "score": null,
+      "method": "rule",
+      "reason": "JD 没写技能",
+      "matched": [],
+      "missing": []
+    },
+    "direction": {
+      "score": null,
+      "method": "rule",
+      "reason": "档案没写求职方向（target.directions）",
+      "jd_groups": {},
+      "evidence": null
+    },
+    "experience": {
+      "score": null,
+      "method": "agent",
+      "reason": "等 Agent 对照经历补充",
+      "hints": [],
+      "evidence": null
+    },
+    "salary": {
+      "score": null,
+      "method": "rule",
+      "reason": "JD 按元/小时、你按元/月计，单位不同，不换算"
+    },
+    "location": {
+      "score": null,
+      "method": "rule",
+      "reason": "档案没写意向城市"
+    }
+  },
+  "weights": {
+    "skills": 30,
+    "direction": 25,
+    "experience": 25,
+    "salary": 10,
+    "location": 10
+  },
+  "total": {
+    "score": null,
+    "grade": null,
+    "complete": false,
+    "missing": [
+      "skills",
+      "direction",
+      "experience",
+      "salary",
+      "location"
+    ]
+  },
+  "gaps": [
+    {
+      "kind": "filter",
+      "item": "graduation",
+      "result": "unknown",
+      "reason": "JD 没写届别；档案没写毕业时间",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "education",
+      "result": "unknown",
+      "reason": "JD 没写最低学历（优先学历不作要求）",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "days_per_week",
+      "result": "unknown",
+      "reason": "JD 没写每周到岗要求；你每周能到岗 4 天",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "min_months",
+      "result": "unknown",
+      "reason": "JD 没写实习时长要求；你能实习 3 个月",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "location",
+      "result": "unknown",
+      "reason": "档案没写意向城市",
+      "jd": "工作地点：青岛"
+    },
+    {
+      "kind": "filter",
+      "item": "employment_type",
+      "result": "unknown",
+      "reason": "JD 没写岗位类型；档案没写想找的岗位类型",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "interview",
+      "result": "unknown",
+      "reason": "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "start_date",
+      "result": "unknown",
+      "reason": "JD 没写到岗时间；档案没写可到岗日期",
+      "jd": null
+    }
+  ]
+}

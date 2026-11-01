@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "task": "V19",
+  "baseline_master": "d8ec9adeff7dfc7ade1c8057f468bfc7e7104510",
+  "frozen_at_utc": "2026-10-30T07:11:05.759464+00:00",
+  "phase": "manual_oracle_frozen_before_first_product_run",
+  "independence": {
+    "m2_6e_branch_read": false,
+    "product_run_before_freeze": false,
+    "data_origin": "原创虚构JD和独立虚构的档案参数",
+    "prior_knowledge": "作者做过H27/H26，知道旧产品部分行为；未从M2-6e实现生成期望",
+    "task_source": "规划者2026-10-30派发的收件箱第6项",
+    "publish_before_m2_6e_pr_opens": false
+  },
+  "frozen_files_sha256": {
+    ".gitattributes": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+    "README.md": "4a528c53ec795c8c893379dd00ddad51ee6dbdeeedc7b8684b4f7b6b0103754b",
+    "profile-parameters.json": "d1377ed4993052a087862c6312edef4a114ef06ee7aebfb8018dd9b56a542ac7",
+    "baseline-profile.json": "1faf5796d582f8e8adbc21ce0493d4ef493d4899f2ab26a18d5a26be6faee0bc",
+    "expectations.json": "ee6f8df9b13462b9a1293ac847645ff2fa00034037fe535549a5e45554085b05",
+    "verify_oracle.py": "a6db63338433e8505539568e1330de3e60123f6fd2d6f18bac853e14937312eb",
+    "v19-01-daily-range-three-meals.txt": "7aadf23d0de892f2a6349ef19e7c8aba2689127055393b509ca7c8df42b2d9c7",
+    "v19-02-daily-single-two-meals.txt": "5f72ac56cebc7f770ffbfef9eaa224b63ebce1eb0ee62004f0228a4e7db3fa51",
+    "v19-03-monthly-range-lunch.txt": "73ee264c8cdedd33aeccedbdb927bba259510328574b5116d7b5942e3329e045",
+    "v19-04-annual-cash-meals.txt": "8f7046e4314f6dd38513000930bab7c8c17fa34453fda04ab7bf1bdc4bec02c5",
+    "v19-05-monthly-unspecified-subsidy.txt": "146cf05108f0c21b0a52d6166ef104b1d86a36ddc3da25eae046a7c010706f88",
+    "v19-06-monthly-board-lodging.txt": "bbfea488138636b1a27a86f73e01f5634f4bed915a824fa67cf80db8ca15a789",
+    "v19-07-negotiable-snacks-canteen.txt": "82c98664c76e90057798919dc43f1aa8a0a050858b33207dcb7dcef645851b52",
+    "v19-08-hourly-catering-industry.txt": "0cddac792fbb9e6acd5d43c9fb89a74d2aa1c535080eb054ab8378e47b8b56fd",
+    "v19-09-monthly-fractional-step.txt": "1def465b978e19d235024a5a67864a987c145255301be307cc674f75f5590e06"
+  },
+  "baseline_git_blob_sha256": {
+    "AGENTS.md": "5b20ecc7067d7551516b2a1b7ae3a7416c775f5b4daea3a854ea468634faf2f9",
+    "docs/cn/README.md": "d67ddbf4e0552bb1639220c6bcd000dc3d2d7ef4b6a78738b1b958666c3593b1",
+    "docs/cn/cn-migration-plan.md": "b894dca8a95f5af0eb211eabc916ca43882154458f2d47849bf2f77c997ca1c1",
+    "docs/cn/match.md": "39e32b422602c00d795c27955c2c5e7c153c8370a8b7b113e0b21186d27ae55b",
+    "docs/cn/profile.md": "77f778a2803d8f635e1bb0fec09c084fa6b72aeeae07253905ad89d170712238",
+    "docs/cn/job-schema.md": "90cd226fdd205c09660dc26c621e6dcb4de658f639f9f745ae57c0904bedbf1d"
+  },
+  "artifact_checks": {
+    "cases": 9,
+    "nontechnical": 7,
+    "evidence_snippets": 19,
+    "score_status": {
+      "fixed": 5,
+      "pending_ruling": 1,
+      "unknown": 2,
+      "pending_rounding": 1
+    },
+    "frozen_files": 15
+  },
+  "policy": "冻结文件和本清单不改；master基线、后续裁定、字段映射与对照另存。"
+}
