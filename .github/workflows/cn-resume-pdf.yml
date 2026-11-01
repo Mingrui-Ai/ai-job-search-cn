@@ -34,10 +34,10 @@ jobs:
         shell: bash
     env:
       TYPST_VERSION: "0.15.1"
-      TYPST_SHA256: b6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c
+      TYPST_SHA256: a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c
       # notofonts/noto-cjk at tag Serif2.003; Sans/LICENSE and Serif/LICENSE are the SIL OFL 1.1.
       NOTO_CJK_COMMIT: 9b0f1436e455d902de067a2501422e5dc71ad16b
-      NOTO_SANS_SC_SHA256: e68bafcb48a2707749396aa12bbbd833cb70401f3a9a689fd2902c7e0d295964
+      NOTO_SANS_SC_SHA256: d68bafcb48a2707749396aa12bbbd833cb70401f3a9a689fd2902c7e0d295964
       NOTO_SERIF_SC_SHA256: 5326cfb097e3ab26fcb39329752b5c0a439bf8d5c4649520e4b492939c352a09
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
