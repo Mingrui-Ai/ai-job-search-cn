@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 import zipfile
 from pathlib import Path
@@ -213,11 +214,17 @@ class ResumeExtract(unittest.TestCase):
         self.assert_failure(self.cli(path, PYTHONPATH=pythonpath), "请让 Agent 直接读取 PDF，或者安装 pypdf")
         self.assertEqual(self.snapshot(), before)
 
+    def bridge(self, **mock):
+        """The bridge call (_run_tree, H25b) mocked; no Poppler, so no real pdftotext -v either."""
+        return patch.object(resume_extract, "_run_tree", **mock), \
+            patch.object(resume_extract, "_poppler_available", return_value=False)
+
     def test_backend_failure_never_echoes_resume_text_in_diagnostics(self):
         path = self.sources / "error.pdf"
         make_pdf(path)
         result = subprocess.CompletedProcess([], 1, b"private resume fragment", b"sensitive diagnostic")
-        with patch.object(resume_extract.subprocess, "run", return_value=result):
+        run, poppler = self.bridge(return_value=result)
+        with run, poppler:
             with self.assertRaises(resume_extract.ExtractionError) as caught:
                 resume_extract.extract_text(path)
         self.assertNotIn("private", str(caught.exception))
@@ -226,14 +233,16 @@ class ResumeExtract(unittest.TestCase):
     def test_empty_pdf_text_layer_has_direct_read_guidance(self):
         path = self.sources / "scan.pdf"
         make_pdf(path)
-        with patch.object(resume_extract.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, b"\n\f", b"")):
+        run, poppler = self.bridge(return_value=subprocess.CompletedProcess([], 0, b"\n\f", b""))
+        with run, poppler:
             with self.assertRaisesRegex(resume_extract.ExtractionError, "没有可提取的文本层"):
                 resume_extract.extract_text(path)
 
     def test_pdf_backend_timeout_is_an_input_error(self):
         path = self.sources / "timeout.pdf"
         make_pdf(path)
-        with patch.object(resume_extract.subprocess, "run", side_effect=subprocess.TimeoutExpired("python", 60)):
+        run, poppler = self.bridge(side_effect=subprocess.TimeoutExpired("python", 60))
+        with run, poppler:
             with self.assertRaisesRegex(resume_extract.ExtractionError, "请让 Agent 直接读取 PDF"):
                 resume_extract.extract_text(path)
 
@@ -262,7 +271,8 @@ class ResumeExtract(unittest.TestCase):
         for success in (False, True):
             with self.subTest(pypdf_success=success):
                 result = subprocess.CompletedProcess([], 0 if success else 1, "合成简历".encode() if success else b"", b"")
-                with patch.object(resume_extract.subprocess, "run", side_effect=[version, result]) as run:
+                with patch.object(resume_extract.subprocess, "run", return_value=version), \
+                        patch.object(resume_extract, "_run_tree", return_value=result) as run:
                     if success:
                         self.assertEqual(resume_extract.extract_text(path), "合成简历")
                     else:
@@ -280,7 +290,7 @@ class ResumeExtract(unittest.TestCase):
                 with self.subTest(poppler=poppler, text=text[:12]):
                     result = subprocess.CompletedProcess([], 0, text.encode("utf-8"), b"")
                     with patch.object(resume_extract, "_poppler_available", return_value=poppler), \
-                            patch.object(resume_extract.subprocess, "run", return_value=result):
+                            patch.object(resume_extract, "_run_tree", return_value=result):
                         with self.assertRaisesRegex(resume_extract.ExtractionError, "大量替换字符或控制字符"):
                             resume_extract.extract_text(path)
 
@@ -290,8 +300,120 @@ class ResumeExtract(unittest.TestCase):
         text = ("合成简历\t项目经历\r\n示例大学\f" * 10) + "\ufffd"
         result = subprocess.CompletedProcess([], 0, text.encode("utf-8"), b"")
         with patch.object(resume_extract, "_poppler_available", return_value=True), \
-                patch.object(resume_extract.subprocess, "run", return_value=result):
+                patch.object(resume_extract, "_run_tree", return_value=result):
             self.assertEqual(resume_extract.extract_text(path), text)
+
+
+class Budgets(unittest.TestCase):
+    """H25b (V18 P2-2): a crafted DOCX is refused in words that quote none of it, never a traceback."""
+
+    def setUp(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        self.root = Path(temp.name)
+
+    def refused(self, path):
+        with self.assertRaisesRegex(resume_extract.ExtractionError, "过于复杂|超过") as caught:
+            resume_extract.extract_text(path)
+        self.assertNotIn("机密片段", str(caught.exception))
+
+    def test_deep_nesting_is_refused_without_recursion(self):
+        # V18's shape: a few hundred bytes zipped, 1100 nested content controls round one paragraph.
+        path = self.root / "deep.docx"
+        make_docx(path, "<w:sdt>" * 1100 + paragraph("机密片段") + "</w:sdt>" * 1100)
+        self.assertLess(path.stat().st_size, 2000)
+        self.refused(path)
+        env = dict(os.environ, PYTHONPATH=str(REPO), PYTHONIOENCODING="utf-8")
+        result = subprocess.run([sys.executable, "-B", "-m", "jobsearch_cn", "profile", "extract", str(path)],
+                                cwd=self.root, env=env, capture_output=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn(b"Traceback", result.stderr)
+        self.assertNotIn("机密片段", result.stderr.decode("utf-8"))
+        self.assertIn("过于复杂", json.loads(result.stderr.decode("utf-8"))["error"])
+
+    def test_nesting_within_the_budget_reads(self):
+        path = self.root / "nested.docx"
+        make_docx(path, "<w:sdt>" * 200 + paragraph("合成简历") + "</w:sdt>" * 200)
+        self.assertEqual(resume_extract.extract_text(path), "合成简历")
+
+    def test_too_many_nodes(self):
+        path = self.root / "wide.docx"
+        make_docx(path, paragraph("机密片段") * 40)
+        self.assertIn("机密片段", resume_extract.extract_text(path))
+        with patch.object(resume_extract, "_MAX_XML_NODES", 100):
+            self.refused(path)
+
+    def test_too_large_uncompressed(self):
+        path = self.root / "large.docx"
+        make_docx(path, paragraph("机密片段" * 500))
+        with patch.object(resume_extract, "_MAX_XML_BYTES", 4000):
+            self.refused(path)
+
+    def test_too_large_a_file(self):
+        path = self.root / "huge.docx"
+        make_docx(path, paragraph("合成简历"))
+        with patch.object(resume_extract, "_MAX_INPUT_BYTES", 10):
+            self.refused(path)
+
+
+class ProcessTree(unittest.TestCase):
+    """H25b (V18 P2-3): the PDF timeout ends the bridge and whatever it started, pipes and all."""
+
+    def tree(self, delay_before_job=0.0):
+        """A child that, like the bridge, waits for the go-ahead and then starts a grandchild holding the pipes."""
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        self.marker = Path(temp.name) / "grandchild-finished.txt"
+        grandchild = f"import time, pathlib; time.sleep(3); pathlib.Path({str(self.marker)!r}).write_text('done')"
+        child = ("import subprocess, sys, time\n"
+                 "if sys.stdin.buffer.read(1) != b'1':\n    sys.exit(3)\n"
+                 f"subprocess.Popen([sys.executable, '-c', {grandchild!r}])\n"
+                 "time.sleep(30)\n")
+        if delay_before_job:
+            # #88 review: the parent is held up between starting the child and putting it in the job.
+            real = resume_extract._windows_job
+
+            def late(process):
+                time.sleep(delay_before_job)
+                return real(process)
+
+            patcher = patch.object(resume_extract, "_windows_job", late)  # enterContext is 3.11+
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        return [sys.executable, "-c", child]
+
+    def assert_tree_ended(self, command, timeout, within):
+        started = time.monotonic()
+        with self.assertRaises(subprocess.TimeoutExpired):
+            resume_extract._run_tree(command, timeout)
+        self.assertLess(time.monotonic() - started, within, "the caller waited for the pipes the grandchild held")
+        time.sleep(4)
+        self.assertFalse(self.marker.exists(), "the grandchild outlived the timeout")
+
+    def test_a_timeout_ends_the_grandchild_too(self):
+        self.assert_tree_ended(self.tree(), 0.8, 2.5)
+
+    def test_the_child_waits_for_the_job_even_when_the_parent_is_slow(self):
+        # Without the go-ahead the child would start its grandchild during the delay, outside the job.
+        self.assert_tree_ended(self.tree(delay_before_job=1.5), 0.8, 4)
+
+    def test_the_bridge_waits_for_the_go_ahead(self):
+        self.assertIn("sys.stdin.buffer.read(1) != b\"1\"", resume_extract._PDF_BRIDGE.split("from pathlib")[0])
+        self.assertEqual(resume_extract.GO_AHEAD, b"1")
+        # Without it, the bridge starts nothing and exits.
+        result = subprocess.run([sys.executable, "-B", "-c", resume_extract._PDF_BRIDGE, "x", "y", "0"],
+                                stdin=subprocess.DEVNULL, capture_output=True, timeout=30)
+        self.assertEqual(result.returncode, 3)
+
+    def test_output_and_exit_code(self):
+        command = [sys.executable, "-c", "import sys; sys.stdin.buffer.read(1); print('synthetic'); sys.exit(3)"]
+        result = resume_extract._run_tree(command, 30)
+        self.assertEqual(result.returncode, 3)
+        self.assertIn(b"synthetic", result.stdout)
+
+    def test_a_child_that_never_reads_stdin(self):
+        result = resume_extract._run_tree([sys.executable, "-c", "print('synthetic')"], 30)
+        self.assertEqual(result.returncode, 0)
 
 
 if __name__ == "__main__":

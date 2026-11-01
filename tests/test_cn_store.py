@@ -403,6 +403,16 @@ class Files(StoreCase):
             with self.assertRaises(store.StoreError):
                 self.store.get(bad)
 
+    def test_a_path_takes_only_a_whole_job_id(self):
+        # V18 P3-1: "$" let "job_…\n" through, and the newline went into the file name.
+        for make in (store.Store, store.MatchStore):
+            for bad in ("job_123456789abc\n", "job_123456789abc\r", "job_123456789abc\r\n", " job_123456789abc",
+                        "job_123456789abc ", "job_123456789abc/x", "x\\job_123456789abc", None):
+                with self.subTest(store=make.__name__, id=bad):
+                    with self.assertRaises(store.StoreError):
+                        make(self.root)._path(bad)
+            self.assertEqual(make(self.root)._path("job_123456789abc").name, "job_123456789abc.json")
+
     def test_no_temp_files_are_left_behind(self):
         self.store.save(parse("boss_intern.txt"))
         self.assertEqual([p.name for p in (self.root / "jobs").glob(".tmp-*")], [])

@@ -9,6 +9,7 @@ no JD, or names no stored job; 2 the input could not be read, reported as
 import argparse
 import codecs
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -239,6 +240,9 @@ def cmd_profile_validate(args) -> int:
 def cmd_profile_show(args) -> int:
     path, _ = _profile_paths(args)
     data = _load_profile(path)
+    if not args.contact and not isinstance(data, dict):
+        # Nothing to mask the contact details in: say what is wrong without echoing the file.
+        raise InputError(f"{path}: must be a JSON object; run profile validate")
     _emit(data if args.contact else profile.redacted(data))
     return 0
 
@@ -304,10 +308,13 @@ def cmd_match_score(args) -> int:
         return 1
     matches = _matches(args)
     record = score.score_job(job, data, _vocabulary(args), previous=_saved_match(matches, args.id))
-    if args.save:
-        matches.save(record)
-    if args.draft:
-        matches.write_draft(record)
+    try:
+        if args.save:
+            matches.save(record)
+        if args.draft:
+            matches.write_draft(record)
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
     _emit(record)
     return 0
 
@@ -352,7 +359,11 @@ def cmd_match_save(args) -> int:
     if errors:
         _emit({"valid": False, "errors": errors})
         return 1
-    _emit({"saved": _matches(args).save(record), "job_id": record["job_id"]})
+    try:
+        saved = _matches(args).save(record)
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
+    _emit({"saved": saved, "job_id": record["job_id"]})
     return 0
 
 
@@ -372,7 +383,8 @@ def cmd_match_list(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
-    digest, job_store = score.profile_hash(data), _store(args)
+    trial = None if args.weights is None else _trial_weights(args.weights)
+    digest, weights, job_store = score.profile_hash(data), score.weights_of(data), _store(args)
     records, warnings = _matches(args).all()
     rows = []
     for record in records:
@@ -383,8 +395,11 @@ def cmd_match_list(args) -> int:
             job = job_store.get(record["job_id"])
         except store.StoreError:
             job = None
-        total = record.get("total") if isinstance(record.get("total"), dict) else {}
-        rows.append({
+        saved = record.get("total") if isinstance(record.get("total"), dict) else {}
+        total = saved if trial is None else score.trial_total(record, trial)
+        # Stale: the job, the profile or its weights changed since scoring (or the job is gone); score it again.
+        reasons = score.stale_reasons(record, job, digest, weights)
+        row = {
             "job_id": record["job_id"],
             "title": job.get("title") if job else None,
             "company": job.get("company") if job else None,
@@ -392,12 +407,44 @@ def cmd_match_list(args) -> int:
             "score": total.get("score"),
             "complete": total.get("complete"),
             "verdict": (record.get("filter") or {}).get("verdict"),
-            # Stale: the job or the profile changed since scoring (or the job is gone); score it again.
-            "stale": score.stale(record, job, digest),
-        })
+            "stale": bool(reasons),
+            "stale_reasons": reasons,
+        }
+        if trial is not None:
+            row["saved"] = {"grade": saved.get("grade"), "score": saved.get("score")}
+        rows.append(row)
     rows.sort(key=lambda row: score.list_key(row["grade"], row["score"], row["job_id"]))
-    _emit({"matches": rows, "warnings": warnings})
+    payload = {"matches": rows, "warnings": warnings}
+    if trial is not None:
+        payload = {"trial": {"note": TRIAL_NOTE, "weights": trial, "shares": score.shares(trial),
+                             "profile": {"weights": weights, "shares": score.shares(weights)}}, **payload}
+    _emit(payload)
     return 0
+
+
+TRIAL_NOTE = ("试算：按这组权重和已保存的各维度分数重新算总分、等级和排序，只输出，不改档案和匹配记录。"
+              "要换成这组权重，改档案的 target.weights，再重新评分。")
+_TRIAL_EXAMPLE = "skills=30,direction=25,experience=25,salary=10,location=10"
+_NAMED_NUMBER = re.compile(r"([a-z]+)=(\d+(?:\.\d+)?)")
+
+
+def _trial_weights(text: str) -> dict:
+    """match list --weights "skills=30,direction=25,..." as the weights it names, checked as the profile's are.
+
+    Not JSON: Windows PowerShell 5.1 drops the double quotes inside an argument it passes to a program.
+    """
+    weights = {}
+    for part in text.split(","):
+        found = _NAMED_NUMBER.fullmatch(part.strip())
+        if not found or found.group(1) in weights:
+            raise InputError(f"--weights: {part.strip()!r} is not one dimension=number; "
+                             f"name each dimension once, like {_TRIAL_EXAMPLE}")
+        name, number = found.groups()
+        weights[name] = float(number) if "." in number else int(number)
+    errors = profile.weight_errors(weights, "--weights")
+    if errors:
+        raise InputError("; ".join(errors))
+    return {key: weights[key] for key in score.DIMENSIONS}
 
 
 def _report_records(args, matches: store.MatchStore):
@@ -423,13 +470,14 @@ def _report_records(args, matches: store.MatchStore):
 
 
 def _report_dir(root: Path, now) -> Path:
-    """<data dir>/reports/<date-time>/, a fresh directory even when two reports land in the same second."""
-    base = root / "reports" / now.strftime("%Y%m%d-%H%M%S")
+    """<data dir>/reports/<date-time>/, a fresh directory even when two reports land in the same second.
+    reports/ must be a real folder inside the data directory (store.safe_dir)."""
+    base = store.safe_dir(root, "reports") / now.strftime("%Y%m%d-%H%M%S")
     path, suffix = base, 1
-    while path.exists():
+    while path.exists() or path.is_symlink():
         suffix += 1
         path = base.with_name(f"{base.name}-{suffix}")
-    path.mkdir(parents=True)
+    path.mkdir()
     return path
 
 
@@ -444,16 +492,20 @@ def cmd_match_report(args) -> int:
     if not records:
         _emit({"error": "no saved match records; run match score <id> --save first"}, sys.stderr)
         return 1
-    digest, entries = score.profile_hash(data), []
+    digest, weights, entries = score.profile_hash(data), score.weights_of(data), []
     for record in records:
         try:
             job = job_store.get(record["job_id"])
         except store.StoreError:
             job = None
-        entries.append(report.entry(record, job, score.stale(record, job, digest)))
+        reasons = score.stale_reasons(record, job, digest, weights)
+        entries.append(report.entry(record, job, bool(reasons), reasons))
     entries, vocabulary = report.order(entries), _vocabulary(args)
     now = datetime.now().astimezone()
-    directory = _report_dir(store.data_dir(args.data_dir), now)
+    try:
+        directory = _report_dir(store.data_dir(args.data_dir), now)
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
     page, form = directory / "report.html", directory / "feedback.csv"
     page.write_text(report.build(entries, data, now.isoformat(timespec="seconds"), vocabulary),
                     encoding="utf-8", newline="\n")
@@ -595,10 +647,14 @@ def build_parser() -> argparse.ArgumentParser:
     match_show.set_defaults(handler=cmd_match_show)
 
     match_list = match_commands.add_parser(
-        "list", parents=[stored], help="按等级、总分列出已评分的岗位，标出过期的记录",
-        description="列出已保存的匹配记录，按等级、总分排序。岗位或档案在评分后改过的记录标为 stale，需要重新评分。",
+        "list", parents=[stored], help="按等级、总分列出已评分的岗位，标出过期的记录；--weights 换一组权重试算",
+        description="列出已保存的匹配记录，按等级、总分排序。岗位、档案或权重在评分后改过的记录标为 stale，"
+                    "stale_reasons 写明原因，需要重新评分。加 --weights 时用这组权重和已保存的各维度分数试算，"
+                    "只输出，不改档案和记录。",
     )
     match_list.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    match_list.add_argument("--weights", metavar="WEIGHTS",
+                            help=f"试算用的权重，五项都写，例如 {_TRIAL_EXAMPLE}")
     match_list.set_defaults(handler=cmd_match_list)
 
     match_report = match_commands.add_parser(

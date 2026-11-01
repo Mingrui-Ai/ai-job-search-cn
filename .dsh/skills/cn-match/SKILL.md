@@ -5,7 +5,7 @@ description: >
   `python -m jobsearch_cn match score`, the experience dimension (and a direction the rules leave
   null) added with evidence quoted from the JD and the profile, validated and saved, then explained
   to the user in Chinese. Triggers on: 岗位评分, 匹配度, 值不值得投, 比较岗位, 岗位排序, 评分,
-  match score, cn-match
+  更看重, 调整权重, match score, cn-match
 ---
 
 # CN Match
@@ -19,4 +19,6 @@ do not restate or extend it here.
   data into tracked files. The profile is built with `docs/cn/profile-setup.md`.
 - Never put the user's contact details into a reply or a file.
 
-Write files only under `data/matches/drafts/`.
+Write files only under `data/matches/drafts/`, except once the user explicitly confirms new
+weights: then set `target.weights` in `data/profile/profile.json` and append one entry to the
+偏好记录 section of `data/profile/notes.md`, and change nothing else in the profile.

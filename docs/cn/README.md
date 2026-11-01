@@ -12,7 +12,7 @@
 | [master-plan.md](master-plan.md) | 总体规划：最终目的、设计原则、系统全貌、M1–M8 的目标与完成标准、待决事项、分工 |
 | [worklog.md](worklog.md) | 工作记录：每一步做了什么、验证结果、遗留问题。2026-10-28 起每条一个文件，放在 [worklog/](worklog/) |
 | [CHANGELOG.md](CHANGELOG.md) | 版本更新记录（CN） |
-| [cn-migration-plan.md](cn-migration-plan.md) | 上游审计结论、架构决策（ADR-1 至 ADR-9）、目录结构、上游同步流程 |
+| [cn-migration-plan.md](cn-migration-plan.md) | 上游审计结论、架构决策（ADR）、目录结构、上游同步流程 |
 | [job-schema.md](job-schema.md) | 岗位记录格式（Job Schema v1）：字段说明、出处规则、与上游字段的对应 |
 | [jd-import.md](jd-import.md) | JD 导入工作流（Codex 与 Claude Code 共用）：解析、补全、校验、保存、去重、查询 |
 | [profile.md](profile.md) | 个人档案格式（Profile v1）：字段、来源规则、与 JD 硬性条件的对照 |
@@ -21,6 +21,7 @@
 | [jd-parse.md](jd-parse.md) | `jd parse`：用法、编码处理、各字段能识别的写法、补全流程、防注入检查 |
 | [baseline-report.md](baseline-report.md) | Day 0 环境、测试基线、已知问题与 Windows 兼容性记录 |
 | [oss-privacy-review.md](oss-privacy-review.md) | 开源前隐私审查（2026-10-28）：公开范围、各类扫描结果和处理结论、转为公开前的操作 |
+| [m3-0-resume-prototypes.md](m3-0-resume-prototypes.md) | M3-0 简历生成方式的原型对比（2026-10-30）：三种同时出 Word 和 PDF 的做法、开源简历模板的调研和许可、推荐方案和 M3-2 的检查清单 |
 | [plan/kickoff-guide-v0.1.md](plan/kickoff-guide-v0.1.md) | 原始文件《AI_Job_Search_CN_项目启动指导_v0.1.md》（存档） |
 | [plan/initial-guidelines.md](plan/initial-guidelines.md) | 原始文件《初步guidelines.md》（存档） |
 
@@ -89,6 +90,8 @@ git worktree remove ../cn-<名字>                           # 删除（目录�
 ```
 
 - 一个分支同一时间只能在一个目录里签出。要查看别人正在用的分支，用 `git switch --detach origin/<分支>`。
+- 工作树共用同一套分支和 stash：在一个工作树里建的本地分支，别的工作树用 `git log --all`、`git branch` 都看得到。所以 Codex A 的留出样例不在工作树里做，而在单独的 clone `D:\06_Projects\ai-job-search-holdout\cn-holdout` 里做（2026-11-01 起，见下一节）。
+- 临时工作树（试合并、复现问题用）放在 `D:\06_Projects\ai-job-search\tmp\` 下，用完就 `git worktree remove`；PR 合并后还留着的，由建它的会话删掉。别人的工作树不删。
 - 各目录的 `data/`、`logs/` 是分开的（都被 git 忽略）。要用同一份数据，设置环境变量 `JOBSEARCH_CN_DATA_DIR` 或加 `--data-dir`。
 - conda 环境 `ai-job-search-cn` 各目录共用。
 
@@ -97,11 +100,11 @@ git worktree remove ../cn-<名字>                           # 删除（目录�
 2026-10-29 起，本仓库同时有一个规划会话和几个工作会话：Claude Code 执行者 A、B、C，Codex A 验证者，Codex B 审核者。分工见[总体规划 §8](master-plan.md#8-协作方式)，任务和进度见[路线图](roadmap.md)。
 
 - **派活**：规划者先把任务单写进路线图，再直接通知各会话。Claude Code 会话之间用 SendMessage。Codex 的任务写在规划者维护的本机收件箱文件里（在仓库外，不入 git，Codex A、B 各一个），再用 `codex queue` 通知它。用户不必转贴任务。
-- **回报**：Claude Code 会话在开 PR、推送新提交或需要裁定时，发消息给规划者；Codex 写在 PR 评论里。规划者用一个监视脚本跟踪 PR 的事件和两个 Codex 每一轮的结束。
-- **审核和合并**：实现类的 PR 开出后，规划者通知 Codex B 审核。Codex B 在自己的工作树里试合并最新 master、跑检查，在 PR 评论里写结论和按 P1–P3 分级的问题。要改的地方由规划者转告作者；Codex B 建议合并、CI 通过后，由规划者合并。规划者自己的文档 PR 和 Codex A 的测试数据 PR 不经过 Codex B。
+- **回报**：Claude Code 会话在开 PR、推送新提交或需要裁定时，发消息给规划者，写明 PR 号、当前提交、跑了哪些检查和结果、要裁定的问题；Codex 写在 PR 评论里。规划者用一个监视脚本跟踪 PR 的事件、两个 Codex 每一轮的结束，以及空闲的会话。
+- **审核和合并**：实现类的 PR 开出后，规划者通知 Codex B 审核。Codex B 在自己的工作树里试合并最新 master、跑检查，在 PR 评论里写结论和按 P1–P3 分级的问题，再给被审的那个提交打 `review` 状态：建议合并为 success，其他结论为 failure。2026-11-01 起，master 的分支保护要求这个状态，所以作者再推送以后，新提交要复审通过才能合并。要改的地方由规划者转告作者；审核通过、CI 通过后，由规划者合并。规划者自己的文档 PR 和 Codex A 的测试数据 PR 不经过 Codex B，由规划者审完打 `review` 状态。
 - **裁定只有一个出口**：审核者和验证者的意见都写在 PR 评论里，范围和口径由规划者裁定，再通知作者要改什么。工作会话之间不互相派活。
 - **交给 Codex 的事**：需要第二个模型的工作，即留出样例、规则改动的独立复核、Codex 入口的实测、真实数据验收。实现交给 Claude Code 会话。
-- **留出样例**：要检验的 PR 开出之前不推送。执行者在那之前不看验证者的工作树和分支。
+- **留出样例**：要检验的 PR 开出之前不推送。Codex A 在单独的 clone 里做（不是工作树，分支不和别人共用），PR 开出后才从那里推送。执行者在那之前不看验证者的目录和分支。
 - **公开仓库**：提交、PR 文字和评论推送后立即公开。不写真实岗位、档案内容、本机用户名和密钥；用户的真实数据只在本机的 `data/` 下。
 - **操作约定**：
   - `git push` 单独执行，看完整输出；

@@ -33,7 +33,8 @@ class Builtin(unittest.TestCase):
         for key in GROUPS[:5]:
             self.assertGreaterEqual(len(self.vocabulary.groups[key]["terms"]), 5, key)
         # market and general (office software every direction uses) start small.
-        self.assertEqual(self.vocabulary.groups["general"]["terms"], ["Excel", "PowerPoint", "PPT"])
+        for term in ("Word", "Excel", "PowerPoint", "PPT", "Office", "WPS", "Visio"):
+            self.assertEqual(self.vocabulary.group_of(term), "general")
         self.assertIn("市场调研", self.vocabulary.groups["market"]["terms"])
 
     def test_no_term_is_listed_twice_even_across_groups(self):
@@ -61,6 +62,7 @@ class Builtin(unittest.TestCase):
         self.assertEqual(self.vocabulary.group_of("招聘流程"), "hr")
         self.assertEqual(self.vocabulary.group_of("CRM"), "market")
         self.assertEqual(self.vocabulary.group_of("数据清洗"), "data")
+        self.assertEqual(self.vocabulary.group_of("统计分析"), "data")
         self.assertIsNone(self.vocabulary.group_of("打篮球"))
 
     def test_content_forms_are_not_skills_on_their_own(self):
@@ -72,7 +74,10 @@ class Builtin(unittest.TestCase):
 
     def test_synonyms_are_one_skill_to_matching(self):
         pairs = (("K8s", "kubernetes"), ("Golang", "Go"), ("NLP", "自然语言处理"), ("JS", "JavaScript"),
-                 ("PPT", "PowerPoint"), ("文案撰写", "文案写作"), ("Ｐｙｔｈｏｎ", "python"),
+                 ("PPT", "PowerPoint"), ("Microsoft PowerPoint", "PPT"), ("Microsoft Word", "Word"),
+                 ("Microsoft Excel", "Excel"), ("Microsoft Office", "Office"), ("MS Office", "Office"),
+                 ("WPS Office", "WPS"), ("Microsoft Visio", "Visio"),
+                 ("文案撰写", "文案写作"), ("Ｐｙｔｈｏｎ", "python"),
                  # H18: the planner grouped these near-synonyms, and PS (ruled on #59).
                  ("LLM", "大模型"), ("大语言模型", "llm"), ("Prompt", "提示词工程"), ("PS", "Photoshop"))
         for a, b in pairs:
@@ -83,6 +88,11 @@ class Builtin(unittest.TestCase):
         # Related, but not the same skill (H18): nothing is inferred from RAG or LangChain.
         self.assertFalse(self.vocabulary.same("RAG", "大模型"))
         self.assertFalse(self.vocabulary.same("LangChain", "LLM"))
+        self.assertFalse(self.vocabulary.same("统计分析", "统计学"))
+        self.assertFalse(self.vocabulary.same("统计分析", "数据分析"))
+        for a, b in (("Office", "Word"), ("Office", "Excel"), ("Office", "WPS"),
+                     ("Word", "WPS"), ("PPT", "Visio")):
+            self.assertFalse(self.vocabulary.same(a, b))
         self.assertEqual(self.vocabulary.key("打篮球"), "打篮球")
 
     def test_every_synonym_is_a_term_and_shares_its_group(self):

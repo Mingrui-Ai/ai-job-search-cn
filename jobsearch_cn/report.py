@@ -13,6 +13,7 @@ here; the CLI writes the files.
 import csv
 import html
 import io
+import unicodedata
 from fractions import Fraction
 
 from jobsearch_cn import match, score
@@ -33,11 +34,21 @@ ASK_JD = "先看 JD 原文（规则可能没读出来），原文也没写就问
 FILL_PROFILE = "补上档案（建档工作流），再重新评分"
 ASK_AGENT = "让 Agent 按评分工作流补充，再生成报告"
 RESCORE = "让 Agent 重新评分（match score），再生成报告"
+# score.STALE_REASONS, as the report names them.
+STALE = {"job": "岗位在评分后改过", "job_gone": "岗位已删除", "profile": "档案在评分后改过",
+         "weights": "权重在评分后改过", "rules": "评分规则更新了"}
+WEIGHTS_ONLY = "各维度的分数仍然有效，重新评分会保留 Agent 补的经历和方向，只按新权重重算总分"
 
 
-def entry(record: dict, job, stale: bool) -> dict:
-    """One job in the report: its saved match record, the stored job (None if gone) and whether it is stale."""
-    return {"record": record, "job": job, "stale": stale}
+def entry(record: dict, job, stale: bool, reasons=()) -> dict:
+    """One job in the report: its saved match record, the stored job (None if gone), whether it is stale and
+    why (score.stale_reasons)."""
+    return {"record": record, "job": job, "stale": stale, "reasons": list(reasons)}
+
+
+def _why_stale(item: dict) -> str:
+    """（权重在评分后改过）, or nothing when the reasons are not known."""
+    return f"（{'、'.join(STALE.get(reason, reason) for reason in item['reasons'])}）" if item["reasons"] else ""
 
 
 def order(entries: list) -> list:
@@ -153,9 +164,17 @@ def feedback_csv(entries: list) -> str:
 
 
 def _cell(value) -> str:
-    """Every cell, so no text - least of all the JD's - is read as a formula when the sheet is opened."""
+    """Every cell, so no text - least of all the JD's - is read as a formula when the sheet is opened.
+
+    The text is kept as it is, with a ' in front when it starts with a line break or a tab, or when its first
+    character after leading whitespace and control characters (an importer may skip them) starts a formula.
+    A full-width ＝ or a BOM in front is not looked past yet (V18 P2-4; Excel and WPS were not tried).
+    """
     text = "" if value is None else str(value)
-    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
+    start = 0
+    while start < len(text) and (text[start].isspace() or unicodedata.category(text[start]) == "Cc"):
+        start += 1
+    return "'" + text if text[:1] in ("\t", "\r", "\n") or text[start:start + 1] in ("=", "+", "-", "@") else text
 
 
 # ---------------------------------------------------------------- HTML
@@ -242,8 +261,8 @@ def build(entries: list, profile: dict, generated_at: str, vocabulary) -> str:
         f'<p class="meta">生成于 {_e(generated_at)} · 共 {len(entries)} 个岗位 · 只读取已保存的匹配记录</p>',
     ]
     if stale:
-        out.append(f'<p class="notice">有 {len(stale)} 条记录已过期（岗位或档案在评分后改过，或评分规则更新了），'
-                   f"下面的结论可能不准：{RESCORE}。</p>")
+        out.append(f'<p class="notice">有 {len(stale)} 条记录已过期（岗位、档案或权重在评分后改过，或评分规则更新了，'
+                   f"原因写在各岗位的小节里），下面的结论可能不准：{RESCORE}。</p>")
     out += [
         f"<p>等级按总分划分：{_e(_legend())}。"
         "看完后在同目录的 <code>feedback.csv</code> 里填写“你的等级”“认可”“原因”三列，"
@@ -255,7 +274,7 @@ def build(entries: list, profile: dict, generated_at: str, vocabulary) -> str:
     for rank, item in enumerate(entries, 1):
         record, job = item["record"], item["job"] or {}
         total, verdict = record.get("total") or {}, (record.get("filter") or {}).get("verdict")
-        expired = '<td class="stale">过期</td>' if item["stale"] else "<td></td>"
+        expired = f'<td class="stale">过期{_e(_why_stale(item))}</td>' if item["stale"] else "<td></td>"
         out.append(
             f"<tr><td class=\"num\">{rank}</td>"
             f"<td><a href=\"#{_e(record['job_id'])}\">{_e(job.get('title') or record['job_id'])}</a></td>"
@@ -282,7 +301,8 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
     if job is None:
         out.append('<p class="notice">岗位库里已经没有这个岗位，只能显示匹配记录里保存的内容。</p>')
     if item["stale"]:
-        out.append(f'<p class="notice stale">这条记录已过期：{RESCORE}。</p>')
+        advice = f"{WEIGHTS_ONLY}。{RESCORE}" if item["reasons"] == ["weights"] else RESCORE
+        out.append(f'<p class="notice stale">这条记录已过期{_e(_why_stale(item))}：{advice}。</p>')
     out.append(f"<p><strong>结论：</strong>{_e(conclusion(record))}</p>")
 
     out += ["<h3>硬性条件</h3>",
@@ -303,7 +323,7 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
     out.append("<h3>各维度</h3>")
     if job is None:
         out.append('<p class="notice">岗位已删除，规则给出的维度列不出 JD 原文。</p>')
-    elif item["stale"]:
+    elif item["stale"] and item["reasons"] != ["weights"]:  # new weights leave the grounds as they were scored
         out.append('<p class="notice stale">依据栏里技能、薪资、方向、地点的 JD 原文取自现在的岗位库，'
                    "这条记录已过期，依据可能已变，请先重新评分。</p>")
     out.append("<table><tr><th>维度</th><th>分数</th><th>权重</th><th>给出方</th><th>理由</th><th>依据</th></tr>")

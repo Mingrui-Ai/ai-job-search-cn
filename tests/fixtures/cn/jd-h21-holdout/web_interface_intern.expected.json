@@ -1,0 +1,55 @@
+{
+  "fixture": "web_interface_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "ats",
+  "method": "agent",
+  "basis": "原创虚构样例；依据 master 文档及 H21/V15 任务，在本批 CLI 首次运行前人工写定。",
+  "fields": {
+    "title": {"value": "页面开发实习生", "evidence": ["页面开发实习生"]},
+    "company": {"value": "示例澄界软件有限公司", "evidence": ["公司名称：示例澄界软件有限公司"]},
+    "cities": {"value": ["深圳"], "evidence": ["工作地点：深圳"]},
+    "remote": {"value": false, "evidence": ["不支持远程办公"]},
+    "employment_type": {"value": "internship", "evidence": ["岗位类型：实习"]},
+    "salary": {"value": {"min": 220, "max": 280, "unit": "CNY/day", "months": null, "negotiable": false}, "evidence": ["薪资：220-280元/天"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": true}, "evidence": ["仅招2027届"]},
+    "requirements.days_per_week": {"value": 4, "evidence": ["每周至少到岗4天"]},
+    "requirements.min_months": {"value": 6, "evidence": ["至少实习6个月"]},
+    "requirements.education": {"value": {"min": "bachelor", "preferred": null}, "evidence": ["学历要求：本科及以上"]},
+    "requirements.skills": {"value": ["HTML", "CSS", "Vue", "JavaScript"], "evidence": ["使用HTML5/CSS3搭建页面，并用Vue3组织组件；熟悉JavaScript。"]},
+    "return_offer": {"value": true, "evidence": ["表现优秀者可转正"]},
+    "published_at": {"value": "2026-10-30", "evidence": ["发布日期：2026-10-30"]},
+    "deadline": {"value": "2026-11-28", "evidence": ["投递截止：2026-11-28"]}
+  },
+  "additional_fields": {"requirements.skill_alternatives": {"value": [], "evidence": []}},
+  "version_probes": [
+    {"text": "HTML5", "expected_skill": "HTML", "decision": "must_read"},
+    {"text": "CSS3", "expected_skill": "CSS", "decision": "must_read"},
+    {"text": "Vue3", "expected_skill": "Vue", "decision": "must_read"}
+  ],
+  "traps": [
+    {"text": "HTML5/CSS3", "interpretation": "斜线并列不等于任选；两项都读出，不生成任选组。"},
+    {"text": "JavaScript", "interpretation": "正常长词对照，不应额外读出 Java。", "forbidden_skills": ["Java"]},
+    {"text": "Top3", "interpretation": "业务榜单名次，不是技能或软件版本。", "forbidden_skills": ["Top", "Top3"]}
+  ],
+  "pending_adjudication": [],
+  "human_match": {
+    "tech": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"},
+      "education": {"result": "match", "reason": "硕士达到本科门槛。"},
+      "days_per_week": {"result": "match", "reason": "能到岗4天，达到4天。"},
+      "min_months": {"result": "match", "reason": "能实习6个月，达到6个月。"},
+      "location": {"result": "match", "reason": "深圳在首选城市内。"},
+      "employment_type": {"result": "match", "reason": "实习在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }},
+    "ops": {"verdict": "ineligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"},
+      "education": {"result": "match", "reason": "本科达到门槛。"},
+      "days_per_week": {"result": "conflict", "reason": "只能到岗3天，少于4天。"},
+      "min_months": {"result": "conflict", "reason": "只能实习3个月，少于6个月。"},
+      "location": {"result": "conflict", "reason": "深圳不在意向内，明确不搬家、不接受远程。"},
+      "employment_type": {"result": "match", "reason": "实习在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }}
+  }
+}

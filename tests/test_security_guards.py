@@ -626,6 +626,14 @@ class GitignoreGuardTests(GuardRepoFixture):
         self.assertIn("upskill/*.md", result.stdout)
         self.assertIn("**/upskill/report-*.md", result.stdout)
 
+    def test_cn_data_rule_is_required(self):
+        # H25b (Codex B's V18 audit, P3-2): the CN fork keeps the job store, match records,
+        # reports and the profile under data/; deleting its rule must fail the guard.
+        self.write_gitignore([r for r in security_guards.REQUIRED_IGNORE_RULES if r != "/data/"])
+        result = run_guards(self.root)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("required personal-data rule missing: '/data/'", result.stdout)
+
 
 class GitignorePatternBehaviorTests(unittest.TestCase):
     """Pin the match semantics of the shipped .gitignore, not just rule presence.
@@ -667,6 +675,21 @@ class GitignorePatternBehaviorTests(unittest.TestCase):
                     expect_ignored,
                     f"{path}: expected ignored={expect_ignored}",
                 )
+
+    def test_cn_data_paths_are_ignored(self):
+        # H25b P3-2: representative paths the CN commands write under the data directory.
+        for path in ("data/jobs/job_0123456789ab.json", "data/matches/job_0123456789ab.json",
+                     "data/matches/drafts/job_0123456789ab.json", "data/reports/20261030-1200/report.html",
+                     "data/reports/20261030-1200/feedback.csv", "data/profile/profile.json",
+                     "data/profile/sources/resume.pdf", "data/inbox/2026-10-30-1.txt"):
+            with self.subTest(path=path):
+                result = subprocess.run(["git", "-C", str(self.root), "check-ignore", "-v", path],
+                                        capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, f"{path}: not ignored by the shipped .gitignore")
+        # tests/fixtures/cn/ holds the de-identified samples and must stay tracked.
+        result = subprocess.run(["git", "-C", str(self.root), "check-ignore", "tests/fixtures/cn/jd/boss_intern.txt"],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 1)
 
     def test_interview_prep_pack_is_ignored_at_the_path_the_command_writes(self):
         # Derived, never copied: a hardcoded prep-pack path pins only that

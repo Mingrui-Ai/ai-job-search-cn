@@ -1,0 +1,37 @@
+{
+  "task": "V15 comparison against H21 PR #91",
+  "ruling_url": "https://github.com/Mingrui-Ai/ai-job-search-cn/pull/91#issuecomment-6521690423",
+  "ruling": "Version numbers separated by spaces, .x suffixes, and a v prefix all belong to the vocabulary skill; PS plus one digit is a console unless the digit is followed by a time or count unit.",
+  "fixtures": {
+    "creative_tools_intern": {
+      "adjudicated_skills": ["Photoshop", "Vue", "Python"],
+      "probes": [
+        {"text": "Photoshop 2024", "expected_skill": "Photoshop"},
+        {"text": "Vue2.x", "expected_skill": "Vue"},
+        {"text": "Pythonv3.11", "expected_skill": "Python"}
+      ]
+    }
+  },
+  "supplemental_probes": [
+    {
+      "id": "ps-duration-not-console",
+      "text": "平面设计助理\n技能要求：PS 5年以上。",
+      "expected_skills": ["PS"]
+    },
+    {
+      "id": "python-duration-not-version",
+      "text": "开发助理\n技能要求：Python 3 年以上。",
+      "expected_skills": ["Python"]
+    },
+    {
+      "id": "ps5-console",
+      "text": "游戏运营助理\n负责PS5游戏机活动。",
+      "expected_skills": []
+    },
+    {
+      "id": "unity3d-out-of-scope",
+      "text": "互动内容助理\n技能要求：Unity3D。",
+      "expected_skills": []
+    }
+  ]
+}

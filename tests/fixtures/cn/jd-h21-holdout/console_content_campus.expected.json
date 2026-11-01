@@ -1,0 +1,56 @@
+{
+  "fixture": "console_content_campus.txt",
+  "job_schema_version": 1,
+  "site_argument": "official",
+  "method": "agent",
+  "basis": "原创虚构的非技术运营岗；依据 master 文档及 H21/V15 任务，在本批 CLI 首次运行前人工写定。",
+  "fields": {
+    "title": {"value": "游戏栏目运营校招专员", "evidence": ["游戏栏目运营校招专员"]},
+    "company": {"value": "示例弦舟文化有限公司", "evidence": ["公司名称：示例弦舟文化有限公司"]},
+    "cities": {"value": ["上海"], "evidence": ["工作地点：上海"]},
+    "remote": {"value": false, "evidence": ["不支持远程办公"]},
+    "employment_type": {"value": "campus", "evidence": ["岗位类型：校招"]},
+    "salary": {"value": {"min": 10000, "max": 14000, "unit": "CNY/month", "months": 13, "negotiable": false}, "evidence": ["薪资：10-14K/月，全年13薪"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": true}, "evidence": ["仅招2027届"]},
+    "requirements.days_per_week": {"value": null, "evidence": []},
+    "requirements.min_months": {"value": null, "evidence": []},
+    "requirements.education": {"value": {"min": "bachelor", "preferred": null}, "evidence": ["学历要求：本科及以上"]},
+    "requirements.skills": {"value": ["Excel", "PowerPoint", "内容策划"], "evidence": ["熟悉Excel2021/PowerPoint2019，负责内容策划，两种办公软件都要会。"]},
+    "return_offer": {"value": null, "evidence": []},
+    "published_at": {"value": "2026-10-30", "evidence": ["发布日期：2026-10-30"]},
+    "deadline": {"value": "2026-11-28", "evidence": ["投递截止：2026-11-28"]}
+  },
+  "additional_fields": {"requirements.skill_alternatives": {"value": [], "evidence": []}},
+  "version_probes": [
+    {"text": "Excel2021", "expected_skill": "Excel", "decision": "must_read"},
+    {"text": "PowerPoint2019", "expected_skill": "PowerPoint", "decision": "must_read"},
+    {"text": "PS4", "expected_skill": null, "decision": "must_not_map_console_to_photoshop"},
+    {"text": "PS5", "expected_skill": null, "decision": "must_not_map_console_to_photoshop"}
+  ],
+  "traps": [
+    {"text": "PS4/PS5游戏机", "interpretation": "游戏机型号；不生成 PS、Photoshop 或软件任选组。", "forbidden_skills": ["PS", "Photoshop", "PS4", "PS5"]},
+    {"text": "Excel2021/PowerPoint2019", "interpretation": "两个办公软件都要会，斜线并列不生成任选组。"},
+    {"text": "全年13薪", "interpretation": "薪数与同一行的月薪对应，不是技能版本或实习时长。"}
+  ],
+  "pending_adjudication": [],
+  "human_match": {
+    "tech": {"verdict": "ineligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"},
+      "education": {"result": "match", "reason": "硕士达到本科门槛。"},
+      "days_per_week": {"result": "not_applicable", "reason": "校招岗位没写实习到岗天数。"},
+      "min_months": {"result": "not_applicable", "reason": "校招岗位没写实习月数。"},
+      "location": {"result": "conflict", "reason": "上海不在意向内，不愿异地，JD不能远程。"},
+      "employment_type": {"result": "conflict", "reason": "档案只找实习，校招不在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }},
+    "ops": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合限定。"},
+      "education": {"result": "match", "reason": "本科达到门槛。"},
+      "days_per_week": {"result": "not_applicable", "reason": "校招没写实习到岗天数。"},
+      "min_months": {"result": "not_applicable", "reason": "校招没写实习月数。"},
+      "location": {"result": "match", "reason": "上海在意向城市内。"},
+      "employment_type": {"result": "match", "reason": "校招在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }}
+  }
+}
