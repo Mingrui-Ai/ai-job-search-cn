@@ -158,10 +158,11 @@ class PermissionGuardTests(GuardRepoFixture):
 
 
 class AskDenyRuleTests(GuardRepoFixture):
-    """settings.json ships deny rules (block in every mode, bypass included) and
-    ask rules (always prompt, even over a skill's allowed-tools grant). Removing
-    one silently re-opens the hole it closed, so each is required, like the
-    personal-data gitignore rules."""
+    """settings.json ships deny rules (block in every mode, bypass included).
+    Removing one silently re-opens the hole it closed, so each is required, like
+    the personal-data gitignore rules. Ask rules (always prompt, even over a
+    skill's allowed-tools grant) were required the same way until the owner
+    removed them all on 2026-11-01; REQUIRED_ASK_RULES is empty."""
 
     def test_missing_required_deny_rule_fails(self):
         deny = list(security_guards.REQUIRED_DENY_RULES)
@@ -172,14 +173,11 @@ class AskDenyRuleTests(GuardRepoFixture):
         self.assertIn("required deny rule missing", result.stdout)
         self.assertIn(dropped, result.stdout)
 
-    def test_missing_required_ask_rule_fails(self):
-        ask = list(security_guards.REQUIRED_ASK_RULES)
-        dropped = ask.pop(0)
-        self.write_settings(sorted(security_guards.ALLOWED_PERMISSIONS), ask=ask)
+    def test_empty_ask_list_passes(self):
+        # The owner removed every ask rule on 2026-11-01.
+        self.write_settings(sorted(security_guards.ALLOWED_PERMISSIONS), ask=[])
         result = run_guards(self.root)
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("required ask rule missing", result.stdout)
-        self.assertIn(dropped, result.stdout)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_extra_deny_and_ask_rules_pass(self):
         # Narrowing further is always fine; only removal is guarded.
@@ -200,14 +198,9 @@ class AskDenyRuleTests(GuardRepoFixture):
         # The obvious siblings of the listed upload shapes.
         for sibling in ("Bash(curl -XPOST:*)", "Bash(curl --request POST:*)", "Bash(wget --method=POST:*)"):
             self.assertIn(sibling, security_guards.REQUIRED_DENY_RULES)
-        self.assertIn("Edit(.claude/settings.json)", security_guards.REQUIRED_ASK_RULES)
-        self.assertIn("Edit(.claude/skills/*/SKILL.md)", security_guards.REQUIRED_ASK_RULES)
-        # A command's frontmatter is a grant too (check 4 parses it), so writing
-        # one must prompt - otherwise a steered session could add
-        # `allowed-tools: Bash` to apply.md with no prompt and the next /apply
-        # would be pre-approved for bare Bash.
-        self.assertIn("Edit(.claude/commands/*.md)", security_guards.REQUIRED_ASK_RULES)
-        self.assertIn("Bash(git push:*)", security_guards.REQUIRED_ASK_RULES)
+        # No ask rule is required since the owner removed them on 2026-11-01;
+        # re-adding one changes this line too, so the change stays explicit.
+        self.assertEqual(security_guards.REQUIRED_ASK_RULES, [])
         # The posting integrity gate runs inside fetch agents with no prompt.
         self.assertIn("Bash(python tools/posting_guard.py:*)", security_guards.ALLOWED_PERMISSIONS)
         self.assertIn("Bash(python3 tools/posting_guard.py:*)", security_guards.ALLOWED_PERMISSIONS)
