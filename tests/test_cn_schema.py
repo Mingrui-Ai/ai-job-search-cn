@@ -48,6 +48,7 @@ def minimal_record() -> dict:
             "skill_alternatives": [], "start": None,
         },
         "interview": None,
+        "benefits": {"meals": None},
         "return_offer": None,
         "published_at": None,
         "deadline": None,
@@ -112,6 +113,8 @@ class DocumentedSchema(SchemaCase):
             ("requirements.education", schema.EDUCATION_KEYS),
             ("requirements.start", schema.START_KEYS),
             ("interview", schema.INTERVIEW_KEYS),
+            ("benefits", schema.BENEFIT_KEYS),
+            ("benefits.meals", schema.MEAL_KEYS),
             ("guard", schema.GUARD_KEYS),
         ):
             names += [f"{prefix}.{key}" for key in keys]
@@ -378,6 +381,47 @@ class InterviewAndStart(SchemaCase):
         upgraded = schema.upgrade(record)
         self.assert_valid(upgraded)
         self.assertEqual((upgraded["interview"], upgraded["requirements"]["start"]), (None, None))
+
+
+class Meals(SchemaCase):
+    """benefits.meals (M2-6e): the meals the job provides a day, and an allowance with its amount."""
+
+    def meals(self, value, text="包两餐"):
+        return self.cited("benefits.meals", value, text)
+
+    def test_meals_by_count_or_with_no_count(self):
+        for per_day in (1, 2, 3, None):
+            with self.subTest(per_day=per_day):
+                self.assert_valid(self.meals({"per_day": per_day, "allowance": None}))
+        self.assert_valid(self.meals({"per_day": 0, "allowance": {"amount": 20, "unit": "CNY/day"}}, "餐补 20 元/天"))
+        self.assert_valid(self.meals({"per_day": 1, "allowance": {"amount": 300, "unit": "CNY/month"}}))
+
+    def test_a_count_from_0_to_3_and_an_allowance_with_an_amount(self):
+        for per_day in (4, -1, 1.5, True, "2"):
+            with self.subTest(per_day=per_day):
+                self.assert_error(self.meals({"per_day": per_day, "allowance": None}), "benefits.meals.per_day")
+        self.assert_error(self.meals({"per_day": 0, "allowance": None}), "benefits.meals: per_day 0 means")
+        for allowance, prefix in (({"amount": 0, "unit": "CNY/day"}, "benefits.meals.allowance.amount"),
+                                  ({"amount": 20, "unit": "CNY/hour"}, "benefits.meals.allowance.unit"),
+                                  ({"amount": 20}, "benefits.meals.allowance.unit: missing"),
+                                  ("20元/天", "benefits.meals.allowance: must be null or an object")):
+            with self.subTest(allowance=allowance):
+                self.assert_error(self.meals({"per_day": 1, "allowance": allowance}), prefix)
+        self.assert_error(with_value(minimal_record(), "benefits", None), "benefits: must be an object")
+        self.assert_error(with_value(minimal_record(), "benefits", {"meals": None, "housing": None}),
+                          "benefits.housing: unknown field")
+
+    def test_meals_need_evidence(self):
+        record = with_value(minimal_record(), "benefits", {"meals": {"per_day": 2, "allowance": None}})
+        self.assert_error(record, "benefits.meals: has a value but no evidence")
+
+    def test_upgrade_adds_benefits_to_an_older_record(self):
+        record = minimal_record()
+        del record["benefits"]
+        self.assert_error(record, "benefits: missing")
+        upgraded = schema.upgrade(record)
+        self.assert_valid(upgraded)
+        self.assertEqual(upgraded["benefits"], {"meals": None})
 
 
 class Evidence(SchemaCase):

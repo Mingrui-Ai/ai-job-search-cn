@@ -212,6 +212,37 @@ _INTERVIEW_DUTY = re.compile(r"负责|协助|组织|跟进|对接|邀约|筛选|
 # A way of interviewing the JD rules out: "不支持远程面试", "不接受视频面试".
 _INTERVIEW_REFUSED = re.compile(r"不(?:支持|接受|提供|安排|采用|可|能)")
 
+# Meals (M2-6e): how many a day the job provides - 包三餐 3, 包两餐 or 提供午餐和晚餐 2, 提供午餐 or 工作餐
+# 1, 包吃 or 包食宿 with no count - and a meal allowance with its amount and period ("餐补 20 元/天"). A
+# meal word followed by 补, 费 or 津 is an allowance, not a meal. An allowance without both an amount
+# and a period, "员工食堂" and "不包吃住" are not read.
+_MEAL_GIVE = r"(?:包|提供|免费提供|管|含)"
+_MEAL = r"餐(?!\s*(?:补|费|津))"
+_MEAL_NAME = r"(?:早|午|晚)(?:餐|饭)(?!\s*(?:补|费|津))"
+_MEAL_AND = r"\s*(?:和|及|与|、|/)\s*"
+_MEALS = (
+    # Three meals named one by one ("提供早餐、午餐和晚餐") are three, not the two of their first pair (#93 review).
+    (re.compile(rf"{_MEAL_GIVE}\s*(?:一日)?\s*(?:三|3)\s*{_MEAL}|三餐\s*(?:全包|免费|全免)"
+                rf"|{_MEAL_GIVE}\s*{_MEAL_NAME}{_MEAL_AND}{_MEAL_NAME}{_MEAL_AND}{_MEAL_NAME}"
+                rf"|{_MEAL_GIVE}\s*早\s*[中午]\s*晚\s*(?:三|3)?\s*{_MEAL}"), 3),
+    (re.compile(rf"{_MEAL_GIVE}\s*(?:一日)?\s*(?:两|二|2)\s*{_MEAL}|{_MEAL_GIVE}\s*(?:早午|午晚|早晚)\s*{_MEAL}"
+                rf"|{_MEAL_GIVE}\s*{_MEAL_NAME}{_MEAL_AND}{_MEAL_NAME}"), 2),
+    (re.compile(rf"(?<![面红书背钱荷])包\s*吃|管\s*吃\s*管?\s*住|管\s*饭|{_MEAL_GIVE}\s*(?:食宿|伙食)"
+                rf"|(?:食宿|吃住)\s*全包"), None),
+    (re.compile(rf"{_MEAL_GIVE}\s*(?:一|1)\s*{_MEAL}|{_MEAL_GIVE}\s*(?:免费)?\s*(?:{_MEAL_NAME}|(?:工作|员工){_MEAL})"
+                rf"|免费\s*(?:{_MEAL_NAME}|(?:工作|员工){_MEAL})"), 1),
+)
+_MEAL_ALLOWANCE_WORD = r"(?:餐补|饭补|饭贴|餐费补贴|餐饮补贴|伙食补贴|午餐补贴)"
+_MEAL_ALLOWANCES = (
+    re.compile(rf"{_MEAL_ALLOWANCE_WORD}\s*[:：为]?\s*(?P<amount>{_N})\s*元?\s*(?:/|每)\s*(?P<per>天|日|月)"),
+    re.compile(rf"(?P<per>每天|每日|每月)\s*(?:有|发|提供)?\s*{_MEAL_ALLOWANCE_WORD}\s*[:：为]?\s*(?P<amount>{_N})\s*元"),
+    re.compile(rf"{_MEAL_ALLOWANCE_WORD}\s*(?P<per>每天|每日|每月)\s*(?P<amount>{_N})\s*元"),
+)
+# What the JD does not give: "不包吃住", "不提供午餐", "无餐补".
+_MEAL_REFUSED = re.compile(r"(?:不|无|没有?|未)\s*$")
+# Most meals first; 包吃 with no count reads as two or more (planner, 2026-10-30).
+_MEAL_RANK = {3: 3, 2: 2, None: 1.5, 1: 1}
+
 # When to start (M2-6c): as soon as possible, or by a date - "11月1日前到岗", "2027年7月入职",
 # "入职时间：11月底前". A month alone is its last day. A start from a date on ("11月1日后到岗",
 # "11月起") is no deadline, "11月前" alone could mean October or November, and a date the JD only
@@ -320,10 +351,10 @@ _AFTER_POSTSCRIPT = re.compile(r"[ \t]*[:：]")
 _OFFICE_TERMS = frozenset(("Word", "Microsoft Word", "Excel", "Microsoft Excel", "PPT", "PowerPoint",
                            "Microsoft PowerPoint", "Office", "Microsoft Office", "MS Office", "WPS",
                            "WPS Office", "Visio", "Microsoft Visio"))
-_OFFICE_NAME = r"(?:(?:Microsoft|MS|WPS)\s+)?(?:Word|Excel|PowerPoint|PPT|Office|WPS|Visio)"
+_OFFICE_NAME = r"(?:(?:Microsoft|MS|WPS)\s+)?(?:Word|Excel|PowerPoint|PPT|Office|WPS|Visio)(?:\s*v?\d+(?:\.\d+)*(?:\.x)?\+?)?"  # H21: a version, "+" too, stays in the list
 _OFFICE_JOIN = r"\s*(?:、|,|，|/|／|&|和|及|与|或者?|or|and)\s*"
 _OFFICE_LIST = re.compile(rf"(?<![A-Za-z]){_OFFICE_NAME}(?:{_OFFICE_JOIN}{_OFFICE_NAME})+(?![A-Za-z])", re.I)
-_OFFICE_DISTINCT_NAME = re.compile(r"\b(?:Excel|PowerPoint|PPT|WPS|Visio|Microsoft|MS)\b", re.I)
+_OFFICE_DISTINCT_NAME = re.compile(r"(?<![A-Za-z])(?:Excel|PowerPoint|PPT|WPS|Visio|Microsoft|MS)(?![A-Za-z])", re.I)
 _OFFICE_USE_BEFORE = re.compile(
     r"(?:熟悉|熟练(?:使用|操作)?|掌握|精通|(?:会|能)?(?:使用|操作|用)"
     r"|(?:办公软件|办公套件|软件工具|技能要求|工具要求|技能|软件)\s*[:：]?)"
@@ -364,10 +395,26 @@ _COMPANY_HEAD = re.compile(
 )
 
 
+# A version right after an English term still names the term (H21): glued or after a space, digits and dots,
+# maybe a "v" in front and ".x" at the end: "HTML5", "Vue2.x", "Python 3.10", "Pythonv3.11", "Photoshop 2024".
+# The version is part of the match, so "Python 3.10 或 Java 8" still reads as one choice. It must not run into a
+# letter, so a name with a digit inside ("C4D") is not split; "+" may follow ("Java8+" is 8 or later).
+# A number followed by a time or count unit is no version: "Python 3 年以上" quotes only Python,
+# and "Python3年以上" still reads Python. A version is taken whole or not at all: "Python 3.5年" must not
+# fall back to "Python 3".
+_UNIT = r"[^\S\r\n]*(?:年|个月|月|周|天|小时|人|次|元|[kKwW](?![A-Za-z])|万)"
+_COUNT = rf"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?{_UNIT}"
+_VERSION = rf"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?(?![A-Za-z0-9#])(?!\.[\dx])(?!{_UNIT})"
+# One digit after PS is a games console (PS4, PS 5), not Photoshop; a year still is ("PS2024"),
+# and so are a count ("PS 5年以上") and a decimal or ".x" version ("PS 5.1", "PS5.x").
+_CONSOLE = rf"(?![^\S\r\n]*\d(?!\d|\.[\dx])(?!{_UNIT}))"
+
+
 def _skill_pattern(term: str) -> re.Pattern:
     escaped = re.escape(term).replace(r"\ ", r"\s*")
     if term.isascii():
-        escaped = rf"(?<![A-Za-z0-9+#.]){escaped}(?![A-Za-z0-9+#])"
+        console = _CONSOLE if term.casefold() == "ps" else ""
+        escaped = rf"(?<![A-Za-z0-9+#.]){escaped}{console}(?:{_VERSION}|(?![A-Za-z0-9+#])|(?={_COUNT}))"
     return re.compile(escaped, re.I)
 
 
@@ -476,6 +523,7 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
             "start": cite("requirements.start", _start(text, reference)),
         },
         "interview": cite("interview", _interview(text)),
+        "benefits": {"meals": cite("benefits.meals", _meals(text))},
         "return_offer": cite("return_offer", _return_offer(text)),
         "published_at": cite("published_at", published),
         "deadline": cite("deadline", _dated(text, (_DEADLINE_AFTER, _DEADLINE_BEFORE), same_line=True)),
@@ -716,6 +764,29 @@ def _offers_a_choice(text: str, mentions: list) -> bool:
             if _INTERVIEW_CHOICE_BEFORE.search(text, _clause_bounds(text, start, start)[0], start):
                 return True
     return False
+
+
+def _meals(text: str):
+    """The meals the job provides a day and a meal allowance with its amount (M2-6e), or nothing."""
+    counts, cited, allowance = [], [], None
+    for pattern, per_day in _MEALS:
+        for match in pattern.finditer(text):
+            left, _ = _clause_bounds(text, match.start(), match.end())
+            if not _MEAL_REFUSED.search(text, left, match.start()):
+                counts.append(per_day)
+                cited.append(match)
+    paid = [match for pattern in _MEAL_ALLOWANCES for match in pattern.finditer(text)
+            if not _MEAL_REFUSED.search(text, _clause_bounds(text, match.start(), match.end())[0], match.start())]
+    if paid:
+        first = min(paid, key=lambda match: match.start())
+        allowance = {"amount": _amount(float(first["amount"])),
+                     "unit": "CNY/month" if first["per"].endswith("月") else "CNY/day"}
+        cited.append(first)
+    if not counts and allowance is None:
+        return _NOTHING
+    per_day = max(counts, key=_MEAL_RANK.get) if counts else 0  # 0: an allowance and no meals
+    snippets = [_clause(text, match.start(), match.end()) for match in sorted(cited, key=lambda match: match.start())]
+    return {"per_day": per_day, "allowance": allowance}, list(dict.fromkeys(snippets))
 
 
 def _start(text: str, reference: date):

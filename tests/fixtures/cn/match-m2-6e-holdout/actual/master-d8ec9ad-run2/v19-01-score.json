@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "job_id": "job_3229a1d1e837",
+  "rules_version": 5,
+  "scored_at": "2026-10-30T15:16:12+08:00",
+  "job_hash": "d570da71a4c54b467a097e677b235635cf8a2ab624dff65b4cb5bbb6a954b2bc",
+  "profile_hash": "feaa757e6215ef3277888d54dc3b7c174cdecc3a46e72c162ae045449012852e",
+  "filter": {
+    "verdict": "needs_check",
+    "checks": [
+      {
+        "check": "graduation",
+        "result": "unknown",
+        "reason": "JD 没写届别；档案没写毕业时间",
+        "jd": {
+          "requirements.graduation": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "graduation.year": null
+        }
+      },
+      {
+        "check": "education",
+        "result": "unknown",
+        "reason": "JD 没写最低学历（优先学历不作要求）",
+        "jd": {
+          "requirements.education": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "education": []
+        }
+      },
+      {
+        "check": "days_per_week",
+        "result": "match",
+        "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+        "jd": {
+          "requirements.days_per_week": {
+            "value": 4,
+            "evidence": "每周到岗4天"
+          }
+        },
+        "profile": {
+          "availability.days_per_week": 4
+        }
+      },
+      {
+        "check": "min_months",
+        "result": "match",
+        "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+        "jd": {
+          "requirements.min_months": {
+            "value": 3,
+            "evidence": "实习3个月"
+          }
+        },
+        "profile": {
+          "availability.months": 3
+        }
+      },
+      {
+        "check": "location",
+        "result": "unknown",
+        "reason": "档案没写意向城市",
+        "jd": {
+          "cities": {
+            "value": [
+              "杭州"
+            ],
+            "evidence": "工作地点：杭州"
+          },
+          "remote": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.cities": [],
+          "availability.acceptable_cities": [],
+          "availability.remote_ok": null,
+          "availability.relocate": null
+        }
+      },
+      {
+        "check": "employment_type",
+        "result": "unknown",
+        "reason": "这是实习岗位；档案没写想找的岗位类型",
+        "jd": {
+          "employment_type": {
+            "value": "internship",
+            "evidence": "职位名称：接口巡检实习生"
+          }
+        },
+        "profile": {
+          "target.employment_types": []
+        }
+      },
+      {
+        "check": "exclusions",
+        "result": "match",
+        "reason": "没有命中排除项",
+        "jd": {
+          "title": {
+            "value": "接口巡检实习生",
+            "evidence": "接口巡检实习生"
+          },
+          "company": {
+            "value": "示例汀鹭软件有限公司",
+            "evidence": "示例汀鹭软件有限公司"
+          },
+          "cities": {
+            "value": [
+              "杭州"
+            ],
+            "evidence": "工作地点：杭州"
+          }
+        },
+        "profile": {
+          "exclusions": {
+            "cities": [],
+            "companies": [],
+            "keywords": []
+          }
+        }
+      },
+      {
+        "check": "interview",
+        "result": "unknown",
+        "reason": "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试",
+        "jd": {
+          "interview": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.cities": [],
+          "availability.acceptable_cities": []
+        }
+      },
+      {
+        "check": "start_date",
+        "result": "unknown",
+        "reason": "JD 没写到岗时间；档案没写可到岗日期",
+        "jd": {
+          "requirements.start": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.start_date": null
+        }
+      }
+    ]
+  },
+  "dimensions": {
+    "skills": {
+      "score": 0,
+      "method": "rule",
+      "reason": "JD 要求 1 项技能，你有 0 项",
+      "matched": [],
+      "missing": [
+        "Python"
+      ]
+    },
+    "direction": {
+      "score": null,
+      "method": "rule",
+      "reason": "档案没写求职方向（target.directions）",
+      "jd_groups": {
+        "tech": 1
+      },
+      "evidence": null
+    },
+    "experience": {
+      "score": null,
+      "method": "agent",
+      "reason": "等 Agent 对照经历补充",
+      "hints": [],
+      "evidence": null
+    },
+    "salary": {
+      "score": null,
+      "method": "rule",
+      "reason": "JD 按元/天、你按元/月计，单位不同，不换算"
+    },
+    "location": {
+      "score": null,
+      "method": "rule",
+      "reason": "档案没写意向城市"
+    }
+  },
+  "weights": {
+    "skills": 30,
+    "direction": 25,
+    "experience": 25,
+    "salary": 10,
+    "location": 10
+  },
+  "total": {
+    "score": 0,
+    "grade": "poor",
+    "complete": false,
+    "missing": [
+      "direction",
+      "experience",
+      "salary",
+      "location"
+    ]
+  },
+  "gaps": [
+    {
+      "kind": "skill",
+      "item": "Python",
+      "jd": "任职要求：熟悉Python"
+    },
+    {
+      "kind": "filter",
+      "item": "graduation",
+      "result": "unknown",
+      "reason": "JD 没写届别；档案没写毕业时间",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "education",
+      "result": "unknown",
+      "reason": "JD 没写最低学历（优先学历不作要求）",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "location",
+      "result": "unknown",
+      "reason": "档案没写意向城市",
+      "jd": "工作地点：杭州"
+    },
+    {
+      "kind": "filter",
+      "item": "employment_type",
+      "result": "unknown",
+      "reason": "这是实习岗位；档案没写想找的岗位类型",
+      "jd": "职位名称：接口巡检实习生"
+    },
+    {
+      "kind": "filter",
+      "item": "interview",
+      "result": "unknown",
+      "reason": "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "start_date",
+      "result": "unknown",
+      "reason": "JD 没写到岗时间；档案没写可到岗日期",
+      "jd": null
+    }
+  ]
+}

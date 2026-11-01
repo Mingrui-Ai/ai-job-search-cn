@@ -1,0 +1,7 @@
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    "notes.md is missing; CVs and greetings will have no free-text material"
+  ]
+}

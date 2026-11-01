@@ -1,0 +1,85 @@
+{
+  "jobs": [
+    {
+      "schema_version": 1,
+      "id": "job_f62c1cb6743d",
+      "source": {
+        "type": "file",
+        "site": "other",
+        "url": null,
+        "imported_at": "2026-11-01T12:09:05+08:00"
+      },
+      "title": "社区内容运营专员",
+      "company": "示例蒲序文化有限公司",
+      "cities": [
+        "武汉"
+      ],
+      "remote": null,
+      "employment_type": "campus",
+      "salary": {
+        "min": 6900,
+        "max": 6900,
+        "unit": "CNY/month",
+        "months": null,
+        "negotiable": false
+      },
+      "requirements": {
+        "graduation": null,
+        "days_per_week": null,
+        "min_months": null,
+        "education": null,
+        "skills": [],
+        "skill_alternatives": [],
+        "start": null
+      },
+      "interview": null,
+      "benefits": {
+        "meals": null
+      },
+      "return_offer": null,
+      "published_at": null,
+      "deadline": null,
+      "status": "new",
+      "evidence": {
+        "title": {
+          "text": "社区内容运营专员",
+          "method": "rule"
+        },
+        "company": {
+          "text": "示例蒲序文化有限公司",
+          "method": "rule"
+        },
+        "cities": {
+          "text": "工作地点：武汉",
+          "method": "rule"
+        },
+        "employment_type": {
+          "text": "校园招聘",
+          "method": "rule"
+        },
+        "salary": {
+          "text": "月薪6900元",
+          "method": "rule"
+        }
+      },
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      },
+      "raw_text": "职位名称：社区内容运营专员\n公司：示例蒲序文化有限公司\n工作地点：武汉\n招聘类别：校园招聘。\n工作内容：安排内容日历，复核活动文案。\n待遇：月薪6900元。\n福利：五险一金、餐补、带薪培训，餐补金额入职后另行说明。\n本招聘文本为V19原创虚构样例。"
+    }
+  ],
+  "warnings": [],
+  "saved": [
+    {
+      "action": "created",
+      "id": "job_f62c1cb6743d",
+      "title": "社区内容运营专员",
+      "company": "示例蒲序文化有限公司",
+      "cities": [
+        "武汉"
+      ],
+      "status": "new"
+    }
+  ]
+}
