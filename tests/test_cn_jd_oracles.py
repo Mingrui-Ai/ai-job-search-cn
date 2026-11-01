@@ -19,6 +19,14 @@ exception the planner has ruled on is written here, with its reason.
 - V8 (tests/fixtures/cn/jd-h16-holdout/): the holdout for H16, a regression set
   since H20 tuned rules on it (H24). Compared exactly, with no exception, and
   its groups of choices against their own frozen file.
+- V7 (tests/fixtures/cn/jd-m2-4a-holdout/): the holdout for M2-4a (H30). Compared
+  exactly, with no exception: H12 closed the two differences its report left.
+- V9 (tests/fixtures/cn/jd-m2-6c-holdout/): the holdout for M2-6c (H30). Compared
+  exactly, with no exception: H29 closed the one miss its report left. Its interviews and start dates compare with
+  pr73-mapping.json, not scheduling-oracles.json: the planner ruled on #73 that
+  the contract differs from those frozen semantics, and the mapping says how.
+- V10 (tests/fixtures/cn/jd-h20-holdout/): the holdout for H20 (H30). Compared
+  exactly, with no exception: H26 and H27 closed the three misses its report left.
 """
 import hashlib
 import json
@@ -234,6 +242,43 @@ class V8(Oracles, unittest.TestCase):
             with self.subTest(sample=expected["fixture"]):
                 self.assertCountEqual([sorted(group) for group in self.parsed(expected)["requirements"]["skill_alternatives"]],
                                       [sorted(group["skills"]) for group in groups])
+
+
+class V7(Oracles, unittest.TestCase):
+    directory = REPO / "tests" / "fixtures" / "cn" / "jd-m2-4a-holdout"
+
+
+class V9(Oracles, unittest.TestCase):
+    directory = REPO / "tests" / "fixtures" / "cn" / "jd-m2-6c-holdout"
+    frozen_files = 13
+    # LF digest: written before the first run on #73, but in no manifest.
+    mapping_sha256 = "8ff7add79297d4bb0bab192eb02cec470976bf91f5b674bb2d43bd6a4a853e65"
+
+    def test_every_interview_and_start_date(self):
+        path = self.directory / "pr73-mapping.json"
+        self.assertEqual(hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest(), self.mapping_sha256)
+        mapped = json.loads(path.read_text(encoding="utf-8"))["fixtures"]
+        samples = self.expectations()
+        self.assertCountEqual(mapped, [expected["fixture"].removesuffix(".txt") for expected in samples])
+        for expected in samples:
+            name = expected["fixture"].removesuffix(".txt")
+            record = self.parsed(expected)
+            with self.subTest(sample=name):
+                self.assertEqual(record["interview"], mapped[name]["interview"])
+                self.assertEqual(record["requirements"]["start"], mapped[name]["start"])
+            for who, wanted in mapped[name]["new_checks"].items():
+                checks = {item["check"]: item for item in match.filter_job(record, profile(who))["checks"]}
+                with self.subTest(sample=name, profile=who):
+                    self.assertEqual({check: checks[check]["result"] for check in wanted}, wanted)
+                    # The cost of travelling, and a year the JD left out, are said or the user cannot tell.
+                    self.assertEqual("路费" in checks["interview"].get("note", ""), mapped[name]["travel_note_required"])
+                    self.assertEqual("推断" in checks["start_date"]["reason"], mapped[name]["inference_note_required"])
+
+
+class V10(Oracles, unittest.TestCase):
+    directory = REPO / "tests" / "fixtures" / "cn" / "jd-h20-holdout"
+    manifest_key = "oracle_files_lf_sha256"
+    frozen_files = 12
 
 
 if __name__ == "__main__":
