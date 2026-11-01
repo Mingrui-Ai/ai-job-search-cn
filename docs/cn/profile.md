@@ -43,6 +43,11 @@ data/profile/
     "roles": ["后端开发", "大模型应用开发"],
     "industries": ["互联网"],
     "salary_min": {"amount": 150, "unit": "CNY/day"},
+    "salary_ideal": {"amount": 220, "unit": "CNY/day"},
+    "salary_step": 20,
+    "meal_value": {"amount": 30, "unit": "CNY/day"},
+    "salary_days_per_week": 4,
+    "one_meal_points": 10,
     "directions": ["tech"],
     "weights": null
   },
@@ -71,7 +76,7 @@ data/profile/
 | `graduation` | 毕业年月。与 JD 的 `requirements.graduation.years` 比较 |
 | `education[]` | `level` 取值同 Job Schema：`associate` / `bachelor` / `master` / `phd`。最高学历用于和 JD 的 `requirements.education.min` 比较 |
 | `availability` | 可到岗日期、每周天数、可实习月数、意向城市、是否接受远程、是否愿意去其他城市。分别对应 JD 的 `days_per_week`、`min_months`、`cities`、`remote`，可到岗日期对应 `requirements.start`，意向城市（两档）也用来判断面试要不要出行。意向城市分两档：`cities` 是首选城市，`acceptable_cities` 是可以接受、但不是首选的城市（M2-6b），两者不能重复；硬性条件里两档都算意向城市，评分的地点维度首选记 100、可以接受记 60。`relocate` 指是否愿意去这两档以外的城市。写了意向城市时，`remote_ok`、`relocate` 也要写，留空会影响两档以外的岗位：硬性条件的地点检查可能判"未知"（另一项已经写明能远程或愿意搬家时，仍可能判符合）；评分时，`relocate` 没写，这类岗位的地点分是 0（JD 可远程、你接受远程的除外，这时是 100 分）。`profile validate` 会给出警告 |
-| `target` | 求职方向。`employment_types` 取值同 Job Schema；`salary_min.unit` 取值同 Job Schema 的薪资单位。`directions` 是想做的方向，取[技能词表](jd-parse.md#技能词表)的分组键，例如 `["data", "product"]`；可以用自己词表里新增的分组，`general`（通用办公软件）不算方向；`profile validate` 会对照词表检查。`weights` 是评分五个维度的权重，为 null 时用默认值（技能 30、方向 25、经历 25、薪资 10、地点 10）；要改就写全五项，例如 `{"skills": 40, "direction": 20, "experience": 20, "salary": 10, "location": 10}`，每项不小于 0，至少一项大于 0。改了权重，已保存的匹配记录会标为过期；重新评分时 Agent 补的经历和方向保留，只按新权重重算总分。改之前可以用 `match list --weights` 试算（M2-6d）。评分方法见 [match.md](match.md#可解释评分m2-4-设计稿) |
+| `target` | 求职方向。`employment_types` 取值同 Job Schema；`salary_min.unit` 取值同 Job Schema 的薪资单位。`salary_ideal`、`salary_step`、`meal_value`、`salary_days_per_week`、`one_meal_points` 供薪资分档（M2-6e）：理想薪资 `{amount, unit}`，单位必须和 `salary_min` 相同、不低于它；步长是正数，单位同理想薪资，和 `salary_ideal` 要么都写、要么都为 null；包两餐、三餐或"包吃"折合多少钱 `{amount, unit}`，单位取 `CNY/day` 或 `CNY/month`；JD 没写每周几天时按天、按月互换用的每周天数，大于 0、不超过 7，可以带小数；只包一餐时加的分数，0 到 100。五个键都要写，值可以为 null，全为 null 时薪资照旧只有 0 和 100 两档。怎么打分见 [match.md](match.md#薪资分档m2-6e)。`directions` 是想做的方向，取[技能词表](jd-parse.md#技能词表)的分组键，例如 `["data", "product"]`；可以用自己词表里新增的分组，`general`（通用办公软件）不算方向；`profile validate` 会对照词表检查。`weights` 是评分五个维度的权重，为 null 时用默认值（技能 30、方向 25、经历 25、薪资 10、地点 10）；要改就写全五项，例如 `{"skills": 40, "direction": 20, "experience": 20, "salary": 10, "location": 10}`，每项不小于 0，至少一项大于 0。改了权重，已保存的匹配记录会标为过期；重新评分时 Agent 补的经历和方向保留，只按新权重重算总分。改之前可以用 `match list --weights` 试算（M2-6d）。评分方法见 [match.md](match.md#可解释评分m2-4-设计稿) |
 | `skills[]` | `level`：`familiar`（了解）、`working`（熟悉）、`proficient`（熟练）、`expert`（精通）。`used_in` 指向用到它的经历或项目的 `id`，写简历时据此给出事实依据。收录范围见下方"填写约定" |
 | `experience[]` | 实习、项目、科研、竞赛、校园经历都放这里，用 `type` 区分：`internship` / `project` / `research` / `competition` / `campus` / `work`。`name`、`org`、`role` 的分工见下方"填写约定" |
 | `awards[]`、`certificates[]`、`languages[]` | 奖项、证书、语言 |
@@ -157,4 +162,5 @@ JD 字段为 `null` 时结论是"未知"，不判为不符合。面试和到岗�
 - `exclusions.keywords` 暂定只匹配岗位标题（正文容易误伤，例如"非外包岗位"），在 v0.2 硬性过滤中实现，可再讨论。
 - `target.directions` 和 `target.weights`（M2-4a，2026-10-28）：供 M2-4 评分的"方向"维度和加权总分使用。和 `experience[].name` 一样直接加入 v1，不升版本号；已有的本地档案需要在 `target` 里补上 `"directions": []`（或自己的方向）和 `"weights": null`，`profile validate` 会提示。
 - `availability.acceptable_cities` 和 `target.weights.location`（M2-6b，2026-10-29）：供评分的"地点"维度使用。同样直接加入 v1，不升版本号；已有的本地档案需要在 `availability` 里补上 `"acceptable_cities": []`（或可以接受的城市），自己写过 `weights` 的还要补上 `"location"`（写 0 就和以前算法一样），`profile validate` 会提示。`relocate` 的含义随之收窄为"愿意去首选和可以接受的城市以外的地方"。
+- 薪资分档的五个字段（M2-6e，2026-10-30）：`target.salary_ideal`、`salary_step`、`meal_value`、`salary_days_per_week`、`one_meal_points`，供评分的薪资维度分档使用。同样直接加入 v1，不升版本号；已有的本地档案需要在 `target` 里补上这五个键（不分档就都写 `null`，评分和以前一样），`profile validate` 会提示。`salary_ideal` 和 `salary_min` 必须同单位（规划者 2026-10-30 同意），所以按月计的理想薪资要配按月计的最低期望。
 - 偏好怎么改（M2-6d，2026-10-30）：评一批岗位前，Agent 问用户现在看重什么，换算成 `target.weights`，用户确认后写进档案，在 `notes.md` 的"偏好记录"记一条（见 §4 和 match.md 的评分工作流）。权重不算进匹配记录里的档案摘要，所以只改权重时，重新评分不会清空 Agent 补的经历和方向。
