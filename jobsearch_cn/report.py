@@ -102,6 +102,8 @@ def pending(record: dict, job, profile: dict) -> list:
             continue
         reason = check.get("reason") or ""
         how = ([ASK_JD] if "JD 没写" in reason else []) + ([FILL_PROFILE] if "档案没写" in reason else [])
+        if check.get("check") == "interview" and "不去外地面试" in reason:  # M2-6f: only in person elsewhere
+            how.append("问 HR 能不能线上面试")
         items.append((_label(CHECKS, check.get("check")), reason, "；".join(how) or "对照理由核对 JD 原文和档案"))
     dimensions = record.get("dimensions") or {}
     for key in (record.get("total") or {}).get("missing") or []:

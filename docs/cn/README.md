@@ -21,6 +21,7 @@
 | [jd-parse.md](jd-parse.md) | `jd parse`：用法、编码处理、各字段能识别的写法、补全流程、防注入检查 |
 | [baseline-report.md](baseline-report.md) | Day 0 环境、测试基线、已知问题与 Windows 兼容性记录 |
 | [oss-privacy-review.md](oss-privacy-review.md) | 开源前隐私审查（2026-10-28）：公开范围、各类扫描结果和处理结论、转为公开前的操作 |
+| [m2-5-round2-checklist.md](m2-5-round2-checklist.md) | M2-5 第二轮的操作清单：用 cn-setup 补档案的哪几项（薪资分档、可以接受的城市、去外地面试），以及重新导入、重新评分、调权重、出报告的顺序和命令 |
 | [m3-0-resume-prototypes.md](m3-0-resume-prototypes.md) | M3-0 简历生成方式的原型对比（2026-10-30）：三种同时出 Word 和 PDF 的做法、开源简历模板的调研和许可、推荐方案和 M3-2 的检查清单 |
 | [plan/kickoff-guide-v0.1.md](plan/kickoff-guide-v0.1.md) | 原始文件《AI_Job_Search_CN_项目启动指导_v0.1.md》（存档） |
 | [plan/initial-guidelines.md](plan/initial-guidelines.md) | 原始文件《初步guidelines.md》（存档） |
