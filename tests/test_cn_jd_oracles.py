@@ -16,8 +16,9 @@ exception the planner has ruled on is written here, with its reason.
 - V6 (tests/fixtures/cn/jd-h9-holdout/): the holdout for H9, a regression set
   since H12 tuned rules on it (H15). Skills compare as in V4. Its exceptions are
   the rule-level expectations the verifier froze beside the human truth.
-- V8 (tests/fixtures/cn/jd-h16-holdout/): the holdout for H16; only the minimum
-  degree, the skills and the education check, which H20 fixed (V8Education).
+- V8 (tests/fixtures/cn/jd-h16-holdout/): the holdout for H16, a regression set
+  since H20 tuned rules on it (H24). Compared exactly, with no exception, and
+  its groups of choices against their own frozen file.
 """
 import hashlib
 import json
@@ -46,13 +47,19 @@ class Oracles:
 
     directory: Path = None
     fold_skills = False
+    # Manifests differ by set: V8's key says its digests are of LF text, and it froze one more
+    # file for each of its groups of choices. Files that are expected values but no sample:
+    manifest_key = "oracle_files_sha256"
+    frozen_files = 10
+    not_samples: tuple = ()
     # (sample, field) / (sample, profile, check) / (sample, profile) -> (value, reason)
     field_exceptions: dict = {}
     check_exceptions: dict = {}
     verdict_exceptions: dict = {}
 
     def expectations(self) -> list:
-        return [json.loads(path.read_text(encoding="utf-8")) for path in sorted(self.directory.glob("*.expected.json"))]
+        return [json.loads(path.read_text(encoding="utf-8")) for path in sorted(self.directory.glob("*.expected.json"))
+                if path.name not in self.not_samples]
 
     def parsed(self, expected: dict) -> dict:
         text = (self.directory / expected["fixture"]).read_text(encoding="utf-8")
@@ -62,8 +69,8 @@ class Oracles:
     def test_the_frozen_files_are_unchanged(self):
         # The digests are of the LF text git stores; a Windows checkout may have CRLF.
         manifest = json.loads((self.directory / "oracle-manifest.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(manifest["oracle_files_sha256"]), 10)
-        for name, digest in manifest["oracle_files_sha256"].items():
+        self.assertEqual(len(manifest[self.manifest_key]), self.frozen_files)
+        for name, digest in manifest[self.manifest_key].items():
             with self.subTest(file=name):
                 data = (self.directory / name).read_bytes().replace(b"\r\n", b"\n")
                 self.assertEqual(hashlib.sha256(data).hexdigest(), digest)
@@ -211,37 +218,22 @@ class V6(Oracles, unittest.TestCase):
         self.assertEqual({key: value for key, (value, _) in exceptions.items()}, frozen)
 
 
-class V8Education(unittest.TestCase):
-    """H20: V8 (tests/fixtures/cn/jd-h16-holdout/, the holdout for H16) found two misreads the rules
-    had before H16 - a choice of degrees took the higher one, a major was read as a skill. Its
-    minimum degrees, skills and education checks now meet the frozen expectations; the rest of
-    V8 is compared in its own reports, not here."""
-
+class V8(Oracles, unittest.TestCase):
     directory = REPO / "tests" / "fixtures" / "cn" / "jd-h16-holdout"
-    FIELDS = ("requirements.education", "requirements.skills")
+    manifest_key = "oracle_files_lf_sha256"
+    frozen_files = 13
+    not_samples = ("alternative-groups.expected.json",)
 
-    def expectations(self) -> list:
-        manifest = json.loads((self.directory / "oracle-manifest.json").read_text(encoding="utf-8"))
-        samples = []
-        for name, digest in manifest["oracle_files_lf_sha256"].items():
-            if name.endswith(".expected.json") and name != "alternative-groups.expected.json":
-                data = (self.directory / name).read_bytes().replace(b"\r\n", b"\n")
-                self.assertEqual(hashlib.sha256(data).hexdigest(), digest, name)  # frozen, never edited
-                samples.append(json.loads(data.decode("utf-8")))
-        self.assertEqual(len(samples), 5)
-        return samples
-
-    def test_education_and_skills(self):
-        for expected in self.expectations():
-            text = (self.directory / expected["fixture"]).read_text(encoding="utf-8")
-            [record], _ = jd_parser.parse_text(text, source_type="file", site=expected["site_argument"], now=NOW)
-            for path in self.FIELDS:
-                with self.subTest(sample=expected["fixture"], field=path):
-                    self.assertEqual(schema._field(record, path), expected["fields"][path]["value"])
-            for who, judged in expected["human_match"].items():
-                checks = {c["check"]: c["result"] for c in match.filter_job(record, profile(who))["checks"]}
-                with self.subTest(sample=expected["fixture"], profile=who):
-                    self.assertEqual(checks["education"], judged["checks"]["education"]["result"])
+    def test_every_group_of_choices(self):
+        # Frozen as sets of skills, without naming H16's field: the order within a group is not compared.
+        frozen = json.loads((self.directory / self.not_samples[0]).read_text(encoding="utf-8"))["cases"]
+        samples = self.expectations()
+        self.assertCountEqual(frozen, [expected["fixture"].removesuffix(".txt") for expected in samples])
+        for expected in samples:
+            groups = frozen[expected["fixture"].removesuffix(".txt")]["groups"]
+            with self.subTest(sample=expected["fixture"]):
+                self.assertCountEqual([sorted(group) for group in self.parsed(expected)["requirements"]["skill_alternatives"]],
+                                      [sorted(group["skills"]) for group in groups])
 
 
 if __name__ == "__main__":

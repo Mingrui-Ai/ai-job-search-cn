@@ -1,0 +1,53 @@
+{
+  "fixture": "creative_tools_intern.txt",
+  "job_schema_version": 1,
+  "site_argument": "ats",
+  "method": "agent",
+  "basis": "原创虚构样例；按 master 文档及 H21/V15 任务人工写定。技能 value 只列可确定部分，三种未明版本写法单列待裁定，不当成应忽略。",
+  "fields": {
+    "title": {"value": "创意工具维护实习生", "evidence": ["创意工具维护实习生"]},
+    "company": {"value": "示例格芒工具有限公司", "evidence": ["公司名称：示例格芒工具有限公司"]},
+    "cities": {"value": ["上海"], "evidence": ["工作地点：上海"]},
+    "remote": {"value": true, "evidence": ["支持远程实习"]},
+    "employment_type": {"value": "internship", "evidence": ["岗位类型：实习"]},
+    "salary": {"value": {"min": null, "max": null, "unit": null, "months": null, "negotiable": true}, "evidence": ["薪资：面议"]},
+    "requirements.graduation": {"value": {"years": [2027], "strict": false}, "evidence": ["2027届优先"]},
+    "requirements.days_per_week": {"value": 3, "evidence": ["每周至少到岗3天"]},
+    "requirements.min_months": {"value": 3, "evidence": ["至少实习3个月"]},
+    "requirements.education": {"value": {"min": "bachelor", "preferred": null}, "evidence": ["学历要求：本科及以上"]},
+    "requirements.skills": {"value": ["Figma", "剪映"], "evidence": ["掌握Figma和剪映"], "comparison": "definite_subset_with_pending_adjudication"},
+    "return_offer": {"value": false, "evidence": ["不提供转正机会"]},
+    "published_at": {"value": "2026-10-30", "evidence": ["发布日期：2026-10-30"]},
+    "deadline": {"value": "2026-11-28", "evidence": ["投递截止：2026-11-28"]}
+  },
+  "additional_fields": {"requirements.skill_alternatives": {"value": [], "evidence": []}},
+  "version_probes": [],
+  "traps": [
+    {"text": "Figma和剪映", "interpretation": "两项无版本技能是正常对照，应读出；不要把整份含未定写法的 JD 都排除。"}
+  ],
+  "pending_adjudication": [
+    {"id": "v15-p1", "status": "待规划者裁定", "text": "Photoshop 2024", "candidate_skill": "Photoshop", "observed_labels": ["Photoshop", "Photoshop 2024", "Photoshop2024"], "question": "词条与数字版本之间有空格，是否属于 H21 接受范围？任务仅写紧跟，不能据现有空格行为自行定论。"},
+    {"id": "v15-p2", "status": "待规划者裁定", "text": "Vue2.x", "candidate_skill": "Vue", "observed_labels": ["Vue", "Vue2", "Vue2.x"], "question": "数字后含通配字母 x 的版本是否接受？不能把它自动截成已明确的纯数字版本。"},
+    {"id": "v15-p3", "status": "待规划者裁定", "text": "Pythonv3.11", "candidate_skill": "Python", "observed_labels": ["Python", "Pythonv3.11", "Pythonv3"], "question": "词条与版本数字之间含 v 标记，是否接受？任务未覆盖字母版本前缀。"}
+  ],
+  "human_match": {
+    "tech": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合优先届别。"},
+      "education": {"result": "match", "reason": "硕士达到本科门槛。"},
+      "days_per_week": {"result": "match", "reason": "能到岗4天，满足3天。"},
+      "min_months": {"result": "match", "reason": "能实习6个月，满足3个月。"},
+      "location": {"result": "match", "reason": "虽然上海非意向城市，但JD支持远程且档案接受远程。"},
+      "employment_type": {"result": "match", "reason": "实习在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }},
+    "ops": {"verdict": "eligible", "checks": {
+      "graduation": {"result": "match", "reason": "2027届符合优先届别。"},
+      "education": {"result": "match", "reason": "本科达到门槛。"},
+      "days_per_week": {"result": "match", "reason": "能到岗3天，达到3天。"},
+      "min_months": {"result": "match", "reason": "能实习3个月，达到3个月。"},
+      "location": {"result": "match", "reason": "上海在意向内，不接受远程不影响同城匹配。"},
+      "employment_type": {"result": "match", "reason": "实习在目标内。"},
+      "exclusions": {"result": "match", "reason": "无排除项命中。"}
+    }}
+  }
+}

@@ -1,0 +1,601 @@
+[
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\jd-h21-holdout\\console_content_campus.txt",
+      "--site",
+      "official",
+      "--save",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "validate",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual-input\\console_content_campus.json"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "save",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual-input\\console_content_campus.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_ec85728a1e37",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_ec85728a1e37",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_ec85728a1e37",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\ops\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_ec85728a1e37",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\ops\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\jd-h21-holdout\\creative_tools_intern.txt",
+      "--site",
+      "ats",
+      "--save",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "validate",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual-input\\creative_tools_intern.json"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "save",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual-input\\creative_tools_intern.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_f2f7b8e6a321",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_f2f7b8e6a321",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_f2f7b8e6a321",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\ops\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_f2f7b8e6a321",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\ops\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\jd-h21-holdout\\service_tools_intern.txt",
+      "--site",
+      "ats",
+      "--save",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "validate",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual-input\\service_tools_intern.json"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "save",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual-input\\service_tools_intern.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_0415ff894e6c",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_0415ff894e6c",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_0415ff894e6c",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\ops\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_0415ff894e6c",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\ops\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\jd-h21-holdout\\visual_layout_intern.txt",
+      "--site",
+      "official",
+      "--save",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "validate",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual-input\\visual_layout_intern.json"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "save",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual-input\\visual_layout_intern.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_4f9b8e1ad0c0",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_4f9b8e1ad0c0",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_4f9b8e1ad0c0",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\ops\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_4f9b8e1ad0c0",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\ops\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\tests\\fixtures\\cn\\jd-h21-holdout\\web_interface_intern.txt",
+      "--site",
+      "ats",
+      "--save",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "validate",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual-input\\web_interface_intern.json"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "save",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual-input\\web_interface_intern.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_95aca86ce9a4",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_95aca86ce9a4",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\tech\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_95aca86ce9a4",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\ops\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\parsed"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "match",
+      "filter",
+      "job_95aca86ce9a4",
+      "--profile",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\profiles\\ops\\profile.json",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\manual"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\supplemental\\ps-duration-not-console.txt",
+      "--site",
+      "ats",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\supplemental-store"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\supplemental\\python-duration-not-version.txt",
+      "--site",
+      "ats",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\supplemental-store"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\supplemental\\ps5-console.txt",
+      "--site",
+      "ats",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\supplemental-store"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "jobsearch_cn",
+      "jd",
+      "parse",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\supplemental\\unity3d-out-of-scope.txt",
+      "--site",
+      "ats",
+      "--data-dir",
+      "<workspace>\\data\\v15-check\\pr91-572fe48-complete\\supplemental-store"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  }
+]

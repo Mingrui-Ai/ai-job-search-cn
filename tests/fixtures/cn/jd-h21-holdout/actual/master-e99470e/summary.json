@@ -1,0 +1,480 @@
+{
+  "code_commit": "e99470eab14a2e22aa1139c6cf0c9604394cf580",
+  "execution_commit": "4ac20083798332232abb34ec770d5cc401d0ad4b",
+  "manifest_sha256": "009b07fcb5a743fabfd9774a4cddafe95f346dc881ed37bd5a5aa53aaf0d7c5f",
+  "python_version": "3.12.15",
+  "started_at_utc": "2026-10-30T03:26:53.932099+00:00",
+  "fully_decidable_field_groups": {
+    "equal": 65,
+    "total": 69
+  },
+  "definite_skills": {
+    "matched": 6,
+    "expected": 16,
+    "missing": 10,
+    "extra": 0
+  },
+  "positive_version_probes": {
+    "matched": 0,
+    "total": 10
+  },
+  "intrinsic_digit_probes": {
+    "matched": 1,
+    "total": 1
+  },
+  "console_probes": {
+    "passed": 2,
+    "total": 2
+  },
+  "forbidden_skill_traps": {
+    "passed": 6,
+    "total": 6
+  },
+  "alternative_group_checks": {
+    "equal": 5,
+    "total": 5
+  },
+  "filter_verdicts": {
+    "equal": 10,
+    "total": 10
+  },
+  "hard_checks": {
+    "equal": 70,
+    "total": 70
+  },
+  "manual_validations": {
+    "equal": 5,
+    "total": 5
+  },
+  "manual_replay_verdicts": {
+    "equal": 10,
+    "total": 10
+  },
+  "manual_replay_checks": {
+    "equal": 70,
+    "total": 70
+  },
+  "cases": {
+    "console_content_campus": {
+      "field_groups": {
+        "equal": 13,
+        "total": 14
+      },
+      "differences": {
+        "requirements.skills": {
+          "expected": [
+            "Excel",
+            "PowerPoint",
+            "内容策划"
+          ],
+          "actual": [
+            "内容策划"
+          ]
+        }
+      },
+      "skills": {
+        "expected": [
+          "excel",
+          "powerpoint",
+          "内容策划"
+        ],
+        "actual": [
+          "内容策划"
+        ],
+        "missing": [
+          "excel",
+          "powerpoint"
+        ],
+        "extra": []
+      },
+      "pending_adjudication": [],
+      "version_probes": [
+        {
+          "text": "Excel2021",
+          "expected_skill": "Excel",
+          "decision": "must_read",
+          "passed": false
+        },
+        {
+          "text": "PowerPoint2019",
+          "expected_skill": "PowerPoint",
+          "decision": "must_read",
+          "passed": false
+        },
+        {
+          "text": "PS4",
+          "expected_skill": null,
+          "decision": "must_not_map_console_to_photoshop",
+          "passed": true
+        },
+        {
+          "text": "PS5",
+          "expected_skill": null,
+          "decision": "must_not_map_console_to_photoshop",
+          "passed": true
+        }
+      ],
+      "forbidden_traps": [
+        {
+          "text": "PS4/PS5游戏机",
+          "forbidden_hits": []
+        }
+      ],
+      "alternative_groups": [],
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        },
+        "ops": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        }
+      }
+    },
+    "creative_tools_intern": {
+      "field_groups": {
+        "equal": 13,
+        "total": 13
+      },
+      "differences": {},
+      "skills": {
+        "expected": [
+          "figma",
+          "剪映"
+        ],
+        "actual": [
+          "figma",
+          "photoshop",
+          "剪映"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "pending_adjudication": [
+        {
+          "id": "v15-p1",
+          "text": "Photoshop 2024",
+          "status": "待规划者裁定",
+          "observed_labels": [
+            "Photoshop"
+          ]
+        },
+        {
+          "id": "v15-p2",
+          "text": "Vue2.x",
+          "status": "待规划者裁定",
+          "observed_labels": []
+        },
+        {
+          "id": "v15-p3",
+          "text": "Pythonv3.11",
+          "status": "待规划者裁定",
+          "observed_labels": []
+        }
+      ],
+      "version_probes": [],
+      "forbidden_traps": [],
+      "alternative_groups": [],
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        },
+        "ops": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        }
+      }
+    },
+    "service_tools_intern": {
+      "field_groups": {
+        "equal": 13,
+        "total": 14
+      },
+      "differences": {
+        "requirements.skills": {
+          "expected": [
+            "Python",
+            "Java",
+            "Docker",
+            "SQL"
+          ],
+          "actual": [
+            "SQL"
+          ]
+        }
+      },
+      "skills": {
+        "expected": [
+          "docker",
+          "java",
+          "python",
+          "sql"
+        ],
+        "actual": [
+          "sql"
+        ],
+        "missing": [
+          "docker",
+          "java",
+          "python"
+        ],
+        "extra": []
+      },
+      "pending_adjudication": [],
+      "version_probes": [
+        {
+          "text": "Python3.10",
+          "expected_skill": "Python",
+          "decision": "must_read",
+          "passed": false
+        },
+        {
+          "text": "Java8",
+          "expected_skill": "Java",
+          "decision": "must_read",
+          "passed": false
+        },
+        {
+          "text": "Docker24.0",
+          "expected_skill": "Docker",
+          "decision": "must_read",
+          "passed": false
+        }
+      ],
+      "forbidden_traps": [
+        {
+          "text": "5G",
+          "forbidden_hits": []
+        }
+      ],
+      "alternative_groups": [],
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        },
+        "ops": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        }
+      }
+    },
+    "visual_layout_intern": {
+      "field_groups": {
+        "equal": 13,
+        "total": 14
+      },
+      "differences": {
+        "requirements.skills": {
+          "expected": [
+            "Photoshop",
+            "Illustrator",
+            "C4D"
+          ],
+          "actual": [
+            "C4D"
+          ]
+        }
+      },
+      "skills": {
+        "expected": [
+          "c4d",
+          "illustrator",
+          "photoshop"
+        ],
+        "actual": [
+          "c4d"
+        ],
+        "missing": [
+          "illustrator",
+          "photoshop"
+        ],
+        "extra": []
+      },
+      "pending_adjudication": [],
+      "version_probes": [
+        {
+          "text": "Photoshop2024",
+          "expected_skill": "Photoshop",
+          "decision": "must_read",
+          "passed": false
+        },
+        {
+          "text": "Illustrator28.0",
+          "expected_skill": "Illustrator",
+          "decision": "must_read",
+          "passed": false
+        },
+        {
+          "text": "C4D",
+          "expected_skill": "C4D",
+          "decision": "must_keep_intrinsic_digit",
+          "passed": true
+        }
+      ],
+      "forbidden_traps": [
+        {
+          "text": "C4D",
+          "forbidden_hits": []
+        },
+        {
+          "text": "4A广告公司",
+          "forbidden_hits": []
+        }
+      ],
+      "alternative_groups": [],
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        },
+        "ops": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        }
+      }
+    },
+    "web_interface_intern": {
+      "field_groups": {
+        "equal": 13,
+        "total": 14
+      },
+      "differences": {
+        "requirements.skills": {
+          "expected": [
+            "HTML",
+            "CSS",
+            "Vue",
+            "JavaScript"
+          ],
+          "actual": [
+            "JavaScript"
+          ]
+        }
+      },
+      "skills": {
+        "expected": [
+          "css",
+          "html",
+          "javascript",
+          "vue"
+        ],
+        "actual": [
+          "javascript"
+        ],
+        "missing": [
+          "css",
+          "html",
+          "vue"
+        ],
+        "extra": []
+      },
+      "pending_adjudication": [],
+      "version_probes": [
+        {
+          "text": "HTML5",
+          "expected_skill": "HTML",
+          "decision": "must_read",
+          "passed": false
+        },
+        {
+          "text": "CSS3",
+          "expected_skill": "CSS",
+          "decision": "must_read",
+          "passed": false
+        },
+        {
+          "text": "Vue3",
+          "expected_skill": "Vue",
+          "decision": "must_read",
+          "passed": false
+        }
+      ],
+      "forbidden_traps": [
+        {
+          "text": "JavaScript",
+          "forbidden_hits": []
+        },
+        {
+          "text": "Top3",
+          "forbidden_hits": []
+        }
+      ],
+      "alternative_groups": [],
+      "profiles": {
+        "tech": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        },
+        "ops": {
+          "parsed": {
+            "verdict_equal": true,
+            "check_differences": {}
+          },
+          "manual": {
+            "verdict_equal": true,
+            "check_differences": {}
+          }
+        }
+      }
+    }
+  },
+  "finished_at_utc": "2026-10-30T03:27:00.290666+00:00",
+  "successful_cli_calls": 35
+}
