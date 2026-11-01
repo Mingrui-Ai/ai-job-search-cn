@@ -30,20 +30,7 @@
       "Bash(python -m jobsearch_cn profile:*)",
       "Bash(python -m jobsearch_cn match:*)"
     ],
-    "ask": [
-      "Edit(.claude/settings.json)",
-      "Edit(.claude/settings.local.json)",
-      "Edit(.claude/skills/*/SKILL.md)",
-      "Edit(.claude/commands/*.md)",
-      "Edit(.claude/agents/**)",
-      "Edit(.github/**)",
-      "Edit(tools/security_guards.py)",
-      "Edit(tools/**)",
-      "Edit(.agents/**)",
-      "Edit(salary_lookup.py)",
-      "Edit(jobsearch_cn/**)",
-      "Bash(git push:*)"
-    ],
+    "ask": [],
     "deny": [
       "Read(.env)",
       "Read(.env.*)",
