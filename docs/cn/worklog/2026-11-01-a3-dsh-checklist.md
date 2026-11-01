@@ -21,6 +21,13 @@
 - #105 合并前，`security_guards` 出现用户已说明的 12 条 `required ask rule missing`。没有还原或提交本地设置，没有修改守卫。
 - 全量 `python -m unittest discover -s tests -t .`：1447 项，1434 通过、12 跳过、1 失败，耗时 249.507 秒。唯一失败为 `tests.test_security_guards.RealRepoTests.test_guards_pass_on_this_repo`，原因同上，正是 12 条缺失 ask 规则；无其他失败或错误。#105 在提交前仍未合并，保留此已知例外，不将检查记为全绿。
 
+**合入 #105 后复核**
+
+- 按用户通知，先还原本地 `.claude/settings.json`，再合入 `origin/master@7775738`（包含 #100 和 #105），合并提交为 `0693803`，无冲突。本分支的设置文件与 master 一致。
+- conda `ai-job-search-cn` / Python 3.12.15：`lint_skills`、`security_guards` 均通过，原先的 12 条缺失 ask 规则错误已消除。
+- 全量 `python -m unittest discover -s tests -t .`：1494 项，1473 通过、21 跳过，0 失败、0 错误，耗时 286.066 秒。
+- 在新的隔离目录重跑清单的 55 次 CLI 调用，全部通过；4 个总判断、36 项状态及其他断言仍与清单一致。`git diff --check` 通过，相对最新 master 仍仅有本 PR 的四份文档改动。以上首次验证结果保留为历史记录。
+
 **遗留**
 
 - 用户尚未在 dsh 中执行本轮清单；不能用 CLI 核对代替技能发现、环境继承和交互确认验收。
