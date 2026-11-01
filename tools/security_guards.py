@@ -38,8 +38,8 @@ Checks:
    glob grants. The same files may carry no frontmatter `hooks` and no
    !`command` dynamic-context line: both run a command when the skill or
    command loads, before any prompt. The settings.json `ask` and `deny` lists
-   are also required to keep every rule in REQUIRED_ASK_RULES /
-   REQUIRED_DENY_RULES.
+   are also required to keep every rule in REQUIRED_ASK_RULES (empty since
+   2026-11-01, when the owner removed the ask rules) / REQUIRED_DENY_RULES.
 5. Agent definitions — every .claude/agents/*.md must declare `tools:` (a
    missing key means every tool) and each entry must be in
    ALLOWED_AGENT_TOOLS, which has no Edit, Write, NotebookEdit or Agent: the
@@ -115,28 +115,14 @@ ALLOWED_PERMISSIONS = {
 
 # Rules that must stay in .claude/settings.json permissions.ask. An ask rule
 # forces a prompt even when an allow rule or a skill's allowed-tools grant
-# would otherwise pre-approve the call. These are the files whose content IS
-# the permission surface: a session that could edit them silently could widen
-# its own grants. Plus the one outbound git action. Extra ask rules are fine;
-# removing one of these fails.
-REQUIRED_ASK_RULES = [
-    "Edit(.claude/settings.json)",
-    "Edit(.claude/settings.local.json)",
-    "Edit(.claude/skills/*/SKILL.md)",
-    # A command's frontmatter may carry allowed-tools too (check 4 reads it).
-    "Edit(.claude/commands/*.md)",
-    "Edit(.claude/agents/**)",
-    "Edit(.github/**)",
-    "Edit(tools/security_guards.py)",
-    # The files `allow` pre-approves to run, by path: editing one silently
-    # turns its allow rule into "run whatever is written here", which is the
-    # same widening. Every portal CLI lives under .agents/.
-    "Edit(tools/**)",
-    "Edit(.agents/**)",
-    "Edit(salary_lookup.py)",
-    "Edit(jobsearch_cn/**)",  # CN fork: code run by the jobsearch_cn allow entries.
-    "Bash(git push:*)",
-]
+# would otherwise pre-approve the call. None since 2026-11-01: the owner
+# removed every ask rule - edits to the permission files and to the code the
+# allow list runs, and git push - so the sessions working on this repo stop
+# prompting for them. The allowlists in this file still fail a widening of
+# the committed files in CI. Extra ask rules are fine; a rule listed here is
+# required again. The twelve that were here are in
+# docs/cn/worklog/2026-11-01-ask-rules.md.
+REQUIRED_ASK_RULES = []
 
 # Rules that must stay in .claude/settings.json permissions.deny. A deny rule
 # blocks in every permission mode, bypassPermissions included, and overrides
