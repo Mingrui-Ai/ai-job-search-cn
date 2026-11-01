@@ -12,7 +12,7 @@
 | `CLAUDE.md` + `.claude/skills/job-application-assistant/01–09` | 候选人档案与求职方法论（`/setup` 填充，**被 git 跟踪**） | 第 2 周设计 CN 档案，只存本地 `data/profile/`（ADR-6）；方法论文件带 `framework_version`，改动后用 `check_upstream_updates.py` 跟踪上游 |
 | `.claude/commands/*.md`（12 个） | `/setup` `/scrape` `/rank` `/apply` `/interview` `/outcome` 等工作流 | 保留；按周逐步本地化（见 §1.3） |
 | `.claude/agents/*.md`（3 个） | posting-fetcher、posting-scorer、application-reviewer，只读权限 | 保留，复用 Drafter–Reviewer 结构 |
-| `.claude/settings.json` | allow / ask / deny 三级权限；ask 列表 2026-11-01 起按经理的决定清空，`git push` 不再询问 | 保留；新增授权必须同时改 `tools/security_guards.py` |
+| `.claude/settings.json` | allow / ask / deny 三级权限；ask 列表 2026-11-01 起按经理的决定清空：这些操作（含 `git push`）不再由仓库的 ask 规则强制询问；实际工具确认由运行时权限模式和其他授权决定，工作流中的用户确认要求仍按现有指令执行 | 保留；新增授权必须同时改 `tools/security_guards.py` |
 | `.agents/skills/*-search/` | 6 个门户 CLI（Bun/TS）：4 个丹麦门户（上游默认 `enabled: false`）、LinkedIn、freehire（全球） | 第 3 周新增合规国内来源时按 `/add-portal` 契约另建；丹麦门户保持原样（5 个上游测试按名字引用它们） |
 | `tools/*.py` | 标准库脚本：去重键、状态、防注入闸门、robots 检查、PDF 校验 | 直接复用；CN 侧通过导入或子进程调用，不复制 |
 | `tests/` + `.github/workflows/ci.yml` | 836 个 Python 测试、Python 3.10–3.14 + Windows 矩阵、安全守卫、LaTeX 编译 | 原样保留；CN 测试放 `tests/test_cn_*.py` 自动纳入 |
