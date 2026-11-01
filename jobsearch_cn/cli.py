@@ -14,7 +14,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import __version__, jd_parser, match, profile, report, resume_extract, resume_pdf, schema, score, store, vocab
+from jobsearch_cn import (__version__, jd_parser, match, material, profile, report, resume_extract, resume_pdf, schema,
+                          score, store, vocab)
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -349,6 +350,29 @@ def cmd_match_validate(args) -> int:
     if errors is None:
         return 1
     _emit({"valid": not errors, "errors": errors})
+    return 1 if errors else 0
+
+
+def cmd_material_validate(args) -> int:
+    text = _read_json_text(args.file)
+    try:
+        record = json.loads(text)
+    except json.JSONDecodeError as exc:
+        name = "stdin" if args.file == "-" else args.file
+        raise InputError(f"{name} is not valid JSON: {exc}") from None
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    # The JD only adds warnings, so a material whose job is not stored is still checked.
+    job_id = record.get("job_id") if isinstance(record, dict) else None
+    job = None
+    if isinstance(job_id, str) and job_id:
+        try:
+            job = _store(args).get(job_id)
+        except store.StoreError:
+            pass  # not a job id the store can look up: the warnings skip the JD
+    errors, warnings = material.validate(record, data, _vocabulary(args), job)
+    _emit({"valid": not errors, "errors": errors, "warnings": warnings})
     return 1 if errors else 0
 
 
@@ -694,6 +718,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     resume_sample.add_argument("--typst", help=f"Typst 程序的路径；默认为环境变量 {resume_pdf.TYPST_ENV}，再找 PATH 里的 typst")
     resume_sample.set_defaults(handler=cmd_resume_sample)
+
+    material_parser = commands.add_parser("material", help="求职材料（简历等）相关命令",
+                                          description="求职材料（简历等）相关命令，格式见 docs/cn/material.md")
+    material_parser.set_defaults(help_parser=material_parser)
+    material_commands = material_parser.add_subparsers(dest="material_command", metavar="<material-command>")
+    material_validate = material_commands.add_parser(
+        "validate", parents=[stored], help="检查一份材料：引用的档案条目都在，改写没有编出数字和技能",
+        description="对照个人档案检查一份材料（data/materials/<岗位id>/resume-<n>.json）。通过时退出码 0，"
+                    "不通过时退出码 1 并列出哪一条、为什么；警告不影响退出码。",
+    )
+    material_validate.add_argument("file", help="材料文件；- 表示标准输入")
+    material_validate.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    material_validate.set_defaults(handler=cmd_material_validate)
     return parser
 
 
