@@ -12,7 +12,7 @@ import zipfile
 from pathlib import Path
 from xml.sax.saxutils import escape
 
-from . import resume_extract
+from . import resume_extract, resume_pdf
 
 # 等线 is the East Asian font Office has installed since 2016, on Windows and on the Mac alike, so a
 # resume opened on either shows the same face. The Noto fonts the PDF uses are not on every machine.
@@ -127,6 +127,12 @@ def build(content: dict, font: str = FONT) -> bytes:
         archive.writestr("word/styles.xml", _styles(font))
         archive.writestr("word/document.xml", _document(content))
     return buffer.getvalue()
+
+
+def write(content: dict, output: Path) -> dict:
+    """Write the .docx for the content to output, by the PDF's safe write (resume_pdf._replace)."""
+    resume_pdf._replace(output, build(content))
+    return {"docx": str(output), "font": FONT}
 
 
 def _squeezed(text: str) -> str:
