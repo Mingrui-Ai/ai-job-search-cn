@@ -96,6 +96,21 @@ python -m jobsearch_cn resume build data/materials/<岗位id>/resume-1.json [--p
 
 部首和私用区是直接读 PDF 字体的 ToUnicode 映射查的，只用标准库。`pdftotext` 会把部首折回正常汉字，所以不能靠它查；`pypdf` 能读出原样，但它是可选依赖。
 
+## CI 上的真实渲染
+
+工作流 `.github/workflows/cn-resume-pdf.yml` 的任务 "Resume PDF real render (Linux)" 在 Ubuntu 上跑 `tests/test_cn_resume_pdf.py`，真的编译 PDF 再检查，而不是跳过：
+
+1. 下载固定版本的 Typst 0.15.1（`typst-x86_64-unknown-linux-musl.tar.xz`），以及 [notofonts/noto-cjk](https://github.com/notofonts/noto-cjk) 在固定提交 `9b0f143`（标签 Serif2.003）上的 `NotoSansSC-VF.ttf` 和 `NotoSerifSC-VF.ttf`。
+2. 用 `sha256sum --check --strict` 核对三个文件的 SHA-256。任何一个不符，任务就在这一步失败，不解压，也不设置后面要用的环境变量。
+3. 只用下载的字体（`TYPST_FONT_PATHS`、`TYPST_IGNORE_SYSTEM_FONTS=true`），装 `pypdf==6.21.3`，设 `JOBSEARCH_CN_REQUIRE_TYPST=1` 后跑测试。
+
+`JOBSEARCH_CN_REQUIRE_TYPST=1` 的意思是缺 Typst 或字体时测试失败，不再跳过。本机不设这个变量，没装 Typst 时测试照旧跳过。
+
+换版本时，摘要不要从下载下来的文件里算，要从独立来源核对：
+
+- Typst：GitHub API `repos/typst/typst/releases/tags/v<版本>` 里那个资产的 `digest` 字段（`sha256:...`）。
+- 字体：仓库在新提交上那个文件的 git blob id（`git ls-tree <提交> <路径>`）。用下载的文件跑 `git hash-object` 算出的 id 和它一致，才用 `sha256sum` 算新的摘要。
+
 ## 模板
 
 模板借自 [habaneraa/typst-resume-one-page](https://github.com/habaneraa/typst-resume-one-page)（MIT），放在 `jobsearch_cn/resume_templates/habaneraa/`，来源和改动见那里的 `SOURCE.md`。所有第三方组件见 [THIRD_PARTY.md](../../THIRD_PARTY.md)。

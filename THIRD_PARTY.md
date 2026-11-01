@@ -28,6 +28,16 @@
 | 微软雅黑 | Windows 自带 | 微软的字体许可，`fsType` 允许嵌入 | 没有上面几款时的备选 |
 | New Computer Modern | Typst 程序自带 | 见 Typst 的 [typst-assets](https://github.com/typst/typst-assets) | 列表圆点（上游模板的设计） |
 
+## CI 里下载的（不进仓库）
+
+只在 GitHub Actions 的真实渲染任务里下载，每个文件都核对 SHA-256，见 [resume-pdf.md](docs/cn/resume-pdf.md) 的"CI 上的真实渲染"。
+
+| 组件 | 版本 | 许可 |
+| --- | --- | --- |
+| [Typst](https://github.com/typst/typst) | 0.15.1（`typst-x86_64-unknown-linux-musl`） | Apache-2.0 |
+| Noto Sans SC、Noto Serif SC（[notofonts/noto-cjk](https://github.com/notofonts/noto-cjk) 的 `*-VF.ttf` 子集） | 提交 `9b0f143`（标签 Serif2.003） | OFL-1.1 |
+| [pypdf](https://github.com/py-pdf/pypdf) | 6.21.3 | BSD-3-Clause |
+
 ## 特意没有用的
 
 - `@preview/nerd-icons`（上游模板依赖的图标包）是 LGPL-3.0，已从模板里去掉，联系方式改成纯文本。
