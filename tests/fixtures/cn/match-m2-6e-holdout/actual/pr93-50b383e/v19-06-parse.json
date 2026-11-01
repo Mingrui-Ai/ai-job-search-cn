@@ -1,0 +1,92 @@
+{
+  "jobs": [
+    {
+      "schema_version": 1,
+      "id": "job_2597364e6fff",
+      "source": {
+        "type": "file",
+        "site": "other",
+        "url": null,
+        "imported_at": "2026-11-01T12:09:05+08:00"
+      },
+      "title": "库区调度助理",
+      "company": "示例序湾物流有限公司",
+      "cities": [
+        "合肥"
+      ],
+      "remote": null,
+      "employment_type": "experienced",
+      "salary": {
+        "min": 6500,
+        "max": 6500,
+        "unit": "CNY/month",
+        "months": null,
+        "negotiable": false
+      },
+      "requirements": {
+        "graduation": null,
+        "days_per_week": null,
+        "min_months": null,
+        "education": null,
+        "skills": [],
+        "skill_alternatives": [],
+        "start": null
+      },
+      "interview": null,
+      "benefits": {
+        "meals": {
+          "per_day": null,
+          "allowance": null
+        }
+      },
+      "return_offer": null,
+      "published_at": null,
+      "deadline": null,
+      "status": "new",
+      "evidence": {
+        "title": {
+          "text": "库区调度助理",
+          "method": "rule"
+        },
+        "company": {
+          "text": "示例序湾物流有限公司",
+          "method": "rule"
+        },
+        "cities": {
+          "text": "工作地点：合肥",
+          "method": "rule"
+        },
+        "employment_type": {
+          "text": "社会招聘",
+          "method": "rule"
+        },
+        "salary": {
+          "text": "月薪6500元",
+          "method": "rule"
+        },
+        "benefits.meals": {
+          "text": "福利：包吃住",
+          "method": "rule"
+        }
+      },
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      },
+      "raw_text": "职位名称：库区调度助理\n公司：示例序湾物流有限公司\n工作地点：合肥\n招聘类别：社会招聘。\n工作内容：登记库区调度记录，协调交接。\n待遇：月薪6500元。\n福利：包吃住，工作服由公司提供。\n本招聘文本为V19原创虚构样例。"
+    }
+  ],
+  "warnings": [],
+  "saved": [
+    {
+      "action": "created",
+      "id": "job_2597364e6fff",
+      "title": "库区调度助理",
+      "company": "示例序湾物流有限公司",
+      "cities": [
+        "合肥"
+      ],
+      "status": "new"
+    }
+  ]
+}

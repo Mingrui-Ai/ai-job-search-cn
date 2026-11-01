@@ -1,0 +1,96 @@
+{
+  "jobs": [
+    {
+      "schema_version": 1,
+      "id": "job_3229a1d1e837",
+      "source": {
+        "type": "file",
+        "site": "other",
+        "url": null,
+        "imported_at": "2026-10-30T15:16:12+08:00"
+      },
+      "title": "接口巡检实习生",
+      "company": "示例汀鹭软件有限公司",
+      "cities": [
+        "杭州"
+      ],
+      "remote": null,
+      "employment_type": "internship",
+      "salary": {
+        "min": 150,
+        "max": 180,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "requirements": {
+        "graduation": null,
+        "days_per_week": 4,
+        "min_months": 3,
+        "education": null,
+        "skills": [
+          "Python"
+        ],
+        "skill_alternatives": [],
+        "start": null
+      },
+      "interview": null,
+      "return_offer": null,
+      "published_at": null,
+      "deadline": null,
+      "status": "new",
+      "evidence": {
+        "title": {
+          "text": "接口巡检实习生",
+          "method": "rule"
+        },
+        "company": {
+          "text": "示例汀鹭软件有限公司",
+          "method": "rule"
+        },
+        "cities": {
+          "text": "工作地点：杭州",
+          "method": "rule"
+        },
+        "employment_type": {
+          "text": "职位名称：接口巡检实习生",
+          "method": "rule"
+        },
+        "salary": {
+          "text": "150-180元/天",
+          "method": "rule"
+        },
+        "requirements.days_per_week": {
+          "text": "每周到岗4天",
+          "method": "rule"
+        },
+        "requirements.min_months": {
+          "text": "实习3个月",
+          "method": "rule"
+        },
+        "requirements.skills": {
+          "text": "任职要求：熟悉Python",
+          "method": "rule"
+        }
+      },
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      },
+      "raw_text": "职位名称：接口巡检实习生\n公司：示例汀鹭软件有限公司\n工作地点：杭州\n工作内容：维护接口检查清单，整理异常记录。\n任职要求：熟悉Python；每周到岗4天，连续实习3个月。\n报酬：150-180元/天。\n福利：工作日包三餐，另有通勤班车。\n本招聘文本为V19原创虚构样例。"
+    }
+  ],
+  "warnings": [],
+  "saved": [
+    {
+      "action": "created",
+      "id": "job_3229a1d1e837",
+      "title": "接口巡检实习生",
+      "company": "示例汀鹭软件有限公司",
+      "cities": [
+        "杭州"
+      ],
+      "status": "new"
+    }
+  ]
+}

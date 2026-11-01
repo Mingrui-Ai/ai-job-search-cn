@@ -1,0 +1,88 @@
+{
+  "jobs": [
+    {
+      "schema_version": 1,
+      "id": "job_bb0e4b2af4b5",
+      "source": {
+        "type": "file",
+        "site": "other",
+        "url": null,
+        "imported_at": "2026-10-30T15:16:12+08:00"
+      },
+      "title": "展陈视觉设计助理",
+      "company": "示例苔岚展示有限公司",
+      "cities": [
+        "苏州"
+      ],
+      "remote": null,
+      "employment_type": "campus",
+      "salary": {
+        "min": 5000,
+        "max": 8000,
+        "unit": "CNY/month",
+        "months": null,
+        "negotiable": false
+      },
+      "requirements": {
+        "graduation": null,
+        "days_per_week": null,
+        "min_months": null,
+        "education": null,
+        "skills": [
+          "Figma"
+        ],
+        "skill_alternatives": [],
+        "start": null
+      },
+      "interview": null,
+      "return_offer": null,
+      "published_at": null,
+      "deadline": null,
+      "status": "new",
+      "evidence": {
+        "title": {
+          "text": "展陈视觉设计助理",
+          "method": "rule"
+        },
+        "company": {
+          "text": "示例苔岚展示有限公司",
+          "method": "rule"
+        },
+        "cities": {
+          "text": "工作地点：苏州",
+          "method": "rule"
+        },
+        "employment_type": {
+          "text": "校园招聘",
+          "method": "rule"
+        },
+        "salary": {
+          "text": "5-8K/月",
+          "method": "rule"
+        },
+        "requirements.skills": {
+          "text": "会用Figma",
+          "method": "rule"
+        }
+      },
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      },
+      "raw_text": "职位名称：展陈视觉设计助理\n公司：示例苔岚展示有限公司\n工作地点：苏州\n招聘类别：校园招聘。\n工作内容：排版展板并维护设计素材；会用Figma。\n薪酬：5-8K/月。\n福利：包午餐；晚餐自行安排。\n本招聘文本为V19原创虚构样例。"
+    }
+  ],
+  "warnings": [],
+  "saved": [
+    {
+      "action": "created",
+      "id": "job_bb0e4b2af4b5",
+      "title": "展陈视觉设计助理",
+      "company": "示例苔岚展示有限公司",
+      "cities": [
+        "苏州"
+      ],
+      "status": "new"
+    }
+  ]
+}
