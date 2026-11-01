@@ -124,6 +124,12 @@ def _settle(key: str, job, profile: dict) -> str:
             return "问 HR 薪资范围" if offered.get("negotiable") else ASK_JD
         if not target.get("salary_min"):
             return FILL_PROFILE
+        if target.get("salary_ideal") and target.get("salary_step"):  # tiers (M2-6e): it could not be turned
+            if target["salary_min"].get("unit") == "CNY/hour":
+                return f"{FILL_PROFILE}：最低期望和理想薪资改按天或按月计（按小时的不换算），再重新评分"
+            if offered.get("unit") == "CNY/hour":
+                return "问 HR 按天或按月大概多少（按小时的不换算）"
+            return f"看 JD 原文或问 HR 每周几天；或者{FILL_PROFILE}，补上每周天数（target.salary_days_per_week）"
         return "档案的最低期望薪资改用 JD 的单位（例如实习按天），再重新评分"
     if key == "location" and job is not None:
         availability = profile.get("availability") or {}
@@ -393,8 +399,9 @@ def _grounds(key: str, dimension: dict, names: dict, job, vocabulary, profile: d
         parts.append("缺：" + "；".join(skill(name) for name in dimension["missing"]))
     if key == "salary":
         quote = score._quote(job, "salary") if _has_evidence(job) else None
-        if quote:
-            parts.append("JD：" + _quotes(quote))
+        meals = (job["evidence"].get("benefits.meals") or {}).get("text") if _has_evidence(job) else None
+        if quote or meals:  # the pay, and the meals that add to it (M2-6e)
+            parts.append("JD：" + "<br>".join(_quotes(q) for q in (quote, meals) if q))
     if key == "location" and _has_evidence(job):
         # The JD's cities, and its remote offer when that counts for you as a preferred city (score._location).
         remote = job.get("remote") is True and (profile.get("availability") or {}).get("remote_ok") is True

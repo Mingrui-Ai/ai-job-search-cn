@@ -32,7 +32,8 @@ CONTACT_KEYS = ("name", "phone", "email", "github", "website")
 GRADUATION_KEYS = ("year", "month")
 EDUCATION_KEYS = ("level", "school", "major", "start", "end", "gpa", "rank", "courses", "source")
 AVAILABILITY_KEYS = ("start_date", "days_per_week", "months", "cities", "acceptable_cities", "remote_ok", "relocate")
-TARGET_KEYS = ("employment_types", "roles", "industries", "salary_min", "directions", "weights")
+TARGET_KEYS = ("employment_types", "roles", "industries", "salary_min", "salary_ideal", "salary_step", "meal_value",
+               "salary_days_per_week", "one_meal_points", "directions", "weights")
 SALARY_MIN_KEYS = ("amount", "unit")
 # The scoring dimensions (M2-4; location since M2-6b).
 WEIGHT_KEYS = ("skills", "direction", "experience", "salary", "location")
@@ -118,6 +119,7 @@ def validate(profile, sources=None, groups=None) -> list[str]:
             if not (schema._is_number(amount) and amount > 0):
                 errors.append("target.salary_min.amount: must be a positive number")
             _check_enum(salary.get("unit"), schema.SALARY_UNITS, "target.salary_min.unit", errors, nullable=False)
+        _check_salary_tiers(target, errors)
         directions = target.get("directions")
         check.texts(directions, "target.directions")
         for index, key in enumerate(directions if isinstance(directions, list) else []):
@@ -179,6 +181,37 @@ def validate(profile, sources=None, groups=None) -> list[str]:
         for key in EXCLUSION_KEYS:
             check.texts(profile["exclusions"].get(key), f"exclusions.{key}")
     return errors
+
+
+def _check_salary_tiers(target: dict, errors: list) -> None:
+    """The salary tiers (M2-6e): an ideal and a step score pay around 50; the meal value, the days a week a
+    day rate counts and the points for one meal are optional. All null scores pay as before."""
+    minimum, ideal, step = target.get("salary_min"), target.get("salary_ideal"), target.get("salary_step")
+    for key, units in (("salary_ideal", schema.SALARY_UNITS), ("meal_value", schema.MEAL_ALLOWANCE_UNITS)):
+        value = target.get(key)
+        if value is not None and _obj(target, key, SALARY_MIN_KEYS, errors, path=f"target.{key}"):
+            if not (schema._is_number(value.get("amount")) and value["amount"] > 0):
+                errors.append(f"target.{key}.amount: must be a positive number")
+            _check_enum(value.get("unit"), units, f"target.{key}.unit", errors, nullable=False)
+    if isinstance(ideal, dict):
+        if not isinstance(minimum, dict):
+            errors.append("target.salary_ideal: set target.salary_min too; the tiers run from the minimum up")
+        elif ideal.get("unit") != minimum.get("unit"):
+            errors.append(f"target.salary_ideal.unit: must be target.salary_min's unit ({minimum.get('unit')})")
+        elif (schema._is_number(ideal.get("amount")) and schema._is_number(minimum.get("amount"))
+              and ideal["amount"] < minimum["amount"]):
+            errors.append("target.salary_ideal.amount: below target.salary_min.amount")
+    if step is not None and not (schema._is_number(step) and step > 0):
+        errors.append("target.salary_step: must be null or a positive number, in the unit of target.salary_ideal")
+    if "salary_ideal" in target and "salary_step" in target and (ideal is None) != (step is None):
+        errors.append("target.salary_ideal, target.salary_step: give both or neither; without them salary scores "
+                      "0 or 100 on target.salary_min alone")
+    days = target.get("salary_days_per_week")
+    if days is not None and not (schema._is_number(days) and 0 < days <= 7):
+        errors.append("target.salary_days_per_week: must be null or the days worked a week, above 0 and up to 7")
+    points = target.get("one_meal_points")
+    if points is not None and not (schema._is_number(points) and 0 <= points <= 100):
+        errors.append("target.one_meal_points: must be null or a number from 0 to 100")
 
 
 def weight_errors(weights, path: str = "target.weights") -> list[str]:
