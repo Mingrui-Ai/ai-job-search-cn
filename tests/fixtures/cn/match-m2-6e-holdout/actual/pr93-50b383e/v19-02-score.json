@@ -1,0 +1,266 @@
+{
+  "schema_version": 1,
+  "job_id": "job_5b3f688e8610",
+  "rules_version": 9,
+  "scored_at": "2026-11-01T12:09:04+08:00",
+  "job_hash": "596bae6eb894a8c5bb5ac939356c35d53a7ffaa91a5852a55c35521ddf26df3a",
+  "profile_hash": "adea0aa4c53372113e3d7917e137793361e0bfe945526dc4faa1f7af2b7c1e53",
+  "filter": {
+    "verdict": "needs_check",
+    "checks": [
+      {
+        "check": "graduation",
+        "result": "unknown",
+        "reason": "JD 没写届别；档案没写毕业时间",
+        "jd": {
+          "requirements.graduation": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "graduation.year": null
+        }
+      },
+      {
+        "check": "education",
+        "result": "unknown",
+        "reason": "JD 没写最低学历（优先学历不作要求）",
+        "jd": {
+          "requirements.education": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "education": []
+        }
+      },
+      {
+        "check": "days_per_week",
+        "result": "match",
+        "reason": "JD 要求每周到岗 4 天，你可以 4 天",
+        "jd": {
+          "requirements.days_per_week": {
+            "value": 4,
+            "evidence": "每周到岗4天"
+          }
+        },
+        "profile": {
+          "availability.days_per_week": 4
+        }
+      },
+      {
+        "check": "min_months",
+        "result": "match",
+        "reason": "JD 要求实习时长 3 个月，你可以 3 个月",
+        "jd": {
+          "requirements.min_months": {
+            "value": 3,
+            "evidence": "实习至少3个月"
+          }
+        },
+        "profile": {
+          "availability.months": 3
+        }
+      },
+      {
+        "check": "location",
+        "result": "unknown",
+        "reason": "档案没写意向城市",
+        "jd": {
+          "cities": {
+            "value": [
+              "南京"
+            ],
+            "evidence": "工作地点：南京"
+          },
+          "remote": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.cities": [],
+          "availability.acceptable_cities": [],
+          "availability.remote_ok": null,
+          "availability.relocate": null
+        }
+      },
+      {
+        "check": "employment_type",
+        "result": "unknown",
+        "reason": "这是实习岗位；档案没写想找的岗位类型",
+        "jd": {
+          "employment_type": {
+            "value": "internship",
+            "evidence": "职位名称：测试台账实习生"
+          }
+        },
+        "profile": {
+          "target.employment_types": []
+        }
+      },
+      {
+        "check": "exclusions",
+        "result": "match",
+        "reason": "没有命中排除项",
+        "jd": {
+          "title": {
+            "value": "测试台账实习生",
+            "evidence": "测试台账实习生"
+          },
+          "company": {
+            "value": "示例砚杉信息有限公司",
+            "evidence": "示例砚杉信息有限公司"
+          },
+          "cities": {
+            "value": [
+              "南京"
+            ],
+            "evidence": "工作地点：南京"
+          }
+        },
+        "profile": {
+          "exclusions": {
+            "cities": [],
+            "companies": [],
+            "keywords": []
+          }
+        }
+      },
+      {
+        "check": "interview",
+        "result": "unknown",
+        "reason": "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试",
+        "jd": {
+          "interview": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.cities": [],
+          "availability.acceptable_cities": []
+        }
+      },
+      {
+        "check": "start_date",
+        "result": "unknown",
+        "reason": "JD 没写到岗时间；档案没写可到岗日期",
+        "jd": {
+          "requirements.start": {
+            "value": null,
+            "evidence": null
+          }
+        },
+        "profile": {
+          "availability.start_date": null
+        }
+      }
+    ]
+  },
+  "dimensions": {
+    "skills": {
+      "score": 0,
+      "method": "rule",
+      "reason": "JD 要求 1 项技能，你有 0 项",
+      "matched": [],
+      "missing": [
+        "SQL"
+      ]
+    },
+    "direction": {
+      "score": null,
+      "method": "rule",
+      "reason": "档案没写求职方向（target.directions）",
+      "jd_groups": {
+        "data": 1
+      },
+      "evidence": null
+    },
+    "experience": {
+      "score": null,
+      "method": "agent",
+      "reason": "等 Agent 对照经历补充",
+      "hints": [],
+      "evidence": null
+    },
+    "salary": {
+      "score": 50,
+      "method": "rule",
+      "reason": "JD 225 元/天；折合 3900 元/月（按JD 写的每周 4 天、一年 52 周）；包两餐，加 600 元/月；合计 4500 元/月；在最低期望 4500 和理想 6500 元/月之间，记 50 分"
+    },
+    "location": {
+      "score": null,
+      "method": "rule",
+      "reason": "档案没写意向城市"
+    }
+  },
+  "weights": {
+    "skills": 30,
+    "direction": 25,
+    "experience": 25,
+    "salary": 10,
+    "location": 10
+  },
+  "total": {
+    "score": 13,
+    "grade": "poor",
+    "complete": false,
+    "missing": [
+      "direction",
+      "experience",
+      "location"
+    ]
+  },
+  "gaps": [
+    {
+      "kind": "skill",
+      "item": "SQL",
+      "jd": "任职要求：会用SQL"
+    },
+    {
+      "kind": "filter",
+      "item": "graduation",
+      "result": "unknown",
+      "reason": "JD 没写届别；档案没写毕业时间",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "education",
+      "result": "unknown",
+      "reason": "JD 没写最低学历（优先学历不作要求）",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "location",
+      "result": "unknown",
+      "reason": "档案没写意向城市",
+      "jd": "工作地点：南京"
+    },
+    {
+      "kind": "filter",
+      "item": "employment_type",
+      "result": "unknown",
+      "reason": "这是实习岗位；档案没写想找的岗位类型",
+      "jd": "职位名称：测试台账实习生"
+    },
+    {
+      "kind": "filter",
+      "item": "interview",
+      "result": "unknown",
+      "reason": "JD 没写面试形式；需要确认是线上还是现场面试、在哪里面试",
+      "jd": null
+    },
+    {
+      "kind": "filter",
+      "item": "start_date",
+      "result": "unknown",
+      "reason": "JD 没写到岗时间；档案没写可到岗日期",
+      "jd": null
+    }
+  ]
+}

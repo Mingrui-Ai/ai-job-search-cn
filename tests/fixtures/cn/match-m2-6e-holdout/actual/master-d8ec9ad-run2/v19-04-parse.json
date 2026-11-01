@@ -1,0 +1,82 @@
+{
+  "jobs": [
+    {
+      "schema_version": 1,
+      "id": "job_9f1dc3e701ce",
+      "source": {
+        "type": "file",
+        "site": "other",
+        "url": null,
+        "imported_at": "2026-10-30T15:16:13+08:00"
+      },
+      "title": "渠道服务专员",
+      "company": "示例澄桨商贸有限公司",
+      "cities": [
+        "成都"
+      ],
+      "remote": null,
+      "employment_type": "experienced",
+      "salary": {
+        "min": 120000,
+        "max": 120000,
+        "unit": "CNY/year",
+        "months": null,
+        "negotiable": false
+      },
+      "requirements": {
+        "graduation": null,
+        "days_per_week": null,
+        "min_months": null,
+        "education": null,
+        "skills": [],
+        "skill_alternatives": [],
+        "start": null
+      },
+      "interview": null,
+      "return_offer": null,
+      "published_at": null,
+      "deadline": null,
+      "status": "new",
+      "evidence": {
+        "title": {
+          "text": "渠道服务专员",
+          "method": "rule"
+        },
+        "company": {
+          "text": "示例澄桨商贸有限公司",
+          "method": "rule"
+        },
+        "cities": {
+          "text": "工作地点：成都",
+          "method": "rule"
+        },
+        "employment_type": {
+          "text": "社会招聘",
+          "method": "rule"
+        },
+        "salary": {
+          "text": "年薪12万",
+          "method": "rule"
+        }
+      },
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      },
+      "raw_text": "职位名称：渠道服务专员\n公司：示例澄桨商贸有限公司\n工作地点：成都\n招聘类别：社会招聘。\n工作内容：整理客户服务计划，跟进渠道资料。\n薪资：年薪12万，固定薪资不含以下补助。\n福利：餐补600元/月，另有节日礼盒。\n本招聘文本为V19原创虚构样例。"
+    }
+  ],
+  "warnings": [],
+  "saved": [
+    {
+      "action": "created",
+      "id": "job_9f1dc3e701ce",
+      "title": "渠道服务专员",
+      "company": "示例澄桨商贸有限公司",
+      "cities": [
+        "成都"
+      ],
+      "status": "new"
+    }
+  ]
+}

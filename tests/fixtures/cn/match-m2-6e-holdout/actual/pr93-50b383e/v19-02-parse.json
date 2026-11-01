@@ -1,0 +1,106 @@
+{
+  "jobs": [
+    {
+      "schema_version": 1,
+      "id": "job_5b3f688e8610",
+      "source": {
+        "type": "file",
+        "site": "other",
+        "url": null,
+        "imported_at": "2026-11-01T12:09:04+08:00"
+      },
+      "title": "测试台账实习生",
+      "company": "示例砚杉信息有限公司",
+      "cities": [
+        "南京"
+      ],
+      "remote": null,
+      "employment_type": "internship",
+      "salary": {
+        "min": 225,
+        "max": 225,
+        "unit": "CNY/day",
+        "months": null,
+        "negotiable": false
+      },
+      "requirements": {
+        "graduation": null,
+        "days_per_week": 4,
+        "min_months": 3,
+        "education": null,
+        "skills": [
+          "SQL"
+        ],
+        "skill_alternatives": [],
+        "start": null
+      },
+      "interview": null,
+      "benefits": {
+        "meals": {
+          "per_day": 2,
+          "allowance": null
+        }
+      },
+      "return_offer": null,
+      "published_at": null,
+      "deadline": null,
+      "status": "new",
+      "evidence": {
+        "title": {
+          "text": "测试台账实习生",
+          "method": "rule"
+        },
+        "company": {
+          "text": "示例砚杉信息有限公司",
+          "method": "rule"
+        },
+        "cities": {
+          "text": "工作地点：南京",
+          "method": "rule"
+        },
+        "employment_type": {
+          "text": "职位名称：测试台账实习生",
+          "method": "rule"
+        },
+        "salary": {
+          "text": "日薪225元",
+          "method": "rule"
+        },
+        "requirements.days_per_week": {
+          "text": "每周到岗4天",
+          "method": "rule"
+        },
+        "requirements.min_months": {
+          "text": "实习至少3个月",
+          "method": "rule"
+        },
+        "requirements.skills": {
+          "text": "任职要求：会用SQL",
+          "method": "rule"
+        },
+        "benefits.meals": {
+          "text": "福利：工作日包两餐（午餐和晚餐）",
+          "method": "rule"
+        }
+      },
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      },
+      "raw_text": "职位名称：测试台账实习生\n公司：示例砚杉信息有限公司\n工作地点：南京\n工作内容：执行回归清单，核对测试台账。\n任职要求：会用SQL，每周到岗4天，实习至少3个月。\n待遇：日薪225元。\n福利：工作日包两餐（午餐和晚餐）。\n本招聘文本为V19原创虚构样例。"
+    }
+  ],
+  "warnings": [],
+  "saved": [
+    {
+      "action": "created",
+      "id": "job_5b3f688e8610",
+      "title": "测试台账实习生",
+      "company": "示例砚杉信息有限公司",
+      "cities": [
+        "南京"
+      ],
+      "status": "new"
+    }
+  ]
+}
