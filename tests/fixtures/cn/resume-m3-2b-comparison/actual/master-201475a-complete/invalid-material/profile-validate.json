@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "jobsearch_cn",
+    "profile",
+    "validate",
+    "--data-dir",
+    "<data>\\invalid-material"
+  ],
+  "exit_code": 0,
+  "stdout": {
+    "valid": true,
+    "errors": [],
+    "warnings": []
+  },
+  "stderr": ""
+}

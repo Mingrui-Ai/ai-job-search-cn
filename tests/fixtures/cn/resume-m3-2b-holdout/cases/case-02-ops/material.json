@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "kind": "resume",
+  "job_id": "job_v22_case_02",
+  "profile_hash": "3c2d700904800affcfea282869f4dac43f8cb1caa3ab24887bfa8573e950303d",
+  "created": "2026-11-01T14:10:00+08:00",
+  "summary": null,
+  "education": [{"ref": "edu-b1", "courses": []}],
+  "experience": [
+    {"ref": "work-b1", "bullets": [
+      {"text": "使用 Excel 核对 600 条内容标签，完成 12 期选题表", "refs": ["work-b1"]}
+    ]},
+    {"ref": "campus-b1", "bullets": [
+      {"text": "用 Word 整理 36 篇稿件，每周发布 3 次", "refs": ["campus-b1"]}
+    ]},
+    {"ref": "competition-b1", "bullets": [
+      {"text": "带领 4 人团队用 PowerPoint 完成 2 套公益传播方案", "refs": ["competition-b1"]}
+    ]}
+  ],
+  "skills": ["Word", "Excel", "Photoshop", "PowerPoint"],
+  "awards": [{"ref": "award-b1"}],
+  "certificates": [{"ref": "cert-b1"}],
+  "languages": [{"ref": "lang-b1"}, {"ref": "lang-b2"}]
+}
