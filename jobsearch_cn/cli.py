@@ -363,7 +363,7 @@ def _read_material(source: str):
 
 
 def _material_job(args, record):
-    """The stored JD a material is for, or None. It only adds warnings, so a job not stored is no error."""
+    """The stored JD a material is for, or None. It only adds warnings and coverage rows, so a job not stored is no error."""
     job_id = record.get("job_id") if isinstance(record, dict) else None
     if isinstance(job_id, str) and job_id:
         try:
@@ -383,11 +383,8 @@ def cmd_material_validate(args) -> int:
     return 1 if errors else 0
 
 
-_load_json_file = _read_material  # reviews are read the same way as materials
-
-
 def cmd_review_draft(args) -> int:
-    record = _load_json_file(args.file)
+    record = _read_material(args.file)
     data = _match_profile(args)
     if data is None:
         return 1
@@ -405,7 +402,7 @@ def cmd_review_draft(args) -> int:
 
 def _checked_review(args):
     """(review, errors, warnings) for a review file, checked against the material it names."""
-    record = _load_json_file(args.file)
+    record = _read_material(args.file)  # a review is JSON read the same way as a material
     if args.material:
         material_path = Path(args.material)
     elif isinstance(record, dict) and isinstance(record.get("material"), str) and args.file != "-":
@@ -413,7 +410,7 @@ def _checked_review(args):
         material_path = Path(args.file).parent / Path(record["material"]).name
     else:
         raise InputError("cannot tell which material this review is of; pass --material")
-    target = _load_json_file(str(material_path))
+    target = _read_material(str(material_path))
     errors, warnings = review.validate(record, target)
     return record, errors, warnings
 

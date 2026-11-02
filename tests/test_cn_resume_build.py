@@ -4,7 +4,8 @@ render takes the names, schools, dates and contact details from the cited profil
 out as the flat content resume_pdf and resume_docx print (resume_templates/sample.json). These pin each
 layout rule the planner ruled on (worklog 2026-11-01-m3-2b-word.md), that every input is a valid profile and
 material, and that the command checks the material before it writes anything, writes only inside the data
-directory, never through a link, and fails when either file does not hold the content.
+directory, never through a link, and fails when either file does not hold the content. The real build, with
+Typst, is in test_cn_resume_pdf.RealRender, the class CI's real-render job runs.
 """
 import copy
 import io
@@ -20,7 +21,7 @@ from unittest import mock
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from jobsearch_cn import cli, material, profile, resume_docx, resume_pdf, vocab  # noqa: E402
-from tests.test_cn_resume_pdf import NEEDS_TOOLCHAIN, TOOLCHAIN, faked_typst, pdf_with_pages  # noqa: E402
+from tests.test_cn_resume_pdf import faked_typst, pdf_with_pages  # noqa: E402
 
 FIXTURE = REPO / "tests" / "fixtures" / "cn" / "material" / "tech-m3"
 VOCABULARY = vocab.load()
@@ -299,20 +300,6 @@ class WriteWord(unittest.TestCase):
             self.assertEqual(output.read_bytes(), b"old")
             self.assertEqual(os.listdir(temp), ["resume-1.docx"])
             self.assertEqual(Path(replace.call_args.args[0]).suffix, ".docx")
-
-
-@unittest.skipUnless(TOOLCHAIN, NEEDS_TOOLCHAIN)
-class RealBuild(unittest.TestCase):
-    def test_the_fixture_builds_a_one_page_pdf_and_a_word_version_that_pass_every_check(self):
-        with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp) / "data"
-            out = io.StringIO()
-            with redirect_stdout(out), redirect_stderr(io.StringIO()):
-                code = cli.main(["resume", "build", str(FIXTURE / "resume-1.json"), "--data-dir", str(root),
-                                 "--profile", str(FIXTURE / "profile" / "profile.json")])
-            result = json.loads(out.getvalue())
-            self.assertEqual((code, result["problems"]), (0, []))
-            self.assertTrue(Path(result["pdf"]).is_file() and Path(result["docx"]).is_file())
 
 
 if __name__ == "__main__":
