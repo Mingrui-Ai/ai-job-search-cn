@@ -43,7 +43,13 @@ SUMMARY_TITLE = "个人简介"
 # A section of notes.md with this title is the log of preference changes (profile.md §4): weights and
 # cities, not evidence for a summary.
 _PREFERENCE_LOG = "偏好记录"
-_HEADING = re.compile(r"(#{1,6})[ \t]+(.*?)[ \t#]*")
+# What counts as a heading in notes.md (M3-2c, planner's ruling on the #115 review): an ATX heading only - at
+# most three spaces, one to six #, then a space or the end of the line, and an optional closing run of #.
+# Four spaces make an indented code block, and #标签 is no heading. Lines in a fenced code block or an HTML
+# comment are no headings either. Setext headings and other HTML blocks are not read (material.md §6).
+_HEADING = re.compile(r" {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*")
+_COMMENT_START = re.compile(r" {0,3}<!--")
+_COMMENT_END = "-->"
 # A fenced code block (CommonMark): three or more backticks or tildes, indented at most three spaces. It
 # closes at a fence of the same character, at least as long, with nothing after it; a backtick fence's
 # info string has no backtick.
@@ -223,18 +229,23 @@ def read_notes(path) -> str | None:
 
 def evidence(notes: str) -> str:
     """notes.md as a summary's evidence: all of it but the 偏好记录 section, which runs to the next heading
-    of its level or above. A line in a fenced code block is never a heading, whatever it starts with."""
-    kept, skipping, fence = [], None, None
+    of its level or above. Only _HEADING is a heading, and never inside a fenced code block or an HTML
+    comment, whatever the line starts with."""
+    kept, skipping, fence, comment = [], None, None, False
     for line in notes.splitlines():
         if fence:
             closing = _FENCE.fullmatch(line)
             if closing and closing.group(1)[0] == fence[0] and len(closing.group(1)) >= len(fence) \
                     and not closing.group(2).strip():
                 fence = None
+        elif comment:
+            comment = _COMMENT_END not in line
         elif _FENCE.fullmatch(line):
             fence = _FENCE.fullmatch(line).group(1)
+        elif _COMMENT_START.match(line):
+            comment = _COMMENT_END not in line  # CommonMark: the block ends on the line holding -->
         else:
-            heading = _HEADING.fullmatch(line.strip())
+            heading = _HEADING.fullmatch(line)
             if heading:
                 level = len(heading.group(1))
                 if skipping is not None and level <= skipping:

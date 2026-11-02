@@ -295,6 +295,35 @@ class SummaryFromNotes(unittest.TestCase):
         notes = NOTES + "\n```text\n## 偏好记录\n做过73次评测\n```\n"
         self.assertEqual(self.errors(summary("做过73次评测"), notes=notes), [])
 
+    def test_only_an_atx_heading_ends_the_log(self):
+        # The planner's boundary after the #115 review: at most three spaces, 1-6 #, then a space or the end.
+        log = "\n- 2026-11-02 · `target.weights` → {\"skills\": 73} · 来源：user（用户确认）\n"
+        for line in ("    ## 示例", "#示例", "##示例", "<!--\n## 示例\n-->", "<!-- 注释\n# 示例 -->",
+                     "\t## 示例"):
+            notes = NOTES + "\n## 偏好记录\n" + line + log
+            with self.subTest(line=line):
+                self.assertNotIn("73", material.evidence(notes))
+                self.assertTrue(any("the number '73' is not in the cited entries (notes.md)" in error
+                                    for error in self.errors(summary("做过73次评测"), notes=notes)))
+        for heading in ("## 评测", " ## 评测", "  ## 评测", "   ## 评测", "## 评测 ##", "#", "##"):
+            notes = NOTES + "\n## 偏好记录\n- `target.weights` → {\"skills\": 25}\n" + heading + "\n做过73次评测。\n"
+            with self.subTest(heading=heading):
+                self.assertEqual(self.errors(summary("做过73次评测"), notes=notes), [])
+                self.assertNotIn("25", material.evidence(notes))
+
+    def test_the_log_heading_itself_follows_the_same_rule(self):
+        for heading, is_log in (("   ## 偏好记录", True), ("## 偏好记录 ##", True), ("    ## 偏好记录", False),
+                                ("#偏好记录", False), ("<!--\n## 偏好记录\n-->", False)):
+            with self.subTest(heading=heading):
+                kept = material.evidence(heading + "\n- `target.weights` → {\"skills\": 25}\n")
+                self.assertEqual("25" not in kept, is_log)
+
+    def test_a_comment_on_one_line_ends_where_it_starts(self):
+        notes = NOTES + "\n## 偏好记录\n<!-- 只追加 -->\n- {\"skills\": 25}\n## 评测\n做过73次评测\n"
+        kept = material.evidence(notes)
+        self.assertNotIn("25", kept)
+        self.assertIn("做过73次评测", kept)
+
     def test_the_hash_leaves_the_notes_out(self):
         # Ruling 4: notes.md is not in profile_hash, so changing it alone warns of nothing; the checks above
         # run again on every build instead.
