@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "contact": {
+    "name": "示例候选人乙",
+    "phone": null,
+    "email": "candidate-b@example.com",
+    "github": null,
+    "website": "portfolio-b.example.com"
+  },
+  "graduation": {"year": 2026, "month": 6},
+  "education": [
+    {
+      "id": "edu-b1",
+      "level": "bachelor",
+      "school": "示例南港大学",
+      "major": "传播学",
+      "start": "2022-09",
+      "end": "2026-06",
+      "gpa": null,
+      "rank": "专业前20%",
+      "courses": ["品牌传播", "消费者行为", "新媒体运营"],
+      "source": "resume.txt"
+    }
+  ],
+  "availability": {
+    "start_date": "2026-07-01",
+    "days_per_week": 5,
+    "months": 12,
+    "cities": ["上海"],
+    "acceptable_cities": ["苏州"],
+    "remote_ok": false,
+    "relocate": true
+  },
+  "target": {
+    "employment_types": ["campus", "experienced"],
+    "roles": ["内容运营", "品牌策划"],
+    "industries": ["文化传媒"],
+    "salary_min": null,
+    "salary_ideal": null,
+    "salary_step": null,
+    "meal_value": null,
+    "salary_days_per_week": null,
+    "one_meal_points": null,
+    "directions": ["market"],
+    "weights": null
+  },
+  "skills": [
+    {"name": "Excel", "level": "proficient", "used_in": ["work-b1"], "source": "resume.txt"},
+    {"name": "PowerPoint", "level": "working", "used_in": ["competition-b1"], "source": "resume.txt"},
+    {"name": "Word", "level": null, "used_in": ["campus-b1"], "source": "resume.txt"},
+    {"name": "Photoshop", "level": "familiar", "used_in": [], "source": "resume.txt"}
+  ],
+  "experience": [
+    {
+      "id": "competition-b1",
+      "type": "competition",
+      "name": "示例城市公益传播赛",
+      "org": null,
+      "role": "队长",
+      "start": "2025-03",
+      "end": "2025-05",
+      "bullets": ["带领 4 人团队使用 PowerPoint 完成 2 套公益传播方案"],
+      "source": "resume.txt"
+    },
+    {
+      "id": "campus-b1",
+      "type": "campus",
+      "name": null,
+      "org": "示例南港大学融媒体中心",
+      "role": "编辑部负责人",
+      "start": "2024-09",
+      "end": null,
+      "bullets": ["使用 Word 整理 36 篇稿件，每周发布 3 次"],
+      "source": "resume.txt"
+    },
+    {
+      "id": "work-b1",
+      "type": "work",
+      "name": null,
+      "org": "示例海风文化工作室",
+      "role": "内容编辑",
+      "start": "2025-07",
+      "end": "2025-09",
+      "bullets": ["使用 Excel 核对 600 条内容标签，完成 12 期选题表"],
+      "source": "resume.txt"
+    }
+  ],
+  "awards": [
+    {"id": "award-b1", "name": "示例城市公益传播赛金奖", "date": "2025-05", "source": "resume.txt"}
+  ],
+  "certificates": [
+    {"id": "cert-b1", "name": "普通话水平测试", "detail": "二级甲等", "date": null, "source": "resume.txt"}
+  ],
+  "languages": [
+    {"id": "lang-b1", "name": "普通话", "level": "二级甲等", "source": "resume.txt"},
+    {"id": "lang-b2", "name": "英语", "level": "熟练", "source": "resume.txt"}
+  ],
+  "exclusions": {"cities": [], "companies": [], "keywords": []}
+}

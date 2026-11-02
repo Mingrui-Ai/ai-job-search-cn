@@ -1,0 +1,297 @@
+{
+  "task": "V22",
+  "method": "manual_oracle_before_m3_2b_pr",
+  "flat_shape": "M3-2a resume_templates/sample.json",
+  "rules": {
+    "summary": "材料 summary 即使不为 null，也不进入简历",
+    "intent": "target.roles 按档案顺序，随后是 target.employment_types 的中文标签和 availability.start_date",
+    "employment_labels": {"internship": "实习", "campus": "校招", "experienced": "社招"},
+    "campus_left": "校园经历左边取 org，中间取 role；这是规则未逐字点名 campus 时的冻结解释",
+    "experience_sections": ["实习经历", "项目经历", "科研经历", "竞赛经历", "校园经历", "工作经历"],
+    "skill_lines": ["精通", "熟练", "熟悉", "项目中使用", "了解"],
+    "text_layers": "PDF 和 DOCX 都必须逐字包含 expected_resume 的每个非空字符串"
+  },
+  "cases": [
+    {
+      "id": "case-01-tech",
+      "profile": "cases/case-01-tech/profile/profile.json",
+      "material": "cases/case-01-tech/material.json",
+      "validation": {"valid": true, "errors": [], "warnings": []},
+      "expected_resume": {
+        "name": "示例候选人甲",
+        "contact": "13800000000 | candidate-a@example.com | github.com/example-candidate-a | portfolio-a.example.com",
+        "intent": "求职意向：后端开发、数据平台（实习） · 2026.12.01 起可到岗",
+        "sections": [
+          {
+            "title": "教育经历",
+            "entries": [
+              {
+                "left": "示例星河大学",
+                "middle": "软件工程 · 硕士",
+                "right": "2025.09 - 至今",
+                "bullets": ["GPA 3.8/4.0，专业前12%", "主修课程：分布式系统、机器学习"]
+              },
+              {
+                "left": "示例海岬学院",
+                "middle": "信息管理 · 本科",
+                "right": "2021.09 - 2025.06",
+                "bullets": []
+              }
+            ]
+          },
+          {
+            "title": "实习经历",
+            "entries": [
+              {
+                "left": "示例云帆科技有限公司",
+                "middle": "后端开发实习生",
+                "right": "2026.04 - 至今",
+                "bullets": ["使用 Go 和 Docker 维护订单服务，连续 6 周整理发布记录"]
+              }
+            ]
+          },
+          {
+            "title": "项目经历",
+            "entries": [
+              {
+                "left": "订单事件分析平台",
+                "middle": "",
+                "right": "2025.11 - 2026.02",
+                "bullets": ["使用 Python 和 SQL 分析 1200 条订单事件"]
+              }
+            ]
+          },
+          {
+            "title": "科研经历",
+            "entries": [
+              {
+                "left": "检索增强生成评测研究",
+                "middle": "研究助理",
+                "right": "2026.01 - 2026.06",
+                "bullets": ["用 RAG 方法整理 80 组问答并复核检索结果"]
+              }
+            ]
+          },
+          {
+            "title": "专业技能",
+            "lines": [
+              {"label": "精通", "rest": "Python、Go"},
+              {"label": "熟练", "rest": "SQL"},
+              {"label": "熟悉", "rest": "Docker"},
+              {"label": "项目中使用", "rest": "RAG"},
+              {"label": "了解", "rest": "Git"}
+            ]
+          },
+          {
+            "title": "荣誉与证书",
+            "lines": [
+              {"label": "", "rest": "示例星河算法挑战赛一等奖（2026.05）"},
+              {"label": "", "rest": "CET-6 560"},
+              {"label": "", "rest": "日语 N2"}
+            ]
+          }
+        ]
+      },
+      "text_layer": {
+        "applies_to": ["pdf", "docx"],
+        "must_contain": [
+          "示例候选人甲",
+          "13800000000 | candidate-a@example.com | github.com/example-candidate-a | portfolio-a.example.com",
+          "求职意向：后端开发、数据平台（实习） · 2026.12.01 起可到岗",
+          "教育经历", "示例星河大学", "软件工程 · 硕士", "2025.09 - 至今",
+          "GPA 3.8/4.0，专业前12%", "主修课程：分布式系统、机器学习",
+          "示例海岬学院", "信息管理 · 本科", "2021.09 - 2025.06",
+          "实习经历", "示例云帆科技有限公司", "后端开发实习生", "2026.04 - 至今",
+          "使用 Go 和 Docker 维护订单服务，连续 6 周整理发布记录",
+          "项目经历", "订单事件分析平台", "2025.11 - 2026.02", "使用 Python 和 SQL 分析 1200 条订单事件",
+          "科研经历", "检索增强生成评测研究", "研究助理", "2026.01 - 2026.06", "用 RAG 方法整理 80 组问答并复核检索结果",
+          "专业技能", "精通", "Python、Go", "熟练", "SQL", "熟悉", "Docker", "项目中使用", "RAG", "了解", "Git",
+          "荣誉与证书", "示例星河算法挑战赛一等奖（2026.05）", "CET-6 560", "日语 N2"
+        ]
+      }
+    },
+    {
+      "id": "case-02-ops",
+      "profile": "cases/case-02-ops/profile/profile.json",
+      "material": "cases/case-02-ops/material.json",
+      "validation": {"valid": true, "errors": [], "warnings": []},
+      "expected_resume": {
+        "name": "示例候选人乙",
+        "contact": "candidate-b@example.com | portfolio-b.example.com",
+        "intent": "求职意向：内容运营、品牌策划（校招、社招） · 2026.07.01 起可到岗",
+        "sections": [
+          {
+            "title": "教育经历",
+            "entries": [
+              {
+                "left": "示例南港大学",
+                "middle": "传播学 · 本科",
+                "right": "2022.09 - 2026.06",
+                "bullets": ["专业前20%"]
+              }
+            ]
+          },
+          {
+            "title": "竞赛经历",
+            "entries": [
+              {
+                "left": "示例城市公益传播赛",
+                "middle": "队长",
+                "right": "2025.03 - 2025.05",
+                "bullets": ["带领 4 人团队用 PowerPoint 完成 2 套公益传播方案"]
+              }
+            ]
+          },
+          {
+            "title": "校园经历",
+            "entries": [
+              {
+                "left": "示例南港大学融媒体中心",
+                "middle": "编辑部负责人",
+                "right": "2024.09 - 至今",
+                "bullets": ["用 Word 整理 36 篇稿件，每周发布 3 次"]
+              }
+            ]
+          },
+          {
+            "title": "工作经历",
+            "entries": [
+              {
+                "left": "示例海风文化工作室",
+                "middle": "内容编辑",
+                "right": "2025.07 - 2025.09",
+                "bullets": ["使用 Excel 核对 600 条内容标签，完成 12 期选题表"]
+              }
+            ]
+          },
+          {
+            "title": "专业技能",
+            "lines": [
+              {"label": "熟练", "rest": "Excel"},
+              {"label": "熟悉", "rest": "PowerPoint"},
+              {"label": "项目中使用", "rest": "Word"},
+              {"label": "了解", "rest": "Photoshop"}
+            ]
+          },
+          {
+            "title": "荣誉与证书",
+            "lines": [
+              {"label": "", "rest": "示例城市公益传播赛金奖（2025.05）"},
+              {"label": "", "rest": "普通话水平测试 二级甲等"},
+              {"label": "", "rest": "英语 熟练"}
+            ]
+          }
+        ]
+      },
+      "text_layer": {
+        "applies_to": ["pdf", "docx"],
+        "must_contain": [
+          "示例候选人乙", "candidate-b@example.com | portfolio-b.example.com",
+          "求职意向：内容运营、品牌策划（校招、社招） · 2026.07.01 起可到岗",
+          "教育经历", "示例南港大学", "传播学 · 本科", "2022.09 - 2026.06", "专业前20%",
+          "竞赛经历", "示例城市公益传播赛", "队长", "2025.03 - 2025.05", "带领 4 人团队用 PowerPoint 完成 2 套公益传播方案",
+          "校园经历", "示例南港大学融媒体中心", "编辑部负责人", "2024.09 - 至今", "用 Word 整理 36 篇稿件，每周发布 3 次",
+          "工作经历", "示例海风文化工作室", "内容编辑", "2025.07 - 2025.09", "使用 Excel 核对 600 条内容标签，完成 12 期选题表",
+          "专业技能", "熟练", "Excel", "熟悉", "PowerPoint", "项目中使用", "Word", "了解", "Photoshop",
+          "荣誉与证书", "示例城市公益传播赛金奖（2025.05）", "普通话水平测试 二级甲等", "英语 熟练"
+        ]
+      }
+    },
+    {
+      "id": "case-03-data",
+      "profile": "cases/case-03-data/profile/profile.json",
+      "material": "cases/case-03-data/material.json",
+      "validation": {
+        "valid": true,
+        "errors": [],
+        "warnings": ["profile_hash: the profile has changed since this material was written; check it still holds"]
+      },
+      "expected_resume": {
+        "name": "示例候选人丙",
+        "contact": "13900000000 | github.com/example-candidate-c",
+        "intent": "求职意向：数据分析（实习） · 2027.01.15 起可到岗",
+        "sections": [
+          {
+            "title": "教育经历",
+            "entries": [
+              {
+                "left": "示例青丘学院",
+                "middle": "统计学 · 本科",
+                "right": "2023.09 - 2027.06",
+                "bullets": ["主修课程：统计建模"]
+              }
+            ]
+          },
+          {
+            "title": "实习经历",
+            "entries": [
+              {
+                "left": "示例杉原零售有限公司",
+                "middle": "数据分析实习生",
+                "right": "2026.06 - 2026.09",
+                "bullets": ["用 Python 和 SQL 清洗 5000 条门店记录"]
+              }
+            ]
+          },
+          {
+            "title": "项目经历",
+            "entries": [
+              {
+                "left": "门店客流看板",
+                "middle": "",
+                "right": "2026.02 - 至今",
+                "bullets": ["使用 Tableau 和 Excel 制作 24 张客流图表"]
+              },
+              {
+                "left": "课程成绩分析",
+                "middle": "",
+                "right": "2025.10 - 2025.12",
+                "bullets": ["使用 Python 分析 300 份课程成绩"]
+              }
+            ]
+          },
+          {
+            "title": "专业技能",
+            "lines": [
+              {"label": "精通", "rest": "Tableau"},
+              {"label": "熟练", "rest": "Python"},
+              {"label": "熟悉", "rest": "Excel"},
+              {"label": "项目中使用", "rest": "SQL"},
+              {"label": "了解", "rest": "Git"}
+            ]
+          },
+          {
+            "title": "荣誉与证书",
+            "lines": [
+              {"label": "", "rest": "Tableau Desktop Specialist Demo-2026"},
+              {"label": "", "rest": "英语 CET-4 520"}
+            ]
+          }
+        ]
+      },
+      "text_layer": {
+        "applies_to": ["pdf", "docx"],
+        "must_contain": [
+          "示例候选人丙", "13900000000 | github.com/example-candidate-c",
+          "求职意向：数据分析（实习） · 2027.01.15 起可到岗",
+          "教育经历", "示例青丘学院", "统计学 · 本科", "2023.09 - 2027.06", "主修课程：统计建模",
+          "实习经历", "示例杉原零售有限公司", "数据分析实习生", "2026.06 - 2026.09", "用 Python 和 SQL 清洗 5000 条门店记录",
+          "项目经历", "门店客流看板", "2026.02 - 至今", "使用 Tableau 和 Excel 制作 24 张客流图表",
+          "课程成绩分析", "2025.10 - 2025.12", "使用 Python 分析 300 份课程成绩",
+          "专业技能", "精通", "Tableau", "熟练", "Python", "熟悉", "Excel", "项目中使用", "SQL", "了解", "Git",
+          "荣誉与证书", "Tableau Desktop Specialist Demo-2026", "英语 CET-4 520"
+        ]
+      }
+    }
+  ],
+  "invalid_case": {
+    "profile": "cases/case-01-tech/profile/profile.json",
+    "material": "invalid-material.json",
+    "validation": {
+      "valid": false,
+      "error": "experience[0].bullets[0].text: the number '99' is not in the cited entries (intern-a1); use the figure the profile gives, or ask the user to add it to the profile",
+      "warnings": []
+    },
+    "build": "reject_before_flat_json_pdf_or_docx"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "jobsearch_cn",
+    "profile",
+    "validate",
+    "--data-dir",
+    "<data>\\case-03-data"
+  ],
+  "exit_code": 0,
+  "stdout": {
+    "valid": true,
+    "errors": [],
+    "warnings": []
+  },
+  "stderr": ""
+}

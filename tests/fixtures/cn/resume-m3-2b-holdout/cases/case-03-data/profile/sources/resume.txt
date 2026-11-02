@@ -1,0 +1,11 @@
+示例候选人丙（虚构）
+电话 13900000000；GitHub github.com/example-candidate-c
+
+示例青丘学院，统计学本科，2023.09 至 2027.06。课程：统计建模、数据可视化。
+
+门店客流看板，2026.02 至今：使用 Tableau 和 Excel 制作 24 张客流图表。
+示例杉原零售有限公司，数据分析实习生，2026.06 至 2026.09：使用 Python 和 SQL 清洗 5000 条门店记录。
+课程成绩分析，2025.10 至 2025.12：使用 Python 分析 300 份课程成绩。
+
+技能：精通 Tableau；熟练 Python；熟悉 Excel；项目中使用 SQL；了解 Git。
+证书：Tableau Desktop Specialist Demo-2026。语言：英语 CET-4 520。
