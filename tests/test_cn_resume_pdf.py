@@ -93,6 +93,7 @@ class TemplateIsPackageData(unittest.TestCase):
         self.assertTrue(sample["contact"] and sample["intent"])
         self.assertTrue(any("entries" in section for section in sample["sections"]))
         self.assertTrue(any("lines" in section for section in sample["sections"]))
+        self.assertTrue(any("text" in section for section in sample["sections"]))  # the summary (M3-2c)
 
 
 class FindTypst(unittest.TestCase):
@@ -452,6 +453,21 @@ class RealRender(unittest.TestCase):
         self.assertEqual(resume_pdf.page_count(Path(result["pdf"]).read_bytes()), 1)
         self.assertTrue(Path(result["docx"]).is_file())
 
+    def test_a_material_without_a_summary_builds_too(self):
+        fixture = REPO / "tests" / "fixtures" / "cn" / "material" / "tech-m3"
+        record = json.loads((fixture / "resume-1.json").read_text(encoding="utf-8"))
+        record["summary"] = None
+        path = Path(self.temp) / "resume-2.json"
+        path.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        out = io.StringIO()
+        with redirect_stdout(out), redirect_stderr(io.StringIO()):
+            code = cli.main(["resume", "build", str(path), "--data-dir", self.temp,
+                             "--profile", str(fixture / "profile" / "profile.json")])
+        result = json.loads(out.getvalue())
+        self.assertEqual((code, result["problems"]), (0, []))
+        self.assertEqual(resume_pdf.page_count(Path(result["pdf"]).read_bytes()), 1)
+        self.assertNotIn("个人简介", "".join(resume_extract.extract_text(Path(result["pdf"])).split()))
+
     def test_the_sample_is_one_page_and_passes_every_check(self):
         content = resume_pdf.sample()
         result = resume_pdf.render(content, self.output)
@@ -480,11 +496,13 @@ class RealRender(unittest.TestCase):
     def test_content_is_never_read_as_typst_markup(self):
         content = resume_pdf.sample()
         marks = ['#read("/etc/hostname")', '#import "@preview/x:0.1.0": *', "*星号* = _下划线_ $x$ <标签>"]
-        content["sections"][0]["entries"][0]["bullets"] = marks
+        sections = {section["title"]: section for section in content["sections"]}
+        sections["教育经历"]["entries"][0]["bullets"] = marks
+        sections["个人简介"]["text"] = "- 不是列表 #emph[不是强调] = 不是标题"
         content["name"] = "#panic()"
         resume_pdf.render(content, self.output)
         text = "".join(resume_extract.extract_text(self.output).split())
-        for mark in [*marks, "#panic()"]:
+        for mark in [*marks, "#panic()", sections["个人简介"]["text"]]:
             self.assertIn("".join(mark.split()), text)
 
     def test_a_radical_in_the_content_is_reported(self):

@@ -3,11 +3,13 @@
 A material holds no name, school, company or date of its own; rendering takes those from the cited entries.
 What it does write - the rewritten bullets and the summary - is checked against what it cites: every number
 must already be in the cited entries (written in figures or in Chinese), and every vocabulary skill must be
-the candidate's. See docs/cn/material.md.
+the candidate's. The summary may also cite notes.md, what the user said while building the profile (M3-2c).
+See docs/cn/material.md.
 """
 from __future__ import annotations
 
 import re
+import unicodedata
 from fractions import Fraction
 
 from jobsearch_cn import jd_parser, profile as profile_mod, schema, score
@@ -31,6 +33,27 @@ SECTIONS = {
     "languages": ("name", "level"),
 }
 MAX_TEXT = profile_mod.MAX_BULLET
+# The summary may cite the profile's free text. An entry id is lowercase letters, digits and hyphens, so a
+# name with a dot cannot be one.
+NOTES_REF = "notes.md"
+# Two lines at the resume's loosest spacing, in the widths of a Chinese character (M3-2c ruling 1): 11pt on
+# a 17.4 cm measure is 44 a line. Word's 10.5pt on 18 cm holds about 48.
+SUMMARY_WIDTH = 88
+SUMMARY_TITLE = "个人简介"
+# A section of notes.md with this title is the log of preference changes (profile.md §4): weights and
+# cities, not evidence for a summary.
+_PREFERENCE_LOG = "偏好记录"
+# What counts as a heading in notes.md (M3-2c, planner's ruling on the #115 review): an ATX heading only - at
+# most three spaces, one to six #, then a space or the end of the line, and an optional closing run of #.
+# Four spaces make an indented code block, and #标签 is no heading. Lines in a fenced code block or an HTML
+# comment are no headings either. Setext headings and other HTML blocks are not read (material.md §6).
+_HEADING = re.compile(r" {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*")
+_COMMENT_START = re.compile(r" {0,3}<!--")
+_COMMENT_END = "-->"
+# A fenced code block (CommonMark): three or more backticks or tildes, indented at most three spaces. It
+# closes at a fence of the same character, at least as long, with nothing after it; a backtick fence's
+# info string has no backtick.
+_FENCE = re.compile(r" {0,3}(`{3,}(?=[^`]*$)|~{3,})(.*)")
 _HIGH_LEVELS = ("proficient", "expert")
 
 # Numbers in figures, with a magnitude (2万) or a percent sign; 1,200 is one number.
@@ -122,11 +145,12 @@ def numbers(text: str) -> list:
     return found
 
 
-def validate(material, profile: dict, vocabulary, job: dict = None) -> tuple[list, list]:
+def validate(material, profile: dict, vocabulary, job: dict = None, notes: str = None) -> tuple[list, list]:
     """(errors, warnings) for a material against the profile it cites; no errors means valid.
 
     profile must already pass profile.validate. job is the stored JD the material is for, when there is one;
-    it only adds warnings.
+    it only adds warnings. notes is the text of the notes.md beside the profile (read_notes), None when there
+    is none that reads as UTF-8; only a summary that cites notes.md needs it.
     """
     if not isinstance(material, dict):
         return ["material: must be a JSON object"], []
@@ -141,7 +165,7 @@ def validate(material, profile: dict, vocabulary, job: dict = None) -> tuple[lis
     schema._check_timestamp(material.get("created"), "created", errors)
 
     entries = _entries(profile)
-    checker = _Citations(errors, entries, profile, vocabulary)
+    checker = _Citations(errors, entries, profile, vocabulary, notes)
 
     summary = material.get("summary")
     if summary is not None:
@@ -149,7 +173,7 @@ def validate(material, profile: dict, vocabulary, job: dict = None) -> tuple[lis
             errors.append("summary: must be an object or null")
         else:
             profile_mod._keys(summary, SUMMARY_KEYS, "summary", errors)
-            refs = checker.refs(summary.get("refs"), "summary.refs", section=None)
+            refs = checker.refs(summary.get("refs"), "summary.refs", section=None, notes=True)
             checker.text(summary.get("text"), "summary.text", refs)
 
     for section in SECTIONS:
@@ -195,6 +219,49 @@ def _entries(profile: dict) -> dict:
     return found
 
 
+def read_notes(path) -> str | None:
+    """The text of a notes.md, or None when there is none or it is not UTF-8 (profile validate reports that)."""
+    try:
+        return path.read_bytes().decode("utf-8-sig")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
+def evidence(notes: str) -> str:
+    """notes.md as a summary's evidence: all of it but the 偏好记录 section, which runs to the next heading
+    of its level or above. Only _HEADING is a heading, and never inside a fenced code block or an HTML
+    comment, whatever the line starts with."""
+    kept, skipping, fence, comment = [], None, None, False
+    for line in notes.splitlines():
+        if fence:
+            closing = _FENCE.fullmatch(line)
+            if closing and closing.group(1)[0] == fence[0] and len(closing.group(1)) >= len(fence) \
+                    and not closing.group(2).strip():
+                fence = None
+        elif comment:
+            comment = _COMMENT_END not in line
+        elif _FENCE.fullmatch(line):
+            fence = _FENCE.fullmatch(line).group(1)
+        elif _COMMENT_START.match(line):
+            comment = _COMMENT_END not in line  # CommonMark: the block ends on the line holding -->
+        else:
+            heading = _HEADING.fullmatch(line)
+            if heading:
+                level = len(heading.group(1))
+                if skipping is not None and level <= skipping:
+                    skipping = None
+                if skipping is None and heading.group(2) == _PREFERENCE_LOG:
+                    skipping = level
+        if skipping is None:
+            kept.append(line)
+    return "\n".join(kept)
+
+
+def width(text: str) -> float:
+    """How wide text prints, in Chinese characters: a letter, digit or half-width mark is half of one."""
+    return sum(0.5 if unicodedata.east_asian_width(char) in ("Na", "H", "N") else 1 for char in text)
+
+
 def _source_text(section: str, entry: dict) -> str:
     parts = []
     for field in SECTIONS[section]:
@@ -204,8 +271,9 @@ def _source_text(section: str, entry: dict) -> str:
 
 
 class _Citations:
-    def __init__(self, errors: list, entries: dict, profile: dict, vocabulary):
+    def __init__(self, errors: list, entries: dict, profile: dict, vocabulary, notes=None):
         self.errors, self.entries, self.profile, self.vocabulary = errors, entries, profile, vocabulary
+        self.notes = notes
         self.patterns = jd_parser._skill_patterns(vocabulary)
 
     def ref(self, value, where: str, section):
@@ -229,14 +297,25 @@ class _Citations:
             return None
         return entry
 
-    def refs(self, value, where: str, section, required=None) -> list:
-        """The ids cited by a refs list that resolve; at least one is needed."""
+    def refs(self, value, where: str, section, required=None, notes=False) -> list:
+        """The ids cited by a refs list that resolve, and notes.md where it may be cited; at least one is
+        needed."""
         if not isinstance(value, list) or not value:
             self.errors.append(f"{where}: must cite at least one profile entry id")
             return []
         good = []
         for index, ref in enumerate(value):
-            if self.ref(ref, f"{where}[{index}]", section) is not None:
+            if ref == NOTES_REF:
+                if not notes:
+                    self.errors.append(f"{where}[{index}]: only the summary may cite {NOTES_REF}")
+                elif self.notes is None:
+                    self.errors.append(f"{where}[{index}]: cites {NOTES_REF}, but there is no {NOTES_REF} beside "
+                                       "the profile that reads as UTF-8 text")
+                elif ref in good:
+                    self.errors.append(f"{where}[{index}]: {NOTES_REF} is cited twice")
+                else:
+                    good.append(ref)
+            elif self.ref(ref, f"{where}[{index}]", section) is not None:
                 good.append(ref)
         if required and required not in value:
             self.errors.append(f"{where}: must include {required!r}, the entry this bullet sits under")
@@ -264,7 +343,8 @@ class _Citations:
             self.errors.append(f"{where}: longer than {MAX_TEXT} characters")
         if not refs:
             return
-        source = "\n".join(_source_text(*self.entries[ref]) for ref in refs)
+        source = "\n".join(evidence(self.notes) if ref == NOTES_REF else _source_text(*self.entries[ref])
+                           for ref in refs)
         known = {value for _, value in numbers(source)}
         for quote, number in numbers(value):
             if number not in known:
@@ -329,6 +409,10 @@ def _skills(value, profile: dict, vocabulary, errors: list) -> None:
 
 def _warnings(material: dict, profile: dict, vocabulary, job) -> list:
     warnings = []
+    summary = material.get("summary")
+    if summary and width(summary["text"]) > SUMMARY_WIDTH:
+        warnings.append(f"summary.text: about {width(summary['text']):g} characters wide, more than the two lines "
+                        f"({SUMMARY_WIDTH}) a summary should take; shorten it")
     digest = material.get("profile_hash")
     if digest and digest != score.profile_hash(profile):
         warnings.append("profile_hash: the profile has changed since this material was written; check it still holds")
@@ -362,13 +446,16 @@ def render(material: dict, profile: dict, vocabulary) -> dict:
     """The flat resume content for a material that passes validate(material, profile, vocabulary).
 
     Names, schools, dates and contact details come from the cited profile entries; the material adds
-    which entries, in what order, the rewritten bullets, the courses and the skills. The summary is not
-    printed: the template has no place for one yet (M3-2 ruling a). Experience is split into one section
-    per type, in the order the material first lists each type.
+    which entries, in what order, the rewritten bullets, the courses and the skills. The summary, when the
+    material has one, is the first section: a paragraph under the header (M3-2c). With none, the content is
+    what it was before the summary was printed. Experience is split into one section per type, in the order
+    the material first lists each type.
     """
     entries = _entries(profile)
     cited = lambda item: entries[item["ref"]][1]  # noqa: E731
     sections = []
+    if material.get("summary"):
+        sections.append({"title": SUMMARY_TITLE, "text": material["summary"]["text"]})
     education = [_education_entry(cited(item), item["courses"]) for item in material["education"]]
     if education:
         sections.append({"title": "教育经历", "entries": education})

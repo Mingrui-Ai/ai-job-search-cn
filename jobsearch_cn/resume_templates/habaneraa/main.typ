@@ -16,6 +16,9 @@
 
 #for s in data.sections [
   = #s.title
+  #if "text" in s [
+    #s.text
+  ]
   #for e in s.at("entries", default: ()) [
     #resume-entry(title: e.left, subtitle: e.middle, date: e.right)[
       #for b in e.bullets [

@@ -4,13 +4,16 @@ render takes the names, schools, dates and contact details from the cited profil
 out as the flat content resume_pdf and resume_docx print (resume_templates/sample.json). These pin each
 layout rule the planner ruled on (worklog 2026-11-01-m3-2b-word.md), that every input is a valid profile and
 material, and that the command checks the material before it writes anything, writes only inside the data
-directory, never through a link, and fails when either file does not hold the content. The real build, with
+directory, never through a link, and fails when either file does not hold the content. A summary (M3-2c) is
+the first section and changes nothing else; with none the content is what 201475a gave. material validate,
+resume build and review draft read the same notes.md. The real build, with
 Typst, is in test_cn_resume_pdf.RealRender, the class CI's real-render job runs.
 """
 import copy
 import io
 import json
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -54,8 +57,9 @@ def entry(**fields) -> dict:
 
 
 class RenderFixture(unittest.TestCase):
-    def test_the_fixture_renders_in_the_shape_and_wording_of_the_sample(self):
-        self.assertEqual(rendered(MATERIAL), {
+    def test_without_a_summary_the_fixture_renders_as_before_the_summary_was_printed(self):
+        # The content M3-2's second part (201475a) gave for this material, which had no place for a summary.
+        self.assertEqual(rendered({**MATERIAL, "summary": None}), {
             "name": "李明",
             "contact": "13800000000 | liming@example.com | github.com/example",
             "intent": "求职意向：后端开发、大模型应用开发（实习） · 深圳、广州 · 每周 4 天，可实习 6 个月 · 2026.11.15 起可到岗",
@@ -79,16 +83,22 @@ class RenderFixture(unittest.TestCase):
             ],
         })
 
-    def test_the_summary_is_not_printed(self):
-        # Ruling a: the template has no place for one yet.
-        self.assertNotIn(MATERIAL["summary"]["text"], resume_pdf.fields_of(rendered(MATERIAL)))
+    def test_a_summary_is_the_first_section_and_changes_nothing_else(self):
+        with_summary, without = rendered(MATERIAL), rendered({**MATERIAL, "summary": None})
+        self.assertEqual(with_summary["sections"][0], {"title": "个人简介", "text": MATERIAL["summary"]["text"]})
+        self.assertEqual({**with_summary, "sections": with_summary["sections"][1:]}, without)
 
     def test_the_word_version_of_the_rendered_content_passes_its_check(self):
         content = rendered(MATERIAL)
+        self.assertIn(MATERIAL["summary"]["text"], resume_pdf.fields_of(content))
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "resume-1.docx"
             resume_docx.write(content, path)
             self.assertEqual(resume_docx.check(path, resume_pdf.fields_of(content)), [])
+            # The summary is held to the same check: a Word version without it fails.
+            resume_docx.write({**content, "sections": content["sections"][1:]}, path)
+            self.assertTrue(any(MATERIAL["summary"]["text"] in problem
+                                for problem in resume_docx.check(path, resume_pdf.fields_of(content))))
 
     def test_nothing_listed_leaves_only_the_header(self):
         bare = {**MATERIAL, "summary": None, "education": [], "experience": [], "skills": [], "awards": [],
@@ -275,6 +285,61 @@ class Command(unittest.TestCase):
         self.assertIn("link", json.loads(err)["error"])
         render.assert_not_called()
         self.assertEqual(outside.read_bytes(), b"keep")
+
+
+class NotesAgree(unittest.TestCase):
+    """material validate, resume build and review draft read the same notes.md and come to the same verdict
+    (M3-2c); a material that does not cite it drafts the same review with or without the file."""
+
+    COMMANDS = ("material validate", "resume build", "review draft")
+
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.temp = Path(directory.name)
+        shutil.copytree(FIXTURE / "profile", self.temp / "profile")
+        self.write({**MATERIAL, "summary": {"text": "计算机硕士在读，有后端和大模型应用的实习与项目经验",
+                                            "refs": ["notes.md"]}})
+
+    def write(self, record: dict) -> None:
+        self.path = self.temp / "resume-1.json"
+        self.path.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+
+    def run_command(self, command: str) -> tuple:
+        out, err = io.StringIO(), io.StringIO()
+        argv = [*command.split(), str(self.path), "--profile", str(self.temp / "profile" / "profile.json"),
+                "--data-dir", str(self.temp / "data")]
+        with redirect_stdout(out), redirect_stderr(err), faked_typst(pdf_with_pages(1)), \
+                mock.patch.object(resume_pdf, "check", return_value=[]):
+            code = cli.main(argv)
+        return code, json.loads(out.getvalue() or err.getvalue())
+
+    def verdicts(self) -> list:
+        """(exit code, errors) from each command."""
+        return [(code, result.get("errors", [])) for code, result in map(self.run_command, self.COMMANDS)]
+
+    def test_with_the_notes_all_pass_and_without_them_all_fail_alike(self):
+        self.assertEqual(self.verdicts(), [(0, [])] * 3)
+        (self.temp / "profile" / "notes.md").unlink()
+        expected = ["summary.refs[0]: cites notes.md, but there is no notes.md beside the profile that reads as "
+                    "UTF-8 text"]
+        self.assertEqual(self.verdicts(), [(1, expected)] * 3)
+
+    def test_a_number_only_in_the_preference_log_fails_all_alike(self):
+        with open(self.temp / "profile" / "notes.md", "a", encoding="utf-8") as notes:
+            notes.write("\n## 偏好记录\n```text\n## 示例\n```\n- `target.weights` → {\"skills\": 73}\n")
+        self.write({**MATERIAL, "summary": {"text": "做过73次评测", "refs": ["notes.md"]}})
+        verdicts = self.verdicts()
+        self.assertEqual([code for code, _ in verdicts], [1, 1, 1])
+        self.assertEqual(len({tuple(errors) for _, errors in verdicts}), 1)
+        self.assertIn("the number '73'", verdicts[0][1][0])
+
+    def test_a_material_not_citing_the_notes_drafts_the_same_review_without_them(self):
+        self.write(MATERIAL)
+        with_notes = self.run_command("review draft")
+        (self.temp / "profile" / "notes.md").unlink()
+        self.assertEqual(self.run_command("review draft"), with_notes)
+        self.assertEqual(with_notes[0], 0)
 
 
 class WriteWord(unittest.TestCase):
