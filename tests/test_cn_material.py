@@ -5,6 +5,8 @@ passes; each way of citing what is not there fails with the path and the reason 
 the wrong section, a bullet that does not cite its own entry, a course or skill the profile lacks); a rewrite
 cannot add a number, written in figures or in Chinese (三倍, 六成, 两万, 百分之三十), nor a skill; the
 warnings; the exit codes; and that the ids are optional, so the M2 sample profiles stay valid unchanged.
+The summary may also cite notes.md (M3-2c): checked against its text but for the 偏好记录 section, refused
+when there is no notes.md or a bullet cites it, and warned about past two lines.
 """
 import copy
 import json
@@ -33,6 +35,24 @@ def load(path: Path) -> dict:
 
 PROFILE = load(SAMPLE / "profile" / "profile.json")
 MATERIAL = load(SAMPLE / "resume-1.json")
+NOTES = (SAMPLE / "profile" / "notes.md").read_text(encoding="utf-8")
+# Appended to the sample notes: a preference log, as profile.md §4 shows it, and a section after it.
+PREFERENCES = """
+## 偏好记录
+
+- 2026-10-30 · `target.weights` → {"skills": 25, "direction": 25, "experience": 20, "salary": 10, "location": 20} · 来源：user（用户确认）
+
+### 补记
+
+- 2026-10-31 · `availability.days_per_week` → 5 · 来源：user（"可以每周 5 天"）
+"""
+
+
+def summary(text: str, refs=("notes.md",)) -> dict:
+    """The sample material with its summary replaced."""
+    data = copy.deepcopy(MATERIAL)
+    data["summary"] = {"text": text, "refs": list(refs)}
+    return data
 
 
 def bullet(text: str, refs=("exp-1",)) -> dict:
@@ -202,6 +222,69 @@ class RewrittenText(unittest.TestCase):
         self.assertEqual(errors_of(bullet("用 Go 重构订单查询接口，镜像用 Docker 打包")), [])
 
 
+class SummaryFromNotes(unittest.TestCase):
+    """A summary may rest on what the user said while building the profile, kept in notes.md."""
+
+    def errors(self, data, notes=NOTES) -> list:
+        return material.validate(data, PROFILE, VOCABULARY, notes=notes)[0]
+
+    def test_notes_alone_is_enough(self):
+        self.assertEqual(self.errors(summary("计算机硕士在读，有后端和大模型应用的实习与项目经验")), [])
+
+    def test_notes_with_entries(self):
+        self.assertEqual(self.errors(summary("计算机硕士在读，做过 RAG 问答服务的检索评测", ["notes.md", "exp-1"])), [])
+
+    def test_citing_notes_without_a_notes_file_fails(self):
+        self.assertEqual(self.errors(summary("计算机硕士在读"), notes=None),
+                         ["summary.refs[0]: cites notes.md, but there is no notes.md beside the profile that reads "
+                          "as UTF-8 text"])
+
+    def test_a_bullet_may_not_cite_notes(self):
+        data = bullet("用 Go 重构订单查询接口", refs=["exp-1", "notes.md"])
+        self.assertEqual(self.errors(data), ["experience[0].bullets[0].refs[1]: only the summary may cite notes.md"])
+
+    def test_notes_cited_twice(self):
+        self.assertEqual(self.errors(summary("计算机硕士在读", ["notes.md", "notes.md"])),
+                         ["summary.refs[1]: notes.md is cited twice"])
+
+    def test_numbers_must_be_in_the_notes(self):
+        self.assertEqual(self.errors(summary("把接口的 P99 延迟从一百二十毫秒降到 45ms")), [])
+        self.assertTrue(any("the number '30' is not in the cited entries (notes.md)" in error
+                            for error in self.errors(summary("把接口的 P99 延迟降到 30ms"))))
+
+    def test_skills_must_be_in_the_notes_or_the_profile(self):
+        self.assertTrue(any(error.startswith("summary.text: the skill 'Kubernetes'")
+                            for error in self.errors(summary("会用 Kubernetes 部署服务"))))
+        notes = NOTES + "\n实习时学会了用 Kubernetes 部署服务。\n"
+        self.assertEqual(self.errors(summary("会用 Kubernetes 部署服务"), notes=notes), [])
+        # Said in the notes, but the summary cites only an entry.
+        self.assertTrue(self.errors(summary("会用 Kubernetes 部署服务", ["exp-1"]), notes=notes))
+
+    def test_the_preference_log_is_no_evidence(self):
+        notes = NOTES + PREFERENCES
+        for text in ("带过 25 人的团队", "每周可以到岗 5 天"):  # 25 in the log, 5 in a subsection of it
+            with self.subTest(text=text):
+                self.assertTrue(any("is not in the cited entries (notes.md)" in error
+                                    for error in self.errors(summary(text), notes=notes)))
+        # A heading of the log's level or above ends it.
+        notes += "\n## 社团\n\n带过 25 人的社团。\n"
+        self.assertEqual(self.errors(summary("带过 25 人的社团"), notes=notes), [])
+
+    def test_evidence_keeps_everything_but_the_log(self):
+        kept = material.evidence(NOTES + PREFERENCES + "\n# 其他\n\n正文")
+        self.assertIn("P99 延迟从 120ms 降到 45ms", kept)
+        self.assertIn("# 其他\n\n正文", kept)
+        for gone in ("偏好记录", "target.weights", "补记", "days_per_week"):
+            self.assertNotIn(gone, kept)
+
+    def test_the_hash_leaves_the_notes_out(self):
+        # Ruling 4: notes.md is not in profile_hash, so changing it alone warns of nothing; the checks above
+        # run again on every build instead.
+        errors, warnings = material.validate(summary("计算机硕士在读"), PROFILE, VOCABULARY,
+                                             notes=NOTES + "\n补一句。\n")
+        self.assertEqual((errors, warnings), ([], []))
+
+
 class Numbers(unittest.TestCase):
     def values(self, text: str) -> list:
         return [value for _, value in material.numbers(text)]
@@ -268,6 +351,18 @@ class Warnings(unittest.TestCase):
         data["skills"] = ["Java"]
         self.assertEqual(material.validate(data, PROFILE, VOCABULARY)[1], [])
 
+    def test_width_counts_half_width_characters_as_half(self):
+        self.assertEqual(material.width("Go 和 Python"), 6)
+        self.assertEqual(material.width("熟悉（RAG），P99"), 8)
+
+    def test_a_summary_past_two_lines(self):
+        self.assertEqual(material.validate(summary("简" * 88, ["exp-1"]), PROFILE, VOCABULARY), ([], []))
+        self.assertEqual(material.validate(summary("简" * 88 + "a", ["exp-1"]), PROFILE, VOCABULARY),
+                         ([], ["summary.text: about 88.5 characters wide, more than the two lines (88) a summary "
+                               "should take; shorten it"]))
+        # Past the 300-character limit it is an error, not a warning.
+        self.assertIn("summary.text: longer than 300 characters", errors_of(summary("简" * 301, ["exp-1"])))
+
 
 def run_cli(*args, data_dir):
     env = dict(os.environ, PYTHONIOENCODING="utf-8", **{store.DATA_DIR_ENV: str(data_dir)})
@@ -318,6 +413,16 @@ class Command(unittest.TestCase):
         data = copy.deepcopy(MATERIAL)
         data["job_id"] = "../not-an-id"
         self.assertEqual(self.validate(data).returncode, 0)
+
+    def test_the_notes_beside_the_profile_are_read(self):
+        data = summary("计算机硕士在读，有后端和大模型应用的实习与项目经验")
+        self.assertEqual(json.loads(self.validate(data).stdout)["errors"], [])
+        (self.data / "profile" / "notes.md").write_bytes("计算机硕士在读".encode("gbk"))
+        self.assertIn("summary.refs[0]: cites notes.md", json.loads(self.validate(data).stdout)["errors"][0])
+        (self.data / "profile" / "notes.md").unlink()
+        self.assertIn("summary.refs[0]: cites notes.md", json.loads(self.validate(data).stdout)["errors"][0])
+        # A summary that does not cite notes.md does not need it.
+        self.assertEqual(self.validate(MATERIAL).returncode, 0)
 
 
 if __name__ == "__main__":

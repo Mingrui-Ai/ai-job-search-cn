@@ -373,12 +373,19 @@ def _material_job(args, record):
     return None
 
 
+def _material_notes(args):
+    """The notes.md beside the profile a material is checked against, for a summary that cites it."""
+    path = Path(args.profile) if args.profile else store.data_dir(args.data_dir) / "profile" / "profile.json"
+    return material.read_notes(path.parent / "notes.md")
+
+
 def cmd_material_validate(args) -> int:
     record = _read_material(args.file)
     data = _match_profile(args)
     if data is None:
         return 1
-    errors, warnings = material.validate(record, data, _vocabulary(args), _material_job(args, record))
+    errors, warnings = material.validate(record, data, _vocabulary(args), _material_job(args, record),
+                                         _material_notes(args))
     _emit({"valid": not errors, "errors": errors, "warnings": warnings})
     return 1 if errors else 0
 
@@ -580,7 +587,7 @@ def cmd_resume_build(args) -> int:
     if data is None:
         return 1
     vocabulary = _vocabulary(args)
-    errors, warnings = material.validate(record, data, vocabulary, _material_job(args, record))
+    errors, warnings = material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args))
     if errors:
         _emit({"error": "the material is invalid; run material validate", "errors": errors}, sys.stderr)
         return 1

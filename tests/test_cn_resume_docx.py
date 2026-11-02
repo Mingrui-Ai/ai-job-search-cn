@@ -52,7 +52,8 @@ class Build(unittest.TestCase):
     def test_the_text_reads_in_the_order_of_the_content(self):
         text = resume_extract.extract_text(self.write(SAMPLE))
         lines = text.split("\n")
-        self.assertEqual(lines[:4], [SAMPLE["name"], SAMPLE["contact"], SAMPLE["intent"], "教育经历"])
+        self.assertEqual(lines[:6], [SAMPLE["name"], SAMPLE["contact"], SAMPLE["intent"],
+                                     "个人简介", SAMPLE["sections"][0]["text"], "教育经历"])
         self.assertIn("示例理工大学\t计算机科学与技术 · 硕士\t2025.09 - 2027.06", lines)
         self.assertIn(f"{resume_docx.BULLET} 熟练：Python、Go", lines)
         self.assertIn(f"{resume_docx.BULLET} CET-6 552", lines)  # a line without a label has no colon
