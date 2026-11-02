@@ -14,8 +14,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import (__version__, jd_parser, match, material, profile, report, resume_extract, resume_pdf, schema,
-                          score, store, vocab)
+from jobsearch_cn import (__version__, jd_parser, match, material, messages, profile, report, resume_extract, resume_pdf,
+                          schema, score, store, vocab)
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -353,7 +353,8 @@ def cmd_match_validate(args) -> int:
     return 1 if errors else 0
 
 
-def cmd_material_validate(args) -> int:
+def _material_input(args):
+    """(record, profile, job) for a material command; profile is None when it failed validation."""
     text = _read_json_text(args.file)
     try:
         record = json.loads(text)
@@ -361,19 +362,74 @@ def cmd_material_validate(args) -> int:
         name = "stdin" if args.file == "-" else args.file
         raise InputError(f"{name} is not valid JSON: {exc}") from None
     data = _match_profile(args)
+    job_id = record.get("job_id") if isinstance(record, dict) else None
+    return record, data, _stored_job(args, job_id)
+
+
+def _stored_job(args, job_id):
+    if not isinstance(job_id, str) or not job_id:
+        return None
+    try:
+        return _store(args).get(job_id)
+    except store.StoreError:
+        return None  # not a job id the store can look up
+
+
+def _message_files(args):
+    try:
+        root = store.data_dir(args.data_dir)
+        return messages.load_templates(root), messages.load_banned(root)
+    except messages.TemplateError as exc:
+        raise InputError(str(exc)) from None
+
+
+def _check_material(args, record, data, job):
+    if isinstance(record, dict) and record.get("kind") in messages.KINDS:
+        templates, banned = _message_files(args)
+        return messages.validate(record, data, _vocabulary(args), job, templates, banned)
+    # For a CV the JD only adds warnings, so a material whose job is not stored is still checked.
+    return material.validate(record, data, _vocabulary(args), job)
+
+
+def cmd_material_validate(args) -> int:
+    record, data, job = _material_input(args)
     if data is None:
         return 1
-    # The JD only adds warnings, so a material whose job is not stored is still checked.
-    job_id = record.get("job_id") if isinstance(record, dict) else None
-    job = None
-    if isinstance(job_id, str) and job_id:
-        try:
-            job = _store(args).get(job_id)
-        except store.StoreError:
-            pass  # not a job id the store can look up: the warnings skip the JD
-    errors, warnings = material.validate(record, data, _vocabulary(args), job)
+    errors, warnings = _check_material(args, record, data, job)
     _emit({"valid": not errors, "errors": errors, "warnings": warnings})
     return 1 if errors else 0
+
+
+def cmd_material_template(args) -> int:
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    job = _stored_job(args, args.job_id)
+    if job is None:
+        raise InputError(f"no stored job {args.job_id!r}; import it with `jd save` first")
+    templates, _ = _message_files(args)
+    try:
+        result = messages.template_for(job, data, _vocabulary(args), templates, args.kind, args.direction)
+    except messages.TemplateError as exc:
+        raise InputError(str(exc)) from None
+    _emit({"job_id": args.job_id, **result})
+    return 0
+
+
+def cmd_material_render(args) -> int:
+    record, data, job = _material_input(args)
+    if data is None:
+        return 1
+    if not isinstance(record, dict) or record.get("kind") not in messages.KINDS:
+        raise InputError(f"material render renders {', '.join(messages.KINDS)}; a CV is built with resume build")
+    errors, warnings = _check_material(args, record, data, job)
+    if errors:
+        _emit({"valid": False, "errors": errors, "warnings": warnings})
+        return 1
+    print(messages.render(record, data, job))
+    for warning in warnings:
+        print(f"警告：{warning}", file=sys.stderr)
+    return 0
 
 
 def cmd_match_save(args) -> int:
@@ -731,6 +787,24 @@ def build_parser() -> argparse.ArgumentParser:
     material_validate.add_argument("file", help="材料文件；- 表示标准输入")
     material_validate.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     material_validate.set_defaults(handler=cmd_material_validate)
+    material_template = material_commands.add_parser(
+        "template", parents=[stored], help="打招呼语、投递邮件、内推请求：按方向选模板",
+        description="按岗位的技能和档案的求职方向选模板（见 docs/cn/material.md），"
+                    "输出槽位、字数限制、写法提示和选它的理由。",
+    )
+    material_template.add_argument("job_id", help="岗位 id（本地岗位库里要有）")
+    material_template.add_argument("--kind", required=True, choices=messages.KINDS, help="材料种类")
+    material_template.add_argument("--direction", help="指定方向，即模板名，例如 tech、ops、default")
+    material_template.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    material_template.set_defaults(handler=cmd_material_template)
+    material_render = material_commands.add_parser(
+        "render", parents=[stored], help="检查打招呼语、邮件或内推请求，通过后输出可以直接复制的文字",
+        description="先做和 material validate 相同的检查，有错误时输出错误，退出码 1；"
+                    "通过时把占位符换成档案和岗位里的值，输出纯文本，警告写到 stderr。",
+    )
+    material_render.add_argument("file", help="材料文件；- 表示标准输入")
+    material_render.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    material_render.set_defaults(handler=cmd_material_render)
     return parser
 
 

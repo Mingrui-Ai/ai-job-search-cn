@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "job_id": "job_000000000001",
+  "profile_hash": "3b5cbef9bab820661299a6d82715f9c382679bb7e1adedee69e3a2671ec9e093",
+  "created": "2026-11-01T10:00:00+08:00",
+  "direction": "tech",
+  "kind": "greeting",
+  "template": "tech/greeting@1",
+  "subject": null,
+  "segments": [
+    {
+      "slot": "opening",
+      "text": "您好，我是{edu-1.school}{edu-1.major}专业的硕士生，想应聘贵司的{job.title}。",
+      "refs": [
+        "edu-1",
+        "job"
+      ]
+    },
+    {
+      "slot": "evidence",
+      "text": "在{exp-1.org}实习时用 Go 重构订单查询接口，P99 延迟从 120ms 降至 45ms。",
+      "refs": [
+        "exp-1"
+      ]
+    },
+    {
+      "slot": "availability",
+      "text": "可以{availability.start_date}起到岗，每周{availability.days_per_week}天。",
+      "refs": [
+        "availability"
+      ]
+    },
+    {
+      "slot": "closing",
+      "text": "方便的话我把简历发给您。",
+      "refs": []
+    }
+  ]
+}
