@@ -396,7 +396,7 @@ def cmd_review_draft(args) -> int:
     if data is None:
         return 1
     vocabulary = _vocabulary(args)
-    errors, _ = material.validate(record, data, vocabulary)
+    errors, _ = material.validate(record, data, vocabulary, notes=_material_notes(args))
     if errors:
         _emit({"error": "the material is invalid; run material validate first", "errors": errors}, sys.stderr)
         return 1

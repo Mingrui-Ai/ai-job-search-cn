@@ -5,8 +5,8 @@ out as the flat content resume_pdf and resume_docx print (resume_templates/sampl
 layout rule the planner ruled on (worklog 2026-11-01-m3-2b-word.md), that every input is a valid profile and
 material, and that the command checks the material before it writes anything, writes only inside the data
 directory, never through a link, and fails when either file does not hold the content. A summary (M3-2c) is
-the first section and changes nothing else; with none the content is what 201475a gave. material validate
-and resume build read the same notes.md. The real build, with
+the first section and changes nothing else; with none the content is what 201475a gave. material validate,
+resume build and review draft read the same notes.md. The real build, with
 Typst, is in test_cn_resume_pdf.RealRender, the class CI's real-render job runs.
 """
 import copy
@@ -288,37 +288,58 @@ class Command(unittest.TestCase):
 
 
 class NotesAgree(unittest.TestCase):
-    """material validate and resume build read the same notes.md and come to the same verdict (M3-2c).
+    """material validate, resume build and review draft read the same notes.md and come to the same verdict
+    (M3-2c); a material that does not cite it drafts the same review with or without the file."""
 
-    review draft (#112) calls material.validate too; whichever of the two merges later adds it here.
-    """
+    COMMANDS = ("material validate", "resume build", "review draft")
 
     def setUp(self):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         self.temp = Path(directory.name)
         shutil.copytree(FIXTURE / "profile", self.temp / "profile")
-        self.record = {**MATERIAL, "summary": {"text": "计算机硕士在读，有后端和大模型应用的实习与项目经验",
-                                               "refs": ["notes.md"]}}
-        self.path = self.temp / "resume-1.json"
-        self.path.write_text(json.dumps(self.record, ensure_ascii=False), encoding="utf-8")
+        self.write({**MATERIAL, "summary": {"text": "计算机硕士在读，有后端和大模型应用的实习与项目经验",
+                                            "refs": ["notes.md"]}})
 
-    def errors(self, command: str) -> list:
+    def write(self, record: dict) -> None:
+        self.path = self.temp / "resume-1.json"
+        self.path.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+
+    def run_command(self, command: str) -> tuple:
         out, err = io.StringIO(), io.StringIO()
         argv = [*command.split(), str(self.path), "--profile", str(self.temp / "profile" / "profile.json"),
                 "--data-dir", str(self.temp / "data")]
         with redirect_stdout(out), redirect_stderr(err), faked_typst(pdf_with_pages(1)), \
                 mock.patch.object(resume_pdf, "check", return_value=[]):
-            cli.main(argv)
-        result = json.loads(out.getvalue() or err.getvalue())
-        return result.get("errors", [])
+            code = cli.main(argv)
+        return code, json.loads(out.getvalue() or err.getvalue())
 
-    def test_with_the_notes_both_pass_and_without_them_both_fail_alike(self):
-        self.assertEqual((self.errors("material validate"), self.errors("resume build")), ([], []))
+    def verdicts(self) -> list:
+        """(exit code, errors) from each command."""
+        return [(code, result.get("errors", [])) for code, result in map(self.run_command, self.COMMANDS)]
+
+    def test_with_the_notes_all_pass_and_without_them_all_fail_alike(self):
+        self.assertEqual(self.verdicts(), [(0, [])] * 3)
         (self.temp / "profile" / "notes.md").unlink()
         expected = ["summary.refs[0]: cites notes.md, but there is no notes.md beside the profile that reads as "
                     "UTF-8 text"]
-        self.assertEqual((self.errors("material validate"), self.errors("resume build")), (expected, expected))
+        self.assertEqual(self.verdicts(), [(1, expected)] * 3)
+
+    def test_a_number_only_in_the_preference_log_fails_all_alike(self):
+        with open(self.temp / "profile" / "notes.md", "a", encoding="utf-8") as notes:
+            notes.write("\n## 偏好记录\n```text\n## 示例\n```\n- `target.weights` → {\"skills\": 73}\n")
+        self.write({**MATERIAL, "summary": {"text": "做过73次评测", "refs": ["notes.md"]}})
+        verdicts = self.verdicts()
+        self.assertEqual([code for code, _ in verdicts], [1, 1, 1])
+        self.assertEqual(len({tuple(errors) for _, errors in verdicts}), 1)
+        self.assertIn("the number '73'", verdicts[0][1][0])
+
+    def test_a_material_not_citing_the_notes_drafts_the_same_review_without_them(self):
+        self.write(MATERIAL)
+        with_notes = self.run_command("review draft")
+        (self.temp / "profile" / "notes.md").unlink()
+        self.assertEqual(self.run_command("review draft"), with_notes)
+        self.assertEqual(with_notes[0], 0)
 
 
 class WriteWord(unittest.TestCase):
