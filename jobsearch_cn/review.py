@@ -13,7 +13,7 @@ import hashlib
 import json
 import re
 
-from jobsearch_cn import jd_parser, profile as profile_mod, schema
+from jobsearch_cn import jd_parser, material as material_mod, profile as profile_mod, schema
 
 REVIEW_VERSION = 1
 KINDS = ("resume-review",)
@@ -26,6 +26,11 @@ VERDICTS = ("pass", "revise")
 SEVERITIES = ("must", "suggest")
 STATUSES = ("covered", "synonym", "gap")
 MAX_ROUNDS = 2
+# The notes `review draft` gives a gap. The machine only reads the skills list and the source text of
+# the entries the material cites, so a skill in neither is left for the reviewer, never called missing.
+GAP_UNUSED = "档案里有，材料没写"
+GAP_IN_CITED_TEXT = "技能列表未列，所引条目原文里有，材料没写"
+GAP_UNCHECKED = "技能列表未列，需核对经历原文"
 MAX_TEXT = profile_mod.MAX_BULLET
 # The items of docs/cn/review-checklist.md §2, by section.
 CHECKLIST = {"A": 5, "B": 6, "C": 6, "D": 6, "E": 6, "F": 4}
@@ -180,16 +185,22 @@ def draft(material: dict, profile: dict, job, vocabulary) -> dict:
 
 
 def coverage(material: dict, profile: dict, job, vocabulary) -> list:
-    """One row per skill the JD asks for: covered in its wording, covered by a synonym, or a gap."""
+    """One row per skill the JD asks for: covered in its wording, covered by a synonym, or a gap.
+
+    A gap's note says only what the machine can tell: the skill is in the profile's skills list; or the
+    list lacks it but the source text of an entry the material cites names it; or neither, which is not
+    proof the candidate lacks it (an entry the material leaves out may name it), so the reviewer checks.
+    """
     if not isinstance(job, dict):
         return []
     held = {vocabulary.key(skill["name"]) for skill in profile.get("skills") or []
             if isinstance(skill, dict) and isinstance(skill.get("name"), str)}
+    patterns = jd_parser._skill_patterns(vocabulary)
+    cited = _cited_skills(material, profile, patterns)
     places = {}  # key -> [(path, surface)]
     for index, name in enumerate(material.get("skills") or []):
         if isinstance(name, str):
             places.setdefault(vocabulary.key(name), []).append((f"skills[{index}]", name))
-    patterns = jd_parser._skill_patterns(vocabulary)
     for path, text in _texts(material):
         claimed = []
         for _, pattern, key in patterns:
@@ -207,7 +218,12 @@ def coverage(material: dict, profile: dict, job, vocabulary) -> list:
         found = places.get(key, [])
         where = list(dict.fromkeys(path for path, _ in found))
         if not found:
-            note = "档案里有，材料没写" if key in held else "档案里没有"
+            if key in held:
+                note = GAP_UNUSED
+            elif key in cited:
+                note = GAP_IN_CITED_TEXT
+            else:
+                note = GAP_UNCHECKED
             rows.append({"requirement": name, "status": "gap", "where": [], "note": note})
         elif any(surface.casefold() == name.casefold() for _, surface in found):
             rows.append({"requirement": name, "status": "covered", "where": where, "note": None})
@@ -216,6 +232,28 @@ def coverage(material: dict, profile: dict, job, vocabulary) -> list:
             rows.append({"requirement": name, "status": "synonym", "where": where,
                          "note": f"材料写作 {spelled}，JD 写作 {name}；档案支持的话改用 JD 的写法"})
     return rows
+
+
+def _cited_skills(material: dict, profile: dict, patterns) -> set:
+    """Vocabulary keys of the skills named in the source text of the profile entries the material cites."""
+    refs = set()
+    summary = material.get("summary")
+    if isinstance(summary, dict):
+        refs.update(summary.get("refs") or [])
+    for section in ("education", "experience", "awards", "certificates", "languages"):
+        for item in material.get(section) or []:
+            if not isinstance(item, dict):
+                continue
+            refs.add(item.get("ref"))
+            for bullet in item.get("bullets") or []:
+                if isinstance(bullet, dict):
+                    refs.update(bullet.get("refs") or [])
+    entries, keys = material_mod._entries(profile), set()
+    for ref in refs:
+        if isinstance(ref, str) and ref in entries:
+            text = material_mod._source_text(*entries[ref])
+            keys.update(key for _, pattern, key in patterns if pattern.search(text))
+    return keys
 
 
 def style(material: dict) -> list:

@@ -21,7 +21,7 @@ REPO = Path(__file__).resolve().parent.parent
 SAMPLE = REPO / "tests" / "fixtures" / "cn" / "material" / "tech-m3"
 
 sys.path.insert(0, str(REPO))
-from jobsearch_cn import review, store, vocab  # noqa: E402
+from jobsearch_cn import review, score, store, vocab  # noqa: E402
 
 VOCABULARY = vocab.load()
 
@@ -33,6 +33,17 @@ def load(path: Path) -> dict:
 PROFILE = load(SAMPLE / "profile" / "profile.json")
 MATERIAL = load(SAMPLE / "resume-1.json")
 JOB = {"requirements": {"skills": ["Golang", "Python", "Docker", "Rust", "langchain"]}}
+
+
+def docker_only_in_exp1() -> tuple[dict, dict]:
+    """The sample with Docker out of the skills list and named only in exp-1's own text."""
+    profile = copy.deepcopy(PROFILE)
+    profile["skills"] = [skill for skill in profile["skills"] if skill["name"] != "Docker"]
+    exp1 = next(entry for entry in profile["experience"] if entry["id"] == "exp-1")
+    exp1["bullets"].append("使用 Docker 部署服务")
+    material = copy.deepcopy(MATERIAL)
+    material["profile_hash"] = score.profile_hash(profile)
+    return profile, material
 
 
 def make_review(**changes) -> dict:
@@ -153,7 +164,22 @@ class Draft(unittest.TestCase):
         self.assertIn("材料写作 Go，JD 写作 Golang", rows["Golang"]["note"])
         self.assertEqual(rows["Docker"], {"requirement": "Docker", "status": "gap", "where": [],
                                           "note": "档案里有，材料没写"})
-        self.assertEqual(rows["Rust"]["note"], "档案里没有")
+        self.assertEqual(rows["Rust"]["note"], "技能列表未列，需核对经历原文")
+
+    def test_a_skill_only_in_a_cited_entrys_text_is_not_called_missing(self):
+        # Codex B on #112: the material may rest a skill on an experience's own text alone.
+        profile, material = docker_only_in_exp1()
+        rows = {row["requirement"]: row for row in review.coverage(material, profile, JOB, VOCABULARY)}
+        self.assertEqual(rows["Docker"], {"requirement": "Docker", "status": "gap", "where": [],
+                                          "note": "技能列表未列，所引条目原文里有，材料没写"})
+
+    def test_a_skill_only_in_an_entry_the_material_leaves_out_is_left_to_the_reviewer(self):
+        profile, material = docker_only_in_exp1()
+        material["experience"] = [item for item in material["experience"] if item["ref"] != "exp-1"]
+        material["summary"]["refs"] = [ref for ref in material["summary"]["refs"] if ref != "exp-1"]
+        self.assertNotIn("exp-1", json.dumps(material))
+        rows = {row["requirement"]: row for row in review.coverage(material, profile, JOB, VOCABULARY)}
+        self.assertEqual(rows["Docker"]["note"], "技能列表未列，需核对经历原文")
 
     def test_draft_coverage_is_a_valid_review_coverage(self):
         data = make_review(coverage=review.coverage(MATERIAL, PROFILE, JOB, VOCABULARY))
@@ -228,6 +254,21 @@ class Command(unittest.TestCase):
         self.assertEqual([row["status"] for row in result["coverage"]],
                          ["synonym", "covered", "gap", "gap", "covered"])
         self.assertEqual(len(result["style"]), 4)  # the sample spaces Chinese from English
+
+    def test_draft_of_a_skill_only_in_an_experiences_text(self):
+        # The repro from Codex B's review of #112, through the command.
+        profile, material = docker_only_in_exp1()
+        (self.data / "profile" / "profile.json").write_text(json.dumps(profile, ensure_ascii=False),
+                                                            encoding="utf-8")
+        self.material.write_text(json.dumps(material, ensure_ascii=False), encoding="utf-8")
+        jobs = self.data / "jobs"
+        jobs.mkdir()
+        (jobs / f"{MATERIAL['job_id']}.json").write_text(json.dumps(JOB), encoding="utf-8")
+        proc = run_cli("review", "draft", str(self.material), data_dir=self.data)
+        self.assertEqual(proc.returncode, 0, proc.stderr.decode("utf-8"))
+        rows = {row["requirement"]: row for row in json.loads(proc.stdout)["coverage"]}
+        self.assertEqual((rows["Docker"]["status"], rows["Docker"]["note"]),
+                         ("gap", "技能列表未列，所引条目原文里有，材料没写"))
 
     def test_draft_without_a_stored_job_and_of_an_invalid_material(self):
         result = json.loads(run_cli("review", "draft", str(self.material), data_dir=self.data).stdout)

@@ -22,3 +22,10 @@
 **遗留**
 
 - 叠在 #108 上，#108 合并后合入 master 再开 PR。
+
+## 2026-11-02（Claude A，规划者 cn-fa）
+
+- 合入 origin/master（201475a，#111）：`cli.py` 保留 master 的 `_read_material`、`_material_job`，review 命令直接用它们（3cdeaf1）。
+- Codex B 首审（锁定 3cdeaf1）的 P2：`review draft` 只看档案的技能列表，把只写在经历原文里的技能报成"档案里没有"。改成保守的说法：技能列表里没有时，所引条目原文里有就写"技能列表未列，所引条目原文里有，材料没写"，否则写"技能列表未列，需核对经历原文"；`gap` 的分类不变。不读材料没引用的条目，不做整份档案的语义分析。review-format.md 同步改了说明。
+- 回归测试：Codex B 的复现（tech-m3 去掉 Docker，exp-1 原文加"使用 Docker 部署服务"）走函数和 `review draft` 命令各一遍；exp-1 不被引用时是"需核对经历原文"。旧代码上这几项都失败。
+- P3-2、P3-3 按规划者安排不在本轮修，记在路线图待办。
