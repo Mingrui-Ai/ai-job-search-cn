@@ -441,6 +441,17 @@ class RealRender(unittest.TestCase):
         path.write_bytes(resume_pdf._compile(folder, typst, resume_pdf._fonts(typst), spaciness))
         return path
 
+    def test_a_material_builds_a_one_page_pdf_and_a_word_version_that_pass_every_check(self):
+        fixture = REPO / "tests" / "fixtures" / "cn" / "material" / "tech-m3"
+        out = io.StringIO()
+        with redirect_stdout(out), redirect_stderr(io.StringIO()):
+            code = cli.main(["resume", "build", str(fixture / "resume-1.json"), "--data-dir", self.temp,
+                             "--profile", str(fixture / "profile" / "profile.json")])
+        result = json.loads(out.getvalue())
+        self.assertEqual((code, result["problems"]), (0, []))
+        self.assertEqual(resume_pdf.page_count(Path(result["pdf"]).read_bytes()), 1)
+        self.assertTrue(Path(result["docx"]).is_file())
+
     def test_the_sample_is_one_page_and_passes_every_check(self):
         content = resume_pdf.sample()
         result = resume_pdf.render(content, self.output)

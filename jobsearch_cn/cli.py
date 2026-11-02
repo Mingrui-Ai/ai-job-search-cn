@@ -14,8 +14,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import (__version__, jd_parser, match, material, profile, report, resume_extract, resume_pdf, review,
-                          schema, score, store, vocab)
+from jobsearch_cn import (__version__, jd_parser, match, material, profile, report, resume_docx, resume_extract,
+                          resume_pdf, review, schema, score, store, vocab)
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -353,17 +353,7 @@ def cmd_match_validate(args) -> int:
     return 1 if errors else 0
 
 
-def cmd_material_validate(args) -> int:
-    record = _load_json_file(args.file)
-    data = _match_profile(args)
-    if data is None:
-        return 1
-    errors, warnings = material.validate(record, data, _vocabulary(args), _material_job(args, record))
-    _emit({"valid": not errors, "errors": errors, "warnings": warnings})
-    return 1 if errors else 0
-
-
-def _load_json_file(source: str):
+def _read_material(source: str):
     text = _read_json_text(source)
     try:
         return json.loads(text)
@@ -373,18 +363,28 @@ def _load_json_file(source: str):
 
 
 def _material_job(args, record):
-    """The stored JD a material is for, or None: the JD only adds warnings and coverage rows."""
+    """The stored JD a material is for, or None. It only adds warnings and coverage rows, so a job not stored is no error."""
     job_id = record.get("job_id") if isinstance(record, dict) else None
     if isinstance(job_id, str) and job_id:
         try:
             return _store(args).get(job_id)
         except store.StoreError:
-            pass  # not a job id the store can look up
+            pass  # not a job id the store can look up: the warnings skip the JD
     return None
 
 
+def cmd_material_validate(args) -> int:
+    record = _read_material(args.file)
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    errors, warnings = material.validate(record, data, _vocabulary(args), _material_job(args, record))
+    _emit({"valid": not errors, "errors": errors, "warnings": warnings})
+    return 1 if errors else 0
+
+
 def cmd_review_draft(args) -> int:
-    record = _load_json_file(args.file)
+    record = _read_material(args.file)
     data = _match_profile(args)
     if data is None:
         return 1
@@ -402,7 +402,7 @@ def cmd_review_draft(args) -> int:
 
 def _checked_review(args):
     """(review, errors, warnings) for a review file, checked against the material it names."""
-    record = _load_json_file(args.file)
+    record = _read_material(args.file)  # a review is JSON read the same way as a material
     if args.material:
         material_path = Path(args.material)
     elif isinstance(record, dict) and isinstance(record.get("material"), str) and args.file != "-":
@@ -410,7 +410,7 @@ def _checked_review(args):
         material_path = Path(args.file).parent / Path(record["material"]).name
     else:
         raise InputError("cannot tell which material this review is of; pass --material")
-    target = _load_json_file(str(material_path))
+    target = _read_material(str(material_path))
     errors, warnings = review.validate(record, target)
     return record, errors, warnings
 
@@ -613,6 +613,50 @@ def cmd_resume_sample(args) -> int:
     return 1 if problems else 0
 
 
+# resume-<n>.json (docs/cn/material.md §1); the PDF and the Word version take its name.
+_MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
+
+
+def cmd_resume_build(args) -> int:
+    named = _MATERIAL_NAME.fullmatch(Path(args.file).name)
+    if not named:
+        raise InputError(f"{args.file}: resume build takes a material file named resume-<n>.json "
+                         "(docs/cn/material.md), and names the PDF and Word files after it")
+    record = _read_material(args.file)
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    vocabulary = _vocabulary(args)
+    errors, warnings = material.validate(record, data, vocabulary, _material_job(args, record))
+    if errors:
+        _emit({"error": "the material is invalid; run material validate", "errors": errors}, sys.stderr)
+        return 1
+    if not schema.is_job_id(record["job_id"]):
+        raise InputError(f"job_id: {record['job_id']!r} is not a job id like job_000000000001; "
+                         "the resume goes in a folder named after it")
+    try:
+        directory = store.safe_dir(store.data_dir(args.data_dir), "resumes", record["job_id"])
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
+    pdf, docx = directory / f"{named.group(1)}.pdf", directory / f"{named.group(1)}.docx"
+    for output in (pdf, docx):
+        if output.is_symlink():
+            raise InputError(f"{output} is a link; nothing is written through it")
+    content = material.render(record, data, vocabulary)
+    try:
+        result = resume_pdf.render(content, pdf, args.typst)
+    except resume_pdf.ResumeError as exc:
+        _emit({"error": str(exc)}, sys.stderr)
+        return 1
+    result.update(resume_docx.write(content, docx))
+    fields = resume_pdf.fields_of(content)
+    problems = resume_pdf.check(pdf, fields) + resume_docx.check(docx, fields)
+    if not content["name"]:
+        warnings.append("contact.name: the profile has no name, so the resume has none")
+    _emit({**result, "problems": problems, "warnings": warnings})
+    return 1 if problems else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m jobsearch_cn",
@@ -772,6 +816,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     resume_sample.add_argument("--typst", help=f"Typst 程序的路径；默认为环境变量 {resume_pdf.TYPST_ENV}，再找 PATH 里的 typst")
     resume_sample.set_defaults(handler=cmd_resume_sample)
+    resume_build = resume_commands.add_parser(
+        "build", parents=[stored], help="把一份材料生成一页 PDF 和 Word 版简历，并检查两份的文字",
+        description="先像 material validate 一样检查材料，再从档案取出姓名、学校、日期等，生成 "
+                    "<数据目录>/resumes/<岗位id>/resume-<n>.pdf 和 .docx（n 同材料文件名），检查两份的文字都和内容一致。"
+                    "材料不通过时退出码 1，什么也不写；检查发现问题时退出码 1。"
+                    "材料格式见 docs/cn/material.md，PDF 和 Word 版见 docs/cn/resume-pdf.md。",
+    )
+    resume_build.add_argument("file", help="材料文件，名为 resume-<n>.json")
+    resume_build.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    resume_build.add_argument("--typst", help=f"Typst 程序的路径；默认为环境变量 {resume_pdf.TYPST_ENV}，再找 PATH 里的 typst")
+    resume_build.set_defaults(handler=cmd_resume_build)
 
     material_parser = commands.add_parser("material", help="求职材料（简历等）相关命令",
                                           description="求职材料（简历等）相关命令，格式见 docs/cn/material.md")

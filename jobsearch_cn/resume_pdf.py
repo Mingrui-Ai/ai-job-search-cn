@@ -6,7 +6,8 @@ template is package data that imports nothing from the network. Install notes:
 docs/cn/resume-pdf.md.
 
 The content goes to Typst as JSON, never spliced into markup, so nothing in it
-needs escaping. Word output and the material format are M3-2's second part.
+needs escaping. material.render makes the content from a material; resume_docx
+writes the same content as a Word document.
 """
 
 import json
@@ -153,9 +154,10 @@ def _replace(output: Path, data: bytes) -> None:
     """Write beside output, then rename over it, as store._write_json does.
 
     Nothing is written through what is at output: a hard link there keeps the file it shares,
-    and an interrupted write leaves the old PDF rather than half a new one.
+    and an interrupted write leaves the old file rather than half a new one. resume_docx writes
+    the Word version the same way.
     """
-    fd, temp = tempfile.mkstemp(dir=output.parent, prefix=".tmp-", suffix=".pdf")
+    fd, temp = tempfile.mkstemp(dir=output.parent, prefix=".tmp-", suffix=output.suffix)
     try:
         with os.fdopen(fd, "wb") as handle:
             handle.write(data)
