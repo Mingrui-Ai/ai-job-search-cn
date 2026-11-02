@@ -131,6 +131,15 @@
   - 邮件要附哪份简历（`resume build` 输出的 PDF 路径），由用户自己附。
 - **不自动发送**：不调邮件客户端，不打开招聘网站，不往剪贴板写东西，不联网。
 
+### 5b. 和投递记录的接口（规划者 2026-11-03 追加）
+
+M4-1（投递记录，Claude A）投出时要核对：实际发出的文件，和审核通过的材料是不是同一版。
+
+- `resume build` 会在 PDF 旁边写一个小的说明文件，至少记 `material_hash`、`profile_hash` 和生成时间。格式由 Claude A 在 `docs/cn/applications.md` 里定。
+- `material render --output` 写 `.txt` 时，照同样的格式在旁边写一份。
+- 开工时以 master 上的格式为准。那时 M4-1a 还没合并的话，先告诉规划者，由规划者协调先后。
+- 测试：说明文件的 `material_hash` 等于 `review draft` 给的值；材料改了再渲染，`material_hash` 跟着变。
+
 ### 6. 验收
 
 **本项（实现 PR）**，用公开的虚构夹具（M3-4 带来的 `tests/fixtures/cn/material/tech-m3/`，以及 `ops-m3/`）：
