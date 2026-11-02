@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "kind": "resume",
+  "job_id": "job_000000220003",
+  "profile_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "created": "2026-11-01T14:20:00+08:00",
+  "summary": null,
+  "education": [
+    {
+      "ref": "edu-c1",
+      "courses": [
+        "统计建模"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "ref": "project-c2",
+      "bullets": [
+        {
+          "text": "使用 Tableau 和 Excel 制作 24 张客流图表",
+          "refs": [
+            "project-c2"
+          ]
+        }
+      ]
+    },
+    {
+      "ref": "intern-c1",
+      "bullets": [
+        {
+          "text": "用 Python 和 SQL 清洗 5000 条门店记录",
+          "refs": [
+            "intern-c1"
+          ]
+        }
+      ]
+    },
+    {
+      "ref": "project-c1",
+      "bullets": [
+        {
+          "text": "使用 Python 分析 300 份课程成绩",
+          "refs": [
+            "project-c1"
+          ]
+        }
+      ]
+    }
+  ],
+  "skills": [
+    "SQL",
+    "Git",
+    "Tableau",
+    "Excel",
+    "Python"
+  ],
+  "awards": [],
+  "certificates": [
+    {
+      "ref": "cert-c1"
+    }
+  ],
+  "languages": [
+    {
+      "ref": "lang-c1"
+    }
+  ]
+}
