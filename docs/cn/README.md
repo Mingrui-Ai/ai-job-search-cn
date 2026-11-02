@@ -20,6 +20,7 @@
 | [material.md](material.md) | 求职材料格式（M3-1）：简历材料怎么引用档案条目 id，`material validate` 的检查项 |
 | [review-checklist.md](review-checklist.md) | 中文简历审核清单（A–F，每条有编号）和"起草 + 审核"工作流设计（M3-3） |
 | [review-format.md](review-format.md) | 审核结果格式（M3-3）：`review draft` 机器初稿（技能覆盖、标点和空格警告）、`review validate`、`review show` |
+| [resume-workflow.md](resume-workflow.md) | 生成简历工作流 cn-resume（三个 Agent 共用，M3-3）：起草材料、生成 PDF 和 Word、独立审核（最多 2 轮）、交给用户 |
 | [match.md](match.md) | 匹配：评分工作流 cn-match（三个 Agent 共用）；`match filter` 硬性条件过滤（符合 / 冲突 / 未知 及依据）；可解释评分 `match score / validate / save / show / list` 和匹配记录 |
 | [jd-parse.md](jd-parse.md) | `jd parse`：用法、编码处理、各字段能识别的写法、补全流程、防注入检查 |
 | [baseline-report.md](baseline-report.md) | Day 0 环境、测试基线、已知问题与 Windows 兼容性记录 |

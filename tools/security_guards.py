@@ -111,6 +111,13 @@ ALLOWED_PERMISSIONS = {
     # and profile; score --save, score --draft and save write match records under
     # <data dir>/matches/. No network.
     "Bash(python -m jobsearch_cn match:*)",
+    # CN fork: the resume workflow (docs/cn/resume-workflow.md), approved by the owner on
+    # 2026-11-02. material validate and review draft/validate/show read the profile, job
+    # store and data/materials/ and only print; resume sample/build run the local Typst
+    # binary and write PDF and Word files under <data dir>/resumes/. No network.
+    "Bash(python -m jobsearch_cn material:*)",
+    "Bash(python -m jobsearch_cn resume:*)",
+    "Bash(python -m jobsearch_cn review:*)",
 }
 
 # Rules that must stay in .claude/settings.json permissions.ask. An ask rule
@@ -297,6 +304,9 @@ ALLOWED_SKILL_TOOLS = {
     "Bash(python -m jobsearch_cn jd:*)",  # CN fork: .claude/skills/cn-jd-import
     "Bash(python -m jobsearch_cn profile:*)",  # CN fork: .claude/skills/cn-setup
     "Bash(python -m jobsearch_cn match:*)",  # CN fork: .claude/skills/cn-match
+    "Bash(python -m jobsearch_cn material:*)",  # CN fork: .claude/skills/cn-resume
+    "Bash(python -m jobsearch_cn resume:*)",  # CN fork: .claude/skills/cn-resume
+    "Bash(python -m jobsearch_cn review:*)",  # CN fork: .claude/skills/cn-resume
 }
 
 # The tools a shipped .claude/agents/*.md may list. These agents read untrusted
