@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "kind": "resume",
+  "job_id": "job_9f4694691d57",
+  "profile_hash": "3b5cbef9bab820661299a6d82715f9c382679bb7e1adedee69e3a2671ec9e093",
+  "created": "2026-11-03T00:11:18.8185891+08:00",
+  "summary": {
+    "text": "计算机硕士在读，有后端开发实习经验；使用Go重构订单查询接口，P99延迟从120ms降至45ms",
+    "refs": [
+      "edu-1",
+      "exp-1"
+    ]
+  },
+  "education": [
+    {
+      "ref": "edu-1",
+      "courses": [
+        "数据库系统",
+        "分布式系统"
+      ]
+    },
+    {
+      "ref": "edu-2",
+      "courses": []
+    }
+  ],
+  "experience": [
+    {
+      "ref": "exp-1",
+      "bullets": [
+        {
+          "text": "使用Go重构订单查询接口，P99延迟从120ms降至45ms",
+          "refs": [
+            "exp-1"
+          ]
+        },
+        {
+          "text": "编写内部RAG问答服务的检索评测脚本（Python），覆盖300条测试问题",
+          "refs": [
+            "exp-1"
+          ]
+        }
+      ]
+    },
+    {
+      "ref": "proj-1",
+      "bullets": [
+        {
+          "text": "使用MySQL和LangChain搭建课程资料问答，支持20门课程的资料检索",
+          "refs": [
+            "proj-1"
+          ]
+        }
+      ]
+    }
+  ],
+  "skills": [
+    "Go",
+    "MySQL",
+    "Docker",
+    "Python",
+    "LangChain",
+    "RAG"
+  ],
+  "awards": [
+    {
+      "ref": "award-1"
+    }
+  ],
+  "certificates": [
+    {
+      "ref": "cert-1"
+    }
+  ],
+  "languages": []
+}

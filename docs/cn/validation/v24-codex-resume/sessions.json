@@ -1,0 +1,82 @@
+[
+  {
+    "stage": "draft",
+    "thread_id": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "started_utc": "2026-11-02T16:06:51.139578+00:00",
+    "finished_utc": "2026-11-02T16:13:49.749717+00:00",
+    "elapsed_seconds": 418.609,
+    "exit_code": 0,
+    "turn_completed": true,
+    "retry_or_failure_count": 0
+  },
+  {
+    "stage": "draft-handoff",
+    "thread_id": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "started_utc": "2026-11-02T16:16:03.316473+00:00",
+    "finished_utc": "2026-11-02T16:17:24.692325+00:00",
+    "elapsed_seconds": 81.375,
+    "exit_code": 0,
+    "turn_completed": true,
+    "retry_or_failure_count": 0
+  },
+  {
+    "stage": "review-r1",
+    "thread_id": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "started_utc": "2026-11-02T16:18:26.481911+00:00",
+    "finished_utc": "2026-11-02T16:28:27.781379+00:00",
+    "elapsed_seconds": 601.297,
+    "exit_code": 1,
+    "turn_completed": false,
+    "retry_or_failure_count": 22
+  },
+  {
+    "stage": "review-r1-finish",
+    "thread_id": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "started_utc": "2026-11-02T16:29:30.777246+00:00",
+    "finished_utc": "2026-11-02T16:30:55.246687+00:00",
+    "elapsed_seconds": 84.469,
+    "exit_code": 0,
+    "turn_completed": true,
+    "retry_or_failure_count": 3
+  },
+  {
+    "stage": "draft-revise",
+    "thread_id": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "started_utc": "2026-11-02T16:31:03.738091+00:00",
+    "finished_utc": "2026-11-02T16:35:59.038507+00:00",
+    "elapsed_seconds": 295.297,
+    "exit_code": 0,
+    "turn_completed": true,
+    "retry_or_failure_count": 0
+  },
+  {
+    "stage": "draft-handoff-r2",
+    "thread_id": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "started_utc": "2026-11-02T16:36:35.799979+00:00",
+    "finished_utc": "2026-11-02T16:38:05.503366+00:00",
+    "elapsed_seconds": 89.703,
+    "exit_code": 0,
+    "turn_completed": true,
+    "retry_or_failure_count": 0
+  },
+  {
+    "stage": "review-r2",
+    "thread_id": "01a19d20-79c5-7a60-a8d2-4688866e06f3",
+    "started_utc": "2026-11-02T16:38:33.407566+00:00",
+    "finished_utc": "2026-11-02T16:43:32.665923+00:00",
+    "elapsed_seconds": 299.266,
+    "exit_code": 0,
+    "turn_completed": true,
+    "retry_or_failure_count": 6
+  },
+  {
+    "stage": "draft-delivery",
+    "thread_id": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "started_utc": "2026-11-02T16:44:07.705494+00:00",
+    "finished_utc": "2026-11-02T16:45:51.686364+00:00",
+    "elapsed_seconds": 103.985,
+    "exit_code": 0,
+    "turn_completed": true,
+    "retry_or_failure_count": 0
+  }
+]
