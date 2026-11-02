@@ -277,6 +277,24 @@ class SummaryFromNotes(unittest.TestCase):
         for gone in ("偏好记录", "target.weights", "补记", "days_per_week"):
             self.assertNotIn(gone, kept)
 
+    def test_a_heading_in_a_code_block_does_not_end_the_log(self):
+        # Codex B's #115 review, P2: a "## 示例" inside a fence was read as a heading of the log's level.
+        log = "\n- 2026-11-02 · `target.weights` → {\"skills\": 73} · 来源：user（用户确认）\n"
+        for fenced in ("```text\n## 示例\n```", "~~~\n# 示例\n~~~", "````\n## 示例\n```\n## 示例\n````",
+                       "  ```\n## 示例\n  ```"):
+            notes = NOTES + "\n## 偏好记录\n" + fenced + log
+            with self.subTest(fenced=fenced):
+                self.assertTrue(any("the number '73' is not in the cited entries (notes.md)" in error
+                                    for error in self.errors(summary("做过73次评测"), notes=notes)))
+                self.assertNotIn("73", material.evidence(notes))
+                # A real heading of the log's level right after the block still ends it.
+                after = notes + "## 评测\n\n做过73次评测。\n"
+                self.assertEqual(self.errors(summary("做过73次评测"), notes=after), [])
+
+    def test_a_code_block_outside_the_log_is_evidence(self):
+        notes = NOTES + "\n```text\n## 偏好记录\n做过73次评测\n```\n"
+        self.assertEqual(self.errors(summary("做过73次评测"), notes=notes), [])
+
     def test_the_hash_leaves_the_notes_out(self):
         # Ruling 4: notes.md is not in profile_hash, so changing it alone warns of nothing; the checks above
         # run again on every build instead.
@@ -423,6 +441,15 @@ class Command(unittest.TestCase):
         self.assertIn("summary.refs[0]: cites notes.md", json.loads(self.validate(data).stdout)["errors"][0])
         # A summary that does not cite notes.md does not need it.
         self.assertEqual(self.validate(MATERIAL).returncode, 0)
+
+    def test_a_fenced_heading_in_the_log_lets_no_number_through(self):
+        # The #115 review's reproduction, end to end.
+        (self.data / "profile" / "notes.md").write_text(
+            "## 偏好记录\n```text\n## 示例\n```\n"
+            "- 2026-11-02 · `target.weights` → {\"skills\": 73} · 来源：user（用户确认）\n", encoding="utf-8")
+        proc = self.validate(summary("做过73次评测"))
+        self.assertEqual(proc.returncode, 1)
+        self.assertIn("the number '73'", json.loads(proc.stdout)["errors"][0])
 
 
 if __name__ == "__main__":

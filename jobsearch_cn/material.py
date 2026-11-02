@@ -44,6 +44,10 @@ SUMMARY_TITLE = "个人简介"
 # cities, not evidence for a summary.
 _PREFERENCE_LOG = "偏好记录"
 _HEADING = re.compile(r"(#{1,6})[ \t]+(.*?)[ \t#]*")
+# A fenced code block (CommonMark): three or more backticks or tildes, indented at most three spaces. It
+# closes at a fence of the same character, at least as long, with nothing after it; a backtick fence's
+# info string has no backtick.
+_FENCE = re.compile(r" {0,3}(`{3,}(?=[^`]*$)|~{3,})(.*)")
 _HIGH_LEVELS = ("proficient", "expert")
 
 # Numbers in figures, with a magnitude (2万) or a percent sign; 1,200 is one number.
@@ -219,16 +223,24 @@ def read_notes(path) -> str | None:
 
 def evidence(notes: str) -> str:
     """notes.md as a summary's evidence: all of it but the 偏好记录 section, which runs to the next heading
-    of its level or above."""
-    kept, skipping = [], None
+    of its level or above. A line in a fenced code block is never a heading, whatever it starts with."""
+    kept, skipping, fence = [], None, None
     for line in notes.splitlines():
-        heading = _HEADING.fullmatch(line.strip())
-        if heading:
-            level = len(heading.group(1))
-            if skipping is not None and level <= skipping:
-                skipping = None
-            if skipping is None and heading.group(2) == _PREFERENCE_LOG:
-                skipping = level
+        if fence:
+            closing = _FENCE.fullmatch(line)
+            if closing and closing.group(1)[0] == fence[0] and len(closing.group(1)) >= len(fence) \
+                    and not closing.group(2).strip():
+                fence = None
+        elif _FENCE.fullmatch(line):
+            fence = _FENCE.fullmatch(line).group(1)
+        else:
+            heading = _HEADING.fullmatch(line.strip())
+            if heading:
+                level = len(heading.group(1))
+                if skipping is not None and level <= skipping:
+                    skipping = None
+                if skipping is None and heading.group(2) == _PREFERENCE_LOG:
+                    skipping = level
         if skipping is None:
             kept.append(line)
     return "\n".join(kept)
