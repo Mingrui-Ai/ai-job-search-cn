@@ -300,9 +300,13 @@ _LABELS = {"must": "必改", "suggest": "建议", "covered": "已覆盖", "synon
 
 
 def markdown(review: dict) -> str:
-    """A valid review as Markdown for the user; nothing is saved."""
-    lines = [f"# 审核结果：{review['material']}（第 {review['round']} 轮）", "",
-             f"- 岗位：{review['job_id']}",
+    """A valid review as Markdown for the user; nothing is saved.
+
+    Free text never breaks the structure it sits in: line breaks in it become <br> (_line), and in a
+    table cell pipes are escaped too (_cell). Paths, enums and the timestamp are validated, so need neither.
+    """
+    lines = [f"# 审核结果：{_line(review['material'])}（第 {review['round']} 轮）", "",
+             f"- 岗位：{_line(review['job_id'])}",
              f"- 结论：{_LABELS[review['verdict']]}",
              f"- 方式：{_LABELS[review['mode']]}" + ("（起草者自己的会话审核，不是独立审核）"
                                                    if review["mode"] == "self" else ""),
@@ -312,9 +316,9 @@ def markdown(review: dict) -> str:
     order = sorted(review["findings"], key=lambda f: (f["severity"] != "must", ITEMS.index(f["item"])))
     for finding in order:
         place = f" `{finding['path']}`" if finding["path"] else ""
-        lines.append(f"- **{_LABELS[finding['severity']]}** {finding['item']}{place}：{finding['reason']}")
+        lines.append(f"- **{_LABELS[finding['severity']]}** {finding['item']}{place}：{_line(finding['reason'])}")
         if finding["suggestion"]:
-            lines.append(f"  - 建议改成：{finding['suggestion']}")
+            lines.append(f"  - 建议改成：{_line(finding['suggestion'])}")
     lines += ["", "## 岗位要求覆盖", ""]
     if not review["coverage"]:
         lines.append("没有列出。")
@@ -327,7 +331,11 @@ def markdown(review: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _line(text: str) -> str:
+    """Free text on one Markdown line: its line breaks become <br>, so it cannot end a list item or a heading."""
+    return "<br>".join(text.splitlines())
+
+
 def _cell(text: str) -> str:
     """Text for one Markdown table cell: a pipe or a line break in it must not split the row."""
-    text = text.replace("\\", "\\\\").replace("|", "\\|")
-    return "<br>".join(text.splitlines())
+    return _line(text.replace("\\", "\\\\").replace("|", "\\|"))

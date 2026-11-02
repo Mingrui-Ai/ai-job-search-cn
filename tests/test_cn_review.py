@@ -263,6 +263,21 @@ class Markdown(unittest.TestCase):
         self.assertIn("  - 建议改成：实现……", text)
         self.assertIn("| Docker | 缺口 | - | 档案里有，材料没写 |", text)
 
+    def test_a_line_break_in_any_free_text_keeps_the_structure(self):
+        # Planner on the #112 P3 PR: findings, the heading and the summary lines too, not just the table.
+        data = make_review()
+        data["findings"] = [{"item": "B1", "path": None, "severity": "must",
+                             "reason": "第一行\n- 不是新的一项\n# 不是标题", "suggestion": "甲\r\n乙"},
+                            {"item": "E4", "path": None, "severity": "suggest", "reason": "一行", "suggestion": None}]
+        data.update(material="resume-1.json\n# 假标题", job_id="job_1\n- 假的一行")
+        lines = review.markdown(data).splitlines()
+        self.assertEqual([line for line in lines if line.startswith("#")],
+                         ["# 审核结果：resume-1.json<br># 假标题（第 1 轮）", "## 问题", "## 岗位要求覆盖"])
+        self.assertIn("- 岗位：job_1<br>- 假的一行", lines)
+        self.assertIn("- **必改** B1：第一行<br>- 不是新的一项<br># 不是标题", lines)
+        self.assertIn("  - 建议改成：甲<br>乙", lines)
+        self.assertEqual(sum(line.startswith("- **") for line in lines), 2)
+
     def test_a_pipe_or_line_break_in_a_cell_keeps_the_table_whole(self):
         # #112 P3-2: legal text must not add columns or break a row.
         data = make_review()
