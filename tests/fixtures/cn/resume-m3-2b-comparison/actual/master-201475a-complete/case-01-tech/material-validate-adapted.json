@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "jobsearch_cn",
+    "material",
+    "validate",
+    "<data>\\case-01-tech\\materials\\job_000000220001\\resume-1.json",
+    "--data-dir",
+    "<data>\\case-01-tech"
+  ],
+  "exit_code": 0,
+  "stdout": {
+    "valid": true,
+    "errors": [],
+    "warnings": []
+  },
+  "stderr": ""
+}
