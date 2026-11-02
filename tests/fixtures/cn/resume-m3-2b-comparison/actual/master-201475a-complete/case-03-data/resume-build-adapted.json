@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "jobsearch_cn",
+    "resume",
+    "build",
+    "<data>\\case-03-data\\materials\\job_000000220003\\resume-1.json",
+    "--data-dir",
+    "<data>\\case-03-data",
+    "--typst",
+    "<typst>"
+  ],
+  "exit_code": 0,
+  "stdout": {
+    "pdf": "<data>\\case-03-data\\resumes\\job_000000220003\\resume-1.pdf",
+    "spaciness": 1.5,
+    "fonts": {
+      "serif": "Noto Serif SC",
+      "sans": "Noto Sans SC"
+    },
+    "docx": "<data>\\case-03-data\\resumes\\job_000000220003\\resume-1.docx",
+    "font": "等线",
+    "problems": [],
+    "warnings": [
+      "profile_hash: the profile has changed since this material was written; check it still holds"
+    ]
+  },
+  "stderr": ""
+}

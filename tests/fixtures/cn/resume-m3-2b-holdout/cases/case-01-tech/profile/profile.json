@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "contact": {
+    "name": "示例候选人甲",
+    "phone": "13800000000",
+    "email": "candidate-a@example.com",
+    "github": "github.com/example-candidate-a",
+    "website": "portfolio-a.example.com"
+  },
+  "graduation": {"year": 2027, "month": 6},
+  "education": [
+    {
+      "id": "edu-a1",
+      "level": "master",
+      "school": "示例星河大学",
+      "major": "软件工程",
+      "start": "2025-09",
+      "end": null,
+      "gpa": "3.8/4.0",
+      "rank": "专业前12%",
+      "courses": ["分布式系统", "数据库系统", "机器学习"],
+      "source": "resume.txt"
+    },
+    {
+      "id": "edu-a2",
+      "level": "bachelor",
+      "school": "示例海岬学院",
+      "major": "信息管理",
+      "start": "2021-09",
+      "end": "2025-06",
+      "gpa": null,
+      "rank": null,
+      "courses": ["数据结构"],
+      "source": "resume.txt"
+    }
+  ],
+  "availability": {
+    "start_date": "2026-12-01",
+    "days_per_week": 4,
+    "months": 6,
+    "cities": ["杭州"],
+    "acceptable_cities": [],
+    "remote_ok": true,
+    "relocate": false
+  },
+  "target": {
+    "employment_types": ["internship"],
+    "roles": ["后端开发", "数据平台"],
+    "industries": ["企业服务"],
+    "salary_min": null,
+    "salary_ideal": null,
+    "salary_step": null,
+    "meal_value": null,
+    "salary_days_per_week": null,
+    "one_meal_points": null,
+    "directions": ["tech"],
+    "weights": null
+  },
+  "skills": [
+    {"name": "Python", "level": "expert", "used_in": ["project-a1"], "source": "resume.txt"},
+    {"name": "Go", "level": "expert", "used_in": ["intern-a1"], "source": "resume.txt"},
+    {"name": "SQL", "level": "proficient", "used_in": ["project-a1"], "source": "resume.txt"},
+    {"name": "Docker", "level": "working", "used_in": ["intern-a1"], "source": "resume.txt"},
+    {"name": "RAG", "level": null, "used_in": ["research-a1"], "source": "resume.txt"},
+    {"name": "Git", "level": "familiar", "used_in": [], "source": "resume.txt"}
+  ],
+  "experience": [
+    {
+      "id": "intern-a1",
+      "type": "internship",
+      "name": null,
+      "org": "示例云帆科技有限公司",
+      "role": "后端开发实习生",
+      "start": "2026-04",
+      "end": null,
+      "bullets": ["使用 Go 和 Docker 维护订单服务，连续 6 周整理发布记录"],
+      "source": "resume.txt"
+    },
+    {
+      "id": "project-a1",
+      "type": "project",
+      "name": "订单事件分析平台",
+      "org": null,
+      "role": null,
+      "start": "2025-11",
+      "end": "2026-02",
+      "bullets": ["使用 Python 和 SQL 分析 1200 条订单事件"],
+      "source": "resume.txt"
+    },
+    {
+      "id": "research-a1",
+      "type": "research",
+      "name": "检索增强生成评测研究",
+      "org": "示例星河大学智能系统实验室",
+      "role": "研究助理",
+      "start": "2026-01",
+      "end": "2026-06",
+      "bullets": ["使用 RAG 方法整理 80 组问答并复核检索结果"],
+      "source": "resume.txt"
+    }
+  ],
+  "awards": [
+    {"id": "award-a1", "name": "示例星河算法挑战赛一等奖", "date": "2026-05", "source": "resume.txt"}
+  ],
+  "certificates": [
+    {"id": "cert-a1", "name": "CET-6", "detail": "560", "date": null, "source": "resume.txt"}
+  ],
+  "languages": [
+    {"id": "lang-a1", "name": "英语", "level": "CET-6 560", "source": "resume.txt"},
+    {"id": "lang-a2", "name": "日语", "level": "N2", "source": "resume.txt"}
+  ],
+  "exclusions": {"cities": [], "companies": [], "keywords": []}
+}

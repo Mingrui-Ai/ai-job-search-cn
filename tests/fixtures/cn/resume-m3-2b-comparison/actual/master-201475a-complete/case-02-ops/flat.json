@@ -1,0 +1,97 @@
+{
+  "name": "示例候选人乙",
+  "contact": "candidate-b@example.com | portfolio-b.example.com",
+  "intent": "求职意向：内容运营、品牌策划（校招、社招） · 上海 · 2026.07.01 起可到岗",
+  "sections": [
+    {
+      "title": "教育经历",
+      "entries": [
+        {
+          "left": "示例南港大学",
+          "middle": "传播学 · 本科",
+          "right": "2022.09 - 2026.06",
+          "bullets": [
+            "专业前20%"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "工作经历",
+      "entries": [
+        {
+          "left": "示例海风文化工作室",
+          "middle": "内容编辑",
+          "right": "2025.07 - 2025.09",
+          "bullets": [
+            "使用 Excel 核对 600 条内容标签，完成 12 期选题表"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "校园经历",
+      "entries": [
+        {
+          "left": "示例南港大学融媒体中心",
+          "middle": "编辑部负责人",
+          "right": "2024.09 - 至今",
+          "bullets": [
+            "用 Word 整理 36 篇稿件，每周发布 3 次"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "竞赛经历",
+      "entries": [
+        {
+          "left": "示例城市公益传播赛",
+          "middle": "队长",
+          "right": "2025.03 - 2025.05",
+          "bullets": [
+            "带领 4 人团队用 PowerPoint 完成 2 套公益传播方案"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "专业技能",
+      "lines": [
+        {
+          "label": "熟练",
+          "rest": "Excel"
+        },
+        {
+          "label": "熟悉",
+          "rest": "PowerPoint"
+        },
+        {
+          "label": "项目中使用",
+          "rest": "Word"
+        },
+        {
+          "label": "了解",
+          "rest": "Photoshop"
+        }
+      ]
+    },
+    {
+      "title": "荣誉与证书",
+      "lines": [
+        {
+          "label": "",
+          "rest": "示例城市公益传播赛金奖（2025.05）"
+        },
+        {
+          "label": "",
+          "rest": "普通话水平测试 二级甲等"
+        },
+        {
+          "label": "",
+          "rest": "英语 熟练"
+        }
+      ]
+    }
+  ]
+}

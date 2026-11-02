@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "jobsearch_cn",
+    "material",
+    "validate",
+    "<data>\\case-03-data\\materials\\job_v22_case_03\\resume-1.json",
+    "--data-dir",
+    "<data>\\case-03-data"
+  ],
+  "exit_code": 0,
+  "stdout": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+      "profile_hash: the profile has changed since this material was written; check it still holds"
+    ]
+  },
+  "stderr": ""
+}
