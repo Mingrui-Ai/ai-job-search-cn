@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "kind": "resume",
+  "job_id": "job_000000000001",
+  "profile_hash": "3b5cbef9bab820661299a6d82715f9c382679bb7e1adedee69e3a2671ec9e093",
+  "created": "2026-11-01T10:00:00+08:00",
+  "summary": {
+    "text": "后端开发实习一段，熟悉 Go 和 Python，做过 RAG 问答服务的检索评测",
+    "refs": [
+      "exp-1",
+      "proj-1"
+    ]
+  },
+  "education": [
+    {
+      "ref": "edu-1",
+      "courses": [
+        "机器学习",
+        "分布式系统"
+      ]
+    },
+    {
+      "ref": "edu-2",
+      "courses": []
+    }
+  ],
+  "experience": [
+    {
+      "ref": "exp-1",
+      "bullets": [
+        {
+          "text": "用 Go 重构订单查询接口，P99 延迟从 120ms 降到 45ms",
+          "refs": [
+            "exp-1"
+          ]
+        },
+        {
+          "text": "用 Python 编写 RAG 问答的检索评测脚本，覆盖 300 条测试问题",
+          "refs": [
+            "exp-1"
+          ]
+        }
+      ]
+    },
+    {
+      "ref": "proj-1",
+      "bullets": [
+        {
+          "text": "基于 LangChain 和 MySQL 搭建课程资料问答，支持 20 门课程",
+          "refs": [
+            "proj-1"
+          ]
+        }
+      ]
+    }
+  ],
+  "skills": [
+    "Python",
+    "Go",
+    "MySQL",
+    "LangChain",
+    "RAG"
+  ],
+  "awards": [
+    {
+      "ref": "award-1"
+    }
+  ],
+  "certificates": [
+    {
+      "ref": "cert-1"
+    }
+  ],
+  "languages": [
+    {
+      "ref": "lang-1"
+    }
+  ]
+}
