@@ -63,10 +63,11 @@ def resolve(material, path: str) -> bool:
                     return False
                 node = node[token.group("name")]
             else:
-                index = int(token.group("index"))
-                if not isinstance(node, list) or index >= len(node):
+                # Compare lengths before int(): Python refuses to convert very long digit strings.
+                digits = token.group("index").lstrip("0") or "0"
+                if not isinstance(node, list) or len(digits) > len(str(len(node))) or int(digits) >= len(node):
                     return False
-                node = node[index]
+                node = node[int(digits)]
     return True
 
 
@@ -118,7 +119,8 @@ def _text(value, where: str, errors: list, nullable: bool = False) -> None:
 
 def _path(value, where: str, material, errors: list) -> None:
     if not isinstance(value, str) or not resolve(material, value):
-        errors.append(f"{where}: {value!r} is not a place in the material")
+        shown = repr(value) if not isinstance(value, str) or len(value) <= 80 else repr(value[:80] + "…")
+        errors.append(f"{where}: {shown} is not a place in the material")
 
 
 def _findings(value, material, errors: list) -> int:
@@ -320,6 +322,12 @@ def markdown(review: dict) -> str:
         lines += ["| 要求 | 情况 | 位置 | 说明 |", "| --- | --- | --- | --- |"]
         for row in review["coverage"]:
             where = "、".join(f"`{p}`" for p in row["where"]) or "-"
-            note = (row["note"] or "-").replace("|", "\\|")
-            lines.append(f"| {row['requirement']} | {_LABELS[row['status']]} | {where} | {note} |")
+            cells = (_cell(row["requirement"]), _LABELS[row["status"]], where, _cell(row["note"] or "-"))
+            lines.append("| " + " | ".join(cells) + " |")
     return "\n".join(lines) + "\n"
+
+
+def _cell(text: str) -> str:
+    """Text for one Markdown table cell: a pipe or a line break in it must not split the row."""
+    text = text.replace("\\", "\\\\").replace("|", "\\|")
+    return "<br>".join(text.splitlines())
