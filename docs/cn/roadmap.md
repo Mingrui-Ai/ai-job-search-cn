@@ -634,11 +634,11 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
   - 第二部分（Claude A，PR #112，2026-11-02 合并）：审核结果的格式，`review draft`、`review validate`、`review show` 三条命令。
   - 第三部分（Claude A，分支 `feat/cn-m3-3c-workflow`，#112 已合并，开 PR 前用公开夹具实跑整条流程）：共用的工作流说明 `docs/cn/resume-workflow.md`；Claude Code 技能、审核子代理、dsh 技能和 `AGENTS.md` 四个入口；授权和测试。起草步骤写明简介默认写，细则链接 `material.md`（M3-2c），不另定一套。审核者 Codex B。
 - [ ] M3-4 打招呼语、投递邮件、内推请求的模板，按方向区分（Claude B，分支 `feat/cn-m3-4-templates`，审核者 Codex B）
-  - 设计稿在 Claude B 的工作记录 `docs/cn/worklog/2026-11-01-m3-4-templates.md`，随 PR 提交。三种材料沿用 Material v1，加 `greeting`、`email`、`referral` 三个 `kind`；模板按方向放在 `jobsearch_cn/message_templates/`；`material template` 选模板，`material validate` 检查，`message render` 输出纯文本。只生成文字，不自动发送。
+  - 设计稿在 Claude B 的工作记录 `docs/cn/worklog/2026-11-01-m3-4-templates.md`，随 PR 提交。三种材料沿用 Material v1，加 `greeting`、`email`、`referral` 三个 `kind`；模板按方向放在 `jobsearch_cn/message_templates/`；`material template` 选模板，`material validate` 检查，`material render` 输出纯文本。只生成文字，不自动发送。
   - 规划者裁定（2026-11-02，补记 11-01 已批准的口径）：姓名、学校、公司名用占位符，渲染时代入；第一版做 tech、data、product、ops，加 default；长度上限（打招呼语 150 字、邮件标题 40、邮件正文 600、内推 300）按代入后的字数算，用户覆盖只能改小；起草流程不在本项，M3-4 和 M3-3 第三部分都合并后，由规划者安排接进工作流。
   - **验收**：设计稿第 7 节的用例通过；V23 对照通过（Codex A，留出样例已冻结，PR 开出后才推送）。
 - [ ] M3-6 沟通草稿接进工作流（规划者 2026-11-02 立项；Claude C 先写设计，规划者确认；实现等 M3-3 第三部分和 M3-4 合并后再开，审核者 Codex B）
-  - 本轮目标是一个岗位走完"匹配确认 → 简历起草 → 独立审核 → Word/PDF 输出 → 沟通草稿"，这是最后一段。设计要写清：在流程里的位置（简历审核通过之后，还是可以单独起草），三种材料由用户选还是默认只起草一种；命令链 `material template` → 起草 → `material validate` → `message render`；沟通草稿要不要走独立审核、审核清单加哪几条；入口并进 `cn-resume` 还是另开技能，dsh 和 `AGENTS.md` 怎么对应，授权要不要改；交给用户的纯文本放在哪；只生成文字，不自动发送。
+  - 本轮目标是一个岗位走完"匹配确认 → 简历起草 → 独立审核 → Word/PDF 输出 → 沟通草稿"，这是最后一段。设计要写清：在流程里的位置（简历审核通过之后，还是可以单独起草），三种材料由用户选还是默认只起草一种；命令链 `material template` → 起草 → `material validate` → `material render`；沟通草稿要不要走独立审核、审核清单加哪几条；入口并进 `cn-resume` 还是另开技能，dsh 和 `AGENTS.md` 怎么对应，授权要不要改；交给用户的纯文本放在哪；只生成文字，不自动发送。
   - **验收**：用公开虚构夹具走完一个岗位的整条流程；Codex A 按任务单做整条流程的验收。M3-5 验收之前完成。
 - [ ] M3-5 验收与 `v0.3.0`：3 个岗位得到 3 份明显不同的简历，全部能追溯到档案；用户至少用其中一份真实投递
 
