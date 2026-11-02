@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 from io import BytesIO
 from pathlib import Path
+from unittest import mock
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
@@ -83,6 +84,48 @@ class Check(unittest.TestCase):
         self.path.write_bytes(b"not a zip")
         [problem] = resume_docx.check(self.path, FIELDS)
         self.assertTrue(problem.startswith("读不了 Word 版的文字："), problem)
+
+
+class SameText(unittest.TestCase):
+    """same_text holds the PDF and the Word version to each other, read whole (#111 P3-1)."""
+
+    CONTENT = {"name": "李明", "contact": "", "intent": "求职意向：后端 · 深圳", "sections": [
+        {"title": "教育经历", "entries": [
+            {"left": "示例大学", "middle": "软件工程 · 本科", "right": "2021.09 - 2025.06", "bullets": ["GPA 3.6"]},
+            {"left": "课程项目", "middle": "", "right": "2025.10", "bullets": []}]}]}
+    # As the PDF template prints it: " · " after each title with a subtitle, and line breaks anywhere.
+    PDF = ("李明\n求职意向：后端 · 深\n圳\n教育经历\n示例大学 · 软件工程 · 本科 2021.09 - 2025.06\n• GPA 3.6\n"
+           "课程项目 2025.10")
+    DOCX = "李明\n\n求职意向：后端 · 深圳\n教育经历\n示例大学\t软件工程 · 本科\t2021.09 - 2025.06\n• GPA 3.6\n课程项目\t\t2025.10"
+
+    def same(self, pdf: str, docx: str, content: dict = None) -> list:
+        texts = {"resume.pdf": pdf, "resume.docx": docx}
+        with mock.patch.object(resume_extract, "extract_text", side_effect=lambda path: texts[path.name]):
+            return resume_docx.same_text(Path("resume.pdf"), Path("resume.docx"), content or self.CONTENT)
+
+    def test_whitespace_and_one_separator_per_entry_with_a_subtitle_are_allowed(self):
+        self.assertEqual(self.same(self.PDF, self.DOCX), [])
+
+    def test_any_other_difference_is_reported_where_it_starts(self):
+        problems = self.same(self.PDF, self.DOCX.replace("GPA 3.6", "GPA 3.8"))
+        self.assertEqual(len(problems), 1)
+        self.assertTrue(problems[0].startswith("PDF 和 Word 版的全文不一致：PDF「"), problems[0])
+        self.assertIn("GPA3.6", problems[0])
+        self.assertIn("GPA3.8", problems[0])
+        # Order counts too: the same fields in another order are not the same text.
+        swapped = self.DOCX.replace("• GPA 3.6\n课程项目\t\t2025.10", "课程项目\t\t2025.10\n• GPA 3.6")
+        self.assertTrue(self.same(self.PDF, swapped))
+
+    def test_a_separator_more_or_less_than_the_entries_explain_is_reported(self):
+        # One the PDF lacks: an entry printed without its separator.
+        self.assertIn("按条目应当多 1 个",
+                      self.same(self.PDF.replace("示例大学 · 软件", "示例大学 软件"), self.DOCX)[0])
+        # One the content does not explain: an entry with an empty subtitle gets none in the PDF.
+        self.assertTrue(self.same(self.PDF.replace("课程项目 2025", "课程项目 · 2025"), self.DOCX))
+
+    def test_a_file_that_cannot_be_read_is_left_to_the_other_checks(self):
+        with mock.patch.object(resume_extract, "extract_text", side_effect=resume_extract.ExtractionError("坏了")):
+            self.assertEqual(resume_docx.same_text(Path("a.pdf"), Path("a.docx"), self.CONTENT), [])
 
 
 if __name__ == "__main__":
