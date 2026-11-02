@@ -342,3 +342,140 @@ def _warnings(material: dict, profile: dict, vocabulary, job) -> list:
             if isinstance(name, str) and vocabulary.key(name) in held and vocabulary.key(name) not in listed:
                 warnings.append(f"skills: the JD asks for {name!r}, which the profile has, but it is not listed")
     return warnings
+
+
+# Rendering (M3-2): the flat content resume_pdf and resume_docx lay out, shaped as resume_templates/sample.json.
+_DEGREES = {"associate": "专科", "bachelor": "本科", "master": "硕士", "phd": "博士"}
+_EMPLOYMENT = {"internship": "实习", "campus": "校招", "experienced": "社招"}
+_EXPERIENCE_TITLES = {"internship": "实习经历", "work": "工作经历", "project": "项目经历",
+                      "research": "科研经历", "competition": "竞赛经历", "campus": "校园经历"}
+# Headed by the project, contest or topic itself; the others by the employer or student body (profile.md).
+_NAMED_FIRST = ("project", "research", "competition")
+# Strongest first. A null level is a skill the profile found only in experience (profile.md, 填写约定).
+_SKILL_LINES = (("expert", "精通"), ("proficient", "熟练"), ("working", "熟悉"), (None, "项目中使用"),
+                ("familiar", "了解"))
+CONTACT_SEPARATOR = " | "
+DOT = " · "
+
+
+def render(material: dict, profile: dict, vocabulary) -> dict:
+    """The flat resume content for a material that passes validate(material, profile, vocabulary).
+
+    Names, schools, dates and contact details come from the cited profile entries; the material adds
+    which entries, in what order, the rewritten bullets, the courses and the skills. The summary is not
+    printed: the template has no place for one yet (M3-2 ruling a). Experience is split into one section
+    per type, in the order the material first lists each type.
+    """
+    entries = _entries(profile)
+    cited = lambda item: entries[item["ref"]][1]  # noqa: E731
+    sections = []
+    education = [_education_entry(cited(item), item["courses"]) for item in material["education"]]
+    if education:
+        sections.append({"title": "教育经历", "entries": education})
+    by_type = {}
+    for item in material["experience"]:
+        entry = cited(item)
+        by_type.setdefault(entry["type"], []).append(_experience_entry(entry, item["bullets"]))
+    sections += [{"title": _EXPERIENCE_TITLES[kind], "entries": items} for kind, items in by_type.items()]
+    skills = _skill_lines(material["skills"], profile, vocabulary)
+    if skills:
+        sections.append({"title": "专业技能", "lines": skills})
+    honours = _honour_lines([cited(item) for item in material["awards"]],
+                            [cited(item) for item in material["certificates"]],
+                            [cited(item) for item in material["languages"]])
+    if honours:
+        sections.append({"title": "荣誉与证书", "lines": honours})
+    contact = profile["contact"]
+    return {"name": contact.get("name") or "", "contact": _contact(contact), "intent": _intent(profile),
+            "sections": sections}
+
+
+def _month(value):
+    """2025-09 or 2025-09-01 as 2025.09."""
+    return value[:7].replace("-", ".") if value else None
+
+
+def _dates(start, end) -> str:
+    """2025.09 - 2027.06 with an ASCII hyphen; an open end is 至今 (M3-2 ruling d)."""
+    start, end = _month(start), _month(end)
+    if start:
+        return f"{start} - {end or '至今'}"
+    return end or ""
+
+
+def _contact(contact: dict) -> str:
+    return CONTACT_SEPARATOR.join(contact[key] for key in ("phone", "email", "github", "website") if contact.get(key))
+
+
+def _intent(profile: dict) -> str:
+    """求职意向 from the profile alone (M3-2 ruling b): roles and kind, cities, days and months, start."""
+    target, availability = profile["target"], profile["availability"]
+    roles = "、".join(target["roles"])
+    kinds = "、".join(_EMPLOYMENT[kind] for kind in target["employment_types"])
+    terms = []
+    if "internship" in target["employment_types"]:
+        if availability.get("days_per_week"):
+            terms.append(f"每周 {availability['days_per_week']} 天")
+        if availability.get("months"):
+            terms.append(f"可实习 {availability['months']} 个月")
+    start = availability.get("start_date")
+    parts = [f"{roles}（{kinds}）" if roles and kinds else roles or kinds,
+             "、".join(availability.get("cities") or []),
+             "，".join(terms),
+             f"{start.replace('-', '.')} 起可到岗" if start else ""]
+    parts = [part for part in parts if part]
+    return "求职意向：" + DOT.join(parts) if parts else ""
+
+
+def _gpa(value):
+    if not value:
+        return None
+    return value if "gpa" in value.casefold() or "绩点" in value else f"GPA {value}"
+
+
+def _education_entry(entry: dict, courses: list) -> dict:
+    bullets = []
+    scores = [part for part in (_gpa(entry.get("gpa")), entry.get("rank")) if part]
+    if scores:
+        bullets.append("，".join(scores))
+    if courses:
+        bullets.append("主修课程：" + "、".join(courses))
+    return {"left": entry.get("school") or "",
+            "middle": DOT.join(part for part in (entry.get("major"), _DEGREES.get(entry.get("level"))) if part),
+            "right": _dates(entry.get("start"), entry.get("end")), "bullets": bullets}
+
+
+def _experience_entry(entry: dict, bullets: list) -> dict:
+    first, second = ("name", "org") if entry["type"] in _NAMED_FIRST else ("org", "name")
+    return {"left": entry.get(first) or entry.get(second) or "", "middle": entry.get("role") or "",
+            "right": _dates(entry.get("start"), entry.get("end")), "bullets": [bullet["text"] for bullet in bullets]}
+
+
+def _skill_lines(names: list, profile: dict, vocabulary) -> list:
+    """One line per level, each in the material's order and spelling (a JD's spelling of the same skill)."""
+    levels = {vocabulary.key(skill["name"]): skill.get("level") for skill in profile["skills"]}
+    lines = []
+    for level, label in _SKILL_LINES:
+        listed = [name for name in names if levels.get(vocabulary.key(name)) == level]
+        if listed:
+            lines.append({"label": label, "rest": "、".join(listed)})
+    return lines
+
+
+def _joined(*parts) -> str:
+    return " ".join(part for part in parts if part)
+
+
+def _honour_lines(awards: list, certificates: list, languages: list) -> list:
+    """Awards as name（2024.10）, certificates as name and detail, then each language whose level no
+    listed certificate already says (M3-2 ruling c: 英语 CET-6 552 is not repeated under CET-6 552)."""
+    texts = [f"{entry['name']}（{_month(entry['date'])}）" if entry.get("date") else entry["name"] for entry in awards]
+    written = [_joined(entry["name"], entry.get("detail")) for entry in certificates]
+    texts += written
+    said = ["".join(text.split()).casefold() for text in written]
+    for entry in languages:
+        level = entry.get("level")
+        if level and any("".join(level.split()).casefold() in text for text in said):
+            continue
+        texts.append(_joined(entry["name"], level))
+    return [{"label": "", "rest": text} for text in texts]

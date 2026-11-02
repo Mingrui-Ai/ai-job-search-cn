@@ -1,7 +1,9 @@
 """resume_pdf: the Typst call, fitting to one page, and the PDF checks.
 
 The pure tests run everywhere. The ones that really render need Typst, a Chinese
-font and a PDF reader, as the pdftotext tests do, and skip without them.
+font and a PDF reader, as the pdftotext tests do, and skip without them, except
+where JOBSEARCH_CN_REQUIRE_TYPST=1: CI's real-render job sets it, and there a
+missing piece fails them instead (H31).
 """
 import copy
 import importlib.util
@@ -22,16 +24,25 @@ sys.path.insert(0, str(REPO))
 from jobsearch_cn import cli, resume_extract, resume_pdf  # noqa: E402
 
 
-def _toolchain() -> bool:
+PYPDF = importlib.util.find_spec("pypdf") is not None
+REQUIRED = os.environ.get("JOBSEARCH_CN_REQUIRE_TYPST") == "1"
+
+
+def _missing() -> str | None:
+    """What the real-render tests lack here, or None. Where they are required every one of them
+    runs, so the one that compares with pypdf's reading needs pypdf, not just a PDF reader."""
     try:
         resume_pdf._fonts(resume_pdf.find_typst())
-    except resume_pdf.ResumeError:
-        return False
-    return resume_extract._poppler_available() or PYPDF
+    except resume_pdf.ResumeError as exc:
+        return str(exc)
+    if REQUIRED and not PYPDF:
+        return "pypdf is not installed"
+    if not (PYPDF or resume_extract._poppler_available()):
+        return "there is no PDF reader (pypdf or pdftotext)"
+    return None
 
 
-PYPDF = importlib.util.find_spec("pypdf") is not None
-TOOLCHAIN = _toolchain()
+MISSING = _missing()
 NEEDS_TOOLCHAIN = "needs Typst, a Chinese font, and pypdf or pdftotext (docs/cn/resume-pdf.md)"
 
 
@@ -366,6 +377,29 @@ class ReplaceOutput(unittest.TestCase):
             self.assertEqual(Path(replace.call_args.args[0]).parent, output.parent)
 
 
+class RequiredToolchain(unittest.TestCase):
+    """The switch CI's real-render job relies on, run where Typst cannot be found."""
+
+    def real_render(self, required: bool) -> subprocess.CompletedProcess:
+        env = {**os.environ, resume_pdf.TYPST_ENV: str(Path(tempfile.gettempdir()) / "no-such-typst")}
+        env.pop("JOBSEARCH_CN_REQUIRE_TYPST", None)
+        if required:
+            env["JOBSEARCH_CN_REQUIRE_TYPST"] = "1"
+        return subprocess.run([sys.executable, "-X", "utf8", "-m", "unittest", "tests.test_cn_resume_pdf.RealRender"],
+                              cwd=REPO, env=env, capture_output=True, text=True, encoding="utf-8", errors="replace")
+
+    def test_without_typst_they_skip_as_before(self):
+        result = self.real_render(required=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertRegex(result.stderr, r"OK \(skipped=\d+\)")
+
+    def test_where_required_a_missing_typst_fails_them_and_says_what_is_missing(self):
+        result = self.real_render(required=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("JOBSEARCH_CN_REQUIRE_TYPST=1, but", result.stderr)
+        self.assertIn("no-such-typst", result.stderr)
+
+
 def page_texts(path: Path) -> list:
     if PYPDF:
         from pypdf import PdfReader
@@ -380,8 +414,13 @@ def page_texts(path: Path) -> list:
         number += 1
 
 
-@unittest.skipUnless(TOOLCHAIN, NEEDS_TOOLCHAIN)
+@unittest.skipUnless(MISSING is None or REQUIRED, NEEDS_TOOLCHAIN)
 class RealRender(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        if MISSING:  # reached only where they are required
+            raise AssertionError(f"JOBSEARCH_CN_REQUIRE_TYPST=1, but {MISSING}")
+
     def setUp(self):
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
@@ -401,6 +440,17 @@ class RealRender(unittest.TestCase):
         path = folder / "out.pdf"
         path.write_bytes(resume_pdf._compile(folder, typst, resume_pdf._fonts(typst), spaciness))
         return path
+
+    def test_a_material_builds_a_one_page_pdf_and_a_word_version_that_pass_every_check(self):
+        fixture = REPO / "tests" / "fixtures" / "cn" / "material" / "tech-m3"
+        out = io.StringIO()
+        with redirect_stdout(out), redirect_stderr(io.StringIO()):
+            code = cli.main(["resume", "build", str(fixture / "resume-1.json"), "--data-dir", self.temp,
+                             "--profile", str(fixture / "profile" / "profile.json")])
+        result = json.loads(out.getvalue())
+        self.assertEqual((code, result["problems"]), (0, []))
+        self.assertEqual(resume_pdf.page_count(Path(result["pdf"]).read_bytes()), 1)
+        self.assertTrue(Path(result["docx"]).is_file())
 
     def test_the_sample_is_one_page_and_passes_every_check(self):
         content = resume_pdf.sample()
