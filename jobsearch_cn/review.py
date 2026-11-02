@@ -13,7 +13,7 @@ import hashlib
 import json
 import re
 
-from jobsearch_cn import jd_parser, material as material_mod, profile as profile_mod, schema
+from jobsearch_cn import jd_parser, material as material_mod, profile as profile_mod, schema, score
 
 REVIEW_VERSION = 1
 KINDS = ("resume-review",)
@@ -209,29 +209,53 @@ def coverage(material: dict, profile: dict, job, vocabulary) -> list:
                     continue
                 claimed.append((match.start(), match.end()))
                 places.setdefault(key, []).append((path, match.group(0)))
-    rows, seen = [], set()
-    for name in ((job.get("requirements") or {}).get("skills") or []):
-        if not isinstance(name, str) or vocabulary.key(name) in seen:
-            continue
+    requirements = job.get("requirements") if isinstance(job.get("requirements"), dict) else {}
+    names = [name for name in requirements.get("skills") or [] if isinstance(name, str)]
+    groups = [[name for name in group if isinstance(name, str)]
+              for group in requirements.get("skill_alternatives") or [] if isinstance(group, list)]
+    spellings = {}  # key -> every spelling the JD uses for that skill, casefolded
+    for name in names + [name for group in groups for name in group]:
+        spellings.setdefault(vocabulary.key(name), set()).add(name.casefold())
+    # The JD's skills as match scoring counts them: a skill_alternatives group is one item, at its first skill.
+    items = score._requirements({"requirements": {"skills": names, "skill_alternatives": groups}}, vocabulary)
+    found_in = {"places": places, "spellings": spellings, "held": held, "cited": cited}
+    return [_coverage_row(item, found_in, vocabulary) for item in items]
+
+
+def _coverage_row(item: list, found_in: dict, vocabulary) -> dict:
+    """One coverage row for a skill, or for a group the JD lets the candidate choose from.
+
+    A group is covered when any of its skills is, a synonym when none is covered but one is written
+    another way, and otherwise a gap whose note names the skills the machine found something about.
+    """
+    members = []  # (name, status, where, note)
+    for name in item:
         key = vocabulary.key(name)
-        seen.add(key)
-        found = places.get(key, [])
+        found = found_in["places"].get(key, [])
         where = list(dict.fromkeys(path for path, _ in found))
         if not found:
-            if key in held:
-                note = GAP_UNUSED
-            elif key in cited:
-                note = GAP_IN_CITED_TEXT
-            else:
-                note = GAP_UNCHECKED
-            rows.append({"requirement": name, "status": "gap", "where": [], "note": note})
-        elif any(surface.casefold() == name.casefold() for _, surface in found):
-            rows.append({"requirement": name, "status": "covered", "where": where, "note": None})
+            note = (GAP_UNUSED if key in found_in["held"] else
+                    GAP_IN_CITED_TEXT if key in found_in["cited"] else GAP_UNCHECKED)
+            members.append((name, "gap", [], note))
+        elif any(surface.casefold() in found_in["spellings"][key] for _, surface in found):
+            members.append((name, "covered", where, None))
         else:
             spelled = "、".join(dict.fromkeys(surface for _, surface in found))
-            rows.append({"requirement": name, "status": "synonym", "where": where,
-                         "note": f"材料写作 {spelled}，JD 写作 {name}；档案支持的话改用 JD 的写法"})
-    return rows
+            members.append((name, "synonym", where, f"材料写作 {spelled}，JD 写作 {name}；档案支持的话改用 JD 的写法"))
+    label = score._label(item)
+    for status in ("covered", "synonym"):
+        chosen = [member for member in members if member[1] == status]
+        if chosen:
+            where = list(dict.fromkeys(path for member in chosen for path in member[2]))
+            note = None if status == "covered" else "；".join(member[3] for member in chosen)
+            return {"requirement": label, "status": status, "where": where, "note": note}
+    for note in (GAP_UNUSED, GAP_IN_CITED_TEXT, GAP_UNCHECKED):
+        named = [member[0] for member in members if member[3] == note]
+        if named:
+            if len(item) > 1 and note != GAP_UNCHECKED:
+                note = f"{'、'.join(named)}：{note}"
+            return {"requirement": label, "status": "gap", "where": [], "note": note}
+    raise AssertionError("an item has at least one skill")
 
 
 def _cited_skills(material: dict, profile: dict, patterns) -> set:

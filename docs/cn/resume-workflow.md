@@ -12,6 +12,7 @@
 - 回复和文件里都不出现联系方式。读档案用 `python -m jobsearch_cn profile show`，它默认隐去联系方式；联系方式由 `resume build` 从档案取，起草和审核都不用看。
 - 只写 `data/materials/<岗位id>/` 下的材料和审核结果；PDF 和 Word 由 `resume build` 写。不改档案：档案缺东西时停下来，请用户按建档工作流补。
 - 文中的 `data/` 指数据目录，默认是仓库下的 `data/`。命令加了 `--data-dir`（或设了环境变量 `JOBSEARCH_CN_DATA_DIR`）时，`data/...` 都换成那个目录下的同一路径。
+- 命令要在 `ai-job-search-cn` 环境里、仓库目录下运行（`python -m jobsearch_cn`，见 [README](README.md#开发环境windows)）；别的 Python 可能版本太旧，跑不起来。
 
 ## 1. 起草
 
@@ -42,7 +43,7 @@
 1. **读**：材料；`python -m jobsearch_cn profile show`、`data/profile/notes.md`；`python -m jobsearch_cn jd show <岗位id>`、`python -m jobsearch_cn match show <岗位id>`；清单 §2；派活时给的 build 输出和说明。资料都自己读，不用起草者的转述。
 2. **机器检查**：`python -m jobsearch_cn material validate <材料>` 的结果核对 A1、A4、C6；`resume build` 输出的 `problems` 核对 D1–D4、D6。审核者不重新生成，生成会改文件。
 3. **看页面**（D5）：用读文件的工具打开 build 输出的 PDF（Claude Code 的 Read 能显示页面和文本层）。打不开或者只读得出文字时，在交回审核结果时说明 D5 没看，由起草者告诉用户。
-4. **机器初稿**：`python -m jobsearch_cn review draft <材料>`，拿到 `material_hash`、关键词覆盖表初稿和标点空格警告（见 [review-format.md](review-format.md#3-命令)）。初稿不认 JD 的"任选其一"（例如"Golang 或 Java"），有一项已覆盖时把这一组合成一行。
+4. **机器初稿**：`python -m jobsearch_cn review draft <材料>`，拿到 `material_hash`、关键词覆盖表初稿和标点空格警告（见 [review-format.md](review-format.md#3-命令)）。
 5. **按清单审**：第 1 轮审全部清单；第 2 轮只看改动和上一轮的问题，确认 `必改` 都解决了、没有引出新问题（清单 §4.4）。覆盖表在初稿上补学历、经验、业务词，逐行判断（C1、C2）。
 6. **写审核结果**：格式见 [review-format.md](review-format.md)，存为 `data/materials/<岗位id>/review-<n>-r<k>.json`（`k` 是轮次）；`mode` 是 `independent`，自审是 `self`。
 7. **检查格式**：`python -m jobsearch_cn review validate data/materials/<岗位id>/review-<n>-r<k>.json`，不通过就改审核结果，直到通过。Claude Code 上由起草者跑，不通过时把错误交回给同一个子代理改。
