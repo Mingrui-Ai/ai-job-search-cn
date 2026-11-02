@@ -1,0 +1,108 @@
+{
+  "name": "示例候选人甲",
+  "contact": "13800000000 | candidate-a@example.com | github.com/example-candidate-a | portfolio-a.example.com",
+  "intent": "求职意向：后端开发、数据平台（实习） · 杭州 · 每周 4 天，可实习 6 个月 · 2026.12.01 起可到岗",
+  "sections": [
+    {
+      "title": "教育经历",
+      "entries": [
+        {
+          "left": "示例星河大学",
+          "middle": "软件工程 · 硕士",
+          "right": "2025.09 - 至今",
+          "bullets": [
+            "GPA 3.8/4.0，专业前12%",
+            "主修课程：分布式系统、机器学习"
+          ]
+        },
+        {
+          "left": "示例海岬学院",
+          "middle": "信息管理 · 本科",
+          "right": "2021.09 - 2025.06",
+          "bullets": []
+        }
+      ]
+    },
+    {
+      "title": "科研经历",
+      "entries": [
+        {
+          "left": "检索增强生成评测研究",
+          "middle": "研究助理",
+          "right": "2026.01 - 2026.06",
+          "bullets": [
+            "用 RAG 方法整理 80 组问答并复核检索结果"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "实习经历",
+      "entries": [
+        {
+          "left": "示例云帆科技有限公司",
+          "middle": "后端开发实习生",
+          "right": "2026.04 - 至今",
+          "bullets": [
+            "使用 Go 和 Docker 维护订单服务，连续 6 周整理发布记录"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "项目经历",
+      "entries": [
+        {
+          "left": "订单事件分析平台",
+          "middle": "",
+          "right": "2025.11 - 2026.02",
+          "bullets": [
+            "使用 Python 和 SQL 分析 1200 条订单事件"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "专业技能",
+      "lines": [
+        {
+          "label": "精通",
+          "rest": "Python、Go"
+        },
+        {
+          "label": "熟练",
+          "rest": "SQL"
+        },
+        {
+          "label": "熟悉",
+          "rest": "Docker"
+        },
+        {
+          "label": "项目中使用",
+          "rest": "RAG"
+        },
+        {
+          "label": "了解",
+          "rest": "Git"
+        }
+      ]
+    },
+    {
+      "title": "荣誉与证书",
+      "lines": [
+        {
+          "label": "",
+          "rest": "示例星河算法挑战赛一等奖（2026.05）"
+        },
+        {
+          "label": "",
+          "rest": "CET-6 560"
+        },
+        {
+          "label": "",
+          "rest": "日语 N2"
+        }
+      ]
+    }
+  ]
+}
