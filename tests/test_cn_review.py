@@ -192,6 +192,35 @@ class Draft(unittest.TestCase):
         job = {"requirements": {"skills": ["Go", "Golang"]}}
         self.assertEqual(len(review.coverage(MATERIAL, PROFILE, job, VOCABULARY)), 1)
 
+    def test_a_choice_of_skills_is_one_row_covered_by_any_of_them(self):
+        # The M3-3c dry run: "熟悉 Golang 或 Java" with Go written; Java is no gap.
+        job = {"requirements": {"skills": ["Go", "MySQL", "Golang", "Java"], "skill_alternatives": [["Golang", "Java"]]}}
+        rows = review.coverage(MATERIAL, PROFILE, job, VOCABULARY)
+        self.assertEqual([row["requirement"] for row in rows], ["Golang 或 Java", "MySQL"])
+        self.assertEqual(rows[0]["status"], "covered")  # the JD also writes Go, so Go is its wording
+        self.assertIn("skills[1]", rows[0]["where"])
+
+    def test_a_choice_written_another_way_is_a_synonym(self):
+        job = {"requirements": {"skills": ["Golang", "Java"], "skill_alternatives": [["Golang", "Java"]]}}
+        [row] = review.coverage(MATERIAL, PROFILE, job, VOCABULARY)
+        self.assertEqual((row["requirement"], row["status"]), ("Golang 或 Java", "synonym"))
+        self.assertIn("材料写作 Go，JD 写作 Golang", row["note"])
+
+    def test_a_choice_none_of_which_is_written_is_one_gap(self):
+        job = {"requirements": {"skills": ["Rust", "Docker", "Java"], "skill_alternatives": [["Rust", "Docker", "Java"]]}}
+        self.assertEqual(review.coverage(MATERIAL, PROFILE, job, VOCABULARY),
+                         [{"requirement": "Rust 或 Docker 或 Java", "status": "gap", "where": [],
+                           "note": "Docker：档案里有，材料没写"}])
+        job = {"requirements": {"skills": ["Rust", "Java"], "skill_alternatives": [["Rust", "Java"]]}}
+        self.assertEqual(review.coverage(MATERIAL, PROFILE, job, VOCABULARY)[0]["note"], "技能列表未列，需核对经历原文")
+
+    def test_without_choices_the_rows_are_unchanged(self):
+        job = dict(JOB, requirements=dict(JOB["requirements"], skill_alternatives=[]))
+        self.assertEqual(review.coverage(MATERIAL, PROFILE, job, VOCABULARY),
+                         review.coverage(MATERIAL, PROFILE, JOB, VOCABULARY))
+        self.assertEqual([row["requirement"] for row in review.coverage(MATERIAL, PROFILE, JOB, VOCABULARY)],
+                         JOB["requirements"]["skills"])
+
     def test_style_warnings(self):
         data = copy.deepcopy(MATERIAL)
         data["summary"]["text"] = "后端开发实习一段。"
