@@ -1,6 +1,7 @@
 {
   "version": 1,
   "direction": "ops",
+  "revision": 1,
   "label": "运营",
   "greeting": {
     "max_chars": 150,

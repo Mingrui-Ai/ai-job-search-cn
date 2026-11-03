@@ -1,6 +1,7 @@
 {
   "version": 1,
   "direction": "product",
+  "revision": 1,
   "label": "产品",
   "greeting": {
     "max_chars": 150,

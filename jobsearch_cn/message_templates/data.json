@@ -1,6 +1,7 @@
 {
   "version": 1,
   "direction": "data",
+  "revision": 1,
   "label": "数据",
   "greeting": {
     "max_chars": 150,

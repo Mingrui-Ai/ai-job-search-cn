@@ -1,6 +1,7 @@
 {
   "version": 1,
   "direction": "tech",
+  "revision": 1,
   "label": "技术",
   "greeting": {
     "max_chars": 150,

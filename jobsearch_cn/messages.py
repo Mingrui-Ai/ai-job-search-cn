@@ -35,7 +35,6 @@ SIGNATURE = "signature"  # the email slot where the candidate's phone and email 
 # Placeholder -> (what it reads, the ref a segment must cite to use it).
 _PLACEHOLDER = re.compile(r"\{([^{}\s]*)\}")
 _ENTRY_FIELDS = {"education": ("school", "major", "level"), "experience": ("name", "org", "role")}
-_LEVELS = {"associate": "大专", "bachelor": "本科", "master": "硕士", "phd": "博士"}
 _AVAILABILITY_FIELDS = ("start_date", "days_per_week", "months")
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _CONTACT_ANYWHERE = ("name",)
@@ -80,21 +79,24 @@ def load_banned(data_dir=None) -> dict:
         user = Path(data_dir) / USER_DIR / "banned.json"
         if user.is_file():
             extra = _read(user)
+            if not isinstance(extra, dict):
+                raise TemplateError(f'{user}: expected {{"errors": [...], "warnings": [...]}}')
             for level in ("errors", "warnings"):
-                for group in extra.get(level) or []:
-                    if isinstance(group, dict):
-                        banned[level].append({"reason": str(group.get("reason") or "用户自己加的禁用说法"),
-                                              "words": [w for w in group.get("words") or [] if isinstance(w, str)],
-                                              "patterns": [p for p in group.get("patterns") or []
-                                                           if isinstance(p, str)]})
-    for level in ("errors", "warnings"):
-        for group in banned[level]:
+                groups = extra.get(level) or []
+                if not isinstance(groups, list) or not all(isinstance(group, dict) for group in groups):
+                    raise TemplateError(f"{user}: {level} must be a list of {{reason, words, patterns}}")
+                for group in groups:
+                    banned[level].append({"reason": str(group.get("reason") or "用户自己加的禁用说法"),
+                                          "words": [w for w in group.get("words") or [] if isinstance(w, str)],
+                                          "patterns": [p for p in group.get("patterns") or []
+                                                       if isinstance(p, str)]})
+    for group in [*banned["errors"], *banned["warnings"], banned["referral_warnings"], banned["greeting_warnings"]]:
+        try:
             group["compiled"] = [re.compile(re.escape(word)) for word in group.get("words") or []] + \
                                 [re.compile(pattern) for pattern in group.get("patterns") or []]
-    for key in ("referral_warnings", "greeting_warnings"):
-        group = banned[key]
-        group["compiled"] = [re.compile(re.escape(word)) for word in group.get("words") or []] + \
-                            [re.compile(pattern) for pattern in group.get("patterns") or []]
+        except re.error as exc:
+            raise TemplateError(f"banned wording {group.get('reason')!r}: a pattern is not a regular expression "
+                                f"({exc})") from None
     return banned
 
 
@@ -112,6 +114,11 @@ def _template(path: Path) -> dict:
     where = str(path)
     if not isinstance(doc, dict) or doc.get("version") != TEMPLATE_VERSION or doc.get("direction") != path.stem:
         raise TemplateError(f'{where}: expected {{"version": {TEMPLATE_VERSION}, "direction": "{path.stem}", ...}}')
+    # version is the file's format; revision counts changes to this template, so a message written to an
+    # older revision gets a warning (validate).
+    revision = doc.setdefault("revision", 1)
+    if not _positive(revision):
+        raise TemplateError(f"{where}: revision must be a positive integer")
     for kind in KINDS:
         spec = doc.get(kind)
         if not isinstance(spec, dict) or not isinstance(spec.get("slots"), list) or not spec["slots"]:
@@ -120,23 +127,29 @@ def _template(path: Path) -> dict:
         for slot in spec["slots"]:
             if not isinstance(slot, dict) or not isinstance(slot.get("slot"), str):
                 raise TemplateError(f"{where}: every slot in {kind}.slots needs a name")
+            if not _positive(slot.get("max", 1)):
+                raise TemplateError(f"{where}: {kind}.slots {slot['slot']!r}: max must be a positive integer")
             names.append(slot["slot"])
         if len(set(names)) != len(names):
             raise TemplateError(f"{where}: {kind}.slots names a slot twice")
         limit = spec.get("max_chars", HARD_LIMITS[kind])
-        if not isinstance(limit, int) or isinstance(limit, bool) or limit <= 0:
+        if not _positive(limit):
             raise TemplateError(f"{where}: {kind}.max_chars must be a positive integer")
         spec["max_chars"] = min(limit, HARD_LIMITS[kind])
         if kind == "email":
             subject = spec.get("subject_max_chars", HARD_SUBJECT_LIMIT)
-            if not isinstance(subject, int) or isinstance(subject, bool) or subject <= 0:
+            if not _positive(subject):
                 raise TemplateError(f"{where}: email.subject_max_chars must be a positive integer")
             spec["subject_max_chars"] = min(subject, HARD_SUBJECT_LIMIT)
     return doc
 
 
+def _positive(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
 def template_id(direction: str, kind: str, templates: dict) -> str:
-    return f"{direction}/{kind}@{templates[direction]['version']}"
+    return f"{direction}/{kind}@{templates[direction]['revision']}"
 
 
 def choose(job, profile: dict, vocabulary, templates: dict, direction: str = None) -> tuple[str, str]:
@@ -216,10 +229,10 @@ def _resolve(name: str, profile: dict, job, entries: dict, slot: str, kind: str)
     section, entry = entries[head]
     if field not in _ENTRY_FIELDS.get(section, ()):
         allowed = ", ".join(_ENTRY_FIELDS.get(section, ())) or "none"
-        return None, head, f"{{{name}}}: a {section} entry's placeholders are {allowed}"
+        return None, head, f"{{{name}}}: an {section} entry's placeholders are {allowed}"
     value = entry.get(field)
     if field == "level":
-        value = _LEVELS.get(value)
+        value = material._DEGREES.get(value)  # 专科, 本科, 硕士, 博士: the words the CV prints
     if not isinstance(value, str) or not value.strip():
         return None, head, f"{{{name}}}: {head} has no {field}"
     return value, head, None

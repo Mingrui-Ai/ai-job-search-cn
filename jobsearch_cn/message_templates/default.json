@@ -1,6 +1,7 @@
 {
   "version": 1,
   "direction": "default",
+  "revision": 1,
   "label": "通用",
   "greeting": {
     "max_chars": 150,

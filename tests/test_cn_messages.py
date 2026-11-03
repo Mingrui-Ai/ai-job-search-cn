@@ -6,7 +6,8 @@ and the profile's directions, falling back to the profile's first direction and 
 that fails a message does (an invented number or skill, an unfilled or forbidden placeholder, a placeholder
 whose entry is not cited, a hand-typed phone, a commitment without the availability, banned wording, a slot
 missing, repeated or out of order, the length limits); the warnings; a user template can lower a limit and
-not raise it, and a user can add banned words but not remove them; the CLI's exit codes.
+not raise it, a user can add banned words but not remove them, and a malformed user file is refused; every
+material command checks a material the same way, and the CV-only ones refuse a message; the CLI's exit codes.
 """
 import copy
 import json
@@ -166,7 +167,7 @@ class Placeholders(unittest.TestCase):
         errors = errors_of(with_segment(GREETING, 0, "您好" + COMMA + "我是{edu-9.school}的学生。", ["edu-1"]))
         self.assertEqual(errors, ["segments[0].text: {edu-9.school}: no profile entry with id 'edu-9'"])
         errors = errors_of(with_segment(GREETING, 0, "您好" + COMMA + "我的绩点是{edu-1.gpa}。", ["edu-1"]))
-        self.assertIn("a education entry's placeholders are school, major, level", errors[0])
+        self.assertIn("an education entry's placeholders are school, major, level", errors[0])
         errors = errors_of(with_segment(GREETING, 0, "您好" + COMMA + "{name}", []))
         self.assertIn("is not a placeholder", errors[0])
 
@@ -321,6 +322,28 @@ class UserFiles(unittest.TestCase):
         self.write("tech.json", {"version": 1, "direction": "data"})
         with self.assertRaises(messages.TemplateError):
             messages.load_templates(self.data)
+        tech = messages._read(messages.BUILTIN / "tech.json")
+        for change in (lambda doc: doc.update(revision=0), lambda doc: doc["greeting"]["slots"][1].update(max="2")):
+            broken = copy.deepcopy(tech)
+            change(broken)
+            self.write("tech.json", broken)
+            with self.assertRaises(messages.TemplateError):
+                messages.load_templates(self.data)
+
+    def test_a_malformed_user_banned_file_is_refused(self):
+        for doc in (["冒昧"], {"errors": "冒昧"}, {"errors": [{"reason": "括号", "patterns": ["("]}]}):
+            self.write("banned.json", doc)
+            with self.assertRaises(messages.TemplateError):
+                messages.load_banned(self.data)
+
+    def test_a_new_revision_warns_a_message_written_to_the_old_one(self):
+        tech = copy.deepcopy(messages._read(messages.BUILTIN / "tech.json"))
+        tech["revision"] = 2
+        self.write("tech.json", tech)
+        templates = messages.load_templates(self.data)
+        self.assertEqual(check(GREETING, templates=templates),
+                         ([], ["template: written to tech/greeting@1, the template is now tech/greeting@2; "
+                               "check the slots still fit"]))
 
     def test_user_banned_words_add_to_the_built_in_ones(self):
         self.write("banned.json", {"errors": [{"reason": "我不想写", "words": ["冒昧"]}], "warnings": []})
@@ -393,6 +416,11 @@ class Cli(unittest.TestCase):
         self.assertEqual(bad.returncode, 1)
         self.assertFalse(json.loads(bad.stdout)["valid"])
         self.assertEqual(run_cli("material", "render", str(TECH / "resume-1.json"), data_dir=self.data).returncode, 2)
+        (self.data / "templates" / "messages").mkdir(parents=True)
+        (self.data / "templates" / "messages" / "banned.json").write_text('["冒昧"]', encoding="utf-8")
+        broken = run_cli("material", "render", str(TECH / "greeting-1.json"), data_dir=self.data)
+        self.assertEqual(broken.returncode, 2)
+        self.assertIn("banned.json", json.loads(broken.stderr)["error"])
 
     def test_validate_and_render_agree_on_a_failing_message(self):
         record = with_segment(GREETING, 1, "做过订单查询接口。", ["exp-1", "notes.md"])
