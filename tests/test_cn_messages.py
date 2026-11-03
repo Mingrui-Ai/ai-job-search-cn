@@ -199,7 +199,7 @@ class Wording(unittest.TestCase):
         errors = errors_of(with_segment(GREETING, 2, "每周 5 天。", ["availability"]))
         self.assertIn("the number '5'", errors[0])
 
-    def test_sensitive_details_and_boasts_fail(self):
+    def test_m34_sensitive_details_and_boasts_fail(self):
         for text, reason in (("我今年 23 岁。", "敏感个人信息"), ("我是党员。", "敏感个人信息"),
                              ("我的后端能力是顶尖的。", "绝对化的自夸")):
             errors = errors_of(with_segment(GREETING, 3, text))
