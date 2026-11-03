@@ -48,3 +48,10 @@
   - 不带 `--note`：备注事件是 M4-1b 的 `note`。
   - `--on`、`--at` 不能是将来（`--on` 按 Asia/Shanghai 的今天，`--at` 容 5 分钟）。
   - 第一次写入时建表也在同一个事务里，写入失败时连表一起回滚。
+- 自查发现：`submit`、`status` 成功后用同一个 `request_id` 重试，会先撞上 `stale_revision`（revision 已经变了）。改成先查请求表、再查 revision，加了测试。
+- 第 4 步：`docs/cn/applications.md` 写好，README 文档索引和常用命令各加一行。第 12 节先写了 `resume build` 说明文件的格式，供 M3-6 照用；实现等 #119。
+
+下一步：
+
+1. 等 #119 合并（2026-11-03 查过，还是 OPEN，head 5b91525）。合并后合入 master，按 applications.md 第 12 节改 `cmd_resume_build` 写说明文件，`submit` / `record --submitted` 读发出文件旁边的说明文件核对，加测试。
+2. 三项检查，开 PR，审核者 Codex B；开 PR 前请规划者确认 V25 已冻结。

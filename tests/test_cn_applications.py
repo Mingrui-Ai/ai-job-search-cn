@@ -4,10 +4,12 @@ Each class pins one acceptance item of the M4-1 design (§11, docs/cn/worklog/20
 that M4-1a covers; the format and commands are docs/cn/applications.md. Everything runs in a temporary data
 directory with public fictional data: the tech-m3 profile and material, and the BOSS intern JD.
 """
+import argparse
 import contextlib
 import io
 import json
 import os
+import re
 import shutil
 import sqlite3
 import subprocess
@@ -248,6 +250,28 @@ class PreviewAndRetry(Data):
         connection = self.connect()
         self.assertEqual(connection.execute("SELECT count(*) FROM applications").fetchone()[0], 1)
         self.assertEqual(connection.execute("SELECT count(*) FROM events").fetchone()[0], 2)
+
+    def test_a_retried_submit_or_status_returns_the_first_result_although_the_revision_moved_on(self):
+        application_id = self.drafted()
+        code, preview, _ = self.cli("submit", application_id, "--expected-revision", "1", "--sent", self.pdf,
+                                    "--preview")
+        args = ("submit", application_id, "--expected-revision", "1", "--sent", self.pdf,
+                "--request-id", preview["request_id"])
+        first = self.cli(*args)[1]
+        code, again, err = self.cli(*args)
+        self.assertEqual(code, 0, err)
+        self.assertTrue(again["repeated"])
+        self.assertEqual(again["events"], first["events"])
+        code, preview, _ = self.status(application_id, "interview")
+        args = ("status", application_id, "interview", "--expected-revision", "2",
+                "--request-id", preview["request_id"])
+        first = self.cli(*args)[1]
+        code, again, err = self.cli(*args)
+        self.assertEqual(code, 0, err)
+        self.assertTrue(again["repeated"])
+        self.assertEqual(again["events"], first["events"])
+        self.assertEqual(len(self.show(application_id)["events"]), 3)
+        self.assertEqual(len(list(self.paths.artifacts.glob("*/mv_*"))), 1)
 
     def test_the_same_request_id_for_another_request_is_a_conflict(self):
         code, preview, _ = self.cli("record", self.job, "--channel", "portal", "--preview")
@@ -671,6 +695,22 @@ class Validate(Data):
                    "--sent", self.pdf)
         self.move(application_id, "interview")
         self.assertEqual(self.cli("validate")[1], {"valid": True, "errors": [], "warnings": [], "orphans": []})
+
+
+class Document(unittest.TestCase):
+    def test_the_document_names_exactly_the_commands_the_cli_has(self):
+        text = (REPO / "docs" / "cn" / "applications.md").read_text(encoding="utf-8")
+        documented = set(re.findall(r"python -m jobsearch_cn application ([a-z]+)", text))
+        parser = cli.build_parser()
+        group = next(action for action in parser._subparsers._group_actions[0].choices["application"]._actions
+                     if isinstance(action, argparse._SubParsersAction))
+        self.assertEqual(documented, set(group.choices))
+        for code in ("invalid", "transition", "stale_revision", "request_conflict", "busy", "not_found"):
+            self.assertIn(f"`{code}`", text)
+        for status in applications.STATUSES:
+            self.assertIn(f"`{status}`", text)
+        for channel in applications.CHANNELS:
+            self.assertIn(f"`{channel}`", text)
 
 
 if __name__ == "__main__":

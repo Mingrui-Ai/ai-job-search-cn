@@ -1035,7 +1035,8 @@ class _nullcontext:
 
 
 def _existing(paths: Paths, application_id: str, expected_revision, preview: bool):
-    """(connection, row) for a write on an application that must exist and be at expected_revision."""
+    """(connection, row) for a write on an application that must exist. The revision is checked by _current,
+    after a retry of a request already written has had the chance to return its first result."""
     if not isinstance(expected_revision, int) or isinstance(expected_revision, bool) or expected_revision < 1:
         raise _invalid("--expected-revision: the revision show or list printed, a whole number from 1")
     if not is_id(application_id, "app"):
@@ -1056,13 +1057,22 @@ def _existing(paths: Paths, application_id: str, expected_revision, preview: boo
                                                 "records yet")
     try:
         row = _row(connection, application_id)
-        stale = _stale(connection, row, expected_revision)
-        if stale:
-            raise stale
     except BaseException:
         connection.close()
         raise
     return connection, row
+
+
+def _current(connection, row, expected_revision: int, request_id, request_body):
+    """A retry's first result, or None once the row is checked to be at expected_revision."""
+    if request_id is not None:
+        repeated = _repeat(connection, request_id, _hash_request(request_body))
+        if repeated is not None:
+            return repeated
+    stale = _stale(connection, row, expected_revision)
+    if stale:
+        raise stale
+    return None
 
 
 def submit(data_root, application_id: str, *, expected_revision, on=None, at=None, channel=None, platform=None,
@@ -1075,17 +1085,22 @@ def submit(data_root, application_id: str, *, expected_revision, on=None, at=Non
     occurred_at, occurred_on = occurred(on, at)
     connection, row = _existing(paths, application_id, expected_revision, preview)
     with _closing(connection):
-        if row["status"] != "drafted":
-            raise ApplicationError("transition", f"only a drafted application can be submitted; this one is "
-                                                 f"{row['status']}", status=row["status"])
         if channel is None and platform is not None:
             channel = row["channel_kind"]
         channel_value = _channel(channel, platform) if channel is not None else \
             {"kind": row["channel_kind"], "platform": row["channel_platform"]}
-        origin = row["record_origin"]
-        warnings = contact_warnings(channel_value["platform"], "--platform")
         prepared = prepare_materials(root, row["job_id"], material, sent, check_material)
-        warnings.extend(prepared["warnings"])
+        request_body = {"command": "submit", "application_id": application_id, "expected_revision": expected_revision,
+                        "channel": channel_value, "occurred_at": occurred_at, "occurred_on": occurred_on,
+                        "actor": actor, "materials": prepared["digest"]}
+        repeated = _current(connection, row, expected_revision, request_id, request_body)
+        if repeated is not None:
+            return repeated
+        if row["status"] != "drafted":
+            raise ApplicationError("transition", f"only a drafted application can be submitted; this one is "
+                                                 f"{row['status']}", status=row["status"])
+        origin = row["record_origin"]
+        warnings = contact_warnings(channel_value["platform"], "--platform") + prepared["warnings"]
         if origin == "current" and not prepared["files"]:
             warnings.append("材料未记录 (no material recorded): the submission is recorded without the files sent; "
                             "say so to the user")
@@ -1100,9 +1115,6 @@ def submit(data_root, application_id: str, *, expected_revision, on=None, at=Non
         if origin == "current":
             snapshot_files, snapshot_warnings = _snapshot_files(root, row["job_id"])
             warnings.extend(snapshot_warnings)
-        request_body = {"command": "submit", "application_id": application_id, "expected_revision": expected_revision,
-                        "channel": channel_value, "occurred_at": occurred_at, "occurred_on": occurred_on,
-                        "actor": actor, "materials": prepared["digest"]}
         return _write(paths, request_id=request_id, request_body=request_body, actor=actor,
                       application_id=application_id, new_row=None, expected_revision=expected_revision,
                       events=events, prepared=prepared, snapshot_files=snapshot_files, warnings=warnings,
@@ -1121,6 +1133,12 @@ def change_status(data_root, application_id: str, new_status: str, *, expected_r
     occurred_at, occurred_on = occurred(on, at)
     connection, row = _existing(paths, application_id, expected_revision, preview)
     with _closing(connection):
+        request_body = {"command": "status", "application_id": application_id, "expected_revision": expected_revision,
+                        "to": new_status, "reason": reason, "occurred_at": occurred_at, "occurred_on": occurred_on,
+                        "actor": actor}
+        repeated = _current(connection, row, expected_revision, request_id, request_body)
+        if repeated is not None:
+            return repeated
         events = [{"type": "status_changed", "occurred_at": occurred_at, "occurred_on": occurred_on,
                    "payload": {"from": row["status"], "to": new_status, "reason": reason}}]
         existing = _events(connection, application_id)
@@ -1130,9 +1148,6 @@ def change_status(data_root, application_id: str, new_status: str, *, expected_r
             return {"application": _application(connection, row), "events": _planned(events, actor),
                     "request_id": new_id("req"), "preview": True,
                     "status": {"from": row["status"], "to": new_status}, "materials": [], "warnings": warnings}
-        request_body = {"command": "status", "application_id": application_id, "expected_revision": expected_revision,
-                        "to": new_status, "reason": reason, "occurred_at": occurred_at, "occurred_on": occurred_on,
-                        "actor": actor}
         return _write(paths, request_id=request_id, request_body=request_body, actor=actor,
                       application_id=application_id, new_row=None, expected_revision=expected_revision,
                       events=events, prepared=None, snapshot_files=None, warnings=warnings, connection=connection)
