@@ -4,10 +4,11 @@ emails and referral requests (M3-4).
 These pin: the fictional samples pass and render to text ready to copy; the template is chosen by the JD's
 and the profile's directions, falling back to the profile's first direction and then the default; each rule
 that fails a message does (an invented number or skill, an unfilled or forbidden placeholder, a placeholder
-whose entry is not cited, a hand-typed phone, a commitment without the availability, banned wording, a slot
-missing, repeated or out of order, the length limits); the warnings; a user template can lower a limit and
-not raise it, a user can add banned words but not remove them, and a malformed user file is refused; every
-material command checks a material the same way, and the CV-only ones refuse a message; the CLI's exit codes.
+whose entry is not cited, a hand-typed phone, a promise of days, months or a start the profile's availability
+does not back, banned wording, a slot missing, repeated or out of order, the length limits); the warnings; a
+user template can lower a limit and not raise it, a user can add banned words but not remove them, and a
+malformed user file is refused; every material command checks a material the same way, and the CV-only ones
+refuse a message; the CLI's exit codes.
 """
 import copy
 import json
@@ -197,6 +198,72 @@ class Placeholders(unittest.TestCase):
         self.assertTrue(any("模板标记没有替换" in error for error in errors), errors)
 
 
+class Availability(unittest.TestCase):
+    """What a message promises about the availability, against the profile's own field for each promise
+    (tech-m3: from 2026-11-15, 4 days a week, 6 months)."""
+
+    @staticmethod
+    def promise(text, profile_data=TECH_PROFILE) -> list:
+        return errors_of(with_segment(GREETING, 2, text, ["availability"]), profile_data=profile_data)
+
+    @staticmethod
+    def changed(**availability) -> dict:
+        data = copy.deepcopy(TECH_PROFILE)
+        data["availability"].update(availability)
+        return data
+
+    def test_days_and_months_match_their_own_field(self):
+        self.assertEqual(self.promise("每周可以到岗 4 天，能连续实习 6 个月。"), [])
+        self.assertEqual(self.promise("每周可以到岗5天。"),
+                         ["segments[2].text: '5天' is not the profile's availability.days_per_week (4); "
+                          "write 4天 or {availability.days_per_week}天"])
+        self.assertEqual(self.promise("能连续实习3个月。"),
+                         ["segments[2].text: '3个月' is not the profile's availability.months (6); "
+                          "write 6个月 or {availability.months}个月"])
+        self.assertEqual(len(self.promise("每周 3-4 天。")), 1)  # a range promises each of its ends
+
+    def test_days_and_months_in_chinese_numerals_are_refused(self):
+        # 五天 and 三个月 slip past the number check (material.numbers leaves a lone 五 alone), so they are refused.
+        for text, quote in (("每周可以到岗五天。", "五天"), ("一周能来两天。", "两天"), ("能连续实习三个月。", "三个月"),
+                            ("能实习半年。", "半年"), ("可以实习一年。", "一年")):
+            errors = self.promise(text)
+            self.assertEqual(len(errors), 1, (text, errors))  # 一周 and 每周 say how often, not how many days
+            self.assertIn(f"'{quote}': write ", errors[0])
+            self.assertIn("in Arabic digits", errors[0])
+
+    def test_the_digits_of_a_date_vouch_for_no_count(self):
+        data = self.changed(start_date="2026-12-07", months=3)
+        self.assertIn("'12 个月' is not the profile's availability.months (3)", self.promise("我可以连续实习 12 个月。", data)[0])
+        self.assertIn("'7 天' is not the profile's availability.days_per_week (4)",
+                      self.promise("我每周可以到岗 7 天，烦请告知申请方式。", data)[0])
+
+    def test_a_promise_the_profile_gives_no_value_for_fails(self):
+        data = self.changed(start_date=None, days_per_week=None, months=None)
+        for text in ("您好，我随时可以到岗。", "每周可以到岗 4 天。", "能连续实习 6 个月。", "周一至周五都可以实习。"):
+            errors = self.promise(text, data)
+            self.assertEqual(len(errors), 1, (text, errors))
+            self.assertIn("which the profile does not give", errors[0])
+        self.assertIn("the profile has no availability.start_date", self.promise("可以{availability.start_date}起到岗。", data)[0])
+
+    def test_a_start_is_written_with_its_placeholder(self):
+        self.assertEqual(self.promise("可以{availability.start_date}起到岗。"), [])
+        data = self.changed(start_date="2026-12-07")
+        for text in ("我明天即可到岗。", "随时可以入职。", "12月1日起可以到岗。", "两周后可以上岗。", "下半年可以开始实习。"):
+            errors = self.promise(text, data)
+            self.assertEqual(len(errors), 1, (text, errors))
+            self.assertIn("promises when you can start; write the date as {availability.start_date}", errors[0])
+
+    def test_a_placeholder_for_another_field_fails(self):
+        self.assertIn("days a week are written {availability.days_per_week}天", self.promise("每周{availability.months}天。")[0])
+        self.assertIn("months are written {availability.months}个月", self.promise("可以实习{availability.months}年。")[0])
+
+    def test_wording_that_promises_nothing_passes(self):
+        # No time next to the verb, a frequency with no count, a wish: nothing to hold against the profile.
+        for text in ("期待入职贵司。", "到岗安排可以再沟通。", "每周的安排可以再沟通。", "入职后负责的是订单查询接口。",
+                     "周一到周五都方便电话沟通。"):
+            self.assertEqual(errors_of(with_segment(GREETING, 3, text)), [], text)
+
+
 class Wording(unittest.TestCase):
     def test_a_hand_typed_phone_or_email(self):
         for text in ("我的电话是 13912345678", "邮箱 li.ming2024@example.com"):
@@ -205,11 +272,12 @@ class Wording(unittest.TestCase):
             self.assertIn("typed by hand", errors[0], text)
 
     def test_a_commitment_without_the_availability(self):
-        errors = errors_of(with_segment(GREETING, 3, "可以尽快到岗。"))
-        self.assertEqual(len(errors), 1)
-        self.assertIn("without citing 'availability'", errors[0])
-        errors = errors_of(with_segment(GREETING, 2, "每周 5 天。", ["availability"]))
-        self.assertIn("the number '5'", errors[0])
+        for text in ("可以尽快到岗。", "随时可以入职。", "能实习半年。", "每周可以到岗 4 天。", "可以连续实习 6 个月。"):
+            errors = errors_of(with_segment(GREETING, 3, text))
+            self.assertTrue(errors, text)
+            self.assertIn("without citing 'availability'", errors[0], text)
+        # A count the profile gives fails only for want of the citation.
+        self.assertEqual(len(errors_of(with_segment(GREETING, 3, "每周可以到岗 4 天。"))), 1)
 
     def test_m34_sensitive_details_and_boasts_fail(self):
         for text, reason in (("我今年 23 岁。", "敏感个人信息"), ("我是党员。", "敏感个人信息"),

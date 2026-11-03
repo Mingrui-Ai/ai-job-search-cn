@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import re
+from fractions import Fraction
 from pathlib import Path
 
 from jobsearch_cn import material, profile as profile_mod, schema, score
@@ -42,8 +43,36 @@ _CONTACT_SIGNATURE = ("phone", "email")
 # Contact details typed by hand rather than through a placeholder.
 _PHONE = re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
-# Wording that commits to a start date, days a week or a length of stay: it must cite the availability.
-_COMMITMENT = re.compile(r"到岗|每周\s*\S{0,3}\s*天|实习\s*\S{0,4}\s*个月|一周\s*\S{0,3}\s*天")
+
+# What a message promises about the availability, read clause by clause (_Checker._availability): a count of
+# days a week or of months is compared with availability.days_per_week or availability.months alone, never
+# with the digits of another field (2026-12-07 is no 12 months); a start is written {availability.start_date}.
+_CLAUSE = re.compile(r"[^，,。；;！!？?\n]+")
+_COUNT = (r"(?P<count>\{availability\.[a-z_]+\}"
+          r"|\d+(?:\.\d+)?(?:\s*(?:-|~|～|－|—|到|至)\s*\d+(?:\.\d+)?)?"
+          r"|[零〇一二两三四五六七八九十百几数半]+)")
+# 三天内, 两个月后: when something happens, not how long; 后端 and 后台 are words.
+_RELATIVE = r"(?:之?内|以内|之?后(?![端台])|以后)"
+_WEEKLY = re.compile(r"[每一]\s*(?:个\s*)?(?:周|星期|礼拜)|(?:天|工作日)\s*[/／每]\s*(?:周|星期)")
+_DAYS = re.compile(rf"(?<![第今明后昨前当每整\d]){_COUNT}\s*(?:个\s*)?(?:工作日|天)(?!\s*{_RELATIVE})")
+_STAY = re.compile(r"实习(?!了|过|生|经历)|在岗|到岗|上岗|入职")
+_MONTHS = re.compile(rf"(?<![上下第\d]){_COUNT}\s*(?P<unit>个半月|个多?月)(?!\s*{_RELATIVE})")
+_YEARS = re.compile(r"(?<![上下前去今明后第\d])(?P<count>\{availability\.[a-z_]+\}|\d{1,2}(?:\.\d+)?|[一二两三半])"
+                    rf"\s*年(?![级底初中末内前后度份制龄纪代轻])(?!\s*{_RELATIVE})")
+_START = re.compile(r"到岗|入职|上岗|报到|到职|开始实习")
+# A start verb commits to a date only with a time next to it: 随时可以入职 does, 期待入职贵司 does not.
+_WHEN = re.compile(r"\{availability\.start_date\}|随时|马上|立即|立刻|即刻|即日|当[天日]|今天|明天|后天|现在|目前"
+                   r"|下{1,2}个?(?:周|星期|礼拜|月)|[本这]个?(?:周|星期|礼拜|月)|月[初中底末]|年[初中底后]|尽[快早]"
+                   r"|第一时间|[上下]半年|暑假|寒假|暑期|(?:周|星期|礼拜)[一二三四五六日天]"
+                   r"|\d{4}\s*年|\d{1,2}\s*月|\d{1,2}\s*[日号]|\d{1,2}\s*[-./]\s*\d{1,2}"
+                   r"|[一二三四五六七八九十]+\s*[月号]")
+# 两周后可以入职 promises a start; in 入职 2 周后独立负责 the time comes after the verb and tells something else.
+_WITHIN = re.compile(rf"(?:\d+|[一二两三四五六七八九十几半]+)\s*个?\s*(?:天|周|星期|礼拜|月)\s*{_RELATIVE}")
+# 周一至周五都可以到岗 promises days a week with no number in it.
+_WEEKDAYS = re.compile(r"(?:周|星期|礼拜)[一二三四五六日天]\s*(?:到|至|-|~|～|—)\s*(?:周|星期|礼拜)?[一二三四五六日天]")
+_UNITS = {"days_per_week": "天", "months": "个月"}
+_FIELD_WORDS = {"days_per_week": "days a week", "months": "months"}
+_NOT_GIVEN = "which the profile does not give; leave it out, or ask the user to add it to the profile"
 
 
 class TemplateError(Exception):
@@ -262,9 +291,9 @@ def _source(ref: str, profile: dict, job, entries: dict) -> str:
         return "\n".join(value for value in (job.get("title"), job.get("company")) if isinstance(value, str)) \
             if isinstance(job, dict) else ""
     if ref == AVAILABILITY:
-        availability = profile.get("availability") or {}
-        return "\n".join(str(availability[key]) for key in _AVAILABILITY_FIELDS
-                         if availability.get(key) is not None and not isinstance(availability.get(key), bool))
+        # Its days and months are checked field by field (_Checker._availability), its start date is written
+        # {availability.start_date}; so it vouches for no other number, and a date's 12 is not 12 months.
+        return ""
     return material._source_text(*entries[ref])
 
 
@@ -322,10 +351,74 @@ class _Checker:
             if ref not in refs:
                 self.errors.append(f"{where}.refs: must include {ref!r}, whose placeholder the text uses")
         written = _PLACEHOLDER.sub(" ", text)  # what the Agent wrote itself; placeholders are data
+        # The availability's counts and dates are checked against their own fields, not as numbers besides.
+        checked = _blank(text, self._availability(text, refs, f"{where}.text"))
         # A hand-typed phone or email is reported as that (_wording), not as an invented number besides.
-        self._invented(_EMAIL.sub(" ", _PHONE.sub(" ", written)), refs, f"{where}.text")
+        self._invented(_EMAIL.sub(" ", _PHONE.sub(" ", _PLACEHOLDER.sub(" ", checked))), refs, f"{where}.text")
         self._wording(written, refs, f"{where}.text", slot)
         return filled
+
+    def _availability(self, text: str, refs: list, where: str) -> list:
+        """Check what the text promises about the availability; return the spans checked here.
+
+        Days a week and months are compared with availability.days_per_week and availability.months alone,
+        written in Arabic digits or as the placeholder (五天, 半年 cannot be checked, so they are refused); a
+        start is written {availability.start_date}, not by hand or as 随时. A promise the profile has no value
+        for fails, and any promise needs the segment to cite the availability.
+        """
+        availability = self.profile.get("availability")
+        availability = availability if isinstance(availability, dict) else {}
+        # Other placeholders are masked, so {exp-1.name} lends no digit or word; positions stay the same.
+        masked = _PLACEHOLDER.sub(lambda m: m.group(0) if m.group(1).startswith(AVAILABILITY + ".")
+                                  else "_" * len(m.group(0)), text)
+        spans, problems, promised = [], [], False
+        for clause in _CLAUSE.finditer(masked):
+            body, taken = clause.group(0), []
+            counts = []
+            if _WEEKLY.search(body):
+                counts += [(match, "days_per_week", False) for match in _DAYS.finditer(body)]
+            if _STAY.search(body):
+                counts += [(match, "months", regex is _YEARS) for regex in (_MONTHS, _YEARS)
+                           for match in regex.finditer(body)]
+            for match, field, years in counts:
+                if any(match.start() < end and start < match.end() for start, end in taken):
+                    continue
+                taken.append(match.span())
+                promised = True
+                problem = _count_problem(match, field, years, availability)
+                if problem:
+                    problems.append(f"{where}: {problem}")
+            if _START.search(body) or _STAY.search(body):
+                for match in _WEEKDAYS.finditer(body):
+                    taken.append(match.span())
+                    promised = True
+                    value = availability.get("days_per_week")
+                    problems.append(f"{where}: {match.group(0)!r} promises days a week; " + (
+                        f"write {value}天 or {{availability.days_per_week}}天" if _positive(value) else
+                        f"it is availability.days_per_week, {_NOT_GIVEN}"))
+            rest = _blank(body, taken)
+            verbs = [match.start() for match in _START.finditer(rest)]
+            times = [match.span() for match in _WHEN.finditer(rest)] + \
+                    [match.span() for match in _WITHIN.finditer(rest) if verbs and match.end() <= verbs[-1]]
+            if verbs and times:
+                promised = True
+                if "{availability.start_date}" not in rest:
+                    quote = text[clause.start():clause.end()].strip()
+                    start = availability.get("start_date")
+                    if not isinstance(start, str) or not start:
+                        problems.append(f"{where}: {quote!r} promises when you can start; it is "
+                                        f"availability.start_date, {_NOT_GIVEN}")
+                    else:
+                        problems.append(f"{where}: {quote!r} promises when you can start; write the date as "
+                                        f"{{availability.start_date}} (the profile gives {start}), not by hand "
+                                        "and not as a word like 随时 or 明天")
+                    taken += times
+            spans += [(clause.start() + start, clause.start() + end) for start, end in taken]
+        if promised and AVAILABILITY not in refs:
+            self.errors.append(f"{where}: commits to a start date, days a week or a length of stay without "
+                               f"citing {AVAILABILITY!r}; write what the profile's availability says, and cite it")
+        self.errors.extend(problems)
+        return spans
 
     def _invented(self, text: str, refs: list, where: str) -> None:
         source = "\n".join(_source(ref, self.profile, self.job, self.entries) for ref in refs)
@@ -348,9 +441,6 @@ class _Checker:
         if _PHONE.search(text) or _EMAIL.search(text):
             self.errors.append(f"{where}: a phone number or email typed by hand; use {{contact.phone}} or "
                                f"{{contact.email}} in an email's {SIGNATURE} segment")
-        if _COMMITMENT.search(text) and AVAILABILITY not in refs:
-            self.errors.append(f"{where}: commits to a start date, days a week or a length of stay without "
-                               f"citing {AVAILABILITY!r}; write what the profile's availability says, and cite it")
         for group in self.banned["errors"]:
             for hit in _hits(group, text, source):
                 self.errors.append(f"{where}: {hit!r} - {group['reason']}")
@@ -362,6 +452,39 @@ class _Checker:
             group = self.banned[extra]
             for hit in _hits(group, text, source):
                 self.warnings.append(f"{where}: {hit!r} - {group['reason']}")
+
+
+def _blank(text: str, spans) -> str:
+    """text with each span replaced by spaces, so the positions of the rest stay the same."""
+    chars = list(text)
+    for start, end in spans:
+        chars[start:end] = " " * (end - start)
+    return "".join(chars)
+
+
+def _count_problem(match, field: str, years: bool, availability: dict):
+    """What is wrong with one count of days a week or months a message promises, or None."""
+    count, quote, unit = match.group("count"), match.group(0).strip(), _UNITS[field]
+    placeholder = f"{{{AVAILABILITY}.{field}}}"
+    if count.startswith("{"):
+        if count != placeholder or years:
+            return f"{quote!r}: {_FIELD_WORDS[field]} are written {placeholder}{unit}"
+        return None  # filled from the profile, and fill() reports a value the profile does not give
+    value = availability.get(field)
+    if value is None or isinstance(value, bool):
+        return f"{quote!r} promises {_FIELD_WORDS[field]}; it is availability.{field}, {_NOT_GIVEN}"
+    if not count[0].isdigit():
+        return (f"{quote!r}: write {_FIELD_WORDS[field]} in Arabic digits ({value}{unit}) or as {placeholder}{unit}, "
+                "so they can be checked against the profile")
+    figures = [Fraction(figure) for figure in re.findall(r"\d+(?:\.\d+)?", count)]
+    if years:
+        figures = [figure * 12 for figure in figures]
+    elif (match.groupdict().get("unit") or "") == "个半月":
+        figures = [figure + Fraction(1, 2) for figure in figures]
+    if any(figure != value for figure in figures):
+        return (f"{quote!r} is not the profile's availability.{field} ({value}); write {value}{unit} "
+                f"or {placeholder}{unit}")
+    return None
 
 
 def _hits(group: dict, text: str, source: str) -> list:
