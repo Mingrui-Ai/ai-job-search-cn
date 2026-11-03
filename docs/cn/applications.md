@@ -141,6 +141,7 @@
 
 - 材料要能通过 `material validate`（对照当前档案；档案改过只给警告），而且必须是这个岗位的材料；
 - 发出的文件不在 `resumes/<岗位id>/` 下、或者文件名和材料编号对不上，给警告，照样记录；
+- 发出的文件用 `resume build` 的说明文件核对（第 12 节）；对不上、找不到说明文件，都给警告，照样记录；
 - 材料旁边有通过了这一版材料的审核结果（`review-<n>-r<轮次>.json`，`material_hash` 相同、`verdict` 为 `pass`）时，记下最后一轮的路径（`review_path`）；没有时给警告。
 
 然后把材料 JSON（`material.json`）和发出的文件（`sent-1.pdf`、`sent-2.docx`……，保留扩展名）**复制**进 `artifacts/<投递id>/mv_…/`，记下实际字节的 SHA-256 和大小。以后材料被改、PDF 重新生成、档案更新，归档和摘要都不变。`material_path` 只说明来源，以后不从那里读。
@@ -208,7 +209,7 @@ python -m jobsearch_cn application export [<投递id> ...] [--out 文件名.json
 - 每条投递：id 和字段的格式，事件从 1 连续编号，每条事件的 payload 字段齐全、取值合法，重放得到的状态、投出时间、渠道、`revision` 和表里存的一致；补录的必须已投出；
 - 事件引用的材料版本和发出文件都登记了；归档文件都在，字节的 SHA-256 和大小没变；现在的投递投出了，就要有快照记录；
 - 请求表里每个 `request_id` 对应的事件确实是它写的；
-- 警告：投出时材料未记录的投递；原因、平台名里像手机号、邮箱、链接的文字；
+- 警告：投出时材料未记录的投递；`materials_check` 为 `unchecked` 的投递（第 12 节）；原因、平台名里像手机号、邮箱、链接的文字；
 - `orphans`：`artifacts/` 下没有登记的文件和目录。
 
 ## 11. 隐私
@@ -240,7 +241,16 @@ python -m jobsearch_cn application export [<投递id> ...] [--out 文件名.json
   ```
 
   `material_hash` 是 `review.material_hash`，`profile_hash` 是当前档案的 `score.profile_hash`，`built_at` 带时区，`files` 列出这次输出的每个文件名和字节 SHA-256。
-- 投出时核对：发出的文件旁边有说明文件时，说明文件里的 `material_hash` 要等于 `--material` 的当前值，发出文件的摘要要在 `files` 里。对不上只给警告（手工改过的 Word 就是这样），照样记录用户说发出的文件。
-- 核对结果记进 `submitted` 事件的 `materials_check`（导出的 `submission.materials_check` 里也有）：每个发出文件都对得上为 `match`；有一个对不上为 `mismatch`；没有对不上、但有发出文件旁边没有可读的说明文件为 `unchecked`；没有发出文件为 null。
+- 投出时用哪个说明文件核对：
+  - 给了 `--material`：用这份材料的说明文件核对所有发出的文件。说明文件在 `resumes/<岗位id>/` 下，名字是材料文件名去掉 `.json` 再加 `.build.json`，就是 `resume build` 写的那个。发出的文件改了名字（例如另存为"姓名-岗位.pdf"）也照样核对。
+  - 没给 `--material`：按每个发出文件自己的名字找它旁边的说明文件。`resume-<n>.<扩展名>` 找 `resume-<n>.build.json`，别的名字找去掉扩展名再加 `.build.json` 的那个。
+- 核对的内容：发出文件的摘要要在说明文件的 `files` 里；给了 `--material` 时，说明文件里的 `material_hash` 还要等于材料的当前值。对不上只给警告（手工改过的 Word 就是这样），照样记录用户说发出的文件。
+- 核对结果记进 `submitted` 事件的 `materials_check`（导出的 `submission.materials_check` 里也有）：
+  - 都对得上为 `match`；
+  - 有一处对不上为 `mismatch`，改过内容的文件就是这样；
+  - 没有对不上、但找不到说明文件或说明文件读不了为 `unchecked`；
+  - 没有发出文件为 null。
+
+  `unchecked` 也给警告，照样记录，`validate` 也列出来。
 - 说明文件只列这次 build 实际写出的文件。一个文件都没写出来（例如 PDF 生成失败）时不写说明文件，也不覆盖原来那份：原来的文件和原来的说明文件还对得上。build 失败时的退出码和输出照旧。
 - `resume build` 的输出里多一项 `build_note`，是说明文件的路径；没写说明文件时为 null。

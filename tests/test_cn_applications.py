@@ -22,7 +22,7 @@ from unittest import mock
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-from jobsearch_cn import applications, cli, store  # noqa: E402
+from jobsearch_cn import applications, cli, review, store  # noqa: E402
 
 FIXTURE = REPO / "tests" / "fixtures" / "cn" / "material" / "tech-m3"
 JD = REPO / "tests" / "fixtures" / "cn" / "jd" / "boss_intern.txt"
@@ -96,6 +96,15 @@ class Data(unittest.TestCase):
 
     def files(self) -> list:
         return sorted(path.relative_to(self.data).as_posix() for path in self.data.rglob("*"))
+
+    def build_note(self, material_hash=None, sha=None):
+        """resume-1.build.json as resume build writes it for self.material and self.pdf (applications.md §12)."""
+        record = json.loads(self.material.read_text(encoding="utf-8"))
+        note = {"schema_version": 1, "kind": "resume-build", "material": "resume-1.json",
+                "material_hash": material_hash or review.material_hash(record), "profile_hash": "x",
+                "built_at": "2026-11-03T10:00:00+08:00",
+                "files": [{"name": "resume-1.pdf", "sha256": sha or applications._sha256(self.pdf.read_bytes())}]}
+        (self.pdf.parent / "resume-1.build.json").write_text(json.dumps(note), encoding="utf-8")
 
 
 class Schema(Data):
@@ -480,18 +489,9 @@ class Materials(Data):
         self.assertEqual([item["path"].rsplit("/", 1)[1] for item in files], ["material.json", "sent-1.pdf",
                                                                               "sent-2.docx"])
 
-    def build_note(self, material_hash=None, sha=None):
-        from jobsearch_cn import review
-        record = json.loads(self.material.read_text(encoding="utf-8"))
-        note = {"schema_version": 1, "kind": "resume-build", "material": "resume-1.json",
-                "material_hash": material_hash or review.material_hash(record), "profile_hash": "x",
-                "built_at": "2026-11-03T10:00:00+08:00",
-                "files": [{"name": "resume-1.pdf", "sha256": sha or applications._sha256(self.pdf.read_bytes())}]}
-        (self.pdf.parent / "resume-1.build.json").write_text(json.dumps(note), encoding="utf-8")
-
-    def submit_with_material(self):
+    def submit_with_material(self, *sent):
         return self.write("record", self.job, "--channel", "portal", "--submitted", "--material", self.material,
-                          "--sent", self.pdf)
+                          "--sent", *(sent or (self.pdf,)))
 
     def test_sent_files_are_checked_against_their_build_note(self):
         self.build_note()
@@ -517,10 +517,57 @@ class Materials(Data):
         code, out, err = self.cli("validate")
         self.assertEqual(code, 0, err)
 
-    def test_no_build_note_is_unchecked_and_no_files_is_null(self):
-        self.assertEqual(self.submit_with_material()["application"]["submission"]["materials_check"], "unchecked")
+    def test_the_material_s_build_note_checks_every_sent_file_renamed_or_not(self):
+        """With --material, its note decides, not the sent file's name: a renamed copy matches, an edited one is a
+        mismatch, not unchecked."""
+        self.build_note()
+        renamed = self.data / "姓名-岗位.pdf"
+        renamed.write_bytes(self.pdf.read_bytes())
+        out = self.submit_with_material(renamed)
+        self.assertEqual(out["application"]["submission"]["materials_check"], "match")
+        edited = self.data / "姓名-岗位-改.pdf"
+        edited.write_bytes(self.pdf.read_bytes() + b"edited by hand\n")
+        out = self.submit_with_material(renamed, edited)
+        self.assertEqual(out["application"]["submission"]["materials_check"], "mismatch")
+        warnings = "\n".join(out["warnings"])
+        self.assertIn("姓名-岗位-改.pdf: not a file resume-1.build.json records", warnings)
+        self.assertNotIn("姓名-岗位.pdf: not a file", warnings)
+
+    def test_without_a_material_each_sent_file_is_looked_up_by_its_own_name(self):
+        self.build_note()
+        out = self.write("record", self.job, "--channel", "portal", "--submitted", "--sent", self.pdf)
+        self.assertEqual(out["application"]["submission"]["materials_check"], "match")
+        renamed = self.data / "姓名-岗位.pdf"
+        renamed.write_bytes(self.pdf.read_bytes())
+        out = self.write("record", self.job, "--channel", "portal", "--submitted", "--sent", renamed, self.pdf)
+        self.assertEqual(out["application"]["submission"]["materials_check"], "unchecked")
+        self.assertIn("姓名-岗位.pdf: no resume build note 姓名-岗位.build.json", "\n".join(out["warnings"]))
+
+    def test_unchecked_is_warned_about_recorded_and_listed_by_validate(self):
+        recorded = []
+        for note in (None, "not json"):
+            with self.subTest(note=note):
+                if note is not None:
+                    (self.pdf.parent / "resume-1.build.json").write_text(note, encoding="utf-8")
+                out = self.submit_with_material()
+                application = out["application"]
+                self.assertEqual(application["submission"]["materials_check"], "unchecked")
+                self.assertTrue(application["submission"]["materials_recorded"])
+                self.assertRegex("\n".join(out["warnings"]),
+                                 "resume-1.pdf: no resume build note resume-1.build.json" if note is None else
+                                 "resume-1.build.json: the build note is unreadable; resume-1.pdf recorded unchecked")
+                recorded.append(application["application_id"])
+        code, out, err = self.cli("validate")
+        self.assertEqual(code, 0, err)
+        self.assertTrue(out["valid"])
+        for application_id in recorded:
+            self.assertIn(f"{application_id}: materials_check unchecked", "\n".join(out["warnings"]))
+
+    def test_no_sent_file_is_null_and_not_warned_about(self):
         out = self.write("record", self.job, "--channel", "email", "--submitted")
         self.assertIsNone(out["application"]["submission"]["materials_check"])
+        self.assertNotIn("build note", "\n".join(out["warnings"]))
+        self.assertNotIn("materials_check", "\n".join(self.cli("validate")[1]["warnings"]))
 
     def test_a_material_for_another_job_or_an_invalid_one_is_refused(self):
         other = self.data / "resume-1.json"
@@ -751,6 +798,7 @@ class Validate(Data):
 
     def test_a_clean_database_is_valid(self):
         application_id = self.drafted()
+        self.build_note()
         self.write("submit", application_id, "--expected-revision", "1", "--material", self.material,
                    "--sent", self.pdf)
         self.move(application_id, "interview")

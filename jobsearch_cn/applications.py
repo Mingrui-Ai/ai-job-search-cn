@@ -709,7 +709,7 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
     if not sent_paths:
         warnings.append("no sent file recorded (--sent); only the material is kept")
     resumes = root / "resumes" / job_id
-    checks = []
+    sent_hashes = []
     for index, sent in enumerate(sent_paths, start=1):
         sent_file = Path(sent)
         data = _read_file(sent_file)
@@ -727,39 +727,65 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
                             f"{number}.json")
         if not data:
             warnings.append(f"{sent_file.name}: the file is empty")
-        checks.append(_build_check(sent_file, _sha256(data), version["material_hash"], warnings))
-    check = None if not checks else "mismatch" if "mismatch" in checks else         "match" if all(item == "match" for item in checks) else "unchecked"
+        sent_hashes.append((sent_file, _sha256(data)))
+    material_file = None if material_path is None else Path(material_path)
+    check = _check_builds(resumes, material_file, version["material_hash"], sent_hashes, warnings)
     digest["check"] = check
     return {"version": version, "files": files, "digest": digest, "warnings": warnings, "check": check}
 
 
 def build_note_path(file: Path) -> Path:
-    """resume-<n>.build.json beside a built file (docs/cn/applications.md section 12)."""
+    """The build note looked for beside a sent file when no material is given: resume-<n>.build.json for
+    resume-<n>.<ext>, otherwise the name without its extension plus .build.json (applications.md section 12)."""
     named = _SENT_NAME.fullmatch(file.name)
     return file.parent / f"{named.group(1)}.build.json" if named else file.parent / (file.stem + ".build.json")
 
 
-def _build_check(sent_file: Path, sent_hash: str, material_hash, warnings: list) -> str:
-    """'match', 'mismatch' or 'unchecked' (no readable build note beside the sent file). Only warns."""
-    note_file = build_note_path(sent_file)
+def material_note_path(resumes: Path, material_file: Path) -> Path:
+    """The note resume build writes for a material: resumes/<job>/<material name without .json>.build.json."""
+    name = material_file.name
+    return resumes / ((name[:-len(".json")] if name.endswith(".json") else name) + ".build.json")
+
+
+def _check_builds(resumes: Path, material_file, material_hash, sent: list, warnings: list):
+    """materials_check, the sent files [(path, sha256)] against resume build notes (applications.md section 12).
+    With a material, its note checks every sent file, renamed or not; without one, each sent file is looked up by
+    its own name. Returns 'match', 'mismatch' or 'unchecked' (both only warned about), or None with no sent file."""
+    if not sent:
+        return None
+    if material_file is not None:
+        groups = {material_note_path(resumes, material_file): sent}
+    else:
+        groups = {}
+        for item in sent:
+            groups.setdefault(build_note_path(item[0]), []).append(item)
+    results = [_check_note(note_file, items, material_hash, warnings) for note_file, items in groups.items()]
+    return "mismatch" if "mismatch" in results else "unchecked" if "unchecked" in results else "match"
+
+
+def _check_note(note_file: Path, sent: list, material_hash, warnings: list) -> str:
+    """One build note against the sent files it should list; material_hash is None when no material is given."""
+    names = ", ".join(path.name for path, _ in sent)
     if not note_file.is_file():
+        warnings.append(f"{names}: no resume build note {note_file.name} to check against; recorded unchecked, "
+                        "as the file(s) you say were sent")
         return "unchecked"
     try:
         note = json.loads(note_file.read_text(encoding="utf-8-sig"))
-        files = note["files"]
-        hashes = {item["sha256"] for item in files}
+        hashes = {item["sha256"] for item in note["files"]}
         note_hash = note["material_hash"]
     except (OSError, ValueError, KeyError, TypeError):
-        warnings.append(f"{note_file.name}: the build note is unreadable; {sent_file.name} is not checked against it")
+        warnings.append(f"{note_file.name}: the build note is unreadable; {names} recorded unchecked")
         return "unchecked"
     result = "match"
-    if sent_hash not in hashes:
-        warnings.append(f"{sent_file.name}: not the file {note_file.name} records (edited after resume build?); "
-                        "recorded as the file you say was sent")
-        result = "mismatch"
+    for path, sha256 in sent:
+        if sha256 not in hashes:
+            warnings.append(f"{path.name}: not a file {note_file.name} records (edited after resume build?); "
+                            "recorded as the file you say was sent")
+            result = "mismatch"
     if material_hash is not None and note_hash != material_hash:
-        warnings.append(f"{sent_file.name}: built from another version of the material than the one given "
-                        f"({note_file.name}); recorded as given")
+        warnings.append(f"{note_file.name}: built from another version of the material than the one given; "
+                        "recorded as given")
         result = "mismatch"
     return result
 
@@ -1294,6 +1320,9 @@ def _check_application(connection, row, errors: list, warnings: list, paths: Pat
                 errors.append(f"{where} event {event['seq']}: sent file {ref} is not in the record")
     if submitted and row["record_origin"] == "current" and not submitted["payload"]["material_version_ids"]:
         warnings.append(f"{where}: 材料未记录 (no material recorded with the submission)")
+    if submitted and submitted["payload"]["materials_check"] == "unchecked":
+        warnings.append(f"{where}: materials_check unchecked (no resume build note the sent files were checked "
+                        "against)")
     for version in versions.values():
         for item in version["files"]:
             _check_archived(paths, item["path"], item["sha256"], item["size_bytes"], f"{where} {version['version_id']}"

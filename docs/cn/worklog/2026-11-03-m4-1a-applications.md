@@ -74,4 +74,31 @@
 
 规划者裁定（cn-e3，2026-11-03）：说明文件只列这次实际写出的文件；一个都没写出来时不写说明文件、不覆盖原来那份，退出码和输出照旧。已实现并加测试（`test_a_failed_build_keeps_the_earlier_build_note`）。说明文件格式由规划者转告 Claude C。
 
-下一步：V25 冻结后等规划者通知开 PR（审核者 Codex B）。
+已开 PR #122（审核者 Codex B，V25 由独立会话对照）。
+
+规划者裁定（cn-e3，2026-11-03，#122 评论；V25 对照结果见 #124：80 个场景，65 个通过）：
+
+- 要改：
+  - A50（P2）：`materials_check` 为 `unchecked` 时也要给警告（命令输出里有，`validate` 也报），照样记录。
+  - A48（同一段代码）：给了 `--material` 时，用材料对应的说明文件（材料文件名去掉 `.json` 加 `.build.json`）核对所有发出的文件；没给材料时才按发出文件的名字找。改过内容的文件这时是 `mismatch`，不再是 `unchecked`。
+- 批准为已批准的差别，不改：
+  - A43–A45：发出文件的 `file_id` 用 `sent-1`、`sent-2`。
+  - A29–A37：`status <id> drafted` 被 argparse 拒绝（退出 2，什么也不写）。
+  - V25 标"按实现核对"的 12 处。
+
+**进展**（2026-11-04，按上面的裁定改）
+
+- `prepare_materials` 先读完所有发出的文件，再一起核对：
+  - 给了材料：用 `resumes/<岗位id>/<材料名去掉 .json>.build.json`（`material_note_path`）核对全部发出文件，并比 `material_hash`；
+  - 没给材料：按发出文件的名字找旁边的说明文件（`build_note_path`），同一个说明文件对应的几个文件一起核对；
+  - 汇总：有 `mismatch` 就是 `mismatch`，否则有 `unchecked` 就是 `unchecked`，都对得上才是 `match`。
+- 找不到说明文件时给警告（`… no resume build note … to check against; recorded unchecked …`）；读不了的说明文件照旧给警告。`validate` 对 `unchecked` 的投递给警告（`<投递id>: materials_check unchecked …`）。
+- 测试：
+  - 改名后的文件用材料的说明文件核对，内容一样为 `match`，改过内容为 `mismatch`；
+  - 没给材料时按名字找，改名的文件为 `unchecked`；
+  - 找不到说明文件和说明文件读不了这两种 `unchecked`，命令输出和 `validate` 都有警告；
+  - 没有发出文件时为 null，不给这类警告。
+- `test_a_clean_database_is_valid` 先写一份说明文件，干净的库仍然没有警告；`build_note` 从 `Materials` 挪到 `Data`，两组测试共用。
+- applications.md 第 6、10、12 节同步改。
+
+下一步：V25 重跑受影响的场景、更新 #124；代审只看改动的部分。
