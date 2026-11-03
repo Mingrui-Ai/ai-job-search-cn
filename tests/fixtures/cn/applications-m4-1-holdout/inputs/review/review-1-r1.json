@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "kind": "resume-review",
+  "job_id": "job_fa26c5d52ff7",
+  "material": "resume-1.json",
+  "material_hash": "ee15c290c88fcab0ca9fadf21d6f52b9fabba24ff5a0e462b271ed5905e54250",
+  "round": 1,
+  "mode": "independent",
+  "created": "2026-11-02T10:00:00+08:00",
+  "verdict": "pass",
+  "findings": [],
+  "coverage": [
+    {
+      "requirement": "Python 或 Go",
+      "status": "covered",
+      "where": [
+        "skills[1]",
+        "summary.text",
+        "experience[2].bullets[0].text",
+        "skills[5]",
+        "experience[1].bullets[0].text"
+      ],
+      "note": null
+    },
+    {
+      "requirement": "SQL",
+      "status": "covered",
+      "where": [
+        "skills[3]",
+        "experience[2].bullets[0].text"
+      ],
+      "note": null
+    },
+    {
+      "requirement": "Docker",
+      "status": "covered",
+      "where": [
+        "skills[4]",
+        "experience[1].bullets[0].text"
+      ],
+      "note": null
+    },
+    {
+      "requirement": "RAG",
+      "status": "covered",
+      "where": [
+        "skills[2]",
+        "summary.text",
+        "experience[0].bullets[0].text"
+      ],
+      "note": null
+    }
+  ]
+}
