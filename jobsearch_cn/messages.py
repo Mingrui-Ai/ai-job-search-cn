@@ -366,7 +366,7 @@ class _Checker:
 
 def _hits(group: dict, text: str, source: str) -> list:
     """The banned words a text uses, in order, once each; a word the cited entries themselves use passes
-    (an award called 第一名, a course called 健康管理)."""
+    (an internship whose own bullet says 覆盖率 100%)."""
     found = []
     for pattern in group["compiled"]:
         for match in pattern.finditer(text):

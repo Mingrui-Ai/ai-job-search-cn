@@ -17,7 +17,7 @@
 | [jd-import.md](jd-import.md) | JD 导入工作流（Codex 与 Claude Code 共用）：解析、补全、校验、保存、去重、查询 |
 | [profile.md](profile.md) | 个人档案格式（Profile v1）：字段、来源规则、与 JD 硬性条件的对照 |
 | [profile-setup.md](profile-setup.md) | 建档工作流 cn-setup（Codex 与 Claude Code 共用） |
-| [material.md](material.md) | 求职材料格式（M3-1）：简历材料怎么引用档案条目 id，`material validate` 的检查项 |
+| [material.md](material.md) | 求职材料格式（M3-1）：简历材料怎么引用档案条目 id，`material validate` 的检查项；打招呼语、投递邮件、内推请求（M3-4）的格式、模板和 `material template`、`material render` |
 | [review-checklist.md](review-checklist.md) | 中文简历审核清单（A–F，每条有编号）和"起草 + 审核"工作流设计（M3-3） |
 | [review-format.md](review-format.md) | 审核结果格式（M3-3）：`review draft` 机器初稿（技能覆盖、标点和空格警告）、`review validate`、`review show` |
 | [resume-workflow.md](resume-workflow.md) | 生成简历工作流 cn-resume（三个 Agent 共用，M3-3）：起草材料、生成 PDF 和 Word、独立审核（最多 2 轮）、交给用户 |
@@ -66,6 +66,8 @@ python -m jobsearch_cn match filter <id>             # 用个人档案过滤一�
 python -m jobsearch_cn match report                  # 把已保存的评分生成可读的报告（HTML）和反馈表（CSV），写到 data/reports/
 python -m jobsearch_cn resume sample                 # 用固定的虚构内容生成一页 PDF，验证 Typst 和字体（docs/cn/resume-pdf.md）
 python -m jobsearch_cn material validate resume-1.json   # 对照个人档案检查一份简历材料（docs/cn/material.md）
+python -m jobsearch_cn material template <id> --kind greeting   # 打招呼语、邮件、内推请求：按方向选模板（material.md 第 7 节）
+python -m jobsearch_cn material render greeting-1.json   # 检查通过后输出可以直接复制的文字；只生成，不发送
 python -m jobsearch_cn resume build resume-1.json    # 从检查过的材料生成一页 PDF 和 Word 版，写到 data/resumes/<岗位id>/
 python -m jobsearch_cn profile validate              # 校验 data/profile/ 下的个人档案；profile show 查看（隐去联系方式）
 ```

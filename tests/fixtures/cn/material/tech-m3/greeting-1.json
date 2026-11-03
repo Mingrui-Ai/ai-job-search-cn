@@ -10,7 +10,7 @@
   "segments": [
     {
       "slot": "opening",
-      "text": "您好，我是{edu-1.school}{edu-1.major}专业的硕士生，想应聘贵司的{job.title}。",
+      "text": "您好，我是{edu-1.school}{edu-1.major}专业的{edu-1.level}生，想应聘贵司的{job.title}。",
       "refs": [
         "edu-1",
         "job"
