@@ -68,7 +68,7 @@
       {
         "slot": "fit",
         "required": false,
-        "hint": "为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；附上 GitHub 或项目地址（档案里有才写）"
+        "hint": "为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；附上 GitHub 或个人主页，写成 {contact.github}、{contact.website}（档案里有才写）"
       },
       {
         "slot": "availability",

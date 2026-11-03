@@ -405,6 +405,9 @@ def _check_material(args, record, data, job, vocabulary=None):
         # Unlike a CV, a message that cites the job or fills {job.title} needs it stored: messages.validate says so.
         templates, banned = _message_files(args)
         return messages.validate(record, data, vocabulary, job, templates, banned)
+    if isinstance(record, dict) and isinstance(record.get("kind"), str) and record["kind"] not in material.KINDS:
+        # A misspelled kind (greet) is neither a CV nor a message: name the kinds, not the CV fields it lacks.
+        return [f"kind: must be one of {', '.join(material.KINDS + messages.KINDS)}"], []
     return material.validate(record, data, vocabulary, job, _material_notes(args, record))
 
 
@@ -440,8 +443,10 @@ def cmd_material_render(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
-    if not _is_message(record):
+    kind = record.get("kind") if isinstance(record, dict) else None
+    if not _is_message(record) and (kind in material.KINDS or not isinstance(kind, str)):
         raise InputError(f"material render renders {', '.join(messages.KINDS)}; a CV is built with resume build")
+    # A misspelled kind is checked as material validate checks it, so the two say the same.
     job = _material_job(args, record)
     errors, warnings = _check_material(args, record, data, job)
     if errors:

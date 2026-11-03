@@ -202,8 +202,34 @@ class Placeholders(unittest.TestCase):
         self.assertTrue(any("the job is not in the job store" in error for error in errors), errors)
 
     def test_a_template_marker_left_in(self):
-        errors = errors_of(with_segment(GREETING, 3, "【这里写结尾】"))
-        self.assertTrue(any("模板标记没有替换" in error for error in errors), errors)
+        for text in ("【这里写结尾】", "期待加入XX公司。", "期待加入xxx团队。", "期待加入××公司。"):
+            errors = errors_of(with_segment(GREETING, 3, text))
+            self.assertTrue(any("模板标记没有替换" in error for error in errors), (text, errors))
+        # Two or more X standing alone; 5xx and XXL-JOB are no marker.
+        for text in ("把 5xx 错误率降下来了。", "熟悉 XXL-JOB 调度。"):
+            self.assertFalse(any("模板标记" in error for error in errors_of(with_segment(GREETING, 3, text))), text)
+
+    def test_a_brace_left_once_filled(self):
+        for text, refs in (("期待{ 回复 }", []), ("我是{{edu-1.school}}的学生。", ["edu-1"])):
+            errors = errors_of(with_segment(GREETING, 3, text, refs))
+            self.assertEqual(len(errors), 1, (text, errors))
+            self.assertIn("once filled it still has a brace", errors[0])
+        # A stored value with braces in it would go out as they are.
+        job = copy.deepcopy(TECH_JOB)
+        job["title"] = "后端开发{待定}实习生"
+        errors = errors_of(GREETING, job=job)
+        self.assertEqual(len(errors), 1, errors)
+        self.assertIn("segments[0].text: once filled it still has a brace", errors[0])
+
+    def test_the_github_and_website_placeholders(self):
+        data = with_segment(EMAIL, 4, "我的代码都在 {contact.github}。", [], slot="fit")  # in place of availability
+        self.assertEqual(check(data), ([], []))
+        self.assertIn("我的代码都在 github.com/example。", messages.render(data, TECH_PROFILE, TECH_JOB))
+        # In a greeting, a link the platform may block warns, as one typed by hand does.
+        self.assertEqual(check(with_segment(GREETING, 3, "代码在 {contact.github}。"))[1],
+                         ["segments[3].text: '{contact.github}' - 招呼语里放链接，平台常会屏蔽"])
+        self.assertEqual(errors_of(with_segment(GREETING, 3, "主页 {contact.website}。")),
+                         ["segments[3].text: {contact.website}: the profile has no contact.website"])
 
 
 class Availability(unittest.TestCase):
@@ -279,6 +305,15 @@ class Wording(unittest.TestCase):
             self.assertEqual(len(errors), 1, errors)  # not an invented number besides
             self.assertIn("typed by hand", errors[0], text)
 
+    def test_a_hand_typed_wechat_or_qq(self):
+        for text in ("您好，我的微信号：li_ming_2024，方便时加我。", "可以加微信 shili_handle 联系。", "vx: shili-2024",
+                     "WeChat：liming2024", "QQ：123456789", "微信号是 13912345678"):
+            errors = errors_of(with_segment(GREETING, 3, text))
+            self.assertEqual(len(errors), 1, (text, errors))  # the digits in it are no invented number besides
+            self.assertTrue("手写了微信号、QQ 号这类联系方式" in errors[0] or "typed by hand" in errors[0], (text, errors))
+        for text in ("做过微信小程序的前端。", "熟悉 wxPython。"):
+            self.assertEqual(errors_of(with_segment(GREETING, 3, text)), [], text)
+
     def test_a_commitment_without_the_availability(self):
         for text in ("可以尽快到岗。", "随时可以入职。", "能实习半年。", "每周可以到岗 4 天。", "可以连续实习 6 个月。"):
             errors = errors_of(with_segment(GREETING, 3, text))
@@ -289,9 +324,11 @@ class Wording(unittest.TestCase):
 
     def test_m34_sensitive_details_and_boasts_fail(self):
         for text, reason in (("我今年 23 岁。", "敏感个人信息"), ("我是党员。", "敏感个人信息"),
+                             ("我没有重大病史。", "敏感个人信息"), ("家庭住址在示例市。", "敏感个人信息"),
                              ("我的后端能力是顶尖的。", "绝对化的自夸")):
             errors = errors_of(with_segment(GREETING, 3, text))
             self.assertTrue(any(reason in error for error in errors), (text, errors))
+        self.assertEqual(errors_of(with_segment(GREETING, 3, "祝您工作顺利，身体健康！")), [])
 
     def test_a_banned_word_the_cited_entry_uses_passes(self):
         banned = copy.deepcopy(BANNED)
@@ -354,11 +391,16 @@ class Shape(unittest.TestCase):
         data = copy.deepcopy(GREETING)
         data["extra"] = 1
         self.assertIn("extra: unknown field", errors_of(data))
+        for named in ("tech/greeting@abc", "tech/greeting@0", "tech/greeting@", "tech/greeting@1.5", "tech/greeting@-1"):
+            data = copy.deepcopy(GREETING)
+            data["template"] = named
+            self.assertEqual(errors_of(data), ["template: the revision after @ must be a positive integer, "
+                                               "as in 'tech/greeting@1'"], named)
 
     def test_a_newer_template_or_a_changed_profile_warns(self):
         data = copy.deepcopy(GREETING)
-        data["template"] = "tech/greeting@0"
-        self.assertEqual(check(data)[1], ["template: written to tech/greeting@0, the template is now "
+        data["template"] = "tech/greeting@2"  # written to a user's revision 2, which is gone
+        self.assertEqual(check(data)[1], ["template: written to tech/greeting@2, the template is now "
                                           "tech/greeting@1; check the slots still fit"])
         changed = copy.deepcopy(TECH_PROFILE)
         changed["skills"][0]["level"] = "expert"
@@ -407,9 +449,12 @@ class UserFiles(unittest.TestCase):
                 messages.load_templates(self.data)
 
     def test_a_malformed_user_banned_file_is_refused(self):
-        for doc in (["冒昧"], {"errors": "冒昧"}, {"errors": [{"reason": "括号", "patterns": ["("]}]}):
+        for doc in (["冒昧"], {"errors": "冒昧"}, {"errors": [{"reason": "括号", "patterns": ["("]}]},
+                    # A string is no list: "简历" would ban 简 and 历 one by one.
+                    {"errors": [{"reason": "整个词", "words": "简历"}]}, {"warnings": [{"patterns": [3]}]},
+                    {"errors": [{"words": [""]}]}):
             self.write("banned.json", doc)
-            with self.assertRaises(messages.TemplateError):
+            with self.assertRaises(messages.TemplateError, msg=doc):
                 messages.load_banned(self.data)
 
     def test_a_new_revision_warns_a_message_written_to_the_old_one(self):
@@ -513,6 +558,21 @@ class Cli(unittest.TestCase):
         self.assertEqual(outputs[0], outputs[1])
         self.assertEqual(outputs[0]["errors"],
                          ["segments[1].refs[1]: a message does not cite notes.md; only a CV's summary does"])
+
+    def test_a_misspelled_kind_names_all_four(self):
+        record = dict(GREETING, kind="greet")
+        path = self.write(record)
+        for command in (("material", "validate"), ("material", "render")):
+            result = run_cli(*command, str(path), data_dir=self.data)
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertEqual(json.loads(result.stdout),
+                             {"valid": False, "errors": ["kind: must be one of resume, greeting, email, referral"],
+                              "warnings": []})
+        resume = self.data / "resume-1.json"  # the name resume build asks for
+        resume.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        built = run_cli("resume", "build", str(resume), data_dir=self.data)
+        self.assertEqual(built.returncode, 1, built.stdout + built.stderr)
+        self.assertEqual(json.loads(built.stderr)["errors"], ["kind: must be one of resume, greeting, email, referral"])
 
     def test_resume_build_and_review_draft_take_only_a_cv(self):
         path = self.data / "resume-1.json"  # the name resume build asks for, but a greeting inside

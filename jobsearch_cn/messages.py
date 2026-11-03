@@ -3,10 +3,12 @@
 A template (jobsearch_cn/message_templates/<direction>.json, overridable under
 <data dir>/templates/messages/) fixes, for one job direction, the slots a message is made of, their order,
 which kinds of experience each prefers and the length limit. The Agent drafts the text; this module checks
-it. Names, schools, job titles and contact details are not typed into a message: they are placeholders
-({edu-1.school}, {job.title}) filled from the profile and the stored job when the message is rendered, so
-a message has nowhere to invent them. Numbers and skills in the text are checked against what each segment
-cites, as for a CV (material.py). See docs/cn/material.md.
+it. Names, schools, job titles and contact details are written as placeholders ({edu-1.school}, {job.title})
+filled from the profile and the stored job when the message is rendered. The check refuses a phone, email,
+WeChat or QQ id typed by hand and a brace left once the placeholders are filled; a school, company or name
+typed by hand it cannot tell from any other words, so that is for the review (M3-6). Numbers and skills in
+the text are checked against what each segment cites, as for a CV (material.py); days a week, months and the
+start date against the profile's own availability field for each. See docs/cn/material.md.
 """
 from __future__ import annotations
 
@@ -38,8 +40,9 @@ _PLACEHOLDER = re.compile(r"\{([^{}\s]*)\}")
 _ENTRY_FIELDS = {"education": ("school", "major", "level"), "experience": ("name", "org", "role")}
 _AVAILABILITY_FIELDS = ("start_date", "days_per_week", "months")
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
-_CONTACT_ANYWHERE = ("name",)
+_CONTACT_ANYWHERE = ("name", "github", "website")
 _CONTACT_SIGNATURE = ("phone", "email")
+_LINK_PLACEHOLDER = re.compile(r"\{contact\.(?:github|website)\}")  # filled with a link
 # Contact details typed by hand rather than through a placeholder.
 _PHONE = re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
@@ -115,11 +118,17 @@ def load_banned(data_dir=None) -> dict:
                 if not isinstance(groups, list) or not all(isinstance(group, dict) for group in groups):
                     raise TemplateError(f"{user}: {level} must be a list of {{reason, words, patterns}}")
                 for group in groups:
-                    banned[level].append({"reason": str(group.get("reason") or "用户自己加的禁用说法"),
-                                          "words": [w for w in group.get("words") or [] if isinstance(w, str)],
-                                          "patterns": [p for p in group.get("patterns") or []
-                                                       if isinstance(p, str)]})
-    for group in [*banned["errors"], *banned["warnings"], banned["referral_warnings"], banned["greeting_warnings"]]:
+                    lists = {}
+                    for key in ("words", "patterns"):
+                        items = group.get(key)
+                        items = [] if items is None else items
+                        # "words": "简历" would ban 简 and 历 one by one, not the whole word.
+                        if not isinstance(items, list) or not all(isinstance(item, str) and item for item in items):
+                            raise TemplateError(f"{user}: {level}: {key} must be a list of non-empty strings")
+                        lists[key] = items
+                    banned[level].append({"reason": str(group.get("reason") or "用户自己加的禁用说法"), **lists})
+    for group in [*banned["errors"], *banned["warnings"], banned["referral_warnings"], banned["greeting_warnings"],
+                  banned["contact_errors"]]:
         try:
             group["compiled"] = [re.compile(re.escape(word)) for word in group.get("words") or []] + \
                                 [re.compile(pattern) for pattern in group.get("patterns") or []]
@@ -253,7 +262,8 @@ def _resolve(name: str, profile: dict, job, entries: dict, slot: str, kind: str)
                 return None, None, (f"{{{name}}}: the phone and the email belong only in an email's "
                                     f"{SIGNATURE} segment")
         elif field not in _CONTACT_ANYWHERE:
-            return None, None, f"{{{name}}}: contact placeholders are name, and phone and email in a signature"
+            return None, None, (f"{{{name}}}: contact placeholders are {', '.join(_CONTACT_ANYWHERE)}, and phone "
+                                "and email in a signature")
         value = (profile.get("contact") or {}).get(field)
         if not isinstance(value, str) or not value.strip():
             return None, None, f"{{{name}}}: the profile has no contact.{field}"
@@ -352,16 +362,31 @@ class _Checker:
             return ""
         filled, needed, problems = fill(text, self.profile, self.job, self.entries, slot, self.kind)
         self.errors.extend(f"{where}.text: {problem}" for problem in problems)
+        if not problems and ("{" in filled or "}" in filled):
+            # { 回复 } or {{edu-1.school}} written by hand, or a profile or job value with braces in it.
+            at = min(index for index in (filled.find("{"), filled.find("}")) if index >= 0)
+            self.errors.append(f"{where}.text: once filled it still has a brace ({filled[max(0, at - 8):at + 9]!r}); "
+                               "write each placeholder exactly as {entry.field} and no other braces, and fix a "
+                               "profile or job value that has braces in it")
         for ref in needed:
             if ref not in refs:
                 self.errors.append(f"{where}.refs: must include {ref!r}, whose placeholder the text uses")
         written = _PLACEHOLDER.sub(" ", text)  # what the Agent wrote itself; placeholders are data
         # The availability's counts and dates are checked against their own fields, not as numbers besides.
         checked = _blank(text, self._availability(text, refs, f"{where}.text"))
-        # A hand-typed phone or email is reported as that (_wording), not as an invented number besides.
-        self._invented(_EMAIL.sub(" ", _PHONE.sub(" ", _PLACEHOLDER.sub(" ", checked))), refs, f"{where}.text")
+        # A hand-typed phone, email or WeChat id is reported as that (_wording), not as an invented number besides.
+        self._invented(self._without_contacts(_PLACEHOLDER.sub(" ", checked)), refs, f"{where}.text")
         self._wording(written, refs, f"{where}.text", slot)
+        if self.kind == "greeting":
+            for link in _LINK_PLACEHOLDER.findall(text):
+                self.warnings.append(f"{where}.text: {link!r} - {self.banned['greeting_warnings']['reason']}")
         return filled
+
+    def _without_contacts(self, text: str) -> str:
+        text = _EMAIL.sub(" ", _PHONE.sub(" ", text))
+        for pattern in self.banned["contact_errors"]["compiled"]:
+            text = pattern.sub(" ", text)
+        return text
 
     def _availability(self, text: str, refs: list, where: str) -> list:
         """Check what the text promises about the availability; return the spans checked here.
@@ -446,6 +471,9 @@ class _Checker:
         if _PHONE.search(text) or _EMAIL.search(text):
             self.errors.append(f"{where}: a phone number or email typed by hand; use {{contact.phone}} or "
                                f"{{contact.email}} in an email's {SIGNATURE} segment")
+        contacts = self.banned["contact_errors"]
+        for hit in _hits(contacts, _EMAIL.sub(" ", _PHONE.sub(" ", text)), source):
+            self.errors.append(f"{where}: {hit!r} - {contacts['reason']}")
         for group in self.banned["errors"]:
             for hit in _hits(group, text, source):
                 self.errors.append(f"{where}: {hit!r} - {group['reason']}")
@@ -529,8 +557,11 @@ def validate(record, profile: dict, vocabulary, job=None, templates: dict = None
     spec = templates[direction][kind]
     current = template_id(direction, kind, templates)
     named = record.get("template")
-    if not isinstance(named, str) or named.rpartition("@")[0] != current.rpartition("@")[0]:
+    head, _, revision = named.rpartition("@") if isinstance(named, str) else ("", "", "")
+    if head != current.rpartition("@")[0]:
         errors.append(f"template: must be {current!r} (the direction and kind of this material)")
+    elif not re.fullmatch(r"[1-9]\d*", revision):
+        errors.append(f"template: the revision after @ must be a positive integer, as in {current!r}")
 
     checker = _Checker(record, profile, vocabulary, job, banned, errors, warnings)
     subject = record.get("subject")
