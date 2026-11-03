@@ -1320,7 +1320,11 @@ def _check_application(connection, row, errors: list, warnings: list, paths: Pat
                 errors.append(f"{where} event {event['seq']}: sent file {ref} is not in the record")
     if submitted and row["record_origin"] == "current" and not submitted["payload"]["material_version_ids"]:
         warnings.append(f"{where}: 材料未记录 (no material recorded with the submission)")
-    if submitted and submitted["payload"]["materials_check"] == "unchecked":
+    check = submitted["payload"]["materials_check"] if submitted else None
+    if check == "mismatch":
+        warnings.append(f"{where}: materials_check mismatch (a sent file or the material differs from its resume "
+                        "build note)")
+    elif check == "unchecked":
         warnings.append(f"{where}: materials_check unchecked (no resume build note the sent files were checked "
                         "against)")
     for version in versions.values():

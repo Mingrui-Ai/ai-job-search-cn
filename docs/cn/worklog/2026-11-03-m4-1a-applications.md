@@ -101,4 +101,10 @@
 - `test_a_clean_database_is_valid` 先写一份说明文件，干净的库仍然没有警告；`build_note` 从 `Materials` 挪到 `Data`，两组测试共用。
 - applications.md 第 6、10、12 节同步改。
 
+规划者裁定（cn-e3，2026-11-04）：`validate` 把 `materials_check` 为 `mismatch` 的投递也列出来，和 `unchecked` 一样算警告、不算错误。理由：发出的文件和 build 出来、审过的那份对不上，比没法核对更要提醒。
+
+- 已实现：`validate` 对 `mismatch` 给警告（`<投递id>: materials_check mismatch …`），`valid` 仍为 true。
+- 加了测试：`test_validate_lists_a_mismatch_as_a_warning_not_an_error`。
+- applications.md 第 10、12 节同步改。
+
 下一步：V25 重跑受影响的场景、更新 #124；代审只看改动的部分。

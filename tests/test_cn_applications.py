@@ -517,6 +517,16 @@ class Materials(Data):
         code, out, err = self.cli("validate")
         self.assertEqual(code, 0, err)
 
+    def test_validate_lists_a_mismatch_as_a_warning_not_an_error(self):
+        self.build_note(sha="0" * 64)
+        application_id = self.submit_with_material()["application"]["application_id"]
+        code, out, err = self.cli("validate")
+        self.assertEqual(code, 0, err)
+        self.assertEqual((out["valid"], out["errors"]), (True, []))
+        warnings = "\n".join(out["warnings"])
+        self.assertIn(f"{application_id}: materials_check mismatch", warnings)
+        self.assertNotIn("materials_check unchecked", warnings)
+
     def test_the_material_s_build_note_checks_every_sent_file_renamed_or_not(self):
         """With --material, its note decides, not the sent file's name: a renamed copy matches, an edited one is a
         mismatch, not unchecked."""

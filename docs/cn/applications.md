@@ -209,7 +209,7 @@ python -m jobsearch_cn application export [<投递id> ...] [--out 文件名.json
 - 每条投递：id 和字段的格式，事件从 1 连续编号，每条事件的 payload 字段齐全、取值合法，重放得到的状态、投出时间、渠道、`revision` 和表里存的一致；补录的必须已投出；
 - 事件引用的材料版本和发出文件都登记了；归档文件都在，字节的 SHA-256 和大小没变；现在的投递投出了，就要有快照记录；
 - 请求表里每个 `request_id` 对应的事件确实是它写的；
-- 警告：投出时材料未记录的投递；`materials_check` 为 `unchecked` 的投递（第 12 节）；原因、平台名里像手机号、邮箱、链接的文字；
+- 警告：投出时材料未记录的投递；`materials_check` 为 `mismatch` 或 `unchecked` 的投递（第 12 节）；原因、平台名里像手机号、邮箱、链接的文字；
 - `orphans`：`artifacts/` 下没有登记的文件和目录。
 
 ## 11. 隐私
@@ -251,6 +251,6 @@ python -m jobsearch_cn application export [<投递id> ...] [--out 文件名.json
   - 没有对不上、但找不到说明文件或说明文件读不了为 `unchecked`；
   - 没有发出文件为 null。
 
-  `unchecked` 也给警告，照样记录，`validate` 也列出来。
+  `mismatch` 和 `unchecked` 都给警告，照样记录；`validate` 也把这两种投递列在警告里，不算错误。发出的文件和 build 出来、审过的那份对不上，比没法核对更要提醒。
 - 说明文件只列这次 build 实际写出的文件。一个文件都没写出来（例如 PDF 生成失败）时不写说明文件，也不覆盖原来那份：原来的文件和原来的说明文件还对得上。build 失败时的退出码和输出照旧。
 - `resume build` 的输出里多一项 `build_note`，是说明文件的路径；没写说明文件时为 null。
