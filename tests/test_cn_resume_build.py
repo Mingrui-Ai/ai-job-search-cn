@@ -10,6 +10,7 @@ resume build and review draft read the same notes.md. The real build, with
 Typst, is in test_cn_resume_pdf.RealRender, the class CI's real-render job runs.
 """
 import copy
+import hashlib
 import io
 import json
 import os
@@ -23,7 +24,7 @@ from unittest import mock
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-from jobsearch_cn import cli, material, profile, resume_docx, resume_pdf, vocab  # noqa: E402
+from jobsearch_cn import cli, material, profile, resume_docx, resume_pdf, review, vocab  # noqa: E402
 from tests.test_cn_resume_pdf import faked_typst, pdf_with_pages  # noqa: E402
 
 FIXTURE = REPO / "tests" / "fixtures" / "cn" / "material" / "tech-m3"
@@ -226,7 +227,14 @@ class Command(unittest.TestCase):
         self.assertEqual((result["problems"], result["warnings"], result["font"]), ([], [], resume_docx.FONT))
         self.assertEqual((self.folder / "resume-2.pdf").read_bytes(), pdf_with_pages(1))
         self.assertEqual(check.call_args.args[1], resume_pdf.fields_of(rendered(MATERIAL)))
-        self.assertEqual(sorted(os.listdir(self.folder)), ["resume-2.docx", "resume-2.pdf"])
+        self.assertEqual(sorted(os.listdir(self.folder)), ["resume-2.build.json", "resume-2.docx", "resume-2.pdf"])
+        note = json.loads((self.folder / "resume-2.build.json").read_text(encoding="utf-8"))
+        self.assertEqual((note["kind"], note["material"], note["material_hash"]),
+                         ("resume-build", "resume-2.json", review.material_hash(MATERIAL)))
+        self.assertEqual({item["name"]: item["sha256"] for item in note["files"]},
+                         {name: hashlib.sha256((self.folder / name).read_bytes()).hexdigest()
+                          for name in ("resume-2.pdf", "resume-2.docx")})
+        self.assertRegex(note["built_at"], r"[+-]\d\d:\d\d$")
 
     def test_an_invalid_material_writes_nothing(self):
         record = copy.deepcopy(MATERIAL)

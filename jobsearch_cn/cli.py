@@ -629,6 +629,22 @@ def cmd_resume_sample(args) -> int:
 _MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
 
 
+def _write_build_note(directory, stem: str, record: dict, data: dict, outputs) -> Path:
+    """resume-<n>.build.json beside the outputs: which material and files this build made (applications.md §12)."""
+    import hashlib
+    from datetime import datetime
+    note = {"schema_version": 1, "kind": "resume-build", "material": f"{stem}.json",
+            "material_hash": review.material_hash(record), "profile_hash": score.profile_hash(data),
+            "built_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "files": [{"name": output.name, "sha256": hashlib.sha256(output.read_bytes()).hexdigest()}
+                      for output in outputs if output.is_file()]}
+    path = directory / f"{stem}.build.json"
+    if path.is_symlink():
+        raise InputError(f"{path} is a link; nothing is written through it")
+    path.write_text(json.dumps(note, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
 def cmd_resume_build(args) -> int:
     named = _MATERIAL_NAME.fullmatch(Path(args.file).name)
     if not named:
@@ -666,6 +682,7 @@ def cmd_resume_build(args) -> int:
     problems += resume_docx.same_text(pdf, docx, content)
     if not content["name"]:
         warnings.append("contact.name: the profile has no name, so the resume has none")
+    result["build_note"] = str(_write_build_note(directory, named.group(1), record, data, (pdf, docx)))
     _emit({**result, "problems": problems, "warnings": warnings})
     return 1 if problems else 0
 
@@ -692,10 +709,10 @@ def _application_material_check(args):
     data = _match_profile(args)  # reports an invalid profile itself
     if data is None:
         return None, False
-    vocabulary, notes = _vocabulary(args), _material_notes(args)
+    vocabulary = _vocabulary(args)
 
     def check(record):
-        return material.validate(record, data, vocabulary, _material_job(args, record), notes)
+        return material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args, record))
     return check, True
 
 

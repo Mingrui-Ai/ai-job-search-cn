@@ -56,3 +56,20 @@
 1. 等 #119 合并（2026-11-03 查过，还是 OPEN，head 5b91525）。合并后合入 master，按 applications.md 第 12 节改 `cmd_resume_build` 写说明文件，`submit` / `record --submitted` 读发出文件旁边的说明文件核对，加测试。
 2. 三项检查，开 PR，审核者 Codex B；开 PR 前请规划者确认 V25 已冻结。
 - 全量测试第一次在并发测试上失败一次：输的那个进程先读到 revision 2 的投递，读事件时对方已经写进第 3 条，重放报成了 `invalid`。改成只用读投递那一刻的事件做预检，真正的判定留给写事务里的 `stale_revision`；加了一个确定复现这个时序的测试，并发测试连跑 8 次都通过。
+
+规划者裁定（cn-a7，2026-11-03，对 18:11 回报）：
+
+1. 字段名用 `material_version_ids`，和 #110 的导出字段一致；设计 §4 的 `version_ids` 是笔误。
+2. `submission.materials_recorded`：未投出为 null，投出时没有材料为 false。同意。
+3. 实现时自定的四条（`--material`/`--sent` 只随投出记；`--historical` 必须带 `--submitted`、岗位不在库里只警告；`record` 不带 `--note`；`--on`/`--at` 不能是将来）都同意。
+4. 说明文件和材料对不上：只警告、照样记录；核对结果记进事件（`materials_check`），导出里看得到。
+5. V25 留出样例由另一个会话准备；开 PR 等规划者通知。
+
+**进展**（2026-11-03，新会话接手第 5 步）
+
+- 合入 origin/master（#119 已合并）。master 上 `_material_notes(args, record)` 改了签名，`application` 的材料检查跟着改。
+- `resume build` 在输出旁边写 `resume-<n>.build.json`（applications.md 第 12 节），输出里多 `build_note`；只列这次实际写出的文件。
+- `submit`、`record --submitted` 读发出文件旁边的说明文件核对，结果写进 `submitted` 事件的 `materials_check`（`match`/`mismatch`/`unchecked`/null），导出 `submission.materials_check`；`validate` 检查这个字段的取值。`materials_check` 也算进请求摘要。
+- 测试：resume build 的说明文件内容；对得上、文件摘要不对、material_hash 不对、没有说明文件、没有发出文件。
+
+下一步：等规划者通知后开 PR（审核者 Codex B）。

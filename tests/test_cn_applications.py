@@ -480,6 +480,48 @@ class Materials(Data):
         self.assertEqual([item["path"].rsplit("/", 1)[1] for item in files], ["material.json", "sent-1.pdf",
                                                                               "sent-2.docx"])
 
+    def build_note(self, material_hash=None, sha=None):
+        from jobsearch_cn import review
+        record = json.loads(self.material.read_text(encoding="utf-8"))
+        note = {"schema_version": 1, "kind": "resume-build", "material": "resume-1.json",
+                "material_hash": material_hash or review.material_hash(record), "profile_hash": "x",
+                "built_at": "2026-11-03T10:00:00+08:00",
+                "files": [{"name": "resume-1.pdf", "sha256": sha or applications._sha256(self.pdf.read_bytes())}]}
+        (self.pdf.parent / "resume-1.build.json").write_text(json.dumps(note), encoding="utf-8")
+
+    def submit_with_material(self):
+        return self.write("record", self.job, "--channel", "portal", "--submitted", "--material", self.material,
+                          "--sent", self.pdf)
+
+    def test_sent_files_are_checked_against_their_build_note(self):
+        self.build_note()
+        out = self.submit_with_material()
+        self.assertEqual(out["application"]["submission"]["materials_check"], "match")
+        self.assertEqual(out["application"]["events"][1]["payload"]["materials_check"], "match")
+        self.assertNotIn("build", "\n".join(out["warnings"]))
+
+    def test_a_mismatch_is_warned_recorded_and_exported(self):
+        for case in ({"sha": "0" * 64}, {"material_hash": "f" * 64}):
+            with self.subTest(case=case):
+                self.build_note(**case)
+                out = self.submit_with_material()
+                application = out["application"]
+                self.assertEqual(application["submission"]["materials_check"], "mismatch")
+                self.assertIn("resume-1.build.json", "\n".join(out["warnings"]))
+                self.assertTrue(application["submission"]["materials_recorded"])
+                code, exported, err = self.cli("export")
+                self.assertEqual(code, 0, err)
+                mine = [item for item in exported["applications"]
+                        if item["application_id"] == application["application_id"]]
+                self.assertEqual(mine[0]["submission"]["materials_check"], "mismatch")
+        code, out, err = self.cli("validate")
+        self.assertEqual(code, 0, err)
+
+    def test_no_build_note_is_unchecked_and_no_files_is_null(self):
+        self.assertEqual(self.submit_with_material()["application"]["submission"]["materials_check"], "unchecked")
+        out = self.write("record", self.job, "--channel", "email", "--submitted")
+        self.assertIsNone(out["application"]["submission"]["materials_check"])
+
     def test_a_material_for_another_job_or_an_invalid_one_is_refused(self):
         other = self.data / "resume-1.json"
         other.write_text(json.dumps(MATERIAL, ensure_ascii=False), encoding="utf-8")

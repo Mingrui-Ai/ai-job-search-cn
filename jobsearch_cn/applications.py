@@ -58,6 +58,7 @@ _ON = re.compile(r"\d{4}-\d{2}-\d{2}")
 _AT = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?:[+-]\d{2}:\d{2}|Z)")
 _UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 _EXTENSION = re.compile(r"\.[a-z0-9]{1,10}")
+MATERIALS_CHECKS = (None, "match", "mismatch", "unchecked")
 _SENT_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.[A-Za-z0-9]+")
 _MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
 _REVIEW_NAME = re.compile(r"review-([1-9][0-9]{0,5})-r([0-9]+)\.json")
@@ -495,6 +496,8 @@ def _application(connection, row) -> dict:
             # 材料未记录: a submission with no material is recorded as it was (an online profile, a form), and
             # counted apart; null until the application is submitted.
             "materials_recorded": None if submitted is None else bool(submitted["payload"]["material_version_ids"]),
+            # the sent files against their resume build note: match, mismatch (only warned), unchecked, or null
+            "materials_check": None if submitted is None else submitted["payload"]["materials_check"],
         },
         "next_followup_on": row["next_followup_on"],
         "context_snapshot": {"job": snapshots["job"], "match": snapshots["match"]},
@@ -666,7 +669,7 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
     sent_paths = list(sent_paths or ())
     warnings, files = [], []
     if material_path is None and not sent_paths:
-        return {"version": None, "files": [], "digest": None, "warnings": []}
+        return {"version": None, "files": [], "digest": None, "warnings": [], "check": None}
     version = {"kind": "resume", "material_path": None, "material_hash": None, "profile_hash": None,
                "review_path": None}
     digest = {"material": None, "sent": []}
@@ -706,6 +709,7 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
     if not sent_paths:
         warnings.append("no sent file recorded (--sent); only the material is kept")
     resumes = root / "resumes" / job_id
+    checks = []
     for index, sent in enumerate(sent_paths, start=1):
         sent_file = Path(sent)
         data = _read_file(sent_file)
@@ -723,7 +727,41 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
                             f"{number}.json")
         if not data:
             warnings.append(f"{sent_file.name}: the file is empty")
-    return {"version": version, "files": files, "digest": digest, "warnings": warnings}
+        checks.append(_build_check(sent_file, _sha256(data), version["material_hash"], warnings))
+    check = None if not checks else "mismatch" if "mismatch" in checks else         "match" if all(item == "match" for item in checks) else "unchecked"
+    digest["check"] = check
+    return {"version": version, "files": files, "digest": digest, "warnings": warnings, "check": check}
+
+
+def build_note_path(file: Path) -> Path:
+    """resume-<n>.build.json beside a built file (docs/cn/applications.md section 12)."""
+    named = _SENT_NAME.fullmatch(file.name)
+    return file.parent / f"{named.group(1)}.build.json" if named else file.parent / (file.stem + ".build.json")
+
+
+def _build_check(sent_file: Path, sent_hash: str, material_hash, warnings: list) -> str:
+    """'match', 'mismatch' or 'unchecked' (no readable build note beside the sent file). Only warns."""
+    note_file = build_note_path(sent_file)
+    if not note_file.is_file():
+        return "unchecked"
+    try:
+        note = json.loads(note_file.read_text(encoding="utf-8-sig"))
+        files = note["files"]
+        hashes = {item["sha256"] for item in files}
+        note_hash = note["material_hash"]
+    except (OSError, ValueError, KeyError, TypeError):
+        warnings.append(f"{note_file.name}: the build note is unreadable; {sent_file.name} is not checked against it")
+        return "unchecked"
+    result = "match"
+    if sent_hash not in hashes:
+        warnings.append(f"{sent_file.name}: not the file {note_file.name} records (edited after resume build?); "
+                        "recorded as the file you say was sent")
+        result = "mismatch"
+    if material_hash is not None and note_hash != material_hash:
+        warnings.append(f"{sent_file.name}: built from another version of the material than the one given "
+                        f"({note_file.name}); recorded as given")
+        result = "mismatch"
+    return result
 
 
 def _write_verified(path: Path, data: bytes) -> None:
@@ -987,7 +1025,8 @@ def record(data_root, job_id: str, *, channel: str, platform=None, submitted: bo
                "payload": {"job_id": job_id, "record_origin": origin, "channel": channel_value}}]
     if submitted:
         events.append({"type": "submitted", "occurred_at": occurred_at, "occurred_on": occurred_on,
-                       "payload": {"channel": channel_value, "material_version_ids": [], "sent_file_refs": []}})
+                       "payload": {"channel": channel_value, "material_version_ids": [], "sent_file_refs": [],
+                                   "materials_check": prepared["check"] if prepared else None}})
     replay([dict(event, seq=index + 1) for index, event in enumerate(events)])
     reader = _reader(paths) if preview else None
     if preview:
@@ -1105,7 +1144,8 @@ def submit(data_root, application_id: str, *, expected_revision, on=None, at=Non
             warnings.append("材料未记录 (no material recorded): the submission is recorded without the files sent; "
                             "say so to the user")
         events = [{"type": "submitted", "occurred_at": occurred_at, "occurred_on": occurred_on,
-                   "payload": {"channel": channel_value, "material_version_ids": [], "sent_file_refs": []}}]
+                   "payload": {"channel": channel_value, "material_version_ids": [], "sent_file_refs": [],
+                                   "materials_check": prepared["check"] if prepared else None}}]
         if preview:
             return {"application": _application(connection, row), "events": _planned(events, actor),
                     "request_id": new_id("req"), "preview": True,
@@ -1295,7 +1335,7 @@ def _check_event(event: dict, where: str, event_ids: set, errors: list) -> None:
         errors.append(f"{where}: voided by an event that is not there")
     payload = event["payload"]
     expected = {"created": {"job_id", "record_origin", "channel"},
-                "submitted": {"channel", "material_version_ids", "sent_file_refs"},
+                "submitted": {"channel", "material_version_ids", "sent_file_refs", "materials_check"},
                 "status_changed": {"from", "to", "reason"}}[event["type"]]
     if not isinstance(payload, dict) or set(payload) != expected:
         errors.append(f"{where}: the payload must have exactly {', '.join(sorted(expected))}")
@@ -1307,6 +1347,8 @@ def _check_event(event: dict, where: str, event_ids: set, errors: list) -> None:
     if event["type"] == "submitted":
         if not isinstance(payload["material_version_ids"], list) or not isinstance(payload["sent_file_refs"], list):
             errors.append(f"{where}: material_version_ids and sent_file_refs must be lists")
+        if payload["materials_check"] not in MATERIALS_CHECKS:
+            errors.append(f"{where}: materials_check {payload['materials_check']!r}")
     if event["type"] == "status_changed":
         if payload["from"] not in STATUSES or payload["to"] not in STATUSES:
             errors.append(f"{where}: unknown status")

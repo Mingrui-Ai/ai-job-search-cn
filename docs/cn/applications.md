@@ -36,7 +36,7 @@
   "updated_at": "2026-11-02T06:30:00Z",
   "revision": 2,
   "status": "applied",
-  "submission": {"confirmed": true, "occurred_at": null, "occurred_on": "2026-11-02", "materials_recorded": true},
+  "submission": {"confirmed": true, "occurred_at": null, "occurred_on": "2026-11-02", "materials_recorded": true, "materials_check": "match"},
   "next_followup_on": null,
   "context_snapshot": {
     "job": {"path": "artifacts/app_…/ctx_…/job.json", "sha256": "…"},
@@ -70,7 +70,7 @@
 | `created_at`、`updated_at` | 记录写入和最后一次改动的时间（UTC），不是投递发生的时间 |
 | `revision` | 最后一条事件的序号。改一条投递时要带上它（`--expected-revision`），见第 8 节 |
 | `status` | 当前状态，见第 4 节 |
-| `submission` | `confirmed`：用户说过已经投出；`occurred_at` / `occurred_on`：投出的时刻或日期（见第 5 节）；`materials_recorded`：投出时记没记材料，未投出为 null。为 false 就是"材料未记录"（例如用平台的在线简历投的），可以单独统计 |
+| `submission` | `confirmed`：用户说过已经投出；`occurred_at` / `occurred_on`：投出的时刻或日期（见第 5 节）；`materials_recorded`：投出时记没记材料，未投出为 null。为 false 就是"材料未记录"（例如用平台的在线简历投的），可以单独统计；`materials_check`：发出的文件和 build 说明文件的核对结果（第 12 节），`match` / `mismatch` / `unchecked`，没有发出文件或未投出为 null |
 | `next_followup_on` | 跟进日期，M4-1b 才能设置，现在总是 null |
 | `context_snapshot` | 第一次投出时复制的岗位记录和评分记录，没有时为 null（例如没评过分）。补录的投递不做快照：现在的岗位和评分不能冒充当时的 |
 | `material_versions` | 投出时归档的材料，见第 6 节 |
@@ -91,7 +91,7 @@
   "recorded_at": "2026-11-02T06:30:00Z",
   "actor": "claude_code",
   "source": {"kind": "user", "reference": null},
-  "payload": {"channel": {"kind": "portal", "platform": "示例招聘站"}, "material_version_ids": ["mv_…"], "sent_file_refs": [{"version_id": "mv_…", "file_id": "sent-1"}]},
+  "payload": {"channel": {"kind": "portal", "platform": "示例招聘站"}, "material_version_ids": ["mv_…"], "sent_file_refs": [{"version_id": "mv_…", "file_id": "sent-1"}], "materials_check": "match"},
   "voided_by": null
 }
 ```
@@ -99,7 +99,7 @@
 | `type` | 由谁写 | `payload` |
 | --- | --- | --- |
 | `created` | `record` | `{job_id, record_origin, channel}` |
-| `submitted` | `record --submitted` 或 `submit` | `{channel, material_version_ids, sent_file_refs}`；没有材料时两个列表都是空的 |
+| `submitted` | `record --submitted` 或 `submit` | `{channel, material_version_ids, sent_file_refs, materials_check}`；没有材料时两个列表都是空的 |
 | `status_changed` | `status` | `{from, to, reason}`；`reason` 最多 300 字，可为 null |
 
 - `seq` 从 1 起连续编号；`request_id` 是写入它的那次请求（第 8 节）。
@@ -217,7 +217,7 @@ python -m jobsearch_cn application export [<投递id> ...] [--out 文件名.json
 - 原因、平台名只写用户说的话，Agent 不往里写联系方式、邮件全文、链接；写了 `validate` 和写入时都给警告。
 - `show`、`list`、`export` 不带档案的联系方式；归档的材料 JSON 本来就只引用档案条目，不含联系方式。发出的 PDF、Word 里有联系方式，它们只在 `artifacts/` 里，导出只带摘要。
 
-## 12. `resume build` 的说明文件（M4-1a 第二部分，待 #119 合并后实现）
+## 12. `resume build` 的说明文件（M4-1a 第二部分）
 
 规划者 2026-11-03 裁定：`resume build` 每生成一次，在输出旁边写一个说明文件，记下这次用的是哪一版材料、生成了哪些文件。M3-6 的 `material render --output` 写 `.txt` 时用同样的格式。
 
@@ -241,3 +241,5 @@ python -m jobsearch_cn application export [<投递id> ...] [--out 文件名.json
 
   `material_hash` 是 `review.material_hash`，`profile_hash` 是当前档案的 `score.profile_hash`，`built_at` 带时区，`files` 列出这次输出的每个文件名和字节 SHA-256。
 - 投出时核对：发出的文件旁边有说明文件时，说明文件里的 `material_hash` 要等于 `--material` 的当前值，发出文件的摘要要在 `files` 里。对不上只给警告（手工改过的 Word 就是这样），照样记录用户说发出的文件。
+- 核对结果记进 `submitted` 事件的 `materials_check`（导出的 `submission.materials_check` 里也有）：每个发出文件都对得上为 `match`；有一个对不上为 `mismatch`；没有对不上、但有发出文件旁边没有可读的说明文件为 `unchecked`；没有发出文件为 null。
+- `resume build` 的输出里多一项 `build_note`，是说明文件的路径。
