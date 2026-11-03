@@ -440,7 +440,7 @@ def cmd_material_render(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
-    if not isinstance(record, dict) or record.get("kind") not in messages.KINDS:
+    if not _is_message(record):
         raise InputError(f"material render renders {', '.join(messages.KINDS)}; a CV is built with resume build")
     job = _material_job(args, record)
     errors, warnings = _check_material(args, record, data, job)
@@ -458,12 +458,16 @@ def cmd_review_draft(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
+    if _is_message(record):
+        # How a greeting, email or referral is reviewed is M3-6's to decide; until then only material validate.
+        raise InputError("review draft drafts the review of a CV; check a greeting, email or referral "
+                         "with material validate")
     vocabulary = _vocabulary(args)
-    errors, _ = material.validate(record, data, vocabulary, notes=_material_notes(args, record))
+    job = _material_job(args, record)
+    errors, _ = _check_material(args, record, data, job, vocabulary)
     if errors:
         _emit({"error": "the material is invalid; run material validate first", "errors": errors}, sys.stderr)
         return 1
-    job = _material_job(args, record)
     result = review.draft(record, data, job, vocabulary)
     result = {"material_hash": review.material_hash(record), "job_found": job is not None, **result}
     _emit(result)
@@ -696,8 +700,10 @@ def cmd_resume_build(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
+    if _is_message(record):
+        raise InputError("resume build builds a CV; a greeting, email or referral is rendered with material render")
     vocabulary = _vocabulary(args)
-    errors, warnings = material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args, record))
+    errors, warnings = _check_material(args, record, data, _material_job(args, record), vocabulary)
     if errors:
         _emit({"error": "the material is invalid; run material validate", "errors": errors}, sys.stderr)
         return 1

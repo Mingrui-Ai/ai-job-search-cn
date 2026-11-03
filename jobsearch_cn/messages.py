@@ -280,6 +280,9 @@ class _Checker:
                 if not isinstance(self.profile.get("availability"), dict):
                     self.errors.append(f"{path}: the profile has no availability")
                     continue
+            elif ref == material.NOTES_REF:
+                self.errors.append(f"{path}: a message does not cite {material.NOTES_REF}; only a CV's summary does")
+                continue
             elif self.citations.ref(ref, path, None) is None:
                 continue
             if ref in good:
@@ -306,7 +309,8 @@ class _Checker:
             if ref not in refs:
                 self.errors.append(f"{where}.refs: must include {ref!r}, whose placeholder the text uses")
         written = _PLACEHOLDER.sub(" ", text)  # what the Agent wrote itself; placeholders are data
-        self._invented(written, refs, f"{where}.text")
+        # A hand-typed phone or email is reported as that (_wording), not as an invented number besides.
+        self._invented(_EMAIL.sub(" ", _PHONE.sub(" ", written)), refs, f"{where}.text")
         self._wording(written, refs, f"{where}.text", slot)
         return filled
 
@@ -318,7 +322,9 @@ class _Checker:
                 cited = ", ".join(refs) or "nothing"
                 self.errors.append(f"{where}: the number {quote!r} is not in what it cites ({cited}); use the "
                                    "figure the profile gives, or ask the user to add it to the profile")
-        held = self.held | {key for _, _, key in self.citations._skills_in(source)}
+        # A skill the job asks for, even one in its title, is not one the candidate has: only the profile counts.
+        own = "\n".join(_source(ref, self.profile, self.job, self.entries) for ref in refs if ref != JOB)
+        held = self.held | {key for _, _, key in self.citations._skills_in(own)}
         for term, key in sorted({(term, key) for _, term, key in self.citations._skills_in(text)}):
             if key not in held:
                 self.errors.append(f"{where}: the skill {term!r} is neither in the profile's skills "

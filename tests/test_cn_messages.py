@@ -151,6 +151,10 @@ class Invented(unittest.TestCase):
         job["title"] = "Kubernetes 开发实习生"
         errors = errors_of(with_segment(GREETING, 3, "我也熟悉 Kubernetes。"), job=job)
         self.assertTrue(any("'Kubernetes'" in error for error in errors), errors)
+        # Citing the job does not make the skill in its title the candidate's.
+        errors = errors_of(with_segment(GREETING, 3, "我也熟悉 Kubernetes。", ["job"]), job=job)
+        self.assertEqual(errors, ["segments[3].text: the skill 'Kubernetes' is neither in the profile's skills "
+                                  "nor in the cited entries"])
 
     def test_numbers_inside_filled_placeholders_are_data(self):
         data = with_segment(GREETING, 2, "每周{availability.days_per_week}天。", ["availability"])
@@ -170,6 +174,12 @@ class Placeholders(unittest.TestCase):
         errors = errors_of(with_segment(GREETING, 0, "您好" + COMMA + "我想应聘{job.title}。", ["edu-1"]))
         self.assertEqual(errors, ["segments[0].refs: must include 'job', whose placeholder the text uses"])
 
+    def test_a_ref_the_profile_does_not_have_or_notes(self):
+        errors = errors_of(with_segment(GREETING, 1, "做过订单查询接口。", ["exp-9"]))
+        self.assertEqual(errors, ["segments[1].refs[0]: no profile entry with id 'exp-9'"])
+        errors = errors_of(with_segment(GREETING, 1, "做过订单查询接口。", ["exp-1", "notes.md"]))
+        self.assertEqual(errors, ["segments[1].refs[1]: a message does not cite notes.md; only a CV's summary does"])
+
     def test_the_phone_and_email_only_in_an_email_signature(self):
         errors = errors_of(with_segment(GREETING, 3, "电话 {contact.phone}"))
         self.assertIn("belong only in an email's signature segment", errors[0])
@@ -188,8 +198,9 @@ class Placeholders(unittest.TestCase):
 
 class Wording(unittest.TestCase):
     def test_a_hand_typed_phone_or_email(self):
-        for text in ("我的电话是 13912345678", "邮箱 someone@example.com"):
+        for text in ("我的电话是 13912345678", "邮箱 li.ming2024@example.com"):
             errors = errors_of(with_segment(GREETING, 3, text))
+            self.assertEqual(len(errors), 1, errors)  # not an invented number besides
             self.assertIn("typed by hand", errors[0], text)
 
     def test_a_commitment_without_the_availability(self):
@@ -239,7 +250,7 @@ class Shape(unittest.TestCase):
         self.assertIn("must be one of opening", errors_of(with_segment(GREETING, 3, "谢谢", slot="ps"))[0])
 
     def test_the_greeting_length_limit(self):
-        long = with_segment(GREETING, 3, "期待和您进一步沟通" * 4)
+        long = with_segment(GREETING, 3, "期待和您进一步沟通" * 5)
         errors = errors_of(long)
         self.assertEqual(len(errors), 1)
         self.assertRegex(errors[0], r"segments: \d+ characters once filled; the limit for a greeting is 150")
@@ -360,8 +371,9 @@ class Cli(unittest.TestCase):
         forced = run_cli("material", "template", TECH_JOB["id"], "--kind", "referral", "--direction", "ops",
                          data_dir=self.data)
         self.assertEqual(json.loads(forced.stdout)["template"], "ops/referral@1")
+        # A job not stored is input read but naming no stored job (1); a direction with no template is not (2).
         self.assertEqual(run_cli("material", "template", "job_00000000ffff", "--kind", "email",
-                                 data_dir=self.data).returncode, 2)
+                                 data_dir=self.data).returncode, 1)
         self.assertEqual(run_cli("material", "template", TECH_JOB["id"], "--kind", "email", "--direction", "x",
                                  data_dir=self.data).returncode, 2)
 
@@ -381,6 +393,25 @@ class Cli(unittest.TestCase):
         self.assertEqual(bad.returncode, 1)
         self.assertFalse(json.loads(bad.stdout)["valid"])
         self.assertEqual(run_cli("material", "render", str(TECH / "resume-1.json"), data_dir=self.data).returncode, 2)
+
+    def test_validate_and_render_agree_on_a_failing_message(self):
+        record = with_segment(GREETING, 1, "做过订单查询接口。", ["exp-1", "notes.md"])
+        (self.data / "profile" / "notes.md").write_text("# 补充\n喜欢做后端。\n", encoding="utf-8")
+        outputs = [json.loads(run_cli("material", command, str(self.write(record)), data_dir=self.data).stdout)
+                   for command in ("validate", "render")]
+        self.assertEqual(outputs[0], outputs[1])
+        self.assertEqual(outputs[0]["errors"],
+                         ["segments[1].refs[1]: a message does not cite notes.md; only a CV's summary does"])
+
+    def test_resume_build_and_review_draft_take_only_a_cv(self):
+        path = self.data / "resume-1.json"  # the name resume build asks for, but a greeting inside
+        path.write_text(json.dumps(GREETING, ensure_ascii=False), encoding="utf-8")
+        for command, says in ((("resume", "build"), "resume build builds a CV"),
+                              (("review", "draft"), "review draft drafts the review of a CV")):
+            result = run_cli(*command, str(path), data_dir=self.data)
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertIn(says, json.loads(result.stderr)["error"])
+        self.assertFalse((self.data / "resume-1.pdf").exists())
 
 
 if __name__ == "__main__":
