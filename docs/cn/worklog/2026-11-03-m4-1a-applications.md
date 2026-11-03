@@ -35,3 +35,16 @@
 
 1. **说明文件**：一次 build 写一个，放在输出旁边，文件名是材料文件名去掉 `.json` 再加 `.build.json`（例如 `resume-1.build.json`）。字段至少有 `material_hash`、`profile_hash`、生成时间（带时区），以及这次 build 输出的每个文件名和它的字节 SHA-256。投出时用这些摘要核对发出的文件是不是这次 build 的文件。格式写进 `applications.md`，M3-6 的 `.txt` 照这个格式。上面第 5 步照此执行。
 2. **投出时没有材料**：只给警告，不报错。记录里写明"材料未记录"（导出时有一个可以单独统计的字段），让 M4-3、M4-4 能单独统计。平台在线简历这类投递要能如实记下，不能为了凑材料挡住。
+
+**进展**（2026-11-03，规划者 cn-a7 正式派活后）
+
+- 合入 origin/master 45e699d。
+- 第 1–3 步：`jobsearch_cn/applications.py`、`cli.py` 末尾的 `application` 命令组、`tests/test_cn_applications.py`（43 项）已写好。
+- 实现时定下的几处（写进 applications.md，PR 里请规划者确认）：
+  - `submitted` 事件的 payload 用 `material_version_ids`（#110 §5.4 的写法；设计 §4 写的是 `version_ids`，设计 §7 说导出字段名照 #110）。
+  - "材料未记录"在导出里是 `submission.materials_recorded`：未投出为 null，投出时没有材料为 false。
+  - `--material`、`--sent` 只能和投出一起记（`record --submitted` 或 `submit`）；只起草时不记材料。
+  - `--historical` 必须带 `--submitted`；补录的岗位可以不在岗位库里（给警告），不做快照。
+  - 不带 `--note`：备注事件是 M4-1b 的 `note`。
+  - `--on`、`--at` 不能是将来（`--on` 按 Asia/Shanghai 的今天，`--at` 容 5 分钟）。
+  - 第一次写入时建表也在同一个事务里，写入失败时连表一起回滚。
