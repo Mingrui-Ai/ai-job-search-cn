@@ -1,6 +1,8 @@
 # V25 · M4-1a 对照报告（#122）
 
-结论：**M4-1a 的 80 个场景里，65 个通过、15 个不通过。** 455 项严格检查有 440 项通过；15 个不通过的场景各只差一项。按原因分：
+最新复跑见[复跑（52d84d0）](#复跑52d84d0)：按规划者裁定 **80 个通过、0 个不通过**；冻结期望的严格比较为 **67 个通过、13 个不通过**，剩余 13 个都是已批准的差别。
+
+第一次对照（5c57441）的结论：**M4-1a 的 80 个场景里，65 个通过、15 个不通过。** 455 项严格检查有 440 项通过；15 个不通过的场景各只差一项。按原因分：
 
 - (a) 实现的问题，5 个场景、3 条；
 - (b) 按实现核对的点，1 个场景：`--material` 指向不存在的文件时退出 2，规划者倾向已批准；
@@ -82,7 +84,86 @@ A49（发出文件在 `resumes/` 外）也是 `unchecked`，那里有"不在 res
 
 **(c)-1 · 状态表里的"→ drafted"一列（A29–A37）。** 冻结期望对每个起点都要求 `status <id> drafted` 退出 1、`transition`。设计 §4 的表里，`drafted` 从来不是可以变成的状态。实现干脆不把它列进 `status` 的可选值，argparse 先拒绝，退出 2，什么也不写。结果都是"拒绝、不写"；冻结期望把错误码和退出码定得比设计更死，`transition` 是我从"其余都拒绝（transition）"推出来的。建议规划者认可这一列的实际行为，不要求实现改。这 9 个场景在严格比较里仍记为不通过，冻结文件不改。
 
-## 复跑
+## 复跑（52d84d0）
+
+2026-11-04，由 Codex A 复跑。被测提交为 #122 的 `52d84d0310c7f537ed3492c278cd177fa21a0163`；仍使用冻结提交 `b785a776a77a48f685b9371f4d3371b207047f0e` 的全部 80 个 M4-1a 场景。冻结文件和原运行器都没有修改，第一次的 `actual/pr122-5c57441/` 原样保留。
+
+### 结果与证据
+
+| 口径 | 通过 | 不通过 | 说明 |
+| --- | --- | --- | --- |
+| 冻结期望的严格比较 | 67 | 13 | 455 项检查中 442 项通过；每个不通过的场景只差一项 |
+| 按规划者裁定验收 | 80 | 0 | 剩余 13 个场景的差别全部已批准，逐项见下文；不回填严格结果 |
+| M4-1b | — | — | B01–B30 共 30 个场景仍为“等 M4-1b”，没有运行 |
+
+- [完整严格结果](actual/pr122-52d84d0/results.json)与 [80 份命令日志](actual/pr122-52d84d0/logs/)独立存放。
+- [裁定补充检查](actual/pr122-52d84d0/ruling-checks.json)：A43、A47、A48、A49、A50 共 5 个场景、20 项检查全部通过；这些检查不计入原来的 80 个场景或 455 项检查。
+- 补充检查分别调用 `application export` 和 `application validate`，核对 `materials_check`、退出 0、`valid=true`、`errors=[]`、相应警告，并比较整个数据目录的文件与摘要，确认只读命令没有写入。A47/A48 的 `mismatch`、A50 的 `unchecked` 都有对应警告；A43/A49 的 `match` 没有这类警告。
+- 环境仍为 Windows、conda `ai-job-search-cn`、Python 3.12.15、Typst 0.15.1；只用虚构输入。本机路径替换为占位符，未提交运行时数据目录。
+
+### 和第一次相比变了什么
+
+| 场景 | 第一次（5c57441） | 本次（52d84d0） |
+| --- | --- | --- |
+| A48 | 改名且改过字节的发出文件记成 `unchecked`，严格比较不通过 | 按材料对应的说明文件核对，事件和导出记成 `mismatch`，保留改过的归档字节并给警告，严格比较通过；`validate` 也警告 |
+| A50 | 找不到说明文件时虽记 `unchecked`，却没有说明文件警告，严格比较不通过 | 明确提示没有说明文件，材料和发出文件照样归档，仍记 `unchecked`，严格比较通过；`validate` 也警告 |
+| A49 | 发出文件在 `resumes/` 外，核对结果为 `unchecked`；场景通过 | 通过 `--material` 找到说明文件，字节一致所以为 `match`；目录/文件名警告仍有，场景仍通过 |
+| A47 | 材料生成后被改，仍可记录为 `mismatch`；场景通过 | 原场景仍通过；新增补充核对确认 `validate` 将 `mismatch` 列为警告，保持 `valid=true` |
+| 其余场景 | 既有结果 | 严格通过/不通过没有变化，未出现回归 |
+
+严格结果从 65/15 变为 67/13，只增加 A48、A50 两个通过场景；检查数从 440/455 变为 442/455。按已批准的口径看，第一次还剩 A48/A50 两个实现问题，本次两个均已解决。A74 的并发落败方仍是 `stale_revision`；A75 约 5.76 秒返回 `busy`，保持通过。
+
+### 已批准的差别，逐条核对
+
+依据：[规划者 cn-e3 在 #122 的裁定](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/122#issuecomment-6608059349)，以及收件箱 11-04 00:20 关于 `validate` 也警告 `mismatch` 的补充。
+
+| 场景 | 本次实际行为 | 验收归属 |
+| --- | --- | --- |
+| A43 | 发出的 PDF `file_id=sent-1`，归档字节和引用都正确 | 已批准的差别；通过 |
+| A44 | 两份发出文件 `file_id=sent-1`、`sent-2`，两条引用正确 | 已批准的差别；通过 |
+| A45 | `submit` 发出的 Word `file_id=sent-1`，字节摘要正确 | 已批准的差别；通过 |
+| A29–A37 | 九个起点执行 `status <id> drafted` 均被 argparse 拒绝，退出 2；逐格都是 `wrote=False`，其余 72 格严格相符 | 已批准的差别；九个场景均通过 |
+| A51 | `--material` 指向不存在的文件，退出 2，`wrote=False` | 已批准的差别；通过 |
+
+原报告“按实现核对”的 12 处逐项更新如下；前 11 处本轮适用，按已批准的实现口径通过，第 12 处仍等待。
+
+| # | 本次核对 | 裁定后的结论 |
+| --- | --- | --- |
+| 1 | argparse 拒绝退出 2，业务拒绝退出 1；`invalid`、`transition`、`not_found` 的既有区分不变 | 已批准；通过 |
+| 2 | A08 缺少预览/请求参数时退出 2、不写；合法自拟请求 id 可提交；A06 重试仍 `repeated=true` | 已批准；通过；“先预览”的 Agent 流程留给 M4-1b |
+| 3 | A02 高版本库拒绝读写；A03 空库的 list/validate/export 可读且不建库，show 为 `not_found`；A42/A68 不存在的 id 为 `not_found` | 已批准；通过 |
+| 4 | A14 不投出却给日期，退出 1、`invalid`；A05 创建事件的发生时间仍为 null | 已批准；通过 |
+| 5 | A09 当前流程找不到岗位为 `not_found`；A19 补录已有岗位仍不做快照、不警告 | 已批准；通过 |
+| 6 | A50 缺说明文件只警告并记录为 `unchecked`；A51 路径不存在退出 2、不写 | 已批准；通过；A50 的警告缺失已修复 |
+| 7 | A54 无效材料、A55 岗位不同都退出 1、`invalid`、不写；A56 只给 `--sent` 接受并给缺材料警告 | 已批准；通过 |
+| 8 | A43/A47 的事件与导出核对字段、相对审核路径、A57 的说明文件键均保持原行为；岗位快照仍逐字节复制 | 已批准；通过 |
+| 9 | A62 孤立目录列入 `orphans`，退出 0、`valid=true`；A64 写入和 validate 均给隐私警告；补充检查确认 `mismatch`/`unchecked` 警告 | 已批准及补充裁定；通过 |
+| 10 | A70 列表字段与排序、A69 show 外层结构、A67 导出同名覆盖均不变，四种路径写法仍拒绝 | 已批准；通过 |
+| 11 | A76 junction 拒绝且目标目录无写入；A77 未知 actor 仍被 argparse 拒绝、退出 2 | 已批准；通过 |
+| 12 | B01–B30 没有运行 | 等 M4-1b，不计为通过 |
+
+### 新问题分类
+
+- (a) 新的实现问题：0；A48、A50 已修复，无新增复现项。
+- (b) 新的“按实现核对”分歧：0；A51 是此前已批准差别。
+- (c) 新的期望分歧：0；A29–A37 是此前已批准差别。
+
+### 本次复跑命令
+
+在 holdout clone 根目录运行；输出目录必须是新的，位于冻结目录之外：
+
+```powershell
+git worktree add --detach <tmp>\v25-pr122b 52d84d0310c7f537ed3492c278cd177fa21a0163
+conda run --no-capture-output -n ai-job-search-cn python tests/fixtures/cn/applications-m4-1-comparison/run_comparison.py `
+  --repo <tmp>\v25-pr122b --typst <typst路径> --output <tmp>\v25-run-52d84d0
+conda run --no-capture-output -n ai-job-search-cn python tests/fixtures/cn/applications-m4-1-comparison/check_rulings.py `
+  --repo <tmp>\v25-pr122b --run <tmp>\v25-run-52d84d0
+conda run --no-capture-output -n ai-job-search-cn python tests/fixtures/cn/applications-m4-1-holdout/verify_oracle.py
+```
+
+`check_rulings.py` 仅使用已完成复跑的数据调用只读命令，补充文件单独保存为 `ruling-checks.json`；不会改严格判定或冻结文件。
+
+## 第一次对照的运行方法
 
 在 holdout clone 的根目录运行（`--output` 必须是一个不在冻结目录里的新目录）：
 

@@ -1,0 +1,19 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--note",
+      "测试",
+      "--preview"
+    ],
+    "exit": 2,
+    "stdout": "",
+    "stderr": "usage: python -m jobsearch_cn [-h] [--version] <command> ...\r\npython -m jobsearch_cn: error: unrecognized arguments: --note 测试\r\n"
+  }
+]

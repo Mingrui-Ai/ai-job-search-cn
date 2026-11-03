@@ -1,0 +1,3711 @@
+{
+  "tested_head": "52d84d0310c7f537ed3492c278cd177fa21a0163",
+  "frozen_oracle_ok": true,
+  "counts": {
+    "pass": 67,
+    "fail": 13,
+    "waiting_m4_1b": 30
+  },
+  "failed": [
+    "A29",
+    "A30",
+    "A31",
+    "A32",
+    "A33",
+    "A34",
+    "A35",
+    "A36",
+    "A37",
+    "A43",
+    "A44",
+    "A45",
+    "A51"
+  ],
+  "results": [
+    {
+      "id": "A01",
+      "part": "M4-1a",
+      "title": "首次写入建库：表、版本、外键",
+      "verdict": "pass",
+      "seconds": 0.5,
+      "crash": null,
+      "checks": [
+        {
+          "check": "record：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "建出 applications/applications.sqlite3",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "user_version = 1",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "§3 的六张表都在",
+          "ok": true,
+          "detail": "['applications', 'events', 'material_files', 'material_versions', 'requests', 'snapshots']"
+        },
+        {
+          "check": "外键生效：插入不存在投递的事件失败",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "写完不残留 -journal/-wal/-shm",
+          "ok": true,
+          "detail": "[]"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "其余列名",
+          "observed": "['applications', 'events', 'material_files', 'material_versions', 'requests', 'snapshots']"
+        }
+      ]
+    },
+    {
+      "id": "A02",
+      "part": "M4-1a",
+      "title": "库版本比程序新：拒绝写入",
+      "verdict": "pass",
+      "seconds": 1.1,
+      "crash": null,
+      "checks": [
+        {
+          "check": "库版本更高时写：拒绝（退出 2）",
+          "ok": true,
+          "detail": "exit=2 err={\r\n  \"error\": \"<work>\\\\A02\\\\data\\\\applications\\\\applications.sqlite3 was written by a newer jobsearch_cn (database version 2, this program knows 1); update the program, nothing was read or written\"\r\n}\r\n"
+        },
+        {
+          "check": "库版本更高时写：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "写入被拒的错误输出",
+          "observed": "{\r\n  \"error\": \"<work>\\\\A02\\\\data\\\\applications\\\\applications.sqlite3 was written by a newer jobsearch_cn (database version 2, this program knows 1); update the program, nothing was read or written\"\r\n}"
+        },
+        {
+          "item": "库版本更高时 show",
+          "observed": "exit=2 {\r\n  \"error\": \"<work>\\\\A02\\\\data\\\\applications\\\\applications.sqlite3 was written by a newer jobsearch_cn (database version 2, this program knows 1);"
+        }
+      ]
+    },
+    {
+      "id": "A03",
+      "part": "M4-1a",
+      "title": "库不存在时只读命令不建库",
+      "verdict": "pass",
+      "seconds": 0.9,
+      "crash": null,
+      "checks": [
+        {
+          "check": "四条命令后没有 applications/",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "库不存在时 show",
+          "observed": "exit=1 out= err={\r\n  \"error\": \"not_found\",\r\n  \"message\": \"no application app_00000000000000000000000000000001: there are no application records yet\"\r\n}"
+        },
+        {
+          "item": "库不存在时 list",
+          "observed": "exit=0 out={\r\n  \"applications\": [],\r\n  \"note\": \"no application records yet\"\r\n} err="
+        },
+        {
+          "item": "库不存在时 validate",
+          "observed": "exit=0 out={\r\n  \"valid\": true,\r\n  \"errors\": [],\r\n  \"warnings\": [\r\n    \"no application records yet\"\r\n  ],\r\n  \"orphans\": []\r\n} err="
+        },
+        {
+          "item": "库不存在时 export",
+          "observed": "exit=0 out={\r\n  \"schema_version\": 1,\r\n  \"exported_at\": \"2026-11-03T16:37:47Z\",\r\n  \"applications\": []\r\n} err="
+        }
+      ]
+    },
+    {
+      "id": "A04",
+      "part": "M4-1a",
+      "title": "预览不写任何东西",
+      "verdict": "pass",
+      "seconds": 1.3,
+      "crash": null,
+      "checks": [
+        {
+          "check": "库不存在时预览退出 0、preview=true、有 request_id",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "预览带将写的 created 事件",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "预览后 applications/ 不存在",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "已有库时预览退出 0、preview=true",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "预览前后数据目录（含库文件）不变",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "预览后 revision=1、status=drafted",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "新建时预览的 application",
+          "observed": "null"
+        },
+        {
+          "item": "request_id 格式",
+          "observed": "req_9cc0795ebb625564ad91e159d1d3e6a6"
+        }
+      ]
+    },
+    {
+      "id": "A05",
+      "part": "M4-1a",
+      "title": "预览后带 request_id 提交：只起草不投",
+      "verdict": "pass",
+      "seconds": 0.5,
+      "crash": null,
+      "checks": [
+        {
+          "check": "record 提交：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "preview=false，request_id 与预览相同",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "application_id 形如 app_+32 位十六进制",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "只有一条 created，seq=1",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "created payload",
+          "ok": true,
+          "detail": "{'channel': {'kind': 'portal', 'platform': '示例招聘站'}, 'job_id': 'job_fa26c5d52ff7', 'record_origin': 'current'}"
+        },
+        {
+          "check": "status=drafted，revision=1，confirmed=false，materials_recorded=null",
+          "ok": true,
+          "detail": "{'confirmed': False, 'occurred_at': None, 'occurred_on': None, 'materials_recorded': None, 'materials_check': None}"
+        },
+        {
+          "check": "actor=user，recorded_at 有值",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "created 事件的发生时间",
+          "observed": "(None, None)"
+        }
+      ]
+    },
+    {
+      "id": "A06",
+      "part": "M4-1a",
+      "title": "同一 request_id、同内容重试：返回原结果、不重复写",
+      "verdict": "pass",
+      "seconds": 0.9,
+      "crash": null,
+      "checks": [
+        {
+          "check": "重试退出 0",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "check": "application_id、event_id、seq 与第一次相同",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "仍只有 1 条投递、1 条事件，revision=1",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "重试输出是否标出重放",
+          "observed": "repeated=True"
+        }
+      ]
+    },
+    {
+      "id": "A07",
+      "part": "M4-1a",
+      "title": "同一 request_id、不同内容：request_conflict",
+      "verdict": "pass",
+      "seconds": 1.1,
+      "crash": null,
+      "checks": [
+        {
+          "check": "同 request_id 不同内容：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"request_conflict\",\r\n  \"message\": \"req_1fb1a8bac5f9873f1338e12479271ead was already used for a different request; preview again for a new request id\",\r\n  \"application_id\": \"app_708e30f4fb7d44e2e95422df4ef58363\"\r\n}\r\n"
+        },
+        {
+          "check": "同 request_id 不同内容：error=request_conflict",
+          "ok": true,
+          "detail": "error=request_conflict"
+        },
+        {
+          "check": "同 request_id 不同内容：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A08",
+      "part": "M4-1a",
+      "title": "不先预览、不带 request_id 直接写",
+      "verdict": "pass",
+      "seconds": 0.7,
+      "crash": null,
+      "checks": [
+        {
+          "check": "不预览也不带 request_id 时没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "直接写",
+          "observed": "exit=2 python -m jobsearch_cn application record: error: one of the arguments --preview --request-id is required"
+        },
+        {
+          "item": "自拟 request_id 提交",
+          "observed": "exit=0 "
+        }
+      ]
+    },
+    {
+      "id": "A09",
+      "part": "M4-1a",
+      "title": "当前流程：岗位不在库里",
+      "verdict": "pass",
+      "seconds": 0.2,
+      "crash": null,
+      "checks": [
+        {
+          "check": "当前流程岗位不在库里：拒绝（退出非 0）",
+          "ok": true,
+          "detail": "exit=1"
+        },
+        {
+          "check": "当前流程岗位不在库里：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "岗位不在库里",
+          "observed": "exit=1 error=not_found"
+        }
+      ]
+    },
+    {
+      "id": "A10",
+      "part": "M4-1a",
+      "title": "投出只知道日期（--on）",
+      "verdict": "pass",
+      "seconds": 0.5,
+      "crash": null,
+      "checks": [
+        {
+          "check": "record --submitted --on：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "record --submitted --on：有警告",
+          "ok": true,
+          "detail": "['材料未记录 (no material recorded): the submission is recorded without the files sent; say so to the user']"
+        },
+        {
+          "check": "同一 request 写 created+submitted，seq 1、2",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "revision=2，status=applied",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "submission 四个字段",
+          "ok": true,
+          "detail": "{'confirmed': True, 'occurred_at': None, 'occurred_on': '2026-10-28', 'materials_recorded': False, 'materials_check': None}"
+        },
+        {
+          "check": "submitted 事件 occurred_on，不补午夜",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "submitted payload：channel、material_version_ids=[]、sent_file_refs=[]",
+          "ok": true,
+          "detail": "{'channel': {'kind': 'portal', 'platform': '示例招聘站'}, 'material_version_ids': [], 'materials_check': None, 'sent_file_refs': []}"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A11",
+      "part": "M4-1a",
+      "title": "投出知道时刻（--at 带时区）",
+      "verdict": "pass",
+      "seconds": 0.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "--at 带时区：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "--at 带时区：有警告",
+          "ok": true,
+          "detail": "['材料未记录 (no material recorded): the submission is recorded without the files sent; say so to the user']"
+        },
+        {
+          "check": "与 2026-10-28T06:30:00Z 同一时刻，occurred_on=null",
+          "ok": true,
+          "detail": "{'confirmed': True, 'occurred_at': '2026-10-28T06:30:00Z', 'occurred_on': None, 'materials_recorded': False, 'materials_check': None}"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "UTC 写法",
+          "observed": "2026-10-28T06:30:00Z"
+        }
+      ]
+    },
+    {
+      "id": "A12",
+      "part": "M4-1a",
+      "title": "投出日期未知",
+      "verdict": "pass",
+      "seconds": 0.5,
+      "crash": null,
+      "checks": [
+        {
+          "check": "日期未知：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "日期未知：有警告",
+          "ok": true,
+          "detail": "['材料未记录 (no material recorded): the submission is recorded without the files sent; say so to the user']"
+        },
+        {
+          "check": "confirmed=true，两种时间都是 null",
+          "ok": true,
+          "detail": "{'confirmed': True, 'occurred_at': None, 'occurred_on': None, 'materials_recorded': False, 'materials_check': None}"
+        },
+        {
+          "check": "recorded_at 有值",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A13",
+      "part": "M4-1a",
+      "title": "不合规的时间一律拒绝",
+      "verdict": "pass",
+      "seconds": 1.8,
+      "crash": null,
+      "checks": [
+        {
+          "check": "--at 2026-10-28T14:30：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--at '2026-10-28T14:30': write a moment with its time zone, like 2026-11-02T14:30+08:00; use --on 2026-11-02 when only the date is known\"\r\n}\r\n"
+        },
+        {
+          "check": "--at 2026-10-28T14:30：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "--at 2026-10-28T14:30：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "--at 2026-10-28T14:30:00：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--at '2026-10-28T14:30:00': write a moment with its time zone, like 2026-11-02T14:30+08:00; use --on 2026-11-02 when only the date is known\"\r\n}\r\n"
+        },
+        {
+          "check": "--at 2026-10-28T14:30:00：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "--at 2026-10-28T14:30:00：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "--on 2026-02-30：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--on '2026-02-30' is not a real date\"\r\n}\r\n"
+        },
+        {
+          "check": "--on 2026-02-30：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "--on 2026-02-30：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "--on 2026/10/28：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--on '2026/10/28': write the date as YYYY-MM-DD\"\r\n}\r\n"
+        },
+        {
+          "check": "--on 2026/10/28：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "--on 2026/10/28：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "--on 2099-01-01：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--on 2099-01-01: that day has not come yet (Asia/Shanghai)\"\r\n}\r\n"
+        },
+        {
+          "check": "--on 2099-01-01：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "--on 2099-01-01：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "--at 2099-01-01T09:00+08:00：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--at 2099-01-01T09:00+08:00: that moment has not happened yet\"\r\n}\r\n"
+        },
+        {
+          "check": "--at 2099-01-01T09:00+08:00：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "--at 2099-01-01T09:00+08:00：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "--on 与 --at 同给：拒绝（退出非 0）",
+          "ok": true,
+          "detail": "exit=2"
+        },
+        {
+          "check": "--on 与 --at 同给：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "库不存在时也没建库",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "--on 与 --at 同给",
+          "observed": "exit=2"
+        }
+      ]
+    },
+    {
+      "id": "A14",
+      "part": "M4-1a",
+      "title": "record 不带 --submitted 却给 --on/--at",
+      "verdict": "pass",
+      "seconds": 0.2,
+      "crash": null,
+      "checks": [],
+      "impl_observed": [
+        {
+          "item": "record 不带 --submitted 给 --on",
+          "observed": "exit=1 error=invalid {\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--on, --at, --material and --sent describe the submission; add --submitted, or record them later with submit\"\r\n}"
+        }
+      ]
+    },
+    {
+      "id": "A15",
+      "part": "M4-1a",
+      "title": "--material/--sent 不随投出：拒绝",
+      "verdict": "pass",
+      "seconds": 0.3,
+      "crash": null,
+      "checks": [
+        {
+          "check": "--material/--sent 不随投出：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--on, --at, --material and --sent describe the submission; add --submitted, or record them later with submit\"\r\n}\r\n"
+        },
+        {
+          "check": "--material/--sent 不随投出：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "错误码",
+          "observed": "invalid"
+        }
+      ]
+    },
+    {
+      "id": "A16",
+      "part": "M4-1a",
+      "title": "--historical 不带 --submitted：拒绝",
+      "verdict": "pass",
+      "seconds": 0.3,
+      "crash": null,
+      "checks": [
+        {
+          "check": "--historical 不带 --submitted：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--historical records an application already sent; add --submitted\"\r\n}\r\n"
+        },
+        {
+          "check": "--historical 不带 --submitted：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "错误码",
+          "observed": "invalid"
+        }
+      ]
+    },
+    {
+      "id": "A17",
+      "part": "M4-1a",
+      "title": "record 不接受 --note",
+      "verdict": "pass",
+      "seconds": 0.2,
+      "crash": null,
+      "checks": [
+        {
+          "check": "record --note：拒绝（退出非 0）",
+          "ok": true,
+          "detail": "exit=2"
+        },
+        {
+          "check": "record --note：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "退出码",
+          "observed": "2"
+        }
+      ]
+    },
+    {
+      "id": "A18",
+      "part": "M4-1a",
+      "title": "补录：岗位不在库里，只警告、不做快照",
+      "verdict": "pass",
+      "seconds": 0.7,
+      "crash": null,
+      "checks": [
+        {
+          "check": "补录岗位不在库里：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "补录岗位不在库里：有警告",
+          "ok": true,
+          "detail": "['job_cb7cb4d6e51d is not in the job store; the historical record keeps only its id']"
+        },
+        {
+          "check": "status=applied，record_origin=historical",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "警告说明岗位不在库里",
+          "ok": true,
+          "detail": "['job_cb7cb4d6e51d is not in the job store; the historical record keeps only its id']"
+        },
+        {
+          "check": "context_snapshot 两项都是 null",
+          "ok": true,
+          "detail": "{'job': None, 'match': None}"
+        },
+        {
+          "check": "artifacts 下没有快照文件",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "check": "submission：confirmed、两个 null、materials_recorded=false",
+          "ok": true,
+          "detail": "{'confirmed': True, 'occurred_at': None, 'occurred_on': None, 'materials_recorded': False, 'materials_check': None}"
+        },
+        {
+          "check": "list 里看得出补录",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "补录缺材料是否另警告",
+          "observed": "['job_cb7cb4d6e51d is not in the job store; the historical record keeps only its id']"
+        }
+      ]
+    },
+    {
+      "id": "A19",
+      "part": "M4-1a",
+      "title": "补录：岗位在库里",
+      "verdict": "pass",
+      "seconds": 0.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "补录岗位在库里：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "historical，occurred_on=2026-09-28，materials_recorded=false",
+          "ok": true,
+          "detail": "{'confirmed': True, 'occurred_at': None, 'occurred_on': '2026-09-28', 'materials_recorded': False, 'materials_check': None}"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "补录岗位在库里时的快照",
+          "observed": "{'job': None, 'match': None}"
+        },
+        {
+          "item": "补录岗位在库里时的警告",
+          "observed": "[]"
+        }
+      ]
+    },
+    {
+      "id": "A20",
+      "part": "M4-1a",
+      "title": "补录：发生日期和记录时间分开",
+      "verdict": "pass",
+      "seconds": 0.5,
+      "crash": null,
+      "checks": [
+        {
+          "check": "补录 referral：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "补录 referral：有警告",
+          "ok": true,
+          "detail": "['job_cb7cb4d6e51d is not in the job store; the historical record keeps only its id']"
+        },
+        {
+          "check": "submitted occurred_on=2026-09-20，recorded_at 是今天写入时刻",
+          "ok": true,
+          "detail": "{'event_id': 'evt_6155781dd81250ce3838c9bfe77a5002', 'seq': 2, 'request_id': 'req_b41c4f786650e4fd2e53250c2eaebfd3', 'type': 'submitted', 'occurred_at': None, 'occurred_on': '2026-09-20', 'recorded_at': '2026-11-03T16:37:58Z', 'actor': 'user', 'source': {'kind': 'user', 'reference': None}, 'payload': {'channel': {'kind': 'referral', 'platform': None}, 'material_version_ids': [], 'materials_check': None, 'sent_file_refs': []}, 'voided_by': None}"
+        },
+        {
+          "check": "channel={referral, null}",
+          "ok": true,
+          "detail": "{'kind': 'referral', 'platform': None}"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A21",
+      "part": "M4-1a",
+      "title": "渠道枚举与平台名长度",
+      "verdict": "pass",
+      "seconds": 3.2,
+      "crash": null,
+      "checks": [
+        {
+          "check": "channel portal 接受",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "channel company_site 接受",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "channel email 接受",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "channel referral 接受",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "channel campus 接受",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "channel offline 接受",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "channel other 接受",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "channel unknown 接受",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "不带 --platform 时 platform=null",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "未知 kind 拒绝",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "平台名 40 字接受",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "check": "平台名 41 字 invalid",
+          "ok": true,
+          "detail": "exit=1 invalid"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "未知 kind",
+          "observed": "exit=2"
+        },
+        {
+          "item": "预览阶段是否做参数检查",
+          "observed": "是（以上均在预览阶段判定）"
+        }
+      ]
+    },
+    {
+      "id": "A22",
+      "part": "M4-1a",
+      "title": "换渠道：同一岗位已有未结束的投递",
+      "verdict": "pass",
+      "seconds": 1.3,
+      "crash": null,
+      "checks": [
+        {
+          "check": "同一岗位再记：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "同一岗位再记：有警告",
+          "ok": true,
+          "detail": "['job_fa26c5d52ff7 already has an unfinished application (app_0fe7adb406b0ddcaa29b4b6105152a86); a second one is right only for another channel or a new attempt']"
+        },
+        {
+          "check": "两条 application_id 不同，第二条 drafted",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "list --job 列出两条",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "重复警告原文",
+          "observed": "['job_fa26c5d52ff7 already has an unfinished application (app_0fe7adb406b0ddcaa29b4b6105152a86); a second one is right only for another channel or a new attempt']"
+        }
+      ]
+    },
+    {
+      "id": "A23",
+      "part": "M4-1a",
+      "title": "同一岗位之前的投递已结束：不给重复警告",
+      "verdict": "pass",
+      "seconds": 1.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "之前的已结束时再记：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "之前的已结束时再记：没有警告",
+          "ok": true,
+          "detail": "[]"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A24",
+      "part": "M4-1a",
+      "title": "submit：草稿确认投出",
+      "verdict": "pass",
+      "seconds": 1.0,
+      "crash": null,
+      "checks": [
+        {
+          "check": "submit：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "submit：有警告",
+          "ok": true,
+          "detail": "['材料未记录 (no material recorded): the submission is recorded without the files sent; say so to the user']"
+        },
+        {
+          "check": "applied，revision=2，submitted(seq 2) occurred_on=2026-10-29",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "payload.channel 等于 created 时的渠道",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "confirmed=true，materials_recorded=false",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A25",
+      "part": "M4-1a",
+      "title": "submit：已投出的不能再 submit",
+      "verdict": "pass",
+      "seconds": 0.9,
+      "crash": null,
+      "checks": [
+        {
+          "check": "已投出再 submit：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"transition\",\r\n  \"message\": \"only a drafted application can be submitted; this one is applied\",\r\n  \"status\": \"applied\"\r\n}\r\n"
+        },
+        {
+          "check": "已投出再 submit：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "错误码",
+          "observed": "transition"
+        }
+      ]
+    },
+    {
+      "id": "A26",
+      "part": "M4-1a",
+      "title": "expected_revision 过期：stale_revision",
+      "verdict": "pass",
+      "seconds": 1.8,
+      "crash": null,
+      "checks": [
+        {
+          "check": "revision 过期：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"stale_revision\",\r\n  \"message\": \"the application changed since revision 2; read it again and tell the user what changed\",\r\n  \"revision\": 3,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_59baacb2ee866ab566dc5ee0cb2b1d68\",\r\n      \"seq\": 3,\r\n      \"request_id\": \"req_bc2a08eedd850be826ed6d"
+        },
+        {
+          "check": "revision 过期：error=stale_revision",
+          "ok": true,
+          "detail": "error=stale_revision"
+        },
+        {
+          "check": "revision 过期：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "错误带当前 revision 3 和之后的事件",
+          "ok": true,
+          "detail": "{'revision': 3}"
+        },
+        {
+          "check": "status 仍为 interview",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "附带字段名",
+          "observed": "['error', 'events', 'message', 'revision']"
+        }
+      ]
+    },
+    {
+      "id": "A27",
+      "part": "M4-1a",
+      "title": "expected_revision 比当前大：也是 stale_revision",
+      "verdict": "pass",
+      "seconds": 0.7,
+      "crash": null,
+      "checks": [
+        {
+          "check": "revision 比当前大：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"stale_revision\",\r\n  \"message\": \"the application changed since revision 5; read it again and tell the user what changed\",\r\n  \"revision\": 1,\r\n  \"events\": []\r\n}\r\n"
+        },
+        {
+          "check": "revision 比当前大：error=stale_revision",
+          "ok": true,
+          "detail": "error=stale_revision"
+        },
+        {
+          "check": "revision 比当前大：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A28",
+      "part": "M4-1a",
+      "title": "缺 --expected-revision",
+      "verdict": "pass",
+      "seconds": 0.8,
+      "crash": null,
+      "checks": [
+        {
+          "check": "缺 --expected-revision：拒绝（退出非 0）",
+          "ok": true,
+          "detail": "exit=2"
+        },
+        {
+          "check": "缺 --expected-revision：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "退出码",
+          "observed": "2"
+        }
+      ]
+    },
+    {
+      "id": "A29",
+      "part": "M4-1a",
+      "title": "状态表：从 drafted 出发",
+      "verdict": "fail",
+      "seconds": 9.2,
+      "crash": null,
+      "checks": [
+        {
+          "check": "走到 drafted",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "drafted→drafted 拒绝（transition，退出 1）",
+          "ok": false,
+          "detail": "exit=2 error=None wrote=False"
+        },
+        {
+          "check": "走到 drafted",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "drafted→applied 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 drafted",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "drafted→interview 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 drafted",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "drafted→offer 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 drafted",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "drafted→no_response 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 drafted",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "drafted→hired 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 drafted",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "drafted→rejected 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 drafted",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "drafted→withdrawn 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 drafted",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "drafted→offer_declined 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "矩阵实际结果",
+          "observed": "{'drafted': 'exit=2 error=None wrote=False', 'applied': 'transition', 'interview': 'transition', 'offer': 'transition', 'no_response': 'transition', 'hired': 'transition', 'rejected': 'transition', 'withdrawn': 'allow', 'offer_declined': 'transition'}"
+        }
+      ]
+    },
+    {
+      "id": "A30",
+      "part": "M4-1a",
+      "title": "状态表：从 applied 出发",
+      "verdict": "fail",
+      "seconds": 10.5,
+      "crash": null,
+      "checks": [
+        {
+          "check": "走到 applied",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "applied→drafted 拒绝（transition，退出 1）",
+          "ok": false,
+          "detail": "exit=2 error=None wrote=False"
+        },
+        {
+          "check": "走到 applied",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "applied→applied 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 applied",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "applied→interview 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 applied",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "applied→offer 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 applied",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "applied→no_response 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 applied",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "applied→hired 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 applied",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "applied→rejected 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 applied",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "applied→withdrawn 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 applied",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "applied→offer_declined 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "矩阵实际结果",
+          "observed": "{'drafted': 'exit=2 error=None wrote=False', 'applied': 'transition', 'interview': 'allow', 'offer': 'allow', 'no_response': 'allow', 'hired': 'transition', 'rejected': 'allow', 'withdrawn': 'allow', 'offer_declined': 'transition'}"
+        }
+      ]
+    },
+    {
+      "id": "A31",
+      "part": "M4-1a",
+      "title": "状态表：从 interview 出发",
+      "verdict": "fail",
+      "seconds": 14.1,
+      "crash": null,
+      "checks": [
+        {
+          "check": "走到 interview",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "interview→drafted 拒绝（transition，退出 1）",
+          "ok": false,
+          "detail": "exit=2 error=None wrote=False"
+        },
+        {
+          "check": "走到 interview",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "interview→applied 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 interview",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "interview→interview 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 interview",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "interview→offer 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 interview",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "interview→no_response 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 interview",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "interview→hired 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 interview",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "interview→rejected 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 interview",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "interview→withdrawn 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 interview",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "interview→offer_declined 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "矩阵实际结果",
+          "observed": "{'drafted': 'exit=2 error=None wrote=False', 'applied': 'transition', 'interview': 'transition', 'offer': 'allow', 'no_response': 'allow', 'hired': 'transition', 'rejected': 'allow', 'withdrawn': 'allow', 'offer_declined': 'transition'}"
+        }
+      ]
+    },
+    {
+      "id": "A32",
+      "part": "M4-1a",
+      "title": "状态表：从 offer 出发",
+      "verdict": "fail",
+      "seconds": 15.0,
+      "crash": null,
+      "checks": [
+        {
+          "check": "走到 offer",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer→drafted 拒绝（transition，退出 1）",
+          "ok": false,
+          "detail": "exit=2 error=None wrote=False"
+        },
+        {
+          "check": "走到 offer",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer→applied 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer→interview 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer→offer 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer→no_response 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer→hired 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 offer",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer→rejected 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 offer",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer→withdrawn 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 offer",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer→offer_declined 允许",
+          "ok": true,
+          "detail": "allow"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "矩阵实际结果",
+          "observed": "{'drafted': 'exit=2 error=None wrote=False', 'applied': 'transition', 'interview': 'transition', 'offer': 'transition', 'no_response': 'transition', 'hired': 'allow', 'rejected': 'allow', 'withdrawn': 'allow', 'offer_declined': 'allow'}"
+        }
+      ]
+    },
+    {
+      "id": "A33",
+      "part": "M4-1a",
+      "title": "状态表：从 no_response 出发",
+      "verdict": "fail",
+      "seconds": 15.5,
+      "crash": null,
+      "checks": [
+        {
+          "check": "走到 no_response",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→drafted 拒绝（transition，退出 1）",
+          "ok": false,
+          "detail": "exit=2 error=None wrote=False"
+        },
+        {
+          "check": "走到 no_response",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→applied 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 no_response",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→interview 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 no_response",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→offer 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 no_response",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→no_response 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 no_response",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→hired 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 no_response",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→rejected 允许",
+          "ok": true,
+          "detail": "allow"
+        },
+        {
+          "check": "走到 no_response",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→withdrawn 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 no_response",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→offer_declined 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "矩阵实际结果",
+          "observed": "{'drafted': 'exit=2 error=None wrote=False', 'applied': 'transition', 'interview': 'allow', 'offer': 'allow', 'no_response': 'transition', 'hired': 'transition', 'rejected': 'allow', 'withdrawn': 'transition', 'offer_declined': 'transition'}"
+        }
+      ]
+    },
+    {
+      "id": "A34",
+      "part": "M4-1a",
+      "title": "状态表：从 hired 出发",
+      "verdict": "fail",
+      "seconds": 18.4,
+      "crash": null,
+      "checks": [
+        {
+          "check": "走到 hired",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "hired→drafted 拒绝（transition，退出 1）",
+          "ok": false,
+          "detail": "exit=2 error=None wrote=False"
+        },
+        {
+          "check": "走到 hired",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "hired→applied 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 hired",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "hired→interview 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 hired",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "hired→offer 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 hired",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "hired→no_response 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 hired",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "hired→hired 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 hired",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "hired→rejected 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 hired",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "hired→withdrawn 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 hired",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "hired→offer_declined 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "矩阵实际结果",
+          "observed": "{'drafted': 'exit=2 error=None wrote=False', 'applied': 'transition', 'interview': 'transition', 'offer': 'transition', 'no_response': 'transition', 'hired': 'transition', 'rejected': 'transition', 'withdrawn': 'transition', 'offer_declined': 'transition'}"
+        }
+      ]
+    },
+    {
+      "id": "A35",
+      "part": "M4-1a",
+      "title": "状态表：从 rejected 出发",
+      "verdict": "fail",
+      "seconds": 13.2,
+      "crash": null,
+      "checks": [
+        {
+          "check": "走到 rejected",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "rejected→drafted 拒绝（transition，退出 1）",
+          "ok": false,
+          "detail": "exit=2 error=None wrote=False"
+        },
+        {
+          "check": "走到 rejected",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "rejected→applied 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 rejected",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "rejected→interview 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 rejected",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "rejected→offer 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 rejected",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "rejected→no_response 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 rejected",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "rejected→hired 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 rejected",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "rejected→rejected 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 rejected",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "rejected→withdrawn 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 rejected",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "rejected→offer_declined 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "矩阵实际结果",
+          "observed": "{'drafted': 'exit=2 error=None wrote=False', 'applied': 'transition', 'interview': 'transition', 'offer': 'transition', 'no_response': 'transition', 'hired': 'transition', 'rejected': 'transition', 'withdrawn': 'transition', 'offer_declined': 'transition'}"
+        }
+      ]
+    },
+    {
+      "id": "A36",
+      "part": "M4-1a",
+      "title": "状态表：从 withdrawn 出发",
+      "verdict": "fail",
+      "seconds": 12.9,
+      "crash": null,
+      "checks": [
+        {
+          "check": "走到 withdrawn",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "withdrawn→drafted 拒绝（transition，退出 1）",
+          "ok": false,
+          "detail": "exit=2 error=None wrote=False"
+        },
+        {
+          "check": "走到 withdrawn",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "withdrawn→applied 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 withdrawn",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "withdrawn→interview 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 withdrawn",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "withdrawn→offer 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 withdrawn",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "withdrawn→no_response 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 withdrawn",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "withdrawn→hired 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 withdrawn",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "withdrawn→rejected 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 withdrawn",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "withdrawn→withdrawn 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 withdrawn",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "withdrawn→offer_declined 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "矩阵实际结果",
+          "observed": "{'drafted': 'exit=2 error=None wrote=False', 'applied': 'transition', 'interview': 'transition', 'offer': 'transition', 'no_response': 'transition', 'hired': 'transition', 'rejected': 'transition', 'withdrawn': 'transition', 'offer_declined': 'transition'}"
+        }
+      ]
+    },
+    {
+      "id": "A37",
+      "part": "M4-1a",
+      "title": "状态表：从 offer_declined 出发",
+      "verdict": "fail",
+      "seconds": 17.9,
+      "crash": null,
+      "checks": [
+        {
+          "check": "走到 offer_declined",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer_declined→drafted 拒绝（transition，退出 1）",
+          "ok": false,
+          "detail": "exit=2 error=None wrote=False"
+        },
+        {
+          "check": "走到 offer_declined",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer_declined→applied 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer_declined",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer_declined→interview 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer_declined",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer_declined→offer 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer_declined",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer_declined→no_response 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer_declined",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer_declined→hired 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer_declined",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer_declined→rejected 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer_declined",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer_declined→withdrawn 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        },
+        {
+          "check": "走到 offer_declined",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "offer_declined→offer_declined 拒绝（transition，退出 1）",
+          "ok": true,
+          "detail": "transition"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "矩阵实际结果",
+          "observed": "{'drafted': 'exit=2 error=None wrote=False', 'applied': 'transition', 'interview': 'transition', 'offer': 'transition', 'no_response': 'transition', 'hired': 'transition', 'rejected': 'transition', 'withdrawn': 'transition', 'offer_declined': 'transition'}"
+        }
+      ]
+    },
+    {
+      "id": "A38",
+      "part": "M4-1a",
+      "title": "no_response 迟到回复：reason 必填",
+      "verdict": "pass",
+      "seconds": 7.7,
+      "crash": null,
+      "checks": [
+        {
+          "check": "no_response→interview 不带 reason：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"no_response -> interview: say what came in --reason (a late reply)\"\r\n}\r\n"
+        },
+        {
+          "check": "no_response→interview 不带 reason：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "no_response→interview 不带 reason：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→offer 不带 reason：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"no_response -> offer: say what came in --reason (a late reply)\"\r\n}\r\n"
+        },
+        {
+          "check": "no_response→offer 不带 reason：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "no_response→offer 不带 reason：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "no_response→rejected 不带 reason：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"no_response -> rejected: say what came in --reason (a late reply)\"\r\n}\r\n"
+        },
+        {
+          "check": "no_response→rejected 不带 reason：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "no_response→rejected 不带 reason：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "带 reason：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "reason 原样写进 payload",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "空字符串 reason",
+          "observed": "exit=1 error=invalid"
+        }
+      ]
+    },
+    {
+      "id": "A39",
+      "part": "M4-1a",
+      "title": "reason 长度上限 300 字",
+      "verdict": "pass",
+      "seconds": 1.2,
+      "crash": null,
+      "checks": [
+        {
+          "check": "301 字：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--reason: at most 300 characters (301 given)\"\r\n}\r\n"
+        },
+        {
+          "check": "301 字：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "301 字：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "300 字：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A40",
+      "part": "M4-1a",
+      "title": "status 的发生时间",
+      "verdict": "pass",
+      "seconds": 1.2,
+      "crash": null,
+      "checks": [
+        {
+          "check": "将来的 --on：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--on 2099-01-01: that day has not come yet (Asia/Shanghai)\"\r\n}\r\n"
+        },
+        {
+          "check": "将来的 --on：error=invalid",
+          "ok": true,
+          "detail": "error=invalid"
+        },
+        {
+          "check": "将来的 --on：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "--at：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "occurred_at 与 2026-11-01T02:00:00Z 同一时刻",
+          "ok": true,
+          "detail": "{'event_id': 'evt_fbbe1814f4e2fdc79941815b4b197904', 'seq': 3, 'request_id': 'req_eae3938f9d5f3889b63bf3faf88864dc', 'type': 'status_changed', 'occurred_at': '2026-11-01T02:00:00Z', 'occurred_on': None, 'recorded_at': '2026-11-03T16:40:26Z', 'actor': 'user', 'source': {'kind': 'user', 'reference': None}, 'payload': {'from': 'applied', 'reason': None, 'to': 'interview'}, 'voided_by': None}"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A41",
+      "part": "M4-1a",
+      "title": "未知状态值",
+      "verdict": "pass",
+      "seconds": 0.9,
+      "crash": null,
+      "checks": [
+        {
+          "check": "status accepted：拒绝（退出非 0）",
+          "ok": true,
+          "detail": "exit=2"
+        },
+        {
+          "check": "status accepted：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "status drafted：拒绝（退出非 0）",
+          "ok": true,
+          "detail": "exit=2"
+        },
+        {
+          "check": "status drafted：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "status accepted",
+          "observed": "exit=2 error=None"
+        },
+        {
+          "item": "status drafted",
+          "observed": "exit=2 error=None"
+        }
+      ]
+    },
+    {
+      "id": "A42",
+      "part": "M4-1a",
+      "title": "投递 id 不存在",
+      "verdict": "pass",
+      "seconds": 1.0,
+      "crash": null,
+      "checks": [
+        {
+          "check": "status 不存在的投递：拒绝（退出非 0）",
+          "ok": true,
+          "detail": "exit=1"
+        },
+        {
+          "check": "status 不存在的投递：没有写入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "show 不存在的投递拒绝",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "不存在的投递",
+          "observed": "status exit=1 error=not_found; show exit=1 error=not_found"
+        }
+      ]
+    },
+    {
+      "id": "A43",
+      "part": "M4-1a",
+      "title": "投出带材料，说明文件相符",
+      "verdict": "fail",
+      "seconds": 0.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "带材料投出（相符）：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "带材料投出（相符）：没有警告",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "check": "一个材料版本",
+          "ok": true,
+          "detail": "1"
+        },
+        {
+          "check": "version_id 形如 mv_+32 位十六进制",
+          "ok": true,
+          "detail": "mv_2173b2cf2d05a39d7779c1fdee9b8d77"
+        },
+        {
+          "check": "kind=resume，material_hash、profile_hash",
+          "ok": true,
+          "detail": "('ee15c290c88fcab0ca9fadf21d6f52b9fabba24ff5a0e462b271ed5905e54250', '670f4cbd7fcb8de44ed4c1b65cb0f884e93984d6a5c55afa2e255a94cb7206a2')"
+        },
+        {
+          "check": "review_path 指向 review-1-r1.json",
+          "ok": true,
+          "detail": "materials/job_fa26c5d52ff7/review-1-r1.json"
+        },
+        {
+          "check": "files 有 source（file_id=material）和 sent",
+          "ok": true,
+          "detail": "[('material', 'source'), ('sent-1', 'sent')]"
+        },
+        {
+          "check": "发出的 PDF file_id=pdf（设计 §3）",
+          "ok": false,
+          "detail": "sent-1"
+        },
+        {
+          "check": "归档 material 在 artifacts/<投递>/<版本>/ 下且摘要、大小对",
+          "ok": true,
+          "detail": "artifacts/app_48fcf0b10df0be140199f40453ce80a0/mv_2173b2cf2d05a39d7779c1fdee9b8d77/material.json"
+        },
+        {
+          "check": "归档 sent-1 在 artifacts/<投递>/<版本>/ 下且摘要、大小对",
+          "ok": true,
+          "detail": "artifacts/app_48fcf0b10df0be140199f40453ce80a0/mv_2173b2cf2d05a39d7779c1fdee9b8d77/sent-1.pdf"
+        },
+        {
+          "check": "归档摘要等于投出时源文件",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "payload.material_version_ids=[version_id]，sent_file_refs 指向发出文件",
+          "ok": true,
+          "detail": "{'channel': {'kind': 'portal', 'platform': '示例招聘站'}, 'material_version_ids': ['mv_2173b2cf2d05a39d7779c1fdee9b8d77'], 'materials_check': 'match', 'sent_file_refs': [{'file_id': 'sent-1', 'version_id': 'mv_2173b2cf2d05a39d7779c1fdee9b8d77'}]}"
+        },
+        {
+          "check": "materials_recorded=true",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "context_snapshot.job 有 path 和 sha256，摘要等于归档字节",
+          "ok": true,
+          "detail": "{'path': 'artifacts/app_48fcf0b10df0be140199f40453ce80a0/ctx_c6f0b83213bbaf8af28f3b31832f87eb/job.json', 'sha256': '07b20efe1b4d05421f58fd3afc4bd489a638dc95dca0305e1c9c9a67f4fb9da4'}"
+        },
+        {
+          "check": "context_snapshot.match 有 path 和 sha256，摘要等于归档字节",
+          "ok": true,
+          "detail": "{'path': 'artifacts/app_48fcf0b10df0be140199f40453ce80a0/ctx_c6f0b83213bbaf8af28f3b31832f87eb/match.json', 'sha256': '9c85b5aff5bdc15fa77743a4e1cc162d29bf91b7c8943adb773c8aa700b98161'}"
+        },
+        {
+          "check": "核对结果写进事件且导出可见（相符）",
+          "ok": true,
+          "detail": "('match', 'match')"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "review_path 写法",
+          "observed": "materials/job_fa26c5d52ff7/review-1-r1.json"
+        },
+        {
+          "item": "核对结果字段",
+          "observed": "payload.materials_check / submission.materials_check"
+        },
+        {
+          "item": "岗位快照是否逐字节复制",
+          "observed": "True"
+        }
+      ]
+    },
+    {
+      "id": "A44",
+      "part": "M4-1a",
+      "title": "同时发出 PDF 和 Word",
+      "verdict": "fail",
+      "seconds": 0.7,
+      "crash": null,
+      "checks": [
+        {
+          "check": "PDF+Word：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "一个版本，含 material 和两个发出文件",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "发出文件 file_id 为 pdf、docx（设计 §3）",
+          "ok": false,
+          "detail": "['sent-1', 'sent-2']"
+        },
+        {
+          "check": "sent_file_refs 两条",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "没有核对不符的警告",
+          "ok": true,
+          "detail": "match"
+        },
+        {
+          "check": "没有审核结果时 review_path=null",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "无审核结果时的警告",
+          "observed": "['resume-1.json: no review beside it passed this version of the material']"
+        }
+      ]
+    },
+    {
+      "id": "A45",
+      "part": "M4-1a",
+      "title": "submit 时带材料",
+      "verdict": "fail",
+      "seconds": 1.1,
+      "crash": null,
+      "checks": [
+        {
+          "check": "submit 带材料：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "status=applied，一份发出文件，摘要对",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "sent_file_refs 的 file_id=docx（设计 §3）",
+          "ok": false,
+          "detail": "sent-1"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "警告",
+          "observed": "['resume-1.json: no review beside it passed this version of the material']"
+        }
+      ]
+    },
+    {
+      "id": "A46",
+      "part": "M4-1a",
+      "title": "投出后改材料、重新生成、改档案：归档不变",
+      "verdict": "pass",
+      "seconds": 2.7,
+      "crash": null,
+      "checks": [
+        {
+          "check": "投出：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "改材料后重新 build 成功",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "check": "artifacts 下文件和摘要不变",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "导出的 material_versions、context_snapshot 不变",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "validate valid=true，退出 0",
+          "ok": true,
+          "detail": "{\r\n  \"valid\": true,\r\n  \"errors\": [],\r\n  \"warnings\": [],\r\n  \"orphans\": []\r\n}\r\n"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "validate 警告",
+          "observed": "[]"
+        }
+      ]
+    },
+    {
+      "id": "A47",
+      "part": "M4-1a",
+      "title": "材料在生成后被改过：material_hash 与说明文件不同",
+      "verdict": "pass",
+      "seconds": 0.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "材料生成后被改：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "材料生成后被改：有警告",
+          "ok": true,
+          "detail": "['resume-1.json: no review beside it passed this version of the material', 'resume-1.build.json: built from another version of the material than the one given; recorded as given']"
+        },
+        {
+          "check": "归档材料的 material_hash 是改后的",
+          "ok": true,
+          "detail": "3d974d1cc93641d7a9526d60f3fada3024edfbd51e10f5bf2b85a3ab716a4ea9"
+        },
+        {
+          "check": "review_path=null",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "核对不符写进事件、导出可见",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "materials_recorded=true",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "警告原文",
+          "observed": "['resume-1.json: no review beside it passed this version of the material', 'resume-1.build.json: built from another version of the material than the one given; recorded as given']"
+        }
+      ]
+    },
+    {
+      "id": "A48",
+      "part": "M4-1a",
+      "title": "发出文件的摘要不在说明文件里",
+      "verdict": "pass",
+      "seconds": 0.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "发出文件摘要不在说明文件里：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "发出文件摘要不在说明文件里：有警告",
+          "ok": true,
+          "detail": "['resume-1.json: no review beside it passed this version of the material', 'resume-1.edited.pdf: not a resume-<n> file built under resumes/job_fa26c5d52ff7/; recorded as the file you say was sent', 'resume-1.edited.pdf: not a file resume-1.build.json records (edited after resume build?); recorded as the file you say was sent']"
+        },
+        {
+          "check": "归档的是改过的字节",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "核对结果为不符，导出可见",
+          "ok": true,
+          "detail": "mismatch"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "警告原文",
+          "observed": "['resume-1.json: no review beside it passed this version of the material', 'resume-1.edited.pdf: not a resume-<n> file built under resumes/job_fa26c5d52ff7/; recorded as the file you say was sent', 'resume-1.edited.pdf: not a file resume-1.build.json records (edited after resume build?); recorded as the file you say was sent']"
+        }
+      ]
+    },
+    {
+      "id": "A49",
+      "part": "M4-1a",
+      "title": "发出文件不在 resumes/ 下（手工改过的 Word 放在别处）",
+      "verdict": "pass",
+      "seconds": 0.9,
+      "crash": null,
+      "checks": [
+        {
+          "check": "文件不在 resumes/ 下：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "文件不在 resumes/ 下：有警告",
+          "ok": true,
+          "detail": "['resume-1.json: no review beside it passed this version of the material', 'resume-1-final.docx: not a resume-<n> file built under resumes/job_fa26c5d52ff7/; recorded as the file you say was sent']"
+        },
+        {
+          "check": "警告提到不在 resumes/ 下",
+          "ok": true,
+          "detail": "['resume-1.json: no review beside it passed this version of the material', 'resume-1-final.docx: not a resume-<n> file built under resumes/job_fa26c5d52ff7/; recorded as the file you say was sent']"
+        },
+        {
+          "check": "归档字节摘要正确",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "导出里没有数据目录外的绝对路径",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "核对结果",
+          "observed": "match"
+        }
+      ]
+    },
+    {
+      "id": "A50",
+      "part": "M4-1a",
+      "title": "没有说明文件",
+      "verdict": "pass",
+      "seconds": 0.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "没有说明文件：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "没有说明文件：有警告",
+          "ok": true,
+          "detail": "['resume-1.json: no review beside it passed this version of the material', 'resume-1.pdf: no resume build note resume-1.build.json to check against; recorded unchecked, as the file(s) you say were sent']"
+        },
+        {
+          "check": "有关于说明文件缺失的警告",
+          "ok": true,
+          "detail": "['resume-1.json: no review beside it passed this version of the material', 'resume-1.pdf: no resume build note resume-1.build.json to check against; recorded unchecked, as the file(s) you say were sent']"
+        },
+        {
+          "check": "导出里看得到未核对",
+          "ok": true,
+          "detail": "{'confirmed': True, 'occurred_at': None, 'occurred_on': '2026-10-28', 'materials_recorded': True, 'materials_check': 'unchecked'}"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "没有说明文件时",
+          "observed": "materials_recorded=True materials_check=unchecked archived_files=2 warnings=['resume-1.json: no review beside it passed this version of the material', 'resume-1.pdf: no resume build note resume-1.build.json to check against; recorded unchecked, as the file(s) you say were sent']"
+        }
+      ]
+    },
+    {
+      "id": "A51",
+      "part": "M4-1a",
+      "title": "--material 指向的文件不存在",
+      "verdict": "fail",
+      "seconds": 0.3,
+      "crash": null,
+      "checks": [
+        {
+          "check": "材料文件不存在：只警告并记录（冻结期望）",
+          "ok": false,
+          "detail": "exit=2 {\r\n  \"error\": \"cannot read <work>\\\\A51\\\\data\\\\materials\\\\job_fa26c5d52ff7\\\\resume-7.json: not a file\"\r\n}"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "材料文件不存在",
+          "observed": "exit=2 wrote=False {\r\n  \"error\": \"cannot read <work>\\\\A51\\\\data\\\\materials\\\\job_fa26c5d52ff7\\\\resume-7.json: not a file\"\r\n}"
+        }
+      ]
+    },
+    {
+      "id": "A52",
+      "part": "M4-1a",
+      "title": "当前流程投出不带材料",
+      "verdict": "pass",
+      "seconds": 0.5,
+      "crash": null,
+      "checks": [
+        {
+          "check": "投出不带材料：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "投出不带材料：有警告",
+          "ok": true,
+          "detail": "['材料未记录 (no material recorded): the submission is recorded without the files sent; say so to the user']"
+        },
+        {
+          "check": "material_versions=[]，materials_recorded=false",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "警告是材料未记录",
+          "ok": true,
+          "detail": "['材料未记录 (no material recorded): the submission is recorded without the files sent; say so to the user']"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A53",
+      "part": "M4-1a",
+      "title": "未投出：materials_recorded 为 null",
+      "verdict": "pass",
+      "seconds": 0.7,
+      "crash": null,
+      "checks": [
+        {
+          "check": "submission 未投出的四个字段",
+          "ok": true,
+          "detail": "{'confirmed': False, 'occurred_at': None, 'occurred_on': None, 'materials_recorded': None, 'materials_check': None}"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A54",
+      "part": "M4-1a",
+      "title": "材料通不过 material validate",
+      "verdict": "pass",
+      "seconds": 0.3,
+      "crash": null,
+      "checks": [],
+      "impl_observed": [
+        {
+          "item": "无效材料",
+          "observed": "exit=1 error=invalid wrote=False {\r\n  \"error\": \"invalid\",\r\n  \"message\": \"<work>\\\\A54\\\\data\\\\materials\\\\job_fa26c5d52ff7\\\\resume-9.json is not a valid material; run material validate"
+        }
+      ]
+    },
+    {
+      "id": "A55",
+      "part": "M4-1a",
+      "title": "材料的 job_id 与投递岗位不同",
+      "verdict": "pass",
+      "seconds": 0.2,
+      "crash": null,
+      "checks": [],
+      "impl_observed": [
+        {
+          "item": "材料岗位不同",
+          "observed": "exit=1 error=invalid wrote=False {\r\n  \"error\": \"invalid\",\r\n  \"message\": \"<work>\\\\A55\\\\data\\\\materials\\\\job_fa26c5d52ff7\\\\resume-1.json is a material for 'job_fa26c5d52ff7', not for "
+        }
+      ]
+    },
+    {
+      "id": "A56",
+      "part": "M4-1a",
+      "title": "只给 --sent 不给 --material",
+      "verdict": "pass",
+      "seconds": 0.5,
+      "crash": null,
+      "checks": [
+        {
+          "check": "若接受：看得出材料 JSON 未记录",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "只给 --sent",
+          "observed": "exit=0 error=None wrote=True [{\"version_id\": \"mv_a12f3017a3840c8a6e261bfe84ef0b83\", \"kind\": \"resume\", \"material_path\": null, \"material_hash\": null, \"profile_hash\": null, \"review_path\": null, \"created_at\": \"2026-11-03T16:40:38Z\", \"files\": [{\"file_id\": \"sent-1\", \"role\": "
+        }
+      ]
+    },
+    {
+      "id": "A57",
+      "part": "M4-1a",
+      "title": "resume build 写说明文件",
+      "verdict": "pass",
+      "seconds": 2.7,
+      "crash": null,
+      "checks": [
+        {
+          "check": "说明文件 resume-1.build.json 在 PDF 旁",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "material_hash、profile_hash",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "生成时间带时区",
+          "ok": true,
+          "detail": "2026-11-04T00:37:44+08:00"
+        },
+        {
+          "check": "pdf、docx 的 SHA-256 等于磁盘字节",
+          "ok": true,
+          "detail": "{'resume-1.pdf': '1852fcf13602f0845b4e00ec90dc24548a1c37378c0964822d0975bd730c4c7a', 'resume-1.docx': '5413d5111e4d0ce07040386a55c44bc3c34596ef132add66add0366ada9137d5'}"
+        },
+        {
+          "check": "重新生成后说明文件更新、摘要仍一致",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "说明文件结构",
+          "observed": "['built_at', 'files', 'kind', 'material', 'material_hash', 'profile_hash', 'schema_version']"
+        }
+      ]
+    },
+    {
+      "id": "A58",
+      "part": "M4-1a",
+      "title": "resume build 失败不留说明文件",
+      "verdict": "pass",
+      "seconds": 0.4,
+      "crash": null,
+      "checks": [
+        {
+          "check": "无效材料 build 退出非 0",
+          "ok": true,
+          "detail": "1"
+        },
+        {
+          "check": "没有 resume-9 的说明文件、PDF、Word",
+          "ok": true,
+          "detail": "[]"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A59",
+      "part": "M4-1a",
+      "title": "干净的库通过",
+      "verdict": "pass",
+      "seconds": 1.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "valid=true，errors=[]，退出 0",
+          "ok": true,
+          "detail": "{\r\n  \"valid\": true,\r\n  \"errors\": [],\r\n  \"warnings\": [],\r\n  \"orphans\": []\r\n}\r\n"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A60",
+      "part": "M4-1a",
+      "title": "删掉一个归档文件",
+      "verdict": "pass",
+      "seconds": 1.3,
+      "crash": null,
+      "checks": [
+        {
+          "check": "valid=false、errors 指出缺文件、退出 1",
+          "ok": true,
+          "detail": "{\r\n  \"valid\": false,\r\n  \"errors\": [\r\n    \"app_5dee0fe2e9aa641d8867ffcbb3fe71bf mv_ad1b85f07af13a5a642ac7ca30340dd6 sent-1: the archived file artifacts/app_5dee0fe2e9aa641d8867ffcbb3fe71bf/mv_ad1b85f07af13a5a642ac7ca30340dd6/sent-1.pdf is missing\"\r\n  ],\r\n  \"warnings\": [],\r\n  \"orphans\": []\r\n}\r\n"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A61",
+      "part": "M4-1a",
+      "title": "归档文件被改了一个字节",
+      "verdict": "pass",
+      "seconds": 1.1,
+      "crash": null,
+      "checks": [
+        {
+          "check": "valid=false、errors 指出摘要不符、退出 1",
+          "ok": true,
+          "detail": "{\r\n  \"valid\": false,\r\n  \"errors\": [\r\n    \"app_a035ff5270ec6b01a609ee94d34ebfeb mv_d6984bb4330292f3385e450b9a4b7008 sent-1: the archived file artifacts/app_a035ff5270ec6b01a609ee94d34ebfeb/mv_d6984bb4330292f3385e450b9a4b7008/sent-1.pdf changed since it was recorded\"\r\n  ],\r\n  \"warnings\": [],\r\n  \"orpha"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A62",
+      "part": "M4-1a",
+      "title": "孤立的归档目录",
+      "verdict": "pass",
+      "seconds": 1.4,
+      "crash": null,
+      "checks": [
+        {
+          "check": "两个孤立目录都被列出",
+          "ok": true,
+          "detail": "{\r\n  \"valid\": true,\r\n  \"errors\": [],\r\n  \"warnings\": [\r\n    \"2 file(s) or folder(s) under applications/artifacts are in no record (a write that did not finish); nothing refers to them, remove them once the user agrees\"\r\n  ],\r\n  \"orphans\": [\r\n    \"artifacts/app_00000000000000000000000000000000/\",\r\n    \"artifacts/app_dc978b0bd87fce28b61230da9f8b6cbf/mv_00000000000000000000000000000000.tmp/\"\r\n  ]\r\n}\r\n"
+        },
+        {
+          "check": "validate 不删除它们",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "export 不出现它们",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "孤立目录",
+          "observed": "exit=0 valid=True orphans=['artifacts/app_00000000000000000000000000000000/', 'artifacts/app_dc978b0bd87fce28b61230da9f8b6cbf/mv_00000000000000000000000000000000.tmp/']"
+        }
+      ]
+    },
+    {
+      "id": "A63",
+      "part": "M4-1a",
+      "title": "投影与事件重放不一致",
+      "verdict": "pass",
+      "seconds": 0.8,
+      "crash": null,
+      "checks": [
+        {
+          "check": "valid=false、退出 1",
+          "ok": true,
+          "detail": "{\r\n  \"valid\": false,\r\n  \"errors\": [\r\n    \"app_0a138564796848ddfa88d5254b2e6285: status is 'offer' but the events give 'applied'\"\r\n  ],\r\n  \"warnings\": [\r\n    \"app_0a138564796848ddfa88d5254b2e6285: 材料未记录 (no material recorded with the submission)\"\r\n  ],\r\n  \"orphans\": []\r\n}\r\n"
+        },
+        {
+          "check": "validate 不自动修复",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A64",
+      "part": "M4-1a",
+      "title": "事件文字里像手机号、邮箱、URL 的内容",
+      "verdict": "pass",
+      "seconds": 1.3,
+      "crash": null,
+      "checks": [
+        {
+          "check": "原因里有联系方式：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "validate valid=true、退出 0",
+          "ok": true,
+          "detail": "{\r\n  \"valid\": true,\r\n  \"errors\": [],\r\n  \"warnings\": [\r\n    \"app_fd8628bf8bed82b0b84fd6ec1c7d79f9: 材料未记录 (no material recorded with the submission)\",\r\n    \"app_fd8628bf8bed82b0b84fd6ec1c7d79f9 event 3 reason: looks like it holds a phone number; keep contact details and links out of application record"
+        },
+        {
+          "check": "validate 警告点到手机号、邮箱、URL",
+          "ok": true,
+          "detail": "['app_fd8628bf8bed82b0b84fd6ec1c7d79f9: 材料未记录 (no material recorded with the submission)', 'app_fd8628bf8bed82b0b84fd6ec1c7d79f9 event 3 reason: looks like it holds a phone number; keep contact details and links out of application records', 'app_fd8628bf8bed82b0b84fd6ec1c7d79f9 event 3 reason: looks like it holds an email address; keep contact details and links out of application records', 'app_fd8628bf8bed82b0b84fd6ec1c7d79f9 event 3 reason: looks like it holds a link; keep contact details and links out of application records']"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "写入时的警告",
+          "observed": "['--reason: looks like it holds a phone number; keep contact details and links out of application records', '--reason: looks like it holds an email address; keep contact details and links out of application records', '--reason: looks like it holds a link; keep contact details and links out of application records']"
+        }
+      ]
+    },
+    {
+      "id": "A65",
+      "part": "M4-1a",
+      "title": "导出字段",
+      "verdict": "pass",
+      "seconds": 2.1,
+      "crash": null,
+      "checks": [
+        {
+          "check": "顶层 schema_version=1、exported_at、applications",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "按 application_id 升序",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_2152a6d4 字段齐全",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "check": "app_2152a6d4 没有 next_followup_at，next_followup_on=null",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_2152a6d4 channel/submission 形状",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_2152a6d4 context_snapshot 是 {job, match}",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_2152a6d4 事件 1 字段齐全、voided_by=null",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "check": "app_2152a6d4 事件 2 字段齐全、voided_by=null",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "check": "app_2152a6d4 事件按 seq 升序",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "submitted payload 用 material_version_ids",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_edaad48a 字段齐全",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "check": "app_edaad48a 没有 next_followup_at，next_followup_on=null",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_edaad48a channel/submission 形状",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_edaad48a context_snapshot 是 {job, match}",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_edaad48a 事件 1 字段齐全、voided_by=null",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "check": "app_edaad48a 事件按 seq 升序",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_eea9e0be 字段齐全",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "check": "app_eea9e0be 没有 next_followup_at，next_followup_on=null",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_eea9e0be channel/submission 形状",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_eea9e0be context_snapshot 是 {job, match}",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "app_eea9e0be 事件 1 字段齐全、voided_by=null",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "check": "app_eea9e0be 事件 2 字段齐全、voided_by=null",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "check": "app_eea9e0be 事件按 seq 升序",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "material_versions 每项字段",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "submitted payload 用 material_version_ids",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "materials_recorded 依次 true / null / false",
+          "ok": true,
+          "detail": "{'app_eea9e0bec17a746f63410860469dc6aa': True, 'app_edaad48a17216a721743b1d784d02e34': None, 'app_2152a6d446d6627d9650a7c64e7d8427': False}"
+        },
+        {
+          "check": "补录那条快照两项都是 null",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "UTF-8，中文不转义",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "source 的形状",
+          "observed": "{'kind': 'user', 'reference': None}"
+        },
+        {
+          "item": "额外字段",
+          "observed": "['confirmed', 'materials_check', 'materials_recorded', 'occurred_at', 'occurred_on']"
+        }
+      ]
+    },
+    {
+      "id": "A66",
+      "part": "M4-1a",
+      "title": "同一状态导出两次逐字节相同（exported_at 除外）",
+      "verdict": "pass",
+      "seconds": 1.2,
+      "crash": null,
+      "checks": [
+        {
+          "check": "两次导出除 exported_at 逐字节相同",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A67",
+      "part": "M4-1a",
+      "title": "export --out 只收文件名",
+      "verdict": "pass",
+      "seconds": 2.4,
+      "crash": null,
+      "checks": [
+        {
+          "check": "--out 文件名写到 applications/exports/",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "check": "内容与打印相同（exported_at 除外）",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "--out sub/v25.json 拒绝、退出 1、不写文件",
+          "ok": true,
+          "detail": "exit=1 invalid"
+        },
+        {
+          "check": "--out ../v25.json 拒绝、退出 1、不写文件",
+          "ok": true,
+          "detail": "exit=1 invalid"
+        },
+        {
+          "check": "--out ..\\v25.json 拒绝、退出 1、不写文件",
+          "ok": true,
+          "detail": "exit=1 invalid"
+        },
+        {
+          "check": "--out <work>\\A67\\outside\\v25.json 拒绝、退出 1、不写文件",
+          "ok": true,
+          "detail": "exit=1 invalid"
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "--out sub/v25.json 错误码",
+          "observed": "invalid"
+        },
+        {
+          "item": "--out ../v25.json 错误码",
+          "observed": "invalid"
+        },
+        {
+          "item": "--out ..\\v25.json 错误码",
+          "observed": "invalid"
+        },
+        {
+          "item": "--out <work>\\A67\\outside\\v25.json 错误码",
+          "observed": "invalid"
+        },
+        {
+          "item": "--out 已存在的文件",
+          "observed": "exit=0 "
+        }
+      ]
+    },
+    {
+      "id": "A68",
+      "part": "M4-1a",
+      "title": "按 id 导出",
+      "verdict": "pass",
+      "seconds": 1.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "只导出指定那一条",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "导出不存在的 id",
+          "observed": "exit=1 error=not_found out="
+        }
+      ]
+    },
+    {
+      "id": "A69",
+      "part": "M4-1a",
+      "title": "show 与导出中的同一条一致",
+      "verdict": "pass",
+      "seconds": 1.1,
+      "crash": null,
+      "checks": [
+        {
+          "check": "show 与导出中的同一条相同",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "show 是否包一层",
+          "observed": "['application']"
+        }
+      ]
+    },
+    {
+      "id": "A70",
+      "part": "M4-1a",
+      "title": "list 过滤",
+      "verdict": "pass",
+      "seconds": 2.4,
+      "crash": null,
+      "checks": [
+        {
+          "check": "--status applied 1 条",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "两个 --status 3 条",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "--job JOB_B 1 条",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "每行有 application_id、job_id、status、record_origin",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "list 行字段",
+          "observed": "['application_id', 'channel', 'company', 'job_id', 'record_origin', 'revision', 'status', 'submission', 'title', 'updated_at']"
+        },
+        {
+          "item": "list 顺序",
+          "observed": "[('applied', '2026-10-28'), ('drafted', None), ('drafted', None)]"
+        }
+      ]
+    },
+    {
+      "id": "A71",
+      "part": "M4-1a",
+      "title": "只读命令不改库、不写文件",
+      "verdict": "pass",
+      "seconds": 1.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "只读命令前后 applications/ 下文件不变",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A72",
+      "part": "M4-1a",
+      "title": "show/export/归档不带档案联系方式",
+      "verdict": "pass",
+      "seconds": 1.4,
+      "crash": null,
+      "checks": [
+        {
+          "check": "show/export/归档（除发出文件）不含档案联系方式",
+          "ok": true,
+          "detail": "[]"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A73",
+      "part": "M4-1a",
+      "title": "git 忽略投递数据",
+      "verdict": "pass",
+      "seconds": 0.0,
+      "crash": null,
+      "checks": [
+        {
+          "check": "全部被 git 忽略",
+          "ok": true,
+          "detail": "[]"
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A74",
+      "part": "M4-1a",
+      "title": "两个进程拿同一个 revision 写",
+      "verdict": "pass",
+      "seconds": 1.7,
+      "crash": null,
+      "checks": [
+        {
+          "check": "恰好一个成功，另一个 stale_revision（或 busy）",
+          "ok": true,
+          "detail": "([0, 1], ['stale_revision'])"
+        },
+        {
+          "check": "事件 seq 连续 1–3，revision=3",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "requests 表 2 行",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "check": "validate 通过",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "落败的一方",
+          "observed": "['stale_revision']"
+        }
+      ]
+    },
+    {
+      "id": "A75",
+      "part": "M4-1a",
+      "title": "别的连接持写锁超过 5 秒：busy",
+      "verdict": "pass",
+      "seconds": 9.0,
+      "crash": null,
+      "checks": [
+        {
+          "check": "退出 1、error=busy",
+          "ok": true,
+          "detail": "exit=1 busy"
+        },
+        {
+          "check": "约 5 秒后返回（4–7.5 秒）",
+          "ok": true,
+          "detail": "5.76"
+        },
+        {
+          "check": "锁释放后库不变",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "validate 通过",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "等待时间（秒）",
+          "observed": "5.76"
+        }
+      ]
+    },
+    {
+      "id": "A76",
+      "part": "M4-1a",
+      "title": "applications/ 是 junction 或符号链接时拒绝写",
+      "verdict": "pass",
+      "seconds": 0.3,
+      "crash": null,
+      "checks": [
+        {
+          "check": "建出 junction",
+          "ok": true,
+          "detail": "b''"
+        },
+        {
+          "check": "拒绝",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "check": "链接指向的目录里没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "链接",
+          "observed": "exit=2 {\r\n  \"error\": \"<work>\\\\A76\\\\data\\\\applications is a link or junction; application records are only read from a real folder\"\r\n}"
+        }
+      ]
+    },
+    {
+      "id": "A77",
+      "part": "M4-1a",
+      "title": "--actor",
+      "verdict": "pass",
+      "seconds": 0.8,
+      "crash": null,
+      "checks": [
+        {
+          "check": "actor=codex 写进事件",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "source.kind=user",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "未知 actor：拒绝（退出非 0）",
+          "ok": true,
+          "detail": "exit=2"
+        },
+        {
+          "check": "未知 actor：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": [
+        {
+          "item": "未知 actor",
+          "observed": "exit=2"
+        }
+      ]
+    },
+    {
+      "id": "A78",
+      "part": "M4-1a",
+      "title": "一次请求写两条事件，重试不重复",
+      "verdict": "pass",
+      "seconds": 0.9,
+      "crash": null,
+      "checks": [
+        {
+          "check": "重试返回两条，event_id 相同",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "库中仍两条事件，revision=2",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A79",
+      "part": "M4-1a",
+      "title": "跨命令复用 request_id",
+      "verdict": "pass",
+      "seconds": 1.0,
+      "crash": null,
+      "checks": [
+        {
+          "check": "跨命令复用 request_id：拒绝（退出 1）",
+          "ok": true,
+          "detail": "exit=1 err={\r\n  \"error\": \"request_conflict\",\r\n  \"message\": \"req_7feb0ab14fb3a6a559e09a5865f9f045 was already used for a different request; preview again for a new request id\",\r\n  \"application_id\": \"app_8a53deda0f1cc942ef5ebd293dba9cc2\"\r\n}\r\n"
+        },
+        {
+          "check": "跨命令复用 request_id：error=request_conflict",
+          "ok": true,
+          "detail": "error=request_conflict"
+        },
+        {
+          "check": "跨命令复用 request_id：没有写入",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "A80",
+      "part": "M4-1a",
+      "title": "故事一：补录一次没回音的投递，后来收到面试",
+      "verdict": "pass",
+      "seconds": 1.6,
+      "crash": null,
+      "checks": [
+        {
+          "check": "补录：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "补录：有警告",
+          "ok": true,
+          "detail": "['job_cb7cb4d6e51d is not in the job store; the historical record keeps only its id']"
+        },
+        {
+          "check": "no_response：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "迟到的面试：接受（退出 0）",
+          "ok": true,
+          "detail": "exit=0 err="
+        },
+        {
+          "check": "status=interview，revision=4，4 条事件",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "historical、occurred_on=2026-09-20、快照 null、materials_recorded=false",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "check": "两条 status_changed 的 from/to",
+          "ok": true,
+          "detail": null
+        }
+      ],
+      "impl_observed": []
+    },
+    {
+      "id": "B01",
+      "part": "M4-1b",
+      "title": "记收到回复：不改状态",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B02",
+      "part": "M4-1b",
+      "title": "回复摘要长度",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B03",
+      "part": "M4-1b",
+      "title": "回复的时间",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B04",
+      "part": "M4-1b",
+      "title": "drafted 或已结束的投递记回复",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B05",
+      "part": "M4-1b",
+      "title": "备注",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B06",
+      "part": "M4-1b",
+      "title": "终结状态的投递加备注",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B07",
+      "part": "M4-1b",
+      "title": "设置和取消跟进日期",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B08",
+      "part": "M4-1b",
+      "title": "跟进日期只到天",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B09",
+      "part": "M4-1b",
+      "title": "过去的跟进日期、已结束投递的跟进",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B10",
+      "part": "M4-1b",
+      "title": "进入终结状态清空跟进日期",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B11",
+      "part": "M4-1b",
+      "title": "list --due --as-of",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B12",
+      "part": "M4-1b",
+      "title": "list --due 不带 --as-of",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B13",
+      "part": "M4-1b",
+      "title": "作废最近一条状态事件",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B14",
+      "part": "M4-1b",
+      "title": "误记拒信：作废后重新改状态",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B15",
+      "part": "M4-1b",
+      "title": "作废 submit 的投出事件",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B16",
+      "part": "M4-1b",
+      "title": "作废跟进日期",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B17",
+      "part": "M4-1b",
+      "title": "连续作废",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B18",
+      "part": "M4-1b",
+      "title": "只有 created 时作废",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B19",
+      "part": "M4-1b",
+      "title": "void 的 revision 和 reason",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B20",
+      "part": "M4-1b",
+      "title": "作废 record --submitted 写的投出事件",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B21",
+      "part": "M4-1b",
+      "title": "回复和备注里的联系方式",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B22",
+      "part": "M4-1b",
+      "title": "M4-1b 写命令的重试与冲突",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B23",
+      "part": "M4-1b",
+      "title": "backup 写数据库快照和附件清单",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B24",
+      "part": "M4-1b",
+      "title": "库不存在时 backup",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B25",
+      "part": "M4-1b",
+      "title": "从备份恢复后校验",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B26",
+      "part": "M4-1b",
+      "title": "Agent 入口",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B27",
+      "part": "M4-1b",
+      "title": "授权",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B28",
+      "part": "M4-1b",
+      "title": "文档与命令一致",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B29",
+      "part": "M4-1b",
+      "title": "故事三：输错作废再重记",
+      "verdict": "waiting_m4_1b"
+    },
+    {
+      "id": "B30",
+      "part": "M4-1b",
+      "title": "故事二：换渠道再投，只跟进其中一条",
+      "verdict": "waiting_m4_1b"
+    }
+  ]
+}

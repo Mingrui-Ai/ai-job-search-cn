@@ -1,0 +1,24 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--submitted",
+      "--on",
+      "2026-10-28",
+      "--material",
+      "<work>\\A51\\data\\materials\\job_fa26c5d52ff7\\resume-7.json",
+      "--sent",
+      "<work>\\A51\\data\\resumes\\job_fa26c5d52ff7\\resume-1.pdf",
+      "--preview"
+    ],
+    "exit": 2,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"cannot read <work>\\\\A51\\\\data\\\\materials\\\\job_fa26c5d52ff7\\\\resume-7.json: not a file\"\r\n}\r\n"
+  }
+]

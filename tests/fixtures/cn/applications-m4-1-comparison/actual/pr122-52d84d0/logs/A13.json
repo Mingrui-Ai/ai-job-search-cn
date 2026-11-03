@@ -1,0 +1,130 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--submitted",
+      "--at",
+      "2026-10-28T14:30",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--at '2026-10-28T14:30': write a moment with its time zone, like 2026-11-02T14:30+08:00; use --on 2026-11-02 when only the date is known\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--submitted",
+      "--at",
+      "2026-10-28T14:30:00",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--at '2026-10-28T14:30:00': write a moment with its time zone, like 2026-11-02T14:30+08:00; use --on 2026-11-02 when only the date is known\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--submitted",
+      "--on",
+      "2026-02-30",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--on '2026-02-30' is not a real date\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--submitted",
+      "--on",
+      "2026/10/28",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--on '2026/10/28': write the date as YYYY-MM-DD\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--submitted",
+      "--on",
+      "2099-01-01",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--on 2099-01-01: that day has not come yet (Asia/Shanghai)\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--submitted",
+      "--at",
+      "2099-01-01T09:00+08:00",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--at 2099-01-01T09:00+08:00: that moment has not happened yet\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--submitted",
+      "--on",
+      "2026-10-28",
+      "--at",
+      "2026-10-28T14:30+08:00",
+      "--preview"
+    ],
+    "exit": 2,
+    "stdout": "",
+    "stderr": "usage: python -m jobsearch_cn application record [-h] [--data-dir DATA_DIR]\r\n                                                 (--preview | --request-id REQUEST_ID)\r\n                                                 [--actor {user,claude_code,codex,dsh}]\r\n                                                 --channel\r\n                                                 {portal,company_site,email,referral,campus,offline,other,unknown}\r\n                                                 [--platform PLATFORM]\r\n                                                 [--submitted] [--historical]\r\n                                                 [--on ON | --at AT]\r\n                                                 [--material MATERIAL]\r\n                                                 [--sent FILE [FILE ...]]\r\n                                                 [--profile PROFILE]\r\n                                                 job_id\r\npython -m jobsearch_cn application record: error: argument --at: not allowed with argument --on\r\n"
+  }
+]

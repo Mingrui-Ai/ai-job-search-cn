@@ -1,0 +1,22 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_af4d7dd8c3a6",
+      "--channel",
+      "portal",
+      "--submitted",
+      "--on",
+      "2026-10-28",
+      "--material",
+      "<work>\\A55\\data\\materials\\job_fa26c5d52ff7\\resume-1.json",
+      "--sent",
+      "<work>\\A55\\data\\resumes\\job_fa26c5d52ff7\\resume-1.pdf",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"<work>\\\\A55\\\\data\\\\materials\\\\job_fa26c5d52ff7\\\\resume-1.json is a material for 'job_fa26c5d52ff7', not for job_af4d7dd8c3a6\"\r\n}\r\n"
+  }
+]
