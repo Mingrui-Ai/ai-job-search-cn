@@ -9,9 +9,16 @@
   alt-font: (sys.inputs.sans,),
   element-spaciness: float(sys.inputs.spaciness),
 )
+// 求职意向按" · "分成几项：20 字以内的一项放进 box，不在中间折行（"2026.11.15 起可到岗"不拆成两行）；
+// 不到半行，所以不会撑出版心。更长的一项照常折行。点前面用不换行空格，点留在上一行末尾，不落到行首。
+// 整行放进一个占满版心的 box，里面不两端对齐：折行时上一行不会被拉开字距。
+#let keep-together(line) = box(width: 100%)[
+  #set par(justify: false)
+  #line.split(" · ").map(part => if part.clusters().len() <= 20 { box(part) } else { part }).join("\u{a0}· ")
+]
 #show: resume-header.with(
   author: data.name,
-  basic-info: ([#data.contact #linebreak() #data.intent],),
+  basic-info: ([#data.contact #linebreak() #keep-together(data.intent)],),
 )
 
 #for s in data.sections [

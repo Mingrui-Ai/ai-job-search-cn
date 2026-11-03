@@ -374,8 +374,12 @@ def _material_job(args, record):
     return None
 
 
-def _material_notes(args):
-    """The notes.md beside the profile a material is checked against, for a summary that cites it."""
+def _material_notes(args, record):
+    """The notes.md beside the profile a material is checked against, read only when its summary cites it."""
+    summary = record.get("summary") if isinstance(record, dict) else None
+    if not (isinstance(summary, dict) and isinstance(summary.get("refs"), list)
+            and material.NOTES_REF in summary["refs"]):
+        return None
     path = Path(args.profile) if args.profile else store.data_dir(args.data_dir) / "profile" / "profile.json"
     return material.read_notes(path.parent / "notes.md")
 
@@ -386,7 +390,7 @@ def cmd_material_validate(args) -> int:
     if data is None:
         return 1
     errors, warnings = material.validate(record, data, _vocabulary(args), _material_job(args, record),
-                                         _material_notes(args))
+                                         _material_notes(args, record))
     _emit({"valid": not errors, "errors": errors, "warnings": warnings})
     return 1 if errors else 0
 
@@ -397,7 +401,7 @@ def cmd_review_draft(args) -> int:
     if data is None:
         return 1
     vocabulary = _vocabulary(args)
-    errors, _ = material.validate(record, data, vocabulary, notes=_material_notes(args))
+    errors, _ = material.validate(record, data, vocabulary, notes=_material_notes(args, record))
     if errors:
         _emit({"error": "the material is invalid; run material validate first", "errors": errors}, sys.stderr)
         return 1
@@ -635,7 +639,7 @@ def cmd_resume_build(args) -> int:
     if data is None:
         return 1
     vocabulary = _vocabulary(args)
-    errors, warnings = material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args))
+    errors, warnings = material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args, record))
     if errors:
         _emit({"error": "the material is invalid; run material validate", "errors": errors}, sys.stderr)
         return 1
@@ -659,6 +663,7 @@ def cmd_resume_build(args) -> int:
     result.update(resume_docx.write(content, docx))
     fields = resume_pdf.fields_of(content)
     problems = resume_pdf.check(pdf, fields) + resume_docx.check(docx, fields)
+    problems += resume_docx.same_text(pdf, docx, content)
     if not content["name"]:
         warnings.append("contact.name: the profile has no name, so the resume has none")
     _emit({**result, "problems": problems, "warnings": warnings})
