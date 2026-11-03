@@ -322,6 +322,24 @@ class Concurrency(Data):
         self.assertEqual(len(shown["events"]), 3)
         self.assertEqual(run("application", "validate", "--data-dir", self.data)[0], 0)
 
+    def test_a_write_landing_between_reading_the_row_and_its_events_is_stale_not_invalid(self):
+        application_id = self.historical()
+        code, preview, _ = self.status(application_id, "interview")
+        real, raced = applications._existing, []
+
+        def racing(*args, **kwargs):
+            connection, row = real(*args, **kwargs)
+            if not raced:
+                raced.append(True)
+                with mock.patch.object(applications, "_existing", real):
+                    self.move(application_id, "rejected")
+            return connection, row
+        with mock.patch.object(applications, "_existing", racing):
+            code, _, err = self.cli("status", application_id, "interview", "--expected-revision", "2",
+                                    "--request-id", preview["request_id"])
+        self.assertEqual((code, err["error"], err["revision"]), (1, "stale_revision", 3))
+        self.assertEqual(self.show(application_id)["status"], "rejected")
+
     def test_a_writer_holding_the_lock_makes_the_other_report_busy(self):
         application_id = self.historical()
         code, preview, _ = self.status(application_id, "interview")

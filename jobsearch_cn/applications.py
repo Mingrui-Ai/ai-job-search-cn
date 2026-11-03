@@ -1141,7 +1141,9 @@ def change_status(data_root, application_id: str, new_status: str, *, expected_r
             return repeated
         events = [{"type": "status_changed", "occurred_at": occurred_at, "occurred_on": occurred_on,
                    "payload": {"from": row["status"], "to": new_status, "reason": reason}}]
-        existing = _events(connection, application_id)
+        # Only the events the row was read at: another process may have written more since, which the write
+        # transaction reports as stale_revision, not as a status this request never saw.
+        existing = [event for event in _events(connection, application_id) if event["seq"] <= row["revision"]]
         replay(existing + [dict(events[0], seq=existing[-1]["seq"] + 1, voided_by=None)])
         warnings = contact_warnings(reason, "--reason")
         if preview:
