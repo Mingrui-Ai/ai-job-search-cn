@@ -10,6 +10,7 @@ commands find the material next to the review, render Markdown, and exit 0, 1 or
 import copy
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -113,6 +114,19 @@ class Validate(unittest.TestCase):
         for path in ("", "nope", "skills[99]", "experience.bullets", "[0]", "skills[0].x", "skills[-1]",
                      "experience[0]bullets", "summary..text"):
             self.assertFalse(review.resolve(MATERIAL, path), path)
+        self.assertTrue(review.resolve(MATERIAL, "skills[002]"))  # leading zeros read as before
+
+    def test_a_very_long_index_is_a_place_that_does_not_exist(self):
+        # #112 P3-3: int() refuses digit strings this long; the check must not raise.
+        huge = "skills[" + "9" * 5000 + "]"
+        self.assertFalse(review.resolve(MATERIAL, huge))
+        self.assertFalse(review.resolve(MATERIAL, "skills[" + "0" * 4999 + "9]"))
+        data = make_review()
+        data["findings"][0]["path"] = huge
+        [error] = errors_of(data)
+        self.assertTrue(error.startswith("findings[0].path: 'skills[999"), error)
+        self.assertTrue(error.endswith("…' is not a place in the material"), error)
+        self.assertLess(len(error), 200)
 
     def test_a_review_of_an_older_material_fails(self):
         changed = copy.deepcopy(MATERIAL)
@@ -249,6 +263,34 @@ class Markdown(unittest.TestCase):
         self.assertIn("  - 建议改成：实现……", text)
         self.assertIn("| Docker | 缺口 | - | 档案里有，材料没写 |", text)
 
+    def test_a_line_break_in_any_free_text_keeps_the_structure(self):
+        # Planner on the #112 P3 PR: findings, the heading and the summary lines too, not just the table.
+        data = make_review()
+        data["findings"] = [{"item": "B1", "path": None, "severity": "must",
+                             "reason": "第一行\n- 不是新的一项\n# 不是标题", "suggestion": "甲\r\n乙"},
+                            {"item": "E4", "path": None, "severity": "suggest", "reason": "一行", "suggestion": None}]
+        data.update(material="resume-1.json\n# 假标题", job_id="job_1\n- 假的一行")
+        lines = review.markdown(data).splitlines()
+        self.assertEqual([line for line in lines if line.startswith("#")],
+                         ["# 审核结果：resume-1.json<br># 假标题（第 1 轮）", "## 问题", "## 岗位要求覆盖"])
+        self.assertIn("- 岗位：job_1<br>- 假的一行", lines)
+        self.assertIn("- **必改** B1：第一行<br>- 不是新的一项<br># 不是标题", lines)
+        self.assertIn("  - 建议改成：甲<br>乙", lines)
+        self.assertEqual(sum(line.startswith("- **") for line in lines), 2)
+
+    def test_a_pipe_or_line_break_in_a_cell_keeps_the_table_whole(self):
+        # #112 P3-2: legal text must not add columns or break a row.
+        data = make_review()
+        data["coverage"] = [{"requirement": "检索 | 排序", "status": "gap", "where": [], "note": "第一行\n第二行\r\n第三行"},
+                            {"requirement": "C:\\tools\\|x", "status": "gap", "where": [], "note": None}]
+        self.assertEqual(errors_of(data), [])
+        rows = [line for line in review.markdown(data).splitlines() if line.startswith("|")]
+        self.assertEqual(len(rows), 4)  # header, rule, two rows
+        for line in rows:
+            self.assertEqual(re.sub(r"\\.", "", line).count("|"), 5, line)  # four cells
+        self.assertEqual(rows[2], "| 检索 \\| 排序 | 缺口 | - | 第一行<br>第二行<br>第三行 |")
+        self.assertEqual(rows[3], "| C:\\\\tools\\\\\\|x | 缺口 | - | - |")
+
 
 def run_cli(*args, data_dir):
     env = dict(os.environ, PYTHONIOENCODING="utf-8", **{store.DATA_DIR_ENV: str(data_dir)})
@@ -332,6 +374,15 @@ class Command(unittest.TestCase):
         self.write_review(make_review(verdict="pass"))
         proc = run_cli("review", "show", str(self.review), data_dir=self.data)
         self.assertEqual(proc.returncode, 1)
+        self.assertFalse(json.loads(proc.stdout)["valid"])
+
+    def test_validate_reports_a_very_long_index_as_json(self):
+        data = make_review()
+        data["findings"][0]["path"] = "skills[" + "9" * 5000 + "]"
+        self.write_review(data)
+        proc = run_cli("review", "validate", str(self.review), data_dir=self.data)
+        self.assertEqual(proc.returncode, 1, proc.stderr.decode("utf-8"))
+        self.assertEqual(proc.stderr, b"")
         self.assertFalse(json.loads(proc.stdout)["valid"])
 
     def test_unreadable_input_exits_2(self):
