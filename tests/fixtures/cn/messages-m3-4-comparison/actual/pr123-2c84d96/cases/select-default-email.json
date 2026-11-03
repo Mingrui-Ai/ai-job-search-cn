@@ -1,0 +1,35 @@
+{
+  "id": "select-default-email",
+  "setup": [
+    {
+      "argv": "profile validate --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "jd save <data>\\job-input.json --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002305\",\n      \"title\": \"档案整理实习生\",\n      \"company\": \"示例留出戊公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "commands": [
+    {
+      "argv": "material template job_000000002305 --kind email --direction default --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"按 --direction 指定\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+      "stderr": ""
+    }
+  ],
+  "judgement": {
+    "expected": "accept",
+    "actual": "accept",
+    "pass": true,
+    "problems": [],
+    "template": "default/email@1",
+    "direction": "default",
+    "reason": "按 --direction 指定"
+  },
+  "setup_ok": true
+}
