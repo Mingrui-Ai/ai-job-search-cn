@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "kind": "resume-review",
+  "job_id": "job_9f4694691d57",
+  "material": "resume-1.json",
+  "material_hash": "ec339680e01cbef68d1c787c853109fefdc3e9047734d80a06043c0c5744d8f4",
+  "round": 1,
+  "mode": "independent",
+  "created": "2026-11-03T00:23:54+08:00",
+  "verdict": "revise",
+  "findings": [
+    {
+      "item": "D5",
+      "path": null,
+      "severity": "must",
+      "reason": "独立查看宿主生成PDF的预览：末条证书后至页底约占整页四分之一，形成大块空白；抬头的“起可到岗”四字另起一行。未见重叠或裁切，但按D5仍需处理版面后重建复审。求职意向由档案渲染，宜交起草端定位排版原因。宿主build的problems、warnings为空只证明机器检查通过；此前两次CLI沙盒WinError 5失败仍保留。Word页面未查看。",
+      "suggestion": null
+    },
+    {
+      "item": "E4",
+      "path": "experience[0].bullets[1].text",
+      "severity": "suggest",
+      "reason": "以“为内部RAG问答服务”起句，核心动词“编写”在后。原意清楚、事实有据，可按E4将动词前置。",
+      "suggestion": "编写内部RAG问答服务的检索评测脚本（Python），覆盖300条测试问题"
+    },
+    {
+      "item": "E4",
+      "path": "experience[1].bullets[0].text",
+      "severity": "suggest",
+      "reason": "以“基于MySQL和LangChain”起句，可按E4用“使用”开头，保持技术、范围和成果数值不变。",
+      "suggestion": "使用MySQL和LangChain搭建课程资料问答，支持20门课程的资料检索"
+    }
+  ],
+  "coverage": [
+    {
+      "requirement": "Golang 或 Java",
+      "status": "covered",
+      "where": [
+        "skills[0]",
+        "summary.text",
+        "experience[0].bullets[0].text"
+      ],
+      "note": "JD职责使用Go，任职要求使用Golang或Java；档案列Go（proficient），exp-1明确使用Go重构订单查询接口。材料使用JD已有写法，满足任选其一，不因未列Java另记缺口。"
+    },
+    {
+      "requirement": "MySQL",
+      "status": "covered",
+      "where": [
+        "skills[1]",
+        "experience[1].bullets[0].text"
+      ],
+      "note": "档案列MySQL（working），proj-1原文明确与LangChain一起用于课程资料问答。仅证明技能与使用经历，不等于具备存储方案设计优化经历。"
+    },
+    {
+      "requirement": "Redis",
+      "status": "gap",
+      "where": [],
+      "note": "已逐项核对完整档案技能、全部经历原文及notes.md，均无Redis依据；与匹配记录的技能缺口一致。"
+    },
+    {
+      "requirement": "Docker",
+      "status": "covered",
+      "where": [
+        "skills[2]"
+      ],
+      "note": "档案技能列Docker（working），PDF按“熟悉”渲染，与程度一致；档案未提供对应项目，不据此扩展为生产部署经验。"
+    },
+    {
+      "requirement": "Kubernetes",
+      "status": "gap",
+      "where": [],
+      "note": "已逐项核对完整档案技能、全部经历原文及notes.md，均无Kubernetes依据；与匹配记录的技能缺口一致。"
+    },
+    {
+      "requirement": "2026届或2027届",
+      "status": "covered",
+      "where": [
+        "education[0].ref"
+      ],
+      "note": "edu-1结束时间为2027-06，档案graduation为2027年6月；PDF教育经历显示2025.09 - 2027.06，满足2027届。"
+    },
+    {
+      "requirement": "本科及以上在读",
+      "status": "covered",
+      "where": [
+        "education[0].ref",
+        "education[1].ref",
+        "summary.text"
+      ],
+      "note": "edu-1为2025-09至2027-06硕士教育，审核时在读；edu-2本科已于2025-06结束。简介准确写“硕士在读”，未把在读写成已获硕士学位。"
+    },
+    {
+      "requirement": "计算机相关专业",
+      "status": "covered",
+      "where": [
+        "education[0].ref",
+        "education[1].ref"
+      ],
+      "note": "edu-1为计算机科学与技术，edu-2为软件工程；PDF均按档案显示。数据库系统、分布式系统课程也均来自edu-1。"
+    },
+    {
+      "requirement": "后端开发经历",
+      "status": "covered",
+      "where": [
+        "experience[0].ref",
+        "experience[0].bullets[0].text",
+        "summary.text"
+      ],
+      "note": "JD未规定既往经验年限。exp-1为2026-03至2026-08后端开发实习，Go订单查询接口重构与岗位职责相关；角色、时间、P99的120ms和45ms均与原文一致。"
+    },
+    {
+      "requirement": "公司核心业务系统",
+      "status": "gap",
+      "where": [],
+      "note": "档案有订单查询接口重构，但未说明该接口属于公司核心业务系统；可用作相邻经历，不应擅自加上“核心业务系统”的范围描述。"
+    },
+    {
+      "requirement": "使用Go编写高并发服务",
+      "status": "gap",
+      "where": [],
+      "note": "exp-1能证明Go接口重构和P99延迟改善，不能据此推出高并发服务开发。全部经历及notes.md均未提供并发规模或高并发服务依据，与匹配记录的经验判断一致。"
+    },
+    {
+      "requirement": "MySQL、Redis等存储方案的设计与优化",
+      "status": "gap",
+      "where": [],
+      "note": "proj-1只证明使用MySQL搭建课程资料问答；档案没有存储方案设计优化或Redis经历。接口延迟改善也未归因为数据库优化，不能补写这一成果。"
+    },
+    {
+      "requirement": "深圳实习，每周至少4天、实习至少6个月",
+      "status": "covered",
+      "where": [
+        "profile_hash"
+      ],
+      "note": "此项实际位于PDF求职意向，材料无独立抬头字段；where仅指向绑定渲染档案的profile_hash。已核对档案availability及PDF：城市含深圳、每周4天、可实习6个月，满足要求。档案可于2026-11-15到岗；JD未写到岗日期及面试安排，沿用匹配记录的待确认项，不判为候选人能力缺口。"
+    }
+  ]
+}
