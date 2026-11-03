@@ -265,6 +265,17 @@ class Command(unittest.TestCase):
         self.assertEqual(json.loads(err)["error"], "内容太多")
         self.assertEqual(os.listdir(self.folder), [])
 
+    def test_a_failed_build_keeps_the_earlier_build_note(self):
+        self.folder.mkdir(parents=True)
+        earlier = self.folder / "resume-2.build.json"
+        earlier.write_text('{"kind": "resume-build", "earlier": true}', encoding="utf-8")
+        with mock.patch.object(resume_pdf, "render", side_effect=resume_pdf.ResumeError("内容太多")):
+            code, _, err = self.run_cli(self.write_material())
+        self.assertEqual((code, json.loads(err)["error"]), (1, "内容太多"))
+        self.assertEqual(earlier.read_text(encoding="utf-8"), '{"kind": "resume-build", "earlier": true}')
+        self.assertIsNone(cli._write_build_note(self.folder, "resume-3", MATERIAL, {}, (self.folder / "resume-3.pdf",)))
+        self.assertFalse((self.folder / "resume-3.build.json").exists())
+
     def test_problems_in_either_file_fail_the_command(self):
         with faked_typst(pdf_with_pages(1)), mock.patch.object(resume_pdf, "check", return_value=["PDF 有问题"]), \
                 mock.patch.object(resume_docx, "check", return_value=["Word 版有问题"]):

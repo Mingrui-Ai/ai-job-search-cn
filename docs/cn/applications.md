@@ -242,4 +242,5 @@ python -m jobsearch_cn application export [<投递id> ...] [--out 文件名.json
   `material_hash` 是 `review.material_hash`，`profile_hash` 是当前档案的 `score.profile_hash`，`built_at` 带时区，`files` 列出这次输出的每个文件名和字节 SHA-256。
 - 投出时核对：发出的文件旁边有说明文件时，说明文件里的 `material_hash` 要等于 `--material` 的当前值，发出文件的摘要要在 `files` 里。对不上只给警告（手工改过的 Word 就是这样），照样记录用户说发出的文件。
 - 核对结果记进 `submitted` 事件的 `materials_check`（导出的 `submission.materials_check` 里也有）：每个发出文件都对得上为 `match`；有一个对不上为 `mismatch`；没有对不上、但有发出文件旁边没有可读的说明文件为 `unchecked`；没有发出文件为 null。
-- `resume build` 的输出里多一项 `build_note`，是说明文件的路径。
+- 说明文件只列这次 build 实际写出的文件。一个文件都没写出来（例如 PDF 生成失败）时不写说明文件，也不覆盖原来那份：原来的文件和原来的说明文件还对得上。build 失败时的退出码和输出照旧。
+- `resume build` 的输出里多一项 `build_note`，是说明文件的路径；没写说明文件时为 null。

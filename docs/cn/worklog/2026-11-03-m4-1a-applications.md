@@ -72,4 +72,6 @@
 - `submit`、`record --submitted` 读发出文件旁边的说明文件核对，结果写进 `submitted` 事件的 `materials_check`（`match`/`mismatch`/`unchecked`/null），导出 `submission.materials_check`；`validate` 检查这个字段的取值。`materials_check` 也算进请求摘要。
 - 测试：resume build 的说明文件内容；对得上、文件摘要不对、material_hash 不对、没有说明文件、没有发出文件。
 
-下一步：等规划者通知后开 PR（审核者 Codex B）。
+规划者裁定（cn-e3，2026-11-03）：说明文件只列这次实际写出的文件；一个都没写出来时不写说明文件、不覆盖原来那份，退出码和输出照旧。已实现并加测试（`test_a_failed_build_keeps_the_earlier_build_note`）。说明文件格式由规划者转告 Claude C。
+
+下一步：V25 冻结后等规划者通知开 PR（审核者 Codex B）。

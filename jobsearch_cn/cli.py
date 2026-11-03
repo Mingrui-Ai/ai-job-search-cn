@@ -629,15 +629,19 @@ def cmd_resume_sample(args) -> int:
 _MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
 
 
-def _write_build_note(directory, stem: str, record: dict, data: dict, outputs) -> Path:
-    """resume-<n>.build.json beside the outputs: which material and files this build made (applications.md §12)."""
+def _write_build_note(directory, stem: str, record: dict, data: dict, outputs):
+    """resume-<n>.build.json beside the outputs: which material and files this build made (applications.md §12).
+    With no file written it writes nothing and returns None, so an earlier note still matches its files."""
+    outputs = [output for output in outputs if output.is_file()]
+    if not outputs:
+        return None
     import hashlib
     from datetime import datetime
     note = {"schema_version": 1, "kind": "resume-build", "material": f"{stem}.json",
             "material_hash": review.material_hash(record), "profile_hash": score.profile_hash(data),
             "built_at": datetime.now().astimezone().isoformat(timespec="seconds"),
             "files": [{"name": output.name, "sha256": hashlib.sha256(output.read_bytes()).hexdigest()}
-                      for output in outputs if output.is_file()]}
+                      for output in outputs]}
     path = directory / f"{stem}.build.json"
     if path.is_symlink():
         raise InputError(f"{path} is a link; nothing is written through it")
@@ -682,7 +686,8 @@ def cmd_resume_build(args) -> int:
     problems += resume_docx.same_text(pdf, docx, content)
     if not content["name"]:
         warnings.append("contact.name: the profile has no name, so the resume has none")
-    result["build_note"] = str(_write_build_note(directory, named.group(1), record, data, (pdf, docx)))
+    note = _write_build_note(directory, named.group(1), record, data, (pdf, docx))
+    result["build_note"] = None if note is None else str(note)
     _emit({**result, "problems": problems, "warnings": warnings})
     return 1 if problems else 0
 
