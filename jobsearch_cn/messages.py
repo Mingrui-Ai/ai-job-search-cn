@@ -56,9 +56,14 @@ _COUNT = (r"(?P<count>\{availability\.[a-z_]+\}"
           r"|[零〇一二两三四五六七八九十百几数半]+)")
 # 三天内, 两个月后: when something happens, not how long; 后端 and 后台 are words.
 _RELATIVE = r"(?:之?内|以内|之?后(?![端台])|以后)"
-_WEEKLY = re.compile(r"[每一]\s*(?:个\s*)?(?:周|星期|礼拜)|(?:天|工作日)\s*[/／每]\s*(?:周|星期)")
-_DAYS = re.compile(rf"(?<![第今明后昨前当每整\d]){_COUNT}\s*(?:个\s*)?(?:工作日|天)(?!\s*{_RELATIVE})")
-_STAY = re.compile(r"实习(?!了|过|生|经历)|在岗|到岗|上岗|入职")
+# Days a week: a count of days a few characters after 每周 or 一周 (每周可以到岗 4 天), or 4 天/周. 每周 alone is
+# how often, not how many days, and 每周更新 3 篇推文持续 30 天 is no promise.
+_DAYS = (re.compile(rf"[每一]\s*(?:个\s*)?(?:周|星期|礼拜)[^，,。；;！!？?\n\d{{}}]{{0,8}}?(?<![第今明后昨前当])"
+                    rf"{_COUNT}\s*(?:个\s*)?(?:工作日|天)(?!\s*{_RELATIVE})"),
+         re.compile(rf"(?<![第今明后昨前当\d]){_COUNT}\s*(?:个\s*)?(?:工作日|天)\s*[/／每]\s*(?:周|星期|礼拜)"))
+# Months: a count in a clause about the stay (可以连续实习 6 个月); 实习了, 实习期间 and 实习生 tell of the past
+# or of someone, not of how long the candidate can stay.
+_STAY = re.compile(r"实习(?!了|过|生|经历|期间|中|的|时(?!长|间))|在岗|到岗|上岗|入职")
 _MONTHS = re.compile(rf"(?<![上下第\d]){_COUNT}\s*(?P<unit>个半月|个多?月)(?!\s*{_RELATIVE})")
 _YEARS = re.compile(r"(?<![上下前去今明后第\d])(?P<count>\{availability\.[a-z_]+\}|\d{1,2}(?:\.\d+)?|[一二两三半])"
                     rf"\s*年(?![级底初中末内前后度份制龄纪代轻])(?!\s*{_RELATIVE})")
@@ -67,7 +72,7 @@ _START = re.compile(r"到岗|入职|上岗|报到|到职|开始实习")
 _WHEN = re.compile(r"\{availability\.start_date\}|随时|马上|立即|立刻|即刻|即日|当[天日]|今天|明天|后天|现在|目前"
                    r"|下{1,2}个?(?:周|星期|礼拜|月)|[本这]个?(?:周|星期|礼拜|月)|月[初中底末]|年[初中底后]|尽[快早]"
                    r"|第一时间|[上下]半年|暑假|寒假|暑期|(?:周|星期|礼拜)[一二三四五六日天]"
-                   r"|\d{4}\s*年|\d{1,2}\s*月|\d{1,2}\s*[日号]|\d{1,2}\s*[-./]\s*\d{1,2}"
+                   r"|\d{4}\s*年|\d{1,2}\s*月|\d{1,2}\s*[日号]|\d{1,2}\s*[-/]\s*\d{1,2}"
                    r"|[一二三四五六七八九十]+\s*[月号]")
 # 两周后可以入职 promises a start; in 入职 2 周后独立负责 the time comes after the verb and tells something else.
 _WITHIN = re.compile(rf"(?:\d+|[一二两三四五六七八九十几半]+)\s*个?\s*(?:天|周|星期|礼拜|月)\s*{_RELATIVE}")
@@ -404,16 +409,15 @@ class _Checker:
         spans, problems, promised = [], [], False
         for clause in _CLAUSE.finditer(masked):
             body, taken = clause.group(0), []
-            counts = []
-            if _WEEKLY.search(body):
-                counts += [(match, "days_per_week", False) for match in _DAYS.finditer(body)]
+            counts = [(match, "days_per_week", False) for regex in _DAYS for match in regex.finditer(body)]
             if _STAY.search(body):
                 counts += [(match, "months", regex is _YEARS) for regex in (_MONTHS, _YEARS)
                            for match in regex.finditer(body)]
             for match, field, years in counts:
-                if any(match.start() < end and start < match.end() for start, end in taken):
+                span = (match.start("count"), match.end())  # 4 天, not 每周可以到岗: 到岗 may still tell a start
+                if any(span[0] < end and start < span[1] for start, end in taken):
                     continue
-                taken.append(match.span())
+                taken.append(span)
                 promised = True
                 problem = _count_problem(match, field, years, availability)
                 if problem:
@@ -497,7 +501,8 @@ def _blank(text: str, spans) -> str:
 
 def _count_problem(match, field: str, years: bool, availability: dict):
     """What is wrong with one count of days a week or months a message promises, or None."""
-    count, quote, unit = match.group("count"), match.group(0).strip(), _UNITS[field]
+    count, unit = match.group("count"), _UNITS[field]
+    quote = match.string[match.start("count"):match.end()].strip()
     placeholder = f"{{{AVAILABILITY}.{field}}}"
     if count.startswith("{"):
         if count != placeholder or years:

@@ -296,6 +296,16 @@ class Availability(unittest.TestCase):
         for text in ("期待入职贵司。", "到岗安排可以再沟通。", "每周的安排可以再沟通。", "入职后负责的是订单查询接口。",
                      "周一到周五都方便电话沟通。"):
             self.assertEqual(errors_of(with_segment(GREETING, 3, text)), [], text)
+        # Counts in an account of past work are numbers for the cited entry to back, not availability.
+        for text in ("每周更新 3 篇推文持续 30 天。", "实习的 3 个月里完成了重构。", "实习期间用 2 个月完成重构。",
+                     "入职后效率提升 1.5 倍。"):
+            errors = errors_of(with_segment(GREETING, 1, text, ["exp-1"]))
+            self.assertTrue(errors, text)
+            self.assertFalse(any("availability" in error for error in errors), (text, errors))
+
+    def test_days_written_per_week(self):
+        self.assertEqual(self.promise("可以 4 天/周到岗。"), [])
+        self.assertIn("'5 天/周' is not the profile's availability.days_per_week (4)", self.promise("可以 5 天/周到岗。")[0])
 
 
 class Wording(unittest.TestCase):
