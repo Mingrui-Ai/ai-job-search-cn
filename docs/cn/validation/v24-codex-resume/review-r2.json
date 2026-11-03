@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "kind": "resume-review",
+  "job_id": "job_9f4694691d57",
+  "material": "resume-1.json",
+  "material_hash": "71cb50d1051a0175f6006154b14a369ddb19b4aac9ab5608cf90dd0b41fffa72",
+  "round": 2,
+  "mode": "independent",
+  "created": "2026-11-03T00:41:30+08:00",
+  "verdict": "revise",
+  "findings": [
+    {
+      "item": "D5",
+      "path": null,
+      "severity": "must",
+      "reason": "第2轮独立目视resume-1-preview-r2.png整页：求职意向“起可到岗”四字仍单独换行，末条证书下至页底约占整页四分之一，D5必改未解决；两处改写未见重叠、裁切或孤字换行。仅查看此PDF预览，未直接打开PDF或目视Word。宿主本次build的problems、warnings为空，仅作D1–D4、D6机器检查依据，不代表CLI沙盒构建成功或D5通过。此前两次WinError 5失败按交接保留，本轮未重建。材料无抬头或间距控制字段，无可直接替换文字；第2轮后停止，由用户决定后续处理。",
+      "suggestion": null
+    }
+  ],
+  "coverage": [
+    {
+      "requirement": "Golang 或 Java",
+      "status": "covered",
+      "where": [
+        "skills[0]",
+        "summary.text",
+        "experience[0].bullets[0].text"
+      ],
+      "note": "沿用第1轮覆盖判断。JD职责用Go、要求用Golang或Java；材料使用JD已有写法，exp-1原文支持Go接口重构，满足任选其一，不另列Java缺口。"
+    },
+    {
+      "requirement": "MySQL",
+      "status": "covered",
+      "where": [
+        "skills[1]",
+        "experience[1].bullets[0].text"
+      ],
+      "note": "第2轮核对experience[1].bullets[0].text：已改为动词“使用”开头，E4建议已解决；MySQL、LangChain、20门课程及proj-1引用均与档案原文一致。仅证明使用经历，不代表存储方案设计优化经验。"
+    },
+    {
+      "requirement": "Redis",
+      "status": "gap",
+      "where": [],
+      "note": "沿用第1轮缺口。当前档案技能、经历原文及notes.md无Redis依据，匹配记录也列为缺口；本轮两处改写未改变此判断。"
+    },
+    {
+      "requirement": "Docker",
+      "status": "covered",
+      "where": [
+        "skills[2]"
+      ],
+      "note": "沿用第1轮覆盖判断。档案技能列Docker（working），材料skills[2]及当前PDF预览的“熟悉”一致；不据此扩展为生产部署经验。"
+    },
+    {
+      "requirement": "Kubernetes",
+      "status": "gap",
+      "where": [],
+      "note": "沿用第1轮缺口。当前档案技能、经历原文及notes.md无Kubernetes依据，匹配记录也列为缺口；本轮两处改写未改变此判断。"
+    },
+    {
+      "requirement": "2026届或2027届",
+      "status": "covered",
+      "where": [
+        "education[0].ref"
+      ],
+      "note": "沿用第1轮覆盖判断。edu-1结束时间及档案graduation均为2027年6月；本轮两处要点改写未影响2027届的依据。"
+    },
+    {
+      "requirement": "本科及以上在读",
+      "status": "covered",
+      "where": [
+        "education[0].ref",
+        "education[1].ref",
+        "summary.text"
+      ],
+      "note": "沿用第1轮覆盖判断。edu-1为2025-09至2027-06硕士教育，edu-2本科已结束，summary.text写“硕士在读”；本轮未改变此依据。"
+    },
+    {
+      "requirement": "计算机相关专业",
+      "status": "covered",
+      "where": [
+        "education[0].ref",
+        "education[1].ref"
+      ],
+      "note": "沿用第1轮覆盖判断。edu-1为计算机科学与技术，edu-2为软件工程；本轮两处要点改写未改变教育引用或专业依据。"
+    },
+    {
+      "requirement": "后端开发经历",
+      "status": "covered",
+      "where": [
+        "experience[0].ref",
+        "experience[0].bullets[0].text",
+        "summary.text"
+      ],
+      "note": "沿用第1轮后端实习覆盖判断。第2轮核对experience[0].bullets[1].text：已用动词“编写”开头，E4建议已解决；内部RAG问答服务、检索评测脚本、Python、300条测试问题及exp-1引用均与原文一致，未扩大角色或范围。"
+    },
+    {
+      "requirement": "公司核心业务系统",
+      "status": "gap",
+      "where": [],
+      "note": "沿用第1轮缺口。exp-1只说明订单查询接口和内部RAG问答服务，未说明属于公司核心业务系统；本轮改写仍保留“内部”范围，不支持补写“核心业务系统”。"
+    },
+    {
+      "requirement": "使用Go编写高并发服务",
+      "status": "gap",
+      "where": [],
+      "note": "沿用第1轮缺口。Go接口重构和P99延迟改善不能推出高并发服务开发，档案无并发规模或高并发服务依据；本轮两处改写未补足此缺口。"
+    },
+    {
+      "requirement": "MySQL、Redis等存储方案的设计与优化",
+      "status": "gap",
+      "where": [],
+      "note": "沿用第1轮缺口。第2轮proj-1改写仍只证明使用MySQL和LangChain搭建课程资料问答、支持20门课程检索，未引出存储方案设计优化或Redis经验的暗示。"
+    },
+    {
+      "requirement": "深圳实习，每周至少4天、实习至少6个月",
+      "status": "covered",
+      "where": [
+        "profile_hash"
+      ],
+      "note": "沿用第1轮覆盖判断。当前档案availability及PDF预览仍为城市含深圳、每周4天、可实习6个月。材料无独立抬头字段，where仅指向绑定渲染档案的profile_hash。2026-11-15为档案可到岗日；JD未写到岗日期和面试安排，仍为待确认项，不视作能力缺口。"
+    }
+  ]
+}

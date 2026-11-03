@@ -96,6 +96,8 @@ def _section(section: dict) -> list:
     rule = '<w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="000000"/></w:pBdr>'
     paragraphs = [_paragraph(_run(section.get("title", ""), bold=True, size=_TITLE),
                              f'{rule}<w:spacing w:before="160" w:after="60"/>')]
+    if section.get("text"):  # the summary: a paragraph, as main.typ prints it
+        paragraphs.append(_paragraph(_run(section["text"])))
     for entry in section.get("entries") or []:
         paragraphs += _entry(entry)
     paragraphs += [_line(line) for line in section.get("lines") or []]

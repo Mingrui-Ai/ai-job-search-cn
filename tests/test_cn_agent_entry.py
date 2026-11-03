@@ -3,8 +3,10 @@
 For each CN workflow, Claude Code's skill, DeepSeek Harness's skill and Codex's
 AGENTS.md all point at one document under docs/cn/. These pin that all three
 point there, that every command the document tells an agent to run exists, and
-that the one Bash grant each Claude Code skill carries is registered in both
-permission allowlists. dsh has no per-skill grants (it uses its own permission
+that each Claude Code skill carries a Bash grant for exactly the command groups
+its document uses, each registered in both permission allowlists. Review
+subagents point at the same document and can neither write nor go online.
+dsh has no per-skill grants (it uses its own permission
 presets), so its entries carry only a name and a description.
 """
 import contextlib
@@ -17,12 +19,18 @@ import unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-# skill name -> (workflow document, command group, commands it must document)
+# skill name -> (workflow document, {command group: commands the document must use})
 WORKFLOWS = {
-    "cn-jd-import": ("docs/cn/jd-import.md", "jd", {"parse", "save", "show", "list", "status", "validate"}),
-    "cn-setup": ("docs/cn/profile-setup.md", "profile", {"validate", "show"}),
-    "cn-match": ("docs/cn/match.md", "match", {"score", "validate", "save", "show", "list", "report"}),
+    "cn-jd-import": ("docs/cn/jd-import.md", {"jd": {"parse", "save", "show", "list", "status", "validate"}}),
+    "cn-setup": ("docs/cn/profile-setup.md", {"profile": {"validate", "show"}}),
+    "cn-match": ("docs/cn/match.md", {"match": {"score", "validate", "save", "show", "list", "report"},
+                                      "jd": {"list", "show"}, "profile": {"validate", "show"}}),
+    "cn-resume": ("docs/cn/resume-workflow.md", {
+        "material": {"validate"}, "resume": {"build"}, "review": {"draft", "validate", "show"},
+        "jd": {"list", "show"}, "profile": {"validate", "show"}, "match": {"list", "show"}}),
 }
+# Subagents a workflow dispatches: agent name -> the workflow document it follows.
+REVIEWERS = {"cn-resume-reviewer": "docs/cn/resume-workflow.md"}
 # Where each runtime looks for project skills.
 SKILL_DIRS = (".claude/skills", ".dsh/skills")
 # dsh skips, with only a log warning, a skill whose name does not match this.
@@ -46,12 +54,12 @@ def frontmatter(path: Path) -> list[str]:
 
 class EntryPoints(unittest.TestCase):
     def each(self):
-        for skill, (workflow, group, commands) in WORKFLOWS.items():
+        for skill, (workflow, groups) in WORKFLOWS.items():
             with self.subTest(skill=skill):
-                yield REPO / ".claude" / "skills" / skill / "SKILL.md", workflow, group, commands
+                yield REPO / ".claude" / "skills" / skill / "SKILL.md", workflow, groups
 
     def every_entry(self):
-        for skill, (workflow, _, _) in WORKFLOWS.items():
+        for skill, (workflow, _) in WORKFLOWS.items():
             for skill_dir in SKILL_DIRS:
                 with self.subTest(skill=skill, runtime=skill_dir):
                     yield REPO / skill_dir / skill / "SKILL.md", workflow
@@ -71,22 +79,54 @@ class EntryPoints(unittest.TestCase):
 
     def test_the_skill_grant_is_in_both_allowlists(self):
         allow = json.loads(read(REPO / ".claude" / "settings.json"))["permissions"]["allow"]
-        for skill, _, group, _ in self.each():
-            grant = f"Bash(python -m jobsearch_cn {group}:*)"
-            self.assertIn(grant, read(skill).split("---", 2)[1])
-            self.assertIn(grant, security_guards.ALLOWED_PERMISSIONS)
-            self.assertIn(grant, security_guards.ALLOWED_SKILL_TOOLS)
-            self.assertIn(grant, allow)
+        for skill, _, groups in self.each():
+            for group in groups:
+                grant = f"Bash(python -m jobsearch_cn {group}:*)"
+                self.assertIn(grant, read(skill).split("---", 2)[1])
+                self.assertIn(grant, security_guards.ALLOWED_PERMISSIONS)
+                self.assertIn(grant, security_guards.ALLOWED_SKILL_TOOLS)
+                self.assertIn(grant, allow)
+
+    def test_the_skill_grants_only_its_workflow_groups(self):
+        for skill, _, groups in self.each():
+            granted = set(re.findall(r"Bash\(python -m jobsearch_cn (\w+):\*\)", read(skill).split("---", 2)[1]))
+            self.assertEqual(granted, set(groups))
 
     def test_every_command_in_the_workflow_exists(self):
         parser = cli.build_parser()
-        for _, workflow, group, required in self.each():
-            used = set(re.findall(rf"python -m jobsearch_cn {group} (\w+)", read(REPO / workflow)))
-            self.assertTrue(required <= used, f"{workflow} should document {sorted(required - used)}")
-            for command in used:
-                with self.assertRaises(SystemExit) as raised, contextlib.redirect_stdout(io.StringIO()):
-                    parser.parse_args([group, command, "--help"])
-                self.assertEqual(raised.exception.code, 0, f"{group} {command}")
+        for _, workflow, groups in self.each():
+            text = read(REPO / workflow)
+            for group, required in groups.items():
+                used = set(re.findall(rf"python -m jobsearch_cn {group} (\w+)", text))
+                self.assertTrue(required <= used, f"{workflow} should document {group} {sorted(required - used)}")
+                for command in used:
+                    with self.assertRaises(SystemExit) as raised, contextlib.redirect_stdout(io.StringIO()):
+                        parser.parse_args([group, command, "--help"])
+                    self.assertEqual(raised.exception.code, 0, f"{group} {command}")
+
+    def test_the_workflow_uses_no_other_command_group(self):
+        for _, workflow, groups in self.each():
+            used = set(re.findall(r"python -m jobsearch_cn (\w+)", read(REPO / workflow)))
+            self.assertTrue(used <= set(groups), f"{workflow} uses {sorted(used - set(groups))} without a grant")
+
+
+class ReviewerAgents(unittest.TestCase):
+    """The review subagents (review-checklist.md §5.1): read-only, offline, pointing at the workflow."""
+
+    def each(self):
+        for name, workflow in REVIEWERS.items():
+            with self.subTest(agent=name):
+                yield REPO / ".claude" / "agents" / f"{name}.md", workflow
+
+    def test_the_agent_points_at_the_workflow(self):
+        for agent, workflow in self.each():
+            self.assertIn(f"name: {agent.stem}", frontmatter(agent))
+            self.assertIn(workflow, read(agent))
+
+    def test_the_agent_cannot_write_or_go_online(self):
+        for agent, _ in self.each():
+            tools = next(line for line in frontmatter(agent) if line.startswith("tools:"))
+            self.assertEqual({t.strip() for t in tools.split(":", 1)[1].split(",")}, {"Read", "Glob", "Grep", "Bash"})
 
 
 class DshEntryPoints(unittest.TestCase):

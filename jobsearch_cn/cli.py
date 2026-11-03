@@ -373,6 +373,12 @@ def _material_job(args, record):
     return None
 
 
+def _material_notes(args):
+    """The notes.md beside the profile a material is checked against, for a summary that cites it."""
+    path = Path(args.profile) if args.profile else store.data_dir(args.data_dir) / "profile" / "profile.json"
+    return material.read_notes(path.parent / "notes.md")
+
+
 def _message_files(args):
     try:
         root = store.data_dir(args.data_dir)
@@ -381,13 +387,21 @@ def _message_files(args):
         raise InputError(str(exc)) from None
 
 
-def _check_material(args, record, data, job):
-    """(errors, warnings) for a CV, or for a greeting, email or referral (messages.py)."""
-    if isinstance(record, dict) and record.get("kind") in messages.KINDS:
+def _is_message(record) -> bool:
+    """A greeting, email or referral (messages.py), not a CV (material.py)."""
+    return isinstance(record, dict) and record.get("kind") in messages.KINDS
+
+
+def _check_material(args, record, data, job, vocabulary=None):
+    """(errors, warnings) for a CV, with the notes.md beside the profile that its summary may cite, or for a
+    greeting, email or referral against its template (messages.py, which cites no notes.md). material validate,
+    material render, resume build and review draft all check through here, so they come to one verdict."""
+    vocabulary = _vocabulary(args) if vocabulary is None else vocabulary
+    if _is_message(record):
         # Unlike a CV, a message that cites the job or fills {job.title} needs it stored: messages.validate says so.
         templates, banned = _message_files(args)
-        return messages.validate(record, data, _vocabulary(args), job, templates, banned)
-    return material.validate(record, data, _vocabulary(args), job)
+        return messages.validate(record, data, vocabulary, job, templates, banned)
+    return material.validate(record, data, vocabulary, job, _material_notes(args))
 
 
 def cmd_material_validate(args) -> int:
@@ -441,7 +455,7 @@ def cmd_review_draft(args) -> int:
     if data is None:
         return 1
     vocabulary = _vocabulary(args)
-    errors, _ = material.validate(record, data, vocabulary)
+    errors, _ = material.validate(record, data, vocabulary, notes=_material_notes(args))
     if errors:
         _emit({"error": "the material is invalid; run material validate first", "errors": errors}, sys.stderr)
         return 1
@@ -679,7 +693,7 @@ def cmd_resume_build(args) -> int:
     if data is None:
         return 1
     vocabulary = _vocabulary(args)
-    errors, warnings = material.validate(record, data, vocabulary, _material_job(args, record))
+    errors, warnings = material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args))
     if errors:
         _emit({"error": "the material is invalid; run material validate", "errors": errors}, sys.stderr)
         return 1

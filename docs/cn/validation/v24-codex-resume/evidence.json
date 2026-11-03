@@ -1,0 +1,122 @@
+{
+  "fingerprint_comparisons": [
+    {
+      "before": "before-r1",
+      "after": "after-r1",
+      "before_count": 11,
+      "after_count": 12,
+      "changed": [],
+      "removed": [],
+      "added": [
+        "materials/job_9f4694691d57/review-1-r1.json"
+      ]
+    },
+    {
+      "before": "after-r1",
+      "after": "after-revise",
+      "before_count": 12,
+      "after_count": 12,
+      "changed": [
+        "materials/job_9f4694691d57/resume-1.json"
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "before": "before-r2",
+      "after": "after-r2",
+      "before_count": 13,
+      "after_count": 14,
+      "changed": [],
+      "removed": [],
+      "added": [
+        "materials/job_9f4694691d57/review-1-r2.json"
+      ]
+    },
+    {
+      "before": "after-r2",
+      "after": "after-delivery",
+      "before_count": 14,
+      "after_count": 14,
+      "changed": [],
+      "removed": [],
+      "added": []
+    },
+    {
+      "before": "before-r1",
+      "after": "after-delivery",
+      "before_count": 11,
+      "after_count": 14,
+      "changed": [
+        "materials/job_9f4694691d57/resume-1.json",
+        "resumes/job_9f4694691d57/resume-1.docx",
+        "resumes/job_9f4694691d57/resume-1.pdf"
+      ],
+      "removed": [],
+      "added": [
+        "materials/job_9f4694691d57/review-1-r1.json",
+        "materials/job_9f4694691d57/review-1-r2.json",
+        "resumes/job_9f4694691d57/resume-1-preview-r2.png"
+      ]
+    }
+  ],
+  "handoffs": [
+    {
+      "stage": "draft-handoff",
+      "raw_utf8_sha256": "9c903b3d63233c2181f75422239b46bcf240a4c7f9fcdcd9ad1988c1f42f7427",
+      "text": "按 docs/cn/resume-workflow.md 第 2 节审核 <data>/materials/job_9f4694691d57/resume-1.json，岗位 id 为 job_9f4694691d57，第 1 轮，mode 为 independent。工作目录是 <repo>；非默认数据目录是 <data>，所有 jobsearch_cn 命令显式传 --data-dir <data>。本次是公开虚构夹具演练，只使用该目录内的公开档案、岗位和材料，按文档自行读取资料并审核全部清单，不读取实现代码、已有验收报告或起草对话。起草 CLI 沙盒此前两次 resume build 均因 WinError 5 失败，原失败记录保留；随后外层协调者在宿主完整权限环境中对同一材料原样构建成功，未修改材料、档案或代码。本次是在宿主完成 build 后继续独立审核，不能表述为 CLI 沙盒内构建成功。宿主执行的真实 build JSON 为：{\"pdf\":\"<data>/resumes/job_9f4694691d57/resume-1.pdf\",\"spaciness\":1.5,\"fonts\":{\"serif\":\"Noto Serif SC\",\"sans\":\"Noto Sans SC\"},\"docx\":\"<data>/resumes/job_9f4694691d57/resume-1.docx\",\"font\":\"等线\",\"problems\":[],\"warnings\":[]}。宿主从上述 PDF 渲染的预览图为 <data>/resumes/job_9f4694691d57/resume-1-preview-r1.png；起草者已只读查看，未见明显重叠或裁切，求职意向末尾“起可到岗”换至下一行，页底有留白，请独立核对 D5；Word 页面未查看。选材说明：保留 edu-1、edu-2，课程选择数据库系统、分布式系统；exp-1 后端实习排在 proj-1 课程问答项目之前，先列 Go 接口重构成果，再列 Python 检索评测，项目保留 MySQL 使用经历；技能保留 Go、MySQL、Docker、Python、LangChain、RAG，未列相关度较低的 PyTorch 和机器学习课程，保留 award-1、cert-1，不重复列同一 CET-6 语言成绩；简介引用 edu-1、exp-1，成果数值沿用原文，没有补写 Redis、Kubernetes 或高并发经验，未因一页限制进一步删减。请按文档运行 material validate、review draft，独立完成审核并运行 review validate；不重新生成、不联网、不投递、不修改材料、档案、代码或现有记录，只写 <data>/materials/job_9f4694691d57/review-1-r1.json。"
+    },
+    {
+      "stage": "draft-handoff-r2",
+      "raw_utf8_sha256": "a1ecfead5a3441bd2c147e096d1f03df4b0b200b34a794af6515da289d1b9137",
+      "text": "按 docs/cn/resume-workflow.md 第 2 节审核 <data>/materials/job_9f4694691d57/resume-1.json，岗位 id 为 job_9f4694691d57，第 2 轮，mode 为 independent。工作目录是 <repo>；非默认数据目录是 <data>。所有支持 --data-dir 的业务命令显式传 --data-dir <data>。V24 派活约束已补正：按照 docs/cn/review-format.md 第 3 节，review validate/show 不支持 --data-dir，这两条命令例外，使用该隔离数据目录下的明确绝对文件路径，材料就在审核文件同目录，不访问默认 data。\n\n第一轮独立审核结果在 <data>/materials/job_9f4694691d57/review-1-r1.json，请自行读取。起草者只修订了同一份材料的两处要点，逐条处理如下：\n\n1. D5（must）：尚未解决。第一轮指出抬头“起可到岗”四字另起一行，以及末条证书后有大块留白。材料没有求职意向抬头或排版间距的控制字段；本轮未改档案、模板或产品代码，也未添加无依据或重复内容填充版面。最新预览仍可见上述换行及页底留白，请独立判断该项，不预设结论。\n2. E4，experience[0].bullets[1].text（suggest）：已采纳，改为“编写内部RAG问答服务的检索评测脚本（Python），覆盖300条测试问题”。保留 exp-1 引用、服务范围、技术和成果数字。\n3. E4，experience[1].bullets[0].text（suggest）：已采纳，改为“使用MySQL和LangChain搭建课程资料问答，支持20门课程的资料检索”。保留 proj-1 引用、技术、范围和成果数字。其余选材、顺序和引用保持原样。\n\n修订后 material validate 通过，退出码 0，实际结果为 {\"valid\":true,\"errors\":[],\"warnings\":[]}。此前强制给 review validate 传 --data-dir 的尝试因参数不支持而失败，不能算作材料摘要检查。本次依照获准的派活补正，使用正确签名 python -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r1.json，已确认旧审核因材料变化失效：退出码 1，实际输出为 {\"valid\":false,\"errors\":[\"material_hash: the material has changed since this review; review the current version\"],\"warnings\":[]}。第一轮审核文件未修改，请将其作为历史意见读取，不修改其 material_hash。\n\n构建沿用 V24 已获准的宿主补充路径：原先 CLI 沙盒内两次 WinError 5 构建失败记录保留，起草者没有调整权限或重试 build；修订后的材料由外层协调者在宿主完整权限环境中构建成功，不能声称在 CLI 沙盒内生成成功。宿主提供的本次真实 build JSON 为：{\"pdf\": \"<data>/resumes/job_9f4694691d57/resume-1.pdf\", \"spaciness\": 1.5, \"fonts\": {\"serif\": \"Noto Serif SC\", \"sans\": \"Noto Sans SC\"}, \"docx\": \"<data>/resumes/job_9f4694691d57/resume-1.docx\", \"font\": \"等线\", \"problems\": [], \"warnings\": []}。\n\n当前 PDF 的最新预览为 <data>/resumes/job_9f4694691d57/resume-1-preview-r2.png。起草者已只读查看，未见明显重叠或裁切，D5 所涉换行和页底留白仍在；Word 页面未查看。build 的 problems、warnings 为空是机器检查结果，不代表 D5 已解决或 Word 版式已目视检查。请自行查看当前 PDF 或上述最新预览，并如实记录查看范围和限制。\n\n这是公开虚构夹具演练，只使用指定数据目录中的公开档案、岗位、材料及第一轮审核结果；不读取起草对话、实现代码或其他验收报告。按第二轮规则只检查改动和前轮问题，并确认是否引出新问题；资料自行读取，不将起草者说明当作审核结论。运行 material validate、review draft，独立形成意见；不联网、不投递、不重新生成、不修改材料、档案、模板、代码或第一轮审核。只写 <data>/materials/job_9f4694691d57/review-1-r2.json，并用正确签名的 review validate 校验该文件。未解决的问题照实保留，不为通过审核更改事实；本轮结束后不自动开启第三轮。"
+    },
+    {
+      "stage": "draft-delivery",
+      "raw_utf8_sha256": "43635b3a1db9b84015017f3c7cbff8b69f2b0eba34526c2641ab1865e549fb29",
+      "text": "本次公开夹具演练已在第二轮停止，**最终结论为“需修改”（revise），尚未通过审核**。`review validate` 和 `review show` 均执行成功；当前审核文件格式及材料版本校验通过，无错误或警告。\n\n已确认以下文件存在：\n\n- [PDF 简历](<data>/resumes/job_9f4694691d57/resume-1.pdf)\n- [Word 简历](<data>/resumes/job_9f4694691d57/resume-1.docx)\n- [第二轮独立审核结果](<data>/materials/job_9f4694691d57/review-1-r2.json)\n\n两条 E4 动词前置建议均已采纳并获第二轮确认，**没有未采纳的建议**。未解决的必改项是 D5：求职意向末尾“起可到岗”仍单独换行，证书下方至页底仍有约四分之一页的留白。材料没有对应的抬头或间距控制字段，本轮未修改档案、模板或代码，也未填充无依据内容。\n\n岗位缺口仍包括 Redis、Kubernetes，以及档案尚无依据证明的核心业务系统经历、Go 高并发服务开发、MySQL/Redis 存储方案设计与优化。JD 的到岗日期和面试安排仍待确认。\n\n两轮均为独立审核，非自审。第二轮审核者查看了最新 PDF 预览整页，未直接打开 PDF、未目视 Word 页面；D5 已查看但未通过。宿主 build 的 `problems`、`warnings` 为空，仅作为机器检查依据。\n\n原先 CLI 沙盒内两次构建均因 `WinError 5` 失败；当前文件来自获准的宿主补充构建，不能记为 CLI 沙盒构建成功。本轮仅只读回查，未修改文件、未开启第三轮，也未将演练材料发送到任何地方。"
+    }
+  ],
+  "image_view_events": [
+    {
+      "thread_id": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+      "event_type": "ImageView",
+      "timestamp": "2026-11-02T16:16:19.785Z",
+      "item": {
+        "type": "ImageView",
+        "id": "exec-adecba70-9852-45c4-9724-9085bce4f9a2",
+        "path": "file:///<data>/resumes/job_9f4694691d57/resume-1-preview-r1.png"
+      }
+    },
+    {
+      "thread_id": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+      "event_type": "ImageView",
+      "timestamp": "2026-11-02T16:37:10.433Z",
+      "item": {
+        "type": "ImageView",
+        "id": "exec-c74cc9f6-cb04-443f-98d8-660adfa83828",
+        "path": "file:///<data>/resumes/job_9f4694691d57/resume-1-preview-r2.png"
+      }
+    },
+    {
+      "thread_id": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+      "event_type": "ImageView",
+      "timestamp": "2026-11-02T16:21:31.985Z",
+      "item": {
+        "type": "ImageView",
+        "id": "exec-5a20790f-efdc-46dd-9d59-056493165bae",
+        "path": "file:///<data>/resumes/job_9f4694691d57/resume-1-preview-r1.png"
+      }
+    },
+    {
+      "thread_id": "01a19d20-79c5-7a60-a8d2-4688866e06f3",
+      "event_type": "ImageView",
+      "timestamp": "2026-11-02T16:40:36.303Z",
+      "item": {
+        "type": "ImageView",
+        "id": "exec-6144393a-7d30-4070-917c-496e831a8a7e",
+        "path": "file:///<data>/resumes/job_9f4694691d57/resume-1-preview-r2.png"
+      }
+    }
+  ]
+}
