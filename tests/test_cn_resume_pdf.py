@@ -468,6 +468,36 @@ class RealRender(unittest.TestCase):
         self.assertEqual(resume_pdf.page_count(Path(result["pdf"]).read_bytes()), 1)
         self.assertNotIn("个人简介", "".join(resume_extract.extract_text(Path(result["pdf"])).split()))
 
+    def test_the_pdf_and_the_word_version_of_the_sample_hold_the_same_text(self):
+        # #111 P3-1: read whole, the two differ only in whitespace and the entry separator.
+        from jobsearch_cn import resume_docx
+        content = resume_pdf.sample()
+        resume_pdf.render(content, self.output)
+        docx = Path(self.temp) / "out.docx"
+        resume_docx.write(content, docx)
+        self.assertEqual(resume_docx.same_text(self.output, docx, content), [])
+        changed = copy.deepcopy(content)
+        changed["sections"][1]["entries"][0]["bullets"][0] = "GPA 3.9/4.0"
+        resume_docx.write(changed, docx)
+        self.assertTrue(resume_docx.same_text(self.output, docx, content))
+
+    def test_a_short_part_of_the_intent_line_is_never_split(self):
+        # Seen in a real run: "2026.11.15 起可到岗" broke after the date. Each part up to 20 characters keeps
+        # to one line, and " · " stays at the end of the line it follows.
+        content = resume_pdf.sample()
+        parts = ["后端开发、大模型应用开发（实习）", "深圳、广州", "每周 4 天，可实习 6 个月", "2026.11.15 起可到岗"]
+        for extra in ("", "、杭州", "、杭州、成都", "、杭州、成都、武汉", "、杭州、成都、武汉、西安"):
+            parts[1] = "深圳、广州" + extra
+            content["intent"] = "求职意向：" + " · ".join(parts)
+            resume_pdf.render(content, self.output)
+            lines = [" ".join(line.split()) for line in resume_extract.extract_text(self.output).splitlines()]
+            start = next(index for index, line in enumerate(lines) if line.startswith("求职意向"))
+            intent = lines[start:start + 2] if not lines[start + 1].startswith("个人简介") else lines[start:start + 1]
+            with self.subTest(extra=extra):
+                for part in parts[1:]:
+                    self.assertTrue(any(" ".join(part.split()) in line for line in intent), (part, intent))
+                self.assertFalse(any(line.startswith("·") for line in intent), intent)
+
     def test_the_sample_is_one_page_and_passes_every_check(self):
         content = resume_pdf.sample()
         result = resume_pdf.render(content, self.output)

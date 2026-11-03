@@ -163,3 +163,38 @@ def check(path: Path, fields=()) -> list:
     if extra:
         problems.append(f"Word 版里有内容之外的文字：{extra[:200]}")
     return problems
+
+
+# The one place the two layouts differ in text, not only in spacing: the PDF template's resume-entry puts
+# " · " between an entry's title and a subtitle that is not empty; the Word version puts a tab there.
+ENTRY_SEPARATOR = "·"
+
+
+def _first_difference(pdf: str, docx: str) -> str:
+    start = next((index for index, (a, b) in enumerate(zip(pdf, docx)) if a != b), min(len(pdf), len(docx)))
+    begin = max(0, start - 10)
+    return f"PDF「{pdf[begin:start + 20]}」，Word 版「{docx[begin:start + 20]}」"
+
+
+def same_text(pdf_path: Path, docx_path: Path, content: dict) -> list:
+    """Whether the PDF and the Word version hold the same text, read whole and in order.
+
+    Allowed to differ: whitespace (line breaks, tabs, spaces) and the entry separator, which the PDF has
+    once for each entry with a subtitle. check and resume_pdf.check hold each file to the content's fields;
+    this holds the two files to each other. A file that cannot be read is reported by those checks.
+    """
+    try:
+        pdf = _squeezed(resume_extract.extract_text(pdf_path))
+        docx = _squeezed(resume_extract.extract_text(docx_path))
+    except resume_extract.ExtractionError:
+        return []
+    separators = sum(1 for section in content.get("sections") or [] for entry in section.get("entries") or []
+                     if entry.get("middle"))
+    bare_pdf, bare_docx = pdf.replace(ENTRY_SEPARATOR, ""), docx.replace(ENTRY_SEPARATOR, "")
+    if bare_pdf != bare_docx:
+        return [f"PDF 和 Word 版的全文不一致：{_first_difference(bare_pdf, bare_docx)}"]
+    extra_separators = pdf.count(ENTRY_SEPARATOR) - docx.count(ENTRY_SEPARATOR)
+    if extra_separators != separators:
+        return [f"PDF 和 Word 版的全文不一致：PDF 比 Word 版多 {extra_separators} 个「{ENTRY_SEPARATOR}」，"
+                f"按条目应当多 {separators} 个"]
+    return []

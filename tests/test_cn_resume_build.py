@@ -341,6 +341,19 @@ class NotesAgree(unittest.TestCase):
         self.assertEqual(self.run_command("review draft"), with_notes)
         self.assertEqual(with_notes[0], 0)
 
+    def test_notes_are_read_only_when_the_summary_cites_them(self):
+        # #115 P3: a material that does not cite notes.md never opens it, in any of the three commands.
+        for record in (MATERIAL, {**MATERIAL, "summary": None}):
+            self.write(record)
+            with mock.patch.object(material, "read_notes") as read:
+                self.assertEqual([code for code, _ in map(self.run_command, self.COMMANDS)], [0, 0, 0])
+            read.assert_not_called()
+        self.write({**MATERIAL, "summary": {"text": "计算机硕士在读", "refs": ["exp-1", "notes.md"]}})
+        with mock.patch.object(material, "read_notes", wraps=material.read_notes) as read:
+            self.assertEqual([code for code, _ in map(self.run_command, self.COMMANDS)], [0, 0, 0])
+        self.assertEqual(read.call_count, 3)
+        self.assertEqual(read.call_args.args[0], self.temp / "profile" / "notes.md")
+
 
 class WriteWord(unittest.TestCase):
     def test_a_hard_link_for_the_output_is_replaced_and_the_file_it_shared_is_kept(self):
