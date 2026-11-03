@@ -1,0 +1,21 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--material",
+      "<work>\\A15\\data\\materials\\job_fa26c5d52ff7\\resume-1.json",
+      "--sent",
+      "<work>\\A15\\data\\resumes\\job_fa26c5d52ff7\\resume-1.pdf",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--on, --at, --material and --sent describe the submission; add --submitted, or record them later with submit\"\r\n}\r\n"
+  }
+]
