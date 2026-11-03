@@ -112,6 +112,14 @@ class Choose(unittest.TestCase):
         with self.assertRaises(messages.TemplateError):
             messages.choose(TECH_JOB, TECH_PROFILE, VOCABULARY, TEMPLATES, "astronaut")
 
+    def test_a_direction_given_without_a_template_uses_the_default(self):
+        # Any skill vocabulary group is a direction; general too, though no profile may want it.
+        for direction in ("design", "market", "finance", "hr", "general"):
+            self.assertEqual(messages.choose(TECH_JOB, TECH_PROFILE, VOCABULARY, TEMPLATES, direction),
+                             ("default", f"按 --direction 指定 {direction}，这个方向还没有模板，用通用模板 default"))
+        result = messages.template_for(TECH_JOB, TECH_PROFILE, VOCABULARY, TEMPLATES, "email", "design")
+        self.assertEqual((result["direction"], result["template"]), ("default", "default/email@1"))
+
     def test_no_shared_direction_takes_the_profiles_first(self):
         direction, why = messages.choose(OPS_JOB, TECH_PROFILE, VOCABULARY, TEMPLATES)
         self.assertEqual(direction, "tech")
@@ -123,7 +131,7 @@ class Choose(unittest.TestCase):
         self.assertEqual(messages.choose(TECH_JOB, data, VOCABULARY, TEMPLATES)[0], "default")
         data["target"]["directions"] = []
         self.assertEqual(messages.choose(TECH_JOB, data, VOCABULARY, TEMPLATES),
-                         ("default", "档案没写求职方向，用通用模板"))
+                         ("default", "档案没写求职方向，用通用模板 default"))
 
     def test_template_for_gives_the_spec_and_its_id(self):
         result = messages.template_for(TECH_JOB, TECH_PROFILE, VOCABULARY, TEMPLATES, "email")
@@ -462,11 +470,18 @@ class Cli(unittest.TestCase):
         forced = run_cli("material", "template", TECH_JOB["id"], "--kind", "referral", "--direction", "ops",
                          data_dir=self.data)
         self.assertEqual(json.loads(forced.stdout)["template"], "ops/referral@1")
-        # A job not stored is input read but naming no stored job (1); a direction with no template is not (2).
+        # A job not stored is input read but naming no stored job (1); a direction that is no template and no
+        # skill vocabulary group is not (2); one with no template of its own uses the default template.
         self.assertEqual(run_cli("material", "template", "job_00000000ffff", "--kind", "email",
                                  data_dir=self.data).returncode, 1)
         self.assertEqual(run_cli("material", "template", TECH_JOB["id"], "--kind", "email", "--direction", "x",
                                  data_dir=self.data).returncode, 2)
+        fallback = run_cli("material", "template", TECH_JOB["id"], "--kind", "email", "--direction", "hr",
+                           data_dir=self.data)
+        self.assertEqual(fallback.returncode, 0, fallback.stderr)
+        output = json.loads(fallback.stdout)
+        self.assertEqual((output["direction"], output["template"]), ("default", "default/email@1"))
+        self.assertIn("hr", output["reason"])
 
     def test_render_prints_text_ready_to_copy(self):
         result = run_cli("material", "render", str(TECH / "greeting-1.json"), data_dir=self.data)

@@ -183,12 +183,17 @@ def template_id(direction: str, kind: str, templates: dict) -> str:
 
 def choose(job, profile: dict, vocabulary, templates: dict, direction: str = None) -> tuple[str, str]:
     """(direction, why) for a message to this job: the one asked for, else the JD's leading direction that
-    the candidate also wants, else the candidate's first direction, else the default template."""
+    the candidate also wants, else the candidate's first direction, else the default template. A direction
+    with no template of its own (design, finance; any skill vocabulary group) uses the default one."""
     if direction:
-        if direction not in templates:
-            raise TemplateError(f"no template for direction {direction!r} "
-                                f"(there are: {', '.join(sorted(templates))})")
-        return direction, "按 --direction 指定"
+        if direction in templates:
+            return direction, "按 --direction 指定"
+        groups = sorted(getattr(vocabulary, "groups", None) or {})
+        if direction in groups:
+            return DEFAULT, f"按 --direction 指定 {direction}，这个方向还没有模板，用通用模板 {DEFAULT}"
+        raise TemplateError(f"no direction {direction!r}: a direction is one with a template "
+                            f"({', '.join(sorted(templates))}) or a skill vocabulary group ({', '.join(groups)}), "
+                            f"which uses the {DEFAULT} template")
     wanted = [d for d in ((profile.get("target") or {}).get("directions") or []) if isinstance(d, str)]
     if isinstance(job, dict):
         groups = {group: len(items) for group, items in score.direction_skills(job, vocabulary).items()}
@@ -198,12 +203,12 @@ def choose(job, profile: dict, vocabulary, templates: dict, direction: str = Non
             pick = next(d for d in shared if groups[d] == top)
             if pick in templates:
                 return pick, f"JD 的技能有 {groups[pick]} 项属于这个方向，也在你的求职方向里"
-            return DEFAULT, f"JD 和你的求职方向都是 {pick}，但这个方向还没有模板，用通用模板"
+            return DEFAULT, f"JD 和你的求职方向都是 {pick}，但这个方向还没有模板，用通用模板 {DEFAULT}"
     if wanted:
         if wanted[0] in templates:
             return wanted[0], "JD 的技能和你的求职方向没有交集（或没有岗位记录），用你的第一个求职方向"
-        return DEFAULT, f"你的第一个求职方向 {wanted[0]} 还没有模板，用通用模板"
-    return DEFAULT, "档案没写求职方向，用通用模板"
+        return DEFAULT, f"你的第一个求职方向 {wanted[0]} 还没有模板，用通用模板 {DEFAULT}"
+    return DEFAULT, f"档案没写求职方向，用通用模板 {DEFAULT}"
 
 
 def template_for(job, profile: dict, vocabulary, templates: dict, kind: str, direction: str = None) -> dict:

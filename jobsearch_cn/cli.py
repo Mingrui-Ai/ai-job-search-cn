@@ -924,7 +924,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     material_template.add_argument("job_id", help="岗位 id（本地岗位库里要有）")
     material_template.add_argument("--kind", required=True, choices=messages.KINDS, help="材料种类")
-    material_template.add_argument("--direction", help="指定方向，即模板名，例如 tech、ops、default")
+    material_template.add_argument("--direction", help="指定方向：模板名（例如 tech、ops、default），或者技能词表里"
+                                                       "还没有模板的方向（例如 design、hr），这时用 default 模板")
     material_template.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     material_template.set_defaults(handler=cmd_material_template)
     material_render = material_commands.add_parser(

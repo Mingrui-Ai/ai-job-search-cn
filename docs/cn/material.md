@@ -184,7 +184,7 @@ python -m jobsearch_cn material template <岗位id> --kind greeting|email|referr
 
 输出 JSON：选中的方向、选它的理由、模板编号和模板内容（`spec`），给 Agent 起草用。岗位库里没有这个岗位时退出码 1。选法按顺序：
 
-1. 给了 `--direction` 就用它，没有这个方向的模板时报错，退出码 2；
+1. 给了 `--direction` 就用它。这个方向在技能词表里（design、market、finance、hr、general 等），但还没有模板时，用 `default`，输出的 `template` 是 `default/<kind>@…`，理由里写明指定的方向和用的模板；既没有模板、也不在词表里的方向报错，退出码 2；
 2. 否则看 JD 的技能主要属于哪些方向（和评分用同一个函数），在其中也写在档案 `target.directions` 里的方向中，取技能项最多的那个，并列时按档案里的顺序；这个方向还没有模板时用 `default`；
 3. 没有交集时，用档案 `target.directions` 的第一个，它没有模板时用 `default`；
 4. 档案没写求职方向，用 `default`。
