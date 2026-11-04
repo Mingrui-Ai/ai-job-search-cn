@@ -90,13 +90,33 @@ class Validate(unittest.TestCase):
 
     def test_findings_name_a_checklist_item_and_a_real_place(self):
         data = make_review()
-        data["findings"][0].update(item="G1", path="experience[5].bullets[0]", severity="meh", reason=" ")
+        data["findings"][0].update(item="H1", path="experience[5].bullets[0]", severity="meh", reason=" ")
         self.assertEqual(errors_of(data), [
-            "findings[0].item: 'G1' is not a checklist item (A1-F4)",
+            "findings[0].item: 'H1' is not a checklist item (A1-G8)",
             "findings[0].path: 'experience[5].bullets[0]' is not a place in the material",
             "findings[0].severity: must be one of must, suggest",
             "findings[0].reason: must be a non-empty string",
         ])
+
+    def test_a_review_of_a_message(self):
+        # M3-6: kind follows the material, the paths are segments[i].text and subject.text, coverage is [].
+        email = load(SAMPLE / "email-1.json")
+        data = make_review(kind="email-review", material="email-1.json", material_hash=review.material_hash(email),
+                           coverage=[], findings=[
+                               {"item": "G3", "path": "segments[1].text", "severity": "must",
+                                "reason": "提到附件，但还没有审核通过的简历", "suggestion": None},
+                               {"item": "E1", "path": "subject.text", "severity": "suggest",
+                                "reason": "标题用了半角标点", "suggestion": None}])
+        self.assertEqual(errors_of(data, email), [])
+        self.assertEqual(errors_of({**data, "kind": "resume-review"}, email),
+                         ["kind: 'resume-review' does not fit a email material; use 'email-review'"])
+        self.assertEqual(errors_of(make_review(kind="greeting-review"))[0],
+                         "kind: 'greeting-review' does not fit a resume material; use 'resume-review'")
+        self.assertEqual(errors_of({**data, "coverage": make_review()["coverage"]}, email),
+                         ["coverage: a greeting, email or referral has no coverage table; write []"])
+        data["findings"][0]["path"] = "segments[99].text"
+        self.assertEqual(errors_of(data, email),
+                         ["findings[0].path: 'segments[99].text' is not a place in the material"])
 
     def test_a_finding_about_the_whole_material_has_no_path(self):
         data = make_review()
@@ -104,8 +124,8 @@ class Validate(unittest.TestCase):
         self.assertEqual(errors_of(data), [])
 
     def test_the_checklist_items(self):
-        self.assertEqual(len(review.ITEMS), 33)
-        self.assertEqual((review.ITEMS[0], review.ITEMS[-1]), ("A1", "F4"))
+        self.assertEqual(len(review.ITEMS), 41)
+        self.assertEqual((review.ITEMS[0], review.ITEMS[-1]), ("A1", "G8"))
         self.assertNotIn("A6", review.ITEMS)
 
     def test_paths(self):
@@ -262,6 +282,12 @@ class Markdown(unittest.TestCase):
         self.assertLess(text.index("**必改** B1"), text.index("**建议** E4"))
         self.assertIn("  - 建议改成：实现……", text)
         self.assertIn("| Docker | 缺口 | - | 档案里有，材料没写 |", text)
+
+    def test_the_markdown_of_a_message_review_says_it_has_no_coverage(self):
+        text = review.markdown(make_review(kind="greeting-review", coverage=[]))
+        self.assertIn("沟通草稿没有覆盖表。", text)
+        self.assertNotIn("没有列出。", text)
+        self.assertIn("没有列出。", review.markdown(make_review(coverage=[])))
 
     def test_a_line_break_in_any_free_text_keeps_the_structure(self):
         # Planner on the #112 P3 PR: findings, the heading and the summary lines too, not just the table.

@@ -4,7 +4,7 @@
 
 ## 1. 存放位置
 
-和所审的材料放在同一个目录：`data/materials/<岗位id>/review-<n>-r<轮次>.json`。`<n>` 和材料 `resume-<n>.json` 的编号一样，轮次是 1 或 2。`data/` 不提交。
+和所审的材料放在同一个目录：`data/materials/<岗位id>/review-<n>-r<轮次>.json`。`<n>` 和材料 `resume-<n>.json` 的编号一样，轮次是 1 或 2。打招呼语、投递邮件、内推请求（M3-6）的审核结果是 `review-<种类>-<n>-r<轮次>.json`，例如 `email-1.json` 的第 1 轮是 `review-email-1-r1.json`。`data/` 不提交。
 
 ## 2. 字段
 
@@ -35,7 +35,7 @@
 | 字段 | 说明 |
 | --- | --- |
 | `schema_version` | 固定为 `1` |
-| `kind` | 目前只能是 `resume-review` |
+| `kind` | 简历是 `resume-review`；打招呼语、投递邮件、内推请求分别是 `greeting-review`、`email-review`、`referral-review`，必须和材料的种类对上 |
 | `job_id` | 必须和所审材料的 `job_id` 相同 |
 | `material` | 所审材料的文件名（只写文件名，例如 `resume-1.json`；材料和审核结果在同一目录） |
 | `material_hash` | 所审材料的摘要，`review draft` 会输出。材料后来改过，这份审核结果就不通过，要按当前版本重审 |
@@ -44,14 +44,14 @@
 | `created` | 写审核结果的时间，ISO 8601，要带时区 |
 | `verdict` | `pass`（通过）或 `revise`（需修改）。`pass` 不能带 `must` 级的问题 |
 | `findings[]` | 问题，没有就写 `[]`，每条见下表 |
-| `coverage[]` | 岗位要求的覆盖情况（清单 C2），每条见下表；JD 没列要求时写 `[]` |
+| `coverage[]` | 岗位要求的覆盖情况（清单 C2），每条见下表；JD 没列要求时写 `[]`；打招呼语、邮件、内推请求没有覆盖表，一律写 `[]` |
 
 `findings[]` 每条：
 
 | 字段 | 说明 |
 | --- | --- |
-| `item` | 清单编号，`A1`–`A5`、`B1`–`B6`、`C1`–`C6`、`D1`–`D6`、`E1`–`E6`、`F1`–`F4` |
-| `path` | 问题在材料里的位置，例如 `summary.text`、`experience[0].bullets[1].text`、`skills[2]`；必须能在材料里找到。关于整份材料的问题（例如 D1 页数）写 `null` |
+| `item` | 清单编号，`A1`–`A5`、`B1`–`B6`、`C1`–`C6`、`D1`–`D6`、`E1`–`E6`、`F1`–`F4`、`G1`–`G8`（G 类只用于沟通草稿） |
+| `path` | 问题在材料里的位置，例如 `summary.text`、`experience[0].bullets[1].text`、`skills[2]`，沟通草稿是 `segments[3].text`、`subject.text`；必须能在材料里找到。关于整份材料的问题（例如 D1 页数）写 `null` |
 | `severity` | `must` 是必改，`suggest` 是建议；界线见 [review-checklist.md §4.3](review-checklist.md#43-审核者读什么输出什么) |
 | `reason` | 理由，不超过 300 字 |
 | `suggestion` | 可以直接替换的新文字，没有就写 `null` |
@@ -79,7 +79,7 @@ python -m jobsearch_cn review show <审核结果> [--material <材料文件>]
 
 - `material_hash`：写进审核结果的摘要；
 - `job_found`：岗位库里有没有这个岗位；
-- `coverage`：JD 解析出的每项技能要求一行，可以直接作为审核结果 `coverage` 的初稿。
+- `coverage`：JD 解析出的每项技能要求一行，可以直接作为审核结果 `coverage` 的初稿。打招呼语、邮件、内推请求是 `[]`，`style` 只查全角标点和中英文之间的空格（E1、E3），不查要点结尾的句号。
 
   - 材料的技能一节或改写的文字里用了 JD 的写法（只差大小写也算；JD 对同一项技能用了几种写法，例如职责写 Go、要求写 Golang，用哪一种都算）：`covered`；
   - 只用了别的写法（例如 JD 写 Golang，材料写 Go）：`synonym`，`note` 写明两种写法；

@@ -453,9 +453,30 @@ def cmd_material_render(args) -> int:
     if errors:
         _emit({"valid": False, "errors": errors, "warnings": warnings})
         return 1
-    print(messages.render(record, data, job))
-    for warning in warnings:
-        print(f"警告：{warning}", file=sys.stderr)
+    text = messages.render(record, data, job)
+    if not args.output:
+        print(text)
+        for warning in warnings:
+            print(f"警告：{warning}", file=sys.stderr)
+        return 0
+    # --output (M3-6): the text goes to a file, never to stdout, since an email's signature carries the
+    # phone and the email address that the agent's replies must not show.
+    named = _MESSAGE_NAME.fullmatch(Path(args.file).name)
+    if not named or named.group(1).split("-")[0] != kind:
+        raise InputError(f"{args.file}: material render --output takes a material file named {kind}-<n>.json "
+                         "and names the text file after it")
+    if not schema.is_job_id(record["job_id"]):
+        raise InputError(f"job_id: {record['job_id']!r} is not a job id; the text goes in a folder named after it")
+    try:
+        directory = store.safe_dir(store.data_dir(args.data_dir), "messages", record["job_id"])
+    except store.StoreError as exc:
+        raise InputError(str(exc)) from None
+    output = directory / f"{named.group(1)}.txt"
+    if output.is_symlink():
+        raise InputError(f"{output} is a link; nothing is written through it")
+    resume_pdf._replace(output, f"{text}\n".encode("utf-8"))
+    note = _write_build_note(directory, named.group(1), record, data, (output,), "message-build")
+    _emit({"text": str(output), "chars": len(text), "warnings": warnings, "build_note": str(note)})
     return 0
 
 
@@ -464,10 +485,6 @@ def cmd_review_draft(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
-    if _is_message(record):
-        # How a greeting, email or referral is reviewed is M3-6's to decide; until then only material validate.
-        raise InputError("review draft drafts the review of a CV; check a greeting, email or referral "
-                         "with material validate")
     vocabulary = _vocabulary(args)
     job = _material_job(args, record)
     errors, _ = _check_material(args, record, data, job, vocabulary)
@@ -695,17 +712,20 @@ def cmd_resume_sample(args) -> int:
 
 # resume-<n>.json (docs/cn/material.md §1); the PDF and the Word version take its name.
 _MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
+# greeting-<n>.json, email-<n>.json, referral-<n>.json: material render --output names the text after it.
+_MESSAGE_NAME = re.compile(r"((?:greeting|email|referral)-[1-9][0-9]{0,5})\.json")
 
 
-def _write_build_note(directory, stem: str, record: dict, data: dict, outputs):
-    """resume-<n>.build.json beside the outputs: which material and files this build made (applications.md §12).
+def _write_build_note(directory, stem: str, record: dict, data: dict, outputs, kind="resume-build"):
+    """<stem>.build.json beside the outputs: which material and files this build made (applications.md §12).
+    resume build writes kind resume-build, material render --output kind message-build.
     With no file written it writes nothing and returns None, so an earlier note still matches its files."""
     outputs = [output for output in outputs if output.is_file()]
     if not outputs:
         return None
     import hashlib
     from datetime import datetime
-    note = {"schema_version": 1, "kind": "resume-build", "material": f"{stem}.json",
+    note = {"schema_version": 1, "kind": kind, "material": f"{stem}.json",
             "material_hash": review.material_hash(record), "profile_hash": score.profile_hash(data),
             "built_at": datetime.now().astimezone().isoformat(timespec="seconds"),
             "files": [{"name": output.name, "sha256": hashlib.sha256(output.read_bytes()).hexdigest()}
@@ -787,7 +807,8 @@ def _application_material_check(args):
     vocabulary = _vocabulary(args)
 
     def check(record):
-        return material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args, record))
+        # The one check material validate runs, so a greeting, email or referral is checked as one (M3-6).
+        return _check_material(args, record, data, _material_job(args, record), vocabulary)
     return check, True
 
 
@@ -908,9 +929,10 @@ def _add_application_parser(commands, stored) -> None:
         moment.add_argument("--at", help="知道时刻：必须带时区，如 2026-11-02T14:30+08:00")
 
     def materials(parser):
-        parser.add_argument("--material", help="投出的这份简历的材料文件（data/materials/<岗位id>/resume-<n>.json）")
+        parser.add_argument("--material", help="投出的材料文件：简历 data/materials/<岗位id>/resume-<n>.json，"
+                                               "或沟通草稿 greeting-<n>.json、email-<n>.json、referral-<n>.json")
         parser.add_argument("--sent", nargs="+", action="extend", metavar="FILE",
-                            help="实际发出的文件（PDF、Word），会复制归档")
+                            help="实际发出的文件（PDF、Word，或沟通草稿的 .txt），会复制归档")
         parser.add_argument("--profile", help="检查材料用的档案；默认为 <数据目录>/profile/profile.json")
 
     record_parser = writer("record", "新建一次投递（只起草，或带 --submitted 记为已投出）",
@@ -1204,6 +1226,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     material_render.add_argument("file", help="材料文件；- 表示标准输入")
     material_render.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    material_render.add_argument("--output", action="store_true",
+                                 help="写到 <数据目录>/messages/<岗位id>/<kind>-<n>.txt，旁边写说明文件 "
+                                      "<kind>-<n>.build.json；标准输出只给路径、字数和警告，不含正文")
     material_render.set_defaults(handler=cmd_material_render)
 
     review_parser = commands.add_parser("review", help="材料审核相关命令（起草 + 审核工作流）",

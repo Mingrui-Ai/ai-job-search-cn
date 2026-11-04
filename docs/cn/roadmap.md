@@ -54,6 +54,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 - 起草时材料的 `profile_hash` 没有命令单独输出，现在从不过期的匹配记录里抄（工作流先做匹配确认，所以够用）。可选的做法：`material validate` 报 `profile_hash` 不一致时，顺带给出当前的值。
 - #116 实跑（Claude A）：求职意向一行折行时，"起可到岗"会单独落到第二行（`resume build` 的模板），只影响版式。
 - 沟通草稿引用 `notes.md` 写求职动机：M3-6 第一版不做；M3-5 验收时看用户要不要，再按简介的规则安排。
+- #127 P2-1 的后续（规划者 2026-11-04 裁定，不在 M3-6 做）：`review validate` 发现旧文件。材料改了没重新 `resume build` 或 `material render --output` 时，第 2 轮的审核结果照样能通过；现在靠审核者先核对说明文件的 `material_hash`（resume-workflow.md 第 2、5 节）。可以让 `review validate`、`review show` 也核对 `resumes/`、`messages/` 下的说明文件，这要给两条命令加 `--data-dir`。
 - #123 P3（V23 的 a-6 等）：套话警告还没做（冻结场景里 3 项"仅警告"严格比较不通过，已裁定不阻塞）；档案联系方式缺 `contact.wechat` 字段，沟通草稿写不了微信号；到岗日期占位符配"不早于"会被误拦。
 - #127 待办：`review validate` 自动发现交付文件是旧版：材料改过、但没重新 `resume build` / `material render --output`，说明文件（`.build.json`）的 `material_hash` 和材料对不上。现在只靠审核者先核对说明文件（#127 加的步骤），要机器检查得让 `review validate` 读数据目录。
 - V24 P3-1（#120 裁定 2）：`resume build` 遇到 OSError 时按项目惯例输出 JSON 错误，不带 traceback 和本机临时路径。
@@ -651,7 +652,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
   - 设计稿在 Claude B 的工作记录 `docs/cn/worklog/2026-11-01-m3-4-templates.md`，随 PR 提交。三种材料沿用 Material v1，加 `greeting`、`email`、`referral` 三个 `kind`；模板按方向放在 `jobsearch_cn/message_templates/`；`material template` 选模板，`material validate` 检查，`material render` 输出纯文本。只生成文字，不自动发送。
   - 规划者裁定（2026-11-02，补记 11-01 已批准的口径）：姓名、学校、公司名用占位符，渲染时代入；第一版做 tech、data、product、ops，加 default；长度上限（打招呼语 150 字、邮件标题 40、邮件正文 600、内推 300）按代入后的字数算，用户覆盖只能改小；起草流程不在本项，M3-4 和 M3-3 第三部分都合并后，由规划者安排接进工作流。
   - **验收**：设计稿第 7 节的用例通过；V23 对照通过（Codex A，PR #125：冻结场景按裁定 75/75，扩展探针 47/47）。P3 见 §1"待办"。
-- [ ] M3-6 沟通草稿接进工作流（规划者 2026-11-02 立项；Claude C 先写设计，规划者确认；实现等 M3-3 第三部分和 M3-4 合并后再开，审核者 Codex B）
+- [x] M3-6 沟通草稿接进工作流（规划者 2026-11-02 立项；Claude C 先写设计，规划者确认；实现等 M3-3 第三部分和 M3-4 合并后再开，审核者 Codex B；PR #127，审核通过）
   - 本轮目标是一个岗位走完"匹配确认 → 简历起草 → 独立审核 → Word/PDF 输出 → 沟通草稿"，这是最后一段。设计要写清：在流程里的位置（简历审核通过之后，还是可以单独起草），三种材料由用户选还是默认只起草一种；命令链 `material template` → 起草 → `material validate` → `material render`；沟通草稿要不要走独立审核、审核清单加哪几条；入口并进 `cn-resume` 还是另开技能，dsh 和 `AGENTS.md` 怎么对应，授权要不要改；交给用户的纯文本放在哪；只生成文字，不自动发送。
   - **验收**：用公开虚构夹具走完一个岗位的整条流程；Codex A 按任务单做整条流程的验收。M3-5 验收之前完成。
 - [ ] M3-5 验收与 `v0.3.0`：3 个岗位得到 3 份明显不同的简历，全部能追溯到档案；用户至少用其中一份真实投递

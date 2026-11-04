@@ -237,9 +237,11 @@ python -m jobsearch_cn material template <岗位id> --kind greeting|email|referr
 ### 7.5 `material render`
 
 ```
-python -m jobsearch_cn material render data/materials/<岗位id>/greeting-1.json [--profile <档案>] [--data-dir <目录>]
+python -m jobsearch_cn material render data/materials/<岗位id>/greeting-1.json [--output] [--profile <档案>] [--data-dir <目录>]
 ```
 
 先做和 `material validate` 相同的检查。有错误时在标准输出写 `{"valid": false, "errors": […], "warnings": […]}`，退出码 1；通过时把占位符换成档案和岗位库里的值，输出纯文本，警告写到标准错误，每条以"警告："开头。打招呼语各段直接连成一段；内推请求每段一行；邮件第一行是"标题：…"，空一行后是正文，段与段之间空一行。给的是简历时退出码 2，简历用 `resume build` 生成；`kind` 拼错时和 `material validate` 一样，输出 `{"valid": false, …}`，退出码 1。
 
-`material validate`、`material render`、`resume build`、`review draft` 检查材料用的是同一个函数，对同一份材料结论相同。`resume build` 和 `review draft` 只收简历，给沟通材料时退出码 2。
+加 `--output`（M3-6）时不往标准输出打正文：文字写到 `<数据目录>/messages/<岗位id>/<种类>-<n>.txt`（UTF-8，先写临时文件再改名，那里是链接时拒绝），旁边写说明文件 `<种类>-<n>.build.json`，格式同 [applications.md 第 12 节](applications.md#12-resume-build-的说明文件m4-1a-第二部分)，`kind` 是 `message-build`。标准输出是 `{"text": 路径, "chars": 字数, "warnings": […], "build_note": 路径}`。材料文件名必须是 `<种类>-<n>.json`，种类和 `kind` 一致，否则退出码 2。工作流里一律加 `--output`，因为邮件签名有联系方式。
+
+`material validate`、`material render`、`resume build`、`review draft` 检查材料用的是同一个函数，对同一份材料结论相同。`resume build` 只收简历，给沟通材料时退出码 2；`review draft` 对沟通材料只给标点空格警告，覆盖表是 `[]`（M3-6）。

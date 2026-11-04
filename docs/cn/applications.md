@@ -154,15 +154,16 @@
 
 投出时（`record --submitted` 或 `submit`）可以带：
 
-- `--material`：这次投的简历的材料文件（`data/materials/<岗位id>/resume-<n>.json`）；
-- `--sent`：实际发出的文件，一个或几个（PDF、Word）；用户手工改过 Word 再发的，就给改过的那份。
+- `--material`：这次投的材料文件：简历 `data/materials/<岗位id>/resume-<n>.json`，或沟通草稿 `greeting-<n>.json`、`email-<n>.json`、`referral-<n>.json`（M3-6）；
+- `--sent`：实际发出的文件，一个或几个（PDF、Word，或沟通草稿的 `.txt`）；用户手工改过 Word 再发的，就给改过的那份。
 
 写入前先检查：
 
 - 材料要能通过 `material validate`（对照当前档案；档案改过只给警告），而且必须是这个岗位的材料；
-- 发出的文件不在 `resumes/<岗位id>/` 下、或者文件名和材料编号对不上，给警告，照样记录；
-- 发出的文件用 `resume build` 的说明文件核对（第 12 节）；对不上、找不到说明文件，都给警告，照样记录；
-- 材料旁边有通过了这一版材料的审核结果（`review-<n>-r<轮次>.json`，`material_hash` 相同、`verdict` 为 `pass`）时，记下最后一轮的路径（`review_path`）；没有时给警告。
+- 发出的文件不在 `resumes/<岗位id>/`（沟通草稿是 `messages/<岗位id>/`）下、或者文件名和材料编号对不上，给警告，照样记录；
+- 发出的文件用 `resume build` 或 `material render --output` 的说明文件核对（第 12 节）；对不上、找不到说明文件，都给警告，照样记录；
+- 材料旁边有通过了这一版材料的审核结果（`review-<n>-r<轮次>.json`，沟通草稿是 `review-<种类>-<n>-r<轮次>.json`；`material_hash` 相同、`verdict` 为 `pass`）时，记下最后一轮的路径（`review_path`）；没有时给警告。
+- 材料版本的 `kind` 现在只有 `resume`（库表的约束），沟通草稿也记为 `resume`，从 `material_path` 看是哪种。
 
 然后把材料 JSON（`material.json`）和发出的文件（`sent-1.pdf`、`sent-2.docx`……，保留扩展名）**复制**进 `artifacts/<投递id>/mv_…/`，记下实际字节的 SHA-256 和大小。以后材料被改、PDF 重新生成、档案更新，归档和摘要都不变。`material_path` 只说明来源，以后不从那里读。
 
@@ -253,6 +254,7 @@ python -m jobsearch_cn application backup
 规划者 2026-11-03 裁定：`resume build` 每生成一次，在输出旁边写一个说明文件，记下这次用的是哪一版材料、生成了哪些文件。M3-6 的 `material render --output` 写 `.txt` 时用同样的格式。
 
 - 位置和名字：`data/resumes/<岗位id>/resume-<n>.build.json`，即材料文件名去掉 `.json` 再加 `.build.json`。每次 build 覆盖上一次的。
+- 沟通草稿（M3-6）：`material render --output` 在 `data/messages/<岗位id>/<种类>-<n>.build.json` 写同样格式的说明文件，`kind` 是 `message-build`，`files` 只有它写的 `<种类>-<n>.txt`。下面说的核对对它一样适用。
 - 格式：
 
   ```json
@@ -272,8 +274,8 @@ python -m jobsearch_cn application backup
 
   `material_hash` 是 `review.material_hash`，`profile_hash` 是当前档案的 `score.profile_hash`，`built_at` 带时区，`files` 列出这次输出的每个文件名和字节 SHA-256。
 - 投出时用哪个说明文件核对：
-  - 给了 `--material`：用这份材料的说明文件核对所有发出的文件。说明文件在 `resumes/<岗位id>/` 下，名字是材料文件名去掉 `.json` 再加 `.build.json`，就是 `resume build` 写的那个。发出的文件改了名字（例如另存为"姓名-岗位.pdf"）也照样核对。
-  - 没给 `--material`：按每个发出文件自己的名字找它旁边的说明文件。`resume-<n>.<扩展名>` 找 `resume-<n>.build.json`，别的名字找去掉扩展名再加 `.build.json` 的那个。
+  - 给了 `--material`：用这份材料的说明文件核对所有发出的文件。说明文件在 `resumes/<岗位id>/` 下（沟通草稿在 `messages/<岗位id>/` 下），名字是材料文件名去掉 `.json` 再加 `.build.json`，就是 `resume build`（沟通草稿是 `material render --output`）写的那个。发出的文件改了名字（例如另存为"姓名-岗位.pdf"）也照样核对。
+  - 没给 `--material`：按每个发出文件自己的名字找它旁边的说明文件。`resume-<n>.<扩展名>` 找 `resume-<n>.build.json`（`greeting-<n>.txt` 找 `greeting-<n>.build.json`，邮件、内推同理），别的名字找去掉扩展名再加 `.build.json` 的那个。
 - 核对的内容：发出文件的摘要要在说明文件的 `files` 里；给了 `--material` 时，说明文件里的 `material_hash` 还要等于材料的当前值。对不上只给警告（手工改过的 Word 就是这样），照样记录用户说发出的文件。
 - 核对结果记进 `submitted` 事件的 `materials_check`（导出的 `submission.materials_check` 里也有）：
   - 都对得上为 `match`；
@@ -366,7 +368,7 @@ Claude Code 和 DeepSeek Harness 的 `cn-application` 技能、Codex 的 `AGENTS
    - 岗位 id 用 `python -m jobsearch_cn jd list`、`python -m jobsearch_cn jd show <岗位id>` 找；
    - 已有的投递和它的 `revision` 用 `python -m jobsearch_cn application list --job <岗位id>`、`python -m jobsearch_cn application show <投递id>` 看。
    - 现在的投递，岗位要先导入岗位库（`cn-jd-import`）；以前投的可以补录（第 7 节）。
-2. **记投递**：`python -m jobsearch_cn application record` 新建；已起草的投出了用 `python -m jobsearch_cn application submit`。有简历文件就带 `--material` 和 `--sent`（第 6 节）。用平台在线简历投的没有文件，照样记，并告诉用户"材料未记录"。
+2. **记投递**：`python -m jobsearch_cn application record` 新建；已起草的投出了用 `python -m jobsearch_cn application submit`。有简历文件就带 `--material` 和 `--sent`（第 6 节）；发的是沟通草稿（打招呼语、邮件、内推请求）时，带它的材料和 `data/messages/<岗位id>/` 下的 `.txt`。用平台在线简历投的没有文件，照样记，并告诉用户"材料未记录"。
 3. **记进展**：
    - 状态变了用 `python -m jobsearch_cn application status`，对方说了什么写进 `--reason`；
    - 状态没变的回复用 `python -m jobsearch_cn application reply`（第 4 节）；

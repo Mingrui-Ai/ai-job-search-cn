@@ -16,7 +16,9 @@ import re
 from jobsearch_cn import jd_parser, material as material_mod, profile as profile_mod, schema, score
 
 REVIEW_VERSION = 1
-KINDS = ("resume-review",)
+KINDS = ("resume-review", "greeting-review", "email-review", "referral-review")
+# The material kinds reviewed without a coverage table (M3-6): their review's coverage is [].
+MESSAGE_KINDS = ("greeting", "email", "referral")
 TOP_LEVEL_KEYS = ("schema_version", "kind", "job_id", "material", "material_hash", "round", "mode",
                   "created", "verdict", "findings", "coverage")
 FINDING_KEYS = ("item", "path", "severity", "reason", "suggestion")
@@ -33,7 +35,7 @@ GAP_IN_CITED_TEXT = "技能列表未列，所引条目原文里有，材料没�
 GAP_UNCHECKED = "技能列表未列，需核对经历原文"
 MAX_TEXT = profile_mod.MAX_BULLET
 # The items of docs/cn/review-checklist.md §2, by section.
-CHECKLIST = {"A": 5, "B": 6, "C": 6, "D": 6, "E": 6, "F": 4}
+CHECKLIST = {"A": 5, "B": 6, "C": 6, "D": 6, "E": 6, "F": 4, "G": 8}
 ITEMS = tuple(f"{section}{n}" for section, count in CHECKLIST.items() for n in range(1, count + 1))
 
 _PATH = re.compile(r"(?P<name>[a-z_]+)|\[(?P<index>\d+)\]")
@@ -81,6 +83,9 @@ def validate(review, material) -> tuple[list, list]:
         errors.append(f"schema_version: must be {REVIEW_VERSION}")
     if review.get("kind") not in KINDS:
         errors.append(f"kind: must be one of {', '.join(KINDS)}")
+    elif isinstance(material, dict) and review["kind"] != _review_kind(material):
+        errors.append(f"kind: {review['kind']!r} does not fit a {material.get('kind') or 'resume'} material; "
+                      f"use {_review_kind(material)!r}")
     for key in ("job_id", "material", "material_hash"):
         _text(review.get(key), key, errors)
     if isinstance(material, dict) and isinstance(review.get("job_id"), str) \
@@ -97,7 +102,10 @@ def validate(review, material) -> tuple[list, list]:
 
     must = _findings(review.get("findings"), material, errors) if "findings" in review else 0
     if "coverage" in review:
-        _coverage(review["coverage"], material, errors)
+        if is_message(material) and review["coverage"] != []:
+            errors.append("coverage: a greeting, email or referral has no coverage table; write []")
+        else:
+            _coverage(review["coverage"], material, errors)
     if review.get("verdict") == "pass" and must:
         errors.append(f"verdict: 'pass' with {must} 'must' finding(s); a pass has none")
     if not errors:
@@ -106,6 +114,15 @@ def validate(review, material) -> tuple[list, list]:
         if review.get("mode") == "self":
             warnings.append("mode: a self-review (the drafter's own session); tell the user it is not independent")
     return errors, warnings
+
+
+def is_message(material) -> bool:
+    """A greeting, email or referral (messages.py), reviewed without a coverage table."""
+    return isinstance(material, dict) and material.get("kind") in MESSAGE_KINDS
+
+
+def _review_kind(material: dict) -> str:
+    return f"{material['kind']}-review" if is_message(material) else "resume-review"
 
 
 def _text(value, where: str, errors: list, nullable: bool = False) -> None:
@@ -135,7 +152,7 @@ def _findings(value, material, errors: list) -> int:
             continue
         profile_mod._keys(finding, FINDING_KEYS, where, errors)
         if finding.get("item") not in ITEMS:
-            errors.append(f"{where}.item: {finding.get('item')!r} is not a checklist item (A1-F4)")
+            errors.append(f"{where}.item: {finding.get('item')!r} is not a checklist item (A1-G8)")
         if finding.get("path") is not None:
             _path(finding.get("path"), f"{where}.path", material, errors)
         schema._check_enum(finding.get("severity"), SEVERITIES, f"{where}.severity", errors, nullable=False)
@@ -172,6 +189,14 @@ def _coverage(value, material, errors: list) -> None:
 
 def _texts(material: dict):
     """(path, text) for every text the drafter wrote."""
+    if is_message(material):
+        subject = material.get("subject")
+        if isinstance(subject, dict) and isinstance(subject.get("text"), str):
+            yield "subject.text", subject["text"]
+        for index, segment in enumerate(material.get("segments") or []):
+            if isinstance(segment, dict) and isinstance(segment.get("text"), str):
+                yield f"segments[{index}].text", segment["text"]
+        return
     summary = material.get("summary")
     if isinstance(summary, dict) and isinstance(summary.get("text"), str):
         yield "summary.text", summary["text"]
@@ -182,7 +207,10 @@ def _texts(material: dict):
 
 
 def draft(material: dict, profile: dict, job, vocabulary) -> dict:
-    """The machine's starting point for a review: JD skill coverage and style warnings."""
+    """The machine's starting point for a review: JD skill coverage and style warnings.
+    A greeting, email or referral gets only the style warnings: its coverage is []."""
+    if is_message(material):
+        return {"coverage": [], "style": style(material)}
     return {"coverage": coverage(material, profile, job, vocabulary), "style": style(material)}
 
 
@@ -286,7 +314,8 @@ def style(material: dict) -> list:
     """Warnings for checklist E1 and E3; they never fail a material."""
     warnings = []
     for path, text in _texts(material):
-        if path != "summary.text" and _FULL_STOP_END.search(text):
+        # Only CV bullets end without a full stop; a summary or a message is prose.
+        if path != "summary.text" and not is_message(material) and _FULL_STOP_END.search(text):
             warnings.append(f"{path}: E1 ends with a full stop; bullets end without one")
         if _HALF_WIDTH_PUNCT.search(text):
             warnings.append(f"{path}: E1 use full-width punctuation (，；：) in Chinese text")
@@ -320,7 +349,9 @@ def markdown(review: dict) -> str:
         if finding["suggestion"]:
             lines.append(f"  - 建议改成：{_line(finding['suggestion'])}")
     lines += ["", "## 岗位要求覆盖", ""]
-    if not review["coverage"]:
+    if review["kind"] != "resume-review":
+        lines.append("沟通草稿没有覆盖表。")
+    elif not review["coverage"]:
         lines.append("没有列出。")
     else:
         lines += ["| 要求 | 情况 | 位置 | 说明 |", "| --- | --- | --- | --- |"]

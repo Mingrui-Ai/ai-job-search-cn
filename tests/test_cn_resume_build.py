@@ -236,6 +236,28 @@ class Command(unittest.TestCase):
                           for name in ("resume-2.pdf", "resume-2.docx")})
         self.assertRegex(note["built_at"], r"[+-]\d\d:\d\d$")
 
+    def test_a_changed_resume_is_built_again_for_the_next_round(self):
+        # The reviewer's first check (resume-workflow.md section 2, step 2): the build note carries the
+        # material_hash review draft gives. After a change it does not, until resume build runs again.
+        path = self.write_material()
+        with faked_typst(pdf_with_pages(1)), mock.patch.object(resume_pdf, "check", return_value=[]):
+            self.assertEqual(self.run_cli(path)[0], 0)
+        note = self.folder / "resume-2.build.json"
+        changed = {**MATERIAL, "summary": None}
+        path.write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+        out = io.StringIO()
+        with redirect_stdout(out):
+            code = cli.main(["review", "draft", str(path), "--profile", str(FIXTURE / "profile" / "profile.json"),
+                             "--data-dir", str(self.root)])
+        self.assertEqual(code, 0)
+        drafted = json.loads(out.getvalue())["material_hash"]
+        self.assertNotEqual(json.loads(note.read_text(encoding="utf-8"))["material_hash"], drafted)
+        with faked_typst(pdf_with_pages(1)), mock.patch.object(resume_pdf, "check", return_value=[]):
+            code, built, _ = self.run_cli(path)
+        self.assertEqual(code, 0)
+        self.assertEqual(Path(json.loads(built)["build_note"]), note)
+        self.assertEqual(json.loads(note.read_text(encoding="utf-8"))["material_hash"], drafted)
+
     def test_an_invalid_material_writes_nothing(self):
         record = copy.deepcopy(MATERIAL)
         record["experience"][0]["bullets"][0]["text"] = "P99 延迟降到 30ms"

@@ -67,9 +67,12 @@ _AT = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?:[+-]
 _UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 _EXTENSION = re.compile(r"\.[a-z0-9]{1,10}")
 MATERIALS_CHECKS = (None, "match", "mismatch", "unchecked")
-_SENT_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.[A-Za-z0-9]+")
-_MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
-_REVIEW_NAME = re.compile(r"review-([1-9][0-9]{0,5})-r([0-9]+)\.json")
+# resume build writes resume-<n>.* into resumes/<job>/; material render --output writes greeting-<n>, email-<n>
+# and referral-<n> .txt into messages/<job>/ (M3-6); each beside a <name>.build.json note (section 12).
+_SENT_NAME = re.compile(r"((?:resume|greeting|email|referral)-[1-9][0-9]{0,5})\.[A-Za-z0-9]+")
+_MATERIAL_NAME = re.compile(r"((?:resume|greeting|email|referral)-[1-9][0-9]{0,5})\.json")
+# review-<n>-r<round>.json for resume-<n>.json, review-<kind>-<n>-r<round>.json for a greeting, email or referral.
+_REVIEW_NAME = re.compile(r"review-((?:(?:greeting|email|referral)-)?[1-9][0-9]{0,5})-r([0-9]+)\.json")
 _BACKUP_NAME = re.compile(r"[0-9]{8}T[0-9]{6}Z(?:-[1-9][0-9]{0,2})?")
 _ARCHIVE_PART = re.compile(r"[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*")  # one part of a recorded archive path
 _EXPORT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}\.json")
@@ -727,11 +730,12 @@ def _passing_review(material_file: Path, material_hash: str, root: Path):
     named = _MATERIAL_NAME.fullmatch(material_file.name)
     if not named:
         return None
-    number = named.group(1).split("-")[1]
+    kind, number = named.group(1).split("-")
+    reviewed = number if kind == "resume" else named.group(1)
     found = []
-    for candidate in material_file.parent.glob(f"review-{number}-r*.json"):
+    for candidate in material_file.parent.glob(f"review-{reviewed}-r*.json"):
         match = _REVIEW_NAME.fullmatch(candidate.name)
-        if not match or not candidate.is_file():
+        if not match or match.group(1) != reviewed or not candidate.is_file():
             continue
         try:
             data = json.loads(candidate.read_bytes().decode("utf-8-sig"))
@@ -754,10 +758,12 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
     warnings, files = [], []
     if material_path is None and not sent_paths:
         return {"version": None, "files": [], "digest": None, "warnings": [], "check": None}
+    # The table allows only 'resume' (DB_VERSION 1), so a greeting, email or referral is recorded under it too.
     version = {"kind": "resume", "material_path": None, "material_hash": None, "profile_hash": None,
                "review_path": None}
     digest = {"material": None, "sent": []}
     number = None
+    outputs = None  # where the given material's files are made: messages/<job>/ for a message, else resumes/<job>/
     if material_path is not None:
         material_file = Path(material_path)
         data = _read_file(material_file)
@@ -786,6 +792,7 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
             warnings.append(f"{material_file.name}: no review beside it passed this version of the material")
         named = _MATERIAL_NAME.fullmatch(material_file.name)
         number = named.group(1) if named else None
+        outputs = root / ("messages" if review.is_message(record) else "resumes") / job_id
         files.append(("material", "source", data, "material.json"))
         digest["material"] = _sha256(data)
     else:
@@ -802,10 +809,11 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
         files.append((file_id, "sent", data, file_id + extension))
         digest["sent"].append({"sha256": _sha256(data), "extension": extension})
         named = _SENT_NAME.fullmatch(sent_file.name)
-        inside = _relative(sent_file.parent, resumes) == "."
-        if not inside or not named:
-            warnings.append(f"{sent_file.name}: not a resume-<n> file built under resumes/{job_id}/; "
-                            "recorded as the file you say was sent")
+        folder = outputs if outputs is not None else _outputs(root, job_id, named.group(1) if named else "")
+        if _relative(sent_file.parent, folder) != "." or not named:
+            where = (f"a text material render --output wrote under messages/{job_id}/"
+                     if folder.parent.name == "messages" else f"a resume-<n> file built under resumes/{job_id}/")
+            warnings.append(f"{sent_file.name}: not {where}; recorded as the file you say was sent")
         elif number is not None and named.group(1) != number:
             warnings.append(f"{sent_file.name}: built from {named.group(1)}.json, but the material given is "
                             f"{number}.json")
@@ -813,32 +821,41 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
             warnings.append(f"{sent_file.name}: the file is empty")
         sent_hashes.append((sent_file, _sha256(data)))
     material_file = None if material_path is None else Path(material_path)
-    check = _check_builds(resumes, material_file, version["material_hash"], sent_hashes, warnings)
+    check = _check_builds(outputs or resumes, material_file, version["material_hash"], sent_hashes, warnings)
     digest["check"] = check
     return {"version": version, "files": files, "digest": digest, "warnings": warnings, "check": check}
 
 
+def _outputs(root: Path, job_id: str, stem: str) -> Path:
+    """The folder files named <stem>.* are made in: messages/<job>/ for greeting-<n>, email-<n> and referral-<n>
+    (material render --output, M3-6), resumes/<job>/ for anything else (resume build)."""
+    return root / ("messages" if stem.split("-")[0] in review.MESSAGE_KINDS else "resumes") / job_id
+
+
 def build_note_path(file: Path) -> Path:
     """The build note looked for beside a sent file when no material is given: resume-<n>.build.json for
-    resume-<n>.<ext>, otherwise the name without its extension plus .build.json (applications.md section 12)."""
+    resume-<n>.<ext> (greeting-<n>.build.json for greeting-<n>.txt and so on), otherwise the name without its
+    extension plus .build.json (applications.md section 12)."""
     named = _SENT_NAME.fullmatch(file.name)
     return file.parent / f"{named.group(1)}.build.json" if named else file.parent / (file.stem + ".build.json")
 
 
-def material_note_path(resumes: Path, material_file: Path) -> Path:
-    """The note resume build writes for a material: resumes/<job>/<material name without .json>.build.json."""
+def material_note_path(folder: Path, material_file: Path) -> Path:
+    """The note made for a material: <folder>/<material name without .json>.build.json, where folder is
+    resumes/<job>/ (resume build) or, for a greeting, email or referral, messages/<job>/ (material render --output)."""
     name = material_file.name
-    return resumes / ((name[:-len(".json")] if name.endswith(".json") else name) + ".build.json")
+    return folder / ((name[:-len(".json")] if name.endswith(".json") else name) + ".build.json")
 
 
-def _check_builds(resumes: Path, material_file, material_hash, sent: list, warnings: list):
-    """materials_check, the sent files [(path, sha256)] against resume build notes (applications.md section 12).
-    With a material, its note checks every sent file, renamed or not; without one, each sent file is looked up by
-    its own name. Returns 'match', 'mismatch' or 'unchecked' (both only warned about), or None with no sent file."""
+def _check_builds(folder: Path, material_file, material_hash, sent: list, warnings: list):
+    """materials_check, the sent files [(path, sha256)] against build notes (applications.md section 12).
+    With a material, its note in folder checks every sent file, renamed or not; without one, each sent file is
+    looked up by its own name. Returns 'match', 'mismatch' or 'unchecked' (both only warned about), or None with
+    no sent file."""
     if not sent:
         return None
     if material_file is not None:
-        groups = {material_note_path(resumes, material_file): sent}
+        groups = {material_note_path(folder, material_file): sent}
     else:
         groups = {}
         for item in sent:
@@ -850,8 +867,9 @@ def _check_builds(resumes: Path, material_file, material_hash, sent: list, warni
 def _check_note(note_file: Path, sent: list, material_hash, warnings: list) -> str:
     """One build note against the sent files it should list; material_hash is None when no material is given."""
     names = ", ".join(path.name for path, _ in sent)
+    maker = "material render --output" if note_file.name.split("-")[0] in review.MESSAGE_KINDS else "resume build"
     if not note_file.is_file():
-        warnings.append(f"{names}: no resume build note {note_file.name} to check against; recorded unchecked, "
+        warnings.append(f"{names}: no {maker} note {note_file.name} to check against; recorded unchecked, "
                         "as the file(s) you say were sent")
         return "unchecked"
     try:
@@ -864,7 +882,7 @@ def _check_note(note_file: Path, sent: list, material_hash, warnings: list) -> s
     result = "match"
     for path, sha256 in sent:
         if sha256 not in hashes:
-            warnings.append(f"{path.name}: not a file {note_file.name} records (edited after resume build?); "
+            warnings.append(f"{path.name}: not a file {note_file.name} records (edited after {maker}?); "
                             "recorded as the file you say was sent")
             result = "mismatch"
     if material_hash is not None and note_hash != material_hash:

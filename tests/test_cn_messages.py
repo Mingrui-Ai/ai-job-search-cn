@@ -606,6 +606,88 @@ class Cli(unittest.TestCase):
         self.assertEqual(warned.returncode, 0)
         self.assertIn("警告：segments[3].text: '在吗'", warned.stderr)
 
+    def test_render_output_writes_the_text_and_a_build_note(self):
+        source = self.data / "email-1.json"
+        shutil.copy(TECH / "email-1.json", source)
+        result = run_cli("material", "render", str(source), "--output", data_dir=self.data)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        email = load(TECH / "email-1.json")
+        text = messages.render(email, TECH_PROFILE, TECH_JOB)
+        path = self.data / "messages" / TECH_JOB["id"] / "email-1.txt"
+        self.assertEqual(Path(output["text"]), path)
+        self.assertEqual(path.read_text(encoding="utf-8"), f"{text}\n")
+        self.assertEqual(output["chars"], len(text))
+        # No body and no contact details on stdout: only the path, the count and the warnings.
+        for value in TECH_PROFILE["contact"].values():
+            if isinstance(value, str) and value:
+                self.assertNotIn(value, result.stdout)
+        from jobsearch_cn import review
+        note = load(path.parent / "email-1.build.json")
+        self.assertEqual((note["kind"], note["material"]), ("message-build", "email-1.json"))
+        self.assertEqual(note["material_hash"], review.material_hash(email))
+        self.assertEqual([entry["name"] for entry in note["files"]], ["email-1.txt"])
+        changed = copy.deepcopy(email)
+        changed["segments"][-1]["text"] += "谢谢。"
+        source.write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+        self.assertEqual(run_cli("material", "render", str(source), "--output", data_dir=self.data).returncode, 0)
+        self.assertNotEqual(load(path.parent / "email-1.build.json")["material_hash"], note["material_hash"])
+
+    def test_render_output_refuses_a_bad_name_and_a_link(self):
+        self.assertEqual(run_cli("material", "render", str(self.write(GREETING)), "--output",
+                                 data_dir=self.data).returncode, 2)
+        source = self.data / "email-1.json"
+        shutil.copy(TECH / "greeting-1.json", source)  # a greeting under an email's name
+        self.assertEqual(run_cli("material", "render", str(source), "--output", data_dir=self.data).returncode, 2)
+        shutil.copy(TECH / "greeting-1.json", self.data / "greeting-1.json")
+        directory = self.data / "messages" / TECH_JOB["id"]
+        directory.mkdir(parents=True)
+        target = self.data / "elsewhere.txt"
+        target.write_text("old", encoding="utf-8")
+        try:
+            (directory / "greeting-1.txt").symlink_to(target)
+        except OSError:
+            self.skipTest("this system cannot make symbolic links")
+        result = run_cli("material", "render", str(self.data / "greeting-1.json"), "--output", data_dir=self.data)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(target.read_text(encoding="utf-8"), "old")
+
+    def test_a_changed_message_is_rendered_again_for_the_next_round(self):
+        # Codex B on #127 (0faf0ed): after a change, the CV's step (resume build) refuses a greeting and leaves
+        # the old text, yet a round-2 review of the new version validates. resume-workflow.md section 5 renders
+        # it again: then the build note, the text and the round-2 review are all of the new version.
+        folder = self.data / "materials" / TECH_JOB["id"]
+        folder.mkdir(parents=True)
+        source = folder / "greeting-1.json"
+        shutil.copy(TECH / "greeting-1.json", source)
+        self.assertEqual(run_cli("material", "render", str(source), "--output", data_dir=self.data).returncode, 0)
+        out = self.data / "messages" / TECH_JOB["id"]
+        before = {name: (out / name).read_bytes() for name in ("greeting-1.txt", "greeting-1.build.json")}
+        changed = with_segment(GREETING, 3, "期待您的回复。")  # the closing
+        source.write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+        self.assertEqual(run_cli("material", "validate", str(source), data_dir=self.data).returncode, 0)
+        self.assertEqual(run_cli("resume", "build", str(source), data_dir=self.data).returncode, 2)
+        self.assertEqual({name: (out / name).read_bytes() for name in before}, before)
+        drafted = json.loads(run_cli("review", "draft", str(source), data_dir=self.data).stdout)
+        # What the reviewer checks first (section 5): the build note is of another version.
+        self.assertNotEqual(json.loads(before["greeting-1.build.json"])["material_hash"], drafted["material_hash"])
+
+        rendered = run_cli("material", "render", str(source), "--output", data_dir=self.data)
+        self.assertEqual(rendered.returncode, 0, rendered.stderr)
+        note = load(Path(json.loads(rendered.stdout)["build_note"]))
+        self.assertEqual(note["material_hash"], drafted["material_hash"])
+        self.assertEqual((out / "greeting-1.txt").read_text(encoding="utf-8"),
+                         f"{messages.render(changed, TECH_PROFILE, TECH_JOB)}\n")
+        second = {"schema_version": 1, "kind": "greeting-review", "job_id": changed["job_id"],
+                  "material": source.name, "material_hash": note["material_hash"], "round": 2,
+                  "mode": "independent", "created": "2026-11-04T10:00:00+08:00", "verdict": "pass",
+                  "findings": [], "coverage": []}
+        (folder / "review-greeting-1-r2.json").write_text(json.dumps(second), encoding="utf-8")
+        validated = subprocess.run([sys.executable, "-X", "utf8", "-m", "jobsearch_cn", "review", "validate",
+                                    str(folder / "review-greeting-1-r2.json")], cwd=REPO, capture_output=True,
+                                   env=dict(os.environ, PYTHONIOENCODING="utf-8"), text=True, encoding="utf-8")
+        self.assertEqual(validated.returncode, 0, validated.stdout + validated.stderr)
+
     def test_render_refuses_a_failing_message_and_a_cv(self):
         bad = run_cli("material", "render", str(self.write(with_segment(GREETING, 3, "我今年 23 岁。"))),
                       data_dir=self.data)
@@ -654,16 +736,31 @@ class Cli(unittest.TestCase):
         self.assertEqual(built.returncode, 1, built.stdout + built.stderr)
         self.assertEqual(json.loads(built.stderr)["errors"], ["kind: must be one of resume, greeting, email, referral"])
 
-    def test_resume_build_and_review_draft_take_only_a_cv(self):
+    def test_resume_build_takes_only_a_cv(self):
         path = self.data / "resume-1.json"  # the name resume build asks for, but a greeting inside
         path.write_text(json.dumps(GREETING, ensure_ascii=False), encoding="utf-8")
-        for command, says in ((("resume", "build"), "resume build builds a CV"),
-                              (("review", "draft"), "review draft drafts the review of a CV")):
-            result = run_cli(*command, str(path), data_dir=self.data)
-            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
-            self.assertIn(says, json.loads(result.stderr)["error"])
+        result = run_cli("resume", "build", str(path), data_dir=self.data)
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("resume build builds a CV", json.loads(result.stderr)["error"])
         self.assertFalse((self.data / "resume-1.pdf").exists())
 
+    def test_review_draft_of_a_message_has_no_coverage_and_agrees_with_validate(self):
+        # M3-6: a greeting, email or referral is reviewed too; the draft gives only E1/E3 style warnings.
+        for name in ("greeting-1.json", "email-1.json", "referral-1.json"):
+            result = run_cli("review", "draft", str(TECH / name), data_dir=self.data)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            output = json.loads(result.stdout)
+            self.assertEqual(output["coverage"], [], name)
+            self.assertTrue(output["job_found"], name)
+        spaced = self.write(with_segment(GREETING, 3, "我用过 Python 写服务。"))
+        style = json.loads(run_cli("review", "draft", str(spaced), data_dir=self.data).stdout)["style"]
+        self.assertIn("segments[3].text: E3 no space between Chinese and English or numbers", style)
+        self.assertFalse(any("full stop" in warning for warning in style))  # a message is prose
+        bad = self.write(with_segment(GREETING, 3, "我今年 23 岁。"))
+        validated = run_cli("material", "validate", str(bad), data_dir=self.data)
+        drafted = run_cli("review", "draft", str(bad), data_dir=self.data)
+        self.assertEqual((validated.returncode, drafted.returncode), (1, 1))
+        self.assertEqual(json.loads(drafted.stderr)["errors"], json.loads(validated.stdout)["errors"])
 
 if __name__ == "__main__":
     unittest.main()

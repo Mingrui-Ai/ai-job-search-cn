@@ -5,9 +5,12 @@ AGENTS.md all point at one document under docs/cn/. These pin that all three
 point there, that every command the document tells an agent to run exists, and
 that each Claude Code skill carries a Bash grant for exactly the command groups
 its document uses, each registered in both permission allowlists. Review
-subagents point at the same document and can neither write nor go online.
+subagents point at the same document and have no Edit, Write or web tools.
 dsh has no per-skill grants (it uses its own permission
-presets), so its entries carry only a name and a description.
+presets), so its entries carry only a name and a description. A changed
+material is built or rendered again before the next review round (a greeting,
+email or referral with material render, never resume build), the reviewer
+first checks the build note is of the version it reviews, and every entry says so.
 """
 import contextlib
 import io
@@ -26,7 +29,8 @@ WORKFLOWS = {
     "cn-match": ("docs/cn/match.md", {"match": {"score", "validate", "save", "show", "list", "report"},
                                       "jd": {"list", "show"}, "profile": {"validate", "show"}}),
     "cn-resume": ("docs/cn/resume-workflow.md", {
-        "material": {"validate"}, "resume": {"build"}, "review": {"draft", "validate", "show"},
+        "material": {"validate", "template", "render"}, "resume": {"build"},
+        "review": {"draft", "validate", "show"},
         "jd": {"list", "show"}, "profile": {"validate", "show"}, "match": {"list", "show"}}),
     "cn-application": ("docs/cn/applications.md", {
         "application": {"record", "submit", "status", "reply", "note", "followup", "void", "show", "list",
@@ -115,7 +119,9 @@ class EntryPoints(unittest.TestCase):
 
 
 class ReviewerAgents(unittest.TestCase):
-    """The review subagents (review-checklist.md §5.1): read-only, offline, pointing at the workflow."""
+    """The review subagents (review-checklist.md §5.1): no Edit, Write or web tools, pointing at the workflow.
+    Their Bash still runs whatever the allow list lets through, writing commands included; only the
+    workflow text keeps them to the read ones, which these tests do not check."""
 
     def each(self):
         for name, workflow in REVIEWERS.items():
@@ -127,10 +133,46 @@ class ReviewerAgents(unittest.TestCase):
             self.assertIn(f"name: {agent.stem}", frontmatter(agent))
             self.assertIn(workflow, read(agent))
 
-    def test_the_agent_cannot_write_or_go_online(self):
+    def test_the_agent_has_no_edit_write_or_web_tools(self):
         for agent, _ in self.each():
             tools = next(line for line in frontmatter(agent) if line.startswith("tools:"))
             self.assertEqual({t.strip() for t in tools.split(":", 1)[1].split(",")}, {"Read", "Glob", "Grep", "Bash"})
+
+
+class ChangedMaterials(unittest.TestCase):
+    """After a change, a material's files are made again before the next review round, and the reviewer first
+    checks they are of the version it reviews (resume-workflow.md sections 2 and 5). Codex B on #127 (0faf0ed):
+    section 3 said to rerun resume build, which takes only a CV, so a changed greeting kept its old text file
+    while a round-2 review of the new version still validated."""
+
+    def step(self, section: str, title: str) -> str:
+        """A numbered step of a section of the workflow, with its indented lines."""
+        text = read(REPO / "docs/cn/resume-workflow.md").split(f"\n## {section}.", 1)[1].split("\n## ", 1)[0]
+        return re.search(rf"^\d+\. \*\*{title}\*\*.*(?:\n   .*)*", text, re.M).group(0)
+
+    def test_a_changed_message_is_rendered_again(self):
+        step = self.step("5", "修改")
+        self.assertEqual(re.findall(r"python -m jobsearch_cn (\w+ \w+)", step), ["material validate", "material render"])
+        self.assertIn("--output", step)
+
+    def test_the_reviewer_first_checks_the_files_are_of_this_version(self):
+        agent = read(REPO / ".claude" / "agents" / "cn-resume-reviewer.md")
+        for where, text in (("resume", self.step("2", "机器检查")), ("message", self.step("5", "审核")),
+                            ("agent", agent)):
+            with self.subTest(where=where):
+                for word in ("build_note", "material_hash", "review draft"):
+                    self.assertIn(word, text)
+        self.assertIn("resume-<n>.build.json", self.step("2", "机器检查"))
+        for command in ("resume build", "material render --output"):
+            self.assertIn(command, agent.split("**Out-of-date files.**", 1)[1])
+
+    def test_every_entry_says_to_rerun_what_made_the_files(self):
+        for entry in [REPO / d / "cn-resume" / "SKILL.md" for d in SKILL_DIRS] + [REPO / "AGENTS.md"]:
+            with self.subTest(entry=entry.relative_to(REPO).as_posix()):
+                text = read(entry)
+                body = text.split("---", 2)[2] if entry.name == "SKILL.md" else text
+                for command in ("resume build", "material render --output"):
+                    self.assertIn(command, body)
 
 
 class DshEntryPoints(unittest.TestCase):
