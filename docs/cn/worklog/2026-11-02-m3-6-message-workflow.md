@@ -193,3 +193,45 @@ M4-1（投递记录，Claude A）投出时要核对：实际发出的文件，�
 **还没定的**
 
 - 无待裁定的问题。`notes.md` 用于沟通草稿，第一版不做，规划者记在路线图待办里。
+
+## 实现计划（2026-11-04，Claude C，未写代码）
+
+基线：本分支已合入 origin/master（a08cade，含 M3-4 #123、M4-1a）。现状要点：`review.KINDS` 只有 `resume-review`；`review draft` 遇到沟通材料直接报错（cli.py `cmd_review_draft`，注释写"由 M3-6 定"）；`resume build` 的说明文件由 cli.py 里写 `resume-<n>.build.json` 的函数生成，格式见 `applications.md` 第 12 节。
+
+### 步骤（每步一个提交，跑三项检查后再进下一步）
+
+1. **`material render --output`**（`cli.py`、`material`/`messages` 渲染不动）
+   - 写 `<数据目录>/messages/<岗位id>/<kind>-<n>.txt`，临时文件再改名，目标或其上级是链接时拒绝（复用 `resume build` 的写法）。
+   - 旁边写 `<kind>-<n>.build.json`，字段照 `applications.md` §12（`material_hash`、`profile_hash`、生成时间、`files` 的摘要），抽出 `resume build` 现有的写说明文件函数共用，不复制一份。
+   - 标准输出 `{"text", "chars", "warnings", "build"}`，无正文。不加 `--output` 行为不变。
+   - 检查 `applications.py` 的投出核对能找到 `messages/` 下的说明文件（§12 "别的名字找去掉扩展名加 .build.json"已覆盖，补测试即可；`--material` 分支现在只找 `resumes/`，见问题 2）。
+2. **Review v1 扩到三种沟通材料**（`review.py`、`cli.py`、`docs/cn/review-format.md`）
+   - `KINDS` 加 `greeting-review`、`email-review`、`referral-review`（或保留单一 kind、按材料种类判断，见问题 1）；文件名 `review-<kind>-<n>-r<k>.json`；`path` 收 `segments[i].text`、`subject.text`；`coverage` 必须是 `[]`；G1–G5 进条目表。
+   - `cmd_review_draft` 去掉对沟通材料的拒绝，走同一个 `_check_material`；对沟通材料只出 E1/E3 警告，不出覆盖表。
+3. **审核清单**（`docs/cn/review-checklist.md`）
+   - 加 G 类 G1–G5（措辞照设计第 3 节），写明适用/不适用的旧条目。
+   - #123 留下的审核项并进 G 类（暂定 G6–G8，见问题 3）：手写的学校、学历、公司、岗位名、姓名；`evidence` 段不引档案条目；手写链接；规则认不出的中文数字到岗说法。这些是机器拦不住的，标 `审核`。
+4. **工作流文档和入口**（`docs/cn/resume-workflow.md` 新增"沟通草稿"一节；`.claude/skills/cn-resume/SKILL.md`、`.dsh/skills/cn-resume/SKILL.md` 描述和触发词；`.claude/agents/cn-resume-reviewer.md`；`AGENTS.md`）
+   - 写入 #120 裁定 1、4、5：Codex 沙盒里 build/render 的说明；D5 留白与材料改不了的必改项怎么处理；交付提醒优先附 PDF。
+   - 审核者不运行 `material render`、`resume build`。
+   - 顺带改 #116 P3：审核子代理说明和相关测试名把"工具层保证"说过了头的地方，改成与实际一致的说法（只改措辞和测试名，不改行为）。
+5. **`tools/security_guards.py` 注释**："material … only print"改成说明 `render --output` 会写 `data/messages/`。只改注释，不改规则——**需经理本人同意，请规划者去问**；未获同意前这一步不做，其余照常。
+6. **手动走一遍**（临时数据目录，tech-m3 夹具）：单独起草打招呼语 → 子代理审核 → render --output → 交付；再走"简历通过后起草邮件"看 G3 和附件句。记进本文件。
+
+### 测试
+
+- 新增/扩充 `tests/test_cn_messages.py`（不动现有带 `m34_` 前缀的测试名）、`tests/test_cn_review.py`、`tests/test_cn_applications.py`、`tests/test_cn_agent_entry.py`：
+  - `--output` 写对位置、内容等于不带 `--output` 的输出；链接拒绝；标准输出无正文、无手机号邮箱；
+  - 说明文件 `material_hash` 等于 `review draft` 给的值；改材料再渲染，hash 变；投出核对能用上它；
+  - `review draft`/`validate` 接受三种沟通材料，`coverage` 非空报错，路径 `segments[i].text` 合法、越界报错，文件名规则；
+  - `review draft` 与 `material validate` 对同一份沟通材料结论一致；
+  - 入口测试跟着描述、触发词、`AGENTS.md` 改。
+- 只用公开虚构夹具；不读留出样例。
+
+### 要规划者裁定的问题
+
+1. **审核结果的 `kind`**：三个新值（`greeting-review` 等），还是保留 `resume-review` 改名为通用的 `material-review`（会动已有审核文件的兼容）？我建议加三个新值，旧值不变。
+2. **投出核对找沟通草稿的说明文件**：`applications` 给了 `--material` 时现在只去 `resumes/<岗位id>/` 找。沟通材料的说明文件在 `messages/<岗位id>/`。由本项改 `applications.py` 按材料种类找（Claude A 的代码，PR 里写明），还是交回 Claude A？我建议本项改，改动小。
+3. **#123 的四项编号**：并进 G 类续编 G6–G8（建议），还是归进已有的 A3/C 类？
+4. **security_guards 注释**：请规划者代问经理是否同意只改那一句注释。
+5. **#116 P3 的范围**：我按"审核子代理说明 + 对应测试名"理解；如果规划者手上有具体条目清单，请发我，免得改多或改少。
