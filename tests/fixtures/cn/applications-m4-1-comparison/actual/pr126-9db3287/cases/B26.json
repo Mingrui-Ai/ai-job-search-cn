@@ -1,0 +1,105 @@
+{
+  "id": "B26",
+  "title": "Agent 入口",
+  "strict_pass": true,
+  "ruling_pass": true,
+  "crash": null,
+  "checks": [
+    {
+      "check": "entry points to shared workflow: .claude/skills/cn-application/SKILL.md",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "entry points to shared workflow: .dsh/skills/cn-application/SKILL.md",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "entry points to shared workflow: AGENTS.md",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "entry test includes cn-application",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "inspection check: tools/lint_skills.py",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "inspection check: -m unittest tests.test_cn_agent_entry -q",
+      "ok": true,
+      "detail": "----------------------------------------------------------------------\nRan 11 tests in 0.538s\n\nOK\n"
+    }
+  ],
+  "ruling_checks": [
+    {
+      "check": "shared workflow contains --preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "shared workflow contains 用户明确同意",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "shared workflow contains --request-id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "shared workflow contains --actor",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "shared workflow contains codex",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "shared workflow contains /outcome",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "shared workflow contains /apply",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "impl_observed": [
+    {
+      "item": "approved entry count",
+      "observed": "3"
+    }
+  ],
+  "steps": [],
+  "states": [],
+  "commands": [
+    {
+      "argv": [
+        "tools/lint_skills.py"
+      ],
+      "exit": 0,
+      "stdout": "lint_skills: OK (14 skills, 12 commands, settings.json)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "-m",
+        "unittest",
+        "tests.test_cn_agent_entry",
+        "-q"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 11 tests in 0.538s\n\nOK\n"
+    }
+  ]
+}

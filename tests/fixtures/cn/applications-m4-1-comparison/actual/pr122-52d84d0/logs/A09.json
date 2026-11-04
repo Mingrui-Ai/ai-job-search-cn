@@ -1,0 +1,15 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_cb7cb4d6e51d",
+      "--channel",
+      "portal",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"not_found\",\r\n  \"message\": \"job_cb7cb4d6e51d is not in the job store; import the JD first (jd parse --save), then record the application\"\r\n}\r\n"
+  }
+]

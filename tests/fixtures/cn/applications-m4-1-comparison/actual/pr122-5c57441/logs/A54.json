@@ -1,0 +1,24 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--submitted",
+      "--on",
+      "2026-10-28",
+      "--material",
+      "<work>\\A54\\data\\materials\\job_fa26c5d52ff7\\resume-9.json",
+      "--sent",
+      "<work>\\A54\\data\\resumes\\job_fa26c5d52ff7\\resume-1.pdf",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"<work>\\\\A54\\\\data\\\\materials\\\\job_fa26c5d52ff7\\\\resume-9.json is not a valid material; run material validate\",\r\n  \"errors\": [\r\n    \"experience[0].ref: no profile entry with id 'exp-404'\"\r\n  ]\r\n}\r\n"
+  }
+]

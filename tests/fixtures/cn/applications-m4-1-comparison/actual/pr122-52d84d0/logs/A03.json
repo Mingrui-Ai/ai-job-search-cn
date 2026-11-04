@@ -1,0 +1,39 @@
+[
+  {
+    "argv": [
+      "application",
+      "show",
+      "app_00000000000000000000000000000001"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"not_found\",\r\n  \"message\": \"no application app_00000000000000000000000000000001: there are no application records yet\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "list"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"applications\": [],\r\n  \"note\": \"no application records yet\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "validate"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"valid\": true,\r\n  \"errors\": [],\r\n  \"warnings\": [\r\n    \"no application records yet\"\r\n  ],\r\n  \"orphans\": []\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "export"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"schema_version\": 1,\r\n  \"exported_at\": \"2026-11-03T16:37:47Z\",\r\n  \"applications\": []\r\n}\r\n",
+    "stderr": ""
+  }
+]

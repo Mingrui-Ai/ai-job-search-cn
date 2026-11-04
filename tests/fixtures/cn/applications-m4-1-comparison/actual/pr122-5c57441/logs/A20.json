@@ -1,0 +1,37 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_cb7cb4d6e51d",
+      "--channel",
+      "referral",
+      "--historical",
+      "--submitted",
+      "--on",
+      "2026-09-20",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_cb7cb4d6e51d\",\r\n        \"record_origin\": \"historical\",\r\n        \"channel\": {\r\n          \"kind\": \"referral\",\r\n          \"platform\": null\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    },\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"submitted\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-09-20\",\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"referral\",\r\n          \"platform\": null\r\n        },\r\n        \"material_version_ids\": [],\r\n        \"sent_file_refs\": [],\r\n        \"materials_check\": null\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_4cde32c16f2c6444a929e390e16f214a\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"applied\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": [\r\n    \"job_cb7cb4d6e51d is not in the job store; the historical record keeps only its id\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_cb7cb4d6e51d",
+      "--channel",
+      "referral",
+      "--historical",
+      "--submitted",
+      "--on",
+      "2026-09-20",
+      "--request-id",
+      "req_4cde32c16f2c6444a929e390e16f214a"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_fc79dc4daf4070bf451342e04972723d\",\r\n    \"job_id\": \"job_cb7cb4d6e51d\",\r\n    \"record_origin\": \"historical\",\r\n    \"channel\": {\r\n      \"kind\": \"referral\",\r\n      \"platform\": null\r\n    },\r\n    \"created_at\": \"2026-11-03T15:03:16Z\",\r\n    \"updated_at\": \"2026-11-03T15:03:16Z\",\r\n    \"revision\": 2,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-09-20\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_01176f416acd2e8b80813954d9a2b53e\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_4cde32c16f2c6444a929e390e16f214a\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T15:03:16Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"referral\",\r\n            \"platform\": null\r\n          },\r\n          \"job_id\": \"job_cb7cb4d6e51d\",\r\n          \"record_origin\": \"historical\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_4790dfeed48660d2501e88b436bb42ce\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_4cde32c16f2c6444a929e390e16f214a\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-09-20\",\r\n        \"recorded_at\": \"2026-11-03T15:03:16Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"referral\",\r\n            \"platform\": null\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_01176f416acd2e8b80813954d9a2b53e\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_4cde32c16f2c6444a929e390e16f214a\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T15:03:16Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"referral\",\r\n          \"platform\": null\r\n        },\r\n        \"job_id\": \"job_cb7cb4d6e51d\",\r\n        \"record_origin\": \"historical\"\r\n      },\r\n      \"voided_by\": null\r\n    },\r\n    {\r\n      \"event_id\": \"evt_4790dfeed48660d2501e88b436bb42ce\",\r\n      \"seq\": 2,\r\n      \"request_id\": \"req_4cde32c16f2c6444a929e390e16f214a\",\r\n      \"type\": \"submitted\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-09-20\",\r\n      \"recorded_at\": \"2026-11-03T15:03:16Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"referral\",\r\n          \"platform\": null\r\n        },\r\n        \"material_version_ids\": [],\r\n        \"materials_check\": null,\r\n        \"sent_file_refs\": []\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_4cde32c16f2c6444a929e390e16f214a\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": [\r\n    \"job_cb7cb4d6e51d is not in the job store; the historical record keeps only its id\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  }
+]

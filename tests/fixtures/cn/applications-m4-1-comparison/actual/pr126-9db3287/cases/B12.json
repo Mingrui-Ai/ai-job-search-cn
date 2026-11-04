@@ -1,0 +1,73 @@
+{
+  "id": "B12",
+  "title": "list --due 不带 --as-of",
+  "strict_pass": true,
+  "ruling_pass": true,
+  "crash": null,
+  "checks": [
+    {
+      "check": "step 1 list data unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "missing database not created",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "ruling_checks": [
+    {
+      "check": "plan 2.3 default date and empty lists",
+      "ok": true,
+      "detail": {
+        "as_of": "2026-11-04",
+        "due": [],
+        "unset": [],
+        "note": "no application records yet"
+      }
+    }
+  ],
+  "impl_observed": [
+    {
+      "item": "step 1 list",
+      "observed": "{'exit': 0, 'error': None, 'output': {'as_of': '2026-11-04', 'due': [], 'unset': [], 'note': 'no application records yet'}}"
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "frozen_command": "list --due",
+      "expect": {
+        "result": "impl",
+        "exit": "impl"
+      },
+      "exit": 0,
+      "error": null,
+      "output": {
+        "as_of": "2026-11-04",
+        "due": [],
+        "unset": [],
+        "note": "no application records yet"
+      }
+    }
+  ],
+  "states": [
+    null
+  ],
+  "commands": [
+    {
+      "argv": [
+        "application",
+        "list",
+        "--due",
+        "--data-dir",
+        "<output>\\work\\B12\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"as_of\": \"2026-11-04\",\r\n  \"due\": [],\r\n  \"unset\": [],\r\n  \"note\": \"no application records yet\"\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    }
+  ]
+}

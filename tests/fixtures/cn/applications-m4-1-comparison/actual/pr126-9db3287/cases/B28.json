@@ -1,0 +1,217 @@
+{
+  "id": "B28",
+  "title": "文档与命令一致",
+  "strict_pass": true,
+  "ruling_pass": true,
+  "crash": null,
+  "checks": [
+    {
+      "check": "documented command list nonempty",
+      "ok": true,
+      "detail": "['backup', 'export', 'followup', 'list', 'note', 'record', 'reply', 'show', 'status', 'submit', 'validate', 'void']"
+    },
+    {
+      "check": "documented command --help: backup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: export",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: followup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: list",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: note",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: record",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: reply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: show",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: submit",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: validate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "documented command --help: void",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "handoff links application workflow",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "ruling_checks": [],
+  "impl_observed": [],
+  "steps": [],
+  "states": [],
+  "commands": [
+    {
+      "argv": [
+        "application",
+        "backup",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application backup [-h] [--data-dir DATA_DIR]\r\n\r\n把数据库的一致快照和它登记的归档文件复制到 <数据目录>/applications/backups/<UTC 时间>/，旁边写\r\nmanifest.json。不改任何记录。\r\n\r\noptions:\r\n  -h, --help           show this help message and exit\r\n  --data-dir DATA_DIR  数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "export",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application export [-h] [--data-dir DATA_DIR]\r\n                                                 [--out OUT]\r\n                                                 [application_ids ...]\r\n\r\n导出投递记录 JSON；不写 --out 时打印。--out 只收文件名，写到 <数据目录>/applications/exports/。\r\n\r\npositional arguments:\r\n  application_ids      只导出这些投递；省略时导出全部\r\n\r\noptions:\r\n  -h, --help           show this help message and exit\r\n  --data-dir DATA_DIR  数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n  --out OUT            文件名（不是路径），以 .json 结尾\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "followup",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application followup [-h] [--data-dir DATA_DIR]\r\n                                                   (--preview | --request-id REQUEST_ID)\r\n                                                   [--actor {user,claude_code,codex,dsh}]\r\n                                                   --expected-revision\r\n                                                   EXPECTED_REVISION\r\n                                                   (--due DUE | --cancel)\r\n                                                   application_id\r\n\r\n设置跟进日期（今天或以后，Asia/Shanghai），或取消。只用于已投出、没结束的投递。\r\n\r\npositional arguments:\r\n  application_id        投递 id\r\n\r\noptions:\r\n  -h, --help            show this help message and exit\r\n  --data-dir DATA_DIR   数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n  --preview             只输出要写的事件和一个 request_id，不写任何东西\r\n  --request-id REQUEST_ID\r\n                        预览给的 request_id：写入；同一个 id 重试不会重复写\r\n  --actor {user,claude_code,codex,dsh}\r\n                        谁在记录（默认 user；Agent 写自己的名字）\r\n  --expected-revision EXPECTED_REVISION\r\n                        show 或 list 给的 revision\r\n  --due DUE             跟进日期：YYYY-MM-DD\r\n  --cancel              取消跟进日期\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "list",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application list [-h] [--data-dir DATA_DIR]\r\n                                               [--status {drafted,applied,interview,offer,no_response,hired,rejected,withdrawn,offer_declined} [{drafted,applied,interview,offer,no_response,hired,rejected,withdrawn,offer_declined} ...]]\r\n                                               [--job JOB] [--due]\r\n                                               [--as-of AS_OF]\r\n\r\n投递列表，最近投出的在前。只读。\r\n\r\noptions:\r\n  -h, --help            show this help message and exit\r\n  --data-dir DATA_DIR   数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n  --status {drafted,applied,interview,offer,no_response,hired,rejected,withdrawn,offer_declined} [{drafted,applied,interview,offer,no_response,hired,rejected,withdrawn,offer_declined} ...]\r\n                        只列这些状态\r\n  --job JOB             只列这个岗位的投递\r\n  --due                 待跟进：已投出、没结束、跟进日期已到的（due）和没设跟进日期的（unset）\r\n  --as-of AS_OF         和 --due 一起用：按这一天算（YYYY-MM-DD；默认 Asia/Shanghai 的今天）\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "note",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application note [-h] [--data-dir DATA_DIR]\r\n                                               (--preview | --request-id REQUEST_ID)\r\n                                               [--actor {user,claude_code,codex,dsh}]\r\n                                               --expected-revision\r\n                                               EXPECTED_REVISION --text TEXT\r\n                                               application_id\r\n\r\n加一条备注，任何状态都可以。\r\n\r\npositional arguments:\r\n  application_id        投递 id\r\n\r\noptions:\r\n  -h, --help            show this help message and exit\r\n  --data-dir DATA_DIR   数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n  --preview             只输出要写的事件和一个 request_id，不写任何东西\r\n  --request-id REQUEST_ID\r\n                        预览给的 request_id：写入；同一个 id 重试不会重复写\r\n  --actor {user,claude_code,codex,dsh}\r\n                        谁在记录（默认 user；Agent 写自己的名字）\r\n  --expected-revision EXPECTED_REVISION\r\n                        show 或 list 给的 revision\r\n  --text TEXT           备注（≤300 字）\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "record",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application record [-h] [--data-dir DATA_DIR]\r\n                                                 (--preview | --request-id REQUEST_ID)\r\n                                                 [--actor {user,claude_code,codex,dsh}]\r\n                                                 --channel\r\n                                                 {portal,company_site,email,referral,campus,offline,other,unknown}\r\n                                                 [--platform PLATFORM]\r\n                                                 [--submitted] [--historical]\r\n                                                 [--on ON | --at AT]\r\n                                                 [--material MATERIAL]\r\n                                                 [--sent FILE [FILE ...]]\r\n                                                 [--profile PROFILE]\r\n                                                 job_id\r\n\r\n新建一次投递。不带 --submitted 是 drafted；带了是 applied。\r\n\r\npositional arguments:\r\n  job_id                岗位 id（岗位库里的）\r\n\r\noptions:\r\n  -h, --help            show this help message and exit\r\n  --data-dir DATA_DIR   数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n  --preview             只输出要写的事件和一个 request_id，不写任何东西\r\n  --request-id REQUEST_ID\r\n                        预览给的 request_id：写入；同一个 id 重试不会重复写\r\n  --actor {user,claude_code,codex,dsh}\r\n                        谁在记录（默认 user；Agent 写自己的名字）\r\n  --channel {portal,company_site,email,referral,campus,offline,other,unknown}\r\n                        投递渠道\r\n  --platform PLATFORM   平台名，如 BOSS直聘（≤40 字）\r\n  --submitted           已经投出\r\n  --historical          补录以前的投递（要带 --submitted；可以没有材料、日期未知）\r\n  --on ON               只知道日期：YYYY-MM-DD\r\n  --at AT               知道时刻：必须带时区，如 2026-11-02T14:30+08:00\r\n  --material MATERIAL   投出的这份简历的材料文件（data/materials/<岗位id>/resume-<n>.json）\r\n  --sent FILE [FILE ...]\r\n                        实际发出的文件（PDF、Word），会复制归档\r\n  --profile PROFILE     检查材料用的档案；默认为 <数据目录>/profile/profile.json\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "reply",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application reply [-h] [--data-dir DATA_DIR]\r\n                                                (--preview | --request-id REQUEST_ID)\r\n                                                [--actor {user,claude_code,codex,dsh}]\r\n                                                --expected-revision\r\n                                                EXPECTED_REVISION --summary\r\n                                                SUMMARY [--on ON | --at AT]\r\n                                                application_id\r\n\r\n记收到的回复（不改状态）。改了状态的回复用 status --reason 记。\r\n\r\npositional arguments:\r\n  application_id        投递 id\r\n\r\noptions:\r\n  -h, --help            show this help message and exit\r\n  --data-dir DATA_DIR   数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n  --preview             只输出要写的事件和一个 request_id，不写任何东西\r\n  --request-id REQUEST_ID\r\n                        预览给的 request_id：写入；同一个 id 重试不会重复写\r\n  --actor {user,claude_code,codex,dsh}\r\n                        谁在记录（默认 user；Agent 写自己的名字）\r\n  --expected-revision EXPECTED_REVISION\r\n                        show 或 list 给的 revision\r\n  --summary SUMMARY     回复说了什么（≤300 字）\r\n  --on ON               只知道日期：YYYY-MM-DD\r\n  --at AT               知道时刻：必须带时区，如 2026-11-02T14:30+08:00\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "show",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application show [-h] [--data-dir DATA_DIR]\r\n                                               application_id\r\n\r\n一条投递的完整内容，格式同导出。只读。\r\n\r\npositional arguments:\r\n  application_id       投递 id\r\n\r\noptions:\r\n  -h, --help           show this help message and exit\r\n  --data-dir DATA_DIR  数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "status",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application status [-h] [--data-dir DATA_DIR]\r\n                                                 (--preview | --request-id REQUEST_ID)\r\n                                                 [--actor {user,claude_code,codex,dsh}]\r\n                                                 --expected-revision\r\n                                                 EXPECTED_REVISION\r\n                                                 [--reason REASON]\r\n                                                 [--on ON | --at AT]\r\n                                                 application_id\r\n                                                 {applied,interview,offer,no_response,hired,rejected,withdrawn,offer_declined}\r\n\r\n按 docs/cn/applications.md §4 的状态表改状态。\r\n\r\npositional arguments:\r\n  application_id        投递 id\r\n  {applied,interview,offer,no_response,hired,rejected,withdrawn,offer_declined}\r\n                        新状态\r\n\r\noptions:\r\n  -h, --help            show this help message and exit\r\n  --data-dir DATA_DIR   数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n  --preview             只输出要写的事件和一个 request_id，不写任何东西\r\n  --request-id REQUEST_ID\r\n                        预览给的 request_id：写入；同一个 id 重试不会重复写\r\n  --actor {user,claude_code,codex,dsh}\r\n                        谁在记录（默认 user；Agent 写自己的名字）\r\n  --expected-revision EXPECTED_REVISION\r\n                        show 或 list 给的 revision\r\n  --reason REASON       原因或对方说了什么（≤300 字）\r\n  --on ON               只知道日期：YYYY-MM-DD\r\n  --at AT               知道时刻：必须带时区，如 2026-11-02T14:30+08:00\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "submit",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application submit [-h] [--data-dir DATA_DIR]\r\n                                                 (--preview | --request-id REQUEST_ID)\r\n                                                 [--actor {user,claude_code,codex,dsh}]\r\n                                                 --expected-revision\r\n                                                 EXPECTED_REVISION\r\n                                                 [--channel {portal,company_site,email,referral,campus,offline,other,unknown}]\r\n                                                 [--platform PLATFORM]\r\n                                                 [--on ON | --at AT]\r\n                                                 [--material MATERIAL]\r\n                                                 [--sent FILE [FILE ...]]\r\n                                                 [--profile PROFILE]\r\n                                                 application_id\r\n\r\n把一条 drafted 的投递记为已投出（applied）。\r\n\r\npositional arguments:\r\n  application_id        投递 id\r\n\r\noptions:\r\n  -h, --help            show this help message and exit\r\n  --data-dir DATA_DIR   数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n  --preview             只输出要写的事件和一个 request_id，不写任何东西\r\n  --request-id REQUEST_ID\r\n                        预览给的 request_id：写入；同一个 id 重试不会重复写\r\n  --actor {user,claude_code,codex,dsh}\r\n                        谁在记录（默认 user；Agent 写自己的名字）\r\n  --expected-revision EXPECTED_REVISION\r\n                        show 或 list 给的 revision\r\n  --channel {portal,company_site,email,referral,campus,offline,other,unknown}\r\n                        实际渠道和起草时不同时写\r\n  --platform PLATFORM   实际平台名\r\n  --on ON               只知道日期：YYYY-MM-DD\r\n  --at AT               知道时刻：必须带时区，如 2026-11-02T14:30+08:00\r\n  --material MATERIAL   投出的这份简历的材料文件（data/materials/<岗位id>/resume-<n>.json）\r\n  --sent FILE [FILE ...]\r\n                        实际发出的文件（PDF、Word），会复制归档\r\n  --profile PROFILE     检查材料用的档案；默认为 <数据目录>/profile/profile.json\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "validate",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application validate [-h] [--data-dir DATA_DIR]\r\n                                                   [--backup NAME]\r\n\r\n检查整库：事件连续、状态重放一致、归档文件在且摘要对、有没有没登记的孤立文件。通过时退出码 0，不通过时退出码 1。只读。\r\n\r\noptions:\r\n  -h, --help           show this help message and exit\r\n  --data-dir DATA_DIR  数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n  --backup NAME        改为检查 applications/backups/ 下的这份备份\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "void",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: python -m jobsearch_cn application void [-h] [--data-dir DATA_DIR]\r\n                                               (--preview | --request-id REQUEST_ID)\r\n                                               [--actor {user,claude_code,codex,dsh}]\r\n                                               --expected-revision\r\n                                               EXPECTED_REVISION --reason\r\n                                               REASON\r\n                                               application_id\r\n\r\n作废最近一条还能作废的事件：不删除，只标记；created 和作废事件本身不能作废。\r\n\r\npositional arguments:\r\n  application_id        投递 id\r\n\r\noptions:\r\n  -h, --help            show this help message and exit\r\n  --data-dir DATA_DIR   数据目录（默认为仓库下的 data/，或环境变量 JOBSEARCH_CN_DATA_DIR）\r\n  --preview             只输出要写的事件和一个 request_id，不写任何东西\r\n  --request-id REQUEST_ID\r\n                        预览给的 request_id：写入；同一个 id 重试不会重复写\r\n  --actor {user,claude_code,codex,dsh}\r\n                        谁在记录（默认 user；Agent 写自己的名字）\r\n  --expected-revision EXPECTED_REVISION\r\n                        show 或 list 给的 revision\r\n  --reason REASON       为什么作废（≤300 字）\r\n",
+      "stderr": "",
+      "test_today_override": null
+    }
+  ]
+}

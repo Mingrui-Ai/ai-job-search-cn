@@ -1,0 +1,108 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_de8342f960b195f3b6eb7d4f4498dff1\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": []\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_de8342f960b195f3b6eb7d4f4498dff1"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_cf8860f8cd5d539fec2dca067111628a\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T15:06:05Z\",\r\n    \"updated_at\": \"2026-11-03T15:06:05Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_bd5d0723712ea2c36360c1cbcd50e082\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_de8342f960b195f3b6eb7d4f4498dff1\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T15:06:05Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_bd5d0723712ea2c36360c1cbcd50e082\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_de8342f960b195f3b6eb7d4f4498dff1\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T15:06:05Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_de8342f960b195f3b6eb7d4f4498dff1\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": []\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "export"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"schema_version\": 1,\r\n  \"exported_at\": \"2026-11-03T15:06:05Z\",\r\n  \"applications\": [\r\n    {\r\n      \"application_id\": \"app_cf8860f8cd5d539fec2dca067111628a\",\r\n      \"job_id\": \"job_fa26c5d52ff7\",\r\n      \"record_origin\": \"current\",\r\n      \"channel\": {\r\n        \"kind\": \"portal\",\r\n        \"platform\": \"示例招聘站\"\r\n      },\r\n      \"created_at\": \"2026-11-03T15:06:05Z\",\r\n      \"updated_at\": \"2026-11-03T15:06:05Z\",\r\n      \"revision\": 1,\r\n      \"status\": \"drafted\",\r\n      \"submission\": {\r\n        \"confirmed\": false,\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"materials_recorded\": null,\r\n        \"materials_check\": null\r\n      },\r\n      \"next_followup_on\": null,\r\n      \"context_snapshot\": {\r\n        \"job\": null,\r\n        \"match\": null\r\n      },\r\n      \"material_versions\": [],\r\n      \"events\": [\r\n        {\r\n          \"event_id\": \"evt_bd5d0723712ea2c36360c1cbcd50e082\",\r\n          \"seq\": 1,\r\n          \"request_id\": \"req_de8342f960b195f3b6eb7d4f4498dff1\",\r\n          \"type\": \"created\",\r\n          \"occurred_at\": null,\r\n          \"occurred_on\": null,\r\n          \"recorded_at\": \"2026-11-03T15:06:05Z\",\r\n          \"actor\": \"user\",\r\n          \"source\": {\r\n            \"kind\": \"user\",\r\n            \"reference\": null\r\n          },\r\n          \"payload\": {\r\n            \"channel\": {\r\n              \"kind\": \"portal\",\r\n              \"platform\": \"示例招聘站\"\r\n            },\r\n            \"job_id\": \"job_fa26c5d52ff7\",\r\n            \"record_origin\": \"current\"\r\n          },\r\n          \"voided_by\": null\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "export",
+      "--out",
+      "v25.json"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"out\": \"<work>\\\\A67\\\\data\\\\applications\\\\exports\\\\v25.json\",\r\n  \"applications\": 1\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "export",
+      "--out",
+      "sub/v25.json"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--out 'sub/v25.json': give a file name ending in .json (letters, digits, . _ -), not a path; exports are written to <data dir>/applications/exports/\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "export",
+      "--out",
+      "../v25.json"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--out '../v25.json': give a file name ending in .json (letters, digits, . _ -), not a path; exports are written to <data dir>/applications/exports/\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "export",
+      "--out",
+      "..\\v25.json"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--out '..\\\\\\\\v25.json': give a file name ending in .json (letters, digits, . _ -), not a path; exports are written to <data dir>/applications/exports/\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "export",
+      "--out",
+      "<work>\\A67\\outside\\v25.json"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"invalid\",\r\n  \"message\": \"--out '<work>\\\\\\\\A67\\\\\\\\outside\\\\\\\\v25.json': give a file name ending in .json (letters, digits, . _ -), not a path; exports are written to <data dir>/applications/exports/\"\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "export",
+      "--out",
+      "v25.json"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"out\": \"<work>\\\\A67\\\\data\\\\applications\\\\exports\\\\v25.json\",\r\n  \"applications\": 1\r\n}\r\n",
+    "stderr": ""
+  }
+]
