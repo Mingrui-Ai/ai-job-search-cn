@@ -175,7 +175,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 | `education` | `requirements.education.min` | `education[]` 中最高的 `level` | 最高学历不低于最低要求；或 JD 写明学历不限（`none`），这时不看档案 | 低于最低要求 | JD 没写最低学历（只写"优先"也算没写），或档案没写学历 |
 | `days_per_week` | `requirements.days_per_week` | `availability.days_per_week` | 要求天数 ≤ 你能到岗的天数 | 要求天数更多 | 任一方没写（校招、社招岗位没写时是 `not_applicable`，见下） |
 | `min_months` | `requirements.min_months` | `availability.months` | 要求月数 ≤ 你能实习的月数 | 要求月数更多 | 任一方没写（同上） |
-| `location` | `cities`、`remote` | `availability.cities`、`acceptable_cities`、`remote_ok`、`relocate` | 城市有交集（"上海"与"上海市"视为相同）；或 JD 可远程且你接受远程；或城市在你可以接受的城市里（附 `note`："杭州是你可以接受的城市，不是首选"）；或你愿意搬家（附 `note`） | 不在首选和可以接受的城市里，你明确不去其他城市（`relocate: false`），并且 JD 写明不支持远程或你明确不接受远程 | JD 或档案没写城市；或没有交集，但是否去其他城市没写，或能否远程两边都没有否定（包括两边都没写） |
+| `location` | `cities`、`remote` | `availability.cities`、`acceptable_cities`、`remote_ok`、`relocate`、`remote_unstated_as_conflict` | 城市有交集（"上海"与"上海市"视为相同）；或 JD 可远程且你接受远程；或城市在你可以接受的城市里（附 `note`："杭州是你可以接受的城市，不是首选"）；或你愿意搬家（附 `note`） | 不在首选和可以接受的城市里，你明确不去其他城市（`relocate: false`），并且 JD 写明不支持远程或你明确不接受远程；或者 JD 没写能否远程，而你打开了 `remote_unstated_as_conflict`（见下方说明） | JD 或档案没写城市；或没有交集，但是否去其他城市没写，或能否远程两边都没有否定（包括两边都没写） |
 | `employment_type` | `employment_type` | `target.employment_types` | 岗位类型在你的求职方向中 | 不在其中 | 任一方没写 |
 | `exclusions` | `title`、`company`、`cities` | `exclusions` | 没命中排除项 | 标题含排除关键词；公司名含排除的公司；工作城市全部在排除城市中 | 设了排除关键词或公司，但 JD 没写标题或公司 |
 | `interview` | `interview` | `availability.cities`、`acceptable_cities`、`interview_travel` | 线上面试，或可以选线上（`either`）；现场面试在意向城市内（首选和可以接受的两档都算，同地点检查；写了几个地点时有一个在内就算）；现场面试只在其他城市，你愿意去外地面试或没说（附 `note`"要去 X 面试，有路费和时间成本"）；档案没写意向城市（附 `note`，提醒看要不要出行） | 不判冲突 | JD 没写面试形式；或要现场面试（`onsite`、`mixed`），但没写在哪里；或现场面试只在其他城市，你暂时不去外地面试（`interview_travel: false`，M2-6f） |
@@ -187,6 +187,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 - 排除关键词**只匹配标题**。匹配正文容易误伤，例如正文写"本岗位不是外包"。
 - **面试和到岗时间**（M2-6c）是待确认的事项，不是门槛：大多数 JD 两项都不写，`unknown` 计入总结论的话，几乎所有岗位都会变成 `needs_check`。所以这两项的 `unknown` 不影响总结论，只出现在检查、评分的缺口和报告的待确认事项里；到岗时间明确冲突时照常判 `ineligible`。面试不判冲突，去外地面试的成本写在 `note` 里，由用户自己权衡；用户暂时不去外地面试时（M2-6f），只在外地现场面试的岗位判 `unknown`，提示投之前先问能不能线上面试，也不判冲突，因为 JD 写了面试地点不等于不能线上面试。工具不估计面试通过或入职成功的可能性。
 - 薪资不在过滤范围内，由评分（M2-4）处理。
+- **远程没写明按不符合**（M2-5 第二轮，经理意见书-007 第 1 条选 A）：大多数 JD 不写能否远程，所以默认"JD 没写能否远程"是一条出路，地点判 `unknown`（待确认）。用户把地点当硬性条件、不想看到这类岗位时，可以在档案里打开 `availability.remote_unstated_as_conflict`（默认关闭，示例档案不打开）。打开后，岗位城市不在首选和可以接受的城市里、你不去其他城市（`relocate: false`）、JD 又没写能否远程的，地点判 `conflict`，理由是"北京不在意向城市内，你不考虑异地；JD 未写明可远程，按你的设置视为不符合"，检查的 `profile` 里列出这个开关；总结论随之是 `ineligible`。`relocate` 没写或为 `true`、JD 写了可远程的，开关不起作用。评分的地点维度不受影响，照旧按城市给分。给用户讲结论时，说明这是按他的设置判的，JD 实际可能支持远程，想看这类岗位就关掉开关。
 
 #### 未知的理由
 
@@ -287,7 +288,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 }
 ```
 
-- `rules_version`：规则给出的结果变了就加 1，包括各项检查和总的结论、维度分数、列出的缺口，默认权重改变时也加 1。只改理由的措辞时不加：之前保存的记录保留旧理由，重新评分后更新；对这种旧记录运行 `match validate`，会报过滤和缺口与规则给出的不一致，重新评分即可。现在是 11（2：H18 的近义词；3：H16 的任选其一的技能；4：M2-6b 的地点维度和新的默认权重；5：M2-6c 的面试和到岗时间两项检查；6：H26 在词表的 data 组加上"统计分析"；7：H29 补充办公软件词条、同义组和 Word/Office 语境判别；8：H21 的版本号写法，例如 HTML5、Vue2.x、Python 3.10；9：M2-6e 的薪资分档；10：M2-6f 的去外地面试偏好；11：M2-5 第二轮修复，不分档时薪资也换算单位，技能词表补 Maven、Gradle、HTTP、TCP/IP、TCP、UDP、计算机网络、数据结构）。加 1 后，旧记录标为过期，重新评分时 Agent 补的内容清空，要重新补。
+- `rules_version`：规则给出的结果变了就加 1，包括各项检查和总的结论、维度分数、列出的缺口，默认权重改变时也加 1。只改理由的措辞时不加：之前保存的记录保留旧理由，重新评分后更新；对这种旧记录运行 `match validate`，会报过滤和缺口与规则给出的不一致，重新评分即可。现在是 11（2：H18 的近义词；3：H16 的任选其一的技能；4：M2-6b 的地点维度和新的默认权重；5：M2-6c 的面试和到岗时间两项检查；6：H26 在词表的 data 组加上"统计分析"；7：H29 补充办公软件词条、同义组和 Word/Office 语境判别；8：H21 的版本号写法，例如 HTML5、Vue2.x、Python 3.10；9：M2-6e 的薪资分档；10：M2-6f 的去外地面试偏好；11：M2-5 第二轮修复，不分档时薪资也换算单位，技能词表补 Maven、Gradle、HTTP、TCP/IP、TCP、UDP、计算机网络、数据结构，地点检查加"远程没写明按不符合"的开关）。加 1 后，旧记录标为过期，重新评分时 Agent 补的内容清空，要重新补。
 - `job_hash`、`profile_hash`：评分时岗位记录和档案的摘要，档案的摘要不含 `contact` 和 `target.weights`（M2-6d：Agent 的判断不依据权重，记录自己存着评分时的 `weights`）。岗位或档案改了，或者档案的权重和记录里的 `weights` 不同，`match list` 会把这条标为"过期"，需要重新评分。重新评分时，两个摘要和 `rules_version` 都没变就保留 Agent 已补的内容（只改了权重时也保留，只按新权重重算总分），有一样变了就清空 Agent 补充。
 - Agent 补充的维度必须有 `reason` 和 `evidence`：`jd` 是 JD 原文片段，必须逐字出现在岗位的 `raw_text` 里；`profile` 是档案条目的 id，必须存在。
 - `match validate` 检查结构、取值、分值范围和依据，并按上面的规则从各维度重新算出总分和等级，和记录不一致就报错。Agent 不能直接改总分。

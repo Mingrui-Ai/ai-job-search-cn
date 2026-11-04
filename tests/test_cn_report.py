@@ -369,6 +369,21 @@ class ReportFromSavedRecords(unittest.TestCase):
         self.assertIn("no saved match records", self.cli("match", "report", expect=1)["error"])
 
 
+class UnstatedRemote(unittest.TestCase):
+    def test_the_report_gives_the_users_setting_as_the_reason(self):
+        # M2-5 round 2: with availability.remote_unstated_as_conflict on, a JD silent on remote work in a city
+        # beyond the user's is ruled out, and the report says it is the user's own setting.
+        [job], _ = jd_parser.parse_text("后端开发实习生\n工作地点：北京\n熟悉 Java", now=NOW)
+        profile = json.loads((FIXTURES / "profile" / "tech" / "profile.json").read_text(encoding="utf-8"))
+        profile["availability"].update(cities=["深圳"], acceptable_cities=[], relocate=False,
+                                       remote_unstated_as_conflict=True)
+        record = score.score_job(job, profile, VOCABULARY, now=NOW)
+        self.assertEqual(record["filter"]["verdict"], match.INELIGIBLE)
+        self.assertTrue(report.conclusion(record).startswith("不符合硬性条件（冲突：地点）"), report.conclusion(record))
+        page = report.build([report.entry(record, job, False)], profile, "2026-11-05 09:00", VOCABULARY)
+        self.assertIn("JD 未写明可远程，按你的设置视为不符合", page)
+
+
 class FormAndPage(unittest.TestCase):
     """report.py on hand-made records: CSV escaping, HTML escaping, how what is open gets settled."""
 

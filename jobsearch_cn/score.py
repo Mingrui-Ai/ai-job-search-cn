@@ -37,7 +37,8 @@ SCHEMA_VERSION = 1
 # 10: an interview only on site outside the wanted cities is unknown, not a match, when the profile's
 #     availability.interview_travel is false (M2-6f).
 # 11: without tiers a salary in another unit is turned into the profile's as the tiers do; Maven, Gradle, HTTP,
-#     TCP/IP, TCP, UDP, 计算机网络 and 数据结构 join the skill vocabulary (M2-5 round 2).
+#     TCP/IP, TCP, UDP, 计算机网络 and 数据结构 join the skill vocabulary; the location check can take a JD
+#     silent on remote work as a conflict, availability.remote_unstated_as_conflict (M2-5 round 2).
 RULES_VERSION = 11
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary, location
 DEFAULT_WEIGHTS = {"skills": 30, "direction": 25, "experience": 25, "salary": 10, "location": 10}
