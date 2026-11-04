@@ -177,8 +177,15 @@ def _location(job, profile):
     # ruled out by one side. Remote unstated on both sides is still a way out.
     if relocate is False and (remote is False or remote_ok is False):
         return _item("location", CONFLICT, f"{where}不在意向城市内，且不能远程、不搬家", job, *fields, profile)
+    # The user's own setting (M2-5 round 2, 经理意见书-007): a JD silent on remote work is taken as on-site.
+    if relocate is False and remote is None and availability.get("remote_unstated_as_conflict") is True:
+        return _item("location", CONFLICT, f"{where}不在意向城市内，你不考虑异地；{UNSTATED_REMOTE}",
+                     job, fields[0], fields[1] + ("availability.remote_unstated_as_conflict",), profile)
     return _item("location", UNKNOWN, f"{where}不在意向城市内；{_ways_out(remote, remote_ok, relocate)}",
                  job, *fields, profile)
+
+
+UNSTATED_REMOTE = "JD 未写明可远程，按你的设置视为不符合"
 
 
 _JD_REMOTE = {None: "JD 没写能否远程", True: "JD 可远程", False: "JD 不支持远程"}
