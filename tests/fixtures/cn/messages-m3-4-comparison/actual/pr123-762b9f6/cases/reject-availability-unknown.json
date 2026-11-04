@@ -1,0 +1,75 @@
+{
+  "id": "reject-availability-unknown",
+  "setup": [
+    {
+      "argv": "profile validate --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "jd save <data>\\job-input.json --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002302\",\n      \"title\": \"数据清洗实习生\",\n      \"company\": \"示例留出乙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "material": {
+    "schema_version": 1,
+    "kind": "greeting",
+    "job_id": "job_000000002302",
+    "profile_hash": "04e64fbae4c0a66ba20b3b127dccac1ff74b0a8f793fe1474561b1c2857d8c39",
+    "created": "2026-11-01T08:00:00+08:00",
+    "direction": "data",
+    "template": "data/greeting@1",
+    "subject": null,
+    "segments": [
+      {
+        "slot": "body",
+        "text": "您好，我随时可以到岗。",
+        "refs": []
+      }
+    ]
+  },
+  "commands": [
+    {
+      "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: commits to a start date, days a week or a length of stay without citing 'availability'; write what the profile's availability says, and cite it\",\n    \"segments[0].text: '我随时可以到岗' promises when you can start; it is availability.start_date, which the profile does not give; leave it out, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: commits to a start date, days a week or a length of stay without citing 'availability'; write what the profile's availability says, and cite it\",\n    \"segments[0].text: '我随时可以到岗' promises when you can start; it is availability.start_date, which the profile does not give; leave it out, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: commits to a start date, days a week or a length of stay without citing 'availability'; write what the profile's availability says, and cite it\",\n    \"segments[0].text: '我随时可以到岗' promises when you can start; it is availability.start_date, which the profile does not give; leave it out, or ask the user to add it to the profile\",\n    \"segments: the required 'evidence' segment is missing\",\n    \"segments: the required 'closing' segment is missing\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "judgement": {
+    "expected": "reject",
+    "actual": "reject",
+    "pass": true,
+    "problems": [],
+    "error_categories": [
+      "unsupported_availability"
+    ],
+    "warning_categories": [],
+    "errors": [
+      "segments[0].text: commits to a start date, days a week or a length of stay without citing 'availability'; write what the profile's availability says, and cite it",
+      "segments[0].text: '我随时可以到岗' promises when you can start; it is availability.start_date, which the profile does not give; leave it out, or ask the user to add it to the profile"
+    ],
+    "warnings": [],
+    "rendered_codepoints": {},
+    "final_text_matches": null,
+    "offending_text": "随时可以到岗",
+    "offending_text_quoted_in_errors": true,
+    "builtin_template_control_same_errors": true
+  },
+  "setup_ok": true
+}

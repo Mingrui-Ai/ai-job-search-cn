@@ -1,5 +1,90 @@
 # 2026-11-03 · V23：M3-4 留出样例和 #123 的对照
 
+## 2026-11-04 复跑结论（Codex A）
+
+**对 #123 的 `762b9f62e95e78915bcb9cd6669d0ec13de26549`：75 个冻结场景按裁定通过 75/75，严格比较通过 72/75；扩展探针发现新 P1、P2 各一项，不能据此宣布 V23 整体验收通过。** 严格比较剩余 3 项都是规划者已列入待办的 a-6 套话警告。新增的 33 个裁定探针通过 28 个、失败 5 个，失败集中在下面两项新问题；探针不混进 75 的分母。
+
+### 依据、范围与证据
+
+- 按 #123 的 [V23 裁定](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/123#issuecomment-6608844037)、[代审裁定](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/123#issuecomment-6609267907)、[11-04 新裁定](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/123#issuecomment-6622522832) 判定：到岗时间只认 `{availability.start_date}`；天数、月数严格等于对应字段，至少、以上和区间不通过；a-8 一起复查。c-1 签名拆段、c-2 不考核错误引用片段，以及 b-1 至 b-8 已获确认。
+- 冻结提交 `eef00aeed249d0ecde36797e6c656a70b745640b` 的目录没有任何 diff；`verify_oracle.py` 在复跑前后通过，30 个冻结文件摘要一致。没有修改输入、期望、冻结清单或产品代码。
+- 被测实现用独立、干净的 detached 工作树；运行器校验完整 head，拒绝脏工作树。报告分支已合入 `origin/master` 的 `39f86c57b5542704579b730a77d092642f86a72e`。没有读取网关提醒列出的历史测试改动，也不转录相关旧方法名。
+- 全部 75 个场景和原有 40 个探针重跑；另加 33 个裁定探针，共 73 个探针。每次使用冻结的虚构档案和独立的临时 `--data-dir`，清除数据目录环境变量，未接触真实数据。
+- 新结果：[results.json](../../../tests/fixtures/cn/messages-m3-4-comparison/actual/pr123-762b9f6/results.json)、[逐场景记录](../../../tests/fixtures/cn/messages-m3-4-comparison/actual/pr123-762b9f6/cases/)、[probes.json](../../../tests/fixtures/cn/messages-m3-4-comparison/actual/pr123-762b9f6/probes.json)、[按裁定汇总](../../../tests/fixtures/cn/messages-m3-4-comparison/actual/pr123-762b9f6/adjudication.json)。首次 `pr123-2c84d96/` 输出保持原样。
+- 映射版本升为 2，只为新增诊断文字补充同一错误类别：微信号、代入后残留花括号、逐字段到岗检查。接口、正文适配和冻结判断不变；本次映射副本随输出保存。按裁定的汇总仅豁免三个指定场景的套话警告缺失，其他结论、类别、渲染和内置模板对照仍核对。
+
+### 冻结场景结果
+
+| 组 | 场景数 | 严格通过 | 按裁定通过 |
+| --- | --- | --- | --- |
+| 模板选择 | 30 | 30 | 30 |
+| 长度边界 | 13 | 13 | 13 |
+| 通过对照 | 6 | 6 | 6 |
+| 必须拒绝 | 22 | 22 | 22 |
+| 仅警告 | 4 | 1 | 4 |
+| 合计 | 75 | 72 | 75 |
+
+首次失败的 23 个全部复跑，20 个转为严格通过；剩下 `warn-cliche-greeting`、`warn-cliche-email`、`warn-referral-salary-and-cliche` 仅缺套话警告，属于已裁定不阻塞的 a-6（P3）。所有场景准备步骤成功；所有成功渲染的文字符合冻结文本的既定适配；45 个候选稿的内置模板对照均未发现除槽位之外的错误差别。
+
+### 原问题与指定探针
+
+| 项目 | 复跑结果 |
+| --- | --- |
+| a-1（原 P2） | design、market、finance、hr、general 的 15 个显式选择全部回退 default，输出模板和理由正确；未知方向仍退出 2 |
+| a-2（原 P1） | `x1-unknown-availability-cited`、`x1-tomorrow-cited` 均从 validate/render 退出 0 改为 1，错误明确指向到岗日期 |
+| a-3（原 P1） | `x2-months-from-date`、`x2-days-from-date` 均改为退出 1，分别指向 `availability.months`、`availability.days_per_week`；5 天、6 个月两个控制探针继续拒绝 |
+| a-4（原 P2） | 冻结微信号场景命中联系方式类别，无数字微信号的 `x7` 也拒绝 |
+| a-5（原 P2） | 家庭住址、病史两个场景均拒绝并命中敏感个人信息 |
+| a-6（P3 待办） | 三个套话场景仍缺警告；内推薪资警告保留，按裁定不阻塞 |
+| a-7（原 P3） | 替换值中残留花括号被拒；冻结记法控制探针 `x3`、`x4` 也拒绝 |
+| a-8（原 P3） | 冻结的“到岗安排尚待确认”通过；`x6` 及新增有引用／无引用两个控制探针均通过且原样渲染 |
+| b-1 至 b-8、c-1 | 原探针结论保留；占位符、模板方向、长度、job 引用、revision、notes 和拿错材料的退出码未回退；正文邮箱仍须拆入签名 |
+
+新增探针还确认：纯日期占位符和相等的阿拉伯数字／对应占位符能通过；手写相同或更晚日期、下周、尽快、随时不能通过；少于档案的天数／月数、不同字段占位符、3–4 天与 3–6 个月区间被拒；中文五天、两天、三个月、半年被拒；三项未知值无论手写数字还是用占位符都不能形成承诺。
+
+### 新问题（建议优先级，交规划者）
+
+**P1 · n-1：同句的到岗日期占位符使手写“明天”绕过检查。**
+
+- 探针 `r-date-mixed-placeholder`：虚构 tech 档案最早到岗日期 `2026-12-07`，正文 `可于{availability.start_date}或明天到岗。`，引用 `availability`。validate 退出 0、无警告；render 退出 0，输出 `可于2026年12月7日或明天到岗。`。
+- 对照：只有 `{availability.start_date}` 时通过；只有“明天”时拒绝。这里不是规则不认识的中文数字说法，而是已认识的时间被同句占位符豁免；违反 11-04“手写日期、随时、尽快、下周等一律不通过”的裁定，且会放出早于档案的承诺。
+- 位置：[`messages.py:439`](https://github.com/Mingrui-Ai/ai-job-search-cn/blob/762b9f62e95e78915bcb9cd6669d0ec13de26549/jobsearch_cn/messages.py#L439)。判断同句只要含 `{availability.start_date}`，就跳过所有其余时间表达的拒绝。应继续检查占位符以外的时间表达。
+
+**P2 · n-2：数值相等时，“至少／以上”仍被当作严格相等放行。**
+
+- 虚构 tech 档案每周 4 天、3 个月，四个探针均引用 `availability`，validate/render 都退出 0、无警告，正文原样输出：
+
+| 探针 | 正文 |
+| --- | --- |
+| `r-days-at-least-equal` | 每周可以至少到岗4天。 |
+| `r-days-above-equal` | 每周可以到岗4天以上。 |
+| `r-months-at-least-equal` | 可以至少实习3个月。 |
+| `r-months-above-equal` | 可以连续实习3个月以上。 |
+
+- 今天的裁定明确拒绝“至少”“区间”“以上”，这四条不符合。对照的无修饰等值通过、少值拒绝、不同端点的区间拒绝，说明只比较数值仍不足以满足裁定。
+- 位置：[`messages.py:54`](https://github.com/Mingrui-Ai/ai-job-search-cn/blob/762b9f62e95e78915bcb9cd6669d0ec13de26549/jobsearch_cn/messages.py#L54)、[`messages.py:522`](https://github.com/Mingrui-Ai/ai-job-search-cn/blob/762b9f62e95e78915bcb9cd6669d0ec13de26549/jobsearch_cn/messages.py#L522)。提取并比较数值，未拒绝范围修饰语。没有新增 P3；原 a-6 仍是已批准待办。
+
+### 复现与验证
+
+从报告分支根目录，以不存在的新输出目录运行：
+
+```powershell
+conda run --no-capture-output -n ai-job-search-cn python tests/fixtures/cn/messages-m3-4-holdout/verify_oracle.py
+conda run --no-capture-output -n ai-job-search-cn python tests/fixtures/cn/messages-m3-4-comparison/run_comparison.py --impl <762b9f6工作树> --output logs/v23-rerun
+conda run --no-capture-output -n ai-job-search-cn python tests/fixtures/cn/messages-m3-4-comparison/summarize_rerun.py logs/v23-rerun
+```
+
+运行器退出 0 只表示执行完成。`results.json` 保留严格判断，`adjudication.json` 单独列出三个已裁定的 a-6 豁免及新增探针的五个失败；`probes.json` 保存输入、准备检查、命令及 stdout/stderr。冻结文件不会因汇总而改变。
+
+- conda `ai-job-search-cn`：冻结校验、`lint_skills`、`security_guards` 通过；被测 head 的 `tests.test_cn_messages` 55 项通过。
+- 报告分支全量测试：`python -m unittest discover -s tests -t .` 共 1653 项，跳过 26 项，其余通过，零失败／错误，380.094 秒。被测 head 只重跑了上述 55 项沟通材料测试，没有把报告分支测试数冒充被测 head 的全量测试数。
+- 79 个新 JSON 均可解析，84 个交付文本通过 UTF-8、U+FFFD、本机用户名和盘符路径检查；`git diff --check` 通过，没有 `data/` 文件进入提交。
+- 遗留／下一步：由规划者处理新 P1 n-1、P2 n-2；修复后重跑相同探针。当前只交付验证证据和报告，不改 #123 实现、不自行合并。另见[本轮工作记录](2026-11-04-v23-rerun.md)。
+
+---
+
+## 首次对照记录（2026-11-03/04，保留原结论）
+
 结论：**75 个场景 52 个通过、23 个不通过，路线图 M3-4 的验收项"V23 对照通过"现在不满足。** 不通过的 23 个都有写明的原因：6 条看起来是实现的问题（a）；另有 2 条实现问题是同一规则换个写法才暴露的，不计入 75。8 条已批准的差别（b）都符合裁定，没有造成不通过。2 条期望本身可能要调整（c），没有造成不通过。没有改冻结文件，也没有改产品代码。
 
 本来是 Codex A 的活，Codex 服务 11-03 17:20 起断流，由 Claude 会话按规划者 cn-e3 的派活接手。

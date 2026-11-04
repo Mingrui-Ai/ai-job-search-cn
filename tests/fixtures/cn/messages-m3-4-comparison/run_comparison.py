@@ -19,7 +19,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 FROZEN = HERE.parent / "messages-m3-4-holdout"
-LOCKED_HEAD = "2c84d966c673550fae95ba6bdc46ba6606145f61"
+LOCKED_HEAD = "762b9f62e95e78915bcb9cd6669d0ec13de26549"
 CREATED = "2026-11-01T08:00:00+08:00"
 BODY_SLOTS = {"greeting": ["body"], "email": ["body", "signature"], "referral": ["body"]}
 UNBOUND = re.compile(r"\{\{(\w+)\}\}")
@@ -337,7 +337,7 @@ def run_probes(runner):
                         "exits": [c["exit"] for c in commands], "commands": commands})
 
     def check(probe_id, rule, context, segments, *, kind="greeting", overrides=(), subject=None, slots=True,
-              limits=None, revision=None, template=None, note=None):
+              limits=None, revision=None, template=None, note=None, expected_exit=None):
         data, _, job, setup = runner.data_dir(context, overrides)
         if slots:
             runner.write_template(data, context, revision=revision, limits=limits)
@@ -349,6 +349,11 @@ def run_probes(runner):
         if any(c["exit"] for c in setup):
             note = (note or "") + f" SETUP FAILED: {setup}"
         record(probe_id, rule, commands, note)
+        results[-1].update(material=load(path), setup=setup)
+        if expected_exit is not None:
+            results[-1].update(expected_exits=[expected_exit, expected_exit],
+                               pass_under_ruling=all(c["exit"] == expected_exit for c in commands)
+                               and all(c["exit"] == 0 for c in setup))
 
     def seg(text, refs=()):
         return [{"slot": "body", "text": text, "refs": list(refs)}]
@@ -471,6 +476,50 @@ def run_probes(runner):
           subject={"text": "岗位申请", "refs": []})
     check("x6-unknown-availability-omitted-cited", "valid-unknown-availability-omitted 加引 availability 后", "data",
           seg("您好，我做过数据字段核对，希望了解岗位安排。到岗安排尚待确认。", ["proj-v23", "availability"]))
+
+    # 2026-11-04 rulings, outside the frozen corpus. Explicit expectations are evidence of the ruling,
+    # never replacements for the frozen expectations. tech: start 2026-12-07, 4 days/week, 3 months.
+    for probe_id, text, expected_exit in [
+        ("r-date-placeholder", "可以{availability.start_date}到岗。", 0),
+        ("r-date-written-equal", "可以2026年12月7日到岗。", 1),
+        ("r-date-written-later", "可以2026年12月8日到岗。", 1),
+        ("r-date-next-week", "下周可以到岗。", 1),
+        ("r-date-soon", "可以尽快入职。", 1),
+        ("r-date-anytime", "随时可以入职。", 1),
+        ("r-date-mixed-placeholder", "可于{availability.start_date}或明天到岗。", 1),
+        ("r-days-equal", "每周可以到岗4天。", 0),
+        ("r-days-placeholder", "每周可以到岗{availability.days_per_week}天。", 0),
+        ("r-days-less", "每周可以到岗3天。", 1),
+        ("r-days-at-least-equal", "每周可以至少到岗4天。", 1),
+        ("r-days-above-equal", "每周可以到岗4天以上。", 1),
+        ("r-days-range", "每周可以到岗3-4天。", 1),
+        ("r-days-wrong-placeholder", "每周可以到岗{availability.months}天。", 1),
+        ("r-months-equal", "可以连续实习3个月。", 0),
+        ("r-months-placeholder", "可以连续实习{availability.months}个月。", 0),
+        ("r-months-less", "可以连续实习2个月。", 1),
+        ("r-months-at-least-equal", "可以至少实习3个月。", 1),
+        ("r-months-above-equal", "可以连续实习3个月以上。", 1),
+        ("r-months-range", "可以连续实习3-6个月。", 1),
+        ("r-cn-five-days", "每周可以到岗五天。", 1),
+        ("r-cn-two-days", "一周能来两天。", 1),
+        ("r-cn-three-months", "能连续实习三个月。", 1),
+        ("r-cn-half-year", "能实习半年。", 1),
+        ("r-arabic-five-days", "每周可以到岗5天。", 1),
+        ("r-arabic-six-months", "能连续实习6个月。", 1),
+    ]:
+        check(probe_id, "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+              "tech", seg(text, ["availability"]), expected_exit=expected_exit)
+    for probe_id, text, refs, expected_exit in [
+        ("r-null-date-placeholder", "可以{availability.start_date}到岗。", ["availability"], 1),
+        ("r-null-days-placeholder", "每周可以到岗{availability.days_per_week}天。", ["availability"], 1),
+        ("r-null-months-placeholder", "可以实习{availability.months}个月。", ["availability"], 1),
+        ("r-null-days-written", "每周可以到岗4天。", ["availability"], 1),
+        ("r-null-months-written", "可以实习3个月。", ["availability"], 1),
+        ("r-a8-uncertain-no-ref", "到岗安排尚待确认。", [], 0),
+        ("r-a8-uncertain-cited", "到岗安排尚待确认。", ["availability"], 0),
+    ]:
+        check(probe_id, "a-2/a-8：未知值拒绝承诺，但待确认不是承诺", "data", seg(text, refs),
+              expected_exit=expected_exit)
     return results
 
 
@@ -488,6 +537,8 @@ def main() -> int:
         parser.error(f"--impl is at {head}, not {LOCKED_HEAD}")
     dirty = subprocess.run(["git", "-C", str(impl), "status", "--porcelain"], capture_output=True, encoding="utf-8",
                            check=True).stdout
+    if dirty:
+        parser.error("--impl must be a clean checkout")
     oracle = subprocess.run([sys.executable, str(FROZEN / "verify_oracle.py")], capture_output=True, encoding="utf-8",
                             env={**os.environ, "PYTHONUTF8": "1"})
     if oracle.returncode:
@@ -497,6 +548,7 @@ def main() -> int:
     expected = {case["id"]: case for case in oracle_doc["cases"]}
     mapping = load(HERE / "comparison-mapping.json")
     output.mkdir(parents=True)
+    dump(output / "comparison-mapping.json", mapping)
     runner = Runner(impl, output)
     summary = []
     for case in inputs["cases"]:
@@ -512,10 +564,13 @@ def main() -> int:
         print(case["id"], "PASS" if judged["pass"] else "FAIL", judged["problems"], flush=True)
     probes = run_probes(runner)
     dump(output / "probes.json", probes)
+    oracle_after = subprocess.run([sys.executable, str(FROZEN / "verify_oracle.py")], capture_output=True,
+                                 encoding="utf-8", env={**os.environ, "PYTHONUTF8": "1"}, check=True)
     shutil.rmtree(runner.work)
     passed = [row for row in summary if row["pass"]]
     dump(output / "results.json", {
         "implementation": head, "implementation_clean": not dirty, "oracle": json.loads(oracle.stdout),
+        "oracle_after": json.loads(oracle_after.stdout),
         "total": len(summary), "passed": len(passed), "failed": len(summary) - len(passed),
         "setup_failures": [row["id"] for row in summary if not row["setup_ok"]], "cases": summary})
     print(f"total {len(summary)}, passed {len(passed)}, failed {len(summary) - len(passed)}")

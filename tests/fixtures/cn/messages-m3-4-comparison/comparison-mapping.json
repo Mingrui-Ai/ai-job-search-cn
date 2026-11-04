@@ -1,6 +1,6 @@
 {
-  "mapping_version": 1,
-  "implementation": "PR #123 at 2c84d966c673550fae95ba6bdc46ba6606145f61, docs/cn/material.md section 7",
+  "mapping_version": 2,
+  "implementation": "PR #123 at 762b9f62e95e78915bcb9cd6669d0ec13de26549, docs/cn/material.md section 7",
   "operations": {
     "select_template": "material template <job_id> --kind <kind> --direction <requested_direction> --data-dir <data>",
     "validate_candidate": "material validate <file> --data-dir <data>, then material render <file> --data-dir <data>"
@@ -35,12 +35,12 @@
   },
   "error_categories": {
     "length_exceeded": "characters once filled; the limit",
-    "unfilled_placeholder": "is not a placeholder|no profile entry with id|a job placeholder is|has no \\w+$|模板标记没有替换",
-    "handwritten_contact": "typed by hand",
+    "unfilled_placeholder": "is not a placeholder|no profile entry with id|a job placeholder is|has no \\w+$|模板标记没有替换|once filled it still has a brace",
+    "handwritten_contact": "typed by hand|手写了微信号、QQ 号这类联系方式",
     "sensitive_personal_information": "敏感个人信息",
     "fabricated_number": "the number .* is not in what it cites",
     "fabricated_skill": "the skill .* is neither",
-    "unsupported_availability": "commits to a start date"
+    "unsupported_availability": "commits to a start date|promises when you can start|availability\\.(?:start_date|days_per_week|months)|write (?:days a week|months) in Arabic digits"
   },
   "warning_categories": {
     "cliche": "套话",
