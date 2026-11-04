@@ -1,0 +1,62 @@
+{
+  "id": "B24",
+  "title": "库不存在时 backup",
+  "strict_pass": true,
+  "ruling_pass": true,
+  "crash": null,
+  "checks": [
+    {
+      "check": "step 1 backup data unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "missing database does not create empty backup",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "ruling_checks": [
+    {
+      "check": "backup without records not_found",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "impl_observed": [
+    {
+      "item": "step 1 backup",
+      "observed": "{'exit': 1, 'error': 'not_found', 'output': None}"
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "frozen_command": "backup",
+      "expect": {
+        "result": "impl",
+        "exit": "impl"
+      },
+      "exit": 1,
+      "error": "not_found",
+      "output": null
+    }
+  ],
+  "states": [
+    null
+  ],
+  "commands": [
+    {
+      "argv": [
+        "application",
+        "backup",
+        "--data-dir",
+        "<output>\\work\\B24\\data"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "{\r\n  \"error\": \"not_found\",\r\n  \"message\": \"there are no application records yet; nothing to back up\"\r\n}\r\n",
+      "test_today_override": null
+    }
+  ]
+}

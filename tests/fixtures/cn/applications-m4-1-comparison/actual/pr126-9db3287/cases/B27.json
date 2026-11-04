@@ -1,0 +1,48 @@
+{
+  "id": "B27",
+  "title": "授权",
+  "strict_pass": true,
+  "ruling_pass": true,
+  "crash": null,
+  "checks": [
+    {
+      "check": "application grant in tools/security_guards.py",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "application grant in .claude/settings.json",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "application grant in .claude/skills/cn-application/SKILL.md",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "inspection check: tools/security_guards.py",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "ruling_checks": [],
+  "impl_observed": [
+    {
+      "item": "approved settings",
+      "observed": ".claude/settings.json and two security_guards allowlists; no changes by verifier"
+    }
+  ],
+  "steps": [],
+  "states": [],
+  "commands": [
+    {
+      "argv": [
+        "tools/security_guards.py"
+      ],
+      "exit": 0,
+      "stdout": "security_guards: OK (permissions allowlist, hooks allowlist, gitignore rules, package manifests, no tracked node_modules, skill/command allowed-tools, load-time commands, agent tools and modes)\n",
+      "stderr": ""
+    }
+  ]
+}

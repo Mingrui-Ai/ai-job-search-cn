@@ -1,0 +1,532 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_78051d4d844e109d178e0a1603dbca63\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": []\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_78051d4d844e109d178e0a1603dbca63"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_3a88d6ad0caafbfa555516a1c95590e0\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:09Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:09Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_9b1d2b41db6fa30fd9e96a4ad4caa6fa\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_78051d4d844e109d178e0a1603dbca63\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:09Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_9b1d2b41db6fa30fd9e96a4ad4caa6fa\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_78051d4d844e109d178e0a1603dbca63\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:09Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_78051d4d844e109d178e0a1603dbca63\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": []\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "show",
+      "app_3a88d6ad0caafbfa555516a1c95590e0"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_3a88d6ad0caafbfa555516a1c95590e0\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:09Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:09Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_9b1d2b41db6fa30fd9e96a4ad4caa6fa\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_78051d4d844e109d178e0a1603dbca63\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:09Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_3a88d6ad0caafbfa555516a1c95590e0",
+      "drafted",
+      "--expected-revision",
+      "1",
+      "--reason",
+      "状态表核对",
+      "--preview"
+    ],
+    "exit": 2,
+    "stdout": "",
+    "stderr": "usage: python -m jobsearch_cn application status [-h] [--data-dir DATA_DIR]\r\n                                                 (--preview | --request-id REQUEST_ID)\r\n                                                 [--actor {user,claude_code,codex,dsh}]\r\n                                                 --expected-revision\r\n                                                 EXPECTED_REVISION\r\n                                                 [--reason REASON]\r\n                                                 [--on ON | --at AT]\r\n                                                 application_id\r\n                                                 {applied,interview,offer,no_response,hired,rejected,withdrawn,offer_declined}\r\npython -m jobsearch_cn application status: error: argument status: invalid choice: 'drafted' (choose from applied, interview, offer, no_response, hired, rejected, withdrawn, offer_declined)\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_99d8b42555f7698bb29d2da7a41d4068\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_99d8b42555f7698bb29d2da7a41d4068"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_ec12fcd39e244298915d3d04c5d242a0\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:10Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:10Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_e12c266e9ce1f2dd29dad564fb4f31d0\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_99d8b42555f7698bb29d2da7a41d4068\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:10Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_e12c266e9ce1f2dd29dad564fb4f31d0\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_99d8b42555f7698bb29d2da7a41d4068\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:10Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_99d8b42555f7698bb29d2da7a41d4068\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "show",
+      "app_ec12fcd39e244298915d3d04c5d242a0"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_ec12fcd39e244298915d3d04c5d242a0\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:10Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:10Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_e12c266e9ce1f2dd29dad564fb4f31d0\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_99d8b42555f7698bb29d2da7a41d4068\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:10Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_ec12fcd39e244298915d3d04c5d242a0",
+      "applied",
+      "--expected-revision",
+      "1",
+      "--reason",
+      "状态表核对",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"transition\",\r\n  \"message\": \"drafted cannot become applied; a drafted application becomes applied through submit\",\r\n  \"status\": \"drafted\",\r\n  \"allowed\": [\r\n    \"withdrawn\"\r\n  ]\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_5dd1355116002167647e6b013b9ec391\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_5dd1355116002167647e6b013b9ec391"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_aeae62ce3c679fb73c8e622c59100ee1\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:11Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:11Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_c518bb41a738a72b9e6acb3b0f4acab9\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_5dd1355116002167647e6b013b9ec391\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:11Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_c518bb41a738a72b9e6acb3b0f4acab9\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_5dd1355116002167647e6b013b9ec391\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:11Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_5dd1355116002167647e6b013b9ec391\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "show",
+      "app_aeae62ce3c679fb73c8e622c59100ee1"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_aeae62ce3c679fb73c8e622c59100ee1\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:11Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:11Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_c518bb41a738a72b9e6acb3b0f4acab9\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_5dd1355116002167647e6b013b9ec391\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:11Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_aeae62ce3c679fb73c8e622c59100ee1",
+      "interview",
+      "--expected-revision",
+      "1",
+      "--reason",
+      "状态表核对",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"transition\",\r\n  \"message\": \"drafted cannot become interview\",\r\n  \"status\": \"drafted\",\r\n  \"allowed\": [\r\n    \"withdrawn\"\r\n  ]\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_c4dfd2d6130ce11a7983b2922cf072a9\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_c4dfd2d6130ce11a7983b2922cf072a9"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_cbae1e6e8dad938494c35de758ac7482\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:12Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:12Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_3404985363d6c0d740d60db7367b034e\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_c4dfd2d6130ce11a7983b2922cf072a9\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:12Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_3404985363d6c0d740d60db7367b034e\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_c4dfd2d6130ce11a7983b2922cf072a9\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:12Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_c4dfd2d6130ce11a7983b2922cf072a9\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "show",
+      "app_cbae1e6e8dad938494c35de758ac7482"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_cbae1e6e8dad938494c35de758ac7482\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:12Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:12Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_3404985363d6c0d740d60db7367b034e\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_c4dfd2d6130ce11a7983b2922cf072a9\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:12Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_cbae1e6e8dad938494c35de758ac7482",
+      "offer",
+      "--expected-revision",
+      "1",
+      "--reason",
+      "状态表核对",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"transition\",\r\n  \"message\": \"drafted cannot become offer\",\r\n  \"status\": \"drafted\",\r\n  \"allowed\": [\r\n    \"withdrawn\"\r\n  ]\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_d1c3a71b09d346f4b6038d9bfed2da31\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1, app_cbae1e6e8dad938494c35de758ac7482); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_d1c3a71b09d346f4b6038d9bfed2da31"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4d388453ea8b90b91ff11e2b75a00da9\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:13Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:13Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_a1942183ccb548efa5b055cf6f5dc511\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_d1c3a71b09d346f4b6038d9bfed2da31\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:13Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_a1942183ccb548efa5b055cf6f5dc511\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_d1c3a71b09d346f4b6038d9bfed2da31\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:13Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_d1c3a71b09d346f4b6038d9bfed2da31\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1, app_cbae1e6e8dad938494c35de758ac7482); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "show",
+      "app_4d388453ea8b90b91ff11e2b75a00da9"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4d388453ea8b90b91ff11e2b75a00da9\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:13Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:13Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_a1942183ccb548efa5b055cf6f5dc511\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_d1c3a71b09d346f4b6038d9bfed2da31\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:13Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_4d388453ea8b90b91ff11e2b75a00da9",
+      "no_response",
+      "--expected-revision",
+      "1",
+      "--reason",
+      "状态表核对",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"transition\",\r\n  \"message\": \"drafted cannot become no_response\",\r\n  \"status\": \"drafted\",\r\n  \"allowed\": [\r\n    \"withdrawn\"\r\n  ]\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_ce8b15ffce65c615f0d36a39ec61d26e\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1, app_cbae1e6e8dad938494c35de758ac7482, app_4d388453ea8b90b91ff11e2b75a00da9); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_ce8b15ffce65c615f0d36a39ec61d26e"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_7457ea3502472934de14caf7facfb4e7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:14Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:14Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_4465cf96a508c40d40df9053ee59eeb5\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_ce8b15ffce65c615f0d36a39ec61d26e\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:14Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_4465cf96a508c40d40df9053ee59eeb5\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_ce8b15ffce65c615f0d36a39ec61d26e\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:14Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_ce8b15ffce65c615f0d36a39ec61d26e\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1, app_cbae1e6e8dad938494c35de758ac7482, app_4d388453ea8b90b91ff11e2b75a00da9); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "show",
+      "app_7457ea3502472934de14caf7facfb4e7"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_7457ea3502472934de14caf7facfb4e7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:14Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:14Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_4465cf96a508c40d40df9053ee59eeb5\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_ce8b15ffce65c615f0d36a39ec61d26e\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:14Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_7457ea3502472934de14caf7facfb4e7",
+      "hired",
+      "--expected-revision",
+      "1",
+      "--reason",
+      "状态表核对",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"transition\",\r\n  \"message\": \"drafted cannot become hired\",\r\n  \"status\": \"drafted\",\r\n  \"allowed\": [\r\n    \"withdrawn\"\r\n  ]\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_87a1fdf5f4003a78857f9d5ad9c9f681\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1, app_cbae1e6e8dad938494c35de758ac7482, app_4d388453ea8b90b91ff11e2b75a00da9, app_7457ea3502472934de14caf7facfb4e7); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_87a1fdf5f4003a78857f9d5ad9c9f681"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_8fdffd168ff8fb772021c114298e1c36\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:15Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:15Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_0a7c48ffccbbd7f84f546c1c673d7632\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_87a1fdf5f4003a78857f9d5ad9c9f681\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:15Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_0a7c48ffccbbd7f84f546c1c673d7632\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_87a1fdf5f4003a78857f9d5ad9c9f681\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:15Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_87a1fdf5f4003a78857f9d5ad9c9f681\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1, app_cbae1e6e8dad938494c35de758ac7482, app_4d388453ea8b90b91ff11e2b75a00da9, app_7457ea3502472934de14caf7facfb4e7); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "show",
+      "app_8fdffd168ff8fb772021c114298e1c36"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_8fdffd168ff8fb772021c114298e1c36\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:15Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:15Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_0a7c48ffccbbd7f84f546c1c673d7632\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_87a1fdf5f4003a78857f9d5ad9c9f681\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:15Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_8fdffd168ff8fb772021c114298e1c36",
+      "rejected",
+      "--expected-revision",
+      "1",
+      "--reason",
+      "状态表核对",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"transition\",\r\n  \"message\": \"drafted cannot become rejected\",\r\n  \"status\": \"drafted\",\r\n  \"allowed\": [\r\n    \"withdrawn\"\r\n  ]\r\n}\r\n"
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_c2ebf50e674af56f462ead0f524f97d7\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1, app_cbae1e6e8dad938494c35de758ac7482, app_4d388453ea8b90b91ff11e2b75a00da9, app_7457ea3502472934de14caf7facfb4e7, app_8fdffd168ff8fb772021c114298e1c36); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_c2ebf50e674af56f462ead0f524f97d7"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_68b89e3147743f05e93633ed317915f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:16Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:16Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_1961e065060e06ee70c9bdc1f2b33fd0\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_c2ebf50e674af56f462ead0f524f97d7\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:16Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_1961e065060e06ee70c9bdc1f2b33fd0\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_c2ebf50e674af56f462ead0f524f97d7\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:16Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_c2ebf50e674af56f462ead0f524f97d7\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1, app_cbae1e6e8dad938494c35de758ac7482, app_4d388453ea8b90b91ff11e2b75a00da9, app_7457ea3502472934de14caf7facfb4e7, app_8fdffd168ff8fb772021c114298e1c36); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "show",
+      "app_68b89e3147743f05e93633ed317915f7"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_68b89e3147743f05e93633ed317915f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:16Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:16Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_1961e065060e06ee70c9bdc1f2b33fd0\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_c2ebf50e674af56f462ead0f524f97d7\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:16Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_68b89e3147743f05e93633ed317915f7",
+      "withdrawn",
+      "--expected-revision",
+      "1",
+      "--reason",
+      "状态表核对",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_68b89e3147743f05e93633ed317915f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:16Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:16Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_1961e065060e06ee70c9bdc1f2b33fd0\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_c2ebf50e674af56f462ead0f524f97d7\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:16Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"status_changed\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"from\": \"drafted\",\r\n        \"to\": \"withdrawn\",\r\n        \"reason\": \"状态表核对\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_b184d37243145ad16aafa711308fcc00\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": \"drafted\",\r\n    \"to\": \"withdrawn\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": []\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_68b89e3147743f05e93633ed317915f7",
+      "withdrawn",
+      "--expected-revision",
+      "1",
+      "--reason",
+      "状态表核对",
+      "--request-id",
+      "req_b184d37243145ad16aafa711308fcc00"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_68b89e3147743f05e93633ed317915f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:16Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:17Z\",\r\n    \"revision\": 2,\r\n    \"status\": \"withdrawn\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_1961e065060e06ee70c9bdc1f2b33fd0\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_c2ebf50e674af56f462ead0f524f97d7\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:16Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_160231051d10f04ea5904a0b9e720065\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_b184d37243145ad16aafa711308fcc00\",\r\n        \"type\": \"status_changed\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:17Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"from\": \"drafted\",\r\n          \"reason\": \"状态表核对\",\r\n          \"to\": \"withdrawn\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_160231051d10f04ea5904a0b9e720065\",\r\n      \"seq\": 2,\r\n      \"request_id\": \"req_b184d37243145ad16aafa711308fcc00\",\r\n      \"type\": \"status_changed\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:17Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"from\": \"drafted\",\r\n        \"reason\": \"状态表核对\",\r\n        \"to\": \"withdrawn\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_b184d37243145ad16aafa711308fcc00\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": []\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_080b106095d24de6573cd25903fbed24\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1, app_cbae1e6e8dad938494c35de758ac7482, app_4d388453ea8b90b91ff11e2b75a00da9, app_7457ea3502472934de14caf7facfb4e7, app_8fdffd168ff8fb772021c114298e1c36); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_080b106095d24de6573cd25903fbed24"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_95f225172a1865cb99dae3826948da4c\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:17Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:17Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_e0ca949c139539ce67480d16fe10fd76\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_080b106095d24de6573cd25903fbed24\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:17Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_e0ca949c139539ce67480d16fe10fd76\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_080b106095d24de6573cd25903fbed24\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:17Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_080b106095d24de6573cd25903fbed24\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": [\r\n    \"job_fa26c5d52ff7 already has an unfinished application (app_3a88d6ad0caafbfa555516a1c95590e0, app_ec12fcd39e244298915d3d04c5d242a0, app_aeae62ce3c679fb73c8e622c59100ee1, app_cbae1e6e8dad938494c35de758ac7482, app_4d388453ea8b90b91ff11e2b75a00da9, app_7457ea3502472934de14caf7facfb4e7, app_8fdffd168ff8fb772021c114298e1c36); a second one is right only for another channel or a new attempt\"\r\n  ]\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "show",
+      "app_95f225172a1865cb99dae3826948da4c"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_95f225172a1865cb99dae3826948da4c\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:17Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:17Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_e0ca949c139539ce67480d16fe10fd76\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_080b106095d24de6573cd25903fbed24\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:17Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_95f225172a1865cb99dae3826948da4c",
+      "offer_declined",
+      "--expected-revision",
+      "1",
+      "--reason",
+      "状态表核对",
+      "--preview"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "{\r\n  \"error\": \"transition\",\r\n  \"message\": \"drafted cannot become offer_declined\",\r\n  \"status\": \"drafted\",\r\n  \"allowed\": [\r\n    \"withdrawn\"\r\n  ]\r\n}\r\n"
+  }
+]

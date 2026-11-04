@@ -1,0 +1,37 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_af4d7dd8c3a6",
+      "--channel",
+      "company_site",
+      "--historical",
+      "--submitted",
+      "--on",
+      "2026-09-28",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_af4d7dd8c3a6\",\r\n        \"record_origin\": \"historical\",\r\n        \"channel\": {\r\n          \"kind\": \"company_site\",\r\n          \"platform\": null\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    },\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"submitted\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-09-28\",\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"company_site\",\r\n          \"platform\": null\r\n        },\r\n        \"material_version_ids\": [],\r\n        \"sent_file_refs\": [],\r\n        \"materials_check\": null\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_7ef4d885ee3558e47c3f49edd36e5f86\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"applied\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": []\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_af4d7dd8c3a6",
+      "--channel",
+      "company_site",
+      "--historical",
+      "--submitted",
+      "--on",
+      "2026-09-28",
+      "--request-id",
+      "req_7ef4d885ee3558e47c3f49edd36e5f86"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_011dbcb573a7612f67de799a4f1a65cc\",\r\n    \"job_id\": \"job_af4d7dd8c3a6\",\r\n    \"record_origin\": \"historical\",\r\n    \"channel\": {\r\n      \"kind\": \"company_site\",\r\n      \"platform\": null\r\n    },\r\n    \"created_at\": \"2026-11-03T16:37:57Z\",\r\n    \"updated_at\": \"2026-11-03T16:37:57Z\",\r\n    \"revision\": 2,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-09-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_4ebd656cd44541229b0b2e2ebcbfbeee\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_7ef4d885ee3558e47c3f49edd36e5f86\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:37:57Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"company_site\",\r\n            \"platform\": null\r\n          },\r\n          \"job_id\": \"job_af4d7dd8c3a6\",\r\n          \"record_origin\": \"historical\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_c3d4bff59bfc680047bbefd686d734d7\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_7ef4d885ee3558e47c3f49edd36e5f86\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-09-28\",\r\n        \"recorded_at\": \"2026-11-03T16:37:57Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"company_site\",\r\n            \"platform\": null\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_4ebd656cd44541229b0b2e2ebcbfbeee\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_7ef4d885ee3558e47c3f49edd36e5f86\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:37:57Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"company_site\",\r\n          \"platform\": null\r\n        },\r\n        \"job_id\": \"job_af4d7dd8c3a6\",\r\n        \"record_origin\": \"historical\"\r\n      },\r\n      \"voided_by\": null\r\n    },\r\n    {\r\n      \"event_id\": \"evt_c3d4bff59bfc680047bbefd686d734d7\",\r\n      \"seq\": 2,\r\n      \"request_id\": \"req_7ef4d885ee3558e47c3f49edd36e5f86\",\r\n      \"type\": \"submitted\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-09-28\",\r\n      \"recorded_at\": \"2026-11-03T16:37:57Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"company_site\",\r\n          \"platform\": null\r\n        },\r\n        \"material_version_ids\": [],\r\n        \"materials_check\": null,\r\n        \"sent_file_refs\": []\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_7ef4d885ee3558e47c3f49edd36e5f86\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": []\r\n}\r\n",
+    "stderr": ""
+  }
+]

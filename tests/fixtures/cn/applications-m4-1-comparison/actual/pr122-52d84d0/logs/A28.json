@@ -1,0 +1,45 @@
+[
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--preview"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_ba5c0102414d26b3965f18e73ab471b1\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"drafted\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": []\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "record",
+      "job_fa26c5d52ff7",
+      "--channel",
+      "portal",
+      "--platform",
+      "示例招聘站",
+      "--request-id",
+      "req_ba5c0102414d26b3965f18e73ab471b1"
+    ],
+    "exit": 0,
+    "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_5f4a745e94e86fd46fc637ac31e9e8b0\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-03T16:38:09Z\",\r\n    \"updated_at\": \"2026-11-03T16:38:09Z\",\r\n    \"revision\": 1,\r\n    \"status\": \"drafted\",\r\n    \"submission\": {\r\n      \"confirmed\": false,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"materials_recorded\": null,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": null,\r\n      \"match\": null\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_4365cc1bf499165b3083dc56c88af64f\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_ba5c0102414d26b3965f18e73ab471b1\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-03T16:38:09Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_4365cc1bf499165b3083dc56c88af64f\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_ba5c0102414d26b3965f18e73ab471b1\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-03T16:38:09Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_ba5c0102414d26b3965f18e73ab471b1\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": []\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "application",
+      "status",
+      "app_5f4a745e94e86fd46fc637ac31e9e8b0",
+      "withdrawn",
+      "--preview"
+    ],
+    "exit": 2,
+    "stdout": "",
+    "stderr": "usage: python -m jobsearch_cn application status [-h] [--data-dir DATA_DIR]\r\n                                                 (--preview | --request-id REQUEST_ID)\r\n                                                 [--actor {user,claude_code,codex,dsh}]\r\n                                                 --expected-revision\r\n                                                 EXPECTED_REVISION\r\n                                                 [--reason REASON]\r\n                                                 [--on ON | --at AT]\r\n                                                 application_id\r\n                                                 {applied,interview,offer,no_response,hired,rejected,withdrawn,offer_declined}\r\npython -m jobsearch_cn application status: error: the following arguments are required: --expected-revision\r\n"
+  }
+]

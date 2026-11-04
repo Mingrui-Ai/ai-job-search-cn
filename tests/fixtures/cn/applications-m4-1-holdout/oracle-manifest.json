@@ -1,0 +1,20 @@
+{
+  "task": "V25",
+  "base": "origin/master@8a072b0",
+  "frozen_files_sha256": {
+    ".gitattributes": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+    "inputs/jd/v25-jd-a-backend.txt": "319407c2dffe7f8d559e4360c5c20769ccb028cba40bf5e53769d70fa330f5a0",
+    "inputs/jd/v25-jd-b-dataplatform.txt": "c03bd2399164bcb60c278793ba5f06005ac47f84b2e3dbe578469f5fa5c23d50",
+    "inputs/jd/v25-jd-c-history.txt": "f7bfdba3354ce8b6af1563d27a8ee13874dcac767effb1299bc4a74b3628b9fc",
+    "inputs/material/resume-1.edited.json": "8745759652b61af161ddb6ab4de0353fad27d21294c5db0dc40d24fa863d53cb",
+    "inputs/material/resume-1.json": "ccfe678730476b6e3bc807c1e218e04238769eba811ddecda03066fc08d91e98",
+    "inputs/material/resume-9.invalid.json": "074d90fd45af127373c0c3fc2421584a53b2cda3494f4ff6928ee8af4de24f54",
+    "inputs/profile/notes.md": "f5d87199362603b5560e799045c3ec36b5402d0e6957b7a4a3db4a65922021f3",
+    "inputs/profile/profile.json": "652bbb546fc346ae848ffb3841e6443646b9dca101cd7fa2d53ab19045940ecd",
+    "inputs/profile/sources/resume.txt": "4b8d76fcdf73a10007adb6737ac0120cd2925b133faff12694f3477b41286005",
+    "inputs/review/review-1-r1.json": "502f62bec98bf3afd33a4da6abbfe367ee920cb840a5db19d78625773a3829bd",
+    "README.md": "c05c8a44d617a22a052db48bbcdf0831c563e9e4d3cda3aca070946319fd3dc2",
+    "scenarios.json": "989ae6cfdca1948e755fd35dfbf433e3e432e140cfe42fa25f9ca845dcb6e641",
+    "verify_oracle.py": "b1bab3c1263fdcabb028fd1f9dadf3e5da45226f13fff8e29a6551ea5f82acfd"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "kind": "resume",
+  "job_id": "job_fa26c5d52ff7",
+  "profile_hash": "670f4cbd7fcb8de44ed4c1b65cb0f884e93984d6a5c55afa2e255a94cb7206a2",
+  "created": "2026-11-01T14:00:00+08:00",
+  "summary": {
+    "text": "后端开发实习经历，使用 Go、Python 和 RAG 完成服务与评测工作",
+    "refs": ["intern-a1", "project-a1", "research-a1"]
+  },
+  "education": [
+    {"ref": "edu-a1", "courses": ["分布式系统", "机器学习"]},
+    {"ref": "edu-a2", "courses": []}
+  ],
+  "experience": [
+    {"ref": "research-a1", "bullets": [
+      {"text": "用 RAG 方法整理 80 组问答并复核检索结果", "refs": ["research-a1"]}
+    ]},
+    {"ref": "intern-a1", "bullets": [
+      {"text": "使用 Go 和 Docker 维护订单服务，连续 6 周整理发布记录", "refs": ["intern-a1"]}
+    ]},
+    {"ref": "project-a1", "bullets": [
+      {"text": "使用 Python 和 SQL 分析 1200 条订单事件", "refs": ["project-a1"]}
+    ]}
+  ],
+  "skills": ["Python", "Go", "SQL", "Docker", "RAG", "Git"],
+  "awards": [{"ref": "award-a1"}],
+  "certificates": [{"ref": "cert-a1"}],
+  "languages": [{"ref": "lang-a1"}, {"ref": "lang-a2"}]
+}
