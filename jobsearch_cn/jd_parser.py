@@ -412,12 +412,14 @@ _VERSION = rf"[^\S\r\n]*v?\d+(?:\.\d+)*(?:\.x)?(?![A-Za-z0-9#])(?!\.[\dx])(?!{_U
 # One digit after PS is a games console (PS4, PS 5), not Photoshop; a year still is ("PS2024"),
 # and so are a count ("PS 5年以上") and a decimal or ".x" version ("PS 5.1", "PS5.x").
 _CONSOLE = rf"(?![^\S\r\n]*\d(?!\d|\.[\dx])(?!{_UNIT}))"
+# "http://" opens a link, not the protocol a JD asks for (M2-5 round 2).
+_LINK = r"(?!://)"
 
 
 def _skill_pattern(term: str) -> re.Pattern:
     escaped = re.escape(term).replace(r"\ ", r"\s*")
     if term.isascii():
-        console = _CONSOLE if term.casefold() == "ps" else ""
+        console = _CONSOLE if term.casefold() == "ps" else _LINK if term.casefold() == "http" else ""
         escaped = rf"(?<![A-Za-z0-9+#.]){escaped}{console}(?:{_VERSION}|(?![A-Za-z0-9+#])|(?={_COUNT}))"
     return re.compile(escaped, re.I)
 

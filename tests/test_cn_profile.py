@@ -266,6 +266,20 @@ class Validate(unittest.TestCase):
         self.assert_error(with_value(self.example, "availability.interview_travel", "不去"),
                           "availability.interview_travel")
 
+    def test_remote_unstated_as_conflict_is_optional_and_true_false_or_null(self):
+        # M2-5 round 2: a switch the user turns on; profiles without it read as off.
+        self.assertIs(self.example["availability"]["remote_unstated_as_conflict"], False)  # the example leaves it off
+        older = with_value(self.example, "availability", {key: value for key, value in
+                                                          self.example["availability"].items()
+                                                          if key != "remote_unstated_as_conflict"})
+        self.assertEqual(profile.validate(older, sources={"resume.pdf"}), [])
+        for value in (True, False, None):
+            with self.subTest(value=value):
+                data = with_value(self.example, "availability.remote_unstated_as_conflict", value)
+                self.assertEqual(profile.validate(data, sources={"resume.pdf"}), [])
+        self.assert_error(with_value(self.example, "availability.remote_unstated_as_conflict", "是"),
+                          "availability.remote_unstated_as_conflict")
+
     def test_cities_compare_as_the_filter_and_the_score_compare_them(self):
         # Codex B on #68: the filter and the score take 深圳市 for 深圳 (match._city), so the validator does
         # too, across the two tiers either way round and within each.

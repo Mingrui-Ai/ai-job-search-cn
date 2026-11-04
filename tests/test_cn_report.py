@@ -369,6 +369,21 @@ class ReportFromSavedRecords(unittest.TestCase):
         self.assertIn("no saved match records", self.cli("match", "report", expect=1)["error"])
 
 
+class UnstatedRemote(unittest.TestCase):
+    def test_the_report_gives_the_users_setting_as_the_reason(self):
+        # M2-5 round 2: with availability.remote_unstated_as_conflict on, a JD silent on remote work in a city
+        # beyond the user's is ruled out, and the report says it is the user's own setting.
+        [job], _ = jd_parser.parse_text("后端开发实习生\n工作地点：北京\n熟悉 Java", now=NOW)
+        profile = json.loads((FIXTURES / "profile" / "tech" / "profile.json").read_text(encoding="utf-8"))
+        profile["availability"].update(cities=["深圳"], acceptable_cities=[], relocate=False,
+                                       remote_unstated_as_conflict=True)
+        record = score.score_job(job, profile, VOCABULARY, now=NOW)
+        self.assertEqual(record["filter"]["verdict"], match.INELIGIBLE)
+        self.assertTrue(report.conclusion(record).startswith("不符合硬性条件（冲突：地点）"), report.conclusion(record))
+        page = report.build([report.entry(record, job, False)], profile, "2026-11-05 09:00", VOCABULARY)
+        self.assertIn("JD 未写明可远程，按你的设置视为不符合", page)
+
+
 class FormAndPage(unittest.TestCase):
     """report.py on hand-made records: CSV escaping, HTML escaping, how what is open gets settled."""
 
@@ -472,7 +487,13 @@ class FormAndPage(unittest.TestCase):
         })
         unit = {"salary": {"min": 5000, "max": 8000, "unit": "CNY/month", "negotiable": False}}
         wanted = {"target": {"salary_min": {"amount": 150, "unit": "CNY/day"}}}
-        self.assertIn("单位", report._settle("salary", unit, wanted))
+        # M2-5 round 2: without tiers too, a null salary in another unit is pay that could not be turned.
+        self.assertIn("salary_days_per_week", report._settle("salary", unit, wanted))
+        hourly_job = {"salary": {"min": 40, "max": 40, "unit": "CNY/hour", "negotiable": False}}
+        self.assertIn("按小时的不换算", report._settle("salary", hourly_job, wanted))
+        hourly_min = {"target": {"salary_min": {"amount": 30, "unit": "CNY/hour"}}}
+        self.assertEqual(report._settle("salary", unit, hourly_min),
+                         f"{report.FILL_PROFILE}：最低期望薪资改按天或按月计（按小时的不换算），再重新评分")
         self.assertEqual(report._settle("salary", unit, {"target": {}}), report.FILL_PROFILE)
         # M2-6e: with tiers a null salary is pay that could not be turned: hourly, or days a week unknown.
         tiers = {"target": {"salary_min": {"amount": 150, "unit": "CNY/day"},

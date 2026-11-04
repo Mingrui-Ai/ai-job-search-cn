@@ -37,7 +37,10 @@ SCHEMA_VERSION = 1
 #    added; the JD's job record gains benefits.meals (M2-6e).
 # 10: an interview only on site outside the wanted cities is unknown, not a match, when the profile's
 #     availability.interview_travel is false (M2-6f).
-RULES_VERSION = 10
+# 11: without tiers a salary in another unit is turned into the profile's as the tiers do; Maven, Gradle, HTTP,
+#     TCP/IP, TCP, UDP, 计算机网络 and 数据结构 join the skill vocabulary; the location check can take a JD
+#     silent on remote work as a conflict, availability.remote_unstated_as_conflict (M2-5 round 2).
+RULES_VERSION = 11
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary, location
 DEFAULT_WEIGHTS = {"skills": 30, "direction": 25, "experience": 25, "salary": 10, "location": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.
@@ -296,7 +299,9 @@ def _salary(job, profile):
     """The salary dimension, and the gap item when the pay falls short of the minimum (else None).
 
     With target.salary_ideal and salary_step the pay is scored in tiers (_salary_tiers); without them, as
-    before M2-6e: the JD's upper figure reaches salary_min (100) or not (0), in the same unit only.
+    before M2-6e: the JD's upper figure reaches salary_min (100) or not (0). A JD paying in another unit is
+    turned into the profile's first, as the tiers do it (_in_unit, the days a week by _days_a_week; M2-5
+    round 2); meals are not added.
     """
     target = profile.get("target") or {}
     if target.get("salary_min") and target.get("salary_ideal") and target.get("salary_step"):
@@ -312,12 +317,22 @@ def _salary(job, profile):
         return result(None, "JD 薪资面议" if offered.get("negotiable") else "JD 没写薪资"), None
     if not wanted:
         return result(None, "档案没写最低期望薪资"), None
+    unit, amount = _UNIT[wanted["unit"]], wanted["amount"]
+    words = f"JD 上限 {_plain(upper)} {_UNIT[offered['unit']]}"
     if offered.get("unit") != wanted.get("unit"):
-        return result(None, f"JD 按{_UNIT[offered['unit']]}、你按{_UNIT[wanted['unit']]}计，单位不同，不换算"), None
-    unit, amount = _UNIT[offered["unit"]], wanted["amount"]
-    if upper >= amount:
-        return result(100, f"JD 上限 {_plain(upper)} {unit}，达到你的最低期望 {_plain(amount)} {unit}"), None
-    reason = f"JD 上限 {_plain(upper)} {unit}，低于你的最低期望 {_plain(amount)} {unit}"
+        days, whose = _days_a_week(job, target)
+        turned = _in_unit(_fraction(upper), offered["unit"], wanted["unit"], days)
+        if turned is None:
+            return result(None, f"{words}；{_not_turned(offered['unit'], wanted['unit'])}"), None
+        by_day = "CNY/day" in (offered["unit"], wanted["unit"])
+        words += f"，折合 {_money(turned)} {unit}" + (f"（按{whose}每周 {_plain(days)} 天、一年 {_WEEKS} 周）"
+                                                     if by_day else "")
+        upper = turned
+    else:
+        upper = _fraction(upper)
+    if upper >= _fraction(amount):
+        return result(100, f"{words}，达到你的最低期望 {_plain(amount)} {unit}"), None
+    reason = f"{words}，低于你的最低期望 {_plain(amount)} {unit}"
     return result(0, reason), reason
 
 
