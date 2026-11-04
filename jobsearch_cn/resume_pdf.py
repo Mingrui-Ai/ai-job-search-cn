@@ -167,14 +167,31 @@ def _replace(output: Path, data: bytes) -> None:
         raise
 
 
+def os_reason(exc: OSError) -> str:
+    """What went wrong, without the path: an OSError's str names the file, here a temporary folder
+    under the user's home (V24, #120). The Windows error number stays, since resume-workflow.md tells
+    the user what WinError 5 means. shutil.Error carries no strerror, only paths, so its type is shown."""
+    reason = exc.strerror or type(exc).__name__
+    winerror = getattr(exc, "winerror", None)
+    return f"[WinError {winerror}] {reason}" if winerror else reason
+
+
 def render(content: dict, output: Path, typst: str | None = None) -> dict:
-    """Write content to output as a one-page PDF; nothing is written when it does not fit."""
+    """Write content to output as a one-page PDF; nothing is written when it does not fit.
+    A folder or file that cannot be made is a ResumeError, said without its path."""
     program = find_typst(typst)
     fonts = _fonts(program)
-    with tempfile.TemporaryDirectory(prefix="jobsearch-cn-resume-") as temp:
-        folder = _build_folder(temp, content)
-        spaciness, data = _fit(lambda value: _compile(folder, program, fonts, value))
-    _replace(output, data)
+    try:
+        with tempfile.TemporaryDirectory(prefix="jobsearch-cn-resume-") as temp:
+            folder = _build_folder(temp, content)
+            spaciness, data = _fit(lambda value: _compile(folder, program, fonts, value))
+    except OSError as exc:
+        raise ResumeError(f"临时目录里建不了编译用的文件夹（{os_reason(exc)}）；可能是沙盒或权限不让写系统临时目录，"
+                          "Codex 的情况见 docs/cn/resume-workflow.md 第 2 节") from None
+    try:
+        _replace(output, data)
+    except OSError as exc:
+        raise ResumeError(f"写不了 {output.name}（{os_reason(exc)}）") from None
     return {"pdf": str(output), "spaciness": spaciness, "fonts": fonts}
 
 

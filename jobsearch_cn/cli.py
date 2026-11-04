@@ -765,6 +765,10 @@ def cmd_resume_build(args) -> int:
         directory = store.safe_dir(store.data_dir(args.data_dir), "resumes", record["job_id"])
     except store.StoreError as exc:
         raise InputError(str(exc)) from None
+    except OSError as exc:
+        _emit({"error": f"cannot make the folder resumes/{record['job_id']} in the data directory: "
+                        f"{resume_pdf.os_reason(exc)}"}, sys.stderr)
+        return 1
     pdf, docx = directory / f"{named.group(1)}.pdf", directory / f"{named.group(1)}.docx"
     for output in (pdf, docx):
         if output.is_symlink():
@@ -775,13 +779,21 @@ def cmd_resume_build(args) -> int:
     except resume_pdf.ResumeError as exc:
         _emit({"error": str(exc)}, sys.stderr)
         return 1
-    result.update(resume_docx.write(content, docx))
+    try:
+        result.update(resume_docx.write(content, docx))
+    except OSError as exc:  # V24 P3-1: JSON, not a traceback, and the reason without the path
+        _emit({"error": f"cannot write {docx.name}: {resume_pdf.os_reason(exc)}"}, sys.stderr)
+        return 1
     fields = resume_pdf.fields_of(content)
     problems = resume_pdf.check(pdf, fields) + resume_docx.check(docx, fields)
     problems += resume_docx.same_text(pdf, docx, content)
     if not content["name"]:
         warnings.append("contact.name: the profile has no name, so the resume has none")
-    note = _write_build_note(directory, named.group(1), record, data, (pdf, docx))
+    try:
+        note = _write_build_note(directory, named.group(1), record, data, (pdf, docx))
+    except OSError as exc:
+        _emit({"error": f"cannot write {named.group(1)}.build.json: {resume_pdf.os_reason(exc)}"}, sys.stderr)
+        return 1
     result["build_note"] = None if note is None else str(note)
     _emit({**result, "problems": problems, "warnings": warnings})
     return 1 if problems else 0

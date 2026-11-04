@@ -38,7 +38,8 @@ MAX_TEXT = profile_mod.MAX_BULLET
 CHECKLIST = {"A": 5, "B": 6, "C": 6, "D": 6, "E": 6, "F": 4, "G": 8}
 ITEMS = tuple(f"{section}{n}" for section, count in CHECKLIST.items() for n in range(1, count + 1))
 
-_PATH = re.compile(r"(?P<name>[a-z_]+)|\[(?P<index>\d+)\]")
+# [0-9], not \d: \d also matches full-width and other Unicode digits, which int() would read as an index.
+_PATH = re.compile(r"(?P<name>[a-z_]+)|\[(?P<index>[0-9]+)\]")
 _CJK = r"㐀-䶿一-鿿"
 _SPACE_BETWEEN = re.compile(rf"[{_CJK}] +[A-Za-z0-9]|[A-Za-z0-9] +[{_CJK}]")
 _HALF_WIDTH_PUNCT = re.compile(rf"[{_CJK}][,;:]|[,;:][{_CJK}]")
