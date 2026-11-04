@@ -19,7 +19,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 FROZEN = HERE.parent / "messages-m3-4-holdout"
-LOCKED_HEAD = "762b9f62e95e78915bcb9cd6669d0ec13de26549"
+LOCKED_HEAD = "67508e9a4c06b0b5ae8e2521934b5dd1c57db7b9"
 CREATED = "2026-11-01T08:00:00+08:00"
 BODY_SLOTS = {"greeting": ["body"], "email": ["body", "signature"], "referral": ["body"]}
 UNBOUND = re.compile(r"\{\{(\w+)\}\}")
@@ -520,6 +520,25 @@ def run_probes(runner):
     ]:
         check(probe_id, "a-2/a-8：未知值拒绝承诺，但待确认不是承诺", "data", seg(text, refs),
               expected_exit=expected_exit)
+    # New-head boundary probes, kept separate from the unchanged 33 r-* probes.
+    for probe_id, text, expected_exit in [
+        ("s-date-from", "可以{availability.start_date}起到岗。", 0),
+        ("s-date-after", "可以{availability.start_date}以后到岗。", 0),
+        ("s-date-earliest", "最早可以{availability.start_date}到岗。", 0),
+        ("s-date-latest", "最晚可以{availability.start_date}到岗。", 1),
+        ("s-date-before", "可以{availability.start_date}之前到岗。", 1),
+        ("s-date-around", "可以{availability.start_date}左右到岗。", 1),
+        ("s-date-or-earlier", "可以{availability.start_date}或更早到岗。", 1),
+        ("s-date-mixed-anytime", "可以{availability.start_date}到岗或随时入职。", 1),
+        ("s-months-placeholder-half", "可以连续实习{availability.months}个半月。", 1),
+        ("s-months-placeholder-more", "可以连续实习{availability.months}个多月。", 1),
+        ("s-days-placeholder-at-least", "每周可以至少到岗{availability.days_per_week}天。", 1),
+        ("s-days-placeholder-above", "每周可以到岗{availability.days_per_week}天以上。", 1),
+        ("s-months-placeholder-at-least", "可以至少实习{availability.months}个月。", 1),
+        ("s-months-placeholder-above", "可以连续实习{availability.months}个月以上。", 1),
+    ]:
+        check(probe_id, "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+              "tech", seg(text, ["availability"]), expected_exit=expected_exit)
     return results
 
 

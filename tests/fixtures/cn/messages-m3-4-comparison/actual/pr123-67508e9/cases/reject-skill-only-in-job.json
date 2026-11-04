@@ -1,0 +1,76 @@
+{
+  "id": "reject-skill-only-in-job",
+  "setup": [
+    {
+      "argv": "profile validate --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "jd save <data>\\job-input.json --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "material": {
+    "schema_version": 1,
+    "kind": "greeting",
+    "job_id": "job_000000002301",
+    "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+    "created": "2026-11-01T08:00:00+08:00",
+    "direction": "tech",
+    "template": "tech/greeting@1",
+    "subject": null,
+    "segments": [
+      {
+        "slot": "body",
+        "text": "您好，我熟练使用 Rust，希望了解后端检索岗位。",
+        "refs": [
+          "proj-v23"
+        ]
+      }
+    ]
+  },
+  "commands": [
+    {
+      "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\",\n    \"segments: the required 'evidence' segment is missing\",\n    \"segments: the required 'closing' segment is missing\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "judgement": {
+    "expected": "reject",
+    "actual": "reject",
+    "pass": true,
+    "problems": [],
+    "error_categories": [
+      "fabricated_skill"
+    ],
+    "warning_categories": [],
+    "errors": [
+      "segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries"
+    ],
+    "warnings": [],
+    "rendered_codepoints": {},
+    "final_text_matches": null,
+    "offending_text": "Rust",
+    "offending_text_quoted_in_errors": true,
+    "builtin_template_control_same_errors": true
+  },
+  "setup_ok": true
+}

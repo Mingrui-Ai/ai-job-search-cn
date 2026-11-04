@@ -1,0 +1,4580 @@
+[
+  {
+    "id": "b1-render-builtin-template",
+    "rule": "占位符由渲染代入",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，我是示例留出测试大学软件工程专业的本科生，想应聘贵司的后端检索实习生。用 Python 整理了 8 项检索校验记录。可以2026年12月7日起到岗，每周4天。方便的话我把简历发给您。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "opening",
+          "text": "您好，我是{edu-v23.school}{edu-v23.major}专业的{edu-v23.level}生，想应聘贵司的{job.title}。",
+          "refs": [
+            "edu-v23",
+            "job"
+          ]
+        },
+        {
+          "slot": "evidence",
+          "text": "用 Python 整理了 8 项检索校验记录。",
+          "refs": [
+            "proj-v23"
+          ]
+        },
+        {
+          "slot": "availability",
+          "text": "可以{availability.start_date}起到岗，每周{availability.days_per_week}天。",
+          "refs": [
+            "availability"
+          ]
+        },
+        {
+          "slot": "closing",
+          "text": "方便的话我把简历发给您。",
+          "refs": []
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b1-placeholder-not-on-the-list",
+    "rule": "占位符由渲染代入：不在白名单的报错",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {proj-v23.bullets}: an experience entry's placeholders are name, org, role\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {proj-v23.bullets}: an experience entry's placeholders are name, org, role\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，{proj-v23.bullets}",
+          "refs": [
+            "proj-v23"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-unknown-direction",
+    "rule": "第一版五个方向：完全不存在的方向",
+    "note": null,
+    "exits": [
+      2
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002301 --kind greeting --direction nosuch --data-dir <data>",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "{\n  \"error\": \"no direction 'nosuch': a direction is one with a template (data, default, ops, product, tech) or a skill vocabulary group (data, design, finance, general, hr, market, ops, product, tech), which uses the default template\"\n}\n"
+      }
+    ],
+    "templates_on_disk": [
+      "banned",
+      "data",
+      "default",
+      "ops",
+      "product",
+      "tech"
+    ]
+  },
+  {
+    "id": "b2-implicit-fallback-design",
+    "rule": "不给 --direction、档案写这个方向时回退 default",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material template job_000000002305 --kind email --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"你的第一个求职方向 design 还没有模板，用通用模板 default\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-fallback-market",
+    "rule": "不给 --direction、档案写这个方向时回退 default",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material template job_000000002305 --kind email --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"你的第一个求职方向 market 还没有模板，用通用模板 default\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-fallback-finance",
+    "rule": "不给 --direction、档案写这个方向时回退 default",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material template job_000000002305 --kind email --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"你的第一个求职方向 finance 还没有模板，用通用模板 default\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-fallback-hr",
+    "rule": "不给 --direction、档案写这个方向时回退 default",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material template job_000000002305 --kind email --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"你的第一个求职方向 hr 还没有模板，用通用模板 default\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-general-not-a-profile-direction",
+    "rule": "general 不能写进档案的 target.directions（档案校验报错）",
+    "note": null,
+    "exits": [
+      1
+    ],
+    "commands": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"target.directions[0]: general holds office software every direction uses; it is not a direction\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-no-direction-default",
+    "rule": "档案没写方向时用 default",
+    "note": null,
+    "exits": [
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002305 --kind email --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"档案没写求职方向，用通用模板 default\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-tech",
+    "rule": "不给 --direction 时按 JD 和档案选",
+    "note": null,
+    "exits": [
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002301 --kind greeting --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002301\",\n  \"direction\": \"tech\",\n  \"label\": \"技术\",\n  \"reason\": \"JD 的技能有 2 项属于这个方向，也在你的求职方向里\",\n  \"kind\": \"greeting\",\n  \"template\": \"tech/greeting@1\",\n  \"spec\": {\n    \"max_chars\": 150,\n    \"slots\": [\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"称呼加一句自我介绍：学校、专业、应聘的岗位（用占位符 {edu-1.school}、{job.title} 等，不手写）\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 2,\n        \"prefer\": [\n          \"internship\",\n          \"project\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"和 JD 技能最相关的一两条实习或项目：用了什么技术、做到什么结果（性能、规模的数字照档案写）\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"实习岗写到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"一句话收尾，例如希望进一步沟通、可以发简历\"\n      }\n    ],\n    \"examples\": [\n      \"您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘贵司的{job.title}岗位。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-data",
+    "rule": "不给 --direction 时按 JD 和档案选",
+    "note": null,
+    "exits": [
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002302 --kind greeting --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002302\",\n  \"direction\": \"data\",\n  \"label\": \"数据\",\n  \"reason\": \"JD 的技能有 1 项属于这个方向，也在你的求职方向里\",\n  \"kind\": \"greeting\",\n  \"template\": \"data/greeting@1\",\n  \"spec\": {\n    \"max_chars\": 150,\n    \"slots\": [\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"称呼加一句自我介绍：学校、专业、应聘的岗位（用占位符 {edu-1.school}、{job.title} 等，不手写）\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 2,\n        \"prefer\": [\n          \"internship\",\n          \"project\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条分析或建模的经历：数据从哪来、用了什么方法、得出什么结论或带来什么变化（数据量、指标照档案写）\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"实习岗写到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"一句话收尾，例如希望进一步沟通、可以发简历\"\n      }\n    ],\n    \"examples\": [\n      \"您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘贵司的{job.title}岗位。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-product",
+    "rule": "不给 --direction 时按 JD 和档案选",
+    "note": null,
+    "exits": [
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002303 --kind greeting --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002303\",\n  \"direction\": \"product\",\n  \"label\": \"产品\",\n  \"reason\": \"JD 的技能有 1 项属于这个方向，也在你的求职方向里\",\n  \"kind\": \"greeting\",\n  \"template\": \"product/greeting@1\",\n  \"spec\": {\n    \"max_chars\": 150,\n    \"slots\": [\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"称呼加一句自我介绍：学校、专业、应聘的岗位（用占位符 {edu-1.school}、{job.title} 等，不手写）\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 2,\n        \"prefer\": [\n          \"internship\",\n          \"project\",\n          \"campus\"\n        ],\n        \"hint\": \"一两条和用户、需求有关的经历：发现了什么问题、推动上线了什么、指标怎么变（照档案写）\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"实习岗写到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"一句话收尾，例如希望进一步沟通、可以发简历\"\n      }\n    ],\n    \"examples\": [\n      \"您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘贵司的{job.title}岗位。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-ops",
+    "rule": "不给 --direction 时按 JD 和档案选",
+    "note": null,
+    "exits": [
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002304 --kind greeting --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002304\",\n  \"direction\": \"ops\",\n  \"label\": \"运营\",\n  \"reason\": \"JD 的技能有 1 项属于这个方向，也在你的求职方向里\",\n  \"kind\": \"greeting\",\n  \"template\": \"ops/greeting@1\",\n  \"spec\": {\n    \"max_chars\": 150,\n    \"slots\": [\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"称呼加一句自我介绍：学校、专业、应聘的岗位（用占位符 {edu-1.school}、{job.title} 等，不手写）\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 2,\n        \"prefer\": [\n          \"internship\",\n          \"campus\",\n          \"project\"\n        ],\n        \"hint\": \"一两条运营经历：做了什么内容或活动、带来多少增长或参与（数字照档案写）；有作品链接可以附在邮件里\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"实习岗写到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"一句话收尾，例如希望进一步沟通、可以发简历\"\n      }\n    ],\n    \"examples\": [\n      \"您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘贵司的{job.title}岗位。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b3-raise-greeting-limit-ignored",
+    "rule": "用户把上限改大不生效：151 字仍拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments: 151 characters once filled; the limit for a greeting is 150\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments: 151 characters once filled; the limit for a greeting is 150\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "{job.title}",
+          "refs": [
+            "job"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b3-lower-greeting-limit-101",
+    "rule": "用户改小上限 100：101 字拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments: 101 characters once filled; the limit for a greeting is 100\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments: 101 characters once filled; the limit for a greeting is 100\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "{job.title}",
+          "refs": [
+            "job"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b3-lower-greeting-limit-100",
+    "rule": "用户改小上限 100：100 字通过",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "{job.title}",
+          "refs": [
+            "job"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b3-raise-subject-limit-ignored",
+    "rule": "用户把标题上限改大不生效：41 字仍拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"subject: 41 characters once filled; the limit is 40\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"subject: 41 characters once filled; the limit is 40\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "email",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/email@1",
+      "subject": {
+        "text": "{job.title}",
+        "refs": [
+          "job"
+        ]
+      },
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，烦请查阅申请材料。",
+          "refs": []
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b4-no-draft-command",
+    "rule": "起草流程归 M3-6：material 只有 validate、template、render，没有 --output",
+    "note": null,
+    "exits": [
+      0,
+      2
+    ],
+    "commands": [
+      {
+        "argv": "material --help",
+        "exit": 0,
+        "stdout": "usage: python -m jobsearch_cn material [-h] <material-command> ...\n\n求职材料（简历等）相关命令，格式见 docs/cn/material.md\n\npositional arguments:\n  <material-command>\n    validate          检查一份材料：引用的档案条目都在，改写没有编出数字和技能\n    template          打招呼语、投递邮件、内推请求：按方向选模板\n    render            检查打招呼语、邮件或内推请求，通过后输出可以直接复制的文字\n\noptions:\n  -h, --help          show this help message and exit\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render x.json --output y.txt",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "usage: python -m jobsearch_cn [-h] [--version] <command> ...\npython -m jobsearch_cn: error: unrecognized arguments: --output y.txt\n"
+      }
+    ]
+  },
+  {
+    "id": "b5-skill-in-title-cited-job",
+    "rule": "job 不算技能依据：岗位名有 Rust，引 job 也拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我熟练使用 Rust。",
+          "refs": [
+            "job"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"Rust 后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b5-required-skill-cited-job",
+    "rule": "job 不算技能依据：JD 要求 Rust，引 job 也拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我熟练使用 Rust，希望了解后端检索岗位。",
+          "refs": [
+            "proj-v23",
+            "job"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b5-number-in-title-cited-job",
+    "rule": "job 算数字依据：岗位名有 2027，引 job 通过",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，我想应聘 2027 届的岗位。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我想应聘 2027 届的岗位。",
+          "refs": [
+            "job"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"2027 届后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b5-number-in-title-no-ref",
+    "rule": "同一句不引 job：拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '2027' is not in what it cites (nothing); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '2027' is not in what it cites (nothing); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我想应聘 2027 届的岗位。",
+          "refs": []
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"2027 届后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b5-salary-cited-job",
+    "rule": "引 job 也不能借薪资数字：job 的原文只有岗位名和公司名",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '180' is not in what it cites (proj-v23, job); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '180' is not in what it cites (proj-v23, job); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "email",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/email@1",
+      "subject": {
+        "text": "后端检索岗位申请",
+        "refs": []
+      },
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我整理了 180 项检索校验记录，希望交流。",
+          "refs": [
+            "proj-v23",
+            "job"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b6-old-revision-warns",
+    "rule": "模板 revision 变了只警告",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": [\n    \"template: written to tech/greeting@1, the template is now tech/greeting@2; check the slots still fit\"\n  ]\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，希望了解岗位。\n",
+        "stderr": "警告：template: written to tech/greeting@1, the template is now tech/greeting@2; check the slots still fit\n"
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，希望了解岗位。",
+          "refs": []
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b6-wrong-kind-in-id",
+    "rule": "编号的方向或种类不符报错",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"template: must be 'tech/greeting@1' (the direction and kind of this material)\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"template: must be 'tech/greeting@1' (the direction and kind of this material)\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/email@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，希望了解岗位。",
+          "refs": []
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b7-cites-notes",
+    "rule": "沟通材料引 notes.md：validate 和 render 都报错",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].refs[0]: a message does not cite notes.md; only a CV's summary does\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].refs[0]: a message does not cite notes.md; only a CV's summary does\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，希望了解岗位。",
+          "refs": [
+            "notes.md"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b8-resume-build-given-message",
+    "rule": "resume build 拿到沟通材料：退出码 2",
+    "note": "第一条文件名合规，走到种类检查；第二条是文件名检查先拒绝",
+    "exits": [
+      2,
+      2
+    ],
+    "commands": [
+      {
+        "argv": "resume build <data>\\resume-1.json --data-dir <data>",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "{\n  \"error\": \"resume build builds a CV; a greeting, email or referral is rendered with material render\"\n}\n"
+      },
+      {
+        "argv": "resume build <data>\\greeting-1.json --data-dir <data>",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "{\n  \"error\": \"<data>\\\\greeting-1.json: resume build takes a material file named resume-<n>.json (docs/cn/material.md), and names the PDF and Word files after it\"\n}\n"
+      }
+    ]
+  },
+  {
+    "id": "b8-review-draft-given-message",
+    "rule": "review draft 拿到沟通材料：退出码 2",
+    "note": null,
+    "exits": [
+      2
+    ],
+    "commands": [
+      {
+        "argv": "review draft <data>\\greeting-1.json --data-dir <data>",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "{\n  \"error\": \"review draft drafts the review of a CV; check a greeting, email or referral with material validate\"\n}\n"
+      }
+    ]
+  },
+  {
+    "id": "b8-render-given-resume",
+    "rule": "material render 拿到简历：退出码 2",
+    "note": null,
+    "exits": [
+      2
+    ],
+    "commands": [
+      {
+        "argv": "material render <data>\\resume-2.json --data-dir <data>",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "{\n  \"error\": \"material render renders greeting, email, referral; a CV is built with resume build\"\n}\n"
+      }
+    ]
+  },
+  {
+    "id": "x1-unknown-availability-cited",
+    "rule": "冻结规则：缺失值不能变成随时到岗；引 availability 后",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '我随时可以到岗' promises when you can start; it is availability.start_date, which the profile does not give; leave it out, or ask the user to add it to the profile (written by hand: '随时')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '我随时可以到岗' promises when you can start; it is availability.start_date, which the profile does not give; leave it out, or ask the user to add it to the profile (written by hand: '随时')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002302",
+      "profile_hash": "04e64fbae4c0a66ba20b3b127dccac1ff74b0a8f793fe1474561b1c2857d8c39",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "data",
+      "template": "data/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我随时可以到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002302\",\n      \"title\": \"数据清洗实习生\",\n      \"company\": \"示例留出乙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x1-tomorrow-cited",
+    "rule": "冻结规则：不能承诺比档案更早；引 availability 后",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '我明天即可到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '明天')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '我明天即可到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '明天')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "email",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/email@1",
+      "subject": {
+        "text": "岗位申请",
+        "refs": []
+      },
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我明天即可到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x2-months-from-date",
+    "rule": "冻结规则：不能承诺更长；档案 3 个月，写 12 个月（日期里的 12）",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '12 个月' is not the profile's availability.months (3); write 3个月 or {availability.months}个月\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '12 个月' is not the profile's availability.months (3); write 3个月 or {availability.months}个月\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我可以连续实习 12 个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x2-days-from-date",
+    "rule": "冻结规则：不能多于档案；档案每周 4 天，写 7 天（日期里的 07）",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\referral-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '7 天' is not the profile's availability.days_per_week (4); write 4天 or {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\referral-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '7 天' is not the profile's availability.days_per_week (4); write 4天 or {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "referral",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/referral@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我每周可以到岗 7 天，烦请告知申请方式。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x2-control-days-5-cited",
+    "rule": "对照：写 5 天并引 availability（日期里没有 5）",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\referral-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '5 天' is not the profile's availability.days_per_week (4); write 4天 or {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\referral-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '5 天' is not the profile's availability.days_per_week (4); write 4天 or {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "referral",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/referral@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我每周可以到岗 5 天，烦请告知申请方式。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x2-control-months-6-cited",
+    "rule": "对照：写 6 个月并引 availability（日期里没有 6）",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '6 个月' is not the profile's availability.months (3); write 3个月 or {availability.months}个月\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '6 个月' is not the profile's availability.months (3); write 3个月 or {availability.months}个月\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我可以连续实习 6 个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x7-wechat-without-digits",
+    "rule": "冻结规则：不能手写微信；微信号不带数字，排除冻结样例 v23 里 23 的偶然命中",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\referral-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '微信号：fake_only_handle' - 手写了微信号、QQ 号这类联系方式；材料里不写，电话和邮箱用 {contact.phone}、{contact.email} 写在邮件的 signature 段\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\referral-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '微信号：fake_only_handle' - 手写了微信号、QQ 号这类联系方式；材料里不写，电话和邮箱用 {contact.phone}、{contact.email} 写在邮件的 signature 段\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "referral",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/referral@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，微信号：fake_only_handle，方便时烦请告知申请方式。",
+          "refs": []
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x3-residual-literal-frozen-notation",
+    "rule": "替换值残留槽位，用冻结文件的 {{ }} 记法",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\referral-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: once filled it still has a brace ('您好，想了解示例{{unfille'); write each placeholder exactly as {entry.field} and no other braces, and fix a profile or job value that has braces in it\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\referral-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: once filled it still has a brace ('您好，想了解示例{{unfille'); write each placeholder exactly as {entry.field} and no other braces, and fix a profile or job value that has braces in it\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "referral",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/referral@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，想了解{job.title}的申请方式。",
+          "refs": [
+            "job"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"示例{{unfilled_title}}岗位\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x4-unfilled-literal-frozen-notation",
+    "rule": "未代入槽位，用冻结文件的 {{ }} 记法",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {unfilled_role} is not a placeholder (write {entry.field}, e.g. {edu-1.school})\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {unfilled_role} is not a placeholder (write {entry.field}, e.g. {edu-1.school})\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我想申请{{unfilled_role}}。",
+          "refs": []
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x5-contact-email-in-body",
+    "rule": "未拆 signature：valid-contact-from-profile 的正文原样放进 body",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {contact.email}: the phone and the email belong only in an email's signature segment\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {contact.email}: the phone and the email belong only in an email's signature segment\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "email",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/email@1",
+      "subject": {
+        "text": "岗位申请",
+        "refs": []
+      },
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我是{contact.name}，希望了解岗位工作。联系邮箱：{contact.email}。",
+          "refs": []
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x6-unknown-availability-omitted-cited",
+    "rule": "valid-unknown-availability-omitted 加引 availability 后",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，我做过数据字段核对，希望了解岗位安排。到岗安排尚待确认。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002302",
+      "profile_hash": "04e64fbae4c0a66ba20b3b127dccac1ff74b0a8f793fe1474561b1c2857d8c39",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "data",
+      "template": "data/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "您好，我做过数据字段核对，希望了解岗位安排。到岗安排尚待确认。",
+          "refs": [
+            "proj-v23",
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002302\",\n      \"title\": \"数据清洗实习生\",\n      \"company\": \"示例留出乙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "r-date-placeholder",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "可以2026年12月7日到岗。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以{availability.start_date}到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      0,
+      0
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-date-written-equal",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '可以2026年12月7日到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '2026年', '12月', '7日')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '可以2026年12月7日到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '2026年', '12月', '7日')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以2026年12月7日到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-date-written-later",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '可以2026年12月8日到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '2026年', '12月', '8日')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '可以2026年12月8日到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '2026年', '12月', '8日')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以2026年12月8日到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-date-next-week",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '下周可以到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '下周')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '下周可以到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '下周')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "下周可以到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-date-soon",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '可以尽快入职' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '尽快')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '可以尽快入职' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '尽快')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以尽快入职。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-date-anytime",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '随时可以入职' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '随时')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '随时可以入职' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '随时')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "随时可以入职。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-date-mixed-placeholder",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '可于{availability.start_date}或明天到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '明天')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '可于{availability.start_date}或明天到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '明天')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可于{availability.start_date}或明天到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-days-equal",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "每周可以到岗4天。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗4天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      0,
+      0
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-days-placeholder",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "每周可以到岗4天。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗{availability.days_per_week}天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      0,
+      0
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-days-less",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3天' is not the profile's availability.days_per_week (4); write 4天 or {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3天' is not the profile's availability.days_per_week (4); write 4天 or {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗3天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-days-at-least-equal",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '4天': '至少' does not promise exactly the profile's availability.days_per_week; write 4天 or {availability.days_per_week}天, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '4天': '至少' does not promise exactly the profile's availability.days_per_week; write 4天 or {availability.days_per_week}天, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以至少到岗4天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-days-above-equal",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '4天': '以上' does not promise exactly the profile's availability.days_per_week; write 4天 or {availability.days_per_week}天, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '4天': '以上' does not promise exactly the profile's availability.days_per_week; write 4天 or {availability.days_per_week}天, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗4天以上。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-days-range",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3-4天' is not the profile's availability.days_per_week (4); write 4天 or {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3-4天' is not the profile's availability.days_per_week (4); write 4天 or {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗3-4天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-days-wrong-placeholder",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.months}天': days a week are written {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.months}天': days a week are written {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗{availability.months}天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-months-equal",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "可以连续实习3个月。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以连续实习3个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      0,
+      0
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-months-placeholder",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "可以连续实习3个月。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以连续实习{availability.months}个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      0,
+      0
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-months-less",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '2个月' is not the profile's availability.months (3); write 3个月 or {availability.months}个月\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '2个月' is not the profile's availability.months (3); write 3个月 or {availability.months}个月\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以连续实习2个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-months-at-least-equal",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3个月': '至少' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3个月': '至少' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以至少实习3个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-months-above-equal",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3个月': '以上' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3个月': '以上' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以连续实习3个月以上。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-months-range",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3-6个月' is not the profile's availability.months (3); write 3个月 or {availability.months}个月\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3-6个月' is not the profile's availability.months (3); write 3个月 or {availability.months}个月\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以连续实习3-6个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-cn-five-days",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '五天': write days a week in Arabic digits (4天) or as {availability.days_per_week}天, so they can be checked against the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '五天': write days a week in Arabic digits (4天) or as {availability.days_per_week}天, so they can be checked against the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗五天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-cn-two-days",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '两天': write days a week in Arabic digits (4天) or as {availability.days_per_week}天, so they can be checked against the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '两天': write days a week in Arabic digits (4天) or as {availability.days_per_week}天, so they can be checked against the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "一周能来两天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-cn-three-months",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '三个月': write months in Arabic digits (3个月) or as {availability.months}个月, so they can be checked against the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '三个月': write months in Arabic digits (3个月) or as {availability.months}个月, so they can be checked against the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "能连续实习三个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-cn-half-year",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '半年': write months in Arabic digits (3个月) or as {availability.months}个月, so they can be checked against the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '半年': write months in Arabic digits (3个月) or as {availability.months}个月, so they can be checked against the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "能实习半年。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-arabic-five-days",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '5天' is not the profile's availability.days_per_week (4); write 4天 or {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '5天' is not the profile's availability.days_per_week (4); write 4天 or {availability.days_per_week}天\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗5天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-arabic-six-months",
+    "rule": "11-04 裁定：到岗日期只用占位符，天数月数严格相等，不收至少/以上/区间或中文数字",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '6个月' is not the profile's availability.months (3); write 3个月 or {availability.months}个月\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '6个月' is not the profile's availability.months (3); write 3个月 or {availability.months}个月\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "能连续实习6个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-null-date-placeholder",
+    "rule": "a-2/a-8：未知值拒绝承诺，但待确认不是承诺",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {availability.start_date}: the profile has no availability.start_date\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {availability.start_date}: the profile has no availability.start_date\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002302",
+      "profile_hash": "04e64fbae4c0a66ba20b3b127dccac1ff74b0a8f793fe1474561b1c2857d8c39",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "data",
+      "template": "data/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以{availability.start_date}到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002302\",\n      \"title\": \"数据清洗实习生\",\n      \"company\": \"示例留出乙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-null-days-placeholder",
+    "rule": "a-2/a-8：未知值拒绝承诺，但待确认不是承诺",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {availability.days_per_week}: the profile has no availability.days_per_week\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {availability.days_per_week}: the profile has no availability.days_per_week\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002302",
+      "profile_hash": "04e64fbae4c0a66ba20b3b127dccac1ff74b0a8f793fe1474561b1c2857d8c39",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "data",
+      "template": "data/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗{availability.days_per_week}天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002302\",\n      \"title\": \"数据清洗实习生\",\n      \"company\": \"示例留出乙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-null-months-placeholder",
+    "rule": "a-2/a-8：未知值拒绝承诺，但待确认不是承诺",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {availability.months}: the profile has no availability.months\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {availability.months}: the profile has no availability.months\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002302",
+      "profile_hash": "04e64fbae4c0a66ba20b3b127dccac1ff74b0a8f793fe1474561b1c2857d8c39",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "data",
+      "template": "data/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以实习{availability.months}个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002302\",\n      \"title\": \"数据清洗实习生\",\n      \"company\": \"示例留出乙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-null-days-written",
+    "rule": "a-2/a-8：未知值拒绝承诺，但待确认不是承诺",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '4天' promises days a week; it is availability.days_per_week, which the profile does not give; leave it out, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '4天' promises days a week; it is availability.days_per_week, which the profile does not give; leave it out, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002302",
+      "profile_hash": "04e64fbae4c0a66ba20b3b127dccac1ff74b0a8f793fe1474561b1c2857d8c39",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "data",
+      "template": "data/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗4天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002302\",\n      \"title\": \"数据清洗实习生\",\n      \"company\": \"示例留出乙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-null-months-written",
+    "rule": "a-2/a-8：未知值拒绝承诺，但待确认不是承诺",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3个月' promises months; it is availability.months, which the profile does not give; leave it out, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '3个月' promises months; it is availability.months, which the profile does not give; leave it out, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002302",
+      "profile_hash": "04e64fbae4c0a66ba20b3b127dccac1ff74b0a8f793fe1474561b1c2857d8c39",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "data",
+      "template": "data/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以实习3个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002302\",\n      \"title\": \"数据清洗实习生\",\n      \"company\": \"示例留出乙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-a8-uncertain-no-ref",
+    "rule": "a-2/a-8：未知值拒绝承诺，但待确认不是承诺",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "到岗安排尚待确认。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002302",
+      "profile_hash": "04e64fbae4c0a66ba20b3b127dccac1ff74b0a8f793fe1474561b1c2857d8c39",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "data",
+      "template": "data/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "到岗安排尚待确认。",
+          "refs": []
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002302\",\n      \"title\": \"数据清洗实习生\",\n      \"company\": \"示例留出乙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      0,
+      0
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "r-a8-uncertain-cited",
+    "rule": "a-2/a-8：未知值拒绝承诺，但待确认不是承诺",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "到岗安排尚待确认。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002302",
+      "profile_hash": "04e64fbae4c0a66ba20b3b127dccac1ff74b0a8f793fe1474561b1c2857d8c39",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "data",
+      "template": "data/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "到岗安排尚待确认。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002302\",\n      \"title\": \"数据清洗实习生\",\n      \"company\": \"示例留出乙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      0,
+      0
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-date-from",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "可以2026年12月7日起到岗。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以{availability.start_date}起到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      0,
+      0
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-date-after",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "可以2026年12月7日以后到岗。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以{availability.start_date}以后到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      0,
+      0
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-date-earliest",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "最早可以2026年12月7日到岗。\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "最早可以{availability.start_date}到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      0,
+      0
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-date-latest",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '最晚' with {availability.start_date}: the profile gives the earliest day you can start, so write that day or from it on ({availability.start_date}起), not by it, before it, around it or earlier\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '最晚' with {availability.start_date}: the profile gives the earliest day you can start, so write that day or from it on ({availability.start_date}起), not by it, before it, around it or earlier\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "最晚可以{availability.start_date}到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-date-before",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '之前' with {availability.start_date}: the profile gives the earliest day you can start, so write that day or from it on ({availability.start_date}起), not by it, before it, around it or earlier\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '之前' with {availability.start_date}: the profile gives the earliest day you can start, so write that day or from it on ({availability.start_date}起), not by it, before it, around it or earlier\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以{availability.start_date}之前到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-date-around",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '左右' with {availability.start_date}: the profile gives the earliest day you can start, so write that day or from it on ({availability.start_date}起), not by it, before it, around it or earlier\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '左右' with {availability.start_date}: the profile gives the earliest day you can start, so write that day or from it on ({availability.start_date}起), not by it, before it, around it or earlier\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以{availability.start_date}左右到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-date-or-earlier",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '或更早' with {availability.start_date}: the profile gives the earliest day you can start, so write that day or from it on ({availability.start_date}起), not by it, before it, around it or earlier\",\n    \"segments[0].text: '可以{availability.start_date}或更早到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '更早')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '或更早' with {availability.start_date}: the profile gives the earliest day you can start, so write that day or from it on ({availability.start_date}起), not by it, before it, around it or earlier\",\n    \"segments[0].text: '可以{availability.start_date}或更早到岗' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '更早')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以{availability.start_date}或更早到岗。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-date-mixed-anytime",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '可以{availability.start_date}到岗或随时入职' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '随时')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '可以{availability.start_date}到岗或随时入职' promises when you can start; write the date as {availability.start_date} (the profile gives 2026-12-07), not by hand and not as a word like 随时 or 明天 (written by hand: '随时')\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以{availability.start_date}到岗或随时入职。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-months-placeholder-half",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.months}个半月': '个半月' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.months}个半月': '个半月' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以连续实习{availability.months}个半月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-months-placeholder-more",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.months}个多月': '个多月' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.months}个多月': '个多月' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以连续实习{availability.months}个多月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-days-placeholder-at-least",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.days_per_week}天': '至少' does not promise exactly the profile's availability.days_per_week; write 4天 or {availability.days_per_week}天, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.days_per_week}天': '至少' does not promise exactly the profile's availability.days_per_week; write 4天 or {availability.days_per_week}天, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以至少到岗{availability.days_per_week}天。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-days-placeholder-above",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.days_per_week}天': '以上' does not promise exactly the profile's availability.days_per_week; write 4天 or {availability.days_per_week}天, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.days_per_week}天': '以上' does not promise exactly the profile's availability.days_per_week; write 4天 or {availability.days_per_week}天, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "每周可以到岗{availability.days_per_week}天以上。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-months-placeholder-at-least",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.months}个月': '至少' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.months}个月': '至少' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以至少实习{availability.months}个月。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  },
+  {
+    "id": "s-months-placeholder-above",
+    "rule": "新 head 规则：日期占位符表示最早到岗日；占位符不能豁免手写时间或改变数量的修饰词",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.months}个月': '以上' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: '{availability.months}个月': '以上' does not promise exactly the profile's availability.months; write 3个月 or {availability.months}个月, with nothing like 至少, 以上, 起, 左右 or 半\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "material": {
+      "schema_version": 1,
+      "kind": "greeting",
+      "job_id": "job_000000002301",
+      "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+      "created": "2026-11-01T08:00:00+08:00",
+      "direction": "tech",
+      "template": "tech/greeting@1",
+      "subject": null,
+      "segments": [
+        {
+          "slot": "body",
+          "text": "可以连续实习{availability.months}个月以上。",
+          "refs": [
+            "availability"
+          ]
+        }
+      ]
+    },
+    "setup": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "jd save <data>\\job-input.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+        "stderr": ""
+      }
+    ],
+    "expected_exits": [
+      1,
+      1
+    ],
+    "pass_under_ruling": true
+  }
+]

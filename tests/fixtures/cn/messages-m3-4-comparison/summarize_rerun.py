@@ -39,6 +39,13 @@ def main():
         rows.append({"id": case["id"], "strict_pass": case["pass"], "ruling_pass": not problems,
                      "deferred_a6": deferred, "remaining_problems": problems})
     explicit = [probe for probe in probes if "pass_under_ruling" in probe]
+    groups = {}
+    for name, prefix in (("previous_33", "r-"), ("new_head", "s-")):
+        selected = [probe for probe in explicit if probe["id"].startswith(prefix)]
+        groups[name] = {
+            "total": len(selected), "passed": sum(probe["pass_under_ruling"] for probe in selected),
+            "failures": [probe["id"] for probe in selected if not probe["pass_under_ruling"]],
+        }
     summary = {
         "implementation": results["implementation"], "rulings": RULINGS,
         "frozen_total": len(rows), "strict_passed": results["passed"],
@@ -47,6 +54,7 @@ def main():
         "probe_total": len(probes), "added_ruling_probe_total": len(explicit),
         "added_ruling_probe_passed": sum(probe["pass_under_ruling"] for probe in explicit),
         "added_ruling_probe_failures": [probe["id"] for probe in explicit if not probe["pass_under_ruling"]],
+        "explicit_probe_groups": groups,
         "scope": "Probe results are separate from the 75 frozen cases; passing those cases alone is not overall acceptance.",
         "cases": rows,
     }
