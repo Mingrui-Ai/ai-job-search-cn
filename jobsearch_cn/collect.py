@@ -173,6 +173,7 @@ class _Run:
         started = clock()
         self.batch = options.batch or started.strftime("%Y%m%d-%H%M%S")
         self.batch_dir = None
+        self.unreadable = 0
         self.known, self.warnings = known_job_ids(self.data_root)
         self.summary = {
             "site": boss.SITE, "query": options.query, "city": options.city, "city_code": options.city_code,
@@ -205,8 +206,8 @@ class _Run:
                 return None
             if first or unreadable:
                 raise _Stop("page_changed", "搜索结果页上找不到岗位卡片或卡片里的详情链接，页面结构可能变了")
-        if unreadable:
-            self.warnings.append(f"{unreadable} 张岗位卡片里没有认得的详情链接，跳过了")
+        # A list that grows by scrolling shows the same odd cards (ads, say) again on every load.
+        self.unreadable = max(self.unreadable, unreadable)
         return cards
 
     def _load_list(self, number: int) -> Snapshot:
@@ -248,6 +249,8 @@ class _Run:
         mismatched = [card for card in candidates if not boss.location_matches(card["location"], options.city)]
         if candidates and len(mismatched) * 2 > len(candidates):
             self.warnings.append(f"一半以上的岗位不在{options.city}：城市代码 {options.city_code} 可能不对")
+        if self.unreadable:
+            self.warnings.append(f"{self.unreadable} 张卡片里没有认得的岗位详情链接（可能是广告），跳过了")
         return candidates[:options.max_jobs]
 
     # -- detail phase ------------------------------------------------------------------------

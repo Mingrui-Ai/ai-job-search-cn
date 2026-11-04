@@ -413,6 +413,18 @@ class Collecting(Run):
         summary = self.run_collect(FakeTab(list_pages=[elsewhere]), max_jobs=1)
         self.assertTrue(any("城市代码" in warning for warning in summary["warnings"]))
 
+    def test_cards_without_a_job_link_are_skipped_with_one_warning(self):
+        end = '</ul></div></div>\n<div id="footer">'
+        ad = '<li class="job-card-box"><a class="job-name" href="https://ad.example.com/x">推广</a></li>\n' + end
+        pages = [LIST_HTML.replace(end, ad), MORE_HTML.replace(end, ad)]
+        self.assertTrue(all(ad in page for page in pages), "sanity: the ad card went in")
+        tab = FakeTab(list_pages=pages)
+        summary = self.run_collect(tab, max_pages=2)
+        self.assertEqual(summary["saved"], 5)
+        self.assertNotIn("https://ad.example.com/x", [url for _, url in tab.calls])
+        self.assertEqual([warning for warning in summary["warnings"] if "详情链接" in warning],
+                         ["1 张卡片里没有认得的岗位详情链接（可能是广告），跳过了"])
+
 
 class Browser(unittest.TestCase):
     def test_only_local_debugging_addresses(self):

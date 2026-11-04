@@ -61,7 +61,7 @@ CITY_CODES = {
 
 SELECTORS = {
     # Search results: one card per job, and inside it the link to the job's detail page.
-    "card": ["li.job-card-box", "li.job-card-wrapper", "div.job-card-wrap"],
+    "card": ["li.job-card-box", "li.job-card-wrapper", "div.job-card-wrap", ".card-area"],
     "card_link": ["a.job-name[href]", "a.job-card-left[href]", "a[href*=\"/job_detail/\"]"],
     "card_title": [".job-name", ".job-title"],
     "card_salary": [".job-salary", ".salary"],
