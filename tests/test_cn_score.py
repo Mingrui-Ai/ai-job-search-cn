@@ -224,9 +224,10 @@ class Choices(Case):
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
 
     def test_a_new_rules_version_marks_older_records_stale(self):
-        self.assertEqual(score.RULES_VERSION, 10)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
+        self.assertEqual(score.RULES_VERSION, 11)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
         # 5: M2-6c's two checks; 6: H26's statistical analysis; 7: H29's office vocabulary;
-        # 8: H21's versioned skills; 9: M2-6e's salary tiers; 10: M2-6f's interview travel
+        # 8: H21's versioned skills; 9: M2-6e's salary tiers; 10: M2-6f's interview travel;
+        # 11: M2-5 round 2's salary in another unit without tiers, and Maven, HTTP, TCP/IP and the rest
         old = setting(scored(self.job, self.tech), "rules_version", 7)
         reasons = score.stale_reasons(old, self.job, score.profile_hash(self.tech), score.weights_of(self.tech))
         self.assertEqual(reasons, ["rules"])
@@ -267,6 +268,8 @@ class Experience(Case):
 
 
 class Salary(Case):
+    """Without tiers: the JD's upper figure reaches salary_min (100) or not (0)."""
+
     def test_upper_bound_against_the_minimum_in_the_same_unit(self):
         job = setting(self.job, "salary", {"min": 100, "max": 150, "unit": "CNY/day", "months": None, "negotiable": False})
         self.assertEqual(self.dimension("salary", job=job)["score"], 100)  # 150 reaches 150
@@ -279,7 +282,10 @@ class Salary(Case):
         cases = (
             (setting(self.job, "salary", None), self.tech, "JD 没写薪资"),
             (setting(self.job, "salary", negotiable), self.tech, "JD 薪资面议"),
-            (setting(self.job, "salary", monthly), self.tech, "单位不同，不换算"),
+            # Another unit is turned as the tiers turn it (M2-5 round 2); null only when it cannot be.
+            (setting(setting(self.job, "salary", monthly), "requirements.days_per_week", None), self.tech,
+             "按天换算要知道每周几天：JD 没写，档案也没写（target.salary_days_per_week），不换算"),
+            (setting(self.job, "salary", pay(40, 60, unit="CNY/hour")), self.tech, "按小时的不换算"),
             (self.job, setting(self.tech, "target.salary_min", None), "档案没写最低期望薪资"),
         )
         for job, profile, reason in cases:
@@ -287,6 +293,49 @@ class Salary(Case):
                 dimension = self.dimension("salary", job=job, profile=profile)
                 self.assertIsNone(dimension["score"])
                 self.assertIn(reason, dimension["reason"])
+
+
+    def test_another_unit_is_turned_into_the_profile_unit(self):
+        # M2-5 round 2: no tiers, a monthly minimum and a JD paying by the day. The figures are examples, nobody's.
+        monthly = setting(self.tech, "target.salary_min", {"amount": 3000, "unit": "CNY/month"})
+        # boss_intern pays 200-250 a day and asks 4 days a week: 250 * 4 * 52 / 12 = 4333.3 a month.
+        dimension = self.dimension("salary", profile=monthly)
+        self.assertEqual(dimension["score"], 100)
+        self.assertEqual(dimension["reason"], "JD 上限 250 元/天，折合 4333.3 元/月（按JD 写的每周 4 天、一年 52 周），"
+                                              "达到你的最低期望 3000 元/月")
+        # 150 * 4 * 52 / 12 = 2600, short of 3000: 0 and a gap that shows the sum turned.
+        short = setting(self.job, "salary", pay(100, 150))
+        record = scored(short, monthly)
+        self.assertEqual(record["dimensions"]["salary"]["score"], 0)
+        [gap] = [g for g in record["gaps"] if g["kind"] == "salary"]
+        self.assertEqual(gap["item"], "JD 上限 150 元/天，折合 2600 元/月（按JD 写的每周 4 天、一年 52 周），"
+                                      "低于你的最低期望 3000 元/月")
+        self.assertEqual(score.validate(record, short, monthly, VOCABULARY), [])
+        # The JD silent on days a week: the profile's salary_days_per_week. 150 * 4.5 * 52 / 12 = 2925, still short.
+        silent = setting(short, "requirements.days_per_week", None)
+        dimension = self.dimension("salary", silent, setting(monthly, "target.salary_days_per_week", 4.5))
+        self.assertEqual(dimension["score"], 0)
+        self.assertIn("折合 2925 元/月（按档案的每周 4.5 天", dimension["reason"])
+        dimension = self.dimension("salary", silent, setting(monthly, "target.salary_days_per_week", 5))
+        self.assertEqual(dimension["score"], 100)  # 150 * 5 * 52 / 12 = 3250
+        # A year is twelve months, no days a week needed: 42000 / 12 = 3500.
+        dimension = self.dimension("salary", setting(silent, "salary", pay(36000, 42000, unit="CNY/year")), monthly)
+        self.assertEqual(dimension["score"], 100)
+        self.assertIn("JD 上限 42000 元/年，折合 3500 元/月，达到", dimension["reason"])
+        # The other way round: a daily minimum of 150 and 2600 a month over 4 days a week is 150 a day.
+        reached = self.dimension("salary", setting(self.job, "salary", pay(2000, 2600, unit="CNY/month")))
+        self.assertEqual(reached["score"], 100)
+        self.assertIn("折合 150 元/天", reached["reason"])
+        # Meals are not added without tiers.
+        meals = setting(short, "benefits.meals", {"per_day": 2, "allowance": {"amount": 30, "unit": "CNY/day"}})
+        self.assertEqual(self.dimension("salary", meals, monthly)["score"], 0)
+
+    def test_the_same_unit_is_compared_as_before(self):
+        # By the hour on both sides needs no turning, so it is still compared (tiers never take it, #93 review).
+        hourly = setting(self.tech, "target.salary_min", {"amount": 30, "unit": "CNY/hour"})
+        dimension = self.dimension("salary", setting(self.job, "salary", pay(25, 35, unit="CNY/hour")), hourly)
+        self.assertEqual((dimension["score"], dimension["reason"]),
+                         (100, "JD 上限 35 元/小时，达到你的最低期望 30 元/小时"))
 
 
 def pay(low, high=None, unit="CNY/day") -> dict:

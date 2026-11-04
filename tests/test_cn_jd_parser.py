@@ -542,6 +542,15 @@ SEED_CASES = (
     ("负责抖音短视频运营和直播运营", "requirements.skills", ["抖音", "短视频运营", "直播运营"]),
     ("负责公众号文案，协助短视频拍摄和直播活动", "requirements.skills", ["公众号"]),
     ("整理访谈记录，参与Web自动化回归", "requirements.skills", []),
+    # M2-5 round 2: build tools and networking basics.
+    ("会用 Maven/Git 做项目构建", "requirements.skills", ["Maven", "Git"]),
+    ("熟悉TCP/IP、HTTP协议", "requirements.skills", ["TCP/IP", "HTTP"]),
+    ("了解 TCP/UDP，熟悉计算机网络和数据结构，用过 Gradle", "requirements.skills",
+     ["TCP", "UDP", "计算机网络", "数据结构", "Gradle"]),
+    ("熟悉 HTTP/2，了解 http 缓存", "requirements.skills", ["HTTP"]),
+    # A link is no protocol asked for, and HTTPS is not read as HTTP.
+    ("岗位详情见 http://example.com/jobs，熟悉 Java", "requirements.skills", ["Java"]),
+    ("熟悉 HTTPS 证书配置", "requirements.skills", []),
     # Synonym spellings (M2-4a) are read as written; matching takes them as one skill.
     ("熟悉HTML、CSS和JS，用过Node.js和JSON", "requirements.skills", ["HTML", "CSS", "JS", "Node.js"]),
     ("会做PPT，文案撰写能力强", "requirements.skills", ["PPT", "文案撰写"]),

@@ -472,7 +472,13 @@ class FormAndPage(unittest.TestCase):
         })
         unit = {"salary": {"min": 5000, "max": 8000, "unit": "CNY/month", "negotiable": False}}
         wanted = {"target": {"salary_min": {"amount": 150, "unit": "CNY/day"}}}
-        self.assertIn("单位", report._settle("salary", unit, wanted))
+        # M2-5 round 2: without tiers too, a null salary in another unit is pay that could not be turned.
+        self.assertIn("salary_days_per_week", report._settle("salary", unit, wanted))
+        hourly_job = {"salary": {"min": 40, "max": 40, "unit": "CNY/hour", "negotiable": False}}
+        self.assertIn("按小时的不换算", report._settle("salary", hourly_job, wanted))
+        hourly_min = {"target": {"salary_min": {"amount": 30, "unit": "CNY/hour"}}}
+        self.assertEqual(report._settle("salary", unit, hourly_min),
+                         f"{report.FILL_PROFILE}：最低期望薪资改按天或按月计（按小时的不换算），再重新评分")
         self.assertEqual(report._settle("salary", unit, {"target": {}}), report.FILL_PROFILE)
         # M2-6e: with tiers a null salary is pay that could not be turned: hourly, or days a week unknown.
         tiers = {"target": {"salary_min": {"amount": 150, "unit": "CNY/day"},
