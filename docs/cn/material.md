@@ -2,11 +2,11 @@
 
 简历等求职材料先写成一份**引用档案条目的 JSON**，检查通过以后再交给渲染（M3-2）。材料只决定选哪些条目、排什么顺序、经历要点怎么改写、列哪些技能和课程；姓名、联系方式、学校、公司、职位、日期都不写在材料里，渲染时按 `ref` 从档案里取，所以材料里没有编造这些内容的地方。
 
-本格式用 `kind` 区分材料种类。目前只有 `resume`（简历）；打招呼语、邮件（M3-4）以后沿用同一格式，另加种类。
+本格式用 `kind` 区分材料种类：`resume`（简历），以及打招呼语、投递邮件、内推请求（`greeting`、`email`、`referral`，M3-4，见[第 7 节](#7-打招呼语投递邮件内推请求m3-4)）。第 1–6 节讲简历。
 
 ## 1. 存放位置
 
-`data/materials/<岗位id>/resume-<n>.json`，一份简历一个文件。`data/` 不提交。
+`data/materials/<岗位id>/resume-<n>.json`，一份简历一个文件；打招呼语、邮件、内推请求是同一目录下的 `greeting-<n>.json`、`email-<n>.json`、`referral-<n>.json`。`data/` 不提交。
 
 ## 2. 引用的条目 id
 
@@ -40,7 +40,7 @@
 | 字段 | 说明 |
 | --- | --- |
 | `schema_version` | 固定为 `1` |
-| `kind` | 材料种类，目前只能是 `resume` |
+| `kind` | 材料种类：简历是 `resume`（另外三种见第 7 节） |
 | `job_id` | 这份材料投的岗位；本地岗位库里有这个岗位时，检查会对照它的技能要求给警告 |
 | `profile_hash` | 写材料时档案的摘要（和匹配记录用的是同一种），档案后来改过会给警告 |
 | `created` | 写材料的时间，ISO 8601，要带时区，例如 `2026-11-01T10:00:00+08:00`（结尾写 `Z` 也行）；日期或时间不存在的不通过 |
@@ -58,7 +58,7 @@
 python -m jobsearch_cn material validate data/materials/<岗位id>/resume-1.json [--profile <档案>] [--data-dir <目录>]
 ```
 
-档案默认为 `<数据目录>/profile/profile.json`，必须先通过 `profile validate`。简介引了 `notes.md` 时才读档案同目录的 `notes.md`（UTF-8，可以带 BOM）；没引就不读，文件在不在、是什么编码都不影响结果。输出和其他校验命令一样：标准输出 `{"valid": …, "errors": […], "warnings": […]}`。不通过时退出码 1，每条错误写明 `<字段路径>: <原因>`；材料或档案读不了（文件不存在、不是 JSON）时退出码 2。
+档案默认为 `<数据目录>/profile/profile.json`，必须先通过 `profile validate`。材料是打招呼语、邮件或内推请求时，按[第 7 节](#74-material-validate-怎么查)检查；下面讲简历。简介引了 `notes.md` 时才读档案同目录的 `notes.md`（UTF-8，可以带 BOM）；没引就不读，文件在不在、是什么编码都不影响结果。输出和其他校验命令一样：标准输出 `{"valid": …, "errors": […], "warnings": […]}`。不通过时退出码 1，每条错误写明 `<字段路径>: <原因>`；材料或档案读不了（文件不存在、不是 JSON）时退出码 2。
 
 **不通过**（错误）：
 
@@ -111,3 +111,135 @@ python -m jobsearch_cn material validate data/materials/<岗位id>/resume-1.json
 - `notes.md` 改了，材料不会因此失效，也不会有警告；
 - 数字和技能每次 `material validate`、`resume build` 都重新对照当时的 `notes.md`，删掉的数或技能会被拦下；
 - 意思上还对不对（例如用户收回了某句话），机器查不出，只能靠审核（[审核清单](review-checklist.md) B6）。**`notes.md` 改过以后，引了它的简介要重新审核。**
+
+## 7. 打招呼语、投递邮件、内推请求（M3-4）
+
+三种材料沿用本格式，另加三个 `kind`：
+
+| kind | 用途 | 文件 |
+| --- | --- | --- |
+| `greeting` | BOSS 直聘等平台的打招呼语 | `data/materials/<岗位id>/greeting-<n>.json` |
+| `email` | 投递邮件：标题和正文，简历作附件 | `data/materials/<岗位id>/email-<n>.json` |
+| `referral` | 请学长学姐、朋友内推的消息 | `data/materials/<岗位id>/referral-<n>.json` |
+
+只生成文字，不自动发送，由用户自己复制、发送。Agent 怎么起草、沟通草稿要不要独立审核、接进哪个工作流，归 M3-6（见[路线图](roadmap.md)）。
+
+### 7.1 字段
+
+例子（虚构，即 `tests/fixtures/cn/material/tech-m3/greeting-1.json`）：
+
+```json
+{
+  "schema_version": 1, "kind": "greeting", "job_id": "job_000000000001",
+  "profile_hash": "…", "created": "2026-11-01T10:00:00+08:00",
+  "direction": "tech", "template": "tech/greeting@1", "subject": null,
+  "segments": [
+    {"slot": "opening", "text": "您好，我是{edu-1.school}{edu-1.major}专业的{edu-1.level}生，想应聘贵司的{job.title}。", "refs": ["edu-1", "job"]},
+    {"slot": "evidence", "text": "在{exp-1.org}实习时用 Go 重构订单查询接口，P99 延迟从 120ms 降至 45ms。", "refs": ["exp-1"]},
+    {"slot": "availability", "text": "可以{availability.start_date}起到岗，每周{availability.days_per_week}天。", "refs": ["availability"]},
+    {"slot": "closing", "text": "方便的话我把简历发给您。", "refs": []}
+  ]
+}
+```
+
+| 字段 | 说明 |
+| --- | --- |
+| `schema_version`、`job_id`、`profile_hash`、`created` | 同简历（第 3 节） |
+| `kind` | `greeting`、`email` 或 `referral` |
+| `direction` | 用的哪个方向的模板，即模板的文件名（7.2） |
+| `template` | 模板编号 `<方向>/<kind>@<revision>`，照抄 `material template` 的输出 |
+| `subject` | 只有 `email` 有：邮件标题，`{"text": …, "refs": […]}`；另外两种写 `null` |
+| `segments[]` | 正文，按模板规定的槽位顺序排；每段有 `slot`（槽位名）、`text` 和 `refs` |
+
+所有字段都要写。`refs` 是这一段的依据，没有依据时写 `[]`，能写的是：
+
+- 档案条目的 `id`（第 2 节）；
+- `job`：本地岗位库里的这个岗位（`job_id`）；
+- `availability`：档案里的到岗信息。
+
+沟通材料不能引 `notes.md`，只有简历的简介能引。用它写求职动机，M3-6 第一版不做，M3-5 验收时看用户要不要。
+
+**占位符**：姓名、学校、专业、学历、公司、岗位名、到岗时间、GitHub 和个人主页都写成 `{条目.字段}`，不手写，由 `material render` 从档案和岗位库代入。检查能保证的是：占位符代入的是档案和岗位库里的原值；手写的手机号、邮箱、微信号、QQ 号和到岗时间不通过（7.4）。手写的学校、学历、公司、岗位名、姓名，检查分不出它和别的文字，起草时要用占位符，写没写对靠审核（M3-6）。只能用下表这些（`edu-1`、`exp-1` 换成实际引用的条目 id）：
+
+| 占位符 | 代入的值 | 本段 `refs` 里要有 |
+| --- | --- | --- |
+| `{job.title}`、`{job.company}` | 岗位名、公司名 | `job` |
+| `{edu-1.school}`、`{edu-1.major}`、`{edu-1.level}` | 学校、专业、学历（专科、本科、硕士、博士，和简历的写法相同） | `edu-1` |
+| `{exp-1.name}`、`{exp-1.org}`、`{exp-1.role}` | 经历的名称、单位、职位 | `exp-1` |
+| `{availability.start_date}`、`{availability.days_per_week}`、`{availability.months}` | 到岗日期（写成"2026年11月15日"）、每周天数、实习月数 | `availability` |
+| `{contact.name}` | 姓名 | 不用写 |
+| `{contact.github}`、`{contact.website}` | GitHub、个人主页（档案里写的原样）；放在 `greeting` 里会得到"招呼语里放链接"的警告 | 不用写 |
+| `{contact.phone}`、`{contact.email}` | 电话、邮箱；只能写在 `email` 的 `signature` 段 | 不用写 |
+
+### 7.2 模板和方向
+
+模板规定一种材料由哪些槽位组成：顺序、哪些必须有、每个槽位最多几段、`evidence` 优先引用哪类经历、写法提示，以及长度上限。正文由 Agent 按 JD 起草；模板里的 `examples` 是虚构的写法示范，不直接拷进材料。
+
+- 内置模板在 `jobsearch_cn/message_templates/<方向>.json`。第一版有 `tech`（技术）、`data`（数据）、`product`（产品）、`ops`（运营），加上兜底的 `default`（通用）（规划者 2026-11-02 裁定）。各方向的差别主要在 `evidence` 优先引用哪类经历，以及写法提示。
+- 用户可以在 `<数据目录>/templates/messages/<方向>.json` 放同名文件覆盖内置模板，或者放一个新文件增加方向。文件开头写 `"version": 1`（文件格式）、`"direction"`（和文件名相同）和 `"revision"`（这个模板的第几版，从 1 开始，不写算 1）。改了槽位或上限时把 `revision` 加 1，按旧版写的材料检查时就会得到警告。
+- 模板文件格式不对（缺槽位、槽位重名、上限或 `revision` 不是正整数等）时，用到模板的命令报错，退出码 2。
+
+```
+python -m jobsearch_cn material template <岗位id> --kind greeting|email|referral [--direction <方向>] [--profile <档案>] [--data-dir <目录>]
+```
+
+输出 JSON：选中的方向、选它的理由、模板编号和模板内容（`spec`），给 Agent 起草用。岗位库里没有这个岗位时退出码 1。选法按顺序：
+
+1. 给了 `--direction` 就用它。这个方向在技能词表里（design、market、finance、hr、general 等），但还没有模板时，用 `default`，输出的 `template` 是 `default/<kind>@…`，理由里写明指定的方向和用的模板；既没有模板、也不在词表里的方向报错，退出码 2；
+2. 否则看 JD 的技能主要属于哪些方向（和评分用同一个函数），在其中也写在档案 `target.directions` 里的方向中，取技能项最多的那个，并列时按档案里的顺序；这个方向还没有模板时用 `default`；
+3. 没有交集时，用档案 `target.directions` 的第一个，它没有模板时用 `default`；
+4. 档案没写求职方向，用 `default`。
+
+### 7.3 长度上限
+
+按字符数算，占位符按代入后的值算（规划者 2026-11-02 裁定）：
+
+| kind | 上限 |
+| --- | --- |
+| `greeting` | 150 字 |
+| `email` | 标题 40 字，正文 600 字 |
+| `referral` | 300 字 |
+
+正文的字数是各段代入后的字数之和，段与段之间的换行不算。模板可以把上限改小，不能改大：写了更大的值也按上表算。
+
+### 7.4 `material validate` 怎么查
+
+`material validate` 按 `kind` 分派：`resume` 按第 4 节查，另外三种按本节查，输出格式和退出码同第 4 节。
+
+**不通过**（错误）：
+
+- 字段缺失、多余或类型不对；`kind` 不是 `resume`、`greeting`、`email`、`referral` 之一时只报这一条，列出这四种；`direction` 没有对应的模板；`template` 的方向、种类和材料不符，或者 `@` 后面不是正整数；
+- 槽位不在模板里、顺序不对、超过这个槽位的段数，或者缺了必需的槽位；
+- `refs` 找不到，或者引了 `job`，岗位库里却没有这个岗位；用了占位符，却没在本段的 `refs` 里引用它所属的条目；占位符不在上表里或取不到值；电话、邮箱的占位符写在了 `email` 的 `signature` 段以外；
+- 代入以后文字里还有 `{` 或 `}`：手写的 `{ 回复 }`、`{{edu-1.school}}`，或者档案、岗位库里的值本身带花括号；
+- **编了数字或技能**：规则同第 4 节，对照本段所引条目的原文。引了 `job` 时原文加上岗位名和公司名。`availability` 不给任何数字作依据：到岗信息里的数按下一条逐项核对，日期 2026-12-07 里的 12 不能当成 12 个月。技能只认档案里的：岗位要求的技能，哪怕写在岗位名里，也不算候选人会。占位符代入的值不查数字和技能；
+- 手写了联系方式：手机号、邮箱（应该用 `{contact.phone}`、`{contact.email}`，写在 `email` 的 `signature` 段），以及"微信""vx""wx""WeChat""QQ"后面跟着的号码或 ID（"微信号：li_ming_2024""加微信 shili_handle""QQ：123456789"）。档案里没有微信号，所以哪一段都不能写；"微信小程序"这类说法不算；
+- **到岗承诺**和档案对不上。按句子看（逗号、句号等分开的一句），每种承诺只和档案里对应的那一项比：
+  - 每周天数："每周""一周"后面几个字以内的"N 天"（"每周可以到岗 4 天""一周能来两天"），或者写成"N 天/周"，是每周天数，只和 `availability.days_per_week` 比；"每周""一周"本身不算天数。"周一至周五"这类写法和"到岗""实习"写在一句里时也算每周天数，要改写成天数。
+  - 实习时长：句子里有"实习""到岗""入职"等词时，"N 个月"、"N 年"是实习时长，只和 `availability.months` 比，N 年按 12N 个月算。"实习了""实习期间""实习的 3 个月里"说的是做过的实习，不算；"三天内""两个月后"说的是什么时候，也不算天数、月数。
+  - 天数、月数只能写成阿拉伯数字，或者 `{availability.days_per_week}`、`{availability.months}`。"五天""三个月""半年""一年"这类中文数字的写法不通过：数字检查认不出单独的中文数（第 4 节），所以直接拒绝，提示改写；
+  - 天数、月数要正好是档案的值（规划者 2026-11-04 裁定）。等于档案的值，但带了让它变成上下限或约数的词，也不通过，提示写档案的值：数前面同一句里的"至少""最少""起码""最多""不超过""超过""大约""将近"等，紧挨在数前面的"约""近"，单位后面的"以上""以下""起""左右""出头""及以上""或更长"等；区间（"3-4 天"）也不通过。占位符一样：`{availability.days_per_week}` 后面只能接"天"或"个工作日"，`{availability.months}` 后面只能接"个月"，接"个半月""个多月""月"或者再加上面这些词都不通过（"{availability.months}个半月"会渲染成"6个半月"，和档案的 6 个月不符）；
+  - 到岗时间：句子里有"到岗""入职""上岗""报到""开始实习"，又写了时间（"随时""明天""尽快""下周""下半年""12月1日""两周后""提前""更早"等），就是到岗时间的承诺，时间只能写成 `{availability.start_date}`，手写的日期和"随时"这类说法都不通过。同一句里写了 `{availability.start_date}`，也不能再手写别的时间："可于{availability.start_date}或明天到岗"不通过。只有动词、没写时间的（"期待入职贵司""到岗安排可以再沟通"）不算承诺；
+  - `{availability.start_date}` 是档案里最早能到岗的日期，写"{availability.start_date}起""{availability.start_date}以后""最早{availability.start_date}"都可以；前面同一句里有"最晚""不晚于"这类词，或者后面紧接"前""之前""左右""或更早"，承诺的就比档案早或者不确定，不通过；
+  - 档案里对应的那一项是空的，这个承诺不通过：没有依据，不要写，或者请用户先补进档案；
+  - 有上面任何一种承诺，本段的 `refs` 里都要有 `availability`。
+
+  这些说法按常见写法认。认不出的说法里，阿拉伯数字照上一条查，`availability` 不给依据，所以不通过；认不出的中文数字查不到，要靠审核（M3-6）。
+- 超出长度上限；
+- 用了禁用说法中"不通过"的一级：敏感个人信息（年龄、出生、婚育、籍贯、民族、政治面貌、党员、健康状况、病史、身高、体重、家庭住址等）、绝对化的自夸（"最强""顶尖""100%""完美"等）、没替换的模板标记（`【`、`】`、"某某"，以及单独的两个及以上的 X，如"XX公司""xxx""××"；"5xx""XXL-JOB"不算）。
+
+手写的链接不查：GitHub 和个人主页用 `{contact.github}`、`{contact.website}`，档案里没有的链接靠审核（M3-6）。
+
+**警告**（不影响退出码，只在没有错误时给出）：档案在材料写好之后改过；材料是按旧版模板写的（`template` 里的 revision 不是现在的）；套话或不礼貌的开头（"在吗""亲""急求""求带""万分感谢"等）；贬低自己（"能力不足""可能不太合适"等）；`referral` 里提薪资；`greeting` 里放链接（平台常会屏蔽）。
+
+禁用说法是数据，不写死在代码里：内置的在 `jobsearch_cn/message_templates/banned.json`，按整个词或正则匹配，微信号、QQ 号的规则也在这里（`contact_errors`）。所引条目的原文里本来就有的说法放行，例如所引经历的要点自己写了"覆盖率 100%"。用户可以在 `<数据目录>/templates/messages/banned.json` 给 `errors`、`warnings` 两级追加词（`words`）和正则（`patterns`），不能删内置的。`words`、`patterns` 都要写成字符串的列表（`"words": ["冒昧"]`）；这个文件格式不对时（例如 `"words": "冒昧"`，或者正则写错）报错，退出码 2。
+
+### 7.5 `material render`
+
+```
+python -m jobsearch_cn material render data/materials/<岗位id>/greeting-1.json [--profile <档案>] [--data-dir <目录>]
+```
+
+先做和 `material validate` 相同的检查。有错误时在标准输出写 `{"valid": false, "errors": […], "warnings": […]}`，退出码 1；通过时把占位符换成档案和岗位库里的值，输出纯文本，警告写到标准错误，每条以"警告："开头。打招呼语各段直接连成一段；内推请求每段一行；邮件第一行是"标题：…"，空一行后是正文，段与段之间空一行。给的是简历时退出码 2，简历用 `resume build` 生成；`kind` 拼错时和 `material validate` 一样，输出 `{"valid": false, …}`，退出码 1。
+
+`material validate`、`material render`、`resume build`、`review draft` 检查材料用的是同一个函数，对同一份材料结论相同。`resume build` 和 `review draft` 只收简历，给沟通材料时退出码 2。
