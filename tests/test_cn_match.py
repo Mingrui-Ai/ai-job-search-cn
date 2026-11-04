@@ -232,6 +232,39 @@ class Location(CheckCase):
         item = self.assert_result(UNKNOWN, job=self.place(["北京"], False), profile=self.wants(["深圳"], False, None))
         self.assertEqual(item["reason"], "北京不在意向城市内；JD 不支持远程；你不接受远程；档案没写是否愿意去其他城市")
 
+    def test_the_user_can_take_unstated_remote_work_as_a_conflict(self):
+        # M2-5 round 2 (经理意见书-007, option A): off by default; on, a JD silent on remote work rules a
+        # city beyond both lists out when the user will not move, with the setting named as the reason.
+        def switched(profile, value=True):
+            return setting(profile, "availability.remote_unstated_as_conflict", value)
+
+        silent = self.place(["北京"], None)
+        for remote_ok in (True, None):
+            with self.subTest(remote_ok=remote_ok):
+                item = self.assert_result(CONFLICT, job=silent, profile=switched(self.wants(["深圳"], remote_ok, False)))
+                self.assertEqual(item["reason"], "北京不在意向城市内，你不考虑异地；JD 未写明可远程，按你的设置视为不符合")
+                self.assertIs(item["profile"]["availability.remote_unstated_as_conflict"], True)
+                verdict = match.filter_job(silent, switched(self.wants(["深圳"], remote_ok, False)))["verdict"]
+                self.assertEqual(verdict, match.INELIGIBLE)
+        # Off - false, null or not written, as in the sample profiles - it stays unknown, as before.
+        self.assertNotIn("remote_unstated_as_conflict", self.profile["availability"])
+        for profile in (self.wants(["深圳"], True, False), switched(self.wants(["深圳"], True, False), False),
+                        switched(self.wants(["深圳"], True, False), None)):
+            with self.subTest(setting=profile["availability"].get("remote_unstated_as_conflict", "absent")):
+                item = self.assert_result(UNKNOWN, job=silent, profile=profile)
+                self.assertNotIn("availability.remote_unstated_as_conflict", item["profile"])
+        # It changes nothing else: a JD that offers remote work, a user who may move or has not said,
+        # a preferred or acceptable city, and a JD naming no city.
+        on = switched(setting(self.wants(["深圳"], True, False), "availability.acceptable_cities", ["杭州"]))
+        self.assert_result(MATCH, job=self.place(["北京"], True), profile=on)
+        self.assert_result(MATCH, job=self.place(["深圳"], None), profile=on)
+        self.assert_result(MATCH, job=self.place(["杭州"], None), profile=on)
+        self.assert_result(UNKNOWN, job=self.place([], None), profile=on)
+        self.assert_result(MATCH, job=silent, profile=switched(self.wants(["深圳"], True, True)))
+        self.assert_result(UNKNOWN, job=silent, profile=switched(self.wants(["深圳"], True, None)))
+        item = self.assert_result(CONFLICT, job=self.place(["北京"], False), profile=on)
+        self.assertEqual(item["reason"], "北京不在意向城市内，且不能远程、不搬家")  # the JD rules remote out itself
+
     def test_an_acceptable_city_matches_with_a_note(self):
         # M2-6b, ruled by the planner: a city the user accepts is one they can work in, even with
         # relocate false; relocate is about the cities beyond both lists.

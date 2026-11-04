@@ -32,8 +32,9 @@ CONTACT_KEYS = ("name", "phone", "email", "github", "website")
 GRADUATION_KEYS = ("year", "month")
 EDUCATION_KEYS = ("level", "school", "major", "start", "end", "gpa", "rank", "courses", "source")
 AVAILABILITY_KEYS = ("start_date", "days_per_week", "months", "cities", "acceptable_cities", "remote_ok", "relocate")
-# Keys a profile may leave out, read as null (M2-6f: profiles written before it have no interview_travel).
-AVAILABILITY_OPTIONAL = ("interview_travel",)
+# Keys a profile may leave out, read as null (M2-6f: profiles written before it have no interview_travel;
+# M2-5 round 2: nor remote_unstated_as_conflict, which is off unless true).
+AVAILABILITY_OPTIONAL = ("interview_travel", "remote_unstated_as_conflict")
 TARGET_KEYS = ("employment_types", "roles", "industries", "salary_min", "salary_ideal", "salary_step", "meal_value",
                "salary_days_per_week", "one_meal_points", "directions", "weights")
 SALARY_MIN_KEYS = ("amount", "unit")
@@ -107,7 +108,7 @@ def validate(profile, sources=None, groups=None) -> list[str]:
             if isinstance(city, str) and match._city(city) in preferred:
                 errors.append(f"availability.acceptable_cities[{index}]: {city!r} is already a preferred city "
                               "(availability.cities)")
-        for key in ("remote_ok", "relocate", "interview_travel"):
+        for key in ("remote_ok", "relocate", "interview_travel", "remote_unstated_as_conflict"):
             _check_bool(availability.get(key), f"availability.{key}", errors)
 
     if _obj(profile, "target", TARGET_KEYS, errors):
