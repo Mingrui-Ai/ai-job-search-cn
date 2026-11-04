@@ -317,6 +317,17 @@ class Markdown(unittest.TestCase):
         self.assertEqual(rows[2], "| 检索 \\| 排序 | 缺口 | - | 第一行<br>第二行<br>第三行 |")
         self.assertEqual(rows[3], "| C:\\\\tools\\\\\\|x | 缺口 | - | - |")
 
+    def test_both_free_text_cells_are_handled_alike(self):
+        # #112 P3-2 the other way round: line breaks in the requirement, a pipe and a backslash in the note.
+        data = make_review()
+        data["coverage"] = [{"requirement": "检索\r排序\n推荐", "status": "gap", "where": [],
+                             "note": "要 A | B，见 C:\\docs\\|y"}]
+        self.assertEqual(errors_of(data), [])
+        rows = [line for line in review.markdown(data).splitlines() if line.startswith("|")]
+        self.assertEqual(len(rows), 3)  # header, rule, one row
+        self.assertEqual(re.sub(r"\\.", "", rows[2]).count("|"), 5, rows[2])  # four cells
+        self.assertEqual(rows[2], "| 检索<br>排序<br>推荐 | 缺口 | - | 要 A \\| B，见 C:\\\\docs\\\\\\|y |")
+
 
 def run_cli(*args, data_dir):
     env = dict(os.environ, PYTHONIOENCODING="utf-8", **{store.DATA_DIR_ENV: str(data_dir)})

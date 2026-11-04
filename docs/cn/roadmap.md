@@ -48,10 +48,10 @@
 P3 不挡合并，写在这里，免得只留在 PR 评论里。
 
 - #111 P3-1：Word 版用制表位分隔条目标题和副标题，PDF 模板多一个" · "，两份全文差几个装饰分隔点；`resume_docx.check` 查的是字段包含，不是全文相同。以后明确"文字一致"允许哪些排版分隔符，再加一项直接对照两份全文的检查。
-- #112 P3-2：`review show` 的覆盖表只转义了 `note` 里的竖线；`requirement` 里的竖线、两者里的换行会把四列表格拆乱。统一处理表格单元格的文字。
-- #112 P3-3：`review validate` 遇到超长的位置下标（例如 `skills[` 加五千个 9 再加 `]`）时，`int()` 触发 Python 的数字长度限制，抛出异常，没有输出约定的 JSON。转整数前先限制长度，按不存在的位置报告。
-- #115 P3：没引 `notes.md` 的材料，`material validate` 和 `resume build` 也会读一次 `notes.md`。改成引了才读。
-- 起草时材料的 `profile_hash` 没有命令单独输出，现在从不过期的匹配记录里抄（工作流先做匹配确认，所以够用）。可选的做法：`material validate` 报 `profile_hash` 不一致时，顺带给出当前的值。
+- [x] #112 P3-2：`review show` 的覆盖表只转义了 `note` 里的竖线；`requirement` 里的竖线、两者里的换行会把四列表格拆乱。统一处理表格单元格的文字。（PR #118，2026-11-03 合并：两列都经 `_cell`；PR #132 补了反过来的测试：换行在要求里，竖线在说明里）
+- [x] #112 P3-3：`review validate` 遇到超长的位置下标（例如 `skills[` 加五千个 9 再加 `]`）时，`int()` 触发 Python 的数字长度限制，抛出异常，没有输出约定的 JSON。转整数前先限制长度，按不存在的位置报告。（PR #118，2026-11-03 合并）
+- [x] #115 P3：没引 `notes.md` 的材料，`material validate` 和 `resume build` 也会读一次 `notes.md`。改成引了才读。（PR #119，2026-11-03 合并；`review draft` 也一样）
+- [x] 起草时材料的 `profile_hash` 没有命令单独输出，现在从不过期的匹配记录里抄（工作流先做匹配确认，所以够用）。可选的做法：`material validate` 报 `profile_hash` 不一致时，顺带给出当前的值。（PR #132：警告末尾附上现在的值，简历和沟通草稿共用一个函数）
 - #116 实跑（Claude A）：求职意向一行折行时，"起可到岗"会单独落到第二行（`resume build` 的模板），只影响版式。
 - 沟通草稿引用 `notes.md` 写求职动机：M3-6 第一版不做；M3-5 验收时看用户要不要，再按简介的规则安排。
 - #127 P2-1 的后续（规划者 2026-11-04 裁定，不在 M3-6 做）：`review validate` 发现旧文件。材料改了没重新 `resume build` 或 `material render --output` 时，第 2 轮的审核结果照样能通过；现在靠审核者先核对说明文件的 `material_hash`（resume-workflow.md 第 2、5 节）。可以让 `review validate`、`review show` 也核对 `resumes/`、`messages/` 下的说明文件，这要给两条命令加 `--data-dir`。

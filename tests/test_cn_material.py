@@ -24,7 +24,7 @@ SAMPLE = REPO / "tests" / "fixtures" / "cn" / "material" / "tech-m3"
 PROFILES = REPO / "tests" / "fixtures" / "cn" / "profile"
 
 sys.path.insert(0, str(REPO))
-from jobsearch_cn import material, profile, score, store, vocab  # noqa: E402
+from jobsearch_cn import material, messages, profile, score, store, vocab  # noqa: E402
 
 VOCABULARY = vocab.load()
 
@@ -379,8 +379,26 @@ class Warnings(unittest.TestCase):
         data["experience"][0]["end"] = "2026-09"
         errors, warnings = material.validate(MATERIAL, data, VOCABULARY)
         self.assertEqual(errors, [])
-        self.assertIn("profile_hash: the profile has changed since this material was written; check it still holds",
-                      warnings)
+        # With the current value, which no command prints on its own (P3 after #115).
+        current = score.profile_hash(data)
+        self.assertNotEqual(current, MATERIAL["profile_hash"])
+        self.assertIn("profile_hash: the profile has changed since this material was written; check it still holds "
+                      f"(the current value is {current})", warnings)
+
+    def test_a_message_gets_the_same_warning(self):
+        # material validate checks greetings, emails and referrals too (messages.py); they warn alike.
+        greeting = load(SAMPLE / "greeting-1.json")
+        data = copy.deepcopy(PROFILE)
+        data["skills"][0]["level"] = "expert"
+        errors, warnings = messages.validate(greeting, data, VOCABULARY, load(SAMPLE / "job.json"),
+                                             messages.load_templates(), messages.load_banned())
+        self.assertEqual(errors, [])
+        self.assertEqual(warnings[0], "profile_hash: the profile has changed since this material was written; "
+                                      f"check it still holds (the current value is {score.profile_hash(data)})")
+
+    def test_no_warning_while_the_profile_is_unchanged(self):
+        self.assertEqual(material._profile_changed(MATERIAL, PROFILE), None)
+        self.assertEqual(material._profile_changed({**MATERIAL, "profile_hash": None}, PROFILE), None)
 
     def test_a_proficient_skill_left_out(self):
         data = copy.deepcopy(MATERIAL)
@@ -433,6 +451,21 @@ class Command(unittest.TestCase):
         proc = self.validate(MATERIAL)
         self.assertEqual(proc.returncode, 0, proc.stderr.decode("utf-8"))
         self.assertEqual(json.loads(proc.stdout), {"valid": True, "errors": [], "warnings": []})
+
+    def test_the_profile_hash_warning_gives_the_value_to_copy(self):
+        # A draft whose profile_hash is not the current one: the warning says what to write, and once written
+        # it goes away. Still a warning, so the exit code stays 0.
+        data = copy.deepcopy(MATERIAL)
+        data["profile_hash"] = "0" * 64
+        proc = self.validate(data)
+        self.assertEqual(proc.returncode, 0, proc.stderr.decode("utf-8"))
+        [warning] = json.loads(proc.stdout)["warnings"]
+        head, _, current = warning.partition(" (the current value is ")
+        self.assertEqual(head, "profile_hash: the profile has changed since this material was written; "
+                               "check it still holds")
+        self.assertEqual(current, score.profile_hash(PROFILE) + ")")
+        data["profile_hash"] = current[:-1]
+        self.assertEqual(json.loads(self.validate(data).stdout), {"valid": True, "errors": [], "warnings": []})
 
     def test_an_invalid_material_lists_the_errors(self):
         proc = self.validate(bullet("延迟降低六成"))
