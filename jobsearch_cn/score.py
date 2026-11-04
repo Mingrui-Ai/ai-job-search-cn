@@ -18,13 +18,14 @@ import json
 from datetime import datetime
 from fractions import Fraction
 
-from jobsearch_cn import match, schema, vocab
+from jobsearch_cn import jd_parser, match, schema, vocab
 from jobsearch_cn.profile import WEIGHT_KEYS
 
 SCHEMA_VERSION = 1
 # Bump when a rule's result changes - a check result or verdict, a dimension score, which
 # gaps are listed - or the default weights do. Rewording a reason does not: a saved record
-# keeps the old wording until it is scored again (docs/cn/match.md, 匹配记录).
+# keeps the old wording until it is scored again (docs/cn/match.md, 匹配记录). Neither do the experience
+# hints, which no score uses; score_job() gives a kept experience the current ones.
 # 2: new same_as synonyms 大模型 / LLM / 大语言模型, 提示词工程 / Prompt, Photoshop / PS (H18).
 # 3: skills the JD offers a choice between count as one requirement (H16).
 # 4: the location dimension and its default weight (M2-6b).
@@ -120,7 +121,9 @@ def score_job(job: dict, profile: dict, vocabulary, previous=None, now=None) -> 
             and previous.get("rules_version") == RULES_VERSION):
         dimensions = previous.get("dimensions") or {}
         if (dimensions.get("experience") or {}).get("score") is not None:
-            record["dimensions"]["experience"] = dimensions["experience"]
+            # The hints come from the rules and may have changed without the score (M2-5 round 2): kept fresh.
+            record["dimensions"]["experience"] = dict(dimensions["experience"],
+                                                      hints=record["dimensions"]["experience"]["hints"])
         if record["dimensions"]["direction"]["score"] is None and (dimensions.get("direction") or {}).get("score") is not None:
             record["dimensions"]["direction"] = dimensions["direction"]
     record["total"] = total(record["dimensions"], record["weights"], record["filter"]["verdict"])
@@ -260,13 +263,28 @@ def _direction(job, profile, vocabulary) -> dict:
 
 
 def _experience(job, profile, vocabulary) -> dict:
-    """Left to an agent; the rules only point at the experience the JD's skills were used in."""
+    """Left to an agent; the rules only point at the experience the JD's skills were used in: the skill's
+    used_in, then any experience whose name, role or bullets name the skill (M2-5 round 2: a profile
+    whose used_in lists are empty still gets hints). The hints never change a score."""
     used = {}
+
+    def point(key, ref):
+        refs = used.setdefault(key, [])
+        if ref not in refs:
+            refs.append(ref)
+
     for skill in profile.get("skills") or []:
         for ref in skill.get("used_in") or []:
-            refs = used.setdefault(vocabulary.key(skill["name"]), [])
-            if ref not in refs:
-                refs.append(ref)
+            point(vocabulary.key(skill["name"]), ref)
+    patterns = jd_parser._skill_patterns(vocabulary)
+    for item in profile.get("experience") or []:
+        if not isinstance(item.get("id"), str):
+            continue
+        texts = [item.get("name"), item.get("role"), *(item.get("bullets") or [])]
+        for text in texts:
+            if isinstance(text, str):
+                for _, _, key in jd_parser.skill_mentions(text, patterns):
+                    point(key, item["id"])
     hints = [{"jd": name, "profile": used[vocabulary.key(name)]}
              for name in _asked(job, vocabulary) if vocabulary.key(name) in used]
     return {"score": None, "method": "agent", "reason": "等 Agent 对照经历补充", "hints": hints, "evidence": None}

@@ -360,14 +360,7 @@ class _Citations:
                                    "nor in the cited entries")
 
     def _skills_in(self, text: str) -> list:
-        claimed, hits = [], []
-        for term, pattern, key in self.patterns:
-            for match in pattern.finditer(text):
-                if any(match.start() < end and start < match.end() for start, end in claimed):
-                    continue
-                claimed.append((match.start(), match.end()))
-                hits.append((match, term, key))
-        return hits
+        return jd_parser.skill_mentions(text, self.patterns)
 
 
 def _courses(value, entry: dict, where: str, errors: list) -> None:
