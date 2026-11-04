@@ -413,9 +413,9 @@ def _warnings(material: dict, profile: dict, vocabulary, job) -> list:
     if summary and width(summary["text"]) > SUMMARY_WIDTH:
         warnings.append(f"summary.text: about {width(summary['text']):g} characters wide, more than the two lines "
                         f"({SUMMARY_WIDTH}) a summary should take; shorten it")
-    digest = material.get("profile_hash")
-    if digest and digest != score.profile_hash(profile):
-        warnings.append("profile_hash: the profile has changed since this material was written; check it still holds")
+    changed = _profile_changed(material, profile)
+    if changed:
+        warnings.append(changed)
     listed = {vocabulary.key(name) for name in material.get("skills") or []}
     for skill in profile.get("skills") or []:
         if skill.get("level") in _HIGH_LEVELS and vocabulary.key(skill["name"]) not in listed:
@@ -426,6 +426,16 @@ def _warnings(material: dict, profile: dict, vocabulary, job) -> list:
             if isinstance(name, str) and vocabulary.key(name) in held and vocabulary.key(name) not in listed:
                 warnings.append(f"skills: the JD asks for {name!r}, which the profile has, but it is not listed")
     return warnings
+
+
+def _profile_changed(record: dict, profile: dict):
+    """The warning for a CV or message written against an earlier profile, or None. It gives the current hash,
+    which no command prints on its own, so a new draft can copy it from here as well as from the match record."""
+    digest, current = record.get("profile_hash"), score.profile_hash(profile)
+    if not digest or digest == current:
+        return None
+    return (f"profile_hash: the profile has changed since this material was written; check it still holds "
+            f"(the current value is {current})")
 
 
 # Rendering (M3-2): the flat content resume_pdf and resume_docx lay out, shaped as resume_templates/sample.json.

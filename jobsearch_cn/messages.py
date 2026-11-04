@@ -671,10 +671,9 @@ def validate(record, profile: dict, vocabulary, job=None, templates: dict = None
         return errors, []
     if named != current:
         warnings.insert(0, f"template: written to {named}, the template is now {current}; check the slots still fit")
-    digest = record.get("profile_hash")
-    if digest and digest != score.profile_hash(profile):
-        warnings.insert(0, "profile_hash: the profile has changed since this material was written; "
-                           "check it still holds")
+    changed = material._profile_changed(record, profile)
+    if changed:
+        warnings.insert(0, changed)
     return errors, warnings
 
 
