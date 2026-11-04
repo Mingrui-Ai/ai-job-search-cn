@@ -1,4 +1,77 @@
-# V25 · M4-1a 对照报告（#122）
+# V25 · M4-1 投递记录对照报告（#122 / #126）
+
+## M4-1b 对照（9db3287，2026-11-04）
+
+**B01–B30 全部运行：按裁定通过 30/30，严格比较通过 28/30。新 P1、P2、P3 均为 0。** 严格差别只有 B11 的历史日期准备和 B21 的警告期望，解释如下。#126 上 Codex B 已报的四项 P2 不在本次冻结步骤的失败边界内，本结果不表示它们已经修复，不替代代码审核；#124 不合并。
+
+### 基线与证据
+
+- 被测实现：#126 的 `9db32876cde23bf2db1097b9a3599362cd0cbbeb`，独立干净的 detached 工作树；运行器核对完整 SHA，不修改产品代码。
+- 裁定：该 head 的 [M4-1b 计划](https://github.com/Mingrui-Ai/ai-job-search-cn/blob/9db32876cde23bf2db1097b9a3599362cd0cbbeb/docs/cn/worklog/2026-11-04-m4-1b-applications.md) §2、§5，以及 [#126 规划者裁定](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/126#issuecomment-6623727633)。
+- 冻结基线仍为 `b785a776a77a48f685b9371f4d3371b207047f0e`。既有 `verify_oracle.py` 在运行前后通过，14 个冻结文件的摘要一致。`scenarios.json`、输入、清单、校验脚本均未改；前两轮 M4-1a 输出和原运行器也未改。
+- 新运行器：[run_m4_1b.py](run_m4_1b.py)。复用旧运行器的虚构数据准备、哈希和 CLI 结果包装；B01–B30 的执行和判断单独保存，不改旧 A 场景的实现。
+- [汇总](actual/pr126-9db3287/results.json)、[30 个场景的命令／输出／事件和逐项判断](actual/pr126-9db3287/cases/)、[B11 历史日期重放](actual/pr126-9db3287/cases/B11-historical-replay.json)。数据目录、实现目录、解释器和 Typst 的本机路径已替换成标记。
+- 环境：Windows、conda `ai-job-search-cn`、Typst 0.15.1。只用冻结虚构数据；每个场景独立数据目录，CLI 显式传 `--data-dir`，不读取真实数据。生成的临时数据库、PDF 和 Word 只留在本机日志目录，不随证据入库。
+
+### 严格结果和按裁定结果
+
+| 场景 | 严格通过 | 按裁定通过 | 说明 |
+| --- | --- | --- | --- |
+| B01–B10 | 10/10 | 10/10 | 回复、备注、跟进和终结状态；`impl` 项另按已批准计划核对 |
+| B11 | 0/1 | 1/1 | 实际日期下不允许新设过去的跟进日期；历史状态另行重放通过 |
+| B12–B20 | 9/9 | 9/9 | 默认日期、连续作废、材料保留、revision 和拒绝不写 |
+| B21 | 0/1 | 1/1 | 冻结步骤的“无警告”与该场景末尾和已批准规则冲突；实际隐私警告正确 |
+| B22–B30 | 8/8 | 8/8 | 重试、备份恢复、入口授权、文档命令和两条故事 |
+| 合计 | 28/30 | 30/30 | 460 项严格检查中 456 项通过，4 项差别分布在 B11、B21 |
+
+**B11：原日期不改，区分历史状态和今天的新请求。** 冻结准备要求用产品命令给 I 设置 `2026-11-01`，实际运行日是 `2026-11-04`。按照已经批准的计划 §2.2，这个新请求退出 1、`invalid`，提示不能设过去日期。因此原始输出中 I 没进入 due，而进入 unset；准备、due、unset 三项严格不符。保留这份输出，另建一份虚构数据，仅在 CLI 子进程中将 `applications._today` 设为 `2026-11-01`，依原日期通过产品命令建立全部六条记录，再执行原 `list --due --as-of 2026-11-10`：due 为 I、P，逾期 9、5 天；unset 仅 R；Q、D、X 排除；整库 validate 通过。未改系统时钟、冻结日期或数据库行。汇总只允许这三项由过去日期导致的差别，历史重放及其他检查仍须全部通过。
+
+**B21：冻结期望内部不一致，依已批准的隐私警告规则判定。** 最后一步 `validate` 写了 `warning=false`，同一场景的 `checks` 却明确要求 warnings 点到手机号、邮箱和 URL。计划 §2.7(5) 已批准这些警告。实际退出 0、`valid=true`，三个类别都准确提示；严格结果保留“无警告”检查失败，按裁定通过。不修改这条冻结期望。
+
+### 按实现核对的项目
+
+| 项目 | 实际行为及核对结果 |
+| --- | --- |
+| B04 回复边界 | drafted 的回复退出 1、`transition`，状态不变；补充核对已投出的 hired、rejected、withdrawn、offer_declined 均可记回复，状态不变 |
+| B05、B06 备注 | 已结束记录可加备注；note 无发生时间，`--on`、`--at` 均被 argparse 拒绝且不写 |
+| B07 参数互斥 | `--due` 与 `--cancel` 同给或都不给均退出 2；设置、取消的事件类型和 payload 正确 |
+| B09 跟进边界 | 过去日期为 `invalid`；补充核对 drafted、no_response 和四个终结状态的设置／取消均为 `transition`、不写 |
+| B12 默认日期 | 空库退出 0，as_of 为北京时间当天，due、unset 为空；额外 note 说明尚无记录，不建库 |
+| B13、B15–B20 作废 | revision 照常增加；连续作废跳过作废事件，第二次作废 submitted；created 不能作废；归档和材料版本保留，validate 无孤立文件错误；record --submitted 的普通投出可作废 |
+| B22 请求冲突 | 同 id 同内容返回原事件、不增事件；复用 id 改内容时提交为 `request_conflict`。该冻结模式先做预览，但预览因旧 revision 返回 stale_revision 后，仍按模式定义执行携带原 id 的故意冲突提交；两次拒绝都不写 |
+| B23–B25 备份 | backup 一步执行；manifest 和数据库、附件摘要相符；源库和原归档不变；复制到新目录后 export 与原库相同（仅忽略 exported_at），validate 通过；无库时为 not_found，不建空备份 |
+| B26–B28 入口和授权 | 三个入口指向同一工作流；预览、用户同意、request_id、actor 和不走上游流程写在共用说明；11 项入口测试、lint_skills、security_guards 通过；文档中每个 application 子命令 --help 退出 0，简历交付段有工作流链接 |
+
+所有正常写操作均先预览再提交，预览逐次核对整个数据目录未变。B22 的同请求重试及故意复用旧请求按冻结模式执行；backup 按已批准例外直接运行。拒绝操作及冻结只读步骤也检查整个数据目录不变。
+
+### 与 Codex B 四项 P2 的对应
+
+依 [Codex B 审核（9db3287）](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/126#issuecomment-6623854046) 保留原编号，不重复列为新问题：
+
+| 已有编号 | 对应领域 | 本轮证据的范围 |
+| --- | --- | --- |
+| P2-1 | B23、B25 备份与恢复 | 正常归档路径通过；冻结输入没有 Windows 异常路径，不覆盖该缺陷 |
+| P2-2 | B04 回复状态 | 测 drafted 和已投出的终结记录；没有“从未投出便撤回”的组合，不覆盖该缺陷 |
+| P2-3 | B22 重试 | 冻结步骤是 note 的同日重试；没有 followup 跨日重试，不覆盖该缺陷 |
+| P2-4 | B23、B25 备份 | 正常无锁备份通过；没有打开源连接后再持独占锁，不覆盖该缺陷 |
+
+**新问题：P1=0、P2=0、P3=0。** B11、B21 按既有批准规则解释，无需新增范围裁定；本轮通过数不能用于关闭上述四项 P2。
+
+### 复跑和检查
+
+```powershell
+conda run --no-capture-output -n ai-job-search-cn python tests/fixtures/cn/applications-m4-1-holdout/verify_oracle.py
+conda run --no-capture-output -n ai-job-search-cn python tests/fixtures/cn/applications-m4-1-comparison/run_m4_1b.py --repo <固定head的工作树> --typst <typst.exe> --output <全新输出目录>
+```
+
+运行器退出 0 仅表示完成取证，判定以 results.json 为准；B11 的实际日期与历史时钟写在证据中。只将 results.json 和 cases/ 作为公开证据，保留 work/ 和 templates/ 在本机。
+
+- 报告分支合入最新 master `5585f24cc80c7d3428f8ee95ce21428aa1443278`，合并提交 `45f150c`；被测工作树仍固定为上面的 #126 SHA，没有把 master 合进去改变被测对象。
+- 报告分支全量测试 1713 项，跳过 26 项，其余通过，零失败／错误，434.720 秒。被测 head 的 M4-1b 事件测试 19 项、入口测试 11 项均通过；不把报告分支全量测试数当作被测 head 的测试数。
+- 两个工作树的 lint_skills、security_guards 均通过；冻结与交付文件完整性检查见[本轮工作记录](../../../../docs/cn/worklog/2026-11-04-v25-m4-1b-comparison.md)。
+- [证据复核摘要](actual/pr126-9db3287/verification.json)：33 份 JSON 可解析，37 个交付文本通过编码与本机信息扫描；记录的步骤和期望与冻结文件一致，124 项预览只读检查、21 项拒绝或只读步骤的数据不变检查通过；`git diff --check` 通过。
+
+## M4-1a 历史对照记录
 
 最新复跑见[复跑（52d84d0）](#复跑52d84d0)：按规划者裁定 **80 个通过、0 个不通过**；冻结期望的严格比较为 **67 个通过、13 个不通过**，剩余 13 个都是已批准的差别。
 

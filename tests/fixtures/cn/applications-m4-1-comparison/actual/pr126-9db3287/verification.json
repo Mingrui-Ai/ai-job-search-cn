@@ -1,0 +1,21 @@
+{
+  "tested_head": "9db32876cde23bf2db1097b9a3599362cd0cbbeb",
+  "frozen_files_unchanged": 14,
+  "scenarios_exercised": 30,
+  "strict_passed": 28,
+  "ruling_passed": 30,
+  "recorded_step_commands_and_expectations_match_frozen": true,
+  "commands_recorded_in_30_cases": 418,
+  "preview_read_only_checks_passed": 124,
+  "reject_or_read_data_unchanged_checks_passed": 21,
+  "only_test_clock_override": "B11 historical replay, applications._today=2026-11-01",
+  "new_P1": 0,
+  "new_P2": 0,
+  "new_P3": 0,
+  "known_review_P2s_are_not_closed_by_these_scenarios": [
+    "P2-1",
+    "P2-2",
+    "P2-3",
+    "P2-4"
+  ]
+}

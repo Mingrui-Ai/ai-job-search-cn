@@ -1,0 +1,1355 @@
+{
+  "id": "B07",
+  "title": "设置和取消跟进日期",
+  "strict_pass": true,
+  "ruling_pass": true,
+  "crash": null,
+  "checks": [
+    {
+      "check": "preview is read-only: record",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "step 1 record result",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "check": "step 1 record exit",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "check": "step 1 record warning",
+      "ok": true,
+      "detail": "['材料未记录 (no material recorded): the submission is recorded without the files sent; say so to the user']"
+    },
+    {
+      "check": "preview is read-only: followup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "step 2 followup result",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "check": "step 2 followup exit",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "check": "step 2 followup warning",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "check": "preview is read-only: followup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "step 3 followup result",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "check": "step 3 followup exit",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "check": "step 3 followup warning",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "check": "preview is read-only: followup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "step 4 followup result",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "check": "step 4 followup data unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "preview is read-only: followup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "step 5 followup result",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "check": "step 5 followup data unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "scheduled payload and cancel clear date",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "validate replays the stored projection",
+      "ok": true,
+      "detail": "{'valid': True, 'errors': [], 'warnings': ['app_4087cca0cbbb1520c6adef851fc0e7f7: 材料未记录 (no material recorded with the submission)'], 'orphans': []}"
+    }
+  ],
+  "ruling_checks": [],
+  "impl_observed": [
+    {
+      "item": "step 4 followup",
+      "observed": "{'exit': 2, 'error': None, 'output': None}"
+    },
+    {
+      "item": "step 5 followup",
+      "observed": "{'exit': 2, 'error': None, 'output': None}"
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "frozen_command": "record {JOB_A} --channel portal --platform 示例招聘站 --submitted --on 2026-10-28",
+      "expect": {
+        "result": "accepted",
+        "exit": 0,
+        "error": null,
+        "warning": true
+      },
+      "exit": 0,
+      "error": null,
+      "output": {
+        "application": {
+          "application_id": "app_4087cca0cbbb1520c6adef851fc0e7f7",
+          "job_id": "job_fa26c5d52ff7",
+          "record_origin": "current",
+          "channel": {
+            "kind": "portal",
+            "platform": "示例招聘站"
+          },
+          "created_at": "2026-11-04T06:15:34Z",
+          "updated_at": "2026-11-04T06:15:34Z",
+          "revision": 2,
+          "status": "applied",
+          "submission": {
+            "confirmed": true,
+            "occurred_at": null,
+            "occurred_on": "2026-10-28",
+            "materials_recorded": false,
+            "materials_check": null
+          },
+          "next_followup_on": null,
+          "context_snapshot": {
+            "job": {
+              "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json",
+              "sha256": "1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac"
+            },
+            "match": {
+              "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json",
+              "sha256": "ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569"
+            }
+          },
+          "material_versions": [],
+          "events": [
+            {
+              "event_id": "evt_870c70f42ee25010ae997c4f113ffb84",
+              "seq": 1,
+              "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+              "type": "created",
+              "occurred_at": null,
+              "occurred_on": null,
+              "recorded_at": "2026-11-04T06:15:34Z",
+              "actor": "user",
+              "source": {
+                "kind": "user",
+                "reference": null
+              },
+              "payload": {
+                "channel": {
+                  "kind": "portal",
+                  "platform": "示例招聘站"
+                },
+                "job_id": "job_fa26c5d52ff7",
+                "record_origin": "current"
+              },
+              "voided_by": null
+            },
+            {
+              "event_id": "evt_1259120416e2d6e5485599311afaf4f2",
+              "seq": 2,
+              "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+              "type": "submitted",
+              "occurred_at": null,
+              "occurred_on": "2026-10-28",
+              "recorded_at": "2026-11-04T06:15:34Z",
+              "actor": "user",
+              "source": {
+                "kind": "user",
+                "reference": null
+              },
+              "payload": {
+                "channel": {
+                  "kind": "portal",
+                  "platform": "示例招聘站"
+                },
+                "material_version_ids": [],
+                "materials_check": null,
+                "sent_file_refs": []
+              },
+              "voided_by": null
+            }
+          ]
+        },
+        "events": [
+          {
+            "event_id": "evt_870c70f42ee25010ae997c4f113ffb84",
+            "seq": 1,
+            "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+            "type": "created",
+            "occurred_at": null,
+            "occurred_on": null,
+            "recorded_at": "2026-11-04T06:15:34Z",
+            "actor": "user",
+            "source": {
+              "kind": "user",
+              "reference": null
+            },
+            "payload": {
+              "channel": {
+                "kind": "portal",
+                "platform": "示例招聘站"
+              },
+              "job_id": "job_fa26c5d52ff7",
+              "record_origin": "current"
+            },
+            "voided_by": null
+          },
+          {
+            "event_id": "evt_1259120416e2d6e5485599311afaf4f2",
+            "seq": 2,
+            "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+            "type": "submitted",
+            "occurred_at": null,
+            "occurred_on": "2026-10-28",
+            "recorded_at": "2026-11-04T06:15:34Z",
+            "actor": "user",
+            "source": {
+              "kind": "user",
+              "reference": null
+            },
+            "payload": {
+              "channel": {
+                "kind": "portal",
+                "platform": "示例招聘站"
+              },
+              "material_version_ids": [],
+              "materials_check": null,
+              "sent_file_refs": []
+            },
+            "voided_by": null
+          }
+        ],
+        "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+        "preview": false,
+        "repeated": false,
+        "warnings": [
+          "材料未记录 (no material recorded): the submission is recorded without the files sent; say so to the user"
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "frozen_command": "followup {APP} --due 2026-11-10 --expected-revision 2",
+      "expect": {
+        "result": "accepted",
+        "exit": 0,
+        "error": null,
+        "warning": false
+      },
+      "exit": 0,
+      "error": null,
+      "output": {
+        "application": {
+          "application_id": "app_4087cca0cbbb1520c6adef851fc0e7f7",
+          "job_id": "job_fa26c5d52ff7",
+          "record_origin": "current",
+          "channel": {
+            "kind": "portal",
+            "platform": "示例招聘站"
+          },
+          "created_at": "2026-11-04T06:15:34Z",
+          "updated_at": "2026-11-04T06:15:35Z",
+          "revision": 3,
+          "status": "applied",
+          "submission": {
+            "confirmed": true,
+            "occurred_at": null,
+            "occurred_on": "2026-10-28",
+            "materials_recorded": false,
+            "materials_check": null
+          },
+          "next_followup_on": "2026-11-10",
+          "context_snapshot": {
+            "job": {
+              "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json",
+              "sha256": "1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac"
+            },
+            "match": {
+              "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json",
+              "sha256": "ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569"
+            }
+          },
+          "material_versions": [],
+          "events": [
+            {
+              "event_id": "evt_870c70f42ee25010ae997c4f113ffb84",
+              "seq": 1,
+              "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+              "type": "created",
+              "occurred_at": null,
+              "occurred_on": null,
+              "recorded_at": "2026-11-04T06:15:34Z",
+              "actor": "user",
+              "source": {
+                "kind": "user",
+                "reference": null
+              },
+              "payload": {
+                "channel": {
+                  "kind": "portal",
+                  "platform": "示例招聘站"
+                },
+                "job_id": "job_fa26c5d52ff7",
+                "record_origin": "current"
+              },
+              "voided_by": null
+            },
+            {
+              "event_id": "evt_1259120416e2d6e5485599311afaf4f2",
+              "seq": 2,
+              "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+              "type": "submitted",
+              "occurred_at": null,
+              "occurred_on": "2026-10-28",
+              "recorded_at": "2026-11-04T06:15:34Z",
+              "actor": "user",
+              "source": {
+                "kind": "user",
+                "reference": null
+              },
+              "payload": {
+                "channel": {
+                  "kind": "portal",
+                  "platform": "示例招聘站"
+                },
+                "material_version_ids": [],
+                "materials_check": null,
+                "sent_file_refs": []
+              },
+              "voided_by": null
+            },
+            {
+              "event_id": "evt_3466c23b503614d89cfc71e65a45fbd5",
+              "seq": 3,
+              "request_id": "req_8cef68f4b7f933af03d2fa200b41c175",
+              "type": "followup_scheduled",
+              "occurred_at": null,
+              "occurred_on": null,
+              "recorded_at": "2026-11-04T06:15:35Z",
+              "actor": "user",
+              "source": {
+                "kind": "user",
+                "reference": null
+              },
+              "payload": {
+                "due_on": "2026-11-10"
+              },
+              "voided_by": null
+            }
+          ]
+        },
+        "events": [
+          {
+            "event_id": "evt_3466c23b503614d89cfc71e65a45fbd5",
+            "seq": 3,
+            "request_id": "req_8cef68f4b7f933af03d2fa200b41c175",
+            "type": "followup_scheduled",
+            "occurred_at": null,
+            "occurred_on": null,
+            "recorded_at": "2026-11-04T06:15:35Z",
+            "actor": "user",
+            "source": {
+              "kind": "user",
+              "reference": null
+            },
+            "payload": {
+              "due_on": "2026-11-10"
+            },
+            "voided_by": null
+          }
+        ],
+        "request_id": "req_8cef68f4b7f933af03d2fa200b41c175",
+        "preview": false,
+        "repeated": false,
+        "warnings": []
+      }
+    },
+    {
+      "index": 3,
+      "frozen_command": "followup {APP} --cancel --expected-revision 3",
+      "expect": {
+        "result": "accepted",
+        "exit": 0,
+        "error": null,
+        "warning": false
+      },
+      "exit": 0,
+      "error": null,
+      "output": {
+        "application": {
+          "application_id": "app_4087cca0cbbb1520c6adef851fc0e7f7",
+          "job_id": "job_fa26c5d52ff7",
+          "record_origin": "current",
+          "channel": {
+            "kind": "portal",
+            "platform": "示例招聘站"
+          },
+          "created_at": "2026-11-04T06:15:34Z",
+          "updated_at": "2026-11-04T06:15:36Z",
+          "revision": 4,
+          "status": "applied",
+          "submission": {
+            "confirmed": true,
+            "occurred_at": null,
+            "occurred_on": "2026-10-28",
+            "materials_recorded": false,
+            "materials_check": null
+          },
+          "next_followup_on": null,
+          "context_snapshot": {
+            "job": {
+              "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json",
+              "sha256": "1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac"
+            },
+            "match": {
+              "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json",
+              "sha256": "ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569"
+            }
+          },
+          "material_versions": [],
+          "events": [
+            {
+              "event_id": "evt_870c70f42ee25010ae997c4f113ffb84",
+              "seq": 1,
+              "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+              "type": "created",
+              "occurred_at": null,
+              "occurred_on": null,
+              "recorded_at": "2026-11-04T06:15:34Z",
+              "actor": "user",
+              "source": {
+                "kind": "user",
+                "reference": null
+              },
+              "payload": {
+                "channel": {
+                  "kind": "portal",
+                  "platform": "示例招聘站"
+                },
+                "job_id": "job_fa26c5d52ff7",
+                "record_origin": "current"
+              },
+              "voided_by": null
+            },
+            {
+              "event_id": "evt_1259120416e2d6e5485599311afaf4f2",
+              "seq": 2,
+              "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+              "type": "submitted",
+              "occurred_at": null,
+              "occurred_on": "2026-10-28",
+              "recorded_at": "2026-11-04T06:15:34Z",
+              "actor": "user",
+              "source": {
+                "kind": "user",
+                "reference": null
+              },
+              "payload": {
+                "channel": {
+                  "kind": "portal",
+                  "platform": "示例招聘站"
+                },
+                "material_version_ids": [],
+                "materials_check": null,
+                "sent_file_refs": []
+              },
+              "voided_by": null
+            },
+            {
+              "event_id": "evt_3466c23b503614d89cfc71e65a45fbd5",
+              "seq": 3,
+              "request_id": "req_8cef68f4b7f933af03d2fa200b41c175",
+              "type": "followup_scheduled",
+              "occurred_at": null,
+              "occurred_on": null,
+              "recorded_at": "2026-11-04T06:15:35Z",
+              "actor": "user",
+              "source": {
+                "kind": "user",
+                "reference": null
+              },
+              "payload": {
+                "due_on": "2026-11-10"
+              },
+              "voided_by": null
+            },
+            {
+              "event_id": "evt_90add02266b87b8956423d3dbeb5cbf8",
+              "seq": 4,
+              "request_id": "req_7a78b1a1c8dc51140203795854c6993e",
+              "type": "followup_cancelled",
+              "occurred_at": null,
+              "occurred_on": null,
+              "recorded_at": "2026-11-04T06:15:36Z",
+              "actor": "user",
+              "source": {
+                "kind": "user",
+                "reference": null
+              },
+              "payload": {},
+              "voided_by": null
+            }
+          ]
+        },
+        "events": [
+          {
+            "event_id": "evt_90add02266b87b8956423d3dbeb5cbf8",
+            "seq": 4,
+            "request_id": "req_7a78b1a1c8dc51140203795854c6993e",
+            "type": "followup_cancelled",
+            "occurred_at": null,
+            "occurred_on": null,
+            "recorded_at": "2026-11-04T06:15:36Z",
+            "actor": "user",
+            "source": {
+              "kind": "user",
+              "reference": null
+            },
+            "payload": {},
+            "voided_by": null
+          }
+        ],
+        "request_id": "req_7a78b1a1c8dc51140203795854c6993e",
+        "preview": false,
+        "repeated": false,
+        "warnings": []
+      }
+    },
+    {
+      "index": 4,
+      "frozen_command": "followup {APP} --due 2026-11-10 --cancel --expected-revision 4",
+      "expect": {
+        "result": "rejected",
+        "exit": "impl",
+        "error": "impl",
+        "writes": false
+      },
+      "exit": 2,
+      "error": null,
+      "output": null
+    },
+    {
+      "index": 5,
+      "frozen_command": "followup {APP} --expected-revision 4",
+      "expect": {
+        "result": "rejected",
+        "exit": "impl",
+        "error": "impl",
+        "writes": false
+      },
+      "exit": 2,
+      "error": null,
+      "output": null
+    }
+  ],
+  "states": [
+    {
+      "application_id": "app_4087cca0cbbb1520c6adef851fc0e7f7",
+      "job_id": "job_fa26c5d52ff7",
+      "record_origin": "current",
+      "channel": {
+        "kind": "portal",
+        "platform": "示例招聘站"
+      },
+      "created_at": "2026-11-04T06:15:34Z",
+      "updated_at": "2026-11-04T06:15:34Z",
+      "revision": 2,
+      "status": "applied",
+      "submission": {
+        "confirmed": true,
+        "occurred_at": null,
+        "occurred_on": "2026-10-28",
+        "materials_recorded": false,
+        "materials_check": null
+      },
+      "next_followup_on": null,
+      "context_snapshot": {
+        "job": {
+          "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json",
+          "sha256": "1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac"
+        },
+        "match": {
+          "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json",
+          "sha256": "ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569"
+        }
+      },
+      "material_versions": [],
+      "events": [
+        {
+          "event_id": "evt_870c70f42ee25010ae997c4f113ffb84",
+          "seq": 1,
+          "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+          "type": "created",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:34Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "channel": {
+              "kind": "portal",
+              "platform": "示例招聘站"
+            },
+            "job_id": "job_fa26c5d52ff7",
+            "record_origin": "current"
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_1259120416e2d6e5485599311afaf4f2",
+          "seq": 2,
+          "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+          "type": "submitted",
+          "occurred_at": null,
+          "occurred_on": "2026-10-28",
+          "recorded_at": "2026-11-04T06:15:34Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "channel": {
+              "kind": "portal",
+              "platform": "示例招聘站"
+            },
+            "material_version_ids": [],
+            "materials_check": null,
+            "sent_file_refs": []
+          },
+          "voided_by": null
+        }
+      ]
+    },
+    {
+      "application_id": "app_4087cca0cbbb1520c6adef851fc0e7f7",
+      "job_id": "job_fa26c5d52ff7",
+      "record_origin": "current",
+      "channel": {
+        "kind": "portal",
+        "platform": "示例招聘站"
+      },
+      "created_at": "2026-11-04T06:15:34Z",
+      "updated_at": "2026-11-04T06:15:35Z",
+      "revision": 3,
+      "status": "applied",
+      "submission": {
+        "confirmed": true,
+        "occurred_at": null,
+        "occurred_on": "2026-10-28",
+        "materials_recorded": false,
+        "materials_check": null
+      },
+      "next_followup_on": "2026-11-10",
+      "context_snapshot": {
+        "job": {
+          "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json",
+          "sha256": "1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac"
+        },
+        "match": {
+          "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json",
+          "sha256": "ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569"
+        }
+      },
+      "material_versions": [],
+      "events": [
+        {
+          "event_id": "evt_870c70f42ee25010ae997c4f113ffb84",
+          "seq": 1,
+          "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+          "type": "created",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:34Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "channel": {
+              "kind": "portal",
+              "platform": "示例招聘站"
+            },
+            "job_id": "job_fa26c5d52ff7",
+            "record_origin": "current"
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_1259120416e2d6e5485599311afaf4f2",
+          "seq": 2,
+          "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+          "type": "submitted",
+          "occurred_at": null,
+          "occurred_on": "2026-10-28",
+          "recorded_at": "2026-11-04T06:15:34Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "channel": {
+              "kind": "portal",
+              "platform": "示例招聘站"
+            },
+            "material_version_ids": [],
+            "materials_check": null,
+            "sent_file_refs": []
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_3466c23b503614d89cfc71e65a45fbd5",
+          "seq": 3,
+          "request_id": "req_8cef68f4b7f933af03d2fa200b41c175",
+          "type": "followup_scheduled",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:35Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "due_on": "2026-11-10"
+          },
+          "voided_by": null
+        }
+      ]
+    },
+    {
+      "application_id": "app_4087cca0cbbb1520c6adef851fc0e7f7",
+      "job_id": "job_fa26c5d52ff7",
+      "record_origin": "current",
+      "channel": {
+        "kind": "portal",
+        "platform": "示例招聘站"
+      },
+      "created_at": "2026-11-04T06:15:34Z",
+      "updated_at": "2026-11-04T06:15:36Z",
+      "revision": 4,
+      "status": "applied",
+      "submission": {
+        "confirmed": true,
+        "occurred_at": null,
+        "occurred_on": "2026-10-28",
+        "materials_recorded": false,
+        "materials_check": null
+      },
+      "next_followup_on": null,
+      "context_snapshot": {
+        "job": {
+          "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json",
+          "sha256": "1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac"
+        },
+        "match": {
+          "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json",
+          "sha256": "ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569"
+        }
+      },
+      "material_versions": [],
+      "events": [
+        {
+          "event_id": "evt_870c70f42ee25010ae997c4f113ffb84",
+          "seq": 1,
+          "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+          "type": "created",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:34Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "channel": {
+              "kind": "portal",
+              "platform": "示例招聘站"
+            },
+            "job_id": "job_fa26c5d52ff7",
+            "record_origin": "current"
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_1259120416e2d6e5485599311afaf4f2",
+          "seq": 2,
+          "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+          "type": "submitted",
+          "occurred_at": null,
+          "occurred_on": "2026-10-28",
+          "recorded_at": "2026-11-04T06:15:34Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "channel": {
+              "kind": "portal",
+              "platform": "示例招聘站"
+            },
+            "material_version_ids": [],
+            "materials_check": null,
+            "sent_file_refs": []
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_3466c23b503614d89cfc71e65a45fbd5",
+          "seq": 3,
+          "request_id": "req_8cef68f4b7f933af03d2fa200b41c175",
+          "type": "followup_scheduled",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:35Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "due_on": "2026-11-10"
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_90add02266b87b8956423d3dbeb5cbf8",
+          "seq": 4,
+          "request_id": "req_7a78b1a1c8dc51140203795854c6993e",
+          "type": "followup_cancelled",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:36Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {},
+          "voided_by": null
+        }
+      ]
+    },
+    {
+      "application_id": "app_4087cca0cbbb1520c6adef851fc0e7f7",
+      "job_id": "job_fa26c5d52ff7",
+      "record_origin": "current",
+      "channel": {
+        "kind": "portal",
+        "platform": "示例招聘站"
+      },
+      "created_at": "2026-11-04T06:15:34Z",
+      "updated_at": "2026-11-04T06:15:36Z",
+      "revision": 4,
+      "status": "applied",
+      "submission": {
+        "confirmed": true,
+        "occurred_at": null,
+        "occurred_on": "2026-10-28",
+        "materials_recorded": false,
+        "materials_check": null
+      },
+      "next_followup_on": null,
+      "context_snapshot": {
+        "job": {
+          "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json",
+          "sha256": "1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac"
+        },
+        "match": {
+          "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json",
+          "sha256": "ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569"
+        }
+      },
+      "material_versions": [],
+      "events": [
+        {
+          "event_id": "evt_870c70f42ee25010ae997c4f113ffb84",
+          "seq": 1,
+          "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+          "type": "created",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:34Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "channel": {
+              "kind": "portal",
+              "platform": "示例招聘站"
+            },
+            "job_id": "job_fa26c5d52ff7",
+            "record_origin": "current"
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_1259120416e2d6e5485599311afaf4f2",
+          "seq": 2,
+          "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+          "type": "submitted",
+          "occurred_at": null,
+          "occurred_on": "2026-10-28",
+          "recorded_at": "2026-11-04T06:15:34Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "channel": {
+              "kind": "portal",
+              "platform": "示例招聘站"
+            },
+            "material_version_ids": [],
+            "materials_check": null,
+            "sent_file_refs": []
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_3466c23b503614d89cfc71e65a45fbd5",
+          "seq": 3,
+          "request_id": "req_8cef68f4b7f933af03d2fa200b41c175",
+          "type": "followup_scheduled",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:35Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "due_on": "2026-11-10"
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_90add02266b87b8956423d3dbeb5cbf8",
+          "seq": 4,
+          "request_id": "req_7a78b1a1c8dc51140203795854c6993e",
+          "type": "followup_cancelled",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:36Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {},
+          "voided_by": null
+        }
+      ]
+    },
+    {
+      "application_id": "app_4087cca0cbbb1520c6adef851fc0e7f7",
+      "job_id": "job_fa26c5d52ff7",
+      "record_origin": "current",
+      "channel": {
+        "kind": "portal",
+        "platform": "示例招聘站"
+      },
+      "created_at": "2026-11-04T06:15:34Z",
+      "updated_at": "2026-11-04T06:15:36Z",
+      "revision": 4,
+      "status": "applied",
+      "submission": {
+        "confirmed": true,
+        "occurred_at": null,
+        "occurred_on": "2026-10-28",
+        "materials_recorded": false,
+        "materials_check": null
+      },
+      "next_followup_on": null,
+      "context_snapshot": {
+        "job": {
+          "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json",
+          "sha256": "1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac"
+        },
+        "match": {
+          "path": "artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json",
+          "sha256": "ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569"
+        }
+      },
+      "material_versions": [],
+      "events": [
+        {
+          "event_id": "evt_870c70f42ee25010ae997c4f113ffb84",
+          "seq": 1,
+          "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+          "type": "created",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:34Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "channel": {
+              "kind": "portal",
+              "platform": "示例招聘站"
+            },
+            "job_id": "job_fa26c5d52ff7",
+            "record_origin": "current"
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_1259120416e2d6e5485599311afaf4f2",
+          "seq": 2,
+          "request_id": "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+          "type": "submitted",
+          "occurred_at": null,
+          "occurred_on": "2026-10-28",
+          "recorded_at": "2026-11-04T06:15:34Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "channel": {
+              "kind": "portal",
+              "platform": "示例招聘站"
+            },
+            "material_version_ids": [],
+            "materials_check": null,
+            "sent_file_refs": []
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_3466c23b503614d89cfc71e65a45fbd5",
+          "seq": 3,
+          "request_id": "req_8cef68f4b7f933af03d2fa200b41c175",
+          "type": "followup_scheduled",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:35Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {
+            "due_on": "2026-11-10"
+          },
+          "voided_by": null
+        },
+        {
+          "event_id": "evt_90add02266b87b8956423d3dbeb5cbf8",
+          "seq": 4,
+          "request_id": "req_7a78b1a1c8dc51140203795854c6993e",
+          "type": "followup_cancelled",
+          "occurred_at": null,
+          "occurred_on": null,
+          "recorded_at": "2026-11-04T06:15:36Z",
+          "actor": "user",
+          "source": {
+            "kind": "user",
+            "reference": null
+          },
+          "payload": {},
+          "voided_by": null
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "application",
+        "record",
+        "job_fa26c5d52ff7",
+        "--channel",
+        "portal",
+        "--platform",
+        "示例招聘站",
+        "--submitted",
+        "--on",
+        "2026-10-28",
+        "--preview",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": null,\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\",\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        }\r\n      },\r\n      \"voided_by\": null\r\n    },\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"submitted\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"material_version_ids\": [],\r\n        \"sent_file_refs\": [],\r\n        \"materials_check\": null\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": null,\r\n    \"to\": \"applied\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": [\r\n    \"材料未记录 (no material recorded): the submission is recorded without the files sent; say so to the user\"\r\n  ]\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "record",
+        "job_fa26c5d52ff7",
+        "--channel",
+        "portal",
+        "--platform",
+        "示例招聘站",
+        "--submitted",
+        "--on",
+        "2026-10-28",
+        "--request-id",
+        "req_94a77c3a69ea83432fe3e44e6bd9ea14",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:34Z\",\r\n    \"revision\": 2,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n      \"seq\": 1,\r\n      \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n      \"type\": \"created\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"job_id\": \"job_fa26c5d52ff7\",\r\n        \"record_origin\": \"current\"\r\n      },\r\n      \"voided_by\": null\r\n    },\r\n    {\r\n      \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n      \"seq\": 2,\r\n      \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n      \"type\": \"submitted\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"channel\": {\r\n          \"kind\": \"portal\",\r\n          \"platform\": \"示例招聘站\"\r\n        },\r\n        \"material_version_ids\": [],\r\n        \"materials_check\": null,\r\n        \"sent_file_refs\": []\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": [\r\n    \"材料未记录 (no material recorded): the submission is recorded without the files sent; say so to the user\"\r\n  ]\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "show",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:34Z\",\r\n    \"revision\": 2,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "followup",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--due",
+        "2026-11-10",
+        "--expected-revision",
+        "2",
+        "--preview",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:34Z\",\r\n    \"revision\": 2,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"followup_scheduled\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"due_on\": \"2026-11-10\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": \"applied\",\r\n    \"to\": \"applied\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": []\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "followup",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--due",
+        "2026-11-10",
+        "--expected-revision",
+        "2",
+        "--request-id",
+        "req_8cef68f4b7f933af03d2fa200b41c175",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:35Z\",\r\n    \"revision\": 3,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": \"2026-11-10\",\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_3466c23b503614d89cfc71e65a45fbd5\",\r\n        \"seq\": 3,\r\n        \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n        \"type\": \"followup_scheduled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:35Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"due_on\": \"2026-11-10\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_3466c23b503614d89cfc71e65a45fbd5\",\r\n      \"seq\": 3,\r\n      \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n      \"type\": \"followup_scheduled\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-04T06:15:35Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {\r\n        \"due_on\": \"2026-11-10\"\r\n      },\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": []\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "show",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:35Z\",\r\n    \"revision\": 3,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": \"2026-11-10\",\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_3466c23b503614d89cfc71e65a45fbd5\",\r\n        \"seq\": 3,\r\n        \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n        \"type\": \"followup_scheduled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:35Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"due_on\": \"2026-11-10\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "followup",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--cancel",
+        "--expected-revision",
+        "3",
+        "--preview",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:35Z\",\r\n    \"revision\": 3,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": \"2026-11-10\",\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_3466c23b503614d89cfc71e65a45fbd5\",\r\n        \"seq\": 3,\r\n        \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n        \"type\": \"followup_scheduled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:35Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"due_on\": \"2026-11-10\"\r\n        },\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": null,\r\n      \"seq\": null,\r\n      \"request_id\": null,\r\n      \"type\": \"followup_cancelled\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": null,\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {},\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_7a78b1a1c8dc51140203795854c6993e\",\r\n  \"preview\": true,\r\n  \"status\": {\r\n    \"from\": \"applied\",\r\n    \"to\": \"applied\"\r\n  },\r\n  \"materials\": [],\r\n  \"warnings\": []\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "followup",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--cancel",
+        "--expected-revision",
+        "3",
+        "--request-id",
+        "req_7a78b1a1c8dc51140203795854c6993e",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:36Z\",\r\n    \"revision\": 4,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_3466c23b503614d89cfc71e65a45fbd5\",\r\n        \"seq\": 3,\r\n        \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n        \"type\": \"followup_scheduled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:35Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"due_on\": \"2026-11-10\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_90add02266b87b8956423d3dbeb5cbf8\",\r\n        \"seq\": 4,\r\n        \"request_id\": \"req_7a78b1a1c8dc51140203795854c6993e\",\r\n        \"type\": \"followup_cancelled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:36Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {},\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  },\r\n  \"events\": [\r\n    {\r\n      \"event_id\": \"evt_90add02266b87b8956423d3dbeb5cbf8\",\r\n      \"seq\": 4,\r\n      \"request_id\": \"req_7a78b1a1c8dc51140203795854c6993e\",\r\n      \"type\": \"followup_cancelled\",\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": null,\r\n      \"recorded_at\": \"2026-11-04T06:15:36Z\",\r\n      \"actor\": \"user\",\r\n      \"source\": {\r\n        \"kind\": \"user\",\r\n        \"reference\": null\r\n      },\r\n      \"payload\": {},\r\n      \"voided_by\": null\r\n    }\r\n  ],\r\n  \"request_id\": \"req_7a78b1a1c8dc51140203795854c6993e\",\r\n  \"preview\": false,\r\n  \"repeated\": false,\r\n  \"warnings\": []\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "show",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:36Z\",\r\n    \"revision\": 4,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_3466c23b503614d89cfc71e65a45fbd5\",\r\n        \"seq\": 3,\r\n        \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n        \"type\": \"followup_scheduled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:35Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"due_on\": \"2026-11-10\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_90add02266b87b8956423d3dbeb5cbf8\",\r\n        \"seq\": 4,\r\n        \"request_id\": \"req_7a78b1a1c8dc51140203795854c6993e\",\r\n        \"type\": \"followup_cancelled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:36Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {},\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "followup",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--due",
+        "2026-11-10",
+        "--cancel",
+        "--expected-revision",
+        "4",
+        "--preview",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: python -m jobsearch_cn application followup [-h] [--data-dir DATA_DIR]\r\n                                                   (--preview | --request-id REQUEST_ID)\r\n                                                   [--actor {user,claude_code,codex,dsh}]\r\n                                                   --expected-revision\r\n                                                   EXPECTED_REVISION\r\n                                                   (--due DUE | --cancel)\r\n                                                   application_id\r\npython -m jobsearch_cn application followup: error: argument --cancel: not allowed with argument --due\r\n",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "show",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:36Z\",\r\n    \"revision\": 4,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_3466c23b503614d89cfc71e65a45fbd5\",\r\n        \"seq\": 3,\r\n        \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n        \"type\": \"followup_scheduled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:35Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"due_on\": \"2026-11-10\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_90add02266b87b8956423d3dbeb5cbf8\",\r\n        \"seq\": 4,\r\n        \"request_id\": \"req_7a78b1a1c8dc51140203795854c6993e\",\r\n        \"type\": \"followup_cancelled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:36Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {},\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "followup",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--expected-revision",
+        "4",
+        "--preview",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: python -m jobsearch_cn application followup [-h] [--data-dir DATA_DIR]\r\n                                                   (--preview | --request-id REQUEST_ID)\r\n                                                   [--actor {user,claude_code,codex,dsh}]\r\n                                                   --expected-revision\r\n                                                   EXPECTED_REVISION\r\n                                                   (--due DUE | --cancel)\r\n                                                   application_id\r\npython -m jobsearch_cn application followup: error: one of the arguments --due --cancel is required\r\n",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "show",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:36Z\",\r\n    \"revision\": 4,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_3466c23b503614d89cfc71e65a45fbd5\",\r\n        \"seq\": 3,\r\n        \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n        \"type\": \"followup_scheduled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:35Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"due_on\": \"2026-11-10\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_90add02266b87b8956423d3dbeb5cbf8\",\r\n        \"seq\": 4,\r\n        \"request_id\": \"req_7a78b1a1c8dc51140203795854c6993e\",\r\n        \"type\": \"followup_cancelled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:36Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {},\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "show",
+        "app_4087cca0cbbb1520c6adef851fc0e7f7",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"application\": {\r\n    \"application_id\": \"app_4087cca0cbbb1520c6adef851fc0e7f7\",\r\n    \"job_id\": \"job_fa26c5d52ff7\",\r\n    \"record_origin\": \"current\",\r\n    \"channel\": {\r\n      \"kind\": \"portal\",\r\n      \"platform\": \"示例招聘站\"\r\n    },\r\n    \"created_at\": \"2026-11-04T06:15:34Z\",\r\n    \"updated_at\": \"2026-11-04T06:15:36Z\",\r\n    \"revision\": 4,\r\n    \"status\": \"applied\",\r\n    \"submission\": {\r\n      \"confirmed\": true,\r\n      \"occurred_at\": null,\r\n      \"occurred_on\": \"2026-10-28\",\r\n      \"materials_recorded\": false,\r\n      \"materials_check\": null\r\n    },\r\n    \"next_followup_on\": null,\r\n    \"context_snapshot\": {\r\n      \"job\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/job.json\",\r\n        \"sha256\": \"1756eac2f697a55a13a12d8fba867479ed99db49ec601eb492e01ca3e94f70ac\"\r\n      },\r\n      \"match\": {\r\n        \"path\": \"artifacts/app_4087cca0cbbb1520c6adef851fc0e7f7/ctx_32c1d64c0e1df17d795bef7ee43f7080/match.json\",\r\n        \"sha256\": \"ad4796cbbd1f9baaea8c2a63b34d351061352ad2b897f1ce5a29b46e8a24f569\"\r\n      }\r\n    },\r\n    \"material_versions\": [],\r\n    \"events\": [\r\n      {\r\n        \"event_id\": \"evt_870c70f42ee25010ae997c4f113ffb84\",\r\n        \"seq\": 1,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"created\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"job_id\": \"job_fa26c5d52ff7\",\r\n          \"record_origin\": \"current\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_1259120416e2d6e5485599311afaf4f2\",\r\n        \"seq\": 2,\r\n        \"request_id\": \"req_94a77c3a69ea83432fe3e44e6bd9ea14\",\r\n        \"type\": \"submitted\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": \"2026-10-28\",\r\n        \"recorded_at\": \"2026-11-04T06:15:34Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"channel\": {\r\n            \"kind\": \"portal\",\r\n            \"platform\": \"示例招聘站\"\r\n          },\r\n          \"material_version_ids\": [],\r\n          \"materials_check\": null,\r\n          \"sent_file_refs\": []\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_3466c23b503614d89cfc71e65a45fbd5\",\r\n        \"seq\": 3,\r\n        \"request_id\": \"req_8cef68f4b7f933af03d2fa200b41c175\",\r\n        \"type\": \"followup_scheduled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:35Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {\r\n          \"due_on\": \"2026-11-10\"\r\n        },\r\n        \"voided_by\": null\r\n      },\r\n      {\r\n        \"event_id\": \"evt_90add02266b87b8956423d3dbeb5cbf8\",\r\n        \"seq\": 4,\r\n        \"request_id\": \"req_7a78b1a1c8dc51140203795854c6993e\",\r\n        \"type\": \"followup_cancelled\",\r\n        \"occurred_at\": null,\r\n        \"occurred_on\": null,\r\n        \"recorded_at\": \"2026-11-04T06:15:36Z\",\r\n        \"actor\": \"user\",\r\n        \"source\": {\r\n          \"kind\": \"user\",\r\n          \"reference\": null\r\n        },\r\n        \"payload\": {},\r\n        \"voided_by\": null\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    },
+    {
+      "argv": [
+        "application",
+        "validate",
+        "--data-dir",
+        "<output>\\work\\B07\\data"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"valid\": true,\r\n  \"errors\": [],\r\n  \"warnings\": [\r\n    \"app_4087cca0cbbb1520c6adef851fc0e7f7: 材料未记录 (no material recorded with the submission)\"\r\n  ],\r\n  \"orphans\": []\r\n}\r\n",
+      "stderr": "",
+      "test_today_override": null
+    }
+  ]
+}
