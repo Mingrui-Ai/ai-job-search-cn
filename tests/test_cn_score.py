@@ -266,6 +266,50 @@ class Experience(Case):
         self.assertEqual((dimension["score"], dimension["method"], dimension["evidence"]), (None, "agent", None))
         self.assertEqual(dimension["hints"], [{"jd": "Go", "profile": ["exp-1"]}, {"jd": "RAG", "profile": ["exp-1", "proj-1"]}])
 
+    def without_used_in(self) -> dict:
+        profile = copy.deepcopy(self.tech)
+        for skill in profile["skills"]:
+            skill["used_in"] = []
+        return profile
+
+    def test_hints_also_come_from_the_experience_text(self):
+        # M2-5 round 2: every used_in empty, yet the bullets, name and role name the skills.
+        profile = self.without_used_in()
+        profile["experience"][1]["role"] = "Java 开发"
+        job = with_skills(self.job, ["Golang", "Python", "MySQL", "Java", "Kafka", "LangChain"])
+        self.assertEqual(self.dimension("experience", job=job, profile=profile)["hints"], [
+            {"jd": "Golang", "profile": ["exp-1"]},  # the bullet says Go, a same_as spelling
+            {"jd": "Python", "profile": ["exp-1"]},
+            {"jd": "MySQL", "profile": ["proj-1"]},
+            {"jd": "Java", "profile": ["proj-1"]},  # from the role
+            {"jd": "LangChain", "profile": ["proj-1"]},
+        ])
+        # used_in first, then the text; an experience listed once.
+        hints = self.dimension("experience", job=with_skills(self.job, ["RAG", "Python"]))["hints"]
+        self.assertEqual(hints, [{"jd": "RAG", "profile": ["exp-1", "proj-1"]}, {"jd": "Python", "profile": ["exp-1"]}])
+
+    def test_the_text_hints_change_no_score(self):
+        job = with_skills(self.job, ["Go", "Python", "MySQL", "Kafka"])
+        silent = copy.deepcopy(self.without_used_in())
+        for item in silent["experience"]:
+            item["bullets"] = ["负责日常开发"]
+        with_text, without = scored(job, self.without_used_in()), scored(job, silent)
+        self.assertNotEqual(with_text["dimensions"]["experience"]["hints"], [])
+        self.assertEqual(without["dimensions"]["experience"]["hints"], [])
+        for record in (with_text, without):
+            del record["dimensions"]["experience"]["hints"], record["profile_hash"]
+        self.assertEqual(with_text, without)
+
+    def test_kept_experience_gets_the_hints_the_rules_give_now(self):
+        # A record saved before the text hints: its judgment stays, its hints are brought up to date.
+        record = agent_filled(scored(self.job, self.without_used_in()))
+        self.assertNotEqual(record["dimensions"]["experience"]["hints"], [])
+        old = setting(record, "dimensions.experience.hints", [])
+        again = scored(self.job, self.without_used_in(), previous=old)
+        self.assertEqual(again["dimensions"]["experience"], record["dimensions"]["experience"])
+        self.assertEqual(again["total"], record["total"])
+        self.assertEqual(score.validate(again, self.job, self.without_used_in(), VOCABULARY), [])
+
 
 class Salary(Case):
     """Without tiers: the JD's upper figure reaches salary_min (100) or not (0)."""

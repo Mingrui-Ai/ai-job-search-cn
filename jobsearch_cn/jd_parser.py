@@ -430,6 +430,21 @@ def _skill_patterns(vocabulary) -> list:
                   key=lambda item: -len(item[0]))
 
 
+def skill_mentions(text: str, patterns) -> list:
+    """(match, term, key) for every vocabulary term in text, a longer term claiming its span first.
+
+    Plain mentions, as in a profile's own text; unlike _skill_hits, nothing is skipped as not asked for.
+    """
+    claimed, hits = [], []
+    for term, pattern, key in patterns:
+        for match in pattern.finditer(text):
+            if any(match.start() < end and start < match.end() for start, end in claimed):
+                continue
+            claimed.append((match.start(), match.end()))
+            hits.append((match, term, key))
+    return hits
+
+
 _BUILTIN_PATTERNS = None
 
 
