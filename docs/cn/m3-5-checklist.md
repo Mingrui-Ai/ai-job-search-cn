@@ -154,7 +154,7 @@ python -m jobsearch_cn material validate data/materials/<岗位id>/<种类>-<n>.
 python -m jobsearch_cn material render data/materials/<岗位id>/<种类>-<n>.json --output --data-dir $dataDir
 ```
 
-- 生成 `.txt` 和 `.build.json` 在 `data/messages/<岗位id>/`；回复里只给路径，不粘贴可能含联系方式的正文。校验、渲染均须退出 0，警告逐条处理。`render.chars` 是含换行和邮件标题等的文件字符数，不直接当作正文上限的计数。
+- 生成 `.txt` 和 `.build.json` 在 `data/messages/<岗位id>/`；回复里只给路径，不粘贴可能含联系方式的正文。校验、渲染均须退出 0，警告逐条处理。`render.chars` 按正文上限的口径计数（各段代入后的字数之和，不含邮件标题和段间换行），和旁边的 `max_chars` 直接比（PR #136 起）。
 - 沟通草稿的经历和数字必须与已通过审核的简历一致；邮件只有在简历确实已生成、通过审核时才能写“简历见附件”。
 - 沟通草稿也按简历工作流第 5 节另开会话独立审核，交接给出材料、已通过简历材料的完整路径、轮次、render 输出和选材说明；审核者同样先核对 `review draft` 与 `build_note` 的 `material_hash`，不打开含签名的 `.txt`，不运行 render。结果写 `review-<种类>-<n>-r<k>.json`，经 `review validate`、`review show` 核对，最终须为 `independent`、`pass`。
 - 最多 2 轮，停止规则与简历相同。材料改过以后必须重新 validate、`material render --output` 和审核，不能沿用旧 `.txt` 或旧审核结果，也不能用 `resume build` 生成沟通草稿。
