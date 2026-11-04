@@ -700,16 +700,31 @@ class Cli(unittest.TestCase):
         self.assertEqual(built.returncode, 1, built.stdout + built.stderr)
         self.assertEqual(json.loads(built.stderr)["errors"], ["kind: must be one of resume, greeting, email, referral"])
 
-    def test_resume_build_and_review_draft_take_only_a_cv(self):
+    def test_resume_build_takes_only_a_cv(self):
         path = self.data / "resume-1.json"  # the name resume build asks for, but a greeting inside
         path.write_text(json.dumps(GREETING, ensure_ascii=False), encoding="utf-8")
-        for command, says in ((("resume", "build"), "resume build builds a CV"),
-                              (("review", "draft"), "review draft drafts the review of a CV")):
-            result = run_cli(*command, str(path), data_dir=self.data)
-            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
-            self.assertIn(says, json.loads(result.stderr)["error"])
+        result = run_cli("resume", "build", str(path), data_dir=self.data)
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("resume build builds a CV", json.loads(result.stderr)["error"])
         self.assertFalse((self.data / "resume-1.pdf").exists())
 
+    def test_review_draft_of_a_message_has_no_coverage_and_agrees_with_validate(self):
+        # M3-6: a greeting, email or referral is reviewed too; the draft gives only E1/E3 style warnings.
+        for name in ("greeting-1.json", "email-1.json", "referral-1.json"):
+            result = run_cli("review", "draft", str(TECH / name), data_dir=self.data)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            output = json.loads(result.stdout)
+            self.assertEqual(output["coverage"], [], name)
+            self.assertTrue(output["job_found"], name)
+        spaced = self.write(with_segment(GREETING, 3, "我用过 Python 写服务。"))
+        style = json.loads(run_cli("review", "draft", str(spaced), data_dir=self.data).stdout)["style"]
+        self.assertIn("segments[3].text: E3 no space between Chinese and English or numbers", style)
+        self.assertFalse(any("full stop" in warning for warning in style))  # a message is prose
+        bad = self.write(with_segment(GREETING, 3, "我今年 23 岁。"))
+        validated = run_cli("material", "validate", str(bad), data_dir=self.data)
+        drafted = run_cli("review", "draft", str(bad), data_dir=self.data)
+        self.assertEqual((validated.returncode, drafted.returncode), (1, 1))
+        self.assertEqual(json.loads(drafted.stderr)["errors"], json.loads(validated.stdout)["errors"])
 
 if __name__ == "__main__":
     unittest.main()

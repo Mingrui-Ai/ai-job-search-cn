@@ -485,10 +485,6 @@ def cmd_review_draft(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
-    if _is_message(record):
-        # How a greeting, email or referral is reviewed is M3-6's to decide; until then only material validate.
-        raise InputError("review draft drafts the review of a CV; check a greeting, email or referral "
-                         "with material validate")
     vocabulary = _vocabulary(args)
     job = _material_job(args, record)
     errors, _ = _check_material(args, record, data, job, vocabulary)
