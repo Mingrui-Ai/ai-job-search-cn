@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "kind": "greeting",
+  "job_id": "job_000000000002",
+  "profile_hash": "3810a3ff0755974edfb1b36386fe014b0253d555eb9a2bb023f0600bae625dd8",
+  "created": "2026-11-01T10:00:00+08:00",
+  "direction": "ops",
+  "template": "ops/greeting@1",
+  "subject": null,
+  "segments": [
+    {
+      "slot": "opening",
+      "text": "您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘{job.title}。",
+      "refs": [
+        "edu-1",
+        "job"
+      ]
+    },
+    {
+      "slot": "evidence",
+      "text": "在{exp-1.org}负责公众号日常推文，3 个月内粉丝从 8000 增至 1.2 万。",
+      "refs": [
+        "exp-1"
+      ]
+    },
+    {
+      "slot": "availability",
+      "text": "每周可以到岗{availability.days_per_week}天，实习{availability.months}个月。",
+      "refs": [
+        "availability"
+      ]
+    },
+    {
+      "slot": "closing",
+      "text": "期待和您沟通。",
+      "refs": []
+    }
+  ]
+}

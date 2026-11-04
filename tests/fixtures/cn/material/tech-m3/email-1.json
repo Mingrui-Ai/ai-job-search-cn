@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "job_id": "job_000000000001",
+  "profile_hash": "3b5cbef9bab820661299a6d82715f9c382679bb7e1adedee69e3a2671ec9e093",
+  "created": "2026-11-01T10:00:00+08:00",
+  "direction": "tech",
+  "kind": "email",
+  "template": "tech/email@1",
+  "subject": {
+    "text": "应聘{job.title}-{contact.name}-{edu-1.school}",
+    "refs": [
+      "job",
+      "edu-1"
+    ]
+  },
+  "segments": [
+    {
+      "slot": "salutation",
+      "text": "您好！",
+      "refs": []
+    },
+    {
+      "slot": "opening",
+      "text": "我是{edu-1.school}{edu-1.major}专业的硕士生{contact.name}，在招聘平台上看到贵司的{job.title}岗位，简历见附件。",
+      "refs": [
+        "edu-1",
+        "job"
+      ]
+    },
+    {
+      "slot": "evidence",
+      "text": "在{exp-1.org}实习期间，我用 Go 重构订单查询接口，P99 延迟从 120ms 降至 45ms；还为内部 RAG 问答服务编写检索评测脚本（Python），覆盖 300 条测试问题。",
+      "refs": [
+        "exp-1"
+      ]
+    },
+    {
+      "slot": "evidence",
+      "text": "课程项目{proj-1.name}基于 LangChain 和 MySQL，支持 20 门课程的资料检索。",
+      "refs": [
+        "proj-1"
+      ]
+    },
+    {
+      "slot": "availability",
+      "text": "我可以{availability.start_date}起到岗，每周{availability.days_per_week}天，实习{availability.months}个月。",
+      "refs": [
+        "availability"
+      ]
+    },
+    {
+      "slot": "closing",
+      "text": "期待您的回复，谢谢！",
+      "refs": []
+    },
+    {
+      "slot": "signature",
+      "text": "{contact.name}\n电话：{contact.phone}\n邮箱：{contact.email}",
+      "refs": []
+    }
+  ]
+}

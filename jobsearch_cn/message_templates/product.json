@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "direction": "product",
+  "revision": 1,
+  "label": "产品",
+  "greeting": {
+    "max_chars": 150,
+    "slots": [
+      {
+        "slot": "opening",
+        "required": true,
+        "hint": "称呼加一句自我介绍：学校、专业、应聘的岗位（用占位符 {edu-1.school}、{job.title} 等，不手写）"
+      },
+      {
+        "slot": "evidence",
+        "required": true,
+        "max": 2,
+        "prefer": [
+          "internship",
+          "project",
+          "campus"
+        ],
+        "hint": "一两条和用户、需求有关的经历：发现了什么问题、推动上线了什么、指标怎么变（照档案写）"
+      },
+      {
+        "slot": "availability",
+        "required": false,
+        "hint": "实习岗写到岗时间、每周天数、实习时长，必须引用 availability"
+      },
+      {
+        "slot": "closing",
+        "required": true,
+        "hint": "一句话收尾，例如希望进一步沟通、可以发简历"
+      }
+    ],
+    "examples": [
+      "您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘贵司的{job.title}岗位。"
+    ]
+  },
+  "email": {
+    "max_chars": 600,
+    "subject_max_chars": 40,
+    "subject_hint": "应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}",
+    "slots": [
+      {
+        "slot": "salutation",
+        "required": true,
+        "hint": "不知道收件人时写 您好；知道再写具体称呼"
+      },
+      {
+        "slot": "opening",
+        "required": true,
+        "hint": "我是谁、从哪看到岗位、应聘什么岗位"
+      },
+      {
+        "slot": "evidence",
+        "required": true,
+        "max": 3,
+        "prefer": [
+          "internship",
+          "project",
+          "campus"
+        ],
+        "hint": "一两条和用户、需求有关的经历：发现了什么问题、推动上线了什么、指标怎么变（照档案写）"
+      },
+      {
+        "slot": "fit",
+        "required": false,
+        "hint": "为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；可以说明对这家公司哪款产品有体会"
+      },
+      {
+        "slot": "availability",
+        "required": false,
+        "hint": "到岗时间、每周天数、实习时长，必须引用 availability"
+      },
+      {
+        "slot": "closing",
+        "required": true,
+        "hint": "说明附件是简历，期待回复"
+      },
+      {
+        "slot": "signature",
+        "required": true,
+        "hint": "姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}"
+      }
+    ],
+    "examples": [
+      "您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。"
+    ]
+  },
+  "referral": {
+    "max_chars": 300,
+    "slots": [
+      {
+        "slot": "opening",
+        "required": true,
+        "hint": "称呼加寒暄，说明自己是谁、怎么认识的（不要编造关系）"
+      },
+      {
+        "slot": "ask",
+        "required": true,
+        "hint": "想请对方内推哪个岗位（{job.company} 的 {job.title}）"
+      },
+      {
+        "slot": "evidence",
+        "required": true,
+        "max": 2,
+        "prefer": [
+          "internship",
+          "project",
+          "campus"
+        ],
+        "hint": "一两条最相关的经历，让对方好向团队介绍"
+      },
+      {
+        "slot": "closing",
+        "required": true,
+        "hint": "说明会发简历、不方便也没关系，表示感谢"
+      }
+    ],
+    "examples": [
+      "学姐好，我想请您帮忙内推{job.company}的{job.title}岗位。"
+    ]
+  }
+}

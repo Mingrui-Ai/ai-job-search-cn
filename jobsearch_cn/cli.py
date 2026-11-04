@@ -14,8 +14,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import (__version__, jd_parser, match, material, profile, report, resume_docx, resume_extract,
-                          resume_pdf, review, schema, score, store, vocab)
+from jobsearch_cn import (__version__, jd_parser, match, material, messages, profile, report, resume_docx,
+                          resume_extract, resume_pdf, review, schema, score, store, vocab)
 from jobsearch_cn import applications as applications_mod
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
@@ -384,15 +384,79 @@ def _material_notes(args, record):
     return material.read_notes(path.parent / "notes.md")
 
 
+def _message_files(args):
+    try:
+        root = store.data_dir(args.data_dir)
+        return messages.load_templates(root), messages.load_banned(root)
+    except messages.TemplateError as exc:
+        raise InputError(str(exc)) from None
+
+
+def _is_message(record) -> bool:
+    """A greeting, email or referral (messages.py), not a CV (material.py)."""
+    return isinstance(record, dict) and record.get("kind") in messages.KINDS
+
+
+def _check_material(args, record, data, job, vocabulary=None):
+    """(errors, warnings) for a CV, with the notes.md beside the profile that its summary may cite, or for a
+    greeting, email or referral against its template (messages.py, which cites no notes.md). material validate,
+    material render, resume build and review draft all check through here, so they come to one verdict."""
+    vocabulary = _vocabulary(args) if vocabulary is None else vocabulary
+    if _is_message(record):
+        # Unlike a CV, a message that cites the job or fills {job.title} needs it stored: messages.validate says so.
+        templates, banned = _message_files(args)
+        return messages.validate(record, data, vocabulary, job, templates, banned)
+    if isinstance(record, dict) and isinstance(record.get("kind"), str) and record["kind"] not in material.KINDS:
+        # A misspelled kind (greet) is neither a CV nor a message: name the kinds, not the CV fields it lacks.
+        return [f"kind: must be one of {', '.join(material.KINDS + messages.KINDS)}"], []
+    return material.validate(record, data, vocabulary, job, _material_notes(args, record))
+
+
 def cmd_material_validate(args) -> int:
     record = _read_material(args.file)
     data = _match_profile(args)
     if data is None:
         return 1
-    errors, warnings = material.validate(record, data, _vocabulary(args), _material_job(args, record),
-                                         _material_notes(args, record))
+    errors, warnings = _check_material(args, record, data, _material_job(args, record))
     _emit({"valid": not errors, "errors": errors, "warnings": warnings})
     return 1 if errors else 0
+
+
+def cmd_material_template(args) -> int:
+    job = _stored_job(_store(args), args.job_id)
+    if job is None:
+        _emit({"error": f"no stored job {args.job_id}"}, sys.stderr)
+        return 1
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    templates, _ = _message_files(args)
+    try:
+        result = messages.template_for(job, data, _vocabulary(args), templates, args.kind, args.direction)
+    except messages.TemplateError as exc:
+        raise InputError(str(exc)) from None
+    _emit({"job_id": args.job_id, **result})
+    return 0
+
+
+def cmd_material_render(args) -> int:
+    record = _read_material(args.file)
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    kind = record.get("kind") if isinstance(record, dict) else None
+    if not _is_message(record) and (kind in material.KINDS or not isinstance(kind, str)):
+        raise InputError(f"material render renders {', '.join(messages.KINDS)}; a CV is built with resume build")
+    # A misspelled kind is checked as material validate checks it, so the two say the same.
+    job = _material_job(args, record)
+    errors, warnings = _check_material(args, record, data, job)
+    if errors:
+        _emit({"valid": False, "errors": errors, "warnings": warnings})
+        return 1
+    print(messages.render(record, data, job))
+    for warning in warnings:
+        print(f"警告：{warning}", file=sys.stderr)
+    return 0
 
 
 def cmd_review_draft(args) -> int:
@@ -400,12 +464,16 @@ def cmd_review_draft(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
+    if _is_message(record):
+        # How a greeting, email or referral is reviewed is M3-6's to decide; until then only material validate.
+        raise InputError("review draft drafts the review of a CV; check a greeting, email or referral "
+                         "with material validate")
     vocabulary = _vocabulary(args)
-    errors, _ = material.validate(record, data, vocabulary, notes=_material_notes(args, record))
+    job = _material_job(args, record)
+    errors, _ = _check_material(args, record, data, job, vocabulary)
     if errors:
         _emit({"error": "the material is invalid; run material validate first", "errors": errors}, sys.stderr)
         return 1
-    job = _material_job(args, record)
     result = review.draft(record, data, job, vocabulary)
     result = {"material_hash": review.material_hash(record), "job_found": job is not None, **result}
     _emit(result)
@@ -658,8 +726,10 @@ def cmd_resume_build(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
+    if _is_message(record):
+        raise InputError("resume build builds a CV; a greeting, email or referral is rendered with material render")
     vocabulary = _vocabulary(args)
-    errors, warnings = material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args, record))
+    errors, warnings = _check_material(args, record, data, _material_job(args, record), vocabulary)
     if errors:
         _emit({"error": "the material is invalid; run material validate", "errors": errors}, sys.stderr)
         return 1
@@ -1049,6 +1119,25 @@ def build_parser() -> argparse.ArgumentParser:
     material_validate.add_argument("file", help="材料文件；- 表示标准输入")
     material_validate.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     material_validate.set_defaults(handler=cmd_material_validate)
+    material_template = material_commands.add_parser(
+        "template", parents=[stored], help="打招呼语、投递邮件、内推请求：按方向选模板",
+        description="按岗位的技能和档案的求职方向选模板（见 docs/cn/material.md），"
+                    "输出槽位、字数限制、写法提示和选它的理由。",
+    )
+    material_template.add_argument("job_id", help="岗位 id（本地岗位库里要有）")
+    material_template.add_argument("--kind", required=True, choices=messages.KINDS, help="材料种类")
+    material_template.add_argument("--direction", help="指定方向：模板名（例如 tech、ops、default），或者技能词表里"
+                                                       "还没有模板的方向（例如 design、hr），这时用 default 模板")
+    material_template.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    material_template.set_defaults(handler=cmd_material_template)
+    material_render = material_commands.add_parser(
+        "render", parents=[stored], help="检查打招呼语、邮件或内推请求，通过后输出可以直接复制的文字",
+        description="先做和 material validate 相同的检查，有错误时输出错误，退出码 1；"
+                    "通过时把占位符换成档案和岗位里的值，输出纯文本，警告写到 stderr。",
+    )
+    material_render.add_argument("file", help="材料文件；- 表示标准输入")
+    material_render.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    material_render.set_defaults(handler=cmd_material_render)
 
     review_parser = commands.add_parser("review", help="材料审核相关命令（起草 + 审核工作流）",
                                         description="材料审核相关命令，格式见 docs/cn/review-format.md，"
