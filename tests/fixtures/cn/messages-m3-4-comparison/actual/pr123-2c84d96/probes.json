@@ -1,0 +1,867 @@
+[
+  {
+    "id": "b1-render-builtin-template",
+    "rule": "占位符由渲染代入",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，我是示例留出测试大学软件工程专业的本科生，想应聘贵司的后端检索实习生。用 Python 整理了 8 项检索校验记录。可以2026年12月7日起到岗，每周4天。方便的话我把简历发给您。\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b1-placeholder-not-on-the-list",
+    "rule": "占位符由渲染代入：不在白名单的报错",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {proj-v23.bullets}: an experience entry's placeholders are name, org, role\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {proj-v23.bullets}: an experience entry's placeholders are name, org, role\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-unknown-direction",
+    "rule": "第一版五个方向：完全不存在的方向",
+    "note": null,
+    "exits": [
+      2
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002301 --kind greeting --direction nosuch --data-dir <data>",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "{\n  \"error\": \"no template for direction 'nosuch' (there are: data, default, ops, product, tech)\"\n}\n"
+      }
+    ],
+    "templates_on_disk": [
+      "banned",
+      "data",
+      "default",
+      "ops",
+      "product",
+      "tech"
+    ]
+  },
+  {
+    "id": "b2-implicit-fallback-design",
+    "rule": "不给 --direction、档案写这个方向时回退 default",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material template job_000000002305 --kind email --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"你的第一个求职方向 design 还没有模板，用通用模板\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-fallback-market",
+    "rule": "不给 --direction、档案写这个方向时回退 default",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material template job_000000002305 --kind email --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"你的第一个求职方向 market 还没有模板，用通用模板\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-fallback-finance",
+    "rule": "不给 --direction、档案写这个方向时回退 default",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material template job_000000002305 --kind email --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"你的第一个求职方向 finance 还没有模板，用通用模板\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-fallback-hr",
+    "rule": "不给 --direction、档案写这个方向时回退 default",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material template job_000000002305 --kind email --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"你的第一个求职方向 hr 还没有模板，用通用模板\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-general-not-a-profile-direction",
+    "rule": "general 不能写进档案的 target.directions（档案校验报错）",
+    "note": null,
+    "exits": [
+      1
+    ],
+    "commands": [
+      {
+        "argv": "profile validate --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"target.directions[0]: general holds office software every direction uses; it is not a direction\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-no-direction-default",
+    "rule": "档案没写方向时用 default",
+    "note": null,
+    "exits": [
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002305 --kind email --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002305\",\n  \"direction\": \"default\",\n  \"label\": \"通用\",\n  \"reason\": \"档案没写求职方向，用通用模板\",\n  \"kind\": \"email\",\n  \"template\": \"default/email@1\",\n  \"spec\": {\n    \"max_chars\": 600,\n    \"subject_max_chars\": 40,\n    \"subject_hint\": \"应聘岗位 + 姓名 + 学校，例如 应聘{job.title}-{contact.name}-{edu-1.school}\",\n    \"slots\": [\n      {\n        \"slot\": \"salutation\",\n        \"required\": true,\n        \"hint\": \"不知道收件人时写 您好；知道再写具体称呼\"\n      },\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"我是谁、从哪看到岗位、应聘什么岗位\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 3,\n        \"prefer\": [\n          \"internship\",\n          \"work\",\n          \"project\",\n          \"campus\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条和 JD 最相关的经历，写清做了什么、结果如何（数字照档案写）\"\n      },\n      {\n        \"slot\": \"fit\",\n        \"required\": false,\n        \"hint\": \"为什么想做这个岗位、这家公司（只写档案或 JD 里有依据的）；说明能按 JD 的要求到岗\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明附件是简历，期待回复\"\n      },\n      {\n        \"slot\": \"signature\",\n        \"required\": true,\n        \"hint\": \"姓名和联系方式，用 {contact.name}、{contact.phone}、{contact.email}\"\n      }\n    ],\n    \"examples\": [\n      \"您好！我是{edu-1.school}{edu-1.major}专业的{contact.name}，应聘贵司的{job.title}岗位，简历见附件。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-tech",
+    "rule": "不给 --direction 时按 JD 和档案选",
+    "note": null,
+    "exits": [
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002301 --kind greeting --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002301\",\n  \"direction\": \"tech\",\n  \"label\": \"技术\",\n  \"reason\": \"JD 的技能有 2 项属于这个方向，也在你的求职方向里\",\n  \"kind\": \"greeting\",\n  \"template\": \"tech/greeting@1\",\n  \"spec\": {\n    \"max_chars\": 150,\n    \"slots\": [\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"称呼加一句自我介绍：学校、专业、应聘的岗位（用占位符 {edu-1.school}、{job.title} 等，不手写）\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 2,\n        \"prefer\": [\n          \"internship\",\n          \"project\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"和 JD 技能最相关的一两条实习或项目：用了什么技术、做到什么结果（性能、规模的数字照档案写）\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"实习岗写到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"一句话收尾，例如希望进一步沟通、可以发简历\"\n      }\n    ],\n    \"examples\": [\n      \"您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘贵司的{job.title}岗位。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-data",
+    "rule": "不给 --direction 时按 JD 和档案选",
+    "note": null,
+    "exits": [
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002302 --kind greeting --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002302\",\n  \"direction\": \"data\",\n  \"label\": \"数据\",\n  \"reason\": \"JD 的技能有 1 项属于这个方向，也在你的求职方向里\",\n  \"kind\": \"greeting\",\n  \"template\": \"data/greeting@1\",\n  \"spec\": {\n    \"max_chars\": 150,\n    \"slots\": [\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"称呼加一句自我介绍：学校、专业、应聘的岗位（用占位符 {edu-1.school}、{job.title} 等，不手写）\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 2,\n        \"prefer\": [\n          \"internship\",\n          \"project\",\n          \"research\",\n          \"competition\"\n        ],\n        \"hint\": \"一两条分析或建模的经历：数据从哪来、用了什么方法、得出什么结论或带来什么变化（数据量、指标照档案写）\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"实习岗写到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"一句话收尾，例如希望进一步沟通、可以发简历\"\n      }\n    ],\n    \"examples\": [\n      \"您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘贵司的{job.title}岗位。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-product",
+    "rule": "不给 --direction 时按 JD 和档案选",
+    "note": null,
+    "exits": [
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002303 --kind greeting --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002303\",\n  \"direction\": \"product\",\n  \"label\": \"产品\",\n  \"reason\": \"JD 的技能有 1 项属于这个方向，也在你的求职方向里\",\n  \"kind\": \"greeting\",\n  \"template\": \"product/greeting@1\",\n  \"spec\": {\n    \"max_chars\": 150,\n    \"slots\": [\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"称呼加一句自我介绍：学校、专业、应聘的岗位（用占位符 {edu-1.school}、{job.title} 等，不手写）\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 2,\n        \"prefer\": [\n          \"internship\",\n          \"project\",\n          \"campus\"\n        ],\n        \"hint\": \"一两条和用户、需求有关的经历：发现了什么问题、推动上线了什么、指标怎么变（照档案写）\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"实习岗写到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"一句话收尾，例如希望进一步沟通、可以发简历\"\n      }\n    ],\n    \"examples\": [\n      \"您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘贵司的{job.title}岗位。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b2-implicit-ops",
+    "rule": "不给 --direction 时按 JD 和档案选",
+    "note": null,
+    "exits": [
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material template job_000000002304 --kind greeting --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"job_id\": \"job_000000002304\",\n  \"direction\": \"ops\",\n  \"label\": \"运营\",\n  \"reason\": \"JD 的技能有 1 项属于这个方向，也在你的求职方向里\",\n  \"kind\": \"greeting\",\n  \"template\": \"ops/greeting@1\",\n  \"spec\": {\n    \"max_chars\": 150,\n    \"slots\": [\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"称呼加一句自我介绍：学校、专业、应聘的岗位（用占位符 {edu-1.school}、{job.title} 等，不手写）\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 2,\n        \"prefer\": [\n          \"internship\",\n          \"campus\",\n          \"project\"\n        ],\n        \"hint\": \"一两条运营经历：做了什么内容或活动、带来多少增长或参与（数字照档案写）；有作品链接可以附在邮件里\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"实习岗写到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"一句话收尾，例如希望进一步沟通、可以发简历\"\n      }\n    ],\n    \"examples\": [\n      \"您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘贵司的{job.title}岗位。\"\n    ]\n  }\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b3-raise-greeting-limit-ignored",
+    "rule": "用户把上限改大不生效：151 字仍拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments: 151 characters once filled; the limit for a greeting is 150\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments: 151 characters once filled; the limit for a greeting is 150\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b3-lower-greeting-limit-101",
+    "rule": "用户改小上限 100：101 字拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments: 101 characters once filled; the limit for a greeting is 100\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments: 101 characters once filled; the limit for a greeting is 100\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b3-lower-greeting-limit-100",
+    "rule": "用户改小上限 100：100 字通过",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试岗位说明示例测试\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b3-raise-subject-limit-ignored",
+    "rule": "用户把标题上限改大不生效：41 字仍拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"subject: 41 characters once filled; the limit is 40\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"subject: 41 characters once filled; the limit is 40\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b4-no-draft-command",
+    "rule": "起草流程归 M3-6：material 只有 validate、template、render，没有 --output",
+    "note": null,
+    "exits": [
+      0,
+      2
+    ],
+    "commands": [
+      {
+        "argv": "material --help",
+        "exit": 0,
+        "stdout": "usage: python -m jobsearch_cn material [-h] <material-command> ...\n\n求职材料（简历等）相关命令，格式见 docs/cn/material.md\n\npositional arguments:\n  <material-command>\n    validate          检查一份材料：引用的档案条目都在，改写没有编出数字和技能\n    template          打招呼语、投递邮件、内推请求：按方向选模板\n    render            检查打招呼语、邮件或内推请求，通过后输出可以直接复制的文字\n\noptions:\n  -h, --help          show this help message and exit\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render x.json --output y.txt",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "usage: python -m jobsearch_cn [-h] [--version] <command> ...\npython -m jobsearch_cn: error: unrecognized arguments: --output y.txt\n"
+      }
+    ]
+  },
+  {
+    "id": "b5-skill-in-title-cited-job",
+    "rule": "job 不算技能依据：岗位名有 Rust，引 job 也拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b5-required-skill-cited-job",
+    "rule": "job 不算技能依据：JD 要求 Rust，引 job 也拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the skill 'Rust' is neither in the profile's skills nor in the cited entries\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b5-number-in-title-cited-job",
+    "rule": "job 算数字依据：岗位名有 2027，引 job 通过",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，我想应聘 2027 届的岗位。\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b5-number-in-title-no-ref",
+    "rule": "同一句不引 job：拒绝",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '2027' is not in what it cites (nothing); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '2027' is not in what it cites (nothing); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b5-salary-cited-job",
+    "rule": "引 job 也不能借薪资数字：job 的原文只有岗位名和公司名",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '180' is not in what it cites (proj-v23, job); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '180' is not in what it cites (proj-v23, job); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b6-old-revision-warns",
+    "rule": "模板 revision 变了只警告",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": [\n    \"template: written to tech/greeting@1, the template is now tech/greeting@2; check the slots still fit\"\n  ]\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，希望了解岗位。\n",
+        "stderr": "警告：template: written to tech/greeting@1, the template is now tech/greeting@2; check the slots still fit\n"
+      }
+    ]
+  },
+  {
+    "id": "b6-wrong-kind-in-id",
+    "rule": "编号的方向或种类不符报错",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"template: must be 'tech/greeting@1' (the direction and kind of this material)\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"template: must be 'tech/greeting@1' (the direction and kind of this material)\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b7-cites-notes",
+    "rule": "沟通材料引 notes.md：validate 和 render 都报错",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].refs[0]: a message does not cite notes.md; only a CV's summary does\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].refs[0]: a message does not cite notes.md; only a CV's summary does\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "b8-resume-build-given-message",
+    "rule": "resume build 拿到沟通材料：退出码 2",
+    "note": "第一条文件名合规，走到种类检查；第二条是文件名检查先拒绝",
+    "exits": [
+      2,
+      2
+    ],
+    "commands": [
+      {
+        "argv": "resume build <data>\\resume-1.json --data-dir <data>",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "{\n  \"error\": \"resume build builds a CV; a greeting, email or referral is rendered with material render\"\n}\n"
+      },
+      {
+        "argv": "resume build <data>\\greeting-1.json --data-dir <data>",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "{\n  \"error\": \"<data>\\\\greeting-1.json: resume build takes a material file named resume-<n>.json (docs/cn/material.md), and names the PDF and Word files after it\"\n}\n"
+      }
+    ]
+  },
+  {
+    "id": "b8-review-draft-given-message",
+    "rule": "review draft 拿到沟通材料：退出码 2",
+    "note": null,
+    "exits": [
+      2
+    ],
+    "commands": [
+      {
+        "argv": "review draft <data>\\greeting-1.json --data-dir <data>",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "{\n  \"error\": \"review draft drafts the review of a CV; check a greeting, email or referral with material validate\"\n}\n"
+      }
+    ]
+  },
+  {
+    "id": "b8-render-given-resume",
+    "rule": "material render 拿到简历：退出码 2",
+    "note": null,
+    "exits": [
+      2
+    ],
+    "commands": [
+      {
+        "argv": "material render <data>\\resume-2.json --data-dir <data>",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "{\n  \"error\": \"material render renders greeting, email, referral; a CV is built with resume build\"\n}\n"
+      }
+    ]
+  },
+  {
+    "id": "x1-unknown-availability-cited",
+    "rule": "冻结规则：缺失值不能变成随时到岗；引 availability 后",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，我随时可以到岗。\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x1-tomorrow-cited",
+    "rule": "冻结规则：不能承诺比档案更早；引 availability 后",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\email-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\email-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "标题：岗位申请\n\n您好，我明天即可到岗。\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x2-months-from-date",
+    "rule": "冻结规则：不能承诺更长；档案 3 个月，写 12 个月（日期里的 12）",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，我可以连续实习 12 个月。\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x2-days-from-date",
+    "rule": "冻结规则：不能多于档案；档案每周 4 天，写 7 天（日期里的 07）",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\referral-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\referral-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，我每周可以到岗 7 天，烦请告知申请方式。\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x2-control-days-5-cited",
+    "rule": "对照：写 5 天并引 availability（日期里没有 5）",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\referral-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '5' is not in what it cites (availability); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\referral-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '5' is not in what it cites (availability); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x2-control-months-6-cited",
+    "rule": "对照：写 6 个月并引 availability（日期里没有 6）",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '6' is not in what it cites (availability); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '6' is not in what it cites (availability); use the figure the profile gives, or ask the user to add it to the profile\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x7-wechat-without-digits",
+    "rule": "冻结规则：不能手写微信；微信号不带数字，排除冻结样例 v23 里 23 的偶然命中",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\referral-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\referral-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，微信号：fake_only_handle，方便时烦请告知申请方式。\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x3-residual-literal-frozen-notation",
+    "rule": "替换值残留槽位，用冻结文件的 {{ }} 记法",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\referral-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\referral-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，想了解示例{{unfilled_title}}岗位的申请方式。\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x4-unfilled-literal-frozen-notation",
+    "rule": "未代入槽位，用冻结文件的 {{ }} 记法",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {unfilled_role} is not a placeholder (write {entry.field}, e.g. {edu-1.school})\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {unfilled_role} is not a placeholder (write {entry.field}, e.g. {edu-1.school})\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x5-contact-email-in-body",
+    "rule": "未拆 signature：valid-contact-from-profile 的正文原样放进 body",
+    "note": null,
+    "exits": [
+      1,
+      1
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {contact.email}: the phone and the email belong only in an email's signature segment\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\email-1.json --data-dir <data>",
+        "exit": 1,
+        "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: {contact.email}: the phone and the email belong only in an email's signature segment\"\n  ],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "id": "x6-unknown-availability-omitted-cited",
+    "rule": "valid-unknown-availability-omitted 加引 availability 后",
+    "note": null,
+    "exits": [
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "argv": "material validate <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+        "stderr": ""
+      },
+      {
+        "argv": "material render <data>\\greeting-1.json --data-dir <data>",
+        "exit": 0,
+        "stdout": "您好，我做过数据字段核对，希望了解岗位安排。到岗安排尚待确认。\n",
+        "stderr": ""
+      }
+    ]
+  }
+]

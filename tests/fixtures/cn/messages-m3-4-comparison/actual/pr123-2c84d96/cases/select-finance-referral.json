@@ -1,0 +1,37 @@
+{
+  "id": "select-finance-referral",
+  "setup": [
+    {
+      "argv": "profile validate --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "jd save <data>\\job-input.json --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002305\",\n      \"title\": \"档案整理实习生\",\n      \"company\": \"示例留出戊公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "commands": [
+    {
+      "argv": "material template job_000000002305 --kind referral --direction finance --data-dir <data>",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "{\n  \"error\": \"no template for direction 'finance' (there are: data, default, ops, product, tech)\"\n}\n"
+    }
+  ],
+  "judgement": {
+    "expected": "accept",
+    "actual": "error",
+    "pass": false,
+    "problems": [
+      "exit 2: {\n  \"error\": \"no template for direction 'finance' (there are: data, default, ops, product, tech)\"\n}"
+    ],
+    "template": null,
+    "direction": null,
+    "reason": null
+  },
+  "setup_ok": true
+}

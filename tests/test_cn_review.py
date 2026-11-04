@@ -10,6 +10,7 @@ commands find the material next to the review, render Markdown, and exit 0, 1 or
 import copy
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -113,6 +114,19 @@ class Validate(unittest.TestCase):
         for path in ("", "nope", "skills[99]", "experience.bullets", "[0]", "skills[0].x", "skills[-1]",
                      "experience[0]bullets", "summary..text"):
             self.assertFalse(review.resolve(MATERIAL, path), path)
+        self.assertTrue(review.resolve(MATERIAL, "skills[002]"))  # leading zeros read as before
+
+    def test_a_very_long_index_is_a_place_that_does_not_exist(self):
+        # #112 P3-3: int() refuses digit strings this long; the check must not raise.
+        huge = "skills[" + "9" * 5000 + "]"
+        self.assertFalse(review.resolve(MATERIAL, huge))
+        self.assertFalse(review.resolve(MATERIAL, "skills[" + "0" * 4999 + "9]"))
+        data = make_review()
+        data["findings"][0]["path"] = huge
+        [error] = errors_of(data)
+        self.assertTrue(error.startswith("findings[0].path: 'skills[999"), error)
+        self.assertTrue(error.endswith("…' is not a place in the material"), error)
+        self.assertLess(len(error), 200)
 
     def test_a_review_of_an_older_material_fails(self):
         changed = copy.deepcopy(MATERIAL)
@@ -192,6 +206,35 @@ class Draft(unittest.TestCase):
         job = {"requirements": {"skills": ["Go", "Golang"]}}
         self.assertEqual(len(review.coverage(MATERIAL, PROFILE, job, VOCABULARY)), 1)
 
+    def test_a_choice_of_skills_is_one_row_covered_by_any_of_them(self):
+        # The M3-3c dry run: "熟悉 Golang 或 Java" with Go written; Java is no gap.
+        job = {"requirements": {"skills": ["Go", "MySQL", "Golang", "Java"], "skill_alternatives": [["Golang", "Java"]]}}
+        rows = review.coverage(MATERIAL, PROFILE, job, VOCABULARY)
+        self.assertEqual([row["requirement"] for row in rows], ["Golang 或 Java", "MySQL"])
+        self.assertEqual(rows[0]["status"], "covered")  # the JD also writes Go, so Go is its wording
+        self.assertIn("skills[1]", rows[0]["where"])
+
+    def test_a_choice_written_another_way_is_a_synonym(self):
+        job = {"requirements": {"skills": ["Golang", "Java"], "skill_alternatives": [["Golang", "Java"]]}}
+        [row] = review.coverage(MATERIAL, PROFILE, job, VOCABULARY)
+        self.assertEqual((row["requirement"], row["status"]), ("Golang 或 Java", "synonym"))
+        self.assertIn("材料写作 Go，JD 写作 Golang", row["note"])
+
+    def test_a_choice_none_of_which_is_written_is_one_gap(self):
+        job = {"requirements": {"skills": ["Rust", "Docker", "Java"], "skill_alternatives": [["Rust", "Docker", "Java"]]}}
+        self.assertEqual(review.coverage(MATERIAL, PROFILE, job, VOCABULARY),
+                         [{"requirement": "Rust 或 Docker 或 Java", "status": "gap", "where": [],
+                           "note": "Docker：档案里有，材料没写"}])
+        job = {"requirements": {"skills": ["Rust", "Java"], "skill_alternatives": [["Rust", "Java"]]}}
+        self.assertEqual(review.coverage(MATERIAL, PROFILE, job, VOCABULARY)[0]["note"], "技能列表未列，需核对经历原文")
+
+    def test_without_choices_the_rows_are_unchanged(self):
+        job = dict(JOB, requirements=dict(JOB["requirements"], skill_alternatives=[]))
+        self.assertEqual(review.coverage(MATERIAL, PROFILE, job, VOCABULARY),
+                         review.coverage(MATERIAL, PROFILE, JOB, VOCABULARY))
+        self.assertEqual([row["requirement"] for row in review.coverage(MATERIAL, PROFILE, JOB, VOCABULARY)],
+                         JOB["requirements"]["skills"])
+
     def test_style_warnings(self):
         data = copy.deepcopy(MATERIAL)
         data["summary"]["text"] = "后端开发实习一段。"
@@ -219,6 +262,34 @@ class Markdown(unittest.TestCase):
         self.assertLess(text.index("**必改** B1"), text.index("**建议** E4"))
         self.assertIn("  - 建议改成：实现……", text)
         self.assertIn("| Docker | 缺口 | - | 档案里有，材料没写 |", text)
+
+    def test_a_line_break_in_any_free_text_keeps_the_structure(self):
+        # Planner on the #112 P3 PR: findings, the heading and the summary lines too, not just the table.
+        data = make_review()
+        data["findings"] = [{"item": "B1", "path": None, "severity": "must",
+                             "reason": "第一行\n- 不是新的一项\n# 不是标题", "suggestion": "甲\r\n乙"},
+                            {"item": "E4", "path": None, "severity": "suggest", "reason": "一行", "suggestion": None}]
+        data.update(material="resume-1.json\n# 假标题", job_id="job_1\n- 假的一行")
+        lines = review.markdown(data).splitlines()
+        self.assertEqual([line for line in lines if line.startswith("#")],
+                         ["# 审核结果：resume-1.json<br># 假标题（第 1 轮）", "## 问题", "## 岗位要求覆盖"])
+        self.assertIn("- 岗位：job_1<br>- 假的一行", lines)
+        self.assertIn("- **必改** B1：第一行<br>- 不是新的一项<br># 不是标题", lines)
+        self.assertIn("  - 建议改成：甲<br>乙", lines)
+        self.assertEqual(sum(line.startswith("- **") for line in lines), 2)
+
+    def test_a_pipe_or_line_break_in_a_cell_keeps_the_table_whole(self):
+        # #112 P3-2: legal text must not add columns or break a row.
+        data = make_review()
+        data["coverage"] = [{"requirement": "检索 | 排序", "status": "gap", "where": [], "note": "第一行\n第二行\r\n第三行"},
+                            {"requirement": "C:\\tools\\|x", "status": "gap", "where": [], "note": None}]
+        self.assertEqual(errors_of(data), [])
+        rows = [line for line in review.markdown(data).splitlines() if line.startswith("|")]
+        self.assertEqual(len(rows), 4)  # header, rule, two rows
+        for line in rows:
+            self.assertEqual(re.sub(r"\\.", "", line).count("|"), 5, line)  # four cells
+        self.assertEqual(rows[2], "| 检索 \\| 排序 | 缺口 | - | 第一行<br>第二行<br>第三行 |")
+        self.assertEqual(rows[3], "| C:\\\\tools\\\\\\|x | 缺口 | - | - |")
 
 
 def run_cli(*args, data_dir):
@@ -303,6 +374,15 @@ class Command(unittest.TestCase):
         self.write_review(make_review(verdict="pass"))
         proc = run_cli("review", "show", str(self.review), data_dir=self.data)
         self.assertEqual(proc.returncode, 1)
+        self.assertFalse(json.loads(proc.stdout)["valid"])
+
+    def test_validate_reports_a_very_long_index_as_json(self):
+        data = make_review()
+        data["findings"][0]["path"] = "skills[" + "9" * 5000 + "]"
+        self.write_review(data)
+        proc = run_cli("review", "validate", str(self.review), data_dir=self.data)
+        self.assertEqual(proc.returncode, 1, proc.stderr.decode("utf-8"))
+        self.assertEqual(proc.stderr, b"")
         self.assertFalse(json.loads(proc.stdout)["valid"])
 
     def test_unreadable_input_exits_2(self):

@@ -1,0 +1,14 @@
+{
+  "id": "job_000000000001",
+  "title": "后端开发实习生",
+  "company": "示例云计算有限公司",
+  "requirements": {
+    "skills": [
+      "Go",
+      "Python",
+      "MySQL",
+      "Docker"
+    ],
+    "skill_alternatives": []
+  }
+}

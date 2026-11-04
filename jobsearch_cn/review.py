@@ -13,7 +13,7 @@ import hashlib
 import json
 import re
 
-from jobsearch_cn import jd_parser, material as material_mod, profile as profile_mod, schema
+from jobsearch_cn import jd_parser, material as material_mod, profile as profile_mod, schema, score
 
 REVIEW_VERSION = 1
 KINDS = ("resume-review",)
@@ -63,10 +63,11 @@ def resolve(material, path: str) -> bool:
                     return False
                 node = node[token.group("name")]
             else:
-                index = int(token.group("index"))
-                if not isinstance(node, list) or index >= len(node):
+                # Compare lengths before int(): Python refuses to convert very long digit strings.
+                digits = token.group("index").lstrip("0") or "0"
+                if not isinstance(node, list) or len(digits) > len(str(len(node))) or int(digits) >= len(node):
                     return False
-                node = node[index]
+                node = node[int(digits)]
     return True
 
 
@@ -118,7 +119,8 @@ def _text(value, where: str, errors: list, nullable: bool = False) -> None:
 
 def _path(value, where: str, material, errors: list) -> None:
     if not isinstance(value, str) or not resolve(material, value):
-        errors.append(f"{where}: {value!r} is not a place in the material")
+        shown = repr(value) if not isinstance(value, str) or len(value) <= 80 else repr(value[:80] + "…")
+        errors.append(f"{where}: {shown} is not a place in the material")
 
 
 def _findings(value, material, errors: list) -> int:
@@ -209,29 +211,53 @@ def coverage(material: dict, profile: dict, job, vocabulary) -> list:
                     continue
                 claimed.append((match.start(), match.end()))
                 places.setdefault(key, []).append((path, match.group(0)))
-    rows, seen = [], set()
-    for name in ((job.get("requirements") or {}).get("skills") or []):
-        if not isinstance(name, str) or vocabulary.key(name) in seen:
-            continue
+    requirements = job.get("requirements") if isinstance(job.get("requirements"), dict) else {}
+    names = [name for name in requirements.get("skills") or [] if isinstance(name, str)]
+    groups = [[name for name in group if isinstance(name, str)]
+              for group in requirements.get("skill_alternatives") or [] if isinstance(group, list)]
+    spellings = {}  # key -> every spelling the JD uses for that skill, casefolded
+    for name in names + [name for group in groups for name in group]:
+        spellings.setdefault(vocabulary.key(name), set()).add(name.casefold())
+    # The JD's skills as match scoring counts them: a skill_alternatives group is one item, at its first skill.
+    items = score._requirements({"requirements": {"skills": names, "skill_alternatives": groups}}, vocabulary)
+    found_in = {"places": places, "spellings": spellings, "held": held, "cited": cited}
+    return [_coverage_row(item, found_in, vocabulary) for item in items]
+
+
+def _coverage_row(item: list, found_in: dict, vocabulary) -> dict:
+    """One coverage row for a skill, or for a group the JD lets the candidate choose from.
+
+    A group is covered when any of its skills is, a synonym when none is covered but one is written
+    another way, and otherwise a gap whose note names the skills the machine found something about.
+    """
+    members = []  # (name, status, where, note)
+    for name in item:
         key = vocabulary.key(name)
-        seen.add(key)
-        found = places.get(key, [])
+        found = found_in["places"].get(key, [])
         where = list(dict.fromkeys(path for path, _ in found))
         if not found:
-            if key in held:
-                note = GAP_UNUSED
-            elif key in cited:
-                note = GAP_IN_CITED_TEXT
-            else:
-                note = GAP_UNCHECKED
-            rows.append({"requirement": name, "status": "gap", "where": [], "note": note})
-        elif any(surface.casefold() == name.casefold() for _, surface in found):
-            rows.append({"requirement": name, "status": "covered", "where": where, "note": None})
+            note = (GAP_UNUSED if key in found_in["held"] else
+                    GAP_IN_CITED_TEXT if key in found_in["cited"] else GAP_UNCHECKED)
+            members.append((name, "gap", [], note))
+        elif any(surface.casefold() in found_in["spellings"][key] for _, surface in found):
+            members.append((name, "covered", where, None))
         else:
             spelled = "、".join(dict.fromkeys(surface for _, surface in found))
-            rows.append({"requirement": name, "status": "synonym", "where": where,
-                         "note": f"材料写作 {spelled}，JD 写作 {name}；档案支持的话改用 JD 的写法"})
-    return rows
+            members.append((name, "synonym", where, f"材料写作 {spelled}，JD 写作 {name}；档案支持的话改用 JD 的写法"))
+    label = score._label(item)
+    for status in ("covered", "synonym"):
+        chosen = [member for member in members if member[1] == status]
+        if chosen:
+            where = list(dict.fromkeys(path for member in chosen for path in member[2]))
+            note = None if status == "covered" else "；".join(member[3] for member in chosen)
+            return {"requirement": label, "status": status, "where": where, "note": note}
+    for note in (GAP_UNUSED, GAP_IN_CITED_TEXT, GAP_UNCHECKED):
+        named = [member[0] for member in members if member[3] == note]
+        if named:
+            if len(item) > 1 and note != GAP_UNCHECKED:
+                note = f"{'、'.join(named)}：{note}"
+            return {"requirement": label, "status": "gap", "where": [], "note": note}
+    raise AssertionError("an item has at least one skill")
 
 
 def _cited_skills(material: dict, profile: dict, patterns) -> set:
@@ -274,9 +300,13 @@ _LABELS = {"must": "必改", "suggest": "建议", "covered": "已覆盖", "synon
 
 
 def markdown(review: dict) -> str:
-    """A valid review as Markdown for the user; nothing is saved."""
-    lines = [f"# 审核结果：{review['material']}（第 {review['round']} 轮）", "",
-             f"- 岗位：{review['job_id']}",
+    """A valid review as Markdown for the user; nothing is saved.
+
+    Free text never breaks the structure it sits in: line breaks in it become <br> (_line), and in a
+    table cell pipes are escaped too (_cell). Paths, enums and the timestamp are validated, so need neither.
+    """
+    lines = [f"# 审核结果：{_line(review['material'])}（第 {review['round']} 轮）", "",
+             f"- 岗位：{_line(review['job_id'])}",
              f"- 结论：{_LABELS[review['verdict']]}",
              f"- 方式：{_LABELS[review['mode']]}" + ("（起草者自己的会话审核，不是独立审核）"
                                                    if review["mode"] == "self" else ""),
@@ -286,9 +316,9 @@ def markdown(review: dict) -> str:
     order = sorted(review["findings"], key=lambda f: (f["severity"] != "must", ITEMS.index(f["item"])))
     for finding in order:
         place = f" `{finding['path']}`" if finding["path"] else ""
-        lines.append(f"- **{_LABELS[finding['severity']]}** {finding['item']}{place}：{finding['reason']}")
+        lines.append(f"- **{_LABELS[finding['severity']]}** {finding['item']}{place}：{_line(finding['reason'])}")
         if finding["suggestion"]:
-            lines.append(f"  - 建议改成：{finding['suggestion']}")
+            lines.append(f"  - 建议改成：{_line(finding['suggestion'])}")
     lines += ["", "## 岗位要求覆盖", ""]
     if not review["coverage"]:
         lines.append("没有列出。")
@@ -296,6 +326,16 @@ def markdown(review: dict) -> str:
         lines += ["| 要求 | 情况 | 位置 | 说明 |", "| --- | --- | --- | --- |"]
         for row in review["coverage"]:
             where = "、".join(f"`{p}`" for p in row["where"]) or "-"
-            note = (row["note"] or "-").replace("|", "\\|")
-            lines.append(f"| {row['requirement']} | {_LABELS[row['status']]} | {where} | {note} |")
+            cells = (_cell(row["requirement"]), _LABELS[row["status"]], where, _cell(row["note"] or "-"))
+            lines.append("| " + " | ".join(cells) + " |")
     return "\n".join(lines) + "\n"
+
+
+def _line(text: str) -> str:
+    """Free text on one Markdown line: its line breaks become <br>, so it cannot end a list item or a heading."""
+    return "<br>".join(text.splitlines())
+
+
+def _cell(text: str) -> str:
+    """Text for one Markdown table cell: a pipe or a line break in it must not split the row."""
+    return _line(text.replace("\\", "\\\\").replace("|", "\\|"))

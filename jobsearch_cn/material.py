@@ -15,7 +15,7 @@ from fractions import Fraction
 from jobsearch_cn import jd_parser, profile as profile_mod, schema, score
 
 MATERIAL_VERSION = 1
-KINDS = ("resume",)  # greetings and emails (M3-4) will be further kinds of the same format
+KINDS = ("resume",)  # greetings, emails and referral requests (M3-4) are checked by messages.py
 
 TOP_LEVEL_KEYS = ("schema_version", "kind", "job_id", "profile_hash", "created", "summary",
                   "education", "experience", "skills", "awards", "certificates", "languages")

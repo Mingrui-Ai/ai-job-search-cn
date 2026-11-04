@@ -1,0 +1,35 @@
+{
+  "id": "select-ops-greeting",
+  "setup": [
+    {
+      "argv": "profile validate --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "jd save <data>\\job-input.json --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002304\",\n      \"title\": \"内容运营实习生\",\n      \"company\": \"示例留出丁公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "commands": [
+    {
+      "argv": "material template job_000000002304 --kind greeting --direction ops --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"job_id\": \"job_000000002304\",\n  \"direction\": \"ops\",\n  \"label\": \"运营\",\n  \"reason\": \"按 --direction 指定\",\n  \"kind\": \"greeting\",\n  \"template\": \"ops/greeting@1\",\n  \"spec\": {\n    \"max_chars\": 150,\n    \"slots\": [\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"称呼加一句自我介绍：学校、专业、应聘的岗位（用占位符 {edu-1.school}、{job.title} 等，不手写）\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 2,\n        \"prefer\": [\n          \"internship\",\n          \"campus\",\n          \"project\"\n        ],\n        \"hint\": \"一两条运营经历：做了什么内容或活动、带来多少增长或参与（数字照档案写）；有作品链接可以附在邮件里\"\n      },\n      {\n        \"slot\": \"availability\",\n        \"required\": false,\n        \"hint\": \"实习岗写到岗时间、每周天数、实习时长，必须引用 availability\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"一句话收尾，例如希望进一步沟通、可以发简历\"\n      }\n    ],\n    \"examples\": [\n      \"您好，我是{edu-1.school}{edu-1.major}专业的学生，想应聘贵司的{job.title}岗位。\"\n    ]\n  }\n}\n",
+      "stderr": ""
+    }
+  ],
+  "judgement": {
+    "expected": "accept",
+    "actual": "accept",
+    "pass": true,
+    "problems": [],
+    "template": "ops/greeting@1",
+    "direction": "ops",
+    "reason": "按 --direction 指定"
+  },
+  "setup_ok": true
+}

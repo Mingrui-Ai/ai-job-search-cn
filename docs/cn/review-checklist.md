@@ -145,11 +145,13 @@ M3-3 第一部分只写设计，不写代码。本文定两件事：
 
 逻辑都在 `python -m jobsearch_cn` 里，工作流说明只写一份，每个运行时只加薄入口（ADR-7、ADR-10）。
 
+步骤写在 [resume-workflow.md](resume-workflow.md)（第三部分），下面是设计时的考虑。
+
 ### 5.1 Claude Code
 
-- 入口技能（例如 `cn-resume`）只指向共用的工作流说明（第三部分写）。
-- 审核者用子代理：新增 `.claude/agents/cn-resume-reviewer.md`，工具只给 Read、Glob、Grep 和读文本层、渲染页面图片要用的命令，没有 Edit、Write，不联网（§6 裁定 2）。起草者用 Agent 工具派它，把起草者的说明和文件路径写进提示词，审核者自己读文件。
-- 新增子代理要改 `.claude/agents/`，并在 `tools/security_guards.py` 的子代理白名单里登记，那一步要先征得用户本人同意。
+- 入口技能 `cn-resume` 只指向共用的工作流说明 [resume-workflow.md](resume-workflow.md)。
+- 审核者用子代理：`.claude/agents/cn-resume-reviewer.md`，工具只给 Read、Glob、Grep、Bash（Bash 受 allow 列表限制），没有 Edit、Write，不联网（§6 裁定 2）。起草者用 Agent 工具派它，把起草者的说明和文件路径写进提示词，审核者自己读文件。
+- 这四个工具都已在 `tools/security_guards.py` 的子代理白名单里，新增子代理不用改白名单；技能用到的 `material`、`resume`、`review` 三组命令的授权经用户本人同意后加进了两份白名单（2026-11-02）。
 
 ### 5.2 Codex
 

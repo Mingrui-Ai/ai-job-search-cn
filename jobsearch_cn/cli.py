@@ -14,8 +14,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import (__version__, jd_parser, match, material, profile, report, resume_docx, resume_extract,
-                          resume_pdf, review, schema, score, store, vocab)
+from jobsearch_cn import (__version__, jd_parser, match, material, messages, profile, report, resume_docx,
+                          resume_extract, resume_pdf, review, schema, score, store, vocab)
+from jobsearch_cn import applications as applications_mod
 
 _HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
@@ -373,10 +374,42 @@ def _material_job(args, record):
     return None
 
 
-def _material_notes(args):
-    """The notes.md beside the profile a material is checked against, for a summary that cites it."""
+def _material_notes(args, record):
+    """The notes.md beside the profile a material is checked against, read only when its summary cites it."""
+    summary = record.get("summary") if isinstance(record, dict) else None
+    if not (isinstance(summary, dict) and isinstance(summary.get("refs"), list)
+            and material.NOTES_REF in summary["refs"]):
+        return None
     path = Path(args.profile) if args.profile else store.data_dir(args.data_dir) / "profile" / "profile.json"
     return material.read_notes(path.parent / "notes.md")
+
+
+def _message_files(args):
+    try:
+        root = store.data_dir(args.data_dir)
+        return messages.load_templates(root), messages.load_banned(root)
+    except messages.TemplateError as exc:
+        raise InputError(str(exc)) from None
+
+
+def _is_message(record) -> bool:
+    """A greeting, email or referral (messages.py), not a CV (material.py)."""
+    return isinstance(record, dict) and record.get("kind") in messages.KINDS
+
+
+def _check_material(args, record, data, job, vocabulary=None):
+    """(errors, warnings) for a CV, with the notes.md beside the profile that its summary may cite, or for a
+    greeting, email or referral against its template (messages.py, which cites no notes.md). material validate,
+    material render, resume build and review draft all check through here, so they come to one verdict."""
+    vocabulary = _vocabulary(args) if vocabulary is None else vocabulary
+    if _is_message(record):
+        # Unlike a CV, a message that cites the job or fills {job.title} needs it stored: messages.validate says so.
+        templates, banned = _message_files(args)
+        return messages.validate(record, data, vocabulary, job, templates, banned)
+    if isinstance(record, dict) and isinstance(record.get("kind"), str) and record["kind"] not in material.KINDS:
+        # A misspelled kind (greet) is neither a CV nor a message: name the kinds, not the CV fields it lacks.
+        return [f"kind: must be one of {', '.join(material.KINDS + messages.KINDS)}"], []
+    return material.validate(record, data, vocabulary, job, _material_notes(args, record))
 
 
 def cmd_material_validate(args) -> int:
@@ -384,10 +417,46 @@ def cmd_material_validate(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
-    errors, warnings = material.validate(record, data, _vocabulary(args), _material_job(args, record),
-                                         _material_notes(args))
+    errors, warnings = _check_material(args, record, data, _material_job(args, record))
     _emit({"valid": not errors, "errors": errors, "warnings": warnings})
     return 1 if errors else 0
+
+
+def cmd_material_template(args) -> int:
+    job = _stored_job(_store(args), args.job_id)
+    if job is None:
+        _emit({"error": f"no stored job {args.job_id}"}, sys.stderr)
+        return 1
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    templates, _ = _message_files(args)
+    try:
+        result = messages.template_for(job, data, _vocabulary(args), templates, args.kind, args.direction)
+    except messages.TemplateError as exc:
+        raise InputError(str(exc)) from None
+    _emit({"job_id": args.job_id, **result})
+    return 0
+
+
+def cmd_material_render(args) -> int:
+    record = _read_material(args.file)
+    data = _match_profile(args)
+    if data is None:
+        return 1
+    kind = record.get("kind") if isinstance(record, dict) else None
+    if not _is_message(record) and (kind in material.KINDS or not isinstance(kind, str)):
+        raise InputError(f"material render renders {', '.join(messages.KINDS)}; a CV is built with resume build")
+    # A misspelled kind is checked as material validate checks it, so the two say the same.
+    job = _material_job(args, record)
+    errors, warnings = _check_material(args, record, data, job)
+    if errors:
+        _emit({"valid": False, "errors": errors, "warnings": warnings})
+        return 1
+    print(messages.render(record, data, job))
+    for warning in warnings:
+        print(f"警告：{warning}", file=sys.stderr)
+    return 0
 
 
 def cmd_review_draft(args) -> int:
@@ -395,12 +464,16 @@ def cmd_review_draft(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
+    if _is_message(record):
+        # How a greeting, email or referral is reviewed is M3-6's to decide; until then only material validate.
+        raise InputError("review draft drafts the review of a CV; check a greeting, email or referral "
+                         "with material validate")
     vocabulary = _vocabulary(args)
-    errors, _ = material.validate(record, data, vocabulary, notes=_material_notes(args))
+    job = _material_job(args, record)
+    errors, _ = _check_material(args, record, data, job, vocabulary)
     if errors:
         _emit({"error": "the material is invalid; run material validate first", "errors": errors}, sys.stderr)
         return 1
-    job = _material_job(args, record)
     result = review.draft(record, data, job, vocabulary)
     result = {"material_hash": review.material_hash(record), "job_found": job is not None, **result}
     _emit(result)
@@ -624,6 +697,26 @@ def cmd_resume_sample(args) -> int:
 _MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
 
 
+def _write_build_note(directory, stem: str, record: dict, data: dict, outputs):
+    """resume-<n>.build.json beside the outputs: which material and files this build made (applications.md §12).
+    With no file written it writes nothing and returns None, so an earlier note still matches its files."""
+    outputs = [output for output in outputs if output.is_file()]
+    if not outputs:
+        return None
+    import hashlib
+    from datetime import datetime
+    note = {"schema_version": 1, "kind": "resume-build", "material": f"{stem}.json",
+            "material_hash": review.material_hash(record), "profile_hash": score.profile_hash(data),
+            "built_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "files": [{"name": output.name, "sha256": hashlib.sha256(output.read_bytes()).hexdigest()}
+                      for output in outputs]}
+    path = directory / f"{stem}.build.json"
+    if path.is_symlink():
+        raise InputError(f"{path} is a link; nothing is written through it")
+    path.write_text(json.dumps(note, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
 def cmd_resume_build(args) -> int:
     named = _MATERIAL_NAME.fullmatch(Path(args.file).name)
     if not named:
@@ -633,8 +726,10 @@ def cmd_resume_build(args) -> int:
     data = _match_profile(args)
     if data is None:
         return 1
+    if _is_message(record):
+        raise InputError("resume build builds a CV; a greeting, email or referral is rendered with material render")
     vocabulary = _vocabulary(args)
-    errors, warnings = material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args))
+    errors, warnings = _check_material(args, record, data, _material_job(args, record), vocabulary)
     if errors:
         _emit({"error": "the material is invalid; run material validate", "errors": errors}, sys.stderr)
         return 1
@@ -658,10 +753,187 @@ def cmd_resume_build(args) -> int:
     result.update(resume_docx.write(content, docx))
     fields = resume_pdf.fields_of(content)
     problems = resume_pdf.check(pdf, fields) + resume_docx.check(docx, fields)
+    problems += resume_docx.same_text(pdf, docx, content)
     if not content["name"]:
         warnings.append("contact.name: the profile has no name, so the resume has none")
+    note = _write_build_note(directory, named.group(1), record, data, (pdf, docx))
+    result["build_note"] = None if note is None else str(note)
     _emit({**result, "problems": problems, "warnings": warnings})
     return 1 if problems else 0
+
+
+# ---------------------------------------------------------------- application (M4-1a, docs/cn/applications.md)
+
+def _application_run(function, *args, **kwargs) -> int:
+    """Run one applications call: its result on stdout (0), a refusal on stderr (1), unreadable input as exit 2."""
+    try:
+        result = function(*args, **kwargs)
+    except applications_mod.ApplicationError as exc:
+        _emit(exc.payload(), sys.stderr)
+        return 1
+    except applications_mod.StorageError as exc:
+        raise InputError(str(exc)) from None
+    _emit(result)
+    return 0
+
+
+def _application_material_check(args):
+    """(check, ok): material validate against the profile, needed only when --material is given."""
+    if not getattr(args, "material", None):
+        return None, True
+    data = _match_profile(args)  # reports an invalid profile itself
+    if data is None:
+        return None, False
+    vocabulary = _vocabulary(args)
+
+    def check(record):
+        return material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args, record))
+    return check, True
+
+
+def cmd_application_record(args) -> int:
+    check, ok = _application_material_check(args)
+    if not ok:
+        return 1
+    return _application_run(
+        applications_mod.record, store.data_dir(args.data_dir), args.job_id, channel=args.channel,
+        platform=args.platform, submitted=args.submitted, on=args.on, at=args.at, historical=args.historical,
+        material=args.material, sent=args.sent or (), actor=args.actor, preview=args.preview,
+        request_id=args.request_id, check_material=check)
+
+
+def cmd_application_submit(args) -> int:
+    check, ok = _application_material_check(args)
+    if not ok:
+        return 1
+    return _application_run(
+        applications_mod.submit, store.data_dir(args.data_dir), args.application_id,
+        expected_revision=args.expected_revision, on=args.on, at=args.at, channel=args.channel,
+        platform=args.platform, material=args.material, sent=args.sent or (), actor=args.actor,
+        preview=args.preview, request_id=args.request_id, check_material=check)
+
+
+def cmd_application_status(args) -> int:
+    return _application_run(
+        applications_mod.change_status, store.data_dir(args.data_dir), args.application_id, args.status,
+        expected_revision=args.expected_revision, reason=args.reason, on=args.on, at=args.at, actor=args.actor,
+        preview=args.preview, request_id=args.request_id)
+
+
+def cmd_application_show(args) -> int:
+    return _application_run(applications_mod.show, store.data_dir(args.data_dir), args.application_id)
+
+
+def cmd_application_list(args) -> int:
+    return _application_run(applications_mod.list_applications, store.data_dir(args.data_dir),
+                            statuses=args.status, job_id=args.job)
+
+
+def cmd_application_validate(args) -> int:
+    try:
+        result = applications_mod.validate(store.data_dir(args.data_dir))
+    except applications_mod.ApplicationError as exc:
+        _emit(exc.payload(), sys.stderr)
+        return 1
+    except applications_mod.StorageError as exc:
+        raise InputError(str(exc)) from None
+    _emit(result)
+    return 0 if result["valid"] else 1
+
+
+def cmd_application_export(args) -> int:
+    root = store.data_dir(args.data_dir)
+    if not args.out:
+        return _application_run(applications_mod.export, root, args.application_ids)
+
+    def write():
+        document = applications_mod.export(root, args.application_ids)
+        path = applications_mod.write_export(root, args.out, document)
+        return {"out": str(path), "applications": len(document["applications"])}
+    return _application_run(write)
+
+
+def _add_application_parser(commands, stored) -> None:
+    group = commands.add_parser("application", help="投递记录：记一次投递、确认投出、改状态、查看和导出",
+                                description="投递记录（docs/cn/applications.md）。写操作先 --preview 看要写什么，"
+                                            "用户确认后带预览给的 --request-id 再运行一次才写入。")
+    group.set_defaults(help_parser=group)
+    sub = group.add_subparsers(dest="application_command", metavar="<application-command>")
+
+    def writer(name, summary, description):
+        parser = sub.add_parser(name, parents=[stored], help=summary, description=description)
+        mode = parser.add_mutually_exclusive_group(required=True)
+        mode.add_argument("--preview", action="store_true", help="只输出要写的事件和一个 request_id，不写任何东西")
+        mode.add_argument("--request-id", help="预览给的 request_id：写入；同一个 id 重试不会重复写")
+        parser.add_argument("--actor", default="user", choices=applications_mod.ACTORS,
+                            help="谁在记录（默认 user；Agent 写自己的名字）")
+        return parser
+
+    def when(parser):
+        moment = parser.add_mutually_exclusive_group()
+        moment.add_argument("--on", help="只知道日期：YYYY-MM-DD")
+        moment.add_argument("--at", help="知道时刻：必须带时区，如 2026-11-02T14:30+08:00")
+
+    def materials(parser):
+        parser.add_argument("--material", help="投出的这份简历的材料文件（data/materials/<岗位id>/resume-<n>.json）")
+        parser.add_argument("--sent", nargs="+", action="extend", metavar="FILE",
+                            help="实际发出的文件（PDF、Word），会复制归档")
+        parser.add_argument("--profile", help="检查材料用的档案；默认为 <数据目录>/profile/profile.json")
+
+    record_parser = writer("record", "新建一次投递（只起草，或带 --submitted 记为已投出）",
+                           "新建一次投递。不带 --submitted 是 drafted；带了是 applied。")
+    record_parser.add_argument("job_id", help="岗位 id（岗位库里的）")
+    record_parser.add_argument("--channel", required=True, choices=applications_mod.CHANNELS, help="投递渠道")
+    record_parser.add_argument("--platform", help=f"平台名，如 BOSS直聘（≤{applications_mod.MAX_PLATFORM} 字）")
+    record_parser.add_argument("--submitted", action="store_true", help="已经投出")
+    record_parser.add_argument("--historical", action="store_true",
+                               help="补录以前的投递（要带 --submitted；可以没有材料、日期未知）")
+    when(record_parser)
+    materials(record_parser)
+    record_parser.set_defaults(handler=cmd_application_record)
+
+    submit_parser = writer("submit", "把一条 drafted 的投递记为已投出", "把一条 drafted 的投递记为已投出（applied）。")
+    submit_parser.add_argument("application_id", help="投递 id")
+    submit_parser.add_argument("--expected-revision", type=int, required=True, help="show 或 list 给的 revision")
+    submit_parser.add_argument("--channel", choices=applications_mod.CHANNELS, help="实际渠道和起草时不同时写")
+    submit_parser.add_argument("--platform", help="实际平台名")
+    when(submit_parser)
+    materials(submit_parser)
+    submit_parser.set_defaults(handler=cmd_application_submit)
+
+    status_parser = writer("status", "改一条投递的状态", "按 docs/cn/applications.md §4 的状态表改状态。")
+    status_parser.add_argument("application_id", help="投递 id")
+    status_parser.add_argument("status", choices=[item for item in applications_mod.STATUSES if item != "drafted"],
+                               help="新状态")
+    status_parser.add_argument("--expected-revision", type=int, required=True, help="show 或 list 给的 revision")
+    status_parser.add_argument("--reason", help=f"原因或对方说了什么（≤{applications_mod.MAX_TEXT} 字）")
+    when(status_parser)
+    status_parser.set_defaults(handler=cmd_application_status)
+
+    show_parser = sub.add_parser("show", parents=[stored], help="一条投递的完整内容（格式同导出）",
+                                 description="一条投递的完整内容，格式同导出。只读。")
+    show_parser.add_argument("application_id", help="投递 id")
+    show_parser.set_defaults(handler=cmd_application_show)
+
+    list_parser = sub.add_parser("list", parents=[stored], help="投递列表，最近投出的在前",
+                                 description="投递列表，最近投出的在前。只读。")
+    list_parser.add_argument("--status", nargs="+", action="extend", choices=applications_mod.STATUSES,
+                             help="只列这些状态")
+    list_parser.add_argument("--job", help="只列这个岗位的投递")
+    list_parser.set_defaults(handler=cmd_application_list)
+
+    validate_parser = sub.add_parser(
+        "validate", parents=[stored], help="检查整个投递记录库和归档文件",
+        description="检查整库：事件连续、状态重放一致、归档文件在且摘要对、有没有没登记的孤立文件。"
+                    "通过时退出码 0，不通过时退出码 1。只读。")
+    validate_parser.set_defaults(handler=cmd_application_validate)
+
+    export_parser = sub.add_parser(
+        "export", parents=[stored], help="导出投递记录 JSON",
+        description="导出投递记录 JSON；不写 --out 时打印。--out 只收文件名，写到 <数据目录>/applications/exports/。")
+    export_parser.add_argument("application_ids", nargs="*", help="只导出这些投递；省略时导出全部")
+    export_parser.add_argument("--out", help="文件名（不是路径），以 .json 结尾")
+    export_parser.set_defaults(handler=cmd_application_export)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -847,6 +1119,25 @@ def build_parser() -> argparse.ArgumentParser:
     material_validate.add_argument("file", help="材料文件；- 表示标准输入")
     material_validate.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     material_validate.set_defaults(handler=cmd_material_validate)
+    material_template = material_commands.add_parser(
+        "template", parents=[stored], help="打招呼语、投递邮件、内推请求：按方向选模板",
+        description="按岗位的技能和档案的求职方向选模板（见 docs/cn/material.md），"
+                    "输出槽位、字数限制、写法提示和选它的理由。",
+    )
+    material_template.add_argument("job_id", help="岗位 id（本地岗位库里要有）")
+    material_template.add_argument("--kind", required=True, choices=messages.KINDS, help="材料种类")
+    material_template.add_argument("--direction", help="指定方向：模板名（例如 tech、ops、default），或者技能词表里"
+                                                       "还没有模板的方向（例如 design、hr），这时用 default 模板")
+    material_template.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    material_template.set_defaults(handler=cmd_material_template)
+    material_render = material_commands.add_parser(
+        "render", parents=[stored], help="检查打招呼语、邮件或内推请求，通过后输出可以直接复制的文字",
+        description="先做和 material validate 相同的检查，有错误时输出错误，退出码 1；"
+                    "通过时把占位符换成档案和岗位里的值，输出纯文本，警告写到 stderr。",
+    )
+    material_render.add_argument("file", help="材料文件；- 表示标准输入")
+    material_render.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    material_render.set_defaults(handler=cmd_material_render)
 
     review_parser = commands.add_parser("review", help="材料审核相关命令（起草 + 审核工作流）",
                                         description="材料审核相关命令，格式见 docs/cn/review-format.md，"
@@ -868,6 +1159,7 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("file", help="审核结果文件（data/materials/<岗位id>/review-<n>-r<轮次>.json）")
         sub.add_argument("--material", help="审核的材料文件；默认为审核结果同目录下 material 字段写的文件")
         sub.set_defaults(handler=handler)
+    _add_application_parser(commands, stored)
     return parser
 
 
