@@ -1,0 +1,1247 @@
+{
+  "implementation": "67508e9a4c06b0b5ae8e2521934b5dd1c57db7b9",
+  "implementation_clean": true,
+  "oracle": {
+    "contexts": 5,
+    "cases": 75,
+    "outcomes": {
+      "accept": 45,
+      "reject": 26,
+      "warn": 4
+    },
+    "selection_cases": 30,
+    "boundary_cases": 12,
+    "corpus_files": 30,
+    "manifest_checked": true
+  },
+  "oracle_after": {
+    "contexts": 5,
+    "cases": 75,
+    "outcomes": {
+      "accept": 45,
+      "reject": 26,
+      "warn": 4
+    },
+    "selection_cases": 30,
+    "boundary_cases": 12,
+    "corpus_files": 30,
+    "manifest_checked": true
+  },
+  "total": 75,
+  "passed": 72,
+  "failed": 3,
+  "setup_failures": [],
+  "cases": [
+    {
+      "id": "select-tech-greeting",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "tech/greeting@1",
+      "direction": "tech",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-tech-email",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "tech/email@1",
+      "direction": "tech",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-tech-referral",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "tech/referral@1",
+      "direction": "tech",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-data-greeting",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "data/greeting@1",
+      "direction": "data",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-data-email",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "data/email@1",
+      "direction": "data",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-data-referral",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "data/referral@1",
+      "direction": "data",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-product-greeting",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "product/greeting@1",
+      "direction": "product",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-product-email",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "product/email@1",
+      "direction": "product",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-product-referral",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "product/referral@1",
+      "direction": "product",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-ops-greeting",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "ops/greeting@1",
+      "direction": "ops",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-ops-email",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "ops/email@1",
+      "direction": "ops",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-ops-referral",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "ops/referral@1",
+      "direction": "ops",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-default-greeting",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/greeting@1",
+      "direction": "default",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-default-email",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/email@1",
+      "direction": "default",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-default-referral",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/referral@1",
+      "direction": "default",
+      "reason": "按 --direction 指定"
+    },
+    {
+      "id": "select-design-greeting",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/greeting@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 design，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-design-email",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/email@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 design，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-design-referral",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/referral@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 design，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-market-greeting",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/greeting@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 market，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-market-email",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/email@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 market，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-market-referral",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/referral@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 market，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-finance-greeting",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/greeting@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 finance，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-finance-email",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/email@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 finance，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-finance-referral",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/referral@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 finance，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-hr-greeting",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/greeting@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 hr，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-hr-email",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/email@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 hr，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-hr-referral",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/referral@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 hr，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-general-greeting",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/greeting@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 general，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-general-email",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/email@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 general，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "select-general-referral",
+      "operation": "select_template",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "template": "default/referral@1",
+      "direction": "default",
+      "reason": "按 --direction 指定 general，这个方向还没有模板，用通用模板 default"
+    },
+    {
+      "id": "length-greeting_body-149",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 149
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-greeting_body-150",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 150
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-greeting_body-151",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "length_exceeded"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "body": 151
+      },
+      "final_text_matches": null,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-email_subject-39",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": 39,
+        "body": 12
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-email_subject-40",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": 40,
+        "body": 12
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-email_subject-41",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "length_exceeded"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": 41
+      },
+      "final_text_matches": null,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-email_body-599",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": 4,
+        "body": 599
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-email_body-600",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": 4,
+        "body": 600
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-email_body-601",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "length_exceeded"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "body": 601
+      },
+      "final_text_matches": null,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-referral_body-299",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 299
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-referral_body-300",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 300
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-referral_body-301",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "length_exceeded"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "body": 301
+      },
+      "final_text_matches": null,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "length-greeting-mixed-han-ascii",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 150
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "valid-supported-number",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 27
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "valid-supported-skill",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": 8,
+        "body": 36
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "valid-contact-from-profile",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": 4,
+        "body": 52
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "valid-recorded-availability",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 43
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "valid-unknown-availability-omitted",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 31
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "valid-supported-fact-slot",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "accept",
+      "actual": "accept",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 38
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-unfilled-greeting",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "unfilled_placeholder"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "{{unfilled_role}}",
+      "offending_text_quoted_in_errors": false,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-unfilled-email-subject",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "unfilled_placeholder"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "{{unfilled_role}}",
+      "offending_text_quoted_in_errors": false,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-unfilled-after-substitution",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "unfilled_placeholder"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "{{unfilled_title}}",
+      "offending_text_quoted_in_errors": false,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-literal-email-equals-profile",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "handwritten_contact"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "v23-tech@example.invalid",
+      "offending_text_quoted_in_errors": false,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-literal-phone",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "handwritten_contact"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "19900000000",
+      "offending_text_quoted_in_errors": false,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-literal-wechat",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "handwritten_contact"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "v23_fake_only",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-mixed-contact-reference-and-literal",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "handwritten_contact"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "v23-alt@example.invalid",
+      "offending_text_quoted_in_errors": false,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-contact-in-email-subject",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "handwritten_contact"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "v23-tech@example.invalid",
+      "offending_text_quoted_in_errors": false,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-sensitive-id",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "fabricated_number",
+        "sensitive_personal_information"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "110000200001010000",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-sensitive-home-address",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "sensitive_personal_information"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "示例市虚构路测试小区甲栋",
+      "offending_text_quoted_in_errors": false,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-sensitive-marital",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "sensitive_personal_information"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "未婚未育",
+      "offending_text_quoted_in_errors": false,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-sensitive-health",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "sensitive_personal_information"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "病史",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-sensitive-birthday",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "fabricated_number",
+        "sensitive_personal_information"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "2004-02-03",
+      "offending_text_quoted_in_errors": false,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-invented-arabic-number",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "fabricated_number"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "99",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-invented-chinese-number",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "fabricated_number"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "九十九",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-number-borrowed-from-job",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "fabricated_number"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "180",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-skill-only-in-job",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "fabricated_skill"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "Rust",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-skill-absent-everywhere",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "fabricated_skill"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "Docker",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-availability-unknown",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "unsupported_availability"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "随时可以到岗",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-availability-earlier-date",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "unsupported_availability"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "明天即可到岗",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-availability-more-days",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "unsupported_availability"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "5 天",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "reject-availability-more-months",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "reject",
+      "actual": "reject",
+      "pass": true,
+      "problems": [],
+      "error_categories": [
+        "unsupported_availability"
+      ],
+      "warning_categories": [],
+      "rendered_codepoints": {},
+      "final_text_matches": null,
+      "offending_text": "6 个月",
+      "offending_text_quoted_in_errors": true,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "warn-cliche-greeting",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "warn",
+      "actual": "accept",
+      "pass": false,
+      "problems": [
+        "expected warn, got accept",
+        "missing required warning: ['cliche']"
+      ],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 23
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "warn-cliche-email",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "warn",
+      "actual": "accept",
+      "pass": false,
+      "problems": [
+        "expected warn, got accept",
+        "missing required warning: ['cliche']"
+      ],
+      "error_categories": [],
+      "warning_categories": [],
+      "rendered_codepoints": {
+        "subject": 4,
+        "body": 31
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "warn-referral-salary",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "warn",
+      "actual": "warn",
+      "pass": true,
+      "problems": [],
+      "error_categories": [],
+      "warning_categories": [
+        "salary_in_referral"
+      ],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 23
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    },
+    {
+      "id": "warn-referral-salary-and-cliche",
+      "operation": "validate_candidate",
+      "setup_ok": true,
+      "expected": "warn",
+      "actual": "warn",
+      "pass": false,
+      "problems": [
+        "missing required warning: ['cliche']"
+      ],
+      "error_categories": [],
+      "warning_categories": [
+        "salary_in_referral"
+      ],
+      "rendered_codepoints": {
+        "subject": null,
+        "body": 33
+      },
+      "final_text_matches": true,
+      "offending_text": null,
+      "offending_text_quoted_in_errors": null,
+      "builtin_template_control_same_errors": true
+    }
+  ]
+}

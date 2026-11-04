@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "job_id": "job_000000000001",
+  "profile_hash": "3b5cbef9bab820661299a6d82715f9c382679bb7e1adedee69e3a2671ec9e093",
+  "created": "2026-11-01T10:00:00+08:00",
+  "direction": "tech",
+  "kind": "referral",
+  "template": "tech/referral@1",
+  "subject": null,
+  "segments": [
+    {
+      "slot": "opening",
+      "text": "学长好，我是{edu-1.school}{edu-1.major}专业的硕士生，冒昧打扰。",
+      "refs": [
+        "edu-1"
+      ]
+    },
+    {
+      "slot": "ask",
+      "text": "想请您帮忙内推{job.company}的{job.title}岗位。",
+      "refs": [
+        "job"
+      ]
+    },
+    {
+      "slot": "evidence",
+      "text": "我在{exp-1.org}做过后端开发实习，用 Go 重构过订单查询接口。",
+      "refs": [
+        "exp-1"
+      ]
+    },
+    {
+      "slot": "closing",
+      "text": "简历我稍后发您，如果不方便也完全没关系，谢谢学长！",
+      "refs": []
+    }
+  ]
+}

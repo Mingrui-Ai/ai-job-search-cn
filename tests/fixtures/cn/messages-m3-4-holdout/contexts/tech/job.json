@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "id": "job_000000002301",
+  "source": {
+    "type": "paste",
+    "site": "other",
+    "url": null,
+    "imported_at": "2026-11-01T08:00:00+08:00"
+  },
+  "title": "后端检索实习生",
+  "company": "示例留出甲公司",
+  "cities": [
+    "广州"
+  ],
+  "remote": null,
+  "employment_type": "internship",
+  "salary": {
+    "min": 180,
+    "max": 240,
+    "unit": "CNY/day",
+    "months": null,
+    "negotiable": false
+  },
+  "requirements": {
+    "graduation": null,
+    "days_per_week": null,
+    "min_months": null,
+    "education": null,
+    "skills": [
+      "Python",
+      "Rust"
+    ],
+    "skill_alternatives": [],
+    "start": null
+  },
+  "interview": null,
+  "benefits": {
+    "meals": null
+  },
+  "return_offer": null,
+  "published_at": null,
+  "deadline": null,
+  "status": "new",
+  "evidence": {
+    "title": {
+      "text": "后端检索实习生",
+      "method": "agent"
+    },
+    "company": {
+      "text": "示例留出甲公司",
+      "method": "agent"
+    },
+    "cities": {
+      "text": "地点：广州",
+      "method": "agent"
+    },
+    "employment_type": {
+      "text": "招聘类型：实习",
+      "method": "agent"
+    },
+    "salary": {
+      "text": "日薪：180-240 元。",
+      "method": "agent"
+    },
+    "requirements.skills": {
+      "text": "岗位要求：Python、Rust。",
+      "method": "agent"
+    }
+  },
+  "guard": {
+    "verdict": "clean",
+    "counts": {}
+  },
+  "raw_text": "【原创虚构岗位，仅用于 V23 留出测试】\n岗位：后端检索实习生\n公司：示例留出甲公司\n地点：广州\n招聘类型：实习\n日薪：180-240 元。\n岗位要求：Python、Rust。\n到岗时间、每周天数和持续月数未说明。"
+}
