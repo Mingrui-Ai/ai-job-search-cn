@@ -573,6 +573,51 @@ class Materials(Data):
         for application_id in recorded:
             self.assertIn(f"{application_id}: materials_check unchecked", "\n".join(out["warnings"]))
 
+    def greeting(self) -> tuple:
+        """greeting-1.json for this job, rendered by material render --output (M3-6): (material, text file)."""
+        record = {**json.loads((FIXTURE / "greeting-1.json").read_text(encoding="utf-8")), "job_id": self.job}
+        material = self.material.parent / "greeting-1.json"
+        material.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        code, out, err = run("material", "render", material, "--output", "--data-dir", self.data)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(Path(out["text"]), self.data / "messages" / self.job / "greeting-1.txt")
+        return material, Path(out["text"])
+
+    def test_a_message_is_checked_against_its_note_in_messages(self):
+        material, text = self.greeting()
+        passed = {"material": "greeting-1.json", "verdict": "pass",
+                  "material_hash": review.material_hash(json.loads(material.read_text(encoding="utf-8")))}
+        (material.parent / "review-greeting-1-r1.json").write_text(json.dumps(passed), encoding="utf-8")
+        (material.parent / "review-1-r1.json").write_text(json.dumps(passed), encoding="utf-8")  # resume-1's name
+        renamed = self.data / "打招呼.txt"
+        renamed.write_bytes(text.read_bytes())
+        out = self.write("record", self.job, "--channel", "portal", "--platform", "BOSS直聘", "--submitted",
+                         "--material", material, "--sent", text, renamed)
+        application = out["application"]
+        self.assertEqual(application["submission"]["materials_check"], "match")
+        self.assertEqual(application["material_versions"][0]["review_path"],
+                         f"materials/{self.job}/review-greeting-1-r1.json")
+        warnings = "\n".join(out["warnings"])
+        self.assertNotIn("greeting-1", warnings)
+        self.assertIn(f"打招呼.txt: not a text material render --output wrote under messages/{self.job}/", warnings)
+        out = self.write("record", self.job, "--channel", "portal", "--submitted", "--sent", text)
+        self.assertEqual(out["application"]["submission"]["materials_check"], "match")  # its own note, by name
+
+    def test_a_message_changed_after_rendering_is_a_mismatch_and_without_a_note_unchecked(self):
+        material, text = self.greeting()
+        record = json.loads(material.read_text(encoding="utf-8"))
+        record["segments"][3]["text"] = "期待您的回复。"  # the closing
+        material.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        sent = ("record", self.job, "--channel", "portal", "--submitted", "--material", material, "--sent", text)
+        out = self.write(*sent)
+        self.assertEqual(out["application"]["submission"]["materials_check"], "mismatch")
+        self.assertIn("greeting-1.build.json: built from another version of the material", "\n".join(out["warnings"]))
+        (text.parent / "greeting-1.build.json").unlink()
+        out = self.write(*sent)
+        self.assertEqual(out["application"]["submission"]["materials_check"], "unchecked")
+        self.assertIn("greeting-1.txt: no material render --output note greeting-1.build.json",
+                      "\n".join(out["warnings"]))
+
     def test_no_sent_file_is_null_and_not_warned_about(self):
         out = self.write("record", self.job, "--channel", "email", "--submitted")
         self.assertIsNone(out["application"]["submission"]["materials_check"])

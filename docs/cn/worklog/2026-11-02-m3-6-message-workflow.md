@@ -252,10 +252,17 @@ M4-1（投递记录，Claude A）投出时要核对：实际发出的文件，�
 - 第 4 步 `resume-workflow.md` 新增第 5 节"沟通草稿"，Codex 沙盒 WinError 5 的处理（#120 裁定 1），材料改不了的必改项（裁定 4），交付提醒优先 PDF（裁定 5）；`cn-resume` 两份入口、审核子代理、`AGENTS.md`；#116 P3：子代理说明不再说"只读、不能写文件"，改成"没有 Edit/Write/联网工具，Bash 能跑允许列表里会写文件的命令，靠说明约束"，测试名改为 `test_the_agent_has_no_edit_write_or_web_tools`。
 - 第 5 步 `security_guards.py` 注释（批准日期写在注释里），规则未改。
 - 第 6 步手动走一遍（Claude Code，临时数据目录，tech-m3 公开夹具）：`material validate` → `material render --output`（标准输出只有路径、124 字、无警告）→ 派 `cn-resume-reviewer` 子代理审第 1 轮，约 3 分 20 秒，结论 `pass`，一条 E3 建议；子代理按第 5 节给出文件名 `review-greeting-1-r1.json`，`review validate` 通过。发现 `review show` 对沟通草稿写"没有列出"，已改。没走"简历通过后起草邮件"那一遍（要真实 Typst build），G3 和附件句只在文档和清单里覆盖，留给 Codex A 的整条流程验收。子代理提到夹具数据目录里没有匹配记录，这是我没拷，不影响沟通草稿。
-- 待做：#126 合并后改 `applications.py` 的 `--material` 查找（`messages/`）和 `applications.md` §12 的说明。
+- 已做（见本节最后）：#126 合并后改 `applications.py` 的 `--material` 查找（`messages/`）和 `applications.md` §12 的说明。
 - Codex B 审 0faf0ed 的 P2-1：沟通草稿改完以后，第 5 节沿用第 3 节"重新 `resume build`"，它只收简历（退出码 2），`.txt` 和说明文件停在旧版，第 2 轮审核结果却能通过 `review validate`。改法（规划者转告）：
   - 第 3 节"重新生成"处注明沟通草稿是 `material render --output`；第 5 节加第 6 步"修改"：重新 `material validate`、`material render --output`，新输出交给下一轮。
   - 第 5 节审核一步加一条：审核者先打开 render 输出里的说明文件，`material_hash` 要等于 `review draft` 给的；不等就不写审核结果，请起草者重新渲染再派这一轮，不算一轮。不打开 `.txt`（邮件签名有联系方式）。清单 G2、审核子代理同步。
   - `cn-resume` 两份入口和 `AGENTS.md` 各加一句：材料改过以后，重新运行生成文件的命令（简历 `resume build`，沟通草稿 `material render --output`）。
   - 测试：入口文字（第 5 节"修改"一步的命令、审核一步和子代理提到说明文件、三处入口都写了两个命令）；改材料后 `resume build` 退出码 2、文件不变，重新渲染后说明文件、`.txt` 和第 2 轮审核结果是同一版。
   - 没加机器检查：`review validate` 不读 `messages/`，也不收 `--data-dir`，要加就得改命令。简历有同样的缺口（改了材料忘了 `resume build`，第 2 轮照样通过），这次没动，回报时问规划者。
+- 规划者裁定（2026-11-04，P2-1 之后）：1. 审核者先核对说明文件那条保留；2. 机器检查不加，记进路线图待办（已记）；3. 简历也加审核者那条核对，本 PR 做。
+  - 第 3 条：第 2 节第 2 步加"先核对 `resume-<n>.build.json` 的 `material_hash` 等于 `review draft` 给的，不等不写结果、不算一轮"；清单 D 类开头、审核子代理、入口测试同步；`test_cn_resume_build` 加改材料后重新 build 的测试（假 Typst）。
+- `applications.py` 投出核对接上沟通草稿（#126 合并后）：
+  - 给了 `--material` 且是沟通草稿时，到 `messages/<岗位id>/` 找 `<种类>-<n>.build.json`（`message-build`）；没给时按发出文件的名字找旁边的（`greeting-<n>.txt` 找 `greeting-<n>.build.json`），原来就能找到。
+  - 顺带改的三处，不改就会让沟通草稿投出时给假警告或被拒：投递命令检查材料改用 `material validate` 那个分派函数（原来直接调简历的检查，沟通草稿通不过）；审核结果按 `review-<种类>-<n>-r<k>.json` 找；发出文件应在 `messages/<岗位id>/` 下。简历的警告原文不变。
+  - `applications.md` 第 6、12、16 节写明。四个变异（找错目录、审核结果名、检查函数、警告用词）各被新测试抓到。
+  - 没做、回报时问规划者：材料版本 `kind` 库表只允许 `resume`，沟通草稿也记成 `resume`（改要迁移库表）；邮件带简历附件时 `--material` 只能给一份，另一份发出的文件会报 mismatch。

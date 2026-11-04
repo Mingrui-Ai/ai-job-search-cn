@@ -807,7 +807,8 @@ def _application_material_check(args):
     vocabulary = _vocabulary(args)
 
     def check(record):
-        return material.validate(record, data, vocabulary, _material_job(args, record), _material_notes(args, record))
+        # The one check material validate runs, so a greeting, email or referral is checked as one (M3-6).
+        return _check_material(args, record, data, _material_job(args, record), vocabulary)
     return check, True
 
 
@@ -928,9 +929,10 @@ def _add_application_parser(commands, stored) -> None:
         moment.add_argument("--at", help="知道时刻：必须带时区，如 2026-11-02T14:30+08:00")
 
     def materials(parser):
-        parser.add_argument("--material", help="投出的这份简历的材料文件（data/materials/<岗位id>/resume-<n>.json）")
+        parser.add_argument("--material", help="投出的材料文件：简历 data/materials/<岗位id>/resume-<n>.json，"
+                                               "或沟通草稿 greeting-<n>.json、email-<n>.json、referral-<n>.json")
         parser.add_argument("--sent", nargs="+", action="extend", metavar="FILE",
-                            help="实际发出的文件（PDF、Word），会复制归档")
+                            help="实际发出的文件（PDF、Word，或沟通草稿的 .txt），会复制归档")
         parser.add_argument("--profile", help="检查材料用的档案；默认为 <数据目录>/profile/profile.json")
 
     record_parser = writer("record", "新建一次投递（只起草，或带 --submitted 记为已投出）",
