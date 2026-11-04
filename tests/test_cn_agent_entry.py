@@ -24,7 +24,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 # skill name -> (workflow document, {command group: commands the document must use})
 WORKFLOWS = {
-    "cn-jd-import": ("docs/cn/jd-import.md", {"jd": {"parse", "save", "show", "list", "status", "validate"}}),
+    "cn-jd-import": ("docs/cn/jd-import.md", {"jd": {"parse", "save", "show", "list", "status", "validate",
+                                                     "screen"}}),
     "cn-setup": ("docs/cn/profile-setup.md", {"profile": {"validate", "show"}}),
     "cn-match": ("docs/cn/match.md", {"match": {"score", "validate", "save", "show", "list", "report"},
                                       "jd": {"list", "show"}, "profile": {"validate", "show"}}),

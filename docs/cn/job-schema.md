@@ -29,7 +29,9 @@ python -m jobsearch_cn jd validate job.json
     "type": "paste",
     "site": "boss",
     "url": null,
-    "imported_at": "2026-10-27T10:00:00+08:00"
+    "imported_at": "2026-10-27T10:00:00+08:00",
+    "site_job_id": null,
+    "fetched_at": null
   },
   "title": "AI Agent开发实习生",
   "company": "示例智能科技（广州）有限公司",
@@ -84,6 +86,8 @@ python -m jobsearch_cn jd validate job.json
 | `source.site` | 枚举或 null | 原发布平台：`boss` BOSS直聘、`shixiseng` 实习僧、`nowcoder` 牛客、`liepin` 猎聘、`zhaopin` 智联招聘、`51job` 前程无忧、`lagou` 拉勾、`official` 公司官网、`ats` 招聘系统托管页（Moka、飞书招聘等）、`referral` 内推、`other` 其他 |
 | `source.url` | 字符串或 null | 原链接；`source.type` 为 `url` 时必填 |
 | `source.imported_at` | 时间 | 导入时间，ISO 8601，必须带时区，例如 `2026-10-27T10:00:00+08:00` |
+| `source.site_job_id` | 字符串或 null | 招聘平台自己的岗位 ID（M6-4），去重的第一依据：1–128 个英文字母、数字和 `. _ ~ -`；只有 `source.site` 是 `boss`、`shixiseng`、`nowcoder`、`liepin`、`zhaopin`、`51job`、`lagou` 时才能写（官网和招聘系统各家的 ID 会撞）。收件夹批次导入时由采集文件给出（[screen.md](screen.md)），`jd parse` 写 null |
+| `source.fetched_at` | 时间或 null | 采集程序抓到当前这份原文的时间（M6-4），格式同 `imported_at`；粘贴和本地文件导入时为 null |
 | `title` | 字符串或 null | 岗位名 |
 | `company` | 字符串或 null | 公司名 |
 | `cities` | 字符串列表 | 工作城市 |

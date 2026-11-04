@@ -9,14 +9,16 @@ in the gitignored data/ directory).
 
 Deduplication (G2), strongest key first:
 
-1. The record id. It is a fingerprint of the JD text, so importing the same JD
+1. The job board's own job id (source.site and source.site_job_id, M6-4).
+   The same posting fetched again, edited or not, finds the stored record.
+2. The record id. It is a fingerprint of the JD text, so importing the same JD
    again finds the stored record.
-2. The normalised source URL. The same posting re-imported after the company
+3. The normalised source URL. The same posting re-imported after the company
    edited it has a new fingerprint but the same URL; it updates the stored
    record and keeps its id and status.
 
-A trusted portal job id would rank above both, but Job Schema v1 has no field
-for one yet; it arrives with the portal sources (v0.3).
+A batch import (jd screen) reads the store once into an Index instead of
+scanning it for every record.
 """
 
 import json
@@ -62,6 +64,36 @@ def normalize_url(url):
     return urlunsplit(("https", host, parts.path.rstrip("/"), urlencode(query), ""))
 
 
+def portal_key(source):
+    """(site, site_job_id) when a record names its job board's own id, else None (M6-4)."""
+    if not isinstance(source, dict) or not source.get("site") or not source.get("site_job_id"):
+        return None
+    return source["site"], source["site_job_id"]
+
+
+class Index:
+    """Stored job ids by portal id and by normalised URL, built from one read of the store.
+
+    The first record in import order wins a key, as Store.find_by_url's scan does.
+    """
+
+    def __init__(self, records):
+        self.by_portal, self.by_url = {}, {}
+        for record in records:
+            self.add(record)
+
+    def add(self, record: dict) -> None:
+        if not isinstance(record, dict) or not schema.is_job_id(record.get("id")):
+            return
+        source = record.get("source")
+        key = portal_key(source)
+        if key is not None:
+            self.by_portal.setdefault(key, record["id"])
+        url = normalize_url((source or {}).get("url")) if isinstance(source, dict) else None
+        if url is not None:
+            self.by_url.setdefault(url, record["id"])
+
+
 class Store:
     def __init__(self, root):
         self.root = Path(root)
@@ -96,33 +128,66 @@ class Store:
         records, _ = self.all()
         return next((r for r in records if normalize_url((r.get("source") or {}).get("url")) == wanted), None)
 
-    def save(self, record: dict):
+    def find_by_portal_id(self, key):
+        """The stored record with this (site, site_job_id), or None."""
+        if key is None:
+            return None
+        records, _ = self.all()
+        return next((r for r in records if portal_key(r.get("source")) == key), None)
+
+    def index(self) -> "Index":
+        """The stored jobs by portal id and URL, read once, for saving many records (jd screen)."""
+        records, _ = self.all()
+        return Index(records)
+
+    def find_existing(self, record: dict, index=None):
+        """(stored record a save of this one updates or None, whether it holds the same JD text)."""
+        key = portal_key(record["source"])
+        if key is not None:
+            if index is not None:
+                found = self.get(index.by_portal[key]) if key in index.by_portal else None
+            else:
+                found = self.find_by_portal_id(key)
+            if found is not None:
+                return found, found["id"] == record["id"] or found["raw_text"] == record["raw_text"]
+        found = self.get(record["id"])
+        if found is not None:
+            return found, True
+        url = normalize_url(record["source"]["url"])
+        if index is not None:
+            found = self.get(index.by_url[url]) if url in index.by_url else None
+        else:
+            found = self.find_by_url(record["source"]["url"])
+        if found is not None:
+            # An earlier URL update kept the original id. The next import
+            # of that edited text must still protect completed fields.
+            return found, found["raw_text"] == record["raw_text"]
+        return None, False
+
+    def save(self, record: dict, index=None):
         """Store a record. Returns (action, stored record); action is created, updated or unchanged.
 
         Raises StoreError if the record, or the merge with what is stored, is invalid.
+        index: a Store.index() kept up to date across the saves of one batch.
         """
         errors = schema.validate(record)
         if errors:
             raise StoreError("invalid record: " + "; ".join(errors))
-        existing = self.get(record["id"])
-        if existing is not None:
+        existing, same_text = self.find_existing(record, index)
+        if existing is None:
+            merged = record
+        elif same_text:
             merged = merge_same_text(existing, record)
         else:
-            existing = self.find_by_url(record["source"]["url"])
-            if existing is None:
-                merged = record
-            elif existing["raw_text"] == record["raw_text"]:
-                # An earlier URL update kept the original id. The next import
-                # of that edited text must still protect completed fields.
-                merged = merge_same_text(existing, record)
-            else:
-                merged = replace_edited(existing, record)
+            merged = replace_edited(existing, record)
         if existing is not None and merged == existing:
             return "unchanged", existing
         errors = schema.validate(merged)
         if errors:
             raise StoreError("merged record is invalid: " + "; ".join(errors))
         self._write(merged)
+        if index is not None:
+            index.add(merged)
         return ("updated" if existing is not None else "created"), merged
 
     def set_status(self, job_id: str, status: str) -> dict:
@@ -288,6 +353,11 @@ def merge_same_text(old: dict, new: dict) -> dict:
     for key in ("site", "url"):
         if source[key] is None:
             source[key] = new["source"][key]
+    # M6-4: a job board's id only beside its own site; fetched_at is when this text was first fetched.
+    if source.get("site_job_id") is None and source["site"] == new["source"]["site"]:
+        source["site_job_id"] = new["source"].get("site_job_id")
+    if source.get("fetched_at") is None:
+        source["fetched_at"] = new["source"].get("fetched_at")
     merged["guard"] = new["guard"]
     return merged
 

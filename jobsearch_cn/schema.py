@@ -22,7 +22,8 @@ Conventions:
 * requirements.skill_alternatives joined v1 after records had been stored
   (H16); upgrade() adds it, empty, to a record read back from the store. So did
   interview and requirements.start (M2-6c), which upgrade() adds as null, and
-  benefits (M2-6e), which it adds with its meals null.
+  benefits (M2-6e), which it adds with its meals null; and source.site_job_id and
+  source.fetched_at (M6-4), which it adds as null.
 """
 
 import math
@@ -58,7 +59,9 @@ TOP_LEVEL_KEYS = (
     "employment_type", "salary", "requirements", "interview", "benefits", "return_offer", "published_at",
     "deadline", "status", "evidence", "guard", "raw_text",
 )
-SOURCE_KEYS = ("type", "site", "url", "imported_at")
+SOURCE_KEYS = ("type", "site", "url", "imported_at", "site_job_id", "fetched_at")
+# Job boards whose own job id names one posting (M6-4); company sites and hosted ATS pages reuse ids.
+PORTAL_SITES = ("boss", "shixiseng", "nowcoder", "liepin", "zhaopin", "51job", "lagou")
 SALARY_KEYS = ("min", "max", "unit", "months", "negotiable")
 REQUIREMENT_KEYS = ("graduation", "days_per_week", "min_months", "education", "skills", "skill_alternatives", "start")
 GRADUATION_KEYS = ("years", "strict")
@@ -88,6 +91,7 @@ MAX_RAW_TEXT = 50_000
 MAX_NAME = 200
 
 _ID = re.compile(r"job_[0-9a-f]{12}")
+_SITE_JOB_ID = re.compile(r"[A-Za-z0-9._~-]{1,128}")
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _FOLDED_AWAY = re.compile(r"[\s\u200b-\u200d\u2060\ufeff]+")
 
@@ -95,6 +99,11 @@ _FOLDED_AWAY = re.compile(r"[\s\u200b-\u200d\u2060\ufeff]+")
 def is_job_id(value) -> bool:
     """job_ and 12 hex digits, nothing around them: fullmatch, since "$" would let a trailing newline through."""
     return isinstance(value, str) and _ID.fullmatch(value) is not None
+
+
+def is_site_job_id(value) -> bool:
+    """A job board's own id for a posting (source.site_job_id): ASCII letters, digits and . _ ~ -."""
+    return isinstance(value, str) and _SITE_JOB_ID.fullmatch(value) is not None
 
 
 def normalize_for_match(text: str) -> str:
@@ -109,6 +118,9 @@ def upgrade(record):
         record.setdefault("benefits", {"meals": None})
         if isinstance(record["benefits"], dict):
             record["benefits"].setdefault("meals", None)
+        if isinstance(record.get("source"), dict):  # M6-4
+            record["source"].setdefault("site_job_id", None)
+            record["source"].setdefault("fetched_at", None)
     requirements = record.get("requirements") if isinstance(record, dict) else None
     if isinstance(requirements, dict):
         requirements.setdefault("skill_alternatives", [])
@@ -272,6 +284,14 @@ def _check_source(source, errors: list) -> None:
             errors.append("source.url: required when source.type is url")
     if "imported_at" in source:
         _check_timestamp(source["imported_at"], "source.imported_at", errors)
+    if "site_job_id" in source and source["site_job_id"] is not None:
+        if not is_site_job_id(source["site_job_id"]):
+            errors.append("source.site_job_id: must be null or 1-128 letters, digits and . _ ~ -")
+        elif source.get("site") not in PORTAL_SITES:
+            errors.append(f"source.site_job_id: only for a job board ({', '.join(PORTAL_SITES)}); "
+                          "ids on company sites and hosted pages are not unique")
+    if "fetched_at" in source and source["fetched_at"] is not None:
+        _check_timestamp(source["fetched_at"], "source.fetched_at", errors)
 
 
 def _check_salary(salary, errors: list) -> None:

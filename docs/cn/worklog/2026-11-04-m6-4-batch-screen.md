@@ -334,6 +334,44 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--che
 11. **评一批前问不问权重**：批量初筛不先问，汇报时说明用的权重，用户要换再试算（建议，少一轮对话）；还是照评分工作流先问一次。
 12. **拆不拆 PR、要不要验证者**：一个 PR（建议）；规则全是复用的，不需要新的留出样例，Codex B 照常审核，Codex 入口的实测和第一批真实岗位放到 M6-5 验收（建议）。
 
+## 13. 规划者裁定（2026-11-05）
+
+12 条全部按建议：`jd screen`；`source` 加 `site_job_id` 和 `fetched_at`；`job_hash` 不含 `source`；缺失或过期都重评；短名单含以前导入过的并标明，不看、过期、打不开的只计数，默认前 10；收 `.txt`；未知字段报错、`extra` 例外；列表页的结构化字段先放 `extra`；不另存结果文件；入口加触发词和 `docs/cn/screen.md`；不先问权重；一个 PR，真实岗位放 M6-5。经理要今晚出结果：先打通主路径，边界情况可以记 P3。
+
 ## 进展
 
-- 2026-11-05 00:30 设计稿写完，提交推送，等规划者裁定。没有改代码。
+- 2026-11-05 00:30 设计稿写完（620ccfc），提交推送，等规划者裁定。没有改代码。
+- 2026-11-05 裁定全部按建议，开始实现；先合入 master（#139）。
+
+## 14. 实现（2026-11-05）
+
+**完成**
+
+- `jobsearch_cn/screen.py`（新）：读批次和格式检查（`list_files`、`read_item`、`read_file`）、`check`（`--check`）、`run`（导入、评分、短名单）、`confirm_points`（待确认的点和档案那一方的缺口）、`salary_text`。
+- `cli.py`：`jd screen`；`.txt` 的解码规则挪到 `jd_parser.decode`，`jd parse` 照旧调用它，报错文字不变。
+- `jd_parser.parse_text`：加 `single`（一份、不按 `===` 拆）和 `site_job_id`、`fetched_at`，写进 `source`。
+- `schema.py`：`source.site_job_id`、`source.fetched_at`，`PORTAL_SITES`，`upgrade()` 补 null。
+- `store.py`：去重先按 (`site`, `site_job_id`)；`find_existing` 公开给批量导入用；`Index` 只读一遍岗位库；`merge_same_text` 在旧值为 null 时填入岗位 ID（来源相同才填）和抓取时间。
+- `score.job_hash`：不含 `source`。
+- 文档：新 `docs/cn/screen.md`（第 2 节是给采集那边的格式），job-schema.md、jd-import.md、match.md、README、AGENTS.md、两个 `cn-jd-import` 入口的触发词，路线图 M6-4。
+- 测试：新 `tests/test_cn_screen.py`（38 项，符号链接那项在不能建链接的 Windows 上跳过）；公开样例批次 `tests/fixtures/cn/inbox/boss/20261105-103000/`（三个虚构岗位，正文取自 `tests/fixtures/cn/jd/` 的公开样例，去掉了导航、推荐列表、链接和采集日期）；`test_cn_schema` 的最小记录补两个字段；`test_cn_agent_entry` 要求 jd-import.md 写到 `jd screen`。
+
+**和设计稿不同的地方**
+
+- 格式错误的说明用英文，和 `jd validate` 的报错一致（例如 `fetched_at: missing`）；`ignored` 每项带原因（设计稿只列文件名）。
+- 短名单的行去掉了 `stale`：评分后不会有过期的记录。被过滤掉的行也给 `line`，方便 Agent 转述。
+- 没有另写 `parse_one`，改成 `parse_text(single=True)`，效果相同。
+- 用户标过不看、过期、打不开的岗位不评分（设计稿只说不列出）。
+- 重跑同一批次：排序和分数相同，每行末尾多"以前导入过"。
+
+**P3（不挡这次合并）**
+
+- 数据目录下 `jobs/`、`matches/` 是链接时拒绝：靠 `store.safe_dir`（H25b 的测试覆盖），`jd screen` 没有单独的命令级测试。
+- `.txt` 里几份 JD 的编号 `#n` 按读出来的顺序数；中间有一份太长被跳过时，后面的编号和 `===` 分段对不上。
+- 两个 `jd screen` 同时处理一个数据目录没有加锁（`jd parse --save` 也一样）。
+- `batch.path` 按系统的分隔符输出（Windows 上是反斜杠）。
+
+**验证**
+
+- 冒烟：临时数据目录、示例档案，五个岗位（两个被过滤）加一个格式错的文件，`--check`、导入评分、重跑（`scored` 为 0、什么都不改）都符合设计。
+- 相关测试（agent_entry、screen、schema、store 三个、jd_parser、package）251 项通过；`lint_skills`、`security_guards` 通过。全量测试的结果见 PR。

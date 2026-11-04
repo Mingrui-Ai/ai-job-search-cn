@@ -1,0 +1,13 @@
+{
+  "format": "jobsearch_cn.inbox/1",
+  "site": "boss",
+  "site_job_id": "bx0002",
+  "url": "https://www.zhipin.com/job_detail/bx0002.html",
+  "fetched_at": "2026-11-05T10:32:20+08:00",
+  "text": "后端开发实习生（Go方向）\n200-250元/天\n深圳·南山区·科技园  本科  4天/周  6个月\n职位描述\n岗位职责：\n1. 参与公司核心业务系统的后端开发，使用 Go 语言编写高并发服务；\n2. 参与 MySQL、Redis 等存储方案的设计与优化。\n任职要求：\n1. 2026届/2027届本科及以上在读，计算机相关专业；\n2. 熟悉 Golang 或 Java，了解 Docker、Kubernetes；\n3. 每周至少实习4天，实习期6个月以上，表现优秀者可转正。\n示例互联网科技（深圳）有限公司",
+  "extra": {
+    "query": "实习",
+    "city": "广州",
+    "page": 1
+  }
+}

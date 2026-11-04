@@ -36,7 +36,8 @@ def minimal_record() -> dict:
     return {
         "schema_version": 1,
         "id": "job_0123456789ab",
-        "source": {"type": "paste", "site": None, "url": None, "imported_at": "2026-10-27T10:00:00+08:00"},
+        "source": {"type": "paste", "site": None, "url": None, "imported_at": "2026-10-27T10:00:00+08:00",
+                   "site_job_id": None, "fetched_at": None},
         "title": "后端开发实习生",
         "company": None,
         "cities": [],

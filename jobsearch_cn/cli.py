@@ -7,7 +7,6 @@ no JD, or names no stored job; 2 the input could not be read, reported as
 """
 
 import argparse
-import codecs
 import json
 import re
 import sys
@@ -15,10 +14,8 @@ from datetime import datetime
 from pathlib import Path
 
 from jobsearch_cn import (__version__, jd_parser, match, material, messages, profile, report, resume_docx,
-                          resume_extract, resume_pdf, review, schema, score, store, vocab)
+                          resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
 from jobsearch_cn import applications as applications_mod
-
-_HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
 
 
 class InputError(Exception):
@@ -63,38 +60,12 @@ def _read_json_text(source: str) -> str:
 
 
 def _read_jd_text(source: str):
-    """JD text as Windows users actually save it. Returns (text, warnings).
-
-    UTF-8 with or without a BOM; UTF-16 with a BOM, which is what Windows
-    PowerShell 5.1's `>` and Out-File write; otherwise GB18030 (a superset of
-    GBK, the Chinese ANSI code page) with a warning. Text with no Chinese but
-    runs of "?" is refused: that is what Windows PowerShell 5.1 delivers when it
-    pipes Chinese to a program as ASCII, and parsing it would store garbage.
-    """
+    """JD text as Windows users actually save it (jd_parser.decode). Returns (text, warnings)."""
     data, name = _read_bytes(source)
-    warnings = []
     try:
-        if data.startswith(codecs.BOM_UTF8):
-            text = data[len(codecs.BOM_UTF8):].decode("utf-8")
-        elif data.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)):
-            text = data.decode("utf-16")
-        else:
-            try:
-                text = data.decode("utf-8")
-            except UnicodeDecodeError:
-                text = data.decode("gb18030")
-                warnings.append({"segment": None, "kind": "encoding",
-                                 "message": f"{name} is not UTF-8; decoded as GB18030 (GBK)"})
-    except UnicodeDecodeError:
-        raise InputError(f"{name} is neither UTF-8, UTF-16 nor GBK text") from None
-    has_han = any(_HAN_FIRST <= char <= _HAN_LAST for char in text)
-    if not has_han and "??" in text and text.count("?") >= 4:
-        raise InputError(
-            f"{name} has no Chinese characters but many '?': Windows PowerShell 5.1 pipes text "
-            "to programs as ASCII. Pass the file path instead, or run "
-            "$OutputEncoding = [System.Text.UTF8Encoding]::new() first."
-        )
-    return text, warnings
+        return jd_parser.decode(data, name)
+    except ValueError as exc:
+        raise InputError(str(exc)) from None
 
 
 def cmd_jd_validate(args) -> int:
@@ -200,6 +171,38 @@ def cmd_jd_status(args) -> int:
         raise InputError(str(exc)) from None
     _emit(_summary(record))
     return 0
+
+
+def cmd_jd_screen(args) -> int:
+    path = Path(args.batch)
+    if not path.is_dir():
+        raise InputError(f"{args.batch} is not a folder; name a batch folder, like data/inbox/boss/20261105-103000")
+    try:
+        site = screen.batch_site(path, args.site)
+        vocabulary = _vocabulary(args)
+        if args.check:
+            payload = screen.check(path, site, vocabulary)
+            _emit(payload)
+            return 0 if payload["jobs"] and not payload["failed"] else 1
+        data = _match_profile(args)
+        if data is None:
+            return 1
+        root = store.data_dir(args.data_dir)
+        for folder in ("jobs", "matches"):
+            store.safe_dir(root, folder)  # before anything is stored (H25b)
+        payload = screen.run(path, site, data, vocabulary, store.Store(root), store.MatchStore(root), top=args.top)
+    except (screen.BatchError, store.StoreError) as exc:
+        raise InputError(str(exc)) from None
+    _emit(payload)
+    imported = payload["imported"]
+    return 0 if imported["created"] + imported["updated"] + imported["unchanged"] else 1
+
+
+def _count(text: str) -> int:
+    """--top: a whole number, 0 or more."""
+    if not text.isascii() or not text.isdigit():
+        raise argparse.ArgumentTypeError(f"{text!r} is not a whole number (0 lists every job)")
+    return int(text)
 
 
 def _profile_paths(args):
@@ -1100,6 +1103,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     validate.add_argument("file", nargs="?", default="-", help="JSON 文件路径；省略或为 - 时读取标准输入")
     validate.set_defaults(handler=cmd_jd_validate)
+
+    screen_parser = jd_commands.add_parser(
+        "screen", parents=[stored], help="批量初筛：导入一个收件夹批次，按规则评分，给出短名单",
+        description="读取收件夹批次 <数据目录>/inbox/<来源>/<批次>/ 里的 .json（采集程序写的，一个文件一个岗位）"
+                    "和 .txt（手工收集的，几份 JD 用一行 === 分隔），逐个导入岗位库（按平台的岗位 ID、内容指纹、"
+                    "链接去重）；批次里匹配记录缺失或过期的岗位按规则评分并保存；输出短名单。"
+                    "格式和输出见 docs/cn/screen.md。加 --check 只检查文件，不读档案，什么也不写。",
+    )
+    screen_parser.add_argument("batch", help="批次目录，例如 data/inbox/boss/20261105-103000")
+    screen_parser.add_argument("--site", choices=schema.SITES, help="批次的来源；默认取批次目录上一级的文件夹名")
+    screen_parser.add_argument("--top", type=_count, default=screen.DEFAULT_TOP,
+                               help=f"短名单列出前几条，默认 {screen.DEFAULT_TOP}；0 表示全部")
+    screen_parser.add_argument("--check", action="store_true",
+                               help="只检查文件格式，列出规则读出的职位名、公司、城市、薪资；不读档案，不写岗位库和匹配记录")
+    screen_parser.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    screen_parser.set_defaults(handler=cmd_jd_screen)
 
     prof = commands.add_parser("profile", help="个人档案相关命令", description="个人档案相关命令（data/profile/）")
     prof.set_defaults(help_parser=prof)
