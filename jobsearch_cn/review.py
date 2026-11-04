@@ -349,7 +349,9 @@ def markdown(review: dict) -> str:
         if finding["suggestion"]:
             lines.append(f"  - 建议改成：{_line(finding['suggestion'])}")
     lines += ["", "## 岗位要求覆盖", ""]
-    if not review["coverage"]:
+    if review["kind"] != "resume-review":
+        lines.append("沟通草稿没有覆盖表。")
+    elif not review["coverage"]:
         lines.append("没有列出。")
     else:
         lines += ["| 要求 | 情况 | 位置 | 说明 |", "| --- | --- | --- | --- |"]

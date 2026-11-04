@@ -283,6 +283,12 @@ class Markdown(unittest.TestCase):
         self.assertIn("  - 建议改成：实现……", text)
         self.assertIn("| Docker | 缺口 | - | 档案里有，材料没写 |", text)
 
+    def test_the_markdown_of_a_message_review_says_it_has_no_coverage(self):
+        text = review.markdown(make_review(kind="greeting-review", coverage=[]))
+        self.assertIn("沟通草稿没有覆盖表。", text)
+        self.assertNotIn("没有列出。", text)
+        self.assertIn("没有列出。", review.markdown(make_review(coverage=[])))
+
     def test_a_line_break_in_any_free_text_keeps_the_structure(self):
         # Planner on the #112 P3 PR: findings, the heading and the summary lines too, not just the table.
         data = make_review()

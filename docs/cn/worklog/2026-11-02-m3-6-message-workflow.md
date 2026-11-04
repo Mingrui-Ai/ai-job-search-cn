@@ -235,3 +235,21 @@ M4-1（投递记录，Claude A）投出时要核对：实际发出的文件，�
 3. **#123 的四项编号**：并进 G 类续编 G6–G8（建议），还是归进已有的 A3/C 类？
 4. **security_guards 注释**：请规划者代问经理是否同意只改那一句注释。
 5. **#116 P3 的范围**：我按"审核子代理说明 + 对应测试名"理解；如果规划者手上有具体条目清单，请发我，免得改多或改少。
+
+## 规划者裁定（计划 d9cc2db，2026-11-04）
+
+1. 审核结果 `kind` 新加 `greeting-review`、`email-review`、`referral-review`，旧值不动。
+2. `applications.py` 投出时到 `messages/` 找说明文件由 M3-6 改，但要等 #126（M4-1b）合并后在新 master 上做，放最后一步。
+3. #123 那四项编 G6–G8。
+4. 经理本人 2026-11-04 同意 `security_guards.py` 只改那一句注释，不改规则。
+5. #116 P3 范围：审核子代理说明和对应测试名，按工具层实际保证改措辞。
+
+## 实现进展（2026-11-04）
+
+- 第 1 步 `material render --output`：写 `messages/<岗位id>/<种类>-<n>.txt` 和 `<种类>-<n>.build.json`（`kind` 为 `message-build`，和 `resume build` 共用写说明文件的函数）；文件名必须是 `<种类>-<n>.json` 且种类对上。
+- 第 2 步 Review v1：三个新 kind 且必须和材料种类对上；沟通草稿 `coverage` 必须是 `[]`；`review draft` 对沟通草稿只出 E1/E3 风格警告（不查要点句号）；条目 A1–G8；`review show` 对沟通草稿写"沟通草稿没有覆盖表"。
+- 第 3 步清单 G1–G8；D5 加页底留白的口径（#120 裁定 4）。
+- 第 4 步 `resume-workflow.md` 新增第 5 节"沟通草稿"，Codex 沙盒 WinError 5 的处理（#120 裁定 1），材料改不了的必改项（裁定 4），交付提醒优先 PDF（裁定 5）；`cn-resume` 两份入口、审核子代理、`AGENTS.md`；#116 P3：子代理说明不再说"只读、不能写文件"，改成"没有 Edit/Write/联网工具，Bash 能跑允许列表里会写文件的命令，靠说明约束"，测试名改为 `test_the_agent_has_no_edit_write_or_web_tools`。
+- 第 5 步 `security_guards.py` 注释（批准日期写在注释里），规则未改。
+- 第 6 步手动走一遍（Claude Code，临时数据目录，tech-m3 公开夹具）：`material validate` → `material render --output`（标准输出只有路径、124 字、无警告）→ 派 `cn-resume-reviewer` 子代理审第 1 轮，约 3 分 20 秒，结论 `pass`，一条 E3 建议；子代理按第 5 节给出文件名 `review-greeting-1-r1.json`，`review validate` 通过。发现 `review show` 对沟通草稿写"没有列出"，已改。没走"简历通过后起草邮件"那一遍（要真实 Typst build），G3 和附件句只在文档和清单里覆盖，留给 Codex A 的整条流程验收。子代理提到夹具数据目录里没有匹配记录，这是我没拷，不影响沟通草稿。
+- 待做：#126 合并后改 `applications.py` 的 `--material` 查找（`messages/`）和 `applications.md` §12 的说明。
