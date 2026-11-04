@@ -93,8 +93,9 @@ _BOUND_AFTER = re.compile(rf"\s*(?:以上|以下|起|左右|上下|前后|出头
 _COUNT_PLACEHOLDER = re.compile(r"\{availability\.(?P<field>days_per_week|months)\}")
 _UNIT_AFTER = {"days_per_week": re.compile(r"\s*(?:个\s*)?(?:工作日|天)"), "months": re.compile(r"\s*个\s*月")}
 # {availability.start_date} is the earliest day the candidate can start: from it on (起, 以后) is that promise;
-# by it (最晚, 之前), around it (左右) or earlier (或更早) is not.
-_DATE_BOUND_BEFORE = re.compile(r"最晚|最迟|不晚于|不迟于|早于|先于")
+# by it (最晚, 之前), around it (左右) or earlier (或更早) is not. 不早于 (and 不会早于, 不先于) is not earlier than it,
+# so that promise too: 早于 and 先于 count only when no 不 negates them (#123 P3).
+_DATE_BOUND_BEFORE = re.compile(r"最晚|最迟|不晚于|不迟于|(?<!不)(?<!不会)(?<!不能)(?<!不得)(?:早于|先于)")
 _DATE_BOUND_AFTER = re.compile(r"\s*(?:之前|以前|前后|前(?![往来去])|左右|上下|或更早|或之前|或提前)")
 _UNITS = {"days_per_week": "天", "months": "个月"}
 _FIELD_WORDS = {"days_per_week": "days a week", "months": "months"}
@@ -703,16 +704,29 @@ def _slots(segments: list, spec: dict, checker: _Checker, errors: list) -> list:
 
 # ---------------------------------------------------------------- rendering
 
-def render(record: dict, profile: dict, job) -> str:
-    """The message as plain text to copy, its placeholders filled. Validate it first."""
+def _filled(record: dict, profile: dict, job) -> tuple:
+    """(the subject or None, the segments) with their placeholders filled."""
     entries = material._entries(profile)
     kind = record["kind"]
     parts = [fill(segment["text"], profile, job, entries, segment["slot"], kind)[0]
              for segment in record["segments"]]
+    subject = fill(record["subject"]["text"], profile, job, entries, None, kind)[0] if kind == "email" else None
+    return subject, parts
+
+
+def render(record: dict, profile: dict, job) -> str:
+    """The message as plain text to copy, its placeholders filled. Validate it first."""
+    subject, parts = _filled(record, profile, job)
+    kind = record["kind"]
     if kind == "greeting":
         return "".join(parts)
     if kind == "referral":
         return "\n".join(parts)
-    subject = fill(record["subject"]["text"], profile, job, entries, None, kind)[0]
     return f"标题：{subject}\n\n" + "\n\n".join(parts)
+
+
+def body_chars(record: dict, profile: dict, job) -> int:
+    """The characters the length limit counts (material.md 7.3): the filled segments, without an email's
+    subject, the 标题： line or the line breaks render puts between segments. Validate it first."""
+    return sum(len(part) for part in _filled(record, profile, job)[1])
 

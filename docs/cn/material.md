@@ -220,7 +220,7 @@ python -m jobsearch_cn material template <岗位id> --kind greeting|email|referr
   - 天数、月数只能写成阿拉伯数字，或者 `{availability.days_per_week}`、`{availability.months}`。"五天""三个月""半年""一年"这类中文数字的写法不通过：数字检查认不出单独的中文数（第 4 节），所以直接拒绝，提示改写；
   - 天数、月数要正好是档案的值（规划者 2026-11-04 裁定）。等于档案的值，但带了让它变成上下限或约数的词，也不通过，提示写档案的值：数前面同一句里的"至少""最少""起码""最多""不超过""超过""大约""将近"等，紧挨在数前面的"约""近"，单位后面的"以上""以下""起""左右""出头""及以上""或更长"等；区间（"3-4 天"）也不通过。占位符一样：`{availability.days_per_week}` 后面只能接"天"或"个工作日"，`{availability.months}` 后面只能接"个月"，接"个半月""个多月""月"或者再加上面这些词都不通过（"{availability.months}个半月"会渲染成"6个半月"，和档案的 6 个月不符）；
   - 到岗时间：句子里有"到岗""入职""上岗""报到""开始实习"，又写了时间（"随时""明天""尽快""下周""下半年""12月1日""两周后""提前""更早"等），就是到岗时间的承诺，时间只能写成 `{availability.start_date}`，手写的日期和"随时"这类说法都不通过。同一句里写了 `{availability.start_date}`，也不能再手写别的时间："可于{availability.start_date}或明天到岗"不通过。只有动词、没写时间的（"期待入职贵司""到岗安排可以再沟通"）不算承诺；
-  - `{availability.start_date}` 是档案里最早能到岗的日期，写"{availability.start_date}起""{availability.start_date}以后""最早{availability.start_date}"都可以；前面同一句里有"最晚""不晚于"这类词，或者后面紧接"前""之前""左右""或更早"，承诺的就比档案早或者不确定，不通过；
+  - `{availability.start_date}` 是档案里最早能到岗的日期，写"{availability.start_date}起""{availability.start_date}以后""最早{availability.start_date}"都可以；"不早于{availability.start_date}"（"不会早于""不先于"同理）说的也是从这天起，可以；前面同一句里有"最晚""不晚于""早于""先于"这类词，或者后面紧接"前""之前""左右""或更早"，承诺的就比档案早或者不确定，不通过；
   - 档案里对应的那一项是空的，这个承诺不通过：没有依据，不要写，或者请用户先补进档案；
   - 有上面任何一种承诺，本段的 `refs` 里都要有 `availability`。
 
@@ -230,7 +230,7 @@ python -m jobsearch_cn material template <岗位id> --kind greeting|email|referr
 
 手写的链接不查：GitHub 和个人主页用 `{contact.github}`、`{contact.website}`，档案里没有的链接靠审核（M3-6）。
 
-**警告**（不影响退出码，只在没有错误时给出）：档案在材料写好之后改过；材料是按旧版模板写的（`template` 里的 revision 不是现在的）；套话或不礼貌的开头（"在吗""亲""急求""求带""万分感谢"等）；贬低自己（"能力不足""可能不太合适"等）；`referral` 里提薪资；`greeting` 里放链接（平台常会屏蔽）。
+**警告**（不影响退出码，只在没有错误时给出）：档案在材料写好之后改过；材料是按旧版模板写的（`template` 里的 revision 不是现在的）；套话或不礼貌的开头（"在吗""亲""急求""求带""万分感谢"等）；贬低自己（"能力不足""可能不太合适"等）；空泛的套话（"吃苦耐劳""抗压能力强""良好的沟通能力""团队合作精神""给我一个机会"等笼统的自我评价和求机会，所引条目的原文里有的放行）；`referral` 里提薪资；`greeting` 里放链接（平台常会屏蔽）。
 
 禁用说法是数据，不写死在代码里：内置的在 `jobsearch_cn/message_templates/banned.json`，按整个词或正则匹配，微信号、QQ 号的规则也在这里（`contact_errors`）。所引条目的原文里本来就有的说法放行，例如所引经历的要点自己写了"覆盖率 100%"。用户可以在 `<数据目录>/templates/messages/banned.json` 给 `errors`、`warnings` 两级追加词（`words`）和正则（`patterns`），不能删内置的。`words`、`patterns` 都要写成字符串的列表（`"words": ["冒昧"]`）；这个文件格式不对时（例如 `"words": "冒昧"`，或者正则写错）报错，退出码 2。
 
@@ -242,6 +242,6 @@ python -m jobsearch_cn material render data/materials/<岗位id>/greeting-1.json
 
 先做和 `material validate` 相同的检查。有错误时在标准输出写 `{"valid": false, "errors": […], "warnings": […]}`，退出码 1；通过时把占位符换成档案和岗位库里的值，输出纯文本，警告写到标准错误，每条以"警告："开头。打招呼语各段直接连成一段；内推请求每段一行；邮件第一行是"标题：…"，空一行后是正文，段与段之间空一行。给的是简历时退出码 2，简历用 `resume build` 生成；`kind` 拼错时和 `material validate` 一样，输出 `{"valid": false, …}`，退出码 1。
 
-加 `--output`（M3-6）时不往标准输出打正文：文字写到 `<数据目录>/messages/<岗位id>/<种类>-<n>.txt`（UTF-8，先写临时文件再改名，那里是链接时拒绝），旁边写说明文件 `<种类>-<n>.build.json`，格式同 [applications.md 第 12 节](applications.md#12-resume-build-的说明文件m4-1a-第二部分)，`kind` 是 `message-build`。标准输出是 `{"text": 路径, "chars": 字数, "warnings": […], "build_note": 路径}`。材料文件名必须是 `<种类>-<n>.json`，种类和 `kind` 一致，否则退出码 2。工作流里一律加 `--output`，因为邮件签名有联系方式。
+加 `--output`（M3-6）时不往标准输出打正文：文字写到 `<数据目录>/messages/<岗位id>/<种类>-<n>.txt`（UTF-8，先写临时文件再改名，那里是链接时拒绝），旁边写说明文件 `<种类>-<n>.build.json`，格式同 [applications.md 第 12 节](applications.md#12-resume-build-的说明文件m4-1a-第二部分)，`kind` 是 `message-build`。标准输出是 `{"text": 路径, "chars": 字数, "max_chars": 上限, "warnings": […], "build_note": 路径}`。`chars` 按 7.3 的口径算，是正文各段代入后的字数之和，和 `max_chars`（这份材料所用模板的正文上限）直接可比；它不是 `.txt` 文件的长度：邮件的"标题：…"一行和段与段之间的换行不算（标题另有 40 字上限，`material validate` 已经查过）。打招呼语各段连成一段，所以两者相同。材料文件名必须是 `<种类>-<n>.json`，种类和 `kind` 一致，否则退出码 2。工作流里一律加 `--output`，因为邮件签名有联系方式。
 
 `material validate`、`material render`、`resume build`、`review draft` 检查材料用的是同一个函数，对同一份材料结论相同。`resume build` 只收简历，给沟通材料时退出码 2；`review draft` 对沟通材料只给标点空格警告，覆盖表是 `[]`（M3-6）。

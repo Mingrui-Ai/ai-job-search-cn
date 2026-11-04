@@ -93,6 +93,17 @@ class Samples(unittest.TestCase):
         self.assertIn("电话：13800000000", email)
         self.assertEqual(len(messages.render(REFERRAL, TECH_PROFILE, TECH_JOB).splitlines()), 4)
 
+    def test_body_chars_counts_as_the_limit_does(self):
+        # #133 P3-03: a greeting is one paragraph, so its count is the text; a referral's line breaks and an
+        # email's 标题： line and blank lines are not counted.
+        greeting = messages.render(GREETING, TECH_PROFILE, TECH_JOB)
+        self.assertEqual(messages.body_chars(GREETING, TECH_PROFILE, TECH_JOB), len(greeting))
+        referral = messages.render(REFERRAL, TECH_PROFILE, TECH_JOB)
+        self.assertEqual(messages.body_chars(REFERRAL, TECH_PROFILE, TECH_JOB), len(referral.replace("\n", "")))
+        email = messages.render(EMAIL, TECH_PROFILE, TECH_JOB)
+        body = email.split("\n\n", 1)[1].replace("\n\n", "")
+        self.assertEqual(messages.body_chars(EMAIL, TECH_PROFILE, TECH_JOB), len(body))
+
     def test_every_built_in_template_covers_the_three_kinds_within_the_hard_limits(self):
         self.assertEqual(set(TEMPLATES), {"tech", "data", "product", "ops", "default"})
         for direction, template in TEMPLATES.items():
@@ -349,7 +360,17 @@ class Availability(unittest.TestCase):
             self.assertTrue(any(f"'{word}' with {{availability.start_date}}: the profile gives the earliest day" in error
                                 for error in errors), (text, errors))
 
-    def test_wording_that_promises_nothing_passes(self):
+    def test_not_earlier_than_the_start_date_is_the_promise(self):
+        # #123 P3: 不早于 was read as 早于. Negated, it is from that day on; 早于, 先于 and 不晚于 still fail.
+        for text in ("不早于{availability.start_date}到岗。", "可以不早于{availability.start_date}入职。",
+                     "到岗时间不会早于{availability.start_date}。", "不先于{availability.start_date}到岗。"):
+            self.assertEqual(self.promise(text), [], text)
+        for text, word in (("早于{availability.start_date}到岗。", "早于"), ("可以先于{availability.start_date}到岗。", "先于"),
+                           ("不晚于{availability.start_date}到岗。", "不晚于"), ("不迟于{availability.start_date}入职。", "不迟于"),
+                           ("不早于{availability.start_date}之前到岗。", "之前")):
+            errors = self.promise(text)
+            self.assertTrue(any(f"'{word}' with {{availability.start_date}}: the profile gives the earliest day" in error
+                                for error in errors), (text, errors))
         # No time next to the verb, a frequency with no count, a wish: nothing to hold against the profile.
         for text in ("期待入职贵司。", "到岗安排可以再沟通。", "每周的安排可以再沟通。", "入职后负责的是订单查询接口。",
                      "周一到周五都方便电话沟通。"):
@@ -416,6 +437,28 @@ class Wording(unittest.TestCase):
         self.assertEqual(check(with_segment(GREETING, 3, "作品见 https://example.com"))[1],
                          ["segments[3].text: 'https://' - 招呼语里放链接，平台常会屏蔽"])
         self.assertEqual(check(with_segment(EMAIL, 5, "作品见 https://example.com"))[1], [])
+
+    def test_common_cliches_warn_and_do_not_fail(self):
+        # V23 a-6 (#123 P3): vague self-praise and asking for a chance warn; the message still passes.
+        reason = "空泛的套话（笼统的自我评价、求给机会），换成具体的经历和结果"
+        for record, index, text, hits in (
+                (GREETING, 3, "本人吃苦耐劳" + COMMA + "抗压能力强。", ["吃苦耐劳", "抗压能力强"]),
+                (EMAIL, 5, "我有良好的团队合作精神和沟通能力" + COMMA + "希望贵司给我机会。",
+                 ["良好的团队合作精神", "给我机会"]),
+                (REFERRAL, 3, "我学习能力很强" + COMMA + "责任心强" + COMMA + "麻烦学长给我一个机会。",
+                 ["责任心强", "学习能力很强", "给我一个机会"]),
+                (GREETING, 3, "具备较强的沟通能力和团队精神。", ["较强的沟通能力", "团队精神"])):
+            errors, warnings = check(with_segment(record, index, text))
+            self.assertEqual(errors, [], text)
+            self.assertEqual(warnings, [f"segments[{index}].text: {hit!r} - {reason}" for hit in hits], text)
+        # A skill named plainly, or a cliché the cited entry itself uses, is not flagged.
+        self.assertEqual(check(with_segment(GREETING, 3, "想和您聊聊沟通能力在后端开发里的用处。"))[1], [])
+        quoted = copy.deepcopy(TECH_PROFILE)
+        quoted["experience"][0]["bullets"][0] += "，团队评价吃苦耐劳"
+        errors, warnings = check(with_segment(GREETING, 1, quoted["experience"][0]["bullets"][0],
+                                              [quoted["experience"][0]["id"]]), profile_data=quoted)
+        self.assertEqual(errors, [])
+        self.assertEqual([warning for warning in warnings if not warning.startswith("profile_hash:")], [])
 
 
 class Shape(unittest.TestCase):
@@ -617,7 +660,16 @@ class Cli(unittest.TestCase):
         path = self.data / "messages" / TECH_JOB["id"] / "email-1.txt"
         self.assertEqual(Path(output["text"]), path)
         self.assertEqual(path.read_text(encoding="utf-8"), f"{text}\n")
-        self.assertEqual(output["chars"], len(text))
+        # #133 P3-03: chars is what the length limit counts, beside that limit; not the .txt with its 标题： line.
+        self.assertEqual((output["chars"], output["max_chars"]), (messages.body_chars(email, TECH_PROFILE, TECH_JOB), 600))
+        self.assertLess(output["chars"], len(text))
+        limited = copy.deepcopy(TEMPLATES)
+        limited["tech"]["email"]["max_chars"] = output["chars"]
+        self.assertEqual(errors_of(email, templates=limited), [])
+        limited["tech"]["email"]["max_chars"] = output["chars"] - 1
+        self.assertEqual(errors_of(email, templates=limited),
+                         [f"segments: {output['chars']} characters once filled; the limit for a email is "
+                          f"{output['chars'] - 1}"])
         # No body and no contact details on stdout: only the path, the count and the warnings.
         for value in TECH_PROFILE["contact"].values():
             if isinstance(value, str) and value:
