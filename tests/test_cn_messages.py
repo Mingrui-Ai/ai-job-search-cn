@@ -606,6 +606,52 @@ class Cli(unittest.TestCase):
         self.assertEqual(warned.returncode, 0)
         self.assertIn("警告：segments[3].text: '在吗'", warned.stderr)
 
+    def test_render_output_writes_the_text_and_a_build_note(self):
+        source = self.data / "email-1.json"
+        shutil.copy(TECH / "email-1.json", source)
+        result = run_cli("material", "render", str(source), "--output", data_dir=self.data)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        email = load(TECH / "email-1.json")
+        text = messages.render(email, TECH_PROFILE, TECH_JOB)
+        path = self.data / "messages" / TECH_JOB["id"] / "email-1.txt"
+        self.assertEqual(Path(output["text"]), path)
+        self.assertEqual(path.read_text(encoding="utf-8"), f"{text}\n")
+        self.assertEqual(output["chars"], len(text))
+        # No body and no contact details on stdout: only the path, the count and the warnings.
+        for value in TECH_PROFILE["contact"].values():
+            if isinstance(value, str) and value:
+                self.assertNotIn(value, result.stdout)
+        from jobsearch_cn import review
+        note = load(path.parent / "email-1.build.json")
+        self.assertEqual((note["kind"], note["material"]), ("message-build", "email-1.json"))
+        self.assertEqual(note["material_hash"], review.material_hash(email))
+        self.assertEqual([entry["name"] for entry in note["files"]], ["email-1.txt"])
+        changed = copy.deepcopy(email)
+        changed["segments"][-1]["text"] += "谢谢。"
+        source.write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+        self.assertEqual(run_cli("material", "render", str(source), "--output", data_dir=self.data).returncode, 0)
+        self.assertNotEqual(load(path.parent / "email-1.build.json")["material_hash"], note["material_hash"])
+
+    def test_render_output_refuses_a_bad_name_and_a_link(self):
+        self.assertEqual(run_cli("material", "render", str(self.write(GREETING)), "--output",
+                                 data_dir=self.data).returncode, 2)
+        source = self.data / "email-1.json"
+        shutil.copy(TECH / "greeting-1.json", source)  # a greeting under an email's name
+        self.assertEqual(run_cli("material", "render", str(source), "--output", data_dir=self.data).returncode, 2)
+        shutil.copy(TECH / "greeting-1.json", self.data / "greeting-1.json")
+        directory = self.data / "messages" / TECH_JOB["id"]
+        directory.mkdir(parents=True)
+        target = self.data / "elsewhere.txt"
+        target.write_text("old", encoding="utf-8")
+        try:
+            (directory / "greeting-1.txt").symlink_to(target)
+        except OSError:
+            self.skipTest("this system cannot make symbolic links")
+        result = run_cli("material", "render", str(self.data / "greeting-1.json"), "--output", data_dir=self.data)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(target.read_text(encoding="utf-8"), "old")
+
     def test_render_refuses_a_failing_message_and_a_cv(self):
         bad = run_cli("material", "render", str(self.write(with_segment(GREETING, 3, "我今年 23 岁。"))),
                       data_dir=self.data)
