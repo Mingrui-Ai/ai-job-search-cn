@@ -55,6 +55,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 - 起草时材料的 `profile_hash` 没有命令单独输出，现在从不过期的匹配记录里抄（工作流先做匹配确认，所以够用）。可选的做法：`material validate` 报 `profile_hash` 不一致时，顺带给出当前的值。
 - #116 实跑（Claude A）：求职意向一行折行时，"起可到岗"会单独落到第二行（`resume build` 的模板），只影响版式。
 - 沟通草稿引用 `notes.md` 写求职动机：M3-6 第一版不做；M3-5 验收时看用户要不要，再按简介的规则安排。
+- #127 P2-1 的后续（规划者 2026-11-04 裁定，不在 M3-6 做）：`review validate` 发现旧文件。材料改了没重新 `resume build` 或 `material render --output` 时，第 2 轮的审核结果照样能通过；现在靠审核者先核对说明文件的 `material_hash`（resume-workflow.md 第 2、5 节）。可以让 `review validate`、`review show` 也核对 `resumes/`、`messages/` 下的说明文件，这要给两条命令加 `--data-dir`。
 - 2026-11-02：Claude C 在整理自己代码里的三项（#111 P3-1、#115 P3、上面的折行），准备一个小 PR，等审核队列空出来再开。
 
 ## 2. 收尾与维护

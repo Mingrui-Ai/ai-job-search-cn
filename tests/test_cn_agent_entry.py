@@ -8,8 +8,9 @@ its document uses, each registered in both permission allowlists. Review
 subagents point at the same document and have no Edit, Write or web tools.
 dsh has no per-skill grants (it uses its own permission
 presets), so its entries carry only a name and a description. A changed
-greeting, email or referral is rendered again, not built, before the next
-review round, and every entry says so.
+material is built or rendered again before the next review round (a greeting,
+email or referral with material render, never resume build), the reviewer
+first checks the build note is of the version it reviews, and every entry says so.
 """
 import contextlib
 import io
@@ -138,24 +139,32 @@ class ReviewerAgents(unittest.TestCase):
             self.assertEqual({t.strip() for t in tools.split(":", 1)[1].split(",")}, {"Read", "Glob", "Grep", "Bash"})
 
 
-class MessageDrafts(unittest.TestCase):
-    """How a changed greeting, email or referral gets its text again (resume-workflow.md section 5). Codex B on
-    #127 (0faf0ed): section 3 said to rerun resume build, which takes only a CV, so a changed greeting kept its
-    old text file while a round-2 review of the new version still validated."""
+class ChangedMaterials(unittest.TestCase):
+    """After a change, a material's files are made again before the next review round, and the reviewer first
+    checks they are of the version it reviews (resume-workflow.md sections 2 and 5). Codex B on #127 (0faf0ed):
+    section 3 said to rerun resume build, which takes only a CV, so a changed greeting kept its old text file
+    while a round-2 review of the new version still validated."""
 
-    def section(self) -> str:
-        return read(REPO / "docs/cn/resume-workflow.md").split("\n## 5.", 1)[1]
+    def step(self, section: str, title: str) -> str:
+        """A numbered step of a section of the workflow, with its indented lines."""
+        text = read(REPO / "docs/cn/resume-workflow.md").split(f"\n## {section}.", 1)[1].split("\n## ", 1)[0]
+        return re.search(rf"^\d+\. \*\*{title}\*\*.*(?:\n   .*)*", text, re.M).group(0)
 
     def test_a_changed_message_is_rendered_again(self):
-        step = re.search(r"^\d+\. \*\*修改\*\*.*$", self.section(), re.M).group(0)
+        step = self.step("5", "修改")
         self.assertEqual(re.findall(r"python -m jobsearch_cn (\w+ \w+)", step), ["material validate", "material render"])
         self.assertIn("--output", step)
 
-    def test_the_reviewer_checks_the_text_is_of_this_version(self):
-        step = re.search(r"^\d+\. \*\*审核\*\*.*(?:\n   .*)*", self.section(), re.M).group(0)
-        for text in (step, read(REPO / ".claude" / "agents" / "cn-resume-reviewer.md")):
-            for word in ("build_note", "material_hash", "review draft"):
-                self.assertIn(word, text)
+    def test_the_reviewer_first_checks_the_files_are_of_this_version(self):
+        agent = read(REPO / ".claude" / "agents" / "cn-resume-reviewer.md")
+        for where, text in (("resume", self.step("2", "机器检查")), ("message", self.step("5", "审核")),
+                            ("agent", agent)):
+            with self.subTest(where=where):
+                for word in ("build_note", "material_hash", "review draft"):
+                    self.assertIn(word, text)
+        self.assertIn("resume-<n>.build.json", self.step("2", "机器检查"))
+        for command in ("resume build", "material render --output"):
+            self.assertIn(command, agent.split("**Out-of-date files.**", 1)[1])
 
     def test_every_entry_says_to_rerun_what_made_the_files(self):
         for entry in [REPO / d / "cn-resume" / "SKILL.md" for d in SKILL_DIRS] + [REPO / "AGENTS.md"]:

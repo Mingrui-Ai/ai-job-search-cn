@@ -34,7 +34,7 @@
 
 | 运行时 | 怎么开审核 | 审核结果谁写进文件 |
 | --- | --- | --- |
-| Claude Code | 起草者用 Agent 工具派 `cn-resume-reviewer` 子代理。提示词里写：材料路径、岗位 id、第几轮、`resume build` 输出的 JSON、起草者的说明，数据目录不是默认的 `data/` 时也写上；第 2 轮再加上一轮审核结果的路径和起草者对每条问题的处理 | 子代理没有写文件的工具，只返回审核结果 JSON；起草者原样存为文件，不改内容 |
+| Claude Code | 起草者用 Agent 工具派 `cn-resume-reviewer` 子代理。提示词里写：材料路径、岗位 id、第几轮、`resume build` 输出的 JSON、起草者的说明，数据目录不是默认的 `data/` 时也写上；第 2 轮再加上一轮审核结果的路径和起草者对每条问题的处理 | 子代理没有写文件的工具，只返回审核结果 JSON（说明文件对不上时只回一句话，请起草者重新生成，见下面第 2 步）；起草者原样存为文件，不改内容 |
 | Codex、dsh | 另开一个会话。起草的会话最后打印一段给用户复制到新会话的话：`按 docs/cn/resume-workflow.md 第 2 节审核 data/materials/<岗位id>/resume-<n>.json，第 <k> 轮`，后面附 `resume build` 的输出和起草者的说明。Windows 上 Codex 的 workspace-write 沙盒里 `resume build` 可能报 WinError 5：这时请用户批准在沙盒外运行这一条 build，不要改文件权限（ACL），也不要放宽整个会话的权限（#120 裁定 1） | 审核会话自己写，只写这一个文件 |
 | 退路：同一会话自审 | 只在用户不想另开会话时用（清单 §6 裁定 5） | 起草者写，`mode` 填 `self` |
 
@@ -42,6 +42,7 @@
 
 1. **读**：材料；`python -m jobsearch_cn profile show`、`data/profile/notes.md`；`python -m jobsearch_cn jd show <岗位id>`、`python -m jobsearch_cn match show <岗位id>`；清单 §2；派活时给的 build 输出和说明。资料都自己读，不用起草者的转述。
 2. **机器检查**：`python -m jobsearch_cn material validate <材料>` 的结果核对 A1、A4、C6；`resume build` 输出的 `problems` 核对 D1–D4、D6。审核者不运行 `resume build` 和 `material render`，这两条会写文件；允许列表管不到这一点，靠审核者自己遵守。
+   - 先核对 build 输出是这一版材料生成的：用第 4 步的 `review draft` 拿到 `material_hash`，再打开 build 输出里的说明文件（`build_note`，即 `data/resumes/<岗位id>/resume-<n>.build.json`），两个 `material_hash` 要相同。不相同说明材料改过以后没有重新 `resume build`，PDF 和 Word 还是旧的：这时不写审核结果，请起草者重新生成，再派这一轮（不算一轮）。沟通草稿的说明文件见第 5 节。
 3. **看页面**（D5）：用读文件的工具打开 build 输出的 PDF（Claude Code 的 Read 能显示页面和文本层）。打不开或者只读得出文字时，在交回审核结果时说明 D5 没看，由起草者告诉用户。
 4. **机器初稿**：`python -m jobsearch_cn review draft <材料>`，拿到 `material_hash`、关键词覆盖表初稿和标点空格警告（见 [review-format.md](review-format.md#3-命令)）。
 5. **按清单审**：第 1 轮审全部清单；第 2 轮只看改动和上一轮的问题，确认 `必改` 都解决了、没有引出新问题（清单 §4.4）。覆盖表在初稿上补学历、经验、业务词，逐行判断（C1、C2）。

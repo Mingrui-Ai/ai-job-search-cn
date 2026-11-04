@@ -53,6 +53,8 @@ M3-3 第一部分只写设计，不写代码。本文定两件事：
 
 ### D 一页与文本层
 
+D 类核对的必须是这一版材料生成的 PDF 和 Word：说明文件 `resume-<n>.build.json` 的 `material_hash` 等于 `review draft` 给的；材料改过以后要重新 `resume build`，旧文件不算（[resume-workflow.md](resume-workflow.md) 第 2 节）。
+
 - **D1** `机器` PDF 正好一页（`verify_pdf`）；`resume build` 自动调间距压到一页，压不下会报错，这时由起草者删内容，不缩字号绕过。
 - **D2** `机器` 内容里的每个字段都能在 PDF 文本层里逐字找到；没有康熙部首和部首补充（U+2E80–U+2FDF）、私用区字符、`(cid:…)`、替换字符 U+FFFD，没有 Type 3 字体（见 [resume-pdf.md](resume-pdf.md#检查什么)）。
 - **D3** `机器` 手机号和邮箱在文本层里是文字，不只是图标或链接。
