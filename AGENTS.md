@@ -38,7 +38,7 @@ To prevent duplication and configuration drift across different AI agent framewo
 
 **岗位评分**：用户要给已保存的岗位评分、比较岗位，问值不值得投，或者说现在更看重什么、想调整评分的权重时，按 [docs/cn/match.md](docs/cn/match.md) 的"评分工作流"一节执行（与 Claude Code 的 `cn-match` 技能共用这一份说明）。这一流程只在用户明确确认新权重以后改档案：写 `target.weights`，在 `notes.md` 的"偏好记录"追加一条；档案的其他字段（包括硬性条件）不在这里改。
 
-**生成简历**：用户要给已保存的岗位做简历、改简历或审简历时，按 [docs/cn/resume-workflow.md](docs/cn/resume-workflow.md) 执行（与 Claude Code 的 `cn-resume` 技能共用这一份说明）。审核要另开一个 Codex 会话做（第 2 节）；用户不想另开时才在同一会话自审，审核结果标为 `self`，交给用户时说明。只写 `data/materials/<岗位id>/` 下的文件，不改档案。
+**生成简历和沟通草稿**：用户要给已保存的岗位做简历、改简历、审简历，或者要打招呼语、投递邮件、内推请求时，按 [docs/cn/resume-workflow.md](docs/cn/resume-workflow.md) 执行（与 Claude Code 的 `cn-resume` 技能共用这一份说明）。审核要另开一个 Codex 会话做（第 2 节）；用户不想另开时才在同一会话自审，审核结果标为 `self`，交给用户时说明。只写 `data/materials/<岗位id>/` 下的文件（PDF、Word 和沟通草稿的文本由命令写到 `data/resumes/`、`data/messages/`），不改档案。
 
 **工程底线（开发与运行时都适用）**
 

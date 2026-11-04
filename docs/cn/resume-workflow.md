@@ -1,6 +1,6 @@
-# 生成简历：起草 + 审核工作流（三个 Agent 共用，M3-3 第三部分）
+# 生成简历和沟通草稿：起草 + 审核工作流（三个 Agent 共用，M3-3 第三部分、M3-6）
 
-这是给一个岗位做简历的唯一说明：Claude Code 的 `cn-resume` 技能和审核子代理 `cn-resume-reviewer`、Codex 读取的 `AGENTS.md`、DeepSeek Harness 的 `.dsh/skills/cn-resume` 都只指向本文（ADR-7、ADR-10）。用户说"给某个岗位做简历""改一下这份简历""审一下这份简历"时，按这里做。
+这是给一个岗位做简历的唯一说明：Claude Code 的 `cn-resume` 技能和审核子代理 `cn-resume-reviewer`、Codex 读取的 `AGENTS.md`、DeepSeek Harness 的 `.dsh/skills/cn-resume` 都只指向本文（ADR-7、ADR-10）。用户说"给某个岗位做简历""改一下这份简历""审一下这份简历"时，按这里做；要打招呼语、投递邮件、内推请求（下称"沟通草稿"）时，按第 5 节做。
 
 为什么这样分工、清单每条查什么，见 [review-checklist.md](review-checklist.md)（下称"清单"）。格式见 [material.md](material.md)（材料）和 [review-format.md](review-format.md)（审核结果），生成 PDF 和 Word 见 [resume-pdf.md](resume-pdf.md)。本文只写步骤。
 
@@ -35,13 +35,13 @@
 | 运行时 | 怎么开审核 | 审核结果谁写进文件 |
 | --- | --- | --- |
 | Claude Code | 起草者用 Agent 工具派 `cn-resume-reviewer` 子代理。提示词里写：材料路径、岗位 id、第几轮、`resume build` 输出的 JSON、起草者的说明，数据目录不是默认的 `data/` 时也写上；第 2 轮再加上一轮审核结果的路径和起草者对每条问题的处理 | 子代理没有写文件的工具，只返回审核结果 JSON；起草者原样存为文件，不改内容 |
-| Codex、dsh | 另开一个会话。起草的会话最后打印一段给用户复制到新会话的话：`按 docs/cn/resume-workflow.md 第 2 节审核 data/materials/<岗位id>/resume-<n>.json，第 <k> 轮`，后面附 `resume build` 的输出和起草者的说明 | 审核会话自己写，只写这一个文件 |
+| Codex、dsh | 另开一个会话。起草的会话最后打印一段给用户复制到新会话的话：`按 docs/cn/resume-workflow.md 第 2 节审核 data/materials/<岗位id>/resume-<n>.json，第 <k> 轮`，后面附 `resume build` 的输出和起草者的说明。Windows 上 Codex 的 workspace-write 沙盒里 `resume build` 可能报 WinError 5：这时请用户批准在沙盒外运行这一条 build，不要改文件权限（ACL），也不要放宽整个会话的权限（#120 裁定 1） | 审核会话自己写，只写这一个文件 |
 | 退路：同一会话自审 | 只在用户不想另开会话时用（清单 §6 裁定 5） | 起草者写，`mode` 填 `self` |
 
 审核者的步骤：
 
 1. **读**：材料；`python -m jobsearch_cn profile show`、`data/profile/notes.md`；`python -m jobsearch_cn jd show <岗位id>`、`python -m jobsearch_cn match show <岗位id>`；清单 §2；派活时给的 build 输出和说明。资料都自己读，不用起草者的转述。
-2. **机器检查**：`python -m jobsearch_cn material validate <材料>` 的结果核对 A1、A4、C6；`resume build` 输出的 `problems` 核对 D1–D4、D6。审核者不重新生成，生成会改文件。
+2. **机器检查**：`python -m jobsearch_cn material validate <材料>` 的结果核对 A1、A4、C6；`resume build` 输出的 `problems` 核对 D1–D4、D6。审核者不运行 `resume build` 和 `material render`，这两条会写文件；允许列表管不到这一点，靠审核者自己遵守。
 3. **看页面**（D5）：用读文件的工具打开 build 输出的 PDF（Claude Code 的 Read 能显示页面和文本层）。打不开或者只读得出文字时，在交回审核结果时说明 D5 没看，由起草者告诉用户。
 4. **机器初稿**：`python -m jobsearch_cn review draft <材料>`，拿到 `material_hash`、关键词覆盖表初稿和标点空格警告（见 [review-format.md](review-format.md#3-命令)）。
 5. **按清单审**：第 1 轮审全部清单；第 2 轮只看改动和上一轮的问题，确认 `必改` 都解决了、没有引出新问题（清单 §4.4）。覆盖表在初稿上补学历、经验、业务词，逐行判断（C1、C2）。
@@ -55,11 +55,43 @@
 - **通过**：`verdict` 是 `pass`，没有 `必改`，就交给用户。带着 `建议` 通过时，不采纳就原样交，建议列给用户；采纳任何一条都会改材料，这一轮的审核结果随之失效（`review validate` 报 `material_hash`），要重新 `material validate`、`resume build`，再审下一轮，只看这几处改动。已经是第 2 轮的，不再改材料，建议列给用户。
 - **修改**：`必改` 全部处理（照改，或者换个写法解决同一个问题）；`建议` 自己判断，不采纳的记一句理由。会编造内容的意见一律不采纳，交给用户时说明。改完重新 `material validate` 和 `resume build`，再审第 2 轮。材料改过以后，第 1 轮的审核结果 `review validate` 不再通过，这是正常的：第 2 轮审的是当前版本。
 - **停止**：第 2 轮之后不再循环，还没解决的问题原样列给用户，由用户决定。
+- **材料改不了的必改项**：有的必改项只能靠改档案或改代码解决，改材料改不了（例如渲染出来的意向行、档案里缺的内容）。这时不开第三轮，交给用户时写明"材料改不了的问题"和原因，由用户决定（#120 裁定 4）。
 - **提前停止**：`material validate` 或 `resume build` 有错误、起草者自己改不了时（例如档案缺 id、一页放不下而用户不同意删内容），停下来问用户，不进入审核。
 
 ## 4. 交给用户
 
-- `resume build` 输出的 PDF 和 Word 路径。投递优先用 PDF；Word 版可能排到第二页（[resume-pdf.md](resume-pdf.md#word-版)）。
+- `resume build` 输出的 PDF 和 Word 路径，并对用户说一句：投递优先用 PDF，Word 版可能因字体不同排到第二页（[resume-pdf.md](resume-pdf.md#word-版)，#120 裁定 5）。
 - 最后一轮审核结果的摘要：`python -m jobsearch_cn review show data/materials/<岗位id>/review-<n>-r<k>.json` 的结论、关键词缺口、没采纳的建议和理由、没解决的问题。
-- 是自审的、页面没看过的（D5），都要说明。
+- 是自审的、页面没看过的（D5）、有材料改不了的问题的（第 3 节），都要说明。
 - 不替用户投递，不把简历发到任何地方。
+
+## 5. 沟通草稿（打招呼语、投递邮件、内推请求，M3-6）
+
+前提、读的资料、审核方式和停止规则都同上，下面只写不同的地方。格式见 [material.md 第 7 节](material.md#7-打招呼语投递邮件内推请求m3-4)，审核条目是清单的 G 类和它列出的旧条目。
+
+**什么时候起草**
+
+- 接在简历后面：简历审核结束、交给用户时，问一句要不要起草沟通的话，按下面的规则建议一种。
+- 单独起草：用户只要一段打招呼语也可以，不必先做简历（BOSS 直聘这类平台通常先打招呼，对方回复了才发简历）。
+
+**起草哪一种**：默认只起草一种，交给用户时说选了哪种、为什么，要别的就说一声。
+
+- 岗位的 `site` 是 `boss`、`shixiseng`、`nowcoder`、`liepin`、`zhaopin`、`51job`、`lagou` 这类平台：打招呼语（`greeting`）；
+- JD 里写了投递邮箱：投递邮件（`email`）；
+- `site` 是 `referral`，或者用户说有人能内推：内推请求（`referral`）；
+- 看不出来时问用户。用户点名要几种就起草几种，一种一个文件，各审各的。
+
+**步骤**
+
+1. **选模板**：`python -m jobsearch_cn material template <岗位id> --kind <种类>`（拿不准方向时加 `--direction`），输出槽位、字数上限和写法提示。
+2. **写材料**：`data/materials/<岗位id>/<种类>-<n>.json`，`n` 取这个种类下一个没用过的编号。`profile_hash` 从匹配记录抄。学校、学历、公司、岗位名、姓名用占位符，不手写（G6）；经历段引用它写的条目（G7）；链接只用占位符，到岗和每周天数只照档案写（G8）。
+   - 这个岗位有审核通过的简历时，经历段只从那份简历列出的经历里选，数字和说法与简历一致（G3）。邮件写"简历见附件"，只在简历已经生成、审核通过时才写。
+   - 第一版不引 `notes.md`。
+3. **检查**：`python -m jobsearch_cn material validate data/materials/<岗位id>/<种类>-<n>.json`，有错误就改到通过；警告逐条处理或记下理由（G1）。
+4. **渲染**：`python -m jobsearch_cn material render data/materials/<岗位id>/<种类>-<n>.json --output`。它写 `data/messages/<岗位id>/<种类>-<n>.txt` 和旁边的说明文件 `<种类>-<n>.build.json`（格式见 [applications.md 第 12 节](applications.md#12-resume-build-的说明文件m4-1a-第二部分)），标准输出只有路径、字数和警告。工作流里一律加 `--output`：邮件签名有联系方式，不能打进对话。警告逐条处理（G2）。
+5. **审核**：同第 2 节。派活时给材料路径、岗位 id、轮次、render 的输出和起草者的说明；有简历时也给那份简历材料的路径（G3 要对照）。审核者跑 `material validate` 和 `review draft`（沟通草稿的 `coverage` 是 `[]`，只有标点空格警告），不运行 `material render`。审核结果存为 `data/materials/<岗位id>/review-<种类>-<n>-r<k>.json`，`kind` 是 `<种类>-review`。最多 2 轮，用户明确说不审时按自审记 `self`。
+6. **交给用户**：
+   - `.txt` 的路径，请用户打开文件复制（Windows 可以用记事本打开）。回复里不贴正文；用户想在对话里看，可以自己运行 `! python -m jobsearch_cn material render <材料>`。
+   - 字数；最后一轮审核的摘要（`python -m jobsearch_cn review show <审核结果>`）；没采纳的建议和理由；是不是自审。
+   - 邮件要附的简历：那份简历 `resume build` 输出的 PDF 路径，由用户自己附，优先 PDF。
+   - 不自动发送：不调邮件客户端，不打开招聘网站，不往剪贴板写，不联网。

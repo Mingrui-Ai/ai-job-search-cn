@@ -111,7 +111,9 @@ class EntryPoints(unittest.TestCase):
 
 
 class ReviewerAgents(unittest.TestCase):
-    """The review subagents (review-checklist.md §5.1): read-only, offline, pointing at the workflow."""
+    """The review subagents (review-checklist.md §5.1): no Edit, Write or web tools, pointing at the workflow.
+    Their Bash still runs whatever the allow list lets through, writing commands included; only the
+    workflow text keeps them to the read ones, which these tests do not check."""
 
     def each(self):
         for name, workflow in REVIEWERS.items():
@@ -123,7 +125,7 @@ class ReviewerAgents(unittest.TestCase):
             self.assertIn(f"name: {agent.stem}", frontmatter(agent))
             self.assertIn(workflow, read(agent))
 
-    def test_the_agent_cannot_write_or_go_online(self):
+    def test_the_agent_has_no_edit_write_or_web_tools(self):
         for agent, _ in self.each():
             tools = next(line for line in frontmatter(agent) if line.startswith("tools:"))
             self.assertEqual({t.strip() for t in tools.split(":", 1)[1].split(",")}, {"Read", "Glob", "Grep", "Bash"})
