@@ -1,0 +1,683 @@
+[
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn jd parse <data>/inbox/boss_intern.txt --site boss --save --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.570893,
+    "started_at_ms": 1793635689663,
+    "result": {
+      "saved": [
+        {
+          "action": "created",
+          "id": "job_9f4694691d57",
+          "title": "后端开发实习生（Go方向）",
+          "company": "示例互联网科技（深圳）有限公司",
+          "cities": [
+            "深圳"
+          ],
+          "status": "new"
+        }
+      ],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn profile validate --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.588422,
+    "started_at_ms": 1793635699793,
+    "result": {
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn profile show --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.599959,
+    "started_at_ms": 1793635699857,
+    "result": {
+      "source": "profile show (default contact redaction)",
+      "top_level_fields": [
+        "availability",
+        "awards",
+        "certificates",
+        "contact",
+        "education",
+        "exclusions",
+        "experience",
+        "graduation",
+        "languages",
+        "schema_version",
+        "skills",
+        "target"
+      ],
+      "full_profile_omitted": true
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn match score job_9f4694691d57 --draft --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.345884,
+    "started_at_ms": 1793635719295,
+    "result": {
+      "job_id": "job_9f4694691d57",
+      "profile_hash": "3b5cbef9bab820661299a6d82715f9c382679bb7e1adedee69e3a2671ec9e093",
+      "total": {
+        "score": 81,
+        "grade": "strong",
+        "complete": false,
+        "missing": [
+          "experience"
+        ]
+      }
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn jd show job_9f4694691d57 --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.413086,
+    "started_at_ms": 1793635735539,
+    "result": {
+      "id": "job_9f4694691d57",
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      }
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn match validate <data>/matches/drafts/job_9f4694691d57.json --data-dir <data>",
+    "exit_code": 1,
+    "elapsed_seconds": 0.342071,
+    "started_at_ms": 1793635769465,
+    "result": {
+      "valid": false,
+      "errors": [
+        "total: does not follow from the dimensions and weights; they give {\"score\": 81, \"grade\": \"strong\", \"complete\": true, \"missing\": []}"
+      ]
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn match validate <data>/matches/drafts/job_9f4694691d57.json --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.338457,
+    "started_at_ms": 1793635791346,
+    "result": {
+      "valid": true,
+      "errors": []
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn match save <data>/matches/drafts/job_9f4694691d57.json --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.338104,
+    "started_at_ms": 1793635806011,
+    "result": {
+      "saved": "created",
+      "job_id": "job_9f4694691d57"
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn match show job_9f4694691d57 --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.361725,
+    "started_at_ms": 1793635830303,
+    "result": {
+      "job_id": "job_9f4694691d57",
+      "profile_hash": "3b5cbef9bab820661299a6d82715f9c382679bb7e1adedee69e3a2671ec9e093",
+      "total": {
+        "score": 81,
+        "grade": "strong",
+        "complete": true,
+        "missing": []
+      }
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn match list --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.577843,
+    "started_at_ms": 1793635830366,
+    "result": {
+      "matches": [
+        {
+          "job_id": "job_9f4694691d57",
+          "title": "后端开发实习生（Go方向）",
+          "company": "示例互联网科技（深圳）有限公司",
+          "grade": "strong",
+          "score": 81,
+          "complete": true,
+          "verdict": "eligible",
+          "stale": false,
+          "stale_reasons": []
+        }
+      ],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn material validate <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.472326,
+    "started_at_ms": 1793635889832,
+    "result": {
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn resume build <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "exit_code": 1,
+    "elapsed_seconds": 0.612782,
+    "started_at_ms": 1793635907478,
+    "result": {
+      "error": "PermissionError: [WinError 5] access denied while creating or cleaning a TemporaryDirectory",
+      "raw_trace_omitted": "local paths; exact failure is described in the report"
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "$resumeTemp = '<data>/materials/job_9f4694691d57/tmp'\n[System.IO.Directory]::CreateDirectory($resumeTemp) | Out-Null\n$env:TEMP = $resumeTemp\n$env:TMP = $resumeTemp\npython -m jobsearch_cn resume build <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "exit_code": 1,
+    "elapsed_seconds": 0.611145,
+    "started_at_ms": 1793635928197,
+    "result": {
+      "error": "PermissionError: [WinError 5] access denied while creating or cleaning a TemporaryDirectory",
+      "raw_trace_omitted": "local paths; exact failure is described in the report"
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "$notesPath = '<data>/materials/job_9f4694691d57/draft-notes.md'\n$draftNotes = @'\n# 起草记录：构建失败，尚未进入独立审核\n\n- 日期：2026-11-03（Asia/Shanghai）\n- 数据目录：<data>\n- 岗位 id：job_9f4694691d57\n- 材料：<data>/materials/job_9f4694691d57/resume-1.json\n- 预定审核轮次：第 1 轮，尚未启动。未运行 review draft 或自行审核，未创建审核结果。\n\n## 已完成\n\n岗位按 jd parse --site boss --save 保存。profile validate 通过，无错误或警告。沿用现有权重（target.weights 为 null，规则采用技能30、方向25、经历25、薪资10、地点10）；未修改档案。补充经历评分80，按 match validate 返回的 total 保存；match list 确认 score 81、grade strong、complete true、verdict eligible、stale false。技能缺口为Redis、Kubernetes，JD未写面试形式或到岗时间。\n\nmaterial validate 输出：\n\n{\"valid\": true, \"errors\": [], \"warnings\": []}\n\n## 选材说明\n\n- 选edu-1、edu-2，相关课程按数据库系统、分布式系统排列；未列机器学习课程。\n- exp-1后端实习排在proj-1课程问答项目之前；实习先列Go接口重构，再列Python检索评测，项目保留MySQL使用经历。\n- 保留档案中的Go、MySQL、Docker、Python、LangChain、RAG，以及award-1和cert-1；未列相关度较低的PyTorch，未重复列与CET-6证书相同的语言成绩。\n- 简介引用edu-1和exp-1。全部成果数值沿用所引条目；没有补写高并发、Redis、Kubernetes经验。\n- 尚未获得页面，未因一页限制进一步删减。\n\n## 构建错误及停止原因\n\n实际执行命令：\n\npython -m jobsearch_cn resume build <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>\n\n首次退出码1，输出Python traceback，没有resume build JSON。创建以下构建目录时失败：\n\n<user-home>/AppData/Local/Temp/jobsearch-cn-resume-4uokvui7/build\n\n错误为 PermissionError: [WinError 5] 拒绝访问。临时目录清理也报同类错误。\n\n第二次仅为该命令进程设置TEMP和TMP到数据目录内的data/materials/job_9f4694691d57/tmp后重试，退出码仍为1，仍无JSON。创建以下目录时出现相同错误：\n\n<data>/materials/job_9f4694691d57/tmp/jobsearch-cn-resume-687alung/build\n\n未修改实现代码、仓库文档、模板或个人档案，未联网、未投递。未更改目录权限或安全配置。构建中止后的临时目录未进一步处理。\n\n已检查resume-1.pdf、resume-1.docx均不存在；PDF页面和Word版式均未能查看，不能宣称D5已检查。按docs/cn/resume-workflow.md第3节的提前停止规则，不进入审核。需要先解决运行环境的临时目录权限问题，重新运行resume build并获得实际JSON；成功后查看页面，再按第2节交接独立审核。当前没有可附的实际build JSON，不应以手写结果替代。\n'@\n[System.IO.File]::WriteAllText($notesPath, $draftNotes + [Environment]::NewLine, (New-Object System.Text.UTF8Encoding $false))\n$notesPath",
+    "exit_code": 0,
+    "elapsed_seconds": 0.232384,
+    "started_at_ms": 1793635999951,
+    "result": "<data>/materials/job_9f4694691d57/draft-notes.md\r\n"
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r1.json --data-dir <data>",
+    "exit_code": 1,
+    "elapsed_seconds": 0.380613,
+    "started_at_ms": 1793637110233,
+    "result": "usage: python -m jobsearch_cn [-h] [--version] <command> ...\r\npython -m jobsearch_cn: error: unrecognized arguments: --data-dir <data>\r\n"
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn profile show --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.28605,
+    "started_at_ms": 1793637110327,
+    "result": {
+      "source": "profile show (default contact redaction)",
+      "top_level_fields": [
+        "availability",
+        "awards",
+        "certificates",
+        "contact",
+        "education",
+        "exclusions",
+        "experience",
+        "graduation",
+        "languages",
+        "schema_version",
+        "skills",
+        "target"
+      ],
+      "full_profile_omitted": true
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn material validate <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.58085,
+    "started_at_ms": 1793637192373,
+    "result": {
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r1.json --material <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "exit_code": 1,
+    "elapsed_seconds": 0.289704,
+    "started_at_ms": 1793637313304,
+    "result": "usage: python -m jobsearch_cn [-h] [--version] <command> ...\r\npython -m jobsearch_cn: error: unrecognized arguments: --data-dir <data>\r\n"
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r1.json",
+    "exit_code": 1,
+    "elapsed_seconds": 0.30512,
+    "started_at_ms": 1793637418880,
+    "result": {
+      "valid": false,
+      "errors": [
+        "material_hash: the material has changed since this review; review the current version"
+      ],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r2.json",
+    "exit_code": 0,
+    "elapsed_seconds": 0.287334,
+    "started_at_ms": 1793637863052,
+    "result": {
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d03-7317-78a3-bfd1-38887c7dc556",
+    "command": "python -m jobsearch_cn review show <data>/materials/job_9f4694691d57/review-1-r2.json",
+    "exit_code": 0,
+    "elapsed_seconds": 0.276176,
+    "started_at_ms": 1793637874331,
+    "result": "# 审核结果：resume-1.json（第 2 轮）\r\n\r\n- 岗位：job_9f4694691d57\r\n- 结论：需修改\r\n- 方式：独立审核\r\n- 时间：2026-11-03T00:41:30+08:00\r\n\r\n## 问题\r\n\r\n- **必改** D5：第2轮独立目视resume-1-preview-r2.png整页：求职意向“起可到岗”四字仍单独换行，末条证书下至页底约占整页四分之一，D5必改未解决；两处改写未见重叠、裁切或孤字换行。仅查看此PDF预览，未直接打开PDF或目视Word。宿主本次build的problems、warnings为空，仅作D1–D4、D6机器检查依据，不代表CLI沙盒构建成功或D5通过。此前两次WinError 5失败按交接保留，本轮未重建。材料无抬头或间距控制字段，无可直接替换文字；第2轮后停止，由用户决定后续处理。\r\n\r\n## 岗位要求覆盖\r\n\r\n| 要求 | 情况 | 位置 | 说明 |\r\n| --- | --- | --- | --- |\r\n| Golang 或 Java | 已覆盖 | `skills[0]`、`summary.text`、`experience[0].bullets[0].text` | 沿用第1轮覆盖判断。JD职责用Go、要求用Golang或Java；材料使用JD已有写法，exp-1原文支持Go接口重构，满足任选其一，不另列Java缺口。 |\r\n| MySQL | 已覆盖 | `skills[1]`、`experience[1].bullets[0].text` | 第2轮核对experience[1].bullets[0].text：已改为动词“使用”开头，E4建议已解决；MySQL、LangChain、20门课程及proj-1引用均与档案原文一致。仅证明使用经历，不代表存储方案设计优化经验。 |\r\n| Redis | 缺口 | - | 沿用第1轮缺口。当前档案技能、经历原文及notes.md无Redis依据，匹配记录也列为缺口；本轮两处改写未改变此判断。 |\r\n| Docker | 已覆盖 | `skills[2]` | 沿用第1轮覆盖判断。档案技能列Docker（working），材料skills[2]及当前PDF预览的“熟悉”一致；不据此扩展为生产部署经验。 |\r\n| Kubernetes | 缺口 | - | 沿用第1轮缺口。当前档案技能、经历原文及notes.md无Kubernetes依据，匹配记录也列为缺口；本轮两处改写未改变此判断。 |\r\n| 2026届或2027届 | 已覆盖 | `education[0].ref` | 沿用第1轮覆盖判断。edu-1结束时间及档案graduation均为2027年6月；本轮两处要点改写未影响2027届的依据。 |\r\n| 本科及以上在读 | 已覆盖 | `education[0].ref`、`education[1].ref`、`summary.text` | 沿用第1轮覆盖判断。edu-1为2025-09至2027-06硕士教育，edu-2本科已结束，summary.text写“硕士在读”；本轮未改变此依据。 |\r\n| 计算机相关专业 | 已覆盖 | `education[0].ref`、`education[1].ref` | 沿用第1轮覆盖判断。edu-1为计算机科学与技术，edu-2为软件工程；本轮两处要点改写未改变教育引用或专业依据。 |\r\n| 后端开发经历 | 已覆盖 | `experience[0].ref`、`experience[0].bullets[0].text`、`summary.text` | 沿用第1轮后端实习覆盖判断。第2轮核对experience[0].bullets[1].text：已用动词“编写”开头，E4建议已解决；内部RAG问答服务、检索评测脚本、Python、300条测试问题及exp-1引用均与原文一致，未扩大角色或范围。 |\r\n| 公司核心业务系统 | 缺口 | - | 沿用第1轮缺口。exp-1只说明订单查询接口和内部RAG问答服务，未说明属于公司核心业务系统；本轮改写仍保留“内部”范围，不支持补写“核心业务系统”。 |\r\n| 使用Go编写高并发服务 | 缺口 | - | 沿用第1轮缺口。Go接口重构和P99延迟改善不能推出高并发服务开发，档案无并发规模或高并发服务依据；本轮两处改写未补足此缺口。 |\r\n| MySQL、Redis等存储方案的设计与优化 | 缺口 | - | 沿用第1轮缺口。第2轮proj-1改写仍只证明使用MySQL和LangChain搭建课程资料问答、支持20门课程检索，未引出存储方案设计优化或Redis经验的暗示。 |\r\n| 深圳实习，每周至少4天、实习至少6个月 | 已覆盖 | `profile_hash` | 沿用第1轮覆盖判断。当前档案availability及PDF预览仍为城市含深圳、每周4天、可实习6个月。材料无独立抬头字段，where仅指向绑定渲染档案的profile_hash。2026-11-15为档案可到岗日；JD未写到岗日期和面试安排，仍为待确认项，不视作能力缺口。 |\r\n"
+  },
+  {
+    "session": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "command": "python -B -X utf8 -m jobsearch_cn profile show --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.403176,
+    "started_at_ms": 1793636401995,
+    "result": {
+      "source": "profile show (default contact redaction)",
+      "top_level_fields": [
+        "availability",
+        "awards",
+        "certificates",
+        "contact",
+        "education",
+        "exclusions",
+        "experience",
+        "graduation",
+        "languages",
+        "schema_version",
+        "skills",
+        "target"
+      ],
+      "full_profile_omitted": true
+    }
+  },
+  {
+    "session": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "command": "python -B -X utf8 -m jobsearch_cn jd show job_9f4694691d57 --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.405884,
+    "started_at_ms": 1793636401995,
+    "result": {
+      "id": "job_9f4694691d57",
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      }
+    }
+  },
+  {
+    "session": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "command": "python -B -X utf8 -m jobsearch_cn match show job_9f4694691d57 --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.406058,
+    "started_at_ms": 1793636401995,
+    "result": {
+      "job_id": "job_9f4694691d57",
+      "profile_hash": "3b5cbef9bab820661299a6d82715f9c382679bb7e1adedee69e3a2671ec9e093",
+      "total": {
+        "score": 81,
+        "grade": "strong",
+        "complete": true,
+        "missing": []
+      }
+    }
+  },
+  {
+    "session": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "command": "python -B -X utf8 -m jobsearch_cn material validate <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.16607,
+    "started_at_ms": 1793636491922,
+    "result": {
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "command": "python -B -X utf8 -m jobsearch_cn review draft <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.476125,
+    "started_at_ms": 1793636550026,
+    "result": {
+      "material_hash": "ec339680e01cbef68d1c787c853109fefdc3e9047734d80a06043c0c5744d8f4",
+      "job_found": true,
+      "coverage": [
+        {
+          "requirement": "Golang 或 Java",
+          "status": "covered",
+          "where": [
+            "skills[0]",
+            "summary.text",
+            "experience[0].bullets[0].text"
+          ],
+          "note": null
+        },
+        {
+          "requirement": "MySQL",
+          "status": "covered",
+          "where": [
+            "skills[1]",
+            "experience[1].bullets[0].text"
+          ],
+          "note": null
+        },
+        {
+          "requirement": "Redis",
+          "status": "gap",
+          "where": [],
+          "note": "技能列表未列，需核对经历原文"
+        },
+        {
+          "requirement": "Docker",
+          "status": "covered",
+          "where": [
+            "skills[2]"
+          ],
+          "note": null
+        },
+        {
+          "requirement": "Kubernetes",
+          "status": "gap",
+          "where": [],
+          "note": "技能列表未列，需核对经历原文"
+        }
+      ],
+      "style": []
+    }
+  },
+  {
+    "session": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "command": "python -B -X utf8 -m jobsearch_cn match list --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.481586,
+    "started_at_ms": 1793636550228,
+    "result": {
+      "matches": [
+        {
+          "job_id": "job_9f4694691d57",
+          "title": "后端开发实习生（Go方向）",
+          "company": "示例互联网科技（深圳）有限公司",
+          "grade": "strong",
+          "score": 81,
+          "complete": true,
+          "verdict": "eligible",
+          "stale": false,
+          "stale_reasons": []
+        }
+      ],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "command": "python -B -X utf8 -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r1.json --data-dir <data>",
+    "exit_code": 1,
+    "elapsed_seconds": 0.361898,
+    "started_at_ms": 1793636752595,
+    "result": "usage: python -m jobsearch_cn [-h] [--version] <command> ...\r\npython -m jobsearch_cn: error: unrecognized arguments: --data-dir <data>\r\n"
+  },
+  {
+    "session": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "command": "python -B -X utf8 -m jobsearch_cn --help --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.372622,
+    "started_at_ms": 1793636776409,
+    "result": "usage: python -m jobsearch_cn [-h] [--version] <command> ...\r\n\r\nAI Job Search CN 本地工具（离线处理用户提供的岗位数据）\r\n\r\npositional arguments:\r\n  <command>\r\n    jd        岗位 JD 相关命令\r\n    profile   个人档案相关命令\r\n    match     岗位与个人档案的匹配\r\n    resume    简历生成相关命令\r\n    material  求职材料（简历等）相关命令\r\n    review    材料审核相关命令（起草 + 审核工作流）\r\n\r\noptions:\r\n  -h, --help  show this help message and exit\r\n  --version   show program's version number and exit\r\n"
+  },
+  {
+    "session": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "command": "python -B -X utf8 -m jobsearch_cn review validate --help --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.373154,
+    "started_at_ms": 1793636776408,
+    "result": "usage: python -m jobsearch_cn review validate [-h] [--material MATERIAL] file\r\n\r\n检查一份审核结果的格式，以及它审的是不是材料的当前版本。通过时退出码 0，不通过时退出码 1。\r\n\r\npositional arguments:\r\n  file                 审核结果文件（data/materials/<岗位id>/review-<n>-r<轮次>.json）\r\n\r\noptions:\r\n  -h, --help           show this help message and exit\r\n  --material MATERIAL  审核的材料文件；默认为审核结果同目录下 material 字段写的文件\r\n"
+  },
+  {
+    "session": "01a19d0e-0f9a-7103-a300-8d67207b6062",
+    "command": "python -B -X utf8 -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r1.json --data-dir <data>",
+    "exit_code": 1,
+    "elapsed_seconds": 0.392222,
+    "started_at_ms": 1793637002700,
+    "result": "usage: python -m jobsearch_cn [-h] [--version] <command> ...\r\npython -m jobsearch_cn: error: unrecognized arguments: --data-dir <data>\r\n"
+  },
+  {
+    "session": "01a19d20-79c5-7a60-a8d2-4688866e06f3",
+    "command": "python -B -X utf8 -m jobsearch_cn profile show --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.699718,
+    "started_at_ms": 1793637607997,
+    "result": {
+      "source": "profile show (default contact redaction)",
+      "top_level_fields": [
+        "availability",
+        "awards",
+        "certificates",
+        "contact",
+        "education",
+        "exclusions",
+        "experience",
+        "graduation",
+        "languages",
+        "schema_version",
+        "skills",
+        "target"
+      ],
+      "full_profile_omitted": true
+    }
+  },
+  {
+    "session": "01a19d20-79c5-7a60-a8d2-4688866e06f3",
+    "command": "python -B -X utf8 -m jobsearch_cn jd show job_9f4694691d57 --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.700559,
+    "started_at_ms": 1793637608141,
+    "result": {
+      "id": "job_9f4694691d57",
+      "guard": {
+        "verdict": "clean",
+        "counts": {}
+      }
+    }
+  },
+  {
+    "session": "01a19d20-79c5-7a60-a8d2-4688866e06f3",
+    "command": "python -B -X utf8 -m jobsearch_cn match show job_9f4694691d57 --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 6e-06,
+    "started_at_ms": 1793637608280,
+    "result": {
+      "job_id": "job_9f4694691d57",
+      "profile_hash": "3b5cbef9bab820661299a6d82715f9c382679bb7e1adedee69e3a2671ec9e093",
+      "total": {
+        "score": 81,
+        "grade": "strong",
+        "complete": true,
+        "missing": []
+      }
+    }
+  },
+  {
+    "session": "01a19d20-79c5-7a60-a8d2-4688866e06f3",
+    "command": "python -B -X utf8 -m jobsearch_cn material validate <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.056673,
+    "started_at_ms": 1793637608421,
+    "result": {
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d20-79c5-7a60-a8d2-4688866e06f3",
+    "command": "python -B -X utf8 -m jobsearch_cn review draft <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "exit_code": 0,
+    "elapsed_seconds": 0.409137,
+    "started_at_ms": 1793637636454,
+    "result": {
+      "material_hash": "71cb50d1051a0175f6006154b14a369ddb19b4aac9ab5608cf90dd0b41fffa72",
+      "job_found": true,
+      "coverage": [
+        {
+          "requirement": "Golang 或 Java",
+          "status": "covered",
+          "where": [
+            "skills[0]",
+            "summary.text",
+            "experience[0].bullets[0].text"
+          ],
+          "note": null
+        },
+        {
+          "requirement": "MySQL",
+          "status": "covered",
+          "where": [
+            "skills[1]",
+            "experience[1].bullets[0].text"
+          ],
+          "note": null
+        },
+        {
+          "requirement": "Redis",
+          "status": "gap",
+          "where": [],
+          "note": "技能列表未列，需核对经历原文"
+        },
+        {
+          "requirement": "Docker",
+          "status": "covered",
+          "where": [
+            "skills[2]"
+          ],
+          "note": null
+        },
+        {
+          "requirement": "Kubernetes",
+          "status": "gap",
+          "where": [],
+          "note": "技能列表未列，需核对经历原文"
+        }
+      ],
+      "style": []
+    }
+  },
+  {
+    "session": "01a19d20-79c5-7a60-a8d2-4688866e06f3",
+    "command": "python -B -X utf8 -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r1.json",
+    "exit_code": 1,
+    "elapsed_seconds": 0.330284,
+    "started_at_ms": 1793637636578,
+    "result": {
+      "valid": false,
+      "errors": [
+        "material_hash: the material has changed since this review; review the current version"
+      ],
+      "warnings": []
+    }
+  },
+  {
+    "session": "01a19d20-79c5-7a60-a8d2-4688866e06f3",
+    "command": "python -B -X utf8 -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r2.json",
+    "exit_code": 0,
+    "elapsed_seconds": 0.348543,
+    "started_at_ms": 1793637750568,
+    "result": {
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    }
+  },
+  {
+    "stage": "host-build-r1",
+    "command": "python -m jobsearch_cn resume build <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "executor": "current Codex host, existing unrestricted permission profile",
+    "elapsed_seconds": 1.234,
+    "exit_code": 0,
+    "started_utc": "2026-11-02T16:14:51.117111+00:00",
+    "result": {
+      "pdf": "<data>/resumes/job_9f4694691d57/resume-1.pdf",
+      "spaciness": 1.5,
+      "fonts": {
+        "serif": "Noto Serif SC",
+        "sans": "Noto Sans SC"
+      },
+      "docx": "<data>/resumes/job_9f4694691d57/resume-1.docx",
+      "font": "等线",
+      "problems": [],
+      "warnings": []
+    }
+  },
+  {
+    "stage": "host-build-r2",
+    "command": "python -m jobsearch_cn resume build <data>/materials/job_9f4694691d57/resume-1.json --data-dir <data>",
+    "executor": "current Codex host, existing unrestricted permission profile",
+    "elapsed_seconds": 1.156,
+    "exit_code": 0,
+    "started_utc": "2026-11-02T16:36:27.965317+00:00",
+    "result": {
+      "pdf": "<data>/resumes/job_9f4694691d57/resume-1.pdf",
+      "spaciness": 1.5,
+      "fonts": {
+        "serif": "Noto Serif SC",
+        "sans": "Noto Sans SC"
+      },
+      "docx": "<data>/resumes/job_9f4694691d57/resume-1.docx",
+      "font": "等线",
+      "problems": [],
+      "warnings": []
+    }
+  },
+  {
+    "stage": "host-review-r1-validate-corrected",
+    "command": "python -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r1.json --material <private-log>/material-r1.json",
+    "executor": "current Codex host, existing unrestricted permission profile",
+    "elapsed_seconds": 0.25,
+    "exit_code": 0,
+    "started_utc": "2026-11-02T16:31:56.827169+00:00",
+    "result": {
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    }
+  },
+  {
+    "stage": "host-review-r1-validate",
+    "command": "python -m jobsearch_cn review validate <data>/materials/job_9f4694691d57/review-1-r1.json --data-dir <data>",
+    "executor": "current Codex host, existing unrestricted permission profile",
+    "elapsed_seconds": 0.25,
+    "exit_code": 2,
+    "started_utc": "2026-11-02T16:31:00.969301+00:00",
+    "result": "usage: python -m jobsearch_cn [-h] [--version] <command> ...\npython -m jobsearch_cn: error: unrecognized arguments: --data-dir <data>\n"
+  }
+]

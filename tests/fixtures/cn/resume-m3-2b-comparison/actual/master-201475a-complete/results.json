@@ -1,0 +1,313 @@
+{
+  "metadata": {
+    "freeze_commit": "1d6953ee75bf14fa39b6efd1c956a2f4aba32063",
+    "target_commit": "201475af8135f541730b6f81af3b3afd9f9e615b",
+    "checkout_commit": "9fb2e5050719047ec5a6efa98ce348d948d2bfa6",
+    "frozen_files_verified": 17,
+    "frozen_git_tree_unchanged": true,
+    "target_code_unchanged": true,
+    "python": "3.12.15",
+    "typst": "typst 0.15.1 (9dfd3a08)",
+    "pdf_reader": "pypdf 6.21.3",
+    "scope": "Frozen flat content, validation, generated text layers; no new Office UI acceptance",
+    "adapter": {
+      "filename": "material.json -> resume-1.json (byte-identical copy)",
+      "job_ids": {
+        "case-01-tech": "job_000000220001",
+        "case-02-ops": "job_000000220002",
+        "case-03-data": "job_000000220003"
+      },
+      "reason": "PR #111 approved filename/job-id contract after the freeze; only temporary copies change"
+    }
+  },
+  "cases": [
+    {
+      "id": "case-01-tech",
+      "validation": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "original_build_exit_code": 2,
+      "build_exit_code": 0,
+      "adaptation": {
+        "differences": [
+          {
+            "path": "/job_id",
+            "expected": "job_v22_case_01",
+            "actual": "job_000000220001"
+          }
+        ],
+        "flat_content_unchanged": true,
+        "validation_unchanged": true
+      },
+      "validation_matches": true,
+      "warnings_preserved": true,
+      "problems": [],
+      "pdf_pages": 1,
+      "flat_exact_match": false,
+      "content_comparison": {
+        "expected_order": [
+          "教育经历",
+          "实习经历",
+          "项目经历",
+          "科研经历",
+          "专业技能",
+          "荣誉与证书"
+        ],
+        "actual_order": [
+          "教育经历",
+          "科研经历",
+          "实习经历",
+          "项目经历",
+          "专业技能",
+          "荣誉与证书"
+        ],
+        "missing_sections": [],
+        "extra_sections": [],
+        "sections": {
+          "教育经历": [],
+          "实习经历": [],
+          "项目经历": [],
+          "科研经历": [],
+          "专业技能": [],
+          "荣誉与证书": []
+        },
+        "header_differences": [
+          {
+            "path": "/intent",
+            "expected": "求职意向：后端开发、数据平台（实习） · 2026.12.01 起可到岗",
+            "actual": "求职意向：后端开发、数据平台（实习） · 杭州 · 每周 4 天，可实习 6 个月 · 2026.12.01 起可到岗"
+          }
+        ]
+      },
+      "text_layers": {
+        "pdf": {
+          "frozen_field_count": 41,
+          "literal_missing": [
+            "13800000000 | candidate-a@example.com | github.com/example-candidate-a | portfolio-a.example.com",
+            "求职意向：后端开发、数据平台（实习） · 2026.12.01 起可到岗",
+            "GPA 3.8/4.0，专业前12%"
+          ],
+          "whitespace_only_missing": [
+            "求职意向：后端开发、数据平台（实习） · 2026.12.01 起可到岗"
+          ],
+          "actual_content_missing": []
+        },
+        "docx": {
+          "frozen_field_count": 41,
+          "literal_missing": [
+            "求职意向：后端开发、数据平台（实习） · 2026.12.01 起可到岗"
+          ],
+          "whitespace_only_missing": [
+            "求职意向：后端开发、数据平台（实习） · 2026.12.01 起可到岗"
+          ],
+          "actual_content_missing": []
+        }
+      },
+      "artifacts_sha256": {
+        "pdf": "10f381a8d2dcd26ff4f28a08625838ea91220da40f6565ac7b66ecda98524af0",
+        "docx": "4fb8d4602c21b36c825a181efe03a623fd962f37606a742efa29ac2f0958c5f2"
+      },
+      "input_bytes_unchanged": true
+    },
+    {
+      "id": "case-02-ops",
+      "validation": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "original_build_exit_code": 2,
+      "build_exit_code": 0,
+      "adaptation": {
+        "differences": [
+          {
+            "path": "/job_id",
+            "expected": "job_v22_case_02",
+            "actual": "job_000000220002"
+          }
+        ],
+        "flat_content_unchanged": true,
+        "validation_unchanged": true
+      },
+      "validation_matches": true,
+      "warnings_preserved": true,
+      "problems": [],
+      "pdf_pages": 1,
+      "flat_exact_match": false,
+      "content_comparison": {
+        "expected_order": [
+          "教育经历",
+          "竞赛经历",
+          "校园经历",
+          "工作经历",
+          "专业技能",
+          "荣誉与证书"
+        ],
+        "actual_order": [
+          "教育经历",
+          "工作经历",
+          "校园经历",
+          "竞赛经历",
+          "专业技能",
+          "荣誉与证书"
+        ],
+        "missing_sections": [],
+        "extra_sections": [],
+        "sections": {
+          "教育经历": [],
+          "竞赛经历": [],
+          "校园经历": [],
+          "工作经历": [],
+          "专业技能": [],
+          "荣誉与证书": []
+        },
+        "header_differences": [
+          {
+            "path": "/intent",
+            "expected": "求职意向：内容运营、品牌策划（校招、社招） · 2026.07.01 起可到岗",
+            "actual": "求职意向：内容运营、品牌策划（校招、社招） · 上海 · 2026.07.01 起可到岗"
+          }
+        ]
+      },
+      "text_layers": {
+        "pdf": {
+          "frozen_field_count": 36,
+          "literal_missing": [
+            "求职意向：内容运营、品牌策划（校招、社招） · 2026.07.01 起可到岗",
+            "专业前20%"
+          ],
+          "whitespace_only_missing": [
+            "求职意向：内容运营、品牌策划（校招、社招） · 2026.07.01 起可到岗"
+          ],
+          "actual_content_missing": []
+        },
+        "docx": {
+          "frozen_field_count": 36,
+          "literal_missing": [
+            "求职意向：内容运营、品牌策划（校招、社招） · 2026.07.01 起可到岗"
+          ],
+          "whitespace_only_missing": [
+            "求职意向：内容运营、品牌策划（校招、社招） · 2026.07.01 起可到岗"
+          ],
+          "actual_content_missing": []
+        }
+      },
+      "artifacts_sha256": {
+        "pdf": "b55232e0e1026941418fd8f98a5d54d1f2c798265aee7f2c08b8434c015a1b2f",
+        "docx": "c6294cabb355e17d093a20acb8ea2521da3887c8baf093faa4f7b492b2bcbd63"
+      },
+      "input_bytes_unchanged": true
+    },
+    {
+      "id": "case-03-data",
+      "validation": {
+        "valid": true,
+        "errors": [],
+        "warnings": [
+          "profile_hash: the profile has changed since this material was written; check it still holds"
+        ]
+      },
+      "original_build_exit_code": 2,
+      "build_exit_code": 0,
+      "adaptation": {
+        "differences": [
+          {
+            "path": "/job_id",
+            "expected": "job_v22_case_03",
+            "actual": "job_000000220003"
+          }
+        ],
+        "flat_content_unchanged": true,
+        "validation_unchanged": true
+      },
+      "validation_matches": true,
+      "warnings_preserved": true,
+      "problems": [],
+      "pdf_pages": 1,
+      "flat_exact_match": false,
+      "content_comparison": {
+        "expected_order": [
+          "教育经历",
+          "实习经历",
+          "项目经历",
+          "专业技能",
+          "荣誉与证书"
+        ],
+        "actual_order": [
+          "教育经历",
+          "项目经历",
+          "实习经历",
+          "专业技能",
+          "荣誉与证书"
+        ],
+        "missing_sections": [],
+        "extra_sections": [],
+        "sections": {
+          "教育经历": [],
+          "实习经历": [],
+          "项目经历": [],
+          "专业技能": [],
+          "荣誉与证书": []
+        },
+        "header_differences": [
+          {
+            "path": "/intent",
+            "expected": "求职意向：数据分析（实习） · 2027.01.15 起可到岗",
+            "actual": "求职意向：数据分析（实习） · 成都 · 每周 4 天，可实习 5 个月 · 2027.01.15 起可到岗"
+          }
+        ]
+      },
+      "text_layers": {
+        "pdf": {
+          "frozen_field_count": 34,
+          "literal_missing": [
+            "求职意向：数据分析（实习） · 2027.01.15 起可到岗"
+          ],
+          "whitespace_only_missing": [
+            "求职意向：数据分析（实习） · 2027.01.15 起可到岗"
+          ],
+          "actual_content_missing": []
+        },
+        "docx": {
+          "frozen_field_count": 34,
+          "literal_missing": [
+            "求职意向：数据分析（实习） · 2027.01.15 起可到岗"
+          ],
+          "whitespace_only_missing": [
+            "求职意向：数据分析（实习） · 2027.01.15 起可到岗"
+          ],
+          "actual_content_missing": []
+        }
+      },
+      "artifacts_sha256": {
+        "pdf": "333381820085f5a2b824cdcf91ba817f30423e3e0ef3f930ef0c6f513b27a258",
+        "docx": "3716e51b05f258da25bc7fe6f702c675d107e10a74dcaee6be08571148191ee5"
+      },
+      "input_bytes_unchanged": true
+    },
+    {
+      "id": "invalid-material",
+      "validation": {
+        "valid": false,
+        "errors": [
+          "experience[0].bullets[0].text: the number '99' is not in the cited entries (intern-a1); use the figure the profile gives, or ask the user to add it to the profile"
+        ],
+        "warnings": []
+      },
+      "original_build_exit_code": 1,
+      "build_exit_code": 1,
+      "validation_matches": true,
+      "build_error_matches": true,
+      "generated_files": [],
+      "trace_exit_code": 1,
+      "render_call_counts": {
+        "flat": 0,
+        "pdf": 0,
+        "docx": 0
+      },
+      "input_bytes_unchanged": true
+    }
+  ]
+}

@@ -18,11 +18,15 @@
 | [profile.md](profile.md) | 个人档案格式（Profile v1）：字段、来源规则、与 JD 硬性条件的对照 |
 | [profile-setup.md](profile-setup.md) | 建档工作流 cn-setup（Codex 与 Claude Code 共用） |
 | [material.md](material.md) | 求职材料格式（M3-1）：简历材料怎么引用档案条目 id，`material validate` 的检查项 |
+| [review-checklist.md](review-checklist.md) | 中文简历审核清单（A–F，每条有编号）和"起草 + 审核"工作流设计（M3-3） |
+| [review-format.md](review-format.md) | 审核结果格式（M3-3）：`review draft` 机器初稿（技能覆盖、标点和空格警告）、`review validate`、`review show` |
+| [resume-workflow.md](resume-workflow.md) | 生成简历工作流 cn-resume（三个 Agent 共用，M3-3）：起草材料、生成 PDF 和 Word、独立审核（最多 2 轮）、交给用户 |
+| [applications.md](applications.md) | 投递记录（M4-1）：SQLite 数据库、事件和状态表、先预览再写入、投出时归档材料、`application record / submit / status / show / list / validate / export` |
 | [match.md](match.md) | 匹配：评分工作流 cn-match（三个 Agent 共用）；`match filter` 硬性条件过滤（符合 / 冲突 / 未知 及依据）；可解释评分 `match score / validate / save / show / list` 和匹配记录 |
 | [jd-parse.md](jd-parse.md) | `jd parse`：用法、编码处理、各字段能识别的写法、补全流程、防注入检查 |
 | [baseline-report.md](baseline-report.md) | Day 0 环境、测试基线、已知问题与 Windows 兼容性记录 |
 | [oss-privacy-review.md](oss-privacy-review.md) | 开源前隐私审查（2026-10-28）：公开范围、各类扫描结果和处理结论、转为公开前的操作 |
-| [resume-pdf.md](resume-pdf.md) | 生成 PDF 简历：安装 Typst（便携版）、字体、`resume sample`、压成一页和检查 |
+| [resume-pdf.md](resume-pdf.md) | 生成简历：安装 Typst（便携版）、字体、`resume sample`、压成一页和检查；`resume build` 从材料生成 PDF 和 Word 版 |
 | [m2-5-round2-checklist.md](m2-5-round2-checklist.md) | M2-5 第二轮的操作清单：用 cn-setup 补档案的哪几项（薪资分档、可以接受的城市、去外地面试），以及重新导入、重新评分、调权重、出报告的顺序和命令 |
 | [m3-0-resume-prototypes.md](m3-0-resume-prototypes.md) | M3-0 简历生成方式的原型对比（2026-10-30）：三种同时出 Word 和 PDF 的做法、开源简历模板的调研和许可、推荐方案和 M3-2 的检查清单 |
 | [plan/kickoff-guide-v0.1.md](plan/kickoff-guide-v0.1.md) | 原始文件《AI_Job_Search_CN_项目启动指导_v0.1.md》（存档） |
@@ -62,6 +66,9 @@ python -m jobsearch_cn jd list                       # 列出岗位库；jd show
 python -m jobsearch_cn match filter <id>             # 用个人档案过滤一个已保存的岗位（硬性条件）
 python -m jobsearch_cn match report                  # 把已保存的评分生成可读的报告（HTML）和反馈表（CSV），写到 data/reports/
 python -m jobsearch_cn resume sample                 # 用固定的虚构内容生成一页 PDF，验证 Typst 和字体（docs/cn/resume-pdf.md）
+python -m jobsearch_cn material validate resume-1.json   # 对照个人档案检查一份简历材料（docs/cn/material.md）
+python -m jobsearch_cn resume build resume-1.json    # 从检查过的材料生成一页 PDF 和 Word 版，写到 data/resumes/<岗位id>/
+python -m jobsearch_cn application list              # 投递记录；先 --preview 再带 --request-id 写入（docs/cn/applications.md）
 python -m jobsearch_cn profile validate              # 校验 data/profile/ 下的个人档案；profile show 查看（隐去联系方式）
 ```
 

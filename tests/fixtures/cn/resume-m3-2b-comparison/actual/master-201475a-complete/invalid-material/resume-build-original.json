@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "jobsearch_cn",
+    "resume",
+    "build",
+    "<data>\\invalid-material\\materials\\job_v22_invalid\\resume-1.json",
+    "--data-dir",
+    "<data>\\invalid-material",
+    "--typst",
+    "<typst>"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": {
+    "error": "the material is invalid; run material validate",
+    "errors": [
+      "experience[0].bullets[0].text: the number '99' is not in the cited entries (intern-a1); use the figure the profile gives, or ask the user to add it to the profile"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "jobsearch_cn",
+    "resume",
+    "build",
+    "<data>\\case-03-data\\materials\\job_v22_case_03\\resume-1.json",
+    "--data-dir",
+    "<data>\\case-03-data",
+    "--typst",
+    "<typst>"
+  ],
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": {
+    "error": "job_id: 'job_v22_case_03' is not a job id like job_000000000001; the resume goes in a folder named after it"
+  }
+}
