@@ -374,4 +374,4 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--che
 **验证**
 
 - 冒烟：临时数据目录、示例档案，五个岗位（两个被过滤）加一个格式错的文件，`--check`、导入评分、重跑（`scored` 为 0、什么都不改）都符合设计。
-- 相关测试（agent_entry、screen、schema、store 三个、jd_parser、package）251 项通过；`lint_skills`、`security_guards` 通过。全量测试的结果见 PR。
+- 相关测试（agent_entry、screen、schema、store 三个、jd_parser、package）251 项通过；`lint_skills`、`security_guards` 通过。全量测试的结果见 PR #141。
