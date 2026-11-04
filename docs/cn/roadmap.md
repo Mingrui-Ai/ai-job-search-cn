@@ -53,7 +53,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 - [x] #116 实跑（Claude A）：求职意向一行折行时，"起可到岗"会单独落到第二行（`resume build` 的模板），只影响版式。（PR #119，2026-11-03 合并）
 - 沟通草稿引用 `notes.md` 写求职动机：M3-6 第一版不做；M3-5 验收时看用户要不要，再按简介的规则安排。
 - #123 P3（V23 的 a-6 等）：套话警告还没做（冻结场景里 3 项"仅警告"严格比较不通过，已裁定不阻塞）；档案联系方式缺 `contact.wechat` 字段，沟通草稿写不了微信号；到岗日期占位符配"不早于"会被误拦。
-- #127 待办（P2-1 的后续，规划者 2026-11-04 裁定，不在 M3-6 做）：`review validate` 自动发现交付文件是旧版：材料改过、但没重新 `resume build` / `material render --output`，说明文件（`.build.json`）的 `material_hash` 和材料对不上。现在只靠审核者先核对说明文件（#127 加的步骤），要机器检查得让 `review validate` 读数据目录。
+- #127 待办（P2-1 的后续，规划者 2026-11-04 裁定，不在 M3-6 做）：`review validate` 自动发现交付文件是旧版：材料改过、但没重新 `resume build` / `material render --output`，说明文件（`.build.json`）的 `material_hash` 和材料对不上。现在只靠审核者先核对说明文件（#127 加的步骤），要机器检查得让 `review validate` 读数据目录；`review show` 也要核对。两条命令都要加 `--data-dir` 才能读到 `resumes/`、`messages/` 下的说明文件。
 - V24 P3-1（#120 裁定 2）：`resume build` 遇到 OSError 时按项目惯例输出 JSON 错误，不带 traceback 和本机临时路径。
 - #132 P3：`review draft` 的警告说明写得比实际宽：它并不输出 `profile_hash` 当前值的警告。
 - `review.resolve` 把全角数字下标当作下标（例如 `skills[０]`）。
