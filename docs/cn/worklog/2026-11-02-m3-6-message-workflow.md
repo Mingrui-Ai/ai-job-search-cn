@@ -253,3 +253,9 @@ M4-1（投递记录，Claude A）投出时要核对：实际发出的文件，�
 - 第 5 步 `security_guards.py` 注释（批准日期写在注释里），规则未改。
 - 第 6 步手动走一遍（Claude Code，临时数据目录，tech-m3 公开夹具）：`material validate` → `material render --output`（标准输出只有路径、124 字、无警告）→ 派 `cn-resume-reviewer` 子代理审第 1 轮，约 3 分 20 秒，结论 `pass`，一条 E3 建议；子代理按第 5 节给出文件名 `review-greeting-1-r1.json`，`review validate` 通过。发现 `review show` 对沟通草稿写"没有列出"，已改。没走"简历通过后起草邮件"那一遍（要真实 Typst build），G3 和附件句只在文档和清单里覆盖，留给 Codex A 的整条流程验收。子代理提到夹具数据目录里没有匹配记录，这是我没拷，不影响沟通草稿。
 - 待做：#126 合并后改 `applications.py` 的 `--material` 查找（`messages/`）和 `applications.md` §12 的说明。
+- Codex B 审 0faf0ed 的 P2-1：沟通草稿改完以后，第 5 节沿用第 3 节"重新 `resume build`"，它只收简历（退出码 2），`.txt` 和说明文件停在旧版，第 2 轮审核结果却能通过 `review validate`。改法（规划者转告）：
+  - 第 3 节"重新生成"处注明沟通草稿是 `material render --output`；第 5 节加第 6 步"修改"：重新 `material validate`、`material render --output`，新输出交给下一轮。
+  - 第 5 节审核一步加一条：审核者先打开 render 输出里的说明文件，`material_hash` 要等于 `review draft` 给的；不等就不写审核结果，请起草者重新渲染再派这一轮，不算一轮。不打开 `.txt`（邮件签名有联系方式）。清单 G2、审核子代理同步。
+  - `cn-resume` 两份入口和 `AGENTS.md` 各加一句：材料改过以后，重新运行生成文件的命令（简历 `resume build`，沟通草稿 `material render --output`）。
+  - 测试：入口文字（第 5 节"修改"一步的命令、审核一步和子代理提到说明文件、三处入口都写了两个命令）；改材料后 `resume build` 退出码 2、文件不变，重新渲染后说明文件、`.txt` 和第 2 轮审核结果是同一版。
+  - 没加机器检查：`review validate` 不读 `messages/`，也不收 `--data-dir`，要加就得改命令。简历有同样的缺口（改了材料忘了 `resume build`，第 2 轮照样通过），这次没动，回报时问规划者。

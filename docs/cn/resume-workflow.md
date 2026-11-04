@@ -52,11 +52,11 @@
 
 ## 3. 修改和停止
 
-- **通过**：`verdict` 是 `pass`，没有 `必改`，就交给用户。带着 `建议` 通过时，不采纳就原样交，建议列给用户；采纳任何一条都会改材料，这一轮的审核结果随之失效（`review validate` 报 `material_hash`），要重新 `material validate`、`resume build`，再审下一轮，只看这几处改动。已经是第 2 轮的，不再改材料，建议列给用户。
-- **修改**：`必改` 全部处理（照改，或者换个写法解决同一个问题）；`建议` 自己判断，不采纳的记一句理由。会编造内容的意见一律不采纳，交给用户时说明。改完重新 `material validate` 和 `resume build`，再审第 2 轮。材料改过以后，第 1 轮的审核结果 `review validate` 不再通过，这是正常的：第 2 轮审的是当前版本。
+- **通过**：`verdict` 是 `pass`，没有 `必改`，就交给用户。带着 `建议` 通过时，不采纳就原样交，建议列给用户；采纳任何一条都会改材料，这一轮的审核结果随之失效（`review validate` 报 `material_hash`），要重新 `material validate`、`resume build`（沟通草稿是 `material render --output`，见第 5 节），再审下一轮，只看这几处改动。已经是第 2 轮的，不再改材料，建议列给用户。
+- **修改**：`必改` 全部处理（照改，或者换个写法解决同一个问题）；`建议` 自己判断，不采纳的记一句理由。会编造内容的意见一律不采纳，交给用户时说明。改完重新 `material validate` 和 `resume build`（沟通草稿是 `material render --output`），第 2 轮审的是这次生成的新文件。材料改过以后，第 1 轮的审核结果 `review validate` 不再通过，这是正常的：第 2 轮审的是当前版本。
 - **停止**：第 2 轮之后不再循环，还没解决的问题原样列给用户，由用户决定。
 - **材料改不了的必改项**：有的必改项只能靠改档案或改代码解决，改材料改不了（例如渲染出来的意向行、档案里缺的内容）。这时不开第三轮，交给用户时写明"材料改不了的问题"和原因，由用户决定（#120 裁定 4）。
-- **提前停止**：`material validate` 或 `resume build` 有错误、起草者自己改不了时（例如档案缺 id、一页放不下而用户不同意删内容），停下来问用户，不进入审核。
+- **提前停止**：`material validate`、`resume build` 或 `material render` 有错误、起草者自己改不了时（例如档案缺 id、一页放不下而用户不同意删内容），停下来问用户，不进入审核。
 
 ## 4. 交给用户
 
@@ -89,8 +89,10 @@
    - 第一版不引 `notes.md`。
 3. **检查**：`python -m jobsearch_cn material validate data/materials/<岗位id>/<种类>-<n>.json`，有错误就改到通过；警告逐条处理或记下理由（G1）。
 4. **渲染**：`python -m jobsearch_cn material render data/materials/<岗位id>/<种类>-<n>.json --output`。它写 `data/messages/<岗位id>/<种类>-<n>.txt` 和旁边的说明文件 `<种类>-<n>.build.json`（格式见 [applications.md 第 12 节](applications.md#12-resume-build-的说明文件m4-1a-第二部分)），标准输出只有路径、字数和警告。工作流里一律加 `--output`：邮件签名有联系方式，不能打进对话。警告逐条处理（G2）。
-5. **审核**：同第 2 节。派活时给材料路径、岗位 id、轮次、render 的输出和起草者的说明；有简历时也给那份简历材料的路径（G3 要对照）。审核者跑 `material validate` 和 `review draft`（沟通草稿的 `coverage` 是 `[]`，只有标点空格警告），不运行 `material render`。审核结果存为 `data/materials/<岗位id>/review-<种类>-<n>-r<k>.json`，`kind` 是 `<种类>-review`。最多 2 轮，用户明确说不审时按自审记 `self`。
-6. **交给用户**：
+5. **审核**：同第 2 节。派活时给材料路径、岗位 id、轮次、render 的输出和起草者的说明（第 2 轮给第 6 步重新 render 的输出）；有简历时也给那份简历材料的路径（G3 要对照）。审核者跑 `material validate` 和 `review draft`（沟通草稿的 `coverage` 是 `[]`，只有标点空格警告），不运行 `material render`。审核结果存为 `data/materials/<岗位id>/review-<种类>-<n>-r<k>.json`，`kind` 是 `<种类>-review`。最多 2 轮，用户明确说不审时按自审记 `self`。
+   - 审核者先核对审的是新文件：打开 render 输出里的说明文件（`build_note`），它的 `material_hash` 要等于 `review draft` 给的。不相等说明材料改过以后没有重新渲染，`.txt` 还是旧的：这时不写审核结果，请起草者按第 6 步重新渲染，再派这一轮（不算一轮）。`.txt` 不用打开，邮件签名里有联系方式。
+6. **修改**：采纳建议或处理必改项以后（第 3 节），重新运行 `python -m jobsearch_cn material validate data/materials/<岗位id>/<种类>-<n>.json` 和 `python -m jobsearch_cn material render data/materials/<岗位id>/<种类>-<n>.json --output`，把这次 render 的输出交给下一轮审核。不用 `resume build`：它只接受简历，给沟通草稿时退出码 2，`.txt` 和说明文件会停在旧版。审核者照旧不运行 `material render`，最多 2 轮。
+7. **交给用户**：
    - `.txt` 的路径，请用户打开文件复制（Windows 可以用记事本打开）。回复里不贴正文；用户想在对话里看，可以自己运行 `! python -m jobsearch_cn material render <材料>`。
    - 字数；最后一轮审核的摘要（`python -m jobsearch_cn review show <审核结果>`）；没采纳的建议和理由；是不是自审。
    - 邮件要附的简历：那份简历 `resume build` 输出的 PDF 路径，由用户自己附，优先 PDF。

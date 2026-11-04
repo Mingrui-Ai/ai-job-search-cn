@@ -5,9 +5,11 @@ AGENTS.md all point at one document under docs/cn/. These pin that all three
 point there, that every command the document tells an agent to run exists, and
 that each Claude Code skill carries a Bash grant for exactly the command groups
 its document uses, each registered in both permission allowlists. Review
-subagents point at the same document and can neither write nor go online.
+subagents point at the same document and have no Edit, Write or web tools.
 dsh has no per-skill grants (it uses its own permission
-presets), so its entries carry only a name and a description.
+presets), so its entries carry only a name and a description. A changed
+greeting, email or referral is rendered again, not built, before the next
+review round, and every entry says so.
 """
 import contextlib
 import io
@@ -26,7 +28,8 @@ WORKFLOWS = {
     "cn-match": ("docs/cn/match.md", {"match": {"score", "validate", "save", "show", "list", "report"},
                                       "jd": {"list", "show"}, "profile": {"validate", "show"}}),
     "cn-resume": ("docs/cn/resume-workflow.md", {
-        "material": {"validate"}, "resume": {"build"}, "review": {"draft", "validate", "show"},
+        "material": {"validate", "template", "render"}, "resume": {"build"},
+        "review": {"draft", "validate", "show"},
         "jd": {"list", "show"}, "profile": {"validate", "show"}, "match": {"list", "show"}}),
 }
 # Subagents a workflow dispatches: agent name -> the workflow document it follows.
@@ -129,6 +132,34 @@ class ReviewerAgents(unittest.TestCase):
         for agent, _ in self.each():
             tools = next(line for line in frontmatter(agent) if line.startswith("tools:"))
             self.assertEqual({t.strip() for t in tools.split(":", 1)[1].split(",")}, {"Read", "Glob", "Grep", "Bash"})
+
+
+class MessageDrafts(unittest.TestCase):
+    """How a changed greeting, email or referral gets its text again (resume-workflow.md section 5). Codex B on
+    #127 (0faf0ed): section 3 said to rerun resume build, which takes only a CV, so a changed greeting kept its
+    old text file while a round-2 review of the new version still validated."""
+
+    def section(self) -> str:
+        return read(REPO / "docs/cn/resume-workflow.md").split("\n## 5.", 1)[1]
+
+    def test_a_changed_message_is_rendered_again(self):
+        step = re.search(r"^\d+\. \*\*修改\*\*.*$", self.section(), re.M).group(0)
+        self.assertEqual(re.findall(r"python -m jobsearch_cn (\w+ \w+)", step), ["material validate", "material render"])
+        self.assertIn("--output", step)
+
+    def test_the_reviewer_checks_the_text_is_of_this_version(self):
+        step = re.search(r"^\d+\. \*\*审核\*\*.*(?:\n   .*)*", self.section(), re.M).group(0)
+        for text in (step, read(REPO / ".claude" / "agents" / "cn-resume-reviewer.md")):
+            for word in ("build_note", "material_hash", "review draft"):
+                self.assertIn(word, text)
+
+    def test_every_entry_says_to_rerun_what_made_the_files(self):
+        for entry in [REPO / d / "cn-resume" / "SKILL.md" for d in SKILL_DIRS] + [REPO / "AGENTS.md"]:
+            with self.subTest(entry=entry.relative_to(REPO).as_posix()):
+                text = read(entry)
+                body = text.split("---", 2)[2] if entry.name == "SKILL.md" else text
+                for command in ("resume build", "material render --output"):
+                    self.assertIn(command, body)
 
 
 class DshEntryPoints(unittest.TestCase):

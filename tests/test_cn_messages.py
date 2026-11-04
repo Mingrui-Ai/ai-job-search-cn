@@ -652,6 +652,42 @@ class Cli(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertEqual(target.read_text(encoding="utf-8"), "old")
 
+    def test_a_changed_message_is_rendered_again_for_the_next_round(self):
+        # Codex B on #127 (0faf0ed): after a change, the CV's step (resume build) refuses a greeting and leaves
+        # the old text, yet a round-2 review of the new version validates. resume-workflow.md section 5 renders
+        # it again: then the build note, the text and the round-2 review are all of the new version.
+        folder = self.data / "materials" / TECH_JOB["id"]
+        folder.mkdir(parents=True)
+        source = folder / "greeting-1.json"
+        shutil.copy(TECH / "greeting-1.json", source)
+        self.assertEqual(run_cli("material", "render", str(source), "--output", data_dir=self.data).returncode, 0)
+        out = self.data / "messages" / TECH_JOB["id"]
+        before = {name: (out / name).read_bytes() for name in ("greeting-1.txt", "greeting-1.build.json")}
+        changed = with_segment(GREETING, 3, "期待您的回复。")  # the closing
+        source.write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+        self.assertEqual(run_cli("material", "validate", str(source), data_dir=self.data).returncode, 0)
+        self.assertEqual(run_cli("resume", "build", str(source), data_dir=self.data).returncode, 2)
+        self.assertEqual({name: (out / name).read_bytes() for name in before}, before)
+        drafted = json.loads(run_cli("review", "draft", str(source), data_dir=self.data).stdout)
+        # What the reviewer checks first (section 5): the build note is of another version.
+        self.assertNotEqual(json.loads(before["greeting-1.build.json"])["material_hash"], drafted["material_hash"])
+
+        rendered = run_cli("material", "render", str(source), "--output", data_dir=self.data)
+        self.assertEqual(rendered.returncode, 0, rendered.stderr)
+        note = load(Path(json.loads(rendered.stdout)["build_note"]))
+        self.assertEqual(note["material_hash"], drafted["material_hash"])
+        self.assertEqual((out / "greeting-1.txt").read_text(encoding="utf-8"),
+                         f"{messages.render(changed, TECH_PROFILE, TECH_JOB)}\n")
+        second = {"schema_version": 1, "kind": "greeting-review", "job_id": changed["job_id"],
+                  "material": source.name, "material_hash": note["material_hash"], "round": 2,
+                  "mode": "independent", "created": "2026-11-04T10:00:00+08:00", "verdict": "pass",
+                  "findings": [], "coverage": []}
+        (folder / "review-greeting-1-r2.json").write_text(json.dumps(second), encoding="utf-8")
+        validated = subprocess.run([sys.executable, "-X", "utf8", "-m", "jobsearch_cn", "review", "validate",
+                                    str(folder / "review-greeting-1-r2.json")], cwd=REPO, capture_output=True,
+                                   env=dict(os.environ, PYTHONIOENCODING="utf-8"), text=True, encoding="utf-8")
+        self.assertEqual(validated.returncode, 0, validated.stdout + validated.stderr)
+
     def test_render_refuses_a_failing_message_and_a_cv(self):
         bad = run_cli("material", "render", str(self.write(with_segment(GREETING, 3, "我今年 23 岁。"))),
                       data_dir=self.data)
