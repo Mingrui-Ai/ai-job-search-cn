@@ -250,3 +250,24 @@ Read, Bash(python -m jobsearch_cn application:*), Bash(python -m jobsearch_cn jd
   `security_guards.py` 只改了这两处。
 - `docs/cn/README.md` 的索引改了 applications.md 那一行；`resume-workflow.md` 第 4 节加了一句链接（只加链接，没有命令）。
 - `tests/test_cn_agent_entry.py` 的 `WORKFLOWS` 加 `cn-application`：命令组 `application`（12 个命令都要在 applications.md 里出现）和 `jd`（`list`、`show`）。
+
+**第 3 步**（2026-11-04，接手的新会话）：Codex B 首审 9db3287 的四个 P2，都按已接受的规则修，复现写进测试。新测试在 9db3287 上都失败（临时工作树里核对过），修改后通过。V25 对照（#124）30/30 通过，没有新问题。
+
+1. **归档路径能走出备份目录（P2-1）**：
+   - `_archive_parts` 改成白名单：只用 `/` 分隔，每一段只有字母、数字、`_`、`-` 和夹在中间的 `.`，也不能是 Windows 设备名。反斜杠、盘符、`..`、绝对路径、结尾的点、冒号都拒绝，Linux 上也这样判。
+   - 新加 `_archived(目录, 路径)`：再按解析后的真实位置确认文件在这个目录的 `artifacts/` 里，中间的链接、junction 不跟随。
+   - `validate`（`_check_archived`）、`backup` 复制时的源和目标、`validate --backup` 核对清单，都用它。清单里的附件现在也核对大小。
+   - 测试：Codex B 的复现（`artifacts/..\..\` 加标记文件）和另外 10 种写法。`validate` 报错；`backup` 不复制、`source_valid` 为 false、备份目录外没有新文件；`validate --backup` 不通过；这份备份单独恢复到新目录，`validate` 也不通过。另外三项：清单里写越界路径；归档目录换成 junction；正常备份单独恢复到新目录能通过。
+2. **没投出的记录能记回复（P2-2）**：
+   - `reply_received` 的重放规则从"不是 `drafted`"改成"有一条没被作废的 `submitted`"，写入和 `validate` 共用。
+   - 测试：没投就撤回的、投出被作废以后撤回的，预览和提交都报 `transition`；投出以后撤回的能记；直接写进库的这种回复，`validate` 报不能重放。
+   - applications.md 第 4 节改了"已投出"的说法。
+3. **跟进请求隔天重试（P2-3）**：
+   - 日期格式还在开头查；"不能早于今天"挪进 `plan`。`_append` 先查这个 `request_id` 写过没有，再报 `plan` 的拒绝。
+   - 测试：今天固定为 2030-05-01 时写入，改成 05-02 以后，同一请求重试返回第一次的结果；改了内容报 `request_conflict`；新请求报 `invalid`，事件数不变。
+   - applications.md 第 8、13 节写明。
+4. **备份等锁超过 5 秒（P2-4）**：
+   - 原因：`Connection.backup` 遇到锁会自己无限重试，每一步还先等完连接的 5 秒。
+   - 改法：开始备份就定截止时间（打开数据库也算在内）；复制时源连接的 `busy_timeout` 设成 0，每 0.05 秒重试一次；`progress` 回调发现下一次重试会超过截止时间，就报 `busy`。`.tmp/` 删掉，原库不动。
+   - 测试：Codex B 的时机，源库打开以后才有人拿锁。`LOCK_TIMEOUT` 设 0.5 秒，0.5 秒左右报 `busy`。锁 3 秒后由计时器放开，所以没有上限时测试是失败，不会卡住。开始前就有锁的情况另有一项测试。
+   - applications.md 第 9、15 节写明。

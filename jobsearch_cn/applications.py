@@ -21,6 +21,7 @@ import re
 import secrets
 import shutil
 import sqlite3
+import time
 import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -53,7 +54,9 @@ FOLLOWUP_STATUSES = ("applied", "interview", "offer")
 ORIGINS = ("current", "historical")
 ACTORS = ("user", "claude_code", "codex", "dsh")
 SOURCE_KINDS = ("user", "authorized_api")
-LOCK_TIMEOUT = 5.0  # seconds a write waits for another writer before it reports busy
+LOCK_TIMEOUT = 5.0  # seconds a write or a backup waits for another writer before it reports busy
+BACKUP_POLL = 0.05  # seconds a backup sleeps between tries while another program holds the lock
+_SQLITE_BUSY, _SQLITE_LOCKED = 5, 6  # the result codes Connection.backup's progress callback gets for a locked step
 MAX_TEXT = 300
 MAX_PLATFORM = 40
 LOCAL_TZ = timezone(timedelta(hours=8), "Asia/Shanghai")  # no daylight saving, so a fixed offset is exact
@@ -68,6 +71,7 @@ _SENT_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.[A-Za-z0-9]+")
 _MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
 _REVIEW_NAME = re.compile(r"review-([1-9][0-9]{0,5})-r([0-9]+)\.json")
 _BACKUP_NAME = re.compile(r"[0-9]{8}T[0-9]{6}Z(?:-[1-9][0-9]{0,2})?")
+_ARCHIVE_PART = re.compile(r"[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*")  # one part of a recorded archive path
 _EXPORT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}\.json")
 _WINDOWS_RESERVED = {"CON", "PRN", "AUX", "NUL", *(f"COM{n}" for n in range(1, 10)), *(f"LPT{n}" for n in range(1, 10))}
 _CONTACT_LIKE = (
@@ -467,9 +471,12 @@ def _apply(state, event: dict) -> dict:
         if after in TERMINAL or after == "no_response":
             state["next_followup_on"] = None
     elif kind == "reply_received":
-        if state["status"] == "drafted":
-            raise ApplicationError("transition", "a reply comes to an application that was sent; record the "
-                                                 "submission first (submit)", status="drafted")
+        # Sent means a submitted event still stands, not "any status but drafted": drafted -> withdrawn is allowed,
+        # and so is withdrawing once a submission was voided, and neither application was ever sent.
+        if not state["submitted"]:
+            hint = "; record the submission first (submit)" if state["status"] == "drafted" else ""
+            raise ApplicationError("transition", f"a reply comes to an application that was sent, and this one never "
+                                                 f"was{hint}", status=state["status"])
     elif kind in ("note_added", "event_voided"):
         pass  # a note changes nothing; the event a void names is skipped by replay
     elif kind in ("followup_scheduled", "followup_cancelled"):
@@ -1315,7 +1322,9 @@ def _append(data_root, application_id: str, command: str, *, expected_revision, 
 
     plan(events) gets the events as they stood at expected_revision and returns {"event", "warnings"} and, for a
     void, "body" (what joins the request digest) and "show" (what the output adds). The events as of the revision
-    make a retry plan exactly what it planned the first time.
+    make a retry plan exactly what it planned the first time. What plan refuses is raised only after _current, so
+    a retry of a request already written gets its first result even when a check that depends on today
+    (followup's date) would refuse it now.
     """
     paths = Paths(data_root)
     _request_id(preview, request_id)
@@ -1388,13 +1397,16 @@ def followup(data_root, application_id: str, *, expected_revision, due=None, can
     due_on = None
     if due is not None:
         due_on = parse_on(due, "--due")
-        if date.fromisoformat(due_on) < _today():
-            raise _invalid(f"--due {due}: that day has passed (Asia/Shanghai); to follow up now, give today's date")
 
     def plan(events):
         if due_on is None:
             return {"event": {"type": "followup_cancelled", "occurred_at": None, "occurred_on": None, "payload": {}},
                     "warnings": []}
+        # "Not before today" is checked here, not with the format above: _append raises what plan refuses only
+        # after a retry of a request already written has had its first result back, and today moves. The same
+        # request retried the next day returns what it wrote; only a new request is held to the new day.
+        if date.fromisoformat(due_on) < _today():
+            raise _invalid(f"--due {due}: that day has passed (Asia/Shanghai); to follow up now, give today's date")
         return {"event": {"type": "followup_scheduled", "occurred_at": None, "occurred_on": None,
                           "payload": {"due_on": due_on}}, "warnings": []}
     return _append(data_root, application_id, "followup", expected_revision=expected_revision, actor=actor,
@@ -1463,11 +1475,38 @@ def _validate_paths(paths: Paths) -> dict:
 
 
 def _archive_parts(relative):
-    """The parts of a recorded archive path (artifacts/...), or None when it is no such path."""
+    """The parts of a recorded archive path (artifacts/...), or None when it is no such path.
+
+    Only / separates, and every part is a plain name: letters, digits, _ and -, with dots only between them, and
+    no Windows device name. So nothing Windows would read as a separator, a drive, a parent or a stream (\\, C:,
+    .., a trailing dot, a colon) gets through, on any system: one database gets the same verdict everywhere.
+    """
     parts = relative.split("/") if isinstance(relative, str) else []
-    if len(parts) < 2 or parts[0] != "artifacts" or any(part in ("", ".", "..") for part in parts):
+    if len(parts) < 2 or parts[0] != "artifacts" or not all(
+            _ARCHIVE_PART.fullmatch(part) and part.split(".")[0].upper() not in _WINDOWS_RESERVED for part in parts):
         return None
     return parts
+
+
+def _archived(folder: Path, relative) -> tuple:
+    """(folder/relative, None) for a recorded archive path, or (None, why it is refused).
+
+    folder is applications/ or a backup laid out like it. The path must be plain (_archive_parts), and the file
+    it names must still lie inside folder/artifacts once every link or junction on the way is followed. Checking
+    the records, copying them into a backup and checking a backup all go through here, so a recorded path never
+    reads or writes outside its own folder.
+    """
+    parts = _archive_parts(relative)
+    if parts is None:
+        return None, f"archive path {relative!r} is not a plain path under artifacts/"
+    path = folder.joinpath(*parts)
+    try:
+        inside = store._inside(path, folder.resolve() / "artifacts")
+    except (OSError, RuntimeError):  # a link loop
+        inside = False
+    if not inside:
+        return None, f"archive path {relative} leads out of artifacts/ through a link or junction"
+    return path, None
 
 
 def _validate_backup(paths: Paths, name) -> dict:
@@ -1481,7 +1520,8 @@ def _validate_backup(paths: Paths, name) -> dict:
         manifest = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
         database = manifest["database"]
         listed = {item["path"]: item for item in manifest["artifacts"]}
-        if manifest["kind"] != "applications-backup" or not isinstance(database, dict):
+        if manifest["kind"] != "applications-backup" or not isinstance(database, dict) \
+                or not all(isinstance(relative, str) for relative in listed):
             raise ValueError
     except (OSError, ValueError, KeyError, TypeError):
         return {"valid": False, "errors": [f"backup {name}: manifest.json is missing or unreadable"], "warnings": [],
@@ -1494,10 +1534,12 @@ def _validate_backup(paths: Paths, name) -> dict:
         errors.append(f"backup {name}: {DB_NAME} is not the database the manifest records")
     result = _validate_paths(copy) if data is not None else {"errors": [], "warnings": [], "orphans": []}
     for relative, item in sorted(listed.items()):
-        parts = _archive_parts(relative)
-        path = folder.joinpath(*parts) if parts else None
-        if path is None or store._is_link(path) or not path.is_file() \
-                or _sha256(path.read_bytes()) != item.get("sha256"):
+        path, refused = _archived(folder, relative)
+        if refused:
+            errors.append(f"backup {name}: manifest: {refused}")
+            continue
+        copied = path.read_bytes() if path.is_file() and not store._is_link(path) else None
+        if copied is None or _sha256(copied) != item.get("sha256") or len(copied) != item.get("size_bytes"):
             errors.append(f"backup {name}: {relative} is missing or not the file the manifest records")
     errors += result["errors"]
     return {"valid": not errors, "errors": errors, "warnings": result["warnings"], "orphans": result["orphans"],
@@ -1508,6 +1550,7 @@ def backup(data_root) -> dict:
     """application backup: a consistent copy of the database (Connection.backup) and of the archived files it
     records, with manifest.json, in applications/backups/<UTC time>/. It records nothing, so it has no preview."""
     paths = Paths(data_root)
+    deadline = time.monotonic() + LOCK_TIMEOUT  # the whole wait for another program's lock, opening included
     source = _reader(paths)
     if source is None:
         raise ApplicationError("not_found", "there are no application records yet; nothing to back up")
@@ -1522,15 +1565,33 @@ def backup(data_root) -> dict:
         try:
             target = sqlite3.connect(temp / DB_NAME)
             try:
-                source.backup(target)
-            except sqlite3.OperationalError as exc:
-                raise _busy(exc) from None
+                _copy_database(source, target, deadline)
             finally:
                 target.close()
             return _finish_backup(paths, backups, name, temp)
         except BaseException:
             shutil.rmtree(temp, ignore_errors=True)
             raise
+
+
+def _copy_database(source, target, deadline: float) -> None:
+    """source.backup(target), refused as busy rather than waiting past deadline for another program's lock.
+
+    Connection.backup retries a locked step by itself and never gives up, and each step would first sit out the
+    connection's busy timeout, so a lock taken after the source was opened could hold a backup indefinitely.
+    Here a step does not wait (busy_timeout 0), the copy sleeps BACKUP_POLL between tries, and the progress
+    callback, which runs after every step, ends the copy before another try would pass the deadline.
+    """
+    source.execute("PRAGMA busy_timeout = 0")
+
+    def progress(status, remaining, total):
+        if status in (_SQLITE_BUSY, _SQLITE_LOCKED) and time.monotonic() + BACKUP_POLL > deadline:
+            raise ApplicationError("busy", f"another program kept the application records locked for "
+                                           f"{LOCK_TIMEOUT:g} seconds; no backup made. Try again in a moment")
+    try:
+        source.backup(target, progress=progress, sleep=BACKUP_POLL)
+    except sqlite3.OperationalError as exc:
+        raise _busy(exc) from None
 
 
 def backup_name(backups: Path, stamp: str) -> str:
@@ -1554,17 +1615,19 @@ def _finish_backup(paths: Paths, backups: Path, name: str, temp: Path) -> dict:
                   for table in ("applications", "events")}
         user_version = connection.execute("PRAGMA user_version").fetchone()[0]
     for relative in recorded:
-        parts = _archive_parts(relative)
-        if parts is None:
-            warnings.append(f"{relative!r} is not under artifacts/; not copied")
+        source_file, refused = _archived(paths.dir, relative)
+        target = _archived(temp, relative)[0]
+        if refused is None and target is None:
+            refused = f"archive path {relative} leads out of the backup"
+        if refused:
+            warnings.append(f"{refused}; not copied")
             continue
-        source_file = paths.dir.joinpath(*parts)
         if store._is_link(source_file) or not source_file.is_file():
             warnings.append(f"{relative} is missing; not copied")
             continue
         data = source_file.read_bytes()
-        temp.joinpath(*parts[:-1]).mkdir(parents=True, exist_ok=True)
-        _write_verified(temp.joinpath(*parts), data)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        _write_verified(target, data)
         artifacts.append({"path": relative, "sha256": _sha256(data), "size_bytes": len(data)})
     checked = _validate_paths(copy)
     data = copy.db.read_bytes()
@@ -1773,11 +1836,10 @@ def _valid_date(value) -> bool:
 
 
 def _check_archived(paths: Paths, relative, sha256, size, where: str, errors: list, registered: set) -> None:
-    parts = relative.split("/") if isinstance(relative, str) else []
-    if len(parts) < 2 or parts[0] != "artifacts" or any(part in ("", ".", "..") for part in parts):
-        errors.append(f"{where}: archive path {relative!r} is not under artifacts/")
+    path, refused = _archived(paths.dir, relative)
+    if refused:
+        errors.append(f"{where}: {refused}")
         return
-    path = paths.dir.joinpath(*parts)
     registered.add(path.relative_to(paths.dir).as_posix())
     if store._is_link(path) or not path.is_file():
         errors.append(f"{where}: the archived file {relative} is missing")

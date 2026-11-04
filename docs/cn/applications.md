@@ -136,8 +136,10 @@
 | 命令 | 能记的状态 | 不能记时 |
 | --- | --- | --- |
 | `note` | 任何状态，包括 `drafted` 和终结状态 | — |
-| `reply` | 已投出的（`drafted` 以外的任何状态，包括终结状态，例如被拒以后的反馈） | `drafted` 报 `transition`：先 `submit` |
+| `reply` | 已投出的：有一条没被作废的 `submitted`，状态可以是终结状态（例如被拒以后的反馈） | 没投出的报 `transition`：`drafted` 先 `submit`；没投就撤回的 `withdrawn`（包括投出被作废以后再撤回的）不能记 |
 | `followup` | `applied`、`interview`、`offer` | 其他状态报 `transition`；没有跟进日期时 `--cancel` 报 `invalid` |
+
+"已投出"看事件，不看状态：`drafted` 可以直接变成 `withdrawn`，所以 `withdrawn` 不说明投出过。写入和 `validate` 重放时用同一条规则。
 
 收到的回复改了状态（例如面试邀请），只记一条 `status interview --reason 收到面试邀请`，不再另记 `reply`；`reply` 只记状态不变的回复（例如"HR 说下周给结果"）。
 
@@ -197,7 +199,7 @@ python -m jobsearch_cn application backup
 1. `--preview`：只算不写（数据库不存在也不会建），输出要写的事件（`event_id`、`seq`、`recorded_at` 为 null）、新旧状态、要归档的文件和它们的摘要、警告，以及一个新的 `request_id`；
 2. 用户看过、同意以后，同样的参数加 `--request-id <预览给的 id>` 再运行一次，才写入。
 
-同一个 `request_id` 重试（例如没看到输出、不知道写没写成）：内容相同就返回第一次的结果，`repeated` 为 true，不重复写；内容不同（参数、材料或发出文件的字节变了）报 `request_conflict`，要重新预览。
+同一个 `request_id` 重试（例如没看到输出、不知道写没写成）：内容相同就返回第一次的结果，`repeated` 为 true，不重复写；内容不同（参数、材料或发出文件的字节变了）报 `request_conflict`，要重新预览。重试不受日期影响：和"今天"比较的检查（跟进日期不能早于今天）只拦新请求，隔天重试已经写成的请求照样返回第一次的结果。
 
 **输出和退出码**：
 
@@ -222,7 +224,7 @@ python -m jobsearch_cn application backup
 
 ## 9. 几个 Agent 同时写
 
-- 每条命令一个短连接，写入用 `BEGIN IMMEDIATE`，锁最多等 5 秒，超时报 `busy`，不无限等。
+- 每条命令一个短连接，写入用 `BEGIN IMMEDIATE`，锁最多等 5 秒，超时报 `busy`，不无限等。`backup` 也一样（第 15 节）。
 - 改已有投递时，事务里再读一次 `revision`，和 `--expected-revision` 不同就报 `stale_revision`，把别人新写的事件带回来。Agent 要重新读、告诉用户发生了什么，不能自动覆盖。
 - 事务里不等用户、不生成 PDF、不联网。归档文件在事务**之前**写好：先写进 `….tmp/`，每个文件读回核对摘要，再改名成正式目录，然后开事务登记。事务没成功时删掉这次写的归档；进程在中途被杀掉留下的目录，`validate` 列在 `orphans` 里，数据库里没有它，不算投递，用户同意后再删。
 - 第一次写入时建表也在同一个事务里，失败时一起回滚。
@@ -234,6 +236,7 @@ python -m jobsearch_cn application backup
 - 每条投递：id 和字段的格式，事件从 1 连续编号，每条事件的 payload 字段齐全、取值合法，没有发生时间的事件确实没写时间，重放得到的状态、投出时间、跟进日期、渠道、`revision` 和表里存的一致；补录的必须已投出；
 - 作废：每条 `event_voided` 指向本投递里更早的一条事件，那条事件当时是最近一条能作废的（不是 `created`，也不是作废事件），它的 `voided_by` 就是这条作废；一条事件最多被作废一次；
 - 事件引用的材料版本和发出文件都登记了；归档文件都在，字节的 SHA-256 和大小没变；现在的投递投出了，就要有快照记录；
+- 归档路径（`material_files.path`、`snapshots.path`）只能是 `artifacts/` 下的普通路径：只用 `/` 分隔，每一段只有字母、数字、`_`、`-` 和夹在中间的 `.`，不是 Windows 的设备名（`NUL` 等）。反斜杠、盘符、`..`、绝对路径、结尾的点、冒号都不行，在哪个系统上都一样判。文件按解析后的真实位置也要在 `artifacts/` 里，中间经过链接或目录联接（junction）走到外面的算错误，不跟随。`backup` 和 `validate --backup` 用同一条规则（第 15 节）；
 - 请求表里每个 `request_id` 对应的事件确实是它写的；
 - 警告：投出时材料未记录的投递；`materials_check` 为 `mismatch` 或 `unchecked` 的投递（第 12 节）；原因、平台名、回复摘要、备注、作废原因里像手机号、邮箱、链接的文字；
 - `orphans`：`artifacts/` 下没有登记的文件和目录，以及 `backups/` 下没做完的 `<名字>.tmp/`（第 15 节）。
@@ -284,7 +287,7 @@ python -m jobsearch_cn application backup
 
 ## 13. 跟进（`followup` 和 `list --due`）
 
-- `followup <投递id> --due YYYY-MM-DD`：设跟进日期，只到天。日期可以是北京时间的今天或以后，不能是过去（多半是输错了）；"本该上周跟进"就写今天。`--cancel` 取消，没设时报 `invalid`。
+- `followup <投递id> --due YYYY-MM-DD`：设跟进日期，只到天。日期可以是北京时间的今天或以后，不能是过去（多半是输错了）；"本该上周跟进"就写今天。这条只拦新请求：今天写成的请求，明天用同一个 `request_id` 重试，照样返回第一次的结果（第 8 节）。`--cancel` 取消，没设时报 `invalid`。
 - 只用于 `applied`、`interview`、`offer`（第 4 节）。进入终结状态或 `no_response` 时跟进日期清空：`no_response` 是用户说不等了，不再提醒；迟到的回复来了、状态变了，可以再设。
 - `list --due [--as-of 日期]` 输出 `{"as_of", "due", "unset"}`，每项是 `list` 的一行：
   - `due`：状态是那三种、`next_followup_on` 不晚于 `as_of` 的。多一项 `days_overdue`，当天到期为 0。按跟进日期从早到晚排，同一天按 `application_id`。
@@ -311,8 +314,8 @@ python -m jobsearch_cn application backup
 
 `backup` 一步执行，不预览：它不改任何记录。写到 `applications/backups/<UTC 时间 YYYYMMDDTHHMMSSZ>/`，同一秒已经有的加 `-2`、`-3`。里面有：
 
-- `applications.sqlite3`：用 SQLite 的备份接口（`Connection.backup`）做的一致快照；别人正在写时最多等 5 秒，超时报 `busy`。
-- `artifacts/…`：快照里登记的归档文件，相对路径不变。数据库要和它引用的附件一起备份（[#110 §7](m4-0-store-decision.md)），只有清单的话附件丢了就恢复不了。
+- `applications.sqlite3`：用 SQLite 的备份接口（`Connection.backup`）做的一致快照。别人正在写时最多等 5 秒，从开始备份算起（打开数据库也算在内），不管锁是开始前就有、还是复制途中才来；超时报 `busy`，删掉这次的 `.tmp/`，原库不动。
+- `artifacts/…`：快照里登记的归档文件，相对路径不变。数据库要和它引用的附件一起备份（[#110 §7](m4-0-store-decision.md)），只有清单的话附件丢了就恢复不了。只复制路径合第 10 节规则、真实位置在 `artifacts/` 里的文件；不合规则的不复制，给警告，`source_valid` 为 false，备份目录以外什么也不写。
 - `manifest.json`：
 
   ```json
@@ -329,7 +332,7 @@ python -m jobsearch_cn application backup
 
 - 先写进 `<名字>.tmp/`，复制的文件读回核对摘要，写好清单再改名。进程中途被杀留下的 `.tmp/`，由 `validate` 列在 `orphans` 里，用户同意后再删。
 - 没有投递记录时报 `not_found`，什么也不写。
-- `validate --backup <名字>` 只读核对一份备份：清单在；数据库文件和清单记的摘要一样；再对备份目录跑和 `validate` 一样的检查；清单列的每个附件都在、摘要对。
+- `validate --backup <名字>` 只读核对一份备份：清单在；数据库文件和清单记的摘要一样；再对备份目录跑和 `validate` 一样的检查；清单列的每个附件路径也合第 10 节的规则，文件都在，摘要和大小对。
 
 恢复没有命令，手工做：
 

@@ -6,14 +6,19 @@ here is fictional: the public fixtures and temporary data directories of tests/t
 
 import hashlib
 import json
+import shutil
+import sqlite3
 import tempfile
+import threading
+import time
 import unittest
 from datetime import date
 from pathlib import Path
 from unittest import mock
 
 from jobsearch_cn import applications
-from tests.test_cn_applications import Data
+from tests.test_cn_applications import Data, run
+from tests.test_cn_store_links import link
 
 
 class Events(Data):
@@ -43,6 +48,37 @@ class Replies(Events):
         self.assertEqual(self.refused("reply", sent, "--summary", "未来的回复", "--on", "2099-01-01"), (1, "invalid"))
         self.move(sent, "rejected")
         self.assertEqual(self.act("reply", sent, "--summary", "对方给了反馈")["application"]["status"], "rejected")
+
+    def test_a_reply_needs_a_submission_that_stands_not_only_a_status_past_drafted(self):
+        """#126 P2-2: drafted -> withdrawn is allowed, so withdrawn alone does not say the application was sent."""
+        never = self.drafted()
+        self.move(never, "withdrawn", "--reason", "记录错误，没有投出")
+        self.assertEqual(self.refused("reply", never, "--summary", "对方给了反馈"), (1, "transition"))
+        code, _, err = self.cli("reply", never, "--expected-revision", 2, "--summary", "对方给了反馈",
+                                "--request-id", applications.new_id("req"))  # a commit is refused too
+        self.assertEqual((code, err["error"], err["status"]), (1, "transition", "withdrawn"))
+        voided = self.write("record", self.job, "--channel", "email", "--submitted",
+                            "--on", "2026-11-01")["application"]["application_id"]
+        self.act("void", voided, "--reason", "其实没投")
+        self.move(voided, "withdrawn", "--reason", "记错了")
+        self.assertEqual(self.refused("reply", voided, "--summary", "对方给了反馈"), (1, "transition"))
+        sent = self.write("record", self.job, "--channel", "portal", "--submitted",
+                          "--on", "2026-11-01")["application"]["application_id"]
+        self.move(sent, "withdrawn", "--reason", "不想去了")
+        self.assertEqual(self.act("reply", sent, "--summary", "HR 表示理解")["application"]["status"], "withdrawn")
+        code, checked, _ = self.cli("validate")
+        self.assertEqual((code, checked["errors"]), (0, []))
+        self.assertEqual(len(self.show(never)["events"]), 2)
+        with self.connect() as connection:  # validate replays with the same rule
+            connection.execute(
+                "INSERT INTO events (application_id, seq, event_id, request_id, type, occurred_at, occurred_on, "
+                "recorded_at, actor, source_kind, payload, voided_by) VALUES (?, 3, ?, ?, 'reply_received', NULL, "
+                "NULL, '2026-11-04T00:00:00Z', 'user', 'user', ?, NULL)",
+                (never, applications.new_id("evt"), applications.new_id("req"), json.dumps({"summary": "对方给了反馈"})))
+        code, checked, _ = self.cli("validate")
+        self.assertEqual(code, 1)
+        self.assertIn(f"{never}: the events do not replay: a reply comes to an application that was sent",
+                      "\n".join(checked["errors"]))
 
     def test_a_note_goes_on_any_status_and_has_no_date(self):
         drafted = self.drafted()
@@ -92,6 +128,28 @@ class Followups(Events):
         self.assertEqual(self.refused("followup", sent, "--due", "2020-01-01"), (1, "invalid"))
         today = applications._today().isoformat()
         self.assertEqual(self.act("followup", sent, "--due", today)["application"]["next_followup_on"], today)
+
+    def test_the_same_request_retried_the_next_day_returns_what_it_wrote(self):
+        """#126 P2-3: "not before today" holds new requests only; a retry of one already written gets its result."""
+        sent = self.historical()
+        args = ("followup", sent, "--expected-revision", 2, "--due", "2030-05-01")
+        with mock.patch.object(applications, "_today", return_value=date(2030, 5, 1)):
+            code, preview, err = self.cli(*args, "--preview")
+            self.assertEqual(code, 0, err)
+            first = self.cli(*args, "--request-id", preview["request_id"])[1]
+            self.assertEqual(self.cli(*args, "--request-id", preview["request_id"])[1]["repeated"], True)
+        with mock.patch.object(applications, "_today", return_value=date(2030, 5, 2)):
+            code, retry, err = self.cli(*args, "--request-id", preview["request_id"])
+            self.assertEqual((code, retry["repeated"], retry["events"]), (0, True, first["events"]), err)
+            self.assertEqual(retry["application"]["next_followup_on"], "2030-05-01")
+            changed = ("followup", sent, "--expected-revision", 2, "--due", "2030-05-03")
+            code, _, err = self.cli(*changed, "--request-id", preview["request_id"])
+            self.assertEqual((code, err["error"]), (1, "request_conflict"))
+            again = ("followup", sent, "--expected-revision", 3, "--due", "2030-05-01")  # a new request, the next day
+            self.assertEqual(self.cli(*again, "--preview")[2]["error"], "invalid")
+            code, _, err = self.cli(*again, "--request-id", applications.new_id("req"))
+            self.assertEqual((code, err["error"]), (1, "invalid"))
+        self.assertEqual(len(self.show(sent)["events"]), 3)
 
     def test_cancel_needs_a_day_set_and_clears_it(self):
         sent = self.historical()
@@ -273,6 +331,141 @@ class Backups(Events):
         (self.paths.dir / "backups" / "20990101T000000Z.tmp").mkdir(parents=True)
         code, checked, _ = self.cli("validate")
         self.assertEqual((code, checked["orphans"]), (0, ["backups/20990101T000000Z.tmp/"]))
+
+    def restored(self, folder: Path) -> tuple:
+        """(exit code, validate output) once the backup in folder alone is copied into a new data directory, by the
+        manual steps of docs/cn/applications.md §15."""
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        target = Path(directory.name) / "applications"
+        target.mkdir()
+        shutil.copy2(folder / "applications.sqlite3", target)
+        if (folder / "artifacts").is_dir():
+            shutil.copytree(folder / "artifacts", target / "artifacts")
+        code, checked, _ = run("application", "validate", "--data-dir", directory.name)
+        return code, checked
+
+    def test_a_backup_restores_on_its_own_into_a_new_data_directory(self):
+        out, folder = self.backed_up()
+        code, checked = self.restored(folder)
+        self.assertEqual((code, checked["valid"], checked["orphans"]), (0, True, []), checked["errors"])
+
+    # #126 P2-1: Windows also splits on \, starts over at a drive, and drops a trailing dot; none of these may
+    # carry a recorded path out of artifacts/, on any system.
+    ESCAPES = ("artifacts/..\\..\\review-marker.txt", "artifacts\\..\\..\\review-marker.txt",
+               "artifacts/C:review-marker.txt", "artifacts/C:\\review-marker.txt", "artifacts/../../review-marker.txt",
+               "/review-marker.txt", "C:/review-marker.txt", "artifacts/x/sent-1.pdf:stream", "artifacts/x/sent-1.pdf.",
+               "artifacts/x/NUL.pdf", "artifacts//sent-1.pdf")
+
+    def tampered(self, relative: str) -> None:
+        """The sent file's row names relative, with the digest and size of a marker in the data root (Codex B's
+        repro, step 2; only this fictional temporary database is changed)."""
+        marker = self.data / "review-marker.txt"
+        marker.write_bytes(b"fictional review marker\n")
+        with self.connect() as connection:
+            connection.execute("UPDATE material_files SET path = ?, sha256 = ?, size_bytes = ? WHERE file_id = 'sent-1'",
+                               (relative, self.sha(marker), marker.stat().st_size))
+
+    def test_a_path_windows_would_read_out_of_artifacts_is_refused_on_every_system(self):
+        self.write("record", self.job, "--channel", "portal", "--submitted", "--on", "2026-11-02",
+                   "--material", self.material, "--sent", self.pdf)
+        backups = self.paths.dir / "backups"
+        for relative in self.ESCAPES:
+            with self.subTest(relative=relative):
+                self.tampered(relative)
+                refused = f"archive path {relative!r} is not a plain path under artifacts/"
+                code, checked, _ = self.cli("validate")
+                self.assertEqual(code, 1)
+                self.assertIn(refused, "\n".join(checked["errors"]))
+                outside = [item for item in self.files() if not item.startswith("applications/backups")]
+                code, out, err = self.cli("backup")
+                self.assertEqual(code, 0, err)  # the records are kept as they are, and said not to pass
+                self.assertFalse(out["manifest"]["source_valid"])
+                self.assertIn(f"{refused}; not copied", out["warnings"])
+                self.assertNotIn(relative, [item["path"] for item in out["manifest"]["artifacts"]])
+                self.assertEqual([item for item in self.files() if not item.startswith("applications/backups")],
+                                 outside)  # nothing written beside the data, and nothing in backups/ but backups
+                self.assertTrue(all(item.is_dir() and applications._BACKUP_NAME.fullmatch(item.name)
+                                    for item in backups.iterdir()))
+                code, checked, _ = self.cli("validate", "--backup", out["backup"])
+                self.assertEqual((code, checked["valid"]), (1, False))
+                self.assertIn(refused, "\n".join(checked["errors"]))
+                self.assertEqual(self.restored(backups / out["backup"])[0], 1)
+
+    def test_a_manifest_path_out_of_the_backup_is_refused(self):
+        out, folder = self.backed_up()
+        marker = folder.parent / "review-marker.txt"  # where artifacts/..\..\ leads from inside the backup
+        marker.write_bytes(b"fictional review marker\n")
+        manifest = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
+        relative = self.ESCAPES[0]
+        manifest["artifacts"][0] = {"path": relative, "sha256": self.sha(marker), "size_bytes": marker.stat().st_size}
+        (folder / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+        code, checked, _ = self.cli("validate", "--backup", out["backup"])
+        self.assertEqual(code, 1)
+        self.assertIn(f"manifest: archive path {relative!r} is not a plain path under artifacts/",
+                      "\n".join(checked["errors"]))
+
+    def test_an_archive_folder_that_is_a_link_is_not_followed(self):
+        out = self.write("record", self.job, "--channel", "portal", "--submitted", "--on", "2026-11-02",
+                         "--material", self.material, "--sent", self.pdf)
+        [version] = out["application"]["material_versions"]
+        linked = Path(version["files"][0]["path"]).parent.as_posix()  # artifacts/<application>/mv_...
+        moved = self.data / "elsewhere"
+        shutil.move(str(self.paths.dir / linked), str(moved))
+        link(self.paths.dir / linked, moved)  # the same files, reached through a link or junction
+        code, checked, _ = self.cli("validate")
+        self.assertEqual(code, 1)
+        self.assertIn("leads out of artifacts/ through a link or junction", "\n".join(checked["errors"]))
+        code, out, err = self.cli("backup")
+        self.assertEqual((code, out["manifest"]["source_valid"]), (0, False), err)
+        self.assertFalse([item for item in out["manifest"]["artifacts"] if item["path"].startswith(linked + "/")])
+        self.assertFalse((self.paths.dir / "backups" / out["backup"] / linked).exists())
+        self.assertEqual(self.cli("validate", "--backup", out["backup"])[0], 1)
+
+    def test_a_lock_held_before_the_backup_starts_ends_it_as_busy(self):
+        self.historical()
+        holder = sqlite3.connect(self.paths.db, isolation_level=None)
+        self.addCleanup(holder.close)
+        holder.execute("BEGIN EXCLUSIVE")
+        with mock.patch.object(applications, "LOCK_TIMEOUT", 0.3):
+            code, _, err = self.cli("backup")
+        holder.execute("ROLLBACK")
+        self.assertEqual((code, err["error"]), (1, "busy"))
+        self.assertFalse((self.paths.dir / "backups").exists())
+
+    def test_a_lock_taken_after_the_backup_opened_the_records_ends_it_as_busy_in_time(self):
+        """#126 P2-4: Connection.backup retries a locked step without end; the backup gives up at LOCK_TIMEOUT."""
+        self.historical()
+        before = self.sha(self.paths.db)
+        holder = sqlite3.connect(self.paths.db, isolation_level=None, check_same_thread=False)
+        self.addCleanup(holder.close)
+        release = threading.Timer(3.0, holder.execute, ("ROLLBACK",))  # without the limit, the backup waits for it
+        opened = applications._reader
+
+        def reader(paths):  # the records are open, then another program takes the lock (Codex B's timing)
+            connection = opened(paths)
+            if paths.dir == self.paths.dir and not holder.in_transaction:
+                holder.execute("BEGIN EXCLUSIVE")
+            return connection
+        release.start()
+        try:
+            with mock.patch.object(applications, "LOCK_TIMEOUT", 0.5), \
+                    mock.patch.object(applications, "_reader", reader):
+                started = time.monotonic()
+                code, _, err = self.cli("backup")
+                waited = time.monotonic() - started
+        finally:
+            release.cancel()
+            release.join()
+        if holder.in_transaction:
+            holder.execute("ROLLBACK")
+        self.assertEqual(code, 1, "the backup waited until the lock was released")
+        self.assertEqual(err["error"], "busy")
+        self.assertTrue(0.3 <= waited < 2.0, waited)
+        self.assertEqual(list((self.paths.dir / "backups").iterdir()), [])  # its .tmp folder is gone
+        self.assertEqual(self.sha(self.paths.db), before)
+        code, out, err = self.cli("backup")
+        self.assertEqual((code, out["manifest"]["source_valid"]), (0, True), err)
 
 
 if __name__ == "__main__":
