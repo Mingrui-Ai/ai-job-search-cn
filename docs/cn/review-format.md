@@ -51,7 +51,7 @@
 | 字段 | 说明 |
 | --- | --- |
 | `item` | 清单编号，`A1`–`A5`、`B1`–`B6`、`C1`–`C6`、`D1`–`D6`、`E1`–`E6`、`F1`–`F4`、`G1`–`G8`（G 类只用于沟通草稿） |
-| `path` | 问题在材料里的位置，例如 `summary.text`、`experience[0].bullets[1].text`、`skills[2]`，沟通草稿是 `segments[3].text`、`subject.text`；必须能在材料里找到。关于整份材料的问题（例如 D1 页数）写 `null` |
+| `path` | 问题在材料里的位置，例如 `summary.text`、`experience[0].bullets[1].text`、`skills[2]`，沟通草稿是 `segments[3].text`、`subject.text`；必须能在材料里找到。下标只认 ASCII 数字，`skills[１]`（全角）这类写法按找不到的位置报告。关于整份材料的问题（例如 D1 页数）写 `null` |
 | `severity` | `must` 是必改，`suggest` 是建议；界线见 [review-checklist.md §4.3](review-checklist.md#43-审核者读什么输出什么) |
 | `reason` | 理由，不超过 300 字 |
 | `suggestion` | 可以直接替换的新文字，没有就写 `null` |
@@ -75,7 +75,7 @@ python -m jobsearch_cn review validate <审核结果> [--material <材料文件>
 python -m jobsearch_cn review show <审核结果> [--material <材料文件>]
 ```
 
-**`review draft`**：材料要先通过 `material validate`，否则退出码 1。只打印，不写文件，输出：
+**`review draft`**：材料要先通过 `material validate`，否则退出码 1。只打印，不写文件。它只用材料检查的错误，不输出那里的警告（例如档案改过、`profile_hash` 和现在的不同），这些看 `material validate` 的输出。输出：
 
 - `material_hash`：写进审核结果的摘要；
 - `job_found`：岗位库里有没有这个岗位；

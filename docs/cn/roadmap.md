@@ -57,7 +57,9 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 - #127 P2-1 的后续（规划者 2026-11-04 裁定，不在 M3-6 做）：`review validate` 发现旧文件。材料改了没重新 `resume build` 或 `material render --output` 时，第 2 轮的审核结果照样能通过；现在靠审核者先核对说明文件的 `material_hash`（resume-workflow.md 第 2、5 节）。可以让 `review validate`、`review show` 也核对 `resumes/`、`messages/` 下的说明文件，这要给两条命令加 `--data-dir`。
 - #123 P3（V23 的 a-6 等）：套话警告还没做（冻结场景里 3 项"仅警告"严格比较不通过，已裁定不阻塞）；档案联系方式缺 `contact.wechat` 字段，沟通草稿写不了微信号；到岗日期占位符配"不早于"会被误拦。
 - #127 待办：`review validate` 自动发现交付文件是旧版：材料改过、但没重新 `resume build` / `material render --output`，说明文件（`.build.json`）的 `material_hash` 和材料对不上。现在只靠审核者先核对说明文件（#127 加的步骤），要机器检查得让 `review validate` 读数据目录。
-- V24 P3-1（#120 裁定 2）：`resume build` 遇到 OSError 时按项目惯例输出 JSON 错误，不带 traceback 和本机临时路径。
+- [x] V24 P3-1（#120 裁定 2）：`resume build` 遇到 OSError 时按项目惯例输出 JSON 错误，不带 traceback 和本机临时路径。（fix/cn-m3-resume-p3：临时目录、PDF、Word、说明文件、数据目录下的文件夹，写不了都输出 `{"error": …}`、退出码 1，只写文件名和系统给的原因）
+- [x] #132 工作记录"看到但没做"：`review.resolve` 把全角数字（`skills[１]`）和其他 Unicode 数字当作下标。改成只认 ASCII 数字，其余按不存在的位置报告。（fix/cn-m3-resume-p3）
+- [x] #132 P3-1：说明里写 `review draft` 也给档案改过的警告（附当前 `profile_hash`），实际不输出。改说明，不改命令。（fix/cn-m3-resume-p3）
 - 2026-11-02：Claude C 在整理自己代码里的三项（#111 P3-1、#115 P3、上面的折行），准备一个小 PR，等审核队列空出来再开。
 
 ## 2. 收尾与维护

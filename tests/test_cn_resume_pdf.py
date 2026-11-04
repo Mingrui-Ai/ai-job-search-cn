@@ -368,10 +368,13 @@ class ReplaceOutput(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / "sample.pdf"
             output.write_bytes(b"old")
+            full = OSError(28, "No space left on device", str(Path(temp) / ".tmp-x.pdf"))
             with faked_typst(pdf_with_pages(1)), \
-                    mock.patch.object(resume_pdf.os, "replace", side_effect=OSError("disk full")) as replace:
-                with self.assertRaises(OSError):
+                    mock.patch.object(resume_pdf.os, "replace", side_effect=full) as replace:
+                # V24 P3-1: a ResumeError, which the commands print as JSON; the reason without the path.
+                with self.assertRaises(resume_pdf.ResumeError) as raised:
                     resume_pdf.render(resume_pdf.sample(), output)
+            self.assertEqual(str(raised.exception), "写不了 sample.pdf（No space left on device）")
             self.assertEqual(output.read_bytes(), b"old")
             self.assertEqual(os.listdir(temp), ["sample.pdf"])
             # Beside the output, inside the folder safe_dir checked, so the rename stays on one disk.

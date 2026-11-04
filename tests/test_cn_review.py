@@ -148,6 +148,16 @@ class Validate(unittest.TestCase):
         self.assertTrue(error.endswith("…' is not a place in the material"), error)
         self.assertLess(len(error), 200)
 
+    def test_only_ascii_digits_are_an_index(self):
+        # int() reads full-width, Arabic-Indic and other Unicode digits; a path names a place by ASCII only.
+        self.assertTrue(review.resolve(MATERIAL, "skills[1]"))
+        for path in ("skills[１]", "skills[١]", "skills[۱]", "skills[१]", "experience[０].bullets[0].text",
+                     "experience[0].bullets[０].text"):
+            self.assertFalse(review.resolve(MATERIAL, path), path)
+        data = make_review()
+        data["findings"][0]["path"] = "skills[１]"
+        self.assertEqual(errors_of(data), ["findings[0].path: 'skills[１]' is not a place in the material"])
+
     def test_a_review_of_an_older_material_fails(self):
         changed = copy.deepcopy(MATERIAL)
         changed["skills"].pop()
@@ -385,6 +395,19 @@ class Command(unittest.TestCase):
         broken["skills"].append("Rust")
         self.material.write_text(json.dumps(broken), encoding="utf-8")
         self.assertEqual(run_cli("review", "draft", str(self.material), data_dir=self.data).returncode, 1)
+
+    def test_draft_gives_no_warnings_of_the_material_check(self):
+        # #132 P3-1: review draft runs material validate's check only for its errors. A changed profile is
+        # warned of by material validate, which the reviewer runs too, and review draft prints none of it.
+        self.material.write_text(json.dumps({**MATERIAL, "profile_hash": "0" * 64}, ensure_ascii=False),
+                                 encoding="utf-8")
+        checked = run_cli("material", "validate", str(self.material), data_dir=self.data)
+        self.assertEqual(checked.returncode, 0, checked.stderr.decode("utf-8"))
+        self.assertTrue(any(warning.startswith("profile_hash: ") for warning in json.loads(checked.stdout)["warnings"]))
+        proc = run_cli("review", "draft", str(self.material), data_dir=self.data)
+        self.assertEqual((proc.returncode, proc.stderr), (0, b""))
+        self.assertEqual(list(json.loads(proc.stdout)), ["material_hash", "job_found", "coverage", "style"])
+        self.assertNotIn(b"profile_hash", proc.stdout)
 
     def test_validate_finds_the_material_next_to_the_review(self):
         self.write_review(make_review())

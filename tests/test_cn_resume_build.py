@@ -298,6 +298,65 @@ class Command(unittest.TestCase):
         self.assertIsNone(cli._write_build_note(self.folder, "resume-3", MATERIAL, {}, (self.folder / "resume-3.pdf",)))
         self.assertFalse((self.folder / "resume-3.build.json").exists())
 
+    def assert_json_error_without_path(self, code, out, err, *hidden):
+        """V24 P3-1: a failed write is one JSON error on stderr, exit 1, with no traceback and no path."""
+        self.assertEqual((code, out), (1, ""))
+        error = json.loads(err)["error"]
+        self.assertNotIn("Traceback", err)
+        for text in hidden:
+            self.assertNotIn(text, err)
+        return error
+
+    def test_a_temporary_folder_that_cannot_be_made_is_a_json_error_without_its_path(self):
+        # V24: in Codex's Windows sandbox, making build/ inside the temporary directory gave WinError 5.
+        temp = str(Path(tempfile.gettempdir()) / "jobsearch-cn-resume-x1" / "build")
+        denied = PermissionError(13, "拒绝访问。", temp)
+        for target in ("_build_folder", "_compile"):
+            with self.subTest(failing=target), faked_typst(pdf_with_pages(1)), \
+                    mock.patch.object(resume_pdf, target, side_effect=denied):
+                error = self.assert_json_error_without_path(*self.run_cli(self.write_material()),
+                                                            temp, "jobsearch-cn-resume-", tempfile.gettempdir())
+                self.assertIn("临时目录", error)
+                self.assertIn("拒绝访问。", error)
+                self.assertEqual(os.listdir(self.folder), [])
+
+    def test_a_copy_of_the_template_that_fails_shows_no_paths(self):
+        # shutil.Error is an OSError whose only content is the paths that failed.
+        failed = shutil.Error([(str(resume_pdf.TEMPLATE), "C:/Users/someone/AppData/Local/Temp/x", "denied")])
+        with faked_typst(pdf_with_pages(1)), mock.patch.object(resume_pdf.shutil, "copytree", side_effect=failed):
+            error = self.assert_json_error_without_path(*self.run_cli(self.write_material()), "someone", "AppData")
+        self.assertIn("（Error）", error)
+
+    @unittest.skipUnless(sys.platform == "win32", "only Windows sets winerror")
+    def test_the_windows_error_number_is_kept_for_the_workflow_note(self):
+        # resume-workflow.md section 2 tells Codex what to do on WinError 5; the number names no path.
+        denied = OSError(None, "拒绝访问。", str(Path(tempfile.gettempdir()) / "jobsearch-cn-resume-x1" / "build"), 5)
+        with faked_typst(pdf_with_pages(1)), mock.patch.object(resume_pdf, "_build_folder", side_effect=denied):
+            error = self.assert_json_error_without_path(*self.run_cli(self.write_material()), "jobsearch-cn-resume-")
+        self.assertIn("（[WinError 5] 拒绝访问。）", error)
+
+    def test_an_output_that_cannot_be_written_is_a_json_error_naming_only_the_file(self):
+        # A folder where a file should go: a real failed write (WinError 5 on Windows, EISDIR elsewhere).
+        path = self.write_material()
+        for name in ("resume-2.pdf", "resume-2.docx", "resume-2.build.json"):
+            shutil.rmtree(self.root, ignore_errors=True)
+            (self.folder / name).mkdir(parents=True)
+            with self.subTest(failing=name), faked_typst(pdf_with_pages(1)), \
+                    mock.patch.object(resume_pdf, "check", return_value=[]), \
+                    mock.patch.object(resume_docx, "check", return_value=[]), \
+                    mock.patch.object(resume_docx, "same_text", return_value=[]):
+                error = self.assert_json_error_without_path(*self.run_cli(path), str(self.root), str(self.temp))
+                self.assertTrue(error.startswith(("写不了 resume-2.pdf（", f"cannot write {name}: ")), error)
+                self.assertIn(name, error)
+                self.assertEqual([entry for entry in os.listdir(self.folder) if entry.startswith(".tmp-")], [])
+
+    def test_a_data_folder_that_cannot_be_made_is_a_json_error(self):
+        self.root.mkdir()
+        (self.root / "resumes").write_text("a file where the folder goes", encoding="utf-8")
+        error = self.assert_json_error_without_path(*self.run_cli(self.write_material()), str(self.root))
+        self.assertTrue(error.startswith(f"cannot make the folder resumes/{MATERIAL['job_id']} in the data directory: "),
+                        error)
+
     def test_problems_in_either_file_fail_the_command(self):
         with faked_typst(pdf_with_pages(1)), mock.patch.object(resume_pdf, "check", return_value=["PDF 有问题"]), \
                 mock.patch.object(resume_docx, "check", return_value=["Word 版有问题"]):
