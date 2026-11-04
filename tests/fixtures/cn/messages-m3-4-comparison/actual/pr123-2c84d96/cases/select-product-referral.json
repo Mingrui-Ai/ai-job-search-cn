@@ -1,0 +1,35 @@
+{
+  "id": "select-product-referral",
+  "setup": [
+    {
+      "argv": "profile validate --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "jd save <data>\\job-input.json --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002303\",\n      \"title\": \"产品需求实习生\",\n      \"company\": \"示例留出丙公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "commands": [
+    {
+      "argv": "material template job_000000002303 --kind referral --direction product --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"job_id\": \"job_000000002303\",\n  \"direction\": \"product\",\n  \"label\": \"产品\",\n  \"reason\": \"按 --direction 指定\",\n  \"kind\": \"referral\",\n  \"template\": \"product/referral@1\",\n  \"spec\": {\n    \"max_chars\": 300,\n    \"slots\": [\n      {\n        \"slot\": \"opening\",\n        \"required\": true,\n        \"hint\": \"称呼加寒暄，说明自己是谁、怎么认识的（不要编造关系）\"\n      },\n      {\n        \"slot\": \"ask\",\n        \"required\": true,\n        \"hint\": \"想请对方内推哪个岗位（{job.company} 的 {job.title}）\"\n      },\n      {\n        \"slot\": \"evidence\",\n        \"required\": true,\n        \"max\": 2,\n        \"prefer\": [\n          \"internship\",\n          \"project\",\n          \"campus\"\n        ],\n        \"hint\": \"一两条最相关的经历，让对方好向团队介绍\"\n      },\n      {\n        \"slot\": \"closing\",\n        \"required\": true,\n        \"hint\": \"说明会发简历、不方便也没关系，表示感谢\"\n      }\n    ],\n    \"examples\": [\n      \"学姐好，我想请您帮忙内推{job.company}的{job.title}岗位。\"\n    ]\n  }\n}\n",
+      "stderr": ""
+    }
+  ],
+  "judgement": {
+    "expected": "accept",
+    "actual": "accept",
+    "pass": true,
+    "problems": [],
+    "template": "product/referral@1",
+    "direction": "product",
+    "reason": "按 --direction 指定"
+  },
+  "setup_ok": true
+}

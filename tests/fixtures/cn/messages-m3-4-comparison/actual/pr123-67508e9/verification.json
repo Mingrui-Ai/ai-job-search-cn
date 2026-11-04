@@ -1,0 +1,12 @@
+{
+  "implementation": "67508e9a4c06b0b5ae8e2521934b5dd1c57db7b9",
+  "frozen_oracle_before_after_identical": true,
+  "frozen_setup_successful": 75,
+  "builtin_template_controls_consistent": 45,
+  "original_probes_same_exit_vectors": 40,
+  "previous_probe_materials_unchanged": 58,
+  "previous_33_expectations_unchanged": 33,
+  "explicit_accepted_with_exact_render": 10,
+  "explicit_rejected_with_identical_validate_render_errors": 37,
+  "json_files_parsed_before_this_audit": 79
+}

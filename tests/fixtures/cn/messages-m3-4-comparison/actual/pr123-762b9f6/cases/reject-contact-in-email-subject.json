@@ -1,0 +1,77 @@
+{
+  "id": "reject-contact-in-email-subject",
+  "setup": [
+    {
+      "argv": "profile validate --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "jd save <data>\\job-input.json --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "material": {
+    "schema_version": 1,
+    "kind": "email",
+    "job_id": "job_000000002301",
+    "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+    "created": "2026-11-01T08:00:00+08:00",
+    "direction": "tech",
+    "template": "tech/email@1",
+    "subject": {
+      "text": "联系 v23-tech@example.invalid",
+      "refs": []
+    },
+    "segments": [
+      {
+        "slot": "body",
+        "text": "您好，烦请查看申请材料。",
+        "refs": []
+      }
+    ]
+  },
+  "commands": [
+    {
+      "argv": "material validate <data>\\email-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"subject.text: a phone number or email typed by hand; use {contact.phone} or {contact.email} in an email's signature segment\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "material render <data>\\email-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"subject.text: a phone number or email typed by hand; use {contact.phone} or {contact.email} in an email's signature segment\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "material validate <data>\\email-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"subject.text: a phone number or email typed by hand; use {contact.phone} or {contact.email} in an email's signature segment\",\n    \"segments: the required 'salutation' segment is missing\",\n    \"segments: the required 'evidence' segment is missing\",\n    \"segments: the required 'closing' segment is missing\",\n    \"segments: the required 'signature' segment is missing\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "judgement": {
+    "expected": "reject",
+    "actual": "reject",
+    "pass": true,
+    "problems": [],
+    "error_categories": [
+      "handwritten_contact"
+    ],
+    "warning_categories": [],
+    "errors": [
+      "subject.text: a phone number or email typed by hand; use {contact.phone} or {contact.email} in an email's signature segment"
+    ],
+    "warnings": [],
+    "rendered_codepoints": {},
+    "final_text_matches": null,
+    "offending_text": "v23-tech@example.invalid",
+    "offending_text_quoted_in_errors": false,
+    "builtin_template_control_same_errors": true
+  },
+  "setup_ok": true
+}

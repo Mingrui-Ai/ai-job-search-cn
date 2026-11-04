@@ -1,0 +1,51 @@
+{
+  "mapping_version": 2,
+  "implementation": "PR #123 at 762b9f62e95e78915bcb9cd6669d0ec13de26549, docs/cn/material.md section 7",
+  "operations": {
+    "select_template": "material template <job_id> --kind <kind> --direction <requested_direction> --data-dir <data>",
+    "validate_candidate": "material validate <file> --data-dir <data>, then material render <file> --data-dir <data>"
+  },
+  "placeholders": {
+    "job:/title": {"placeholder": "{job.title}", "ref": "job"},
+    "profile:/contact/name": {"placeholder": "{contact.name}", "ref": null},
+    "profile:/contact/email": {"placeholder": "{contact.email}", "ref": null},
+    "profile:/availability/start_date": {"placeholder": "{availability.start_date}", "ref": "availability"},
+    "profile:/availability/days_per_week": {"placeholder": "{availability.days_per_week}", "ref": "availability"},
+    "profile:/availability/months": {"placeholder": "{availability.months}", "ref": "availability"},
+    "profile:/experience/0/bullets/0": {"inline": true, "ref": null}
+  },
+  "unbound_placeholder_rule": "{{name}} with no slot becomes {name}, the PR's grammar; the same rewrite applies to the placeholder inside an overridden job title",
+  "single_slot_template": {
+    "why": "A frozen candidate is one body; the built-in templates require several slots. Each case gets a user template (a published extension point) with the same direction, revision and limits as the built-in one, and only these slots.",
+    "slots": {
+      "greeting": ["body"],
+      "email": ["body", "signature"],
+      "referral": ["body"]
+    }
+  },
+  "signature_splits": {
+    "valid-contact-from-profile": [
+      {"slot": "body", "text": "您好，我是{{contact_name}}，希望了解岗位工作。"},
+      {"slot": "signature", "text": "联系邮箱：{{contact_email}}。"}
+    ],
+    "reject-mixed-contact-reference-and-literal": [
+      {"slot": "body", "text": "您好，"},
+      {"slot": "signature", "text": "邮箱：{{contact_email}}，另一个邮箱是 v23-alt@example.invalid。"}
+    ]
+  },
+  "error_categories": {
+    "length_exceeded": "characters once filled; the limit",
+    "unfilled_placeholder": "is not a placeholder|no profile entry with id|a job placeholder is|has no \\w+$|模板标记没有替换|once filled it still has a brace",
+    "handwritten_contact": "typed by hand|手写了微信号、QQ 号这类联系方式",
+    "sensitive_personal_information": "敏感个人信息",
+    "fabricated_number": "the number .* is not in what it cites",
+    "fabricated_skill": "the skill .* is neither",
+    "unsupported_availability": "commits to a start date|promises when you can start|availability\\.(?:start_date|days_per_week|months)|write (?:days a week|months) in Arabic digits"
+  },
+  "warning_categories": {
+    "cliche": "套话",
+    "salary_in_referral": "内推请求里提薪资"
+  },
+  "must_be_reported_on_subject": ["reject-unfilled-email-subject", "reject-contact-in-email-subject"],
+  "date_rendering": "profile 2026-12-07 renders as 2026年12月7日 (material.md 7.1); the final-text check applies this one rewrite"
+}

@@ -1,0 +1,76 @@
+{
+  "id": "reject-availability-more-days",
+  "setup": [
+    {
+      "argv": "profile validate --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "jd save <data>\\job-input.json --data-dir <data>",
+      "exit": 0,
+      "stdout": "{\n  \"saved\": [\n    {\n      \"action\": \"created\",\n      \"id\": \"job_000000002301\",\n      \"title\": \"后端检索实习生\",\n      \"company\": \"示例留出甲公司\",\n      \"cities\": [\n        \"广州\"\n      ],\n      \"status\": \"new\"\n    }\n  ],\n  \"invalid\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "material": {
+    "schema_version": 1,
+    "kind": "referral",
+    "job_id": "job_000000002301",
+    "profile_hash": "c90d57b8ead3d6b49880ee7a2bd1febbc1d2bc2facf6db2a96365abb02afe620",
+    "created": "2026-11-01T08:00:00+08:00",
+    "direction": "tech",
+    "template": "tech/referral@1",
+    "subject": null,
+    "segments": [
+      {
+        "slot": "body",
+        "text": "您好，我每周可以到岗 5 天，烦请告知申请方式。",
+        "refs": []
+      }
+    ]
+  },
+  "commands": [
+    {
+      "argv": "material validate <data>\\referral-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '5' is not in what it cites (nothing); use the figure the profile gives, or ask the user to add it to the profile\",\n    \"segments[0].text: commits to a start date, days a week or a length of stay without citing 'availability'; write what the profile's availability says, and cite it\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "material render <data>\\referral-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '5' is not in what it cites (nothing); use the figure the profile gives, or ask the user to add it to the profile\",\n    \"segments[0].text: commits to a start date, days a week or a length of stay without citing 'availability'; write what the profile's availability says, and cite it\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": "material validate <data>\\referral-1.json --data-dir <data>",
+      "exit": 1,
+      "stdout": "{\n  \"valid\": false,\n  \"errors\": [\n    \"segments[0].text: the number '5' is not in what it cites (nothing); use the figure the profile gives, or ask the user to add it to the profile\",\n    \"segments[0].text: commits to a start date, days a week or a length of stay without citing 'availability'; write what the profile's availability says, and cite it\",\n    \"segments: the required 'ask' segment is missing\",\n    \"segments: the required 'evidence' segment is missing\",\n    \"segments: the required 'closing' segment is missing\"\n  ],\n  \"warnings\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "judgement": {
+    "expected": "reject",
+    "actual": "reject",
+    "pass": true,
+    "problems": [],
+    "error_categories": [
+      "fabricated_number",
+      "unsupported_availability"
+    ],
+    "warning_categories": [],
+    "errors": [
+      "segments[0].text: the number '5' is not in what it cites (nothing); use the figure the profile gives, or ask the user to add it to the profile",
+      "segments[0].text: commits to a start date, days a week or a length of stay without citing 'availability'; write what the profile's availability says, and cite it"
+    ],
+    "warnings": [],
+    "rendered_codepoints": {},
+    "final_text_matches": null,
+    "offending_text": "5 天",
+    "offending_text_quoted_in_errors": false,
+    "builtin_template_control_same_errors": true
+  },
+  "setup_ok": true
+}

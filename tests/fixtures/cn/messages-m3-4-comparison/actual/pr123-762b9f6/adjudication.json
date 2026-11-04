@@ -1,0 +1,562 @@
+{
+  "implementation": "762b9f62e95e78915bcb9cd6669d0ec13de26549",
+  "rulings": [
+    "https://github.com/Mingrui-Ai/ai-job-search-cn/pull/123#issuecomment-6608844037",
+    "https://github.com/Mingrui-Ai/ai-job-search-cn/pull/123#issuecomment-6609267907",
+    "https://github.com/Mingrui-Ai/ai-job-search-cn/pull/123#issuecomment-6622522832"
+  ],
+  "frozen_total": 75,
+  "strict_passed": 72,
+  "ruling_passed": 75,
+  "deferred_a6_cases": [
+    "warn-cliche-greeting",
+    "warn-cliche-email",
+    "warn-referral-salary-and-cliche"
+  ],
+  "probe_total": 73,
+  "added_ruling_probe_total": 33,
+  "added_ruling_probe_passed": 28,
+  "added_ruling_probe_failures": [
+    "r-date-mixed-placeholder",
+    "r-days-at-least-equal",
+    "r-days-above-equal",
+    "r-months-at-least-equal",
+    "r-months-above-equal"
+  ],
+  "scope": "Probe results are separate from the 75 frozen cases; passing those cases alone is not overall acceptance.",
+  "cases": [
+    {
+      "id": "select-tech-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-tech-email",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-tech-referral",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-data-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-data-email",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-data-referral",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-product-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-product-email",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-product-referral",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-ops-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-ops-email",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-ops-referral",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-default-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-default-email",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-default-referral",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-design-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-design-email",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-design-referral",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-market-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-market-email",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-market-referral",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-finance-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-finance-email",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-finance-referral",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-hr-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-hr-email",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-hr-referral",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-general-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-general-email",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "select-general-referral",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-greeting_body-149",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-greeting_body-150",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-greeting_body-151",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-email_subject-39",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-email_subject-40",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-email_subject-41",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-email_body-599",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-email_body-600",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-email_body-601",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-referral_body-299",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-referral_body-300",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-referral_body-301",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "length-greeting-mixed-han-ascii",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "valid-supported-number",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "valid-supported-skill",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "valid-contact-from-profile",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "valid-recorded-availability",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "valid-unknown-availability-omitted",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "valid-supported-fact-slot",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-unfilled-greeting",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-unfilled-email-subject",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-unfilled-after-substitution",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-literal-email-equals-profile",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-literal-phone",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-literal-wechat",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-mixed-contact-reference-and-literal",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-contact-in-email-subject",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-sensitive-id",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-sensitive-home-address",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-sensitive-marital",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-sensitive-health",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-sensitive-birthday",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-invented-arabic-number",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-invented-chinese-number",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-number-borrowed-from-job",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-skill-only-in-job",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-skill-absent-everywhere",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-availability-unknown",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-availability-earlier-date",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-availability-more-days",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "reject-availability-more-months",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "warn-cliche-greeting",
+      "strict_pass": false,
+      "ruling_pass": true,
+      "deferred_a6": [
+        "expected warn, got accept",
+        "missing required warning: ['cliche']"
+      ],
+      "remaining_problems": []
+    },
+    {
+      "id": "warn-cliche-email",
+      "strict_pass": false,
+      "ruling_pass": true,
+      "deferred_a6": [
+        "expected warn, got accept",
+        "missing required warning: ['cliche']"
+      ],
+      "remaining_problems": []
+    },
+    {
+      "id": "warn-referral-salary",
+      "strict_pass": true,
+      "ruling_pass": true,
+      "deferred_a6": [],
+      "remaining_problems": []
+    },
+    {
+      "id": "warn-referral-salary-and-cliche",
+      "strict_pass": false,
+      "ruling_pass": true,
+      "deferred_a6": [
+        "missing required warning: ['cliche']"
+      ],
+      "remaining_problems": []
+    }
+  ]
+}

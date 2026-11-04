@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "contact": {
+    "name": "示例候选乙",
+    "phone": "00000000000",
+    "email": "v23-data@example.invalid",
+    "github": null,
+    "website": null
+  },
+  "graduation": {
+    "year": 2027,
+    "month": 6
+  },
+  "education": [
+    {
+      "id": "edu-v23",
+      "level": "bachelor",
+      "school": "示例留出测试大学",
+      "major": "统计学",
+      "start": "2023-09",
+      "end": "2027-06",
+      "gpa": null,
+      "rank": null,
+      "courses": [],
+      "source": "resume.txt"
+    }
+  ],
+  "availability": {
+    "start_date": null,
+    "days_per_week": null,
+    "months": null,
+    "cities": [
+      "广州"
+    ],
+    "acceptable_cities": [],
+    "remote_ok": false,
+    "relocate": false,
+    "interview_travel": null
+  },
+  "target": {
+    "employment_types": [
+      "internship"
+    ],
+    "roles": [
+      "数据清洗实习生"
+    ],
+    "industries": [],
+    "salary_min": null,
+    "salary_ideal": null,
+    "salary_step": null,
+    "meal_value": null,
+    "salary_days_per_week": null,
+    "one_meal_points": null,
+    "directions": [
+      "data"
+    ],
+    "weights": null
+  },
+  "skills": [
+    {
+      "name": "SQL",
+      "level": "working",
+      "used_in": [
+        "proj-v23"
+      ],
+      "source": "resume.txt"
+    }
+  ],
+  "experience": [
+    {
+      "id": "proj-v23",
+      "type": "project",
+      "name": "虚构表格核对项目",
+      "org": null,
+      "role": "记录整理成员",
+      "start": "2026-04",
+      "end": "2026-07",
+      "bullets": [
+        "用 SQL 核对了 6 类数据字段。"
+      ],
+      "source": "resume.txt"
+    }
+  ],
+  "awards": [],
+  "certificates": [],
+  "languages": [],
+  "exclusions": {
+    "cities": [],
+    "companies": [],
+    "keywords": []
+  }
+}
