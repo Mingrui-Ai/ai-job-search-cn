@@ -476,7 +476,12 @@ def cmd_material_render(args) -> int:
         raise InputError(f"{output} is a link; nothing is written through it")
     resume_pdf._replace(output, f"{text}\n".encode("utf-8"))
     note = _write_build_note(directory, named.group(1), record, data, (output,), "message-build")
-    _emit({"text": str(output), "chars": len(text), "warnings": warnings, "build_note": str(note)})
+    # chars is counted as the length limit counts it (material.md 7.3), and max_chars is that limit, so the
+    # two can be shown side by side: not the .txt, whose 标题： line and line breaks the limit leaves out (#133).
+    templates, _ = _message_files(args)
+    _emit({"text": str(output), "chars": messages.body_chars(record, data, job),
+           "max_chars": templates[record["direction"]][kind]["max_chars"], "warnings": warnings,
+           "build_note": str(note)})
     return 0
 
 
