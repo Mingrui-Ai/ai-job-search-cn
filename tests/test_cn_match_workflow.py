@@ -21,6 +21,7 @@ import sys
 import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
+from fractions import Fraction
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -259,6 +260,38 @@ class TrialWeights(unittest.TestCase):
                     if [row[0] for row in self.in_list_order(trial)] != RANKINGS[name]:
                         reordered.add(name)
         self.assertEqual(reordered, {"tech", "ops"}, "some weights must reorder each profile's list")
+
+
+def share_the_rest(current: tuple, fixed: dict) -> tuple:
+    """match.md 换算规则 step 3 for the dimensions the user did not name: the rest of 100 split in their current
+    shares, rounded half up, the difference put on the largest of them (the first in DIMENSIONS on a tie)."""
+    current = dict(zip(score.DIMENSIONS, current))
+    others = [key for key in score.DIMENSIONS if key not in fixed]
+    rest, whole = 100 - sum(fixed.values()), sum(current[key] for key in others)
+    shares = {key: int(Fraction(rest * current[key], whole) + Fraction(1, 2)) for key in others}
+    largest = max(others, key=lambda key: (current[key], -score.DIMENSIONS.index(key)))
+    shares[largest] += rest - sum(shares.values())
+    return tuple({**fixed, **shares}[key] for key in score.DIMENSIONS)
+
+
+class ShareTheRest(unittest.TestCase):
+    """M2-5 round 2: a user naming only some weights - also on a trial not yet written - leaves the others to
+    share the rest in their current proportions (match.md 换算规则, 在试算上接着改)."""
+
+    DOC = (REPO / "docs" / "cn" / "match.md").read_text(encoding="utf-8")
+
+    def test_the_examples_on_the_default_weights(self):
+        default = (30, 25, 25, 10, 10)
+        self.assertEqual(share_the_rest(default, {"location": 30}), (24, 19, 19, 8, 30))
+        self.assertEqual(share_the_rest(default, {"salary": 30, "location": 20}), (18, 16, 16, 30, 20))
+        self.assertEqual(share_the_rest(default, {"direction": 35, "location": 35}), (13, 35, 12, 5, 35))
+
+    def test_changing_a_trial(self):
+        trial = share_the_rest((30, 25, 25, 10, 10), {"direction": 25 // 2})  # 方向不太在乎
+        self.assertEqual(trial, (35, 12, 29, 12, 12))
+        self.assertEqual(share_the_rest(trial, {"location": 25}), (30, 10, 25, 10, 25))  # 地点改成 25
+        self.assertIn("试算是 35 / 12 / 29 / 12 / 12", self.DOC)
+        self.assertIn("结果是 30 / 10 / 25 / 10 / 25", self.DOC)
 
 
 def v5_rankings() -> dict:

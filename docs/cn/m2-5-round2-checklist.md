@@ -85,6 +85,7 @@ M2-6 做完以后，M2-5 第二轮在用户的真实岗位和档案上重新评�
    - 做完以后，`match list` 里不应再有 `stale` 的记录。
 5. **调权重**（对 Agent 说"我现在更看重……"，走评分工作流的"评一批岗位前：先问现在看重什么"）：
    - Agent 换算成合计 100 的五项，用 `match list --weights skills=…,direction=…,experience=…,salary=…,location=…` 试算，给用户看百分比和排序的变化。在 Windows PowerShell 5.1 里，`--weights` 后面不加引号也能整个传进去；
+   - 用户看了试算只改其中几项的（例如"把薪资和地点提到 20"）：这几项照用户的数，其余几项按用户正在改的那组试算的占比分摊剩下的，不留在试算的数上、也不把差额都给一项；用户说某项"不变"的才保持原数（见评分工作流"换算规则"第 1、3 步和"在试算上接着改"的例子）；
    - 用户明确确认后，写 `target.weights`、在偏好记录追加一条，再跑 `profile validate`；
    - 不想调就跳过这一步。
 6. **只因权重过期的记录重新评分**：`match list` 里 `stale_reasons` 只有 `weights` 的，逐个运行 `match score <id> --save`。经历会保留，每个几秒钟。做完以后，`match list` 的排序和第 5 步的试算一致。
