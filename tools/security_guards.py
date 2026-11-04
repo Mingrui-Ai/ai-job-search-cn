@@ -118,6 +118,11 @@ ALLOWED_PERMISSIONS = {
     "Bash(python -m jobsearch_cn material:*)",
     "Bash(python -m jobsearch_cn resume:*)",
     "Bash(python -m jobsearch_cn review:*)",
+    # CN fork: the application records (docs/cn/applications.md), approved by the owner on
+    # 2026-11-04. The write commands write the database and archive under
+    # <data dir>/applications/ only after the user has seen the preview and agreed; backup
+    # writes under applications/backups/. No network.
+    "Bash(python -m jobsearch_cn application:*)",
 }
 
 # Rules that must stay in .claude/settings.json permissions.ask. An ask rule
@@ -307,6 +312,7 @@ ALLOWED_SKILL_TOOLS = {
     "Bash(python -m jobsearch_cn material:*)",  # CN fork: .claude/skills/cn-resume
     "Bash(python -m jobsearch_cn resume:*)",  # CN fork: .claude/skills/cn-resume
     "Bash(python -m jobsearch_cn review:*)",  # CN fork: .claude/skills/cn-resume
+    "Bash(python -m jobsearch_cn application:*)",  # CN fork: .claude/skills/cn-application
 }
 
 # The tools a shipped .claude/agents/*.md may list. These agents read untrusted

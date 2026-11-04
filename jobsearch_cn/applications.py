@@ -21,6 +21,7 @@ import re
 import secrets
 import shutil
 import sqlite3
+import time
 import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -44,11 +45,18 @@ TRANSITIONS = {
     **{status: () for status in TERMINAL},
 }
 REASON_REQUIRED_FROM = ("no_response",)  # a late reply: say what came
-EVENT_TYPES = ("created", "submitted", "status_changed")
+EVENT_TYPES = ("created", "submitted", "status_changed", "reply_received", "note_added", "followup_scheduled",
+               "followup_cancelled", "event_voided")
+UNTIMED_EVENTS = ("note_added", "followup_scheduled", "followup_cancelled", "event_voided")  # no --on / --at
+# A follow-up is for an application that was sent and is still open. no_response is the user saying they stopped
+# waiting: entering it clears the follow-up date like an ending does (docs/cn/applications.md §4).
+FOLLOWUP_STATUSES = ("applied", "interview", "offer")
 ORIGINS = ("current", "historical")
 ACTORS = ("user", "claude_code", "codex", "dsh")
 SOURCE_KINDS = ("user", "authorized_api")
-LOCK_TIMEOUT = 5.0  # seconds a write waits for another writer before it reports busy
+LOCK_TIMEOUT = 5.0  # seconds a write or a backup waits for another writer before it reports busy
+BACKUP_POLL = 0.05  # seconds a backup sleeps between tries while another program holds the lock
+_SQLITE_BUSY, _SQLITE_LOCKED = 5, 6  # the result codes Connection.backup's progress callback gets for a locked step
 MAX_TEXT = 300
 MAX_PLATFORM = 40
 LOCAL_TZ = timezone(timedelta(hours=8), "Asia/Shanghai")  # no daylight saving, so a fixed offset is exact
@@ -62,6 +70,8 @@ MATERIALS_CHECKS = (None, "match", "mismatch", "unchecked")
 _SENT_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.[A-Za-z0-9]+")
 _MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
 _REVIEW_NAME = re.compile(r"review-([1-9][0-9]{0,5})-r([0-9]+)\.json")
+_BACKUP_NAME = re.compile(r"[0-9]{8}T[0-9]{6}Z(?:-[1-9][0-9]{0,2})?")
+_ARCHIVE_PART = re.compile(r"[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*")  # one part of a recorded archive path
 _EXPORT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}\.json")
 _WINDOWS_RESERVED = {"CON", "PRN", "AUX", "NUL", *(f"COM{n}" for n in range(1, 10)), *(f"LPT{n}" for n in range(1, 10))}
 _CONTACT_LIKE = (
@@ -198,13 +208,18 @@ def parse_at(text: str) -> str:
     return _utc(moment)
 
 
-def parse_on(text: str) -> str:
+def parse_on(text: str, where: str = "--on") -> str:
     if not isinstance(text, str) or not _ON.fullmatch(text.strip()):
-        raise _invalid(f"--on {text!r}: write the date as YYYY-MM-DD")
+        raise _invalid(f"{where} {text!r}: write the date as YYYY-MM-DD")
     try:
         return date.fromisoformat(text.strip()).isoformat()
     except ValueError:
-        raise _invalid(f"--on {text!r} is not a real date") from None
+        raise _invalid(f"{where} {text!r} is not a real date") from None
+
+
+def _today() -> date:
+    """Today in Asia/Shanghai: the day --on may not pass, a follow-up may not precede, list --due defaults to."""
+    return datetime.now(timezone.utc).astimezone(LOCAL_TZ).date()
 
 
 def occurred(on=None, at=None) -> tuple:
@@ -219,7 +234,7 @@ def occurred(on=None, at=None) -> tuple:
         return value, None
     if on is not None:
         value = parse_on(on)
-        if date.fromisoformat(value) > now.astimezone(LOCAL_TZ).date():
+        if date.fromisoformat(value) > _today():
             raise _invalid(f"--on {on}: that day has not come yet (Asia/Shanghai)")
         return None, value
     return None, None
@@ -292,6 +307,15 @@ class Paths:
         self.dir = self.root / "applications"
         self.db = self.dir / DB_NAME
         self.artifacts = self.dir / "artifacts"
+        self.backups = self.dir / "backups"
+
+    @classmethod
+    def folder(cls, directory) -> "Paths":
+        """A backup folder, laid out like applications/: read only, so it has no data root."""
+        paths = cls.__new__(cls)
+        paths.root, paths.dir = None, Path(directory)
+        paths.db, paths.artifacts, paths.backups = paths.dir / DB_NAME, paths.dir / "artifacts", paths.dir / "backups"
+        return paths
 
 
 def _busy(exc: sqlite3.OperationalError):
@@ -400,6 +424,22 @@ def replay(events: list) -> dict | None:
     return state
 
 
+def _as_of(events: list, revision: int) -> list:
+    """The events as they stood at revision: later ones dropped, and a voided_by that a later void set cleared."""
+    seqs = {event["event_id"]: event["seq"] for event in events}
+    return [dict(event, voided_by=event["voided_by"] if seqs.get(event["voided_by"], revision + 1) <= revision
+                 else None) for event in events if event["seq"] <= revision]
+
+
+def void_target(events: list):
+    """The event void would void: the latest one neither voided nor itself a void (None when there is none).
+    Voiding again steps back one event at a time; a void is never voided, the event is recorded again instead."""
+    for event in reversed(events):
+        if not event["voided_by"] and event["type"] != "event_voided":
+            return event
+    return None
+
+
 def _apply(state, event: dict) -> dict:
     kind, payload = event["type"], event["payload"]
     if state is None:
@@ -428,8 +468,25 @@ def _apply(state, event: dict) -> dict:
         if before in REASON_REQUIRED_FROM and not payload.get("reason"):
             raise _invalid(f"{before} -> {after}: say what came in --reason (a late reply)")
         state["status"] = after
-        if after in TERMINAL:
+        if after in TERMINAL or after == "no_response":
             state["next_followup_on"] = None
+    elif kind == "reply_received":
+        # Sent means a submitted event still stands, not "any status but drafted": drafted -> withdrawn is allowed,
+        # and so is withdrawing once a submission was voided, and neither application was ever sent.
+        if not state["submitted"]:
+            hint = "; record the submission first (submit)" if state["status"] == "drafted" else ""
+            raise ApplicationError("transition", f"a reply comes to an application that was sent, and this one never "
+                                                 f"was{hint}", status=state["status"])
+    elif kind in ("note_added", "event_voided"):
+        pass  # a note changes nothing; the event a void names is skipped by replay
+    elif kind in ("followup_scheduled", "followup_cancelled"):
+        if state["status"] not in FOLLOWUP_STATUSES:
+            raise ApplicationError("transition", f"a follow-up is for a sent application still open "
+                                                 f"({', '.join(FOLLOWUP_STATUSES)}); this one is {state['status']}",
+                                   status=state["status"])
+        if kind == "followup_cancelled" and state["next_followup_on"] is None:
+            raise _invalid("there is no follow-up date to cancel")
+        state["next_followup_on"] = payload["due_on"] if kind == "followup_scheduled" else None
     else:
         raise _invalid(f"event {event['seq']}: unknown event type {kind!r}")
     return state
@@ -560,9 +617,36 @@ def list_applications(data_root, statuses=None, job_id=None) -> dict:
             "application_id": item["application_id"], "job_id": item["job_id"],
             "title": job.get("title"), "company": job.get("company"),
             "status": item["status"], "channel": item["channel"], "record_origin": item["record_origin"],
-            "submission": item["submission"], "revision": item["revision"], "updated_at": item["updated_at"],
+            "submission": item["submission"], "next_followup_on": item["next_followup_on"],
+            "revision": item["revision"], "updated_at": item["updated_at"],
         })
     return {"applications": summaries}
+
+
+def due(data_root, as_of=None, statuses=None, job_id=None) -> dict:
+    """list --due: sent, still open applications whose follow-up day has come ("due", the longest overdue first),
+    and those with no follow-up day ("unset", the longest waiting first; not overdue). as_of defaults to today in
+    Asia/Shanghai."""
+    as_of = _today().isoformat() if as_of is None else parse_on(as_of, "--as-of")
+    listed = list_applications(data_root, statuses, job_id)
+    result = {"as_of": as_of, "due": [], "unset": []}
+    if "note" in listed:
+        return dict(result, note=listed["note"])
+    for item in listed["applications"]:
+        if not item["submission"]["confirmed"] or item["status"] not in FOLLOWUP_STATUSES:
+            continue
+        if item["next_followup_on"] is None:
+            result["unset"].append(item)
+        elif item["next_followup_on"] <= as_of:
+            overdue = (date.fromisoformat(as_of) - date.fromisoformat(item["next_followup_on"])).days
+            result["due"].append(dict(item, days_overdue=overdue))
+    result["due"].sort(key=lambda item: (item["next_followup_on"], item["application_id"]))
+
+    def waiting(item):
+        key = _submission_key(item)
+        return ((0, key[1]) if key[0] == 2 else (1, ""), item["application_id"])
+    result["unset"].sort(key=waiting)
+    return result
 
 
 def export(data_root, application_ids=None) -> dict:
@@ -914,6 +998,10 @@ def _commit(paths: Paths, connection, *, request_id, request_hash, actor, applic
                             "type": event["type"], "occurred_at": event["occurred_at"],
                             "occurred_on": event["occurred_on"], "recorded_at": now, "actor": actor,
                             "source": {"kind": "user", "reference": None}, "payload": payload, "voided_by": None})
+        voids = {event["payload"]["target_event_id"]: event["event_id"] for event in written
+                 if event["type"] == "event_voided"}
+        if voids:  # the revision check above makes the target still the latest event that can be voided
+            existing = [dict(event, voided_by=voids.get(event["event_id"], event["voided_by"])) for event in existing]
         state = replay(existing + written)
         projection = (state["status"], state["submitted"], state["submitted_at"], state["submitted_on"],
                       state["next_followup_on"], state["revision"], state["channel"]["kind"],
@@ -950,6 +1038,11 @@ def _commit(paths: Paths, connection, *, request_id, request_hash, actor, applic
             [(application_id, event["seq"], event["event_id"], request_id, event["type"], event["occurred_at"],
               event["occurred_on"], event["recorded_at"], actor, "user", _dump(event["payload"]), None)
              for event in written])
+        for target, void_id in voids.items():
+            changed = connection.execute("UPDATE events SET voided_by = ? WHERE application_id = ? AND event_id = ? "
+                                         "AND voided_by IS NULL", (void_id, application_id, target)).rowcount
+            if changed != 1:
+                raise _invalid(f"event {target} is not an event of this application that can be voided")
         connection.execute("INSERT INTO requests (request_id, request_hash, application_id, first_seq, last_seq) "
                            "VALUES (?, ?, ?, ?, ?)", (request_id, request_hash, application_id, written[0]["seq"],
                                                       written[-1]["seq"]))
@@ -1178,7 +1271,9 @@ def submit(data_root, application_id: str, *, expected_revision, on=None, at=Non
                     "status": {"from": row["status"], "to": "applied"},
                     "materials": _material_preview(prepared), "warnings": warnings}
         snapshot_files = None
-        if origin == "current":
+        # A submission voided and made again keeps the job and match kept the first time (docs/cn/applications.md).
+        kept = connection.execute("SELECT 1 FROM snapshots WHERE application_id = ?", (application_id,)).fetchone()
+        if origin == "current" and kept is None:
             snapshot_files, snapshot_warnings = _snapshot_files(root, row["job_id"])
             warnings.extend(snapshot_warnings)
         return _write(paths, request_id=request_id, request_body=request_body, actor=actor,
@@ -1221,11 +1316,135 @@ def change_status(data_root, application_id: str, new_status: str, *, expected_r
                       events=events, prepared=None, snapshot_files=None, warnings=warnings, connection=connection)
 
 
+def _append(data_root, application_id: str, command: str, *, expected_revision, actor, preview, request_id,
+            body: dict, plan) -> dict:
+    """reply, note, followup and void: one event added to an existing application.
+
+    plan(events) gets the events as they stood at expected_revision and returns {"event", "warnings"} and, for a
+    void, "body" (what joins the request digest) and "show" (what the output adds). The events as of the revision
+    make a retry plan exactly what it planned the first time. What plan refuses is raised only after _current, so
+    a retry of a request already written gets its first result even when a check that depends on today
+    (followup's date) would refuse it now.
+    """
+    paths = Paths(data_root)
+    _request_id(preview, request_id)
+    actor = _actor(actor)
+    connection, row = _existing(paths, application_id, expected_revision, preview)
+    with _closing(connection):
+        existing = _as_of(_events(connection, application_id), expected_revision)
+        try:
+            planned, refused = plan(existing), None
+        except ApplicationError as exc:
+            planned, refused = {}, exc
+        request_body = {"command": command, "application_id": application_id, "expected_revision": expected_revision,
+                        "actor": actor, **body, **planned.get("body", {})}
+        repeated = _current(connection, row, expected_revision, request_id, request_body)
+        if repeated is not None:
+            return repeated
+        if refused is not None:
+            raise refused
+        event = planned["event"]
+        trial = existing
+        if event["type"] == "event_voided":
+            target = event["payload"]["target_event_id"]
+            trial = [dict(item, voided_by="pending" if item["event_id"] == target else item["voided_by"])
+                     for item in existing]
+        state = replay(trial + [dict(event, seq=existing[-1]["seq"] + 1, voided_by=None)])
+        warnings = planned["warnings"]
+        if preview:
+            return {"application": _application(connection, row), "events": _planned([event], actor),
+                    "request_id": new_id("req"), "preview": True,
+                    "status": {"from": row["status"], "to": state["status"]}, "materials": [], "warnings": warnings,
+                    **planned.get("show", {})}
+        result = _write(paths, request_id=request_id, request_body=request_body, actor=actor,
+                        application_id=application_id, new_row=None, expected_revision=expected_revision,
+                        events=[event], prepared=None, snapshot_files=None, warnings=warnings, connection=connection)
+        return dict(result, **planned.get("show", {}))
+
+
+def reply(data_root, application_id: str, *, expected_revision, summary, on=None, at=None, actor: str = "user",
+          preview: bool = False, request_id=None) -> dict:
+    """application reply: a reply came in that does not change the status (one that does is a status --reason)."""
+    summary = _text(summary, "--summary", MAX_TEXT, required=True)
+    occurred_at, occurred_on = occurred(on, at)
+
+    def plan(events):
+        return {"event": {"type": "reply_received", "occurred_at": occurred_at, "occurred_on": occurred_on,
+                          "payload": {"summary": summary}},
+                "warnings": contact_warnings(summary, "--summary")}
+    return _append(data_root, application_id, "reply", expected_revision=expected_revision, actor=actor,
+                   preview=preview, request_id=request_id, plan=plan,
+                   body={"summary": summary, "occurred_at": occurred_at, "occurred_on": occurred_on})
+
+
+def note(data_root, application_id: str, *, expected_revision, text, actor: str = "user", preview: bool = False,
+         request_id=None) -> dict:
+    """application note: the user's own words on an application, in any status."""
+    text = _text(text, "--text", MAX_TEXT, required=True)
+
+    def plan(events):
+        return {"event": {"type": "note_added", "occurred_at": None, "occurred_on": None, "payload": {"text": text}},
+                "warnings": contact_warnings(text, "--text")}
+    return _append(data_root, application_id, "note", expected_revision=expected_revision, actor=actor,
+                   preview=preview, request_id=request_id, plan=plan, body={"text": text})
+
+
+def followup(data_root, application_id: str, *, expected_revision, due=None, cancel: bool = False,
+             actor: str = "user", preview: bool = False, request_id=None) -> dict:
+    """application followup: set the day to follow up (today or later, Asia/Shanghai), or cancel it."""
+    if (due is None) == (not cancel):
+        raise _invalid("give --due YYYY-MM-DD or --cancel")
+    due_on = None
+    if due is not None:
+        due_on = parse_on(due, "--due")
+
+    def plan(events):
+        if due_on is None:
+            return {"event": {"type": "followup_cancelled", "occurred_at": None, "occurred_on": None, "payload": {}},
+                    "warnings": []}
+        # "Not before today" is checked here, not with the format above: _append raises what plan refuses only
+        # after a retry of a request already written has had its first result back, and today moves. The same
+        # request retried the next day returns what it wrote; only a new request is held to the new day.
+        if date.fromisoformat(due_on) < _today():
+            raise _invalid(f"--due {due}: that day has passed (Asia/Shanghai); to follow up now, give today's date")
+        return {"event": {"type": "followup_scheduled", "occurred_at": None, "occurred_on": None,
+                          "payload": {"due_on": due_on}}, "warnings": []}
+    return _append(data_root, application_id, "followup", expected_revision=expected_revision, actor=actor,
+                   preview=preview, request_id=request_id, plan=plan, body={"due_on": due_on, "cancel": bool(cancel)})
+
+
+def void(data_root, application_id: str, *, expected_revision, reason, actor: str = "user", preview: bool = False,
+         request_id=None) -> dict:
+    """application void: void the latest event that can be voided (a mistake). Nothing is deleted."""
+    reason = _text(reason, "--reason", MAX_TEXT, required=True)
+
+    def plan(events):
+        target = void_target(events)
+        if target is None or target["type"] == "created":
+            raise _invalid("nothing is left to void but the created event, and an application is not deleted; one "
+                           "recorded by mistake is marked withdrawn with --reason (docs/cn/applications.md)")
+        if target["type"] == "submitted" and events[0]["payload"].get("record_origin") == "historical":
+            raise _invalid("a historical record is a submission by definition, so its submitted event is not voided "
+                           "alone; one recorded by mistake is marked withdrawn with --reason (docs/cn/applications.md)")
+        return {"event": {"type": "event_voided", "occurred_at": None, "occurred_on": None,
+                          "payload": {"target_event_id": target["event_id"], "reason": reason}},
+                "warnings": contact_warnings(reason, "--reason"), "body": {"target_event_id": target["event_id"]},
+                "show": {"voids": target}}
+    return _append(data_root, application_id, "void", expected_revision=expected_revision, actor=actor,
+                   preview=preview, request_id=request_id, plan=plan, body={"reason": reason})
+
+
 # ---------------------------------------------------------------- validate
 
-def validate(data_root) -> dict:
-    """{"valid", "errors", "warnings", "orphans"}: the whole database against its own rules and its archive."""
-    paths = Paths(data_root)
+def validate(data_root, backup=None) -> dict:
+    """{"valid", "errors", "warnings", "orphans"}: the whole database against its own rules and its archive; with
+    backup, a folder application backup wrote, checked by the same rules and against its manifest."""
+    if backup is not None:
+        return _validate_backup(Paths(data_root), backup)
+    return _validate_paths(Paths(data_root))
+
+
+def _validate_paths(paths: Paths) -> dict:
     connection = _reader(paths)
     if connection is None:
         return {"valid": True, "errors": [], "warnings": ["no application records yet"], "orphans": []}
@@ -1249,9 +1468,179 @@ def validate(data_root) -> dict:
                               f"{row['application_id']} are not the ones it wrote")
     orphans = _orphans(paths, registered)
     if orphans:
-        warnings.append(f"{len(orphans)} file(s) or folder(s) under applications/artifacts are in no record "
-                        "(a write that did not finish); nothing refers to them, remove them once the user agrees")
+        warnings.append(f"{len(orphans)} file(s) or folder(s) under applications/artifacts or backups are in no "
+                        "record (a write or backup that did not finish); nothing refers to them, remove them once "
+                        "the user agrees")
     return {"valid": not errors, "errors": errors, "warnings": warnings, "orphans": orphans}
+
+
+def _archive_parts(relative):
+    """The parts of a recorded archive path (artifacts/...), or None when it is no such path.
+
+    Only / separates, and every part is a plain name: letters, digits, _ and -, with dots only between them, and
+    no Windows device name. So nothing Windows would read as a separator, a drive, a parent or a stream (\\, C:,
+    .., a trailing dot, a colon) gets through, on any system: one database gets the same verdict everywhere.
+    """
+    parts = relative.split("/") if isinstance(relative, str) else []
+    if len(parts) < 2 or parts[0] != "artifacts" or not all(
+            _ARCHIVE_PART.fullmatch(part) and part.split(".")[0].upper() not in _WINDOWS_RESERVED for part in parts):
+        return None
+    return parts
+
+
+def _archived(folder: Path, relative) -> tuple:
+    """(folder/relative, None) for a recorded archive path, or (None, why it is refused).
+
+    folder is applications/ or a backup laid out like it. The path must be plain (_archive_parts), and the file
+    it names must still lie inside folder/artifacts once every link or junction on the way is followed. Checking
+    the records, copying them into a backup and checking a backup all go through here, so a recorded path never
+    reads or writes outside its own folder.
+    """
+    parts = _archive_parts(relative)
+    if parts is None:
+        return None, f"archive path {relative!r} is not a plain path under artifacts/"
+    path = folder.joinpath(*parts)
+    try:
+        inside = store._inside(path, folder.resolve() / "artifacts")
+    except (OSError, RuntimeError):  # a link loop
+        inside = False
+    if not inside:
+        return None, f"archive path {relative} leads out of artifacts/ through a link or junction"
+    return path, None
+
+
+def _validate_backup(paths: Paths, name) -> dict:
+    if not isinstance(name, str) or not _BACKUP_NAME.fullmatch(name):
+        raise _invalid(f"--backup {name!r}: the name of a folder under applications/backups/, like 20261104T083000Z")
+    folder = paths.backups / name
+    if store._is_link(paths.backups) or store._is_link(folder) or not folder.is_dir():
+        raise ApplicationError("not_found", f"no backup {name} under applications/backups/")
+    copy = Paths.folder(folder)
+    try:
+        manifest = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
+        database = manifest["database"]
+        listed = {item["path"]: item for item in manifest["artifacts"]}
+        if manifest["kind"] != "applications-backup" or not isinstance(database, dict) \
+                or not all(isinstance(relative, str) for relative in listed):
+            raise ValueError
+    except (OSError, ValueError, KeyError, TypeError):
+        return {"valid": False, "errors": [f"backup {name}: manifest.json is missing or unreadable"], "warnings": [],
+                "orphans": [], "backup": name}
+    errors = []
+    data = copy.db.read_bytes() if copy.db.is_file() and not store._is_link(copy.db) else None
+    if data is None:
+        errors.append(f"backup {name}: {DB_NAME} is missing")
+    elif _sha256(data) != database.get("sha256") or len(data) != database.get("size_bytes"):
+        errors.append(f"backup {name}: {DB_NAME} is not the database the manifest records")
+    result = _validate_paths(copy) if data is not None else {"errors": [], "warnings": [], "orphans": []}
+    for relative, item in sorted(listed.items()):
+        path, refused = _archived(folder, relative)
+        if refused:
+            errors.append(f"backup {name}: manifest: {refused}")
+            continue
+        copied = path.read_bytes() if path.is_file() and not store._is_link(path) else None
+        if copied is None or _sha256(copied) != item.get("sha256") or len(copied) != item.get("size_bytes"):
+            errors.append(f"backup {name}: {relative} is missing or not the file the manifest records")
+    errors += result["errors"]
+    return {"valid": not errors, "errors": errors, "warnings": result["warnings"], "orphans": result["orphans"],
+            "backup": name}
+
+
+def backup(data_root) -> dict:
+    """application backup: a consistent copy of the database (Connection.backup) and of the archived files it
+    records, with manifest.json, in applications/backups/<UTC time>/. It records nothing, so it has no preview."""
+    paths = Paths(data_root)
+    deadline = time.monotonic() + LOCK_TIMEOUT  # the whole wait for another program's lock, opening included
+    source = _reader(paths)
+    if source is None:
+        raise ApplicationError("not_found", "there are no application records yet; nothing to back up")
+    with _closing(source):
+        try:
+            backups = store.safe_dir(paths.root, "applications", "backups")
+        except store.StoreError as exc:
+            raise StorageError(str(exc)) from None
+        name = backup_name(backups, datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"))
+        temp = backups / f"{name}.tmp"
+        temp.mkdir()
+        try:
+            target = sqlite3.connect(temp / DB_NAME)
+            try:
+                _copy_database(source, target, deadline)
+            finally:
+                target.close()
+            return _finish_backup(paths, backups, name, temp)
+        except BaseException:
+            shutil.rmtree(temp, ignore_errors=True)
+            raise
+
+
+def _copy_database(source, target, deadline: float) -> None:
+    """source.backup(target), refused as busy rather than waiting past deadline for another program's lock.
+
+    Connection.backup retries a locked step by itself and never gives up, and each step would first sit out the
+    connection's busy timeout, so a lock taken after the source was opened could hold a backup indefinitely.
+    Here a step does not wait (busy_timeout 0), the copy sleeps BACKUP_POLL between tries, and the progress
+    callback, which runs after every step, ends the copy before another try would pass the deadline.
+    """
+    source.execute("PRAGMA busy_timeout = 0")
+
+    def progress(status, remaining, total):
+        if status in (_SQLITE_BUSY, _SQLITE_LOCKED) and time.monotonic() + BACKUP_POLL > deadline:
+            raise ApplicationError("busy", f"another program kept the application records locked for "
+                                           f"{LOCK_TIMEOUT:g} seconds; no backup made. Try again in a moment")
+    try:
+        source.backup(target, progress=progress, sleep=BACKUP_POLL)
+    except sqlite3.OperationalError as exc:
+        raise _busy(exc) from None
+
+
+def backup_name(backups: Path, stamp: str) -> str:
+    """The UTC time, with -2, -3 ... when a backup (or one under way) already took it in the same second."""
+    name = stamp
+    for number in range(2, 1000):
+        if not (backups / name).exists() and not (backups / f"{name}.tmp").exists():
+            return name
+        name = f"{stamp}-{number}"
+    raise ApplicationError("busy", "too many backups in one second; try again")
+
+
+def _finish_backup(paths: Paths, backups: Path, name: str, temp: Path) -> dict:
+    """Copy the archived files the database copy records, check the copy, write the manifest, then rename."""
+    copy, warnings, artifacts = Paths.folder(temp), [], []
+    connection = _reader(copy)
+    with _closing(connection):
+        recorded = [row[0] for row in connection.execute(
+            "SELECT path FROM material_files UNION SELECT path FROM snapshots WHERE path IS NOT NULL ORDER BY 1")]
+        counts = {table: connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+                  for table in ("applications", "events")}
+        user_version = connection.execute("PRAGMA user_version").fetchone()[0]
+    for relative in recorded:
+        source_file, refused = _archived(paths.dir, relative)
+        target = _archived(temp, relative)[0]
+        if refused is None and target is None:
+            refused = f"archive path {relative} leads out of the backup"
+        if refused:
+            warnings.append(f"{refused}; not copied")
+            continue
+        if store._is_link(source_file) or not source_file.is_file():
+            warnings.append(f"{relative} is missing; not copied")
+            continue
+        data = source_file.read_bytes()
+        target.parent.mkdir(parents=True, exist_ok=True)
+        _write_verified(target, data)
+        artifacts.append({"path": relative, "sha256": _sha256(data), "size_bytes": len(data)})
+    checked = _validate_paths(copy)
+    data = copy.db.read_bytes()
+    manifest = {"schema_version": 1, "kind": "applications-backup", "created_at": now_utc(),
+                "database": {"name": DB_NAME, "sha256": _sha256(data), "size_bytes": len(data),
+                             "user_version": user_version},
+                "counts": counts, "artifacts": artifacts, "source_valid": checked["valid"]}
+    store._write_json(temp, temp / "manifest.json", manifest)
+    if not checked["valid"]:
+        warnings.append("the records do not pass validate; the backup keeps them as they are (application validate)")
+    final = backups / name
+    temp.rename(final)
+    return {"backup": name, "path": str(final), "manifest": manifest, "warnings": warnings}
 
 
 def _check_application(connection, row, errors: list, warnings: list, paths: Paths, registered: set) -> None:
@@ -1284,6 +1673,8 @@ def _check_application(connection, row, errors: list, warnings: list, paths: Pat
     payload_errors = []
     for event in events:
         _check_event(event, f"{where} event {event['seq']}", event_ids, payload_errors)
+    if not payload_errors:
+        _check_voids(events, where, payload_errors)
     errors.extend(payload_errors)
     if payload_errors:
         return
@@ -1340,10 +1731,39 @@ def _check_application(connection, row, errors: list, warnings: list, paths: Pat
         errors.append(f"{where}: submitted, but the job and match at that time were not kept")
     for event in events:
         payload = event["payload"]
-        warnings.extend(contact_warnings(payload.get("reason"), f"{where} event {event['seq']} reason"))
+        for key in ("reason", "summary", "text"):
+            warnings.extend(contact_warnings(payload.get(key), f"{where} event {event['seq']} {key}"))
         channel = payload.get("channel")
         if isinstance(channel, dict):
             warnings.extend(contact_warnings(channel.get("platform"), f"{where} event {event['seq']} platform"))
+
+
+def _check_voids(events: list, where: str, errors: list) -> None:
+    """Each void names an earlier event of this application that was then the latest one a void could take (never
+    created, never a void), each event is voided at most once, and voided_by is the void that names it."""
+    by_id = {event["event_id"]: event for event in events}
+    voided = {}
+    for event in events:
+        if event["type"] != "event_voided":
+            continue
+        target_id = event["payload"]["target_event_id"]
+        target = by_id.get(target_id)
+        if target is None or target["seq"] >= event["seq"]:
+            errors.append(f"{where} event {event['seq']}: voids {target_id}, no earlier event of this application")
+            continue
+        if target_id in voided:
+            errors.append(f"{where} event {event['seq']}: voids event {target['seq']}, which was voided already")
+        if target["voided_by"] != event["event_id"]:
+            errors.append(f"{where} event {event['seq']}: voids event {target['seq']}, whose voided_by does not "
+                          "name it")
+        voided[target_id] = event["event_id"]
+        latest = void_target(_as_of(events, event["seq"] - 1))
+        if target["type"] in ("created", "event_voided") or latest is None or latest["event_id"] != target_id:
+            errors.append(f"{where} event {event['seq']}: voids event {target['seq']}, which was not the latest "
+                          "event that could be voided")
+    for event in events:
+        if event["voided_by"] is not None and voided.get(event["event_id"]) != event["voided_by"]:
+            errors.append(f"{where} event {event['seq']}: voided_by names no void of this event")
 
 
 def _check_event(event: dict, where: str, event_ids: set, errors: list) -> None:
@@ -1369,10 +1789,25 @@ def _check_event(event: dict, where: str, event_ids: set, errors: list) -> None:
     payload = event["payload"]
     expected = {"created": {"job_id", "record_origin", "channel"},
                 "submitted": {"channel", "material_version_ids", "sent_file_refs", "materials_check"},
-                "status_changed": {"from", "to", "reason"}}[event["type"]]
+                "status_changed": {"from", "to", "reason"},
+                "reply_received": {"summary"}, "note_added": {"text"}, "followup_scheduled": {"due_on"},
+                "followup_cancelled": set(), "event_voided": {"target_event_id", "reason"}}[event["type"]]
     if not isinstance(payload, dict) or set(payload) != expected:
-        errors.append(f"{where}: the payload must have exactly {', '.join(sorted(expected))}")
+        errors.append(f"{where}: the payload must have exactly {', '.join(sorted(expected)) or 'nothing'}")
         return
+    if event["type"] in UNTIMED_EVENTS and (event["occurred_at"] is not None or event["occurred_on"] is not None):
+        errors.append(f"{where}: a {event['type']} event has no occurred_at or occurred_on")
+    for key in ("summary", "text"):
+        if key in payload and (not isinstance(payload[key], str) or not payload[key].strip()
+                               or len(payload[key]) > MAX_TEXT):
+            errors.append(f"{where}: {key} must be text of 1 to {MAX_TEXT} characters")
+    if event["type"] == "followup_scheduled" and not _valid_date(payload["due_on"]):
+        errors.append(f"{where}: due_on {payload['due_on']!r} is not a date")
+    if event["type"] == "event_voided":
+        if not is_id(payload["target_event_id"], "evt"):
+            errors.append(f"{where}: target_event_id {payload['target_event_id']!r}")
+        if not isinstance(payload["reason"], str) or not payload["reason"].strip() or len(payload["reason"]) > MAX_TEXT:
+            errors.append(f"{where}: a void needs a reason of 1 to {MAX_TEXT} characters")
     if "channel" in payload:
         channel = payload["channel"]
         if not isinstance(channel, dict) or set(channel) != {"kind", "platform"} or channel["kind"] not in CHANNELS:
@@ -1401,11 +1836,10 @@ def _valid_date(value) -> bool:
 
 
 def _check_archived(paths: Paths, relative, sha256, size, where: str, errors: list, registered: set) -> None:
-    parts = relative.split("/") if isinstance(relative, str) else []
-    if len(parts) < 2 or parts[0] != "artifacts" or any(part in ("", ".", "..") for part in parts):
-        errors.append(f"{where}: archive path {relative!r} is not under artifacts/")
+    path, refused = _archived(paths.dir, relative)
+    if refused:
+        errors.append(f"{where}: {refused}")
         return
-    path = paths.dir.joinpath(*parts)
     registered.add(path.relative_to(paths.dir).as_posix())
     if store._is_link(path) or not path.is_file():
         errors.append(f"{where}: the archived file {relative} is missing")
@@ -1417,10 +1851,9 @@ def _check_archived(paths: Paths, relative, sha256, size, where: str, errors: li
 
 def _orphans(paths: Paths, registered: set) -> list:
     """Files and folders under artifacts/ that no record names, as paths relative to applications/."""
-    if not paths.artifacts.is_dir() or store._is_link(paths.artifacts):
-        return []
     found = []
-    for current, folders, files in os.walk(paths.artifacts):
+    walked = paths.artifacts.is_dir() and not store._is_link(paths.artifacts)
+    for current, folders, files in os.walk(paths.artifacts) if walked else ():
         here = Path(current)
         for name in sorted(folders):
             relative = (here / name).relative_to(paths.dir).as_posix()
@@ -1433,4 +1866,7 @@ def _orphans(paths: Paths, registered: set) -> list:
             relative = (here / name).relative_to(paths.dir).as_posix()
             if relative not in registered:
                 found.append(relative)
+    if paths.backups.is_dir() and not store._is_link(paths.backups):  # a backup that did not finish
+        found.extend(f"backups/{item.name}/" for item in paths.backups.iterdir()
+                     if item.name.endswith(".tmp") and item.is_dir())
     return sorted(found)

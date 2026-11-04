@@ -31,7 +31,8 @@
       "Bash(python -m jobsearch_cn match:*)",
       "Bash(python -m jobsearch_cn material:*)",
       "Bash(python -m jobsearch_cn resume:*)",
-      "Bash(python -m jobsearch_cn review:*)"
+      "Bash(python -m jobsearch_cn review:*)",
+      "Bash(python -m jobsearch_cn application:*)"
     ],
     "ask": [],
     "deny": [

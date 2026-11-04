@@ -28,6 +28,10 @@ WORKFLOWS = {
     "cn-resume": ("docs/cn/resume-workflow.md", {
         "material": {"validate"}, "resume": {"build"}, "review": {"draft", "validate", "show"},
         "jd": {"list", "show"}, "profile": {"validate", "show"}, "match": {"list", "show"}}),
+    "cn-application": ("docs/cn/applications.md", {
+        "application": {"record", "submit", "status", "reply", "note", "followup", "void", "show", "list",
+                        "validate", "backup", "export"},
+        "jd": {"list", "show"}}),
 }
 # Subagents a workflow dispatches: agent name -> the workflow document it follows.
 REVIEWERS = {"cn-resume-reviewer": "docs/cn/resume-workflow.md"}
