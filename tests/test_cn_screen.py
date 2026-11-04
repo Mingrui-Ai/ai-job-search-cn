@@ -127,6 +127,12 @@ class ItemFormat(unittest.TestCase):
         self.assertIn("fetched_at: must be an ISO 8601", self.problem(item(DATA, fetched_at="2026-11-05T10:31:20")))
         self.read(item(DATA, fetched_at="2026-11-05T02:31:20Z"))
 
+    def test_a_url_whose_port_cannot_be_read(self):
+        for bad in ("https://example.invalid:abc/1", "https://example.invalid:99999/1", "http://[::1/1"):
+            self.assertIn("url: not a readable URL", self.problem(item(DATA, url=bad)))
+        self.read(item(DATA, url="https://example.invalid:8443/1"))
+        self.assertIsNone(store.normalize_url("https://example.invalid:abc/1"))
+
     def test_not_json_not_utf8_not_one_object(self):
         for data, expected in ((b"{", "not valid JSON"), ("文本".encode("gbk"), "not UTF-8"),
                                (b"[]", "one JSON object")):
@@ -200,6 +206,26 @@ class Reading(Case):
         self.assertEqual(payload["duplicates"], [["a.json", "b.json"]])
         self.assertEqual(payload["files"][0]["jobs"][0]["unread"], [])
         self.assertEqual(sorted(path.name for path in self.data.iterdir()), ["inbox"])
+
+    def test_a_bad_url_skips_only_its_file(self):
+        self.put("a.json", item(DATA, site_job_id="a1", url="https://example.invalid:abc/1"))
+        self.put("b.json", item(BACKEND, site_job_id="b2", url="https://example.invalid/2"))
+        payload = screen.check(self.batch, "boss", VOCABULARY, NOW)
+        self.assertEqual((payload["ok"], payload["failed"], payload["jobs"]), (1, 1, 1))
+        self.assertIn("url: not a readable URL", payload["files"][0]["reason"])
+        payload = self.run_batch()
+        self.assertEqual(payload["imported"], {"created": 1, "updated": 0, "unchanged": 0, "skipped": 1})
+        self.assertEqual(payload["skipped"][0]["file"], "a.json")
+        self.assertIn("url: not a readable URL", payload["skipped"][0]["reason"])
+
+    def test_a_stored_record_with_a_bad_url_does_not_stop_the_batch(self):
+        records, _ = jd_parser.parse_text(DATA, source_type="portal", site="boss", single=True, now=NOW,
+                                          site_job_id="a1", fetched_at="2026-11-05T10:31:20+08:00")
+        with self.assertRaisesRegex(store.StoreError, "not a readable URL"):
+            self.store.save(dict(records[0], source=dict(records[0]["source"], url="https://example.invalid:abc/1")))
+        self.store._write(dict(records[0], source=dict(records[0]["source"], url="https://example.invalid:abc/1")))
+        self.put("b.json", item(BACKEND, site_job_id="b2"))
+        self.assertEqual(self.run_batch()["imported"]["created"], 1)
 
 
 class Dedup(Case):
@@ -291,6 +317,52 @@ class Dedup(Case):
         self.assertEqual(payload["imported"], {"created": 5, "updated": 0, "unchanged": 0, "skipped": 0})
         duplicates = [w for w in payload["warnings"] if w["kind"] == "duplicate"]
         self.assertEqual([(w["file"], w["message"][:22]) for w in duplicates], [("f6.json", "the same posting as a1")])
+
+    def test_an_update_frees_the_keys_it_moved_away_from(self):
+        """(old, U1) -> (new, U1) updates it; (old, U2) is then another posting, with and without the index."""
+        u1, u2 = "https://example.invalid/job/1", "https://example.invalid/job/2"
+        sequence = [(DATA, "old", u1), (BACKEND, "new", u1), (OPS, "old", u2)]
+        plain = []
+        for text, site_job_id, url in sequence:
+            action, _ = self.store.save(self.parsed(text, site_job_id=site_job_id, url=url))
+            plain.append(action)
+        self.assertEqual(plain, ["created", "updated", "created"])
+        stored = {r["source"]["site_job_id"]: r["raw_text"] for r in self.store.all()[0]}
+        shutil.rmtree(self.data / "jobs")
+        index, batched = self.store.index(), []
+        for text, site_job_id, url in sequence:
+            action, _ = self.store.save(self.parsed(text, site_job_id=site_job_id, url=url), index)
+            batched.append(action)
+        self.assertEqual(batched, plain)
+        self.assertEqual({r["source"]["site_job_id"]: r["raw_text"] for r in self.store.all()[0]}, stored)
+        self.assertEqual(sorted(stored), ["new", "old"])
+        shutil.rmtree(self.data / "jobs")
+        for name, (text, site_job_id, url) in zip(("a.json", "b.json", "c.json"), sequence):
+            self.put(name, item(text, site_job_id=site_job_id, url=url))
+        payload = self.run_batch()
+        self.assertEqual(payload["imported"], {"created": 2, "updated": 0, "unchanged": 0, "skipped": 0})
+        self.assertEqual({r["source"]["site_job_id"]: r["raw_text"] for r in self.store.all()[0]}, stored)
+
+    def test_the_first_text_again_after_an_edit_replaces_the_edit(self):
+        edited = DATA.replace("150-200元/天", "180-220元/天", 1)
+        self.assertNotEqual(edited, DATA)
+        for key in ({"site_job_id": "a1"}, {"url": "https://example.invalid/job/7"}):
+            with self.subTest(key=key):
+                shutil.rmtree(self.data / "jobs", ignore_errors=True)
+                actions = [self.store.save(self.parsed(text, **key))[0] for text in (DATA, edited, DATA)]
+                self.assertEqual(actions, ["created", "updated", "updated"])
+                [stored] = self.store.all()[0]
+                self.assertEqual((stored["raw_text"], stored["salary"]["min"], stored["salary"]["max"]), (DATA, 150, 200))
+
+    def test_a_batch_with_both_versions_runs_again_without_skipping(self):
+        edited = DATA.replace("150-200元/天", "180-220元/天", 1)
+        self.put("v1.json", item(DATA, site_job_id="a1"))
+        self.put("v2.json", item(edited, site_job_id="a1"))
+        for _ in range(2):
+            payload = self.run_batch()
+            self.assertEqual(payload["imported"]["skipped"], 0, payload["skipped"])
+            [stored] = self.store.all()[0]
+            self.assertEqual(stored["raw_text"], edited)  # the batch's last file wins
 
 
 class Scoring(Case):

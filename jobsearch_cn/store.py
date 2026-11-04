@@ -49,13 +49,21 @@ def data_dir(override=None) -> Path:
 
 
 def normalize_url(url):
-    """A comparable form of a posting URL, or None."""
+    """A comparable form of a posting URL, or None (also for one whose port cannot be read).
+
+    schema.validate rejects such URLs, so None here only spares the batch from a
+    record written by hand or stored before that check.
+    """
     if not url:
         return None
-    parts = urlsplit(url.strip())
+    try:
+        parts = urlsplit(url.strip())
+        port = parts.port
+    except ValueError:
+        return None
     host = (parts.hostname or "").lower()
-    if parts.port and not ((parts.scheme == "http" and parts.port == 80) or (parts.scheme == "https" and parts.port == 443)):
-        host = f"{host}:{parts.port}"
+    if port and not ((parts.scheme == "http" and port == 80) or (parts.scheme == "https" and port == 443)):
+        host = f"{host}:{port}"
     query = sorted(
         (key, value) for key, value in parse_qsl(parts.query, keep_blank_values=True)
         if key.lower() not in TRACKING_PARAMS and not key.lower().startswith("utm_")
@@ -74,24 +82,64 @@ def portal_key(source):
 class Index:
     """Stored job ids by portal id and by normalised URL, built from one read of the store.
 
-    The first record in import order wins a key, as Store.find_by_url's scan does.
+    The first record in import order wins a key, as the scans of Store.find_by_portal_id
+    and Store.find_by_url do. A saved record replaces its old keys: an update that moves
+    a record to a new portal id or URL frees the old ones, so they find what a scan of
+    the store would find, not the moved record.
     """
 
     def __init__(self, records):
+        # key -> {job id: import order} of every record holding the key now.
         self.by_portal, self.by_url = {}, {}
+        self._keys = {}  # job id -> (portal key, url) it is filed under
         for record in records:
             self.add(record)
 
     def add(self, record: dict) -> None:
+        """File a stored record under its current keys, dropping the keys it held before."""
         if not isinstance(record, dict) or not schema.is_job_id(record.get("id")):
             return
-        source = record.get("source")
-        key = portal_key(source)
+        job_id = record["id"]
+        old_portal, old_url = self._keys.pop(job_id, (None, None))
+        _unfile(self.by_portal, old_portal, job_id)
+        _unfile(self.by_url, old_url, job_id)
+        source = record.get("source") if isinstance(record.get("source"), dict) else {}
+        key, url = portal_key(source), normalize_url(source.get("url"))
+        order = (source.get("imported_at") or "", job_id)  # Store.all's sort
         if key is not None:
-            self.by_portal.setdefault(key, record["id"])
-        url = normalize_url((source or {}).get("url")) if isinstance(source, dict) else None
+            self.by_portal.setdefault(key, {})[job_id] = order
         if url is not None:
-            self.by_url.setdefault(url, record["id"])
+            self.by_url.setdefault(url, {})[job_id] = order
+        self._keys[job_id] = (key, url)
+
+    def portal(self, key):
+        """The id of the first stored record with this (site, site_job_id), or None."""
+        return _first(self.by_portal.get(key))
+
+    def url(self, url):
+        """The id of the first stored record with this normalised URL, or None."""
+        return _first(self.by_url.get(url))
+
+
+def _unfile(keys: dict, key, job_id: str) -> None:
+    if key is None or key not in keys:
+        return
+    keys[key].pop(job_id, None)
+    if not keys[key]:
+        del keys[key]
+
+
+def _first(ids):
+    return min(ids, key=ids.get) if ids else None
+
+
+def same_text(stored: dict, record: dict) -> bool:
+    """Whether two records hold the same JD text, up to what copying changes (the id's fingerprint).
+
+    Compared on the stored record's current text, not its id: an update with edited
+    text keeps the first version's id, so the id no longer fingerprints the text.
+    """
+    return schema.normalize_for_match(stored["raw_text"]) == schema.normalize_for_match(record["raw_text"])
 
 
 class Store:
@@ -145,23 +193,27 @@ class Store:
         key = portal_key(record["source"])
         if key is not None:
             if index is not None:
-                found = self.get(index.by_portal[key]) if key in index.by_portal else None
+                found_id = index.portal(key)
+                found = self.get(found_id) if found_id is not None else None
             else:
                 found = self.find_by_portal_id(key)
             if found is not None:
-                return found, found["id"] == record["id"] or found["raw_text"] == record["raw_text"]
+                return found, same_text(found, record)
         found = self.get(record["id"])
         if found is not None:
-            return found, True
+            # An edit update keeps the first version's id: the record under this
+            # id may hold later text, which this one then replaces.
+            return found, same_text(found, record)
         url = normalize_url(record["source"]["url"])
         if index is not None:
-            found = self.get(index.by_url[url]) if url in index.by_url else None
+            found_id = index.url(url) if url is not None else None
+            found = self.get(found_id) if found_id is not None else None
         else:
             found = self.find_by_url(record["source"]["url"])
         if found is not None:
             # An earlier URL update kept the original id. The next import
             # of that edited text must still protect completed fields.
-            return found, found["raw_text"] == record["raw_text"]
+            return found, same_text(found, record)
         return None, False
 
     def save(self, record: dict, index=None):

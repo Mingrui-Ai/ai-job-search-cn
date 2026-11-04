@@ -30,6 +30,7 @@ import math
 import re
 import unicodedata
 from datetime import date, datetime
+from urllib.parse import urlsplit
 
 SCHEMA_VERSION = 1
 
@@ -267,6 +268,16 @@ def _check_timestamp(value, path: str, errors: list) -> None:
         errors.append(f"{path}: must be an ISO 8601 time with a UTC offset, like 2026-10-27T10:00:00+08:00")
 
 
+def _url_problem(url: str):
+    """Why a URL cannot be split into host and port (store.normalize_url's reading), or None."""
+    try:
+        parts = urlsplit(url.strip())
+        parts.port  # raises ValueError for a port like "abc" or out of range
+    except ValueError as exc:
+        return str(exc)
+    return None
+
+
 def _check_source(source, errors: list) -> None:
     if not isinstance(source, dict):
         errors.append("source: must be an object")
@@ -280,6 +291,8 @@ def _check_source(source, errors: list) -> None:
         url = source["url"]
         if url is not None and not (isinstance(url, str) and url.startswith(("https://", "http://"))):
             errors.append("source.url: must be null or an http(s) URL")
+        elif url is not None and (problem := _url_problem(url)):
+            errors.append(f"source.url: not a readable URL ({problem})")
         if url is None and source.get("type") == "url":
             errors.append("source.url: required when source.type is url")
     if "imported_at" in source:

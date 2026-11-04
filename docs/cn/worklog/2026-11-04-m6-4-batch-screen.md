@@ -375,3 +375,10 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--che
 
 - 冒烟：临时数据目录、示例档案，五个岗位（两个被过滤）加一个格式错的文件，`--check`、导入评分、重跑（`scored` 为 0、什么都不改）都符合设计。
 - 相关测试（agent_entry、screen、schema、store 三个、jd_parser、package）251 项通过；`lint_skills`、`security_guards` 通过。全量测试的结果见 PR #141。
+
+**Codex B 审核（ab09501）的三条 P2，已改**
+
+- P2-1 索引残留旧键：`Index` 记下每条记录归在哪些键下，`add` 先移除旧键再登记新键；一个键下有几条记录时按导入顺序取第一条，和逐条保存的扫描一致。测试：(old, U1) → (new, U1) → (old, U2)，带索引、不带索引、`jd screen` 三种都是新建 2 条。
+- P2-2 改回第一版原文被跳过：`find_existing` 的三条路径都用 `store.same_text` 比较库里**当前**原文（按 `normalize_for_match`，即指纹的口径），不再用保留下来的 `id`。测试：按岗位 ID、按链接两种，原文 → 修改 → 恢复都是更新且存的是第一版；同时含两个版本的批次重跑不跳过。
+- P2-3 端口读不出的 URL 让整批退出：`schema._check_source` 用 `urlsplit(...).port` 检查，读不出时报 `source.url: not a readable URL (...)`，收件格式检查和 `Store.save` 都因此只跳过这个文件；`normalize_url` 对这种 URL 返回 None，库里已有的这类记录也不会中断批次。测试：`--check` 和正常初筛各一个坏文件加一个好文件；库里写入坏 URL 记录后批次照常。
+- 七项新测试在 ab09501 的代码上全部失败（3 失败、4 报错），改后通过。
