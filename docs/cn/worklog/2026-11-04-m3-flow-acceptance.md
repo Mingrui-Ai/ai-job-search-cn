@@ -1,4 +1,4 @@
-# 2026-11-04 · M3 整条流程工程验收（第一轮）
+# 2026-11-04 · M3 整条流程工程验收（第一、二轮）
 
 ## 完成
 
@@ -362,3 +362,157 @@ python -m jobsearch_cn application list --job $J --data-dir $D
 1. 规划者审核本报告及问题分级，决定需要先修哪些问题。
 2. PR #127 合并后做第二轮：补 M3-6 沟通草稿，重点核对邮件 G3（和简历一致）及“简历见附件”；再串一次审核和 materials_check。
 3. M3-5 仍需真实用户档案、三个目标岗位、三份有针对性且可追溯的简历，用户本人打开确认，并至少用一份真实投递。本轮没有满足或模拟替代该真实投递门槛。
+
+## 第二轮：沟通草稿
+
+### 完成与决策
+
+本轮验收 M3-6 的三种沟通草稿，沿用上文的公开 tech 岗位、完整 tech 档案和简历材料。第一轮的过程与发现保留为历史记录；下面是当前基线的独立实测，不用第一轮的通过记录代替本轮执行。
+
+**结论：tech 简历重新独立审核通过后，打招呼语、投递邮件、内推请求均完成起草、校验、渲染与独立审核；邮件修改后的旧审核失效，旧渲染被审核入口拒绝，重新 render 后第 2 轮通过；本地 submit 关联第 2 轮审核，materials_check=match。本轮未发现新的 P1/P2，新增 1 项 P3 字数口径问题。**
+
+- 基线：`origin/master@7e5071fdb33781c5243f887dd201fd3c76eec804`，包含 PR #127、#130、#132。
+- 起草工作树 `tmp/m3-flow2`，分支 `codex/m3-flow2-acceptance`；审核工作树 `tmp/m3-flow2-review`，同基线 detached HEAD。运行数据各在自己的 `data/tech/`，未读取、改动真实用户数据。
+- 用户点名三种，因此各写一份，不按默认规则只选一种。候选人关系、薪资和技能均不额外假定，不打开 JD 中的链接，不发送邮件或消息。
+- 用户已明确授权临时验收、写本地投递记录、推送报告并开 PR。投递中的“已投出”只是本次公开夹具测试设定，不代表真实发送。
+- 独立审核由 `fork_turns=none` 的 Codex 子上下文执行，完全不继承起草对话；每次只给资料路径、生成命令的输出和简短的选择/改动说明。审核者读自己的原始资料副本，仅写审核结果，不运行 build/render，不打开沟通 `.txt`。本轮依用户要求使用隔离子上下文，未覆盖手动复制提示词另开窗口的交接界面。
+- 本 PR 只改本报告，不改实现、测试、模板或公开夹具。临时脚本、日志和产物不提交；交付后删除两个临时工作树。
+
+### 简历前提重新成立
+
+从 `tests/fixtures/cn/material/tech-m3/profile/` 逐字节复制档案与 notes；从 `tests/fixtures/cn/messages-m3-4-holdout/contexts/tech/jd.txt` 重新导入，仍得到 `job_b508159d1f40`。`profile validate/show`、`jd parse/validate/save/show` 全部退出 0。
+
+同一句 `日薪：180-240 元。` 现在直接被规则解析为 180–240 元/天，证据的 method 为 `rule`，无需第一轮的人工补全：**第一轮 P2-01 在当前基线复验通过。**
+
+重新 `match score --draft`，经历维度仍按第一轮同一公开事实给 85、method=agent、引用 `exp-1` 和 `proj-1`；总分严格抄 `match validate` 返回的重算结果，再 validate/save/show/list。得到 81、strong、complete=true，记录不过期；硬性条件仍为 needs_check，Rust 为真实缺口。未改档案、权重或硬性条件。
+
+简历 JSON 直接取本报告上文的 tech 输入，`profile_hash` 与新匹配记录一致。`material validate`、真实 Typst `resume build` 均退出 0、无错误或警告；一页 PDF、DOCX 和说明文件均生成，PDFium 页面图已查看。审核者重新执行第 1 轮，`mode=independent, verdict=pass`，0 must、2 suggest（E4 动词开头、D5 页底留白）。两条不采纳：原句事实准确，相关经历已经用完，不为填空补造内容。简历未修改。
+
+简历材料哈希仍为 `a614cc74fae80269339180dee08ea1ca8e71237511dfc6db2b8b5125c2d011b6`；审核者核对了该值与 build.json 一致，也核对了 PDF、DOCX 的文件哈希。邮件起草时，简历已生成、已审核通过，附件前提确实成立。
+
+### 三种输入与第一次渲染
+
+以下记号均为本轮临时目录：`$D=data/tech`，`$J=job_b508159d1f40`，`$M=$D/materials/$J`，`$T=$D/messages/$J`。实际命令通过 `JOBSEARCH_CN_DATA_DIR` 指向 `$D` 的绝对路径；也可等价地在支持它的命令上加 `--data-dir $D`。所有 Python 命令使用 conda 的 `ai-job-search-cn` 环境。
+
+```powershell
+python -m jobsearch_cn material template $J --kind greeting
+python -m jobsearch_cn material template $J --kind email
+python -m jobsearch_cn material template $J --kind referral
+# 写三份材料；以下各执行一次
+python -m jobsearch_cn material validate $M/<kind>-1.json
+python -m jobsearch_cn material render $M/<kind>-1.json --output
+```
+
+三个 template 均自动选中 `tech/<kind>@1`；三份材料的 `schema_version=1`、`direction=tech`，`profile_hash=3b5cbef9bab820661299a6d82715f9c382679bb7e1adedee69e3a2671ec9e093`。created 分别为 `2026-11-04T20:17:18+08:00`、`20:17:19+08:00`、`20:17:21+08:00`。greeting/referral 的 subject 为 null；email 的 subject 为 `{"text":"应聘{job.title}-{contact.name}-{edu-1.school}","refs":["job","edu-1"]}`。
+
+为复核 G3、G6–G8，列出实际槽位与引用；表里的占位符就是材料原文，不是填充后的联系方式。公共经历段 E 为 `为内部RAG问答服务编写检索评测脚本（Python），覆盖300条测试问题。`（refs=`["exp-1"]`）；公共项目段 P 为 `基于LangChain和MySQL搭建课程资料问答，支持20门课程的资料检索。`（refs=`["proj-1"]`）。
+
+| 材料 | 槽位（按顺序） | 实际文字或引用 |
+| --- | --- | --- |
+| greeting | opening | `您好，我是{edu-1.school}{edu-1.level}生，想应聘{job.title}。`；refs=`["edu-1","job"]` |
+| greeting | evidence | E |
+| greeting | availability | `可{availability.start_date}起到岗，每周{availability.days_per_week}天，持续{availability.months}个月。`；refs=`["availability"]` |
+| greeting | closing | `方便的话可发简历进一步沟通。`；refs=`[]` |
+| email | salutation | `您好！`；refs=`[]` |
+| email | opening | `我是{edu-1.school}{edu-1.major}专业的{edu-1.level}生{contact.name}，从岗位介绍中了解到{job.company}的{job.title}，希望应聘。`；refs=`["edu-1","job"]` |
+| email | evidence × 2 | 第一段 E 后接 `使用Go重构订单查询接口，P99延迟从120ms降至45ms。`，refs=`["exp-1"]`；第二段 P |
+| email | fit | `GitHub：{contact.github}`；refs=`[]` |
+| email | availability | 同 greeting 的 availability |
+| email | closing（第 1 版） | `简历见附件，期待进一步沟通，谢谢！`；refs=`[]` |
+| email | signature | `{contact.name}\n电话：{contact.phone}\n邮箱：{contact.email}`；refs=`[]`，其中 `\n` 表示材料字符串内的实际换行 |
+| referral | opening | `您好，我是{edu-1.school}{edu-1.level}生{contact.name}。`；refs=`["edu-1"]` |
+| referral | ask | `如果方便，想请您帮忙内推{job.company}的{job.title}。`；refs=`["job"]` |
+| referral | evidence × 2 | E、P |
+| referral | closing | `可提供简历供您了解；如不方便也没关系，谢谢！`；refs=`[]` |
+
+三次 validate 与三次 render 均退出 0，errors/warnings 为空。每份都写 `.txt` 和 `message-build` 说明文件；标准输出只有路径、chars、warnings、build_note。本轮只用 `--output`，没有运行打印正文的无参数 render。
+
+| 材料 | render 返回 chars | 按 material.md §7.3 统计的正文 | 邮件标题 | 第 1 轮独立审核 |
+| --- | --- | --- | --- | --- |
+| greeting | 105 | 105 | 不适用 | pass，0 findings |
+| email | 312 | 274 | 19 | pass，0 findings |
+| referral | 148 | 144 | 不适用 | pass，0 findings |
+
+审核者各执行 material validate、review draft，先打开各自的说明文件核对 material_hash，再按 G 类和适用旧条目审核；三份审核均为 `round=1, mode=independent, coverage=[]`，review validate/show 均通过。G3：只使用简历已列出的 exp-1/proj-1，300、120→45、20 及其含义均一致，不加 Rust；G6：身份字段全用占位符；G7：两个经历段各引用实际依据；G8：链接仅为 contact.github 占位符，到岗承诺均来自 availability，没有手写相对日期、天数或额外承诺。审核者核对邮件附件的已通过简历材料和实际生成文件。
+
+### 一次修改、旧文件拦截、第 2 轮
+
+只改 `email-1.json` 的 `segments[6].text` 一次：从 `简历见附件，期待进一步沟通，谢谢！` 改成 `简历见附件，感谢您阅读，期待进一步沟通！`。其他字段、created、经历、数字和 refs 全部不变；打招呼语和内推请求不修改，不开第 2 轮。
+
+| 阶段 | 实际结果 |
+| --- | --- |
+| 改材料，故意暂不 render | material validate、review draft 均退出 0；旧 `.txt` 与原备份逐字节一致 |
+| 核对旧审核 | `review validate review-email-1-r1.json` 退出 1，`material_hash: the material has changed since this review; review the current version` |
+| 派独立审核入口 | 审核者自己读取当前材料与旧 build.json，发现哈希不同，要求重渲染，不写审核结果；这次不计轮次 |
+| 配旧文件做 submit 预览 | 返回 `materials_check=mismatch`；两条警告分别是当前版本无通过审核、说明文件来自另一版材料；数据目录逐文件摘要在预览前后相同 |
+| 起草者重新生成 | 再次 material validate，随后 `material render email-1.json --output`，均退出 0、warnings=[]，返回 chars=315；新正文 277、标题仍 19 |
+| 第 2 轮 | 审核者先确认第 2 轮审核文件尚不存在，再以新 render 输出、新说明文件核对当前 material_hash；只审收尾改动，写 `review-email-1-r2.json`，round=2、independent、pass、findings=[]、coverage=[]；review validate/show 均退出 0 |
+
+| 版本 | 材料的 material_hash |
+| --- | --- |
+| greeting（未改） | `838b08356fb0611315b57dcb2f30911752d4549fe481f3616ce90d8641178c0a` |
+| email 第 1 版 | `91663dc89e38b53366c328163713b180a243d30ca48bb87db197fadd5f5cc42c` |
+| email 第 2 版 | `aa64aa3703f28cb0eabc6bfb494f02b7173e562d682cdbadc1e2484337540121` |
+| referral（未改） | `c749070dbd2b57970ffdee590dba405a16c56a188bb1d4b39149d6234777d4ff` |
+
+旧审核记录保留原样，不给它换 hash 冒充新审核。旧文件拦截是审核工作流中的实际人工核对，加上 review validate 对旧审核的检查；不宣称 review validate 自己会读 `.txt`，也不宣称投递记录会阻止用户登记已发出的不一致文件。
+
+### 本地投递、隐私与产物核对
+
+先 `application list --job $J` 确认无记录，执行下列预览并说明事件和状态后，按本次用户验收授权，把 `--preview` 换成其返回的 `--request-id` 写入：
+
+```powershell
+python -m jobsearch_cn application record $J --channel email --platform 公开夹具工程验收 --actor codex --preview
+# 返回 created，null → drafted，warnings=[]；写入后 revision=1
+python -m jobsearch_cn application submit $A --expected-revision 1 --on 2026-11-04 --material $M/email-1.json --sent $T/email-1.txt --actor codex --preview
+```
+
+`$A=app_b4396db68f7583a9ad5462cd16e3758f`。未重渲染时的 submit 预览如上表，是 mismatch，没有提交；重渲染且第 2 轮审核通过后，重新预览，得到 `drafted → applied`、一条 submitted 事件、materials_check=match、warnings=[]。再次逐文件比较确认预览未改数据；按新 request_id `req_d2e9a02daef2b9b3fce9b82b92a19a43` 写入。最终：
+
+```json
+{
+  "application_id": "app_b4396db68f7583a9ad5462cd16e3758f",
+  "revision": 2,
+  "status": "applied",
+  "submission": {
+    "confirmed": true,
+    "occurred_at": null,
+    "occurred_on": "2026-11-04",
+    "materials_recorded": true,
+    "materials_check": "match"
+  }
+}
+```
+
+材料版本的 `material_path=materials/job_b508159d1f40/email-1.json`，`review_path=materials/job_b508159d1f40/review-email-1-r2.json`，material_hash 为上表 email 第 2 版的值，未选旧的 r1 审核。随后 show/list/export 均退出 0，`application validate` 为 `valid=true, errors=[], warnings=[], orphans=[]`；同一 submit 请求重试返回 `repeated=true`，仍是同一 application、revision=2。独立读取归档材料、sent-1.txt、岗位和评分快照，4 份文件 SHA-256 都匹配，材料与发出文件的大小也与记录一致。
+
+最终产物核对：临时脚本直接按原始档案/岗位字段替换占位符，与 `.txt` 逐字比较（仅忽略文件末尾的换行），三份均相同、无未替换占位符；重算 SHA-256 与各自 build.json 一致。脚本只打印布尔值、计数和摘要，不打印正文。邮件仍含“简历见附件”，本地签名包含档案中已有的电话、邮箱；给用户附件路径指向已通过审核的 `$D/resumes/$J/resume-1.pdf`，本次没有真实发送。
+
+| 文件 | 字节数 | SHA-256 |
+| --- | --- | --- |
+| greeting-1.txt | 272 | `35d369c1b737efd7783e3a65fdd89967294a349f44c2b2058e0c94d982b168b8` |
+| email-1.txt（修改前） | 687 | `cdd3ac9eec41d334783080ed4604e5c0e98128670d865e536d1560c1e9d6247b` |
+| email-1.txt（第 2 轮） | 696 | `84935f2b41e283e99894c3a9efebbbc983bcb2041b3130f20f9e5a08dbd47a8e` |
+| referral-1.txt | 381 | `4ef0b149d2104223de169ac81654e98d3c40a2cf4fc7ceee50fcd45171d3ad72` |
+
+以公开夹具中所有非空联系方式值为探针，扫描验收者留存的 **48 份 CLI 标准输出**（含 profile show、material validate/render、review draft/validate/show、application 预览/写入/show/export 等），命中为 0。审核者读取 profile show 的脱敏输出、未打开沟通 `.txt`；审核结果原样复制回来，没有修改审核内容。最终 profile.json 和 notes.md 仍与公开夹具逐字节相同。
+
+### 验证与分级
+
+- `python tools/lint_skills.py`：退出 0，14 skills / 12 commands。
+- `python tools/security_guards.py`：退出 0。
+- `python -m unittest discover -s tests -t .`：完整 stdout/stderr 写入文件，前台进程等待到结束，退出 0，`Ran 1756 tests in 680.656s`，`OK (skipped=27)`。未把跳过项计成通过；本轮 tech 的真实 Typst build 和页面检查已另行实际执行。
+- 全量日志为本机临时证据中的 `unittest.log`，另有 `lint_skills.log`、`security_guards.log` 和逐命令输出；不把大段日志或临时档案提交到公开仓库。
+- 请求审核前重新 fetch，origin/master 仍为 `7e5071fdb33781c5243f887dd201fd3c76eec804`，无需合入额外提交。测试完成后，git 跟踪的文件只改本报告，没有改实现。
+
+本轮新增发现的分级如下；第一轮编号继续沿用，避免两个轮次的同名条目混淆。
+
+| 编号 | 分级 | 发现、证据与影响 | 建议 |
+| --- | --- | --- | --- |
+| P3-03 | P3（输出/文档口径） | material.md §7.3 的正文长度是代入后各段字符数之和，不计段间换行；messages.py 按此执行上限检查。但 cli.py:479 的 render.chars 是 `len(text)`，含段间换行，邮件还含标题及“标题：”前缀。实测 email 第 1 版为正文 274、标题 19，返回 chars=312；referral 正文 144，返回 148。工作流交付时只要求报“字数”，容易把整个文件字数当作正文上限所用字数。长度校验本身未失效，不阻断主流程 | 明确 chars 的含义，或另给 body_chars / subject_chars；本 PR 只报告，由规划者裁定是否修复 |
+
+第一轮问题的本轮处置：P2-01 已在同输入复验通过；P2-02 的 data/ops 未重审，且 #130 已调整 D5“相关事实用尽时留白只作建议”的判准，旧 revise 不能直接当作当前失败；P3-01 的手动会话交接、P3-02 的原生 Word/WPS 页面检查仍不在本轮范围。当前文档明确沟通投递的 material_versions.kind 仍统一记为 resume，本轮按该已有契约核对，不新增缺陷条目。
+
+### 下一步
+
+由规划者审核第二轮事实与 P3-03 分级。本轮仍不是 M3-5 正式验收：真实档案、三个真实目标岗位、用户本人确认产物和至少一次真实投递均未由公开夹具替代。
