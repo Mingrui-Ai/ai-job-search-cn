@@ -269,6 +269,11 @@ SEED_CASES = (
     ("时薪 40 元", "salary", salary(40, 40, "CNY/hour")),
     ("月薪：8000-12000元", "salary", salary(8000, 12000, "CNY/month")),
     ("月薪:9000元", "salary", salary(9000, 9000, "CNY/month")),
+    # Codex B on #130: 元 on both ends of a range keeps the whole range.
+    ("日薪：180元-240元/天", "salary", salary(180, 240, "CNY/day")),
+    ("日薪：180元-240元", "salary", salary(180, 240, "CNY/day")),
+    ("月薪：8000元-12000元", "salary", salary(8000, 12000, "CNY/month")),
+    ("时薪：30元-50元", "salary", salary(30, 50, "CNY/hour")),
     # A bare number after a label stays unread: no unit to confirm it is pay.
     ("日薪：200", "salary", None),
     ("每天：工作8小时", "salary", None),
