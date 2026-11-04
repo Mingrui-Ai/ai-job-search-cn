@@ -114,7 +114,10 @@ ALLOWED_PERMISSIONS = {
     # CN fork: the resume workflow (docs/cn/resume-workflow.md), approved by the owner on
     # 2026-11-02. material validate and review draft/validate/show read the profile, job
     # store and data/materials/ and only print; resume sample/build run the local Typst
-    # binary and write PDF and Word files under <data dir>/resumes/. No network.
+    # binary and write PDF and Word files under <data dir>/resumes/. material template and
+    # material render print; material render --output (M3-6, comment approved by the owner
+    # on 2026-11-04) writes a text file and its build note under <data dir>/messages/.
+    # No network.
     "Bash(python -m jobsearch_cn material:*)",
     "Bash(python -m jobsearch_cn resume:*)",
     "Bash(python -m jobsearch_cn review:*)",
