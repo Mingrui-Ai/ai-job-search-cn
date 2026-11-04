@@ -191,3 +191,45 @@ Read, Bash(python -m jobsearch_cn application:*), Bash(python -m jobsearch_cn jd
    - 快照沿用（第 1 点）；
    - 改状态的回复只记 `status`（第 2 点）；
    - 上游技能的触发词（第 4 点）。
+
+## 5. 规划者裁定（接替 cn-e3 的规划者，2026-11-04）
+
+计划（0ebf62a）审过，开始实现。§2.7 七条全部同意：
+
+1. 作废 `submitted` 后再 `submit`：已有快照就沿用第一次的，不改主键，文档写明。
+2. 改了状态的回复只记 `status --reason`；状态不变的回复才用 `reply`。写进工作流。
+3. 先预览、用户同意后带 `request_id` 提交、`--actor` 写 Agent 名：工作流和三个入口写死。
+4. `cn-application` 触发词用中文；工作流和 dsh 入口写明不用上游 `/outcome`、`/apply` 记投递。
+5. `validate` 的五项检查和隐私类文字警告：照计划做。
+6. `reply` 可带 `--on`/`--at`（不能是将来）；`note`、`followup`、`void` 不带。
+7. 备份中断留下的 `<名字>.tmp/` 列进 `orphans`，用户同意后再删。
+
+**授权**：经理本人 2026-11-04 同意（规划者用 AskUserQuestion 问的），按计划第 3 节改 `tools/security_guards.py` 的 `ALLOWED_PERMISSIONS` 和 `ALLOWED_SKILL_TOOLS`，加 `"Bash(python -m jobsearch_cn application:*)"`，注释写批准日期 2026-11-04 和计划里的三点。只改这两处，其余不动。
+
+§2.1–2.6 没有另外裁定。规划者说"计划审过，开始实现"，所以照计划的建议做，包括备份复制附件。
+
+## 6. 进展
+
+**第 1 步**（2026-11-04）：`applications.py`、`cli.py`、测试 `tests/test_cn_applications_events.py`（19 项）、`applications.md`。
+
+- 新事件和重放：
+  - `reply` 在 `drafted` 报 `transition`；
+  - `followup` 只在 `applied`、`interview`、`offer`，`--cancel` 要有日期可取消；
+  - 进入终结状态或 `no_response` 清空跟进日期；
+  - `note`、`void` 只加 `revision`。
+- `reply`、`note`、`followup`、`void` 共用 `_append`：从 `expected_revision` 那一刻的事件（`_as_of`，晚于这个 revision 的作废也一并撤掉）计划要写的事件。这样重试时作废的目标和第一次相同，请求摘要也相同，返回第一次的结果。作废的目标 id 算进请求摘要。
+- `void`：
+  - 预览和输出带 `voids`；
+  - `_commit` 在同一事务里填目标的 `voided_by`，只改 `voided_by` 为空的那一行；
+  - 作废以后再 `submit` 沿用第一次的快照。
+- 实现时多定的一条：**补录投递的 `submitted` 不能单独作废**（`invalid`）。作废以后它就成了"没投出的补录"，`validate` 本来就把这算错误（补录必须已投出）。记错的补录直接 `status withdrawn --reason 记错了`。写进了 applications.md 第 14 节，请规划者确认。
+- `list --due`：照计划 2.3。普通 `list` 的每一行加 `next_followup_on`。
+- `backup`：照计划 2.5。快照做好后，对快照所在的目录跑 `validate` 得出 `source_valid`。`validate --backup <名字>` 复用同一套检查；`.tmp/` 列进 `orphans`。
+- `validate`：
+  - 新事件的 payload；
+  - 没有发生时间的事件确实没写时间；
+  - 作废的对应关系（`_check_voids`）；
+  - 回复摘要、备注、作废原因里像联系方式的文字给警告。
+- applications.md：第 3、4、8、10 节补上新内容，新加第 13 节（跟进）、14 节（作废）、15 节（备份和恢复）、16 节（Agent 工作流）。
+
+下一步：入口（三个文件）、`AGENTS.md`、README 索引、`resume-workflow.md` 的链接、授权四处，`test_cn_agent_entry` 加 `cn-application`。

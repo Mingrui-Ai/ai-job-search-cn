@@ -755,13 +755,46 @@ def cmd_application_show(args) -> int:
 
 
 def cmd_application_list(args) -> int:
+    if args.as_of is not None and not args.due:
+        _emit({"error": "invalid", "message": "--as-of goes with --due"}, sys.stderr)
+        return 1
+    if args.due:
+        return _application_run(applications_mod.due, store.data_dir(args.data_dir), as_of=args.as_of,
+                                statuses=args.status, job_id=args.job)
     return _application_run(applications_mod.list_applications, store.data_dir(args.data_dir),
                             statuses=args.status, job_id=args.job)
 
 
+def _application_write(function, args, **kwargs) -> int:
+    """reply, note, followup and void: the arguments every write on an existing application shares."""
+    return _application_run(function, store.data_dir(args.data_dir), args.application_id,
+                            expected_revision=args.expected_revision, actor=args.actor, preview=args.preview,
+                            request_id=args.request_id, **kwargs)
+
+
+def cmd_application_reply(args) -> int:
+    return _application_write(applications_mod.reply, args, summary=args.summary, on=args.on, at=args.at)
+
+
+def cmd_application_note(args) -> int:
+    return _application_write(applications_mod.note, args, text=args.text)
+
+
+def cmd_application_followup(args) -> int:
+    return _application_write(applications_mod.followup, args, due=args.due, cancel=args.cancel)
+
+
+def cmd_application_void(args) -> int:
+    return _application_write(applications_mod.void, args, reason=args.reason)
+
+
+def cmd_application_backup(args) -> int:
+    return _application_run(applications_mod.backup, store.data_dir(args.data_dir))
+
+
 def cmd_application_validate(args) -> int:
     try:
-        result = applications_mod.validate(store.data_dir(args.data_dir))
+        result = applications_mod.validate(store.data_dir(args.data_dir), backup=args.backup)
     except applications_mod.ApplicationError as exc:
         _emit(exc.payload(), sys.stderr)
         return 1
@@ -784,7 +817,7 @@ def cmd_application_export(args) -> int:
 
 
 def _add_application_parser(commands, stored) -> None:
-    group = commands.add_parser("application", help="投递记录：记一次投递、确认投出、改状态、查看和导出",
+    group = commands.add_parser("application", help="投递记录：记投递、投出、改状态、回复、备注、跟进、作废、查看、导出和备份",
                                 description="投递记录（docs/cn/applications.md）。写操作先 --preview 看要写什么，"
                                             "用户确认后带预览给的 --request-id 再运行一次才写入。")
     group.set_defaults(help_parser=group)
@@ -840,6 +873,36 @@ def _add_application_parser(commands, stored) -> None:
     when(status_parser)
     status_parser.set_defaults(handler=cmd_application_status)
 
+    def existing(name, summary, description, handler):
+        parser = writer(name, summary, description)
+        parser.add_argument("application_id", help="投递 id")
+        parser.add_argument("--expected-revision", type=int, required=True, help="show 或 list 给的 revision")
+        parser.set_defaults(handler=handler)
+        return parser
+
+    reply_parser = existing("reply", "记一次不改状态的回复", "记收到的回复（不改状态）。改了状态的回复用 status --reason 记。",
+                            cmd_application_reply)
+    reply_parser.add_argument("--summary", required=True, help=f"回复说了什么（≤{applications_mod.MAX_TEXT} 字）")
+    when(reply_parser)
+    note_parser = existing("note", "给一条投递加备注", "加一条备注，任何状态都可以。", cmd_application_note)
+    note_parser.add_argument("--text", required=True, help=f"备注（≤{applications_mod.MAX_TEXT} 字）")
+    followup_parser = existing("followup", "设置或取消跟进日期",
+                               "设置跟进日期（今天或以后，Asia/Shanghai），或取消。只用于已投出、没结束的投递。",
+                               cmd_application_followup)
+    due_or_cancel = followup_parser.add_mutually_exclusive_group(required=True)
+    due_or_cancel.add_argument("--due", help="跟进日期：YYYY-MM-DD")
+    due_or_cancel.add_argument("--cancel", action="store_true", help="取消跟进日期")
+    void_parser = existing("void", "作废最近一条事件（输错时用）",
+                           "作废最近一条还能作废的事件：不删除，只标记；created 和作废事件本身不能作废。",
+                           cmd_application_void)
+    void_parser.add_argument("--reason", required=True, help=f"为什么作废（≤{applications_mod.MAX_TEXT} 字）")
+
+    backup_parser = sub.add_parser(
+        "backup", parents=[stored], help="备份投递记录库和归档文件",
+        description="把数据库的一致快照和它登记的归档文件复制到 <数据目录>/applications/backups/<UTC 时间>/，"
+                    "旁边写 manifest.json。不改任何记录。")
+    backup_parser.set_defaults(handler=cmd_application_backup)
+
     show_parser = sub.add_parser("show", parents=[stored], help="一条投递的完整内容（格式同导出）",
                                  description="一条投递的完整内容，格式同导出。只读。")
     show_parser.add_argument("application_id", help="投递 id")
@@ -850,12 +913,16 @@ def _add_application_parser(commands, stored) -> None:
     list_parser.add_argument("--status", nargs="+", action="extend", choices=applications_mod.STATUSES,
                              help="只列这些状态")
     list_parser.add_argument("--job", help="只列这个岗位的投递")
+    list_parser.add_argument("--due", action="store_true",
+                             help="待跟进：已投出、没结束、跟进日期已到的（due）和没设跟进日期的（unset）")
+    list_parser.add_argument("--as-of", help="和 --due 一起用：按这一天算（YYYY-MM-DD；默认 Asia/Shanghai 的今天）")
     list_parser.set_defaults(handler=cmd_application_list)
 
     validate_parser = sub.add_parser(
         "validate", parents=[stored], help="检查整个投递记录库和归档文件",
         description="检查整库：事件连续、状态重放一致、归档文件在且摘要对、有没有没登记的孤立文件。"
                     "通过时退出码 0，不通过时退出码 1。只读。")
+    validate_parser.add_argument("--backup", metavar="NAME", help="改为检查 applications/backups/ 下的这份备份")
     validate_parser.set_defaults(handler=cmd_application_validate)
 
     export_parser = sub.add_parser(
