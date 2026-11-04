@@ -28,6 +28,7 @@
 | [oss-privacy-review.md](oss-privacy-review.md) | 开源前隐私审查（2026-10-28）：公开范围、各类扫描结果和处理结论、转为公开前的操作 |
 | [resume-pdf.md](resume-pdf.md) | 生成简历：安装 Typst（便携版）、字体、`resume sample`、压成一页和检查；`resume build` 从材料生成 PDF 和 Word 版 |
 | [m2-5-round2-checklist.md](m2-5-round2-checklist.md) | M2-5 第二轮的操作清单：用 cn-setup 补档案的哪几项（薪资分档、可以接受的城市、去外地面试），以及重新导入、重新评分、调权重、出报告的顺序和命令 |
+| [m3-5-checklist.md](m3-5-checklist.md) | M3-5 真实验收操作清单：备份、经理选择三个岗位、简历与沟通草稿、独立审核、Word/WPS 和 PDF 实看、真实投递与记录 |
 | [m3-0-resume-prototypes.md](m3-0-resume-prototypes.md) | M3-0 简历生成方式的原型对比（2026-10-30）：三种同时出 Word 和 PDF 的做法、开源简历模板的调研和许可、推荐方案和 M3-2 的检查清单 |
 | [plan/kickoff-guide-v0.1.md](plan/kickoff-guide-v0.1.md) | 原始文件《AI_Job_Search_CN_项目启动指导_v0.1.md》（存档） |
 | [plan/initial-guidelines.md](plan/initial-guidelines.md) | 原始文件《初步guidelines.md》（存档） |
