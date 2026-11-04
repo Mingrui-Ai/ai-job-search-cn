@@ -233,3 +233,20 @@ Read, Bash(python -m jobsearch_cn application:*), Bash(python -m jobsearch_cn jd
 - applications.md：第 3、4、8、10 节补上新内容，新加第 13 节（跟进）、14 节（作废）、15 节（备份和恢复）、16 节（Agent 工作流）。
 
 下一步：入口（三个文件）、`AGENTS.md`、README 索引、`resume-workflow.md` 的链接、授权四处，`test_cn_agent_entry` 加 `cn-application`。
+
+**第 2 步**（2026-11-04）：入口和授权。
+
+- 入口三个：
+  - `.claude/skills/cn-application/SKILL.md`：`allowed-tools` 是 `Read`、`application:*`、`jd:*`；
+  - `.dsh/skills/cn-application/SKILL.md`：frontmatter 是 Claude 技能的去掉 `allowed-tools`，正文有三条 dsh 规则；
+  - `AGENTS.md` 的"记录投递"一段。
+
+  都指向 applications.md 第 16 节，写死"先预览、用户同意后带 request_id 写入"、`--actor`、不用上游 `/outcome`、`/apply`。触发词用中文。
+- 授权：
+  - `tools/security_guards.py` 的 `ALLOWED_PERMISSIONS` 加一行，注释写批准日期 2026-11-04 和三点（写命令只在用户看过预览、同意以后写 `applications/` 下的数据库和归档；`backup` 写 `applications/backups/`；不联网）；
+  - `ALLOWED_SKILL_TOOLS` 加一行，行尾注释 `cn-application`；
+  - `.claude/settings.json` 的 `permissions.allow` 加同一行。
+
+  `security_guards.py` 只改了这两处。
+- `docs/cn/README.md` 的索引改了 applications.md 那一行；`resume-workflow.md` 第 4 节加了一句链接（只加链接，没有命令）。
+- `tests/test_cn_agent_entry.py` 的 `WORKFLOWS` 加 `cn-application`：命令组 `application`（12 个命令都要在 applications.md 里出现）和 `jd`（`list`、`show`）。

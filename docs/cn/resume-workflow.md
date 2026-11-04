@@ -63,3 +63,4 @@
 - 最后一轮审核结果的摘要：`python -m jobsearch_cn review show data/materials/<岗位id>/review-<n>-r<k>.json` 的结论、关键词缺口、没采纳的建议和理由、没解决的问题。
 - 是自审的、页面没看过的（D5），都要说明。
 - 不替用户投递，不把简历发到任何地方。
+- 用户投出以后，按 [applications.md](applications.md) 第 16 节的投递记录工作流记一次（`cn-application`）。
