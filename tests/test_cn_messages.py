@@ -291,6 +291,64 @@ class Availability(unittest.TestCase):
         self.assertIn("days a week are written {availability.days_per_week}天", self.promise("每周{availability.months}天。")[0])
         self.assertIn("months are written {availability.months}个月", self.promise("可以实习{availability.months}年。")[0])
 
+    def test_a_bound_fails_even_at_the_profiles_value(self):
+        # Planner, 2026-11-04: the profile's value exactly. The review's cases and other bounds (4 days, 6 months),
+        # then V23's on a profile of 3 months.
+        cases = [(text, TECH_PROFILE) for text in (
+            "每周至少到岗4天。", "能连续实习6个月以上。", "每周可以到岗4天以上。", "能连续实习至少6个月。", "每周可以至少到岗4天。",
+            "每周 4 天起。", "每周 4 天左右。", "每周约 4 天。", "最多每周 4 天。", "大约实习 6 个月。", "不超过 6 个月的实习都可以。",
+            "实习 6 个月及以上。", "实习 6 个月或更长。", "可以实习 6 个月出头。", "可以 4 天/周以上。",
+            "每周至少{availability.days_per_week}天。", "实习{availability.months}个月以上。",
+            "可以工作{availability.months}个月以内。")]
+        cases += [(text, self.changed(months=3)) for text in ("可以至少实习3个月。", "可以连续实习3个月以上。")]
+        for text, data in cases:
+            errors = self.promise(text, data)
+            self.assertEqual(len(errors), 1, (text, errors))
+            self.assertIn("does not promise exactly the profile's availability.", errors[0])
+        self.assertEqual(self.promise("每周至少到岗4天。"),
+                         ["segments[2].text: '4天': '至少' does not promise exactly the profile's "
+                          "availability.days_per_week; write 4天 or {availability.days_per_week}天, with nothing like "
+                          "至少, 以上, 起, 左右 or 半"])
+        # 至少 before the first of two counts in a clause bounds that one, not the next.
+        errors = self.promise("每周 4 天并至少实习 6 个月。")
+        self.assertEqual(len(errors), 1, errors)
+        self.assertIn("'6 个月': '至少'", errors[0])
+
+    def test_a_unit_that_changes_the_months_fails(self):
+        # {availability.months}个半月 renders as 6个半月 while the profile says 6.
+        for text, quote in (("可以连续实习{availability.months}个半月。", "'{availability.months}个半月': '个半月'"),
+                            ("可以连续实习6个半月。", "'6个半月': '个半月'"),
+                            ("实习{availability.months}个多月。", "'{availability.months}个多月': '个多月'"),
+                            ("可以实习 6 个多月。", "'6 个多月': '个多月'")):
+            errors = self.promise(text)
+            self.assertEqual(len(errors), 1, (text, errors))
+            self.assertIn(quote, errors[0])
+        self.assertEqual(self.promise("实习{availability.months}月。"),
+                         ["segments[2].text: '{availability.months}': months are written {availability.months}个月"])
+
+    def test_a_time_by_hand_fails_beside_the_placeholder(self):
+        # The placeholder vouches for itself only (the review's two cases, then V23's on a later start).
+        for text, data in (("可以{availability.start_date}或明天到岗。", TECH_PROFILE),
+                           ("可以{availability.start_date}到岗或随时入职。", TECH_PROFILE),
+                           ("可于{availability.start_date}或明天到岗。", self.changed(start_date="2026-12-07"))):
+            errors = self.promise(text, data)
+            self.assertEqual(len(errors), 1, (text, errors))
+            self.assertIn("promises when you can start; write the date as {availability.start_date}", errors[0])
+            self.assertRegex(errors[0], r"\(written by hand: '(明天|随时)'\)$")
+        self.assertIn("written by hand: '提前'", self.promise("可以提前到岗。")[0])
+
+    def test_the_start_date_placeholder_is_the_earliest_day(self):
+        for text in ("可以{availability.start_date}起到岗。", "最早{availability.start_date}到岗。",
+                     "{availability.start_date}以后都可以到岗。", "可以{availability.start_date}前往贵司报到。",
+                     "{availability.start_date}起每周可以到岗 4 天，实习 6 个月。"):
+            self.assertEqual(self.promise(text), [], text)
+        for text, word in (("最晚{availability.start_date}到岗。", "最晚"), ("{availability.start_date}之前可以到岗。", "之前"),
+                           ("{availability.start_date}前到岗。", "前"), ("{availability.start_date}左右到岗。", "左右"),
+                           ("可以{availability.start_date}或更早到岗。", "或更早")):
+            errors = self.promise(text)
+            self.assertTrue(any(f"'{word}' with {{availability.start_date}}: the profile gives the earliest day" in error
+                                for error in errors), (text, errors))
+
     def test_wording_that_promises_nothing_passes(self):
         # No time next to the verb, a frequency with no count, a wish: nothing to hold against the profile.
         for text in ("期待入职贵司。", "到岗安排可以再沟通。", "每周的安排可以再沟通。", "入职后负责的是订单查询接口。",
@@ -568,6 +626,18 @@ class Cli(unittest.TestCase):
         self.assertEqual(outputs[0], outputs[1])
         self.assertEqual(outputs[0]["errors"],
                          ["segments[1].refs[1]: a message does not cite notes.md; only a CV's summary does"])
+
+    def test_validate_and_render_refuse_the_reviews_availability_cases(self):
+        # Codex B's review of 762b9f6 ran these through both commands: each passed and rendered its promise.
+        for text in ("每周至少到岗4天。", "能连续实习6个月以上。", "可以{availability.start_date}或明天到岗。",
+                     "可以连续实习{availability.months}个半月。"):
+            path = self.write(with_segment(GREETING, 2, text, ["availability"]))
+            for command in ("validate", "render"):
+                result = run_cli("material", command, str(path), data_dir=self.data)
+                self.assertEqual(result.returncode, 1, (text, command, result.stdout + result.stderr))
+                output = json.loads(result.stdout)
+                self.assertFalse(output["valid"])
+                self.assertEqual(len(output["errors"]), 1, (text, command, output))
 
     def test_a_misspelled_kind_names_all_four(self):
         record = dict(GREETING, kind="greet")

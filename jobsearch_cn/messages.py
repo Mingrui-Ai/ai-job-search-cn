@@ -68,9 +68,12 @@ _MONTHS = re.compile(rf"(?<![上下第\d]){_COUNT}\s*(?P<unit>个半月|个多?�
 _YEARS = re.compile(r"(?<![上下前去今明后第\d])(?P<count>\{availability\.[a-z_]+\}|\d{1,2}(?:\.\d+)?|[一二两三半])"
                     rf"\s*年(?![级底初中末内前后度份制龄纪代轻])(?!\s*{_RELATIVE})")
 _START = re.compile(r"到岗|入职|上岗|报到|到职|开始实习")
-# A start verb commits to a date only with a time next to it: 随时可以入职 does, 期待入职贵司 does not.
+_START_PLACEHOLDER = "{availability.start_date}"
+# A start verb commits to a date only with a time next to it: 随时可以入职 does, 期待入职贵司 does not. Every time
+# but the placeholder is written by hand, and fails even beside it ({availability.start_date}或明天到岗).
 _WHEN = re.compile(r"\{availability\.start_date\}|随时|马上|立即|立刻|即刻|即日|当[天日]|今天|明天|后天|现在|目前"
                    r"|下{1,2}个?(?:周|星期|礼拜|月)|[本这]个?(?:周|星期|礼拜|月)|月[初中底末]|年[初中底后]|尽[快早]"
+                   r"|更早|提前|早[些点]|早一[点些]"
                    r"|第一时间|[上下]半年|暑假|寒假|暑期|(?:周|星期|礼拜)[一二三四五六日天]"
                    r"|\d{4}\s*年|\d{1,2}\s*月|\d{1,2}\s*[日号]|\d{1,2}\s*[-/]\s*\d{1,2}"
                    r"|[一二三四五六七八九十]+\s*[月号]")
@@ -78,6 +81,21 @@ _WHEN = re.compile(r"\{availability\.start_date\}|随时|马上|立即|立刻|�
 _WITHIN = re.compile(rf"(?:\d+|[一二两三四五六七八九十几半]+)\s*个?\s*(?:天|周|星期|礼拜|月)\s*{_RELATIVE}")
 # 周一至周五都可以到岗 promises days a week with no number in it.
 _WEEKDAYS = re.compile(r"(?:周|星期|礼拜)[一二三四五六日天]\s*(?:到|至|-|~|～|—)\s*(?:周|星期|礼拜)?[一二三四五六日天]")
+# Words that make a count a bound or a guess, not the profile's value (planner, 2026-11-04: equal, exactly):
+# 至少 or 最多 anywhere before the count in its clause, 约 right before it, 以上, 起 or 左右 right after its unit.
+_BOUND_BEFORE = re.compile(r"至少|最少|起码|最低|最短|最长|最多|至多|不少于|不低于|不短于|不小于|不多于|不超过|不大于"
+                           r"|多于|少于|超过|大于|小于|高于|低于|不到|不足|大约|大概|大致|差不多|将近|接近")
+_BOUND_RIGHT_BEFORE = re.compile(r"(?:约|近|超|逾)\s*$")
+_BOUND_AFTER = re.compile(rf"\s*(?:以上|以下|起|左右|上下|前后|出头|有余|开外|多(?!数)|及以上|或以上|或以下"
+                          rf"|或更[多长久少短]|甚至更[多长久]|更[多长久少短]|往上|打底|保底|不等|{_RELATIVE})")
+# A days or months placeholder is followed by its unit and nothing that changes it: {availability.months}个半月
+# would render as 6个半月 while the profile says 6.
+_COUNT_PLACEHOLDER = re.compile(r"\{availability\.(?P<field>days_per_week|months)\}")
+_UNIT_AFTER = {"days_per_week": re.compile(r"\s*(?:个\s*)?(?:工作日|天)"), "months": re.compile(r"\s*个\s*月")}
+# {availability.start_date} is the earliest day the candidate can start: from it on (起, 以后) is that promise;
+# by it (最晚, 之前), around it (左右) or earlier (或更早) is not.
+_DATE_BOUND_BEFORE = re.compile(r"最晚|最迟|不晚于|不迟于|早于|先于")
+_DATE_BOUND_AFTER = re.compile(r"\s*(?:之前|以前|前后|前(?![往来去])|左右|上下|或更早|或之前|或提前)")
 _UNITS = {"days_per_week": "天", "months": "个月"}
 _FIELD_WORDS = {"days_per_week": "days a week", "months": "months"}
 _NOT_GIVEN = "which the profile does not give; leave it out, or ask the user to add it to the profile"
@@ -396,10 +414,11 @@ class _Checker:
     def _availability(self, text: str, refs: list, where: str) -> list:
         """Check what the text promises about the availability; return the spans checked here.
 
-        Days a week and months are compared with availability.days_per_week and availability.months alone,
-        written in Arabic digits or as the placeholder (五天, 半年 cannot be checked, so they are refused); a
-        start is written {availability.start_date}, not by hand or as 随时. A promise the profile has no value
-        for fails, and any promise needs the segment to cite the availability.
+        Days a week and months are the profile's availability.days_per_week and availability.months exactly,
+        written in Arabic digits or as the placeholder (五天, 半年 cannot be checked, so they are refused), with
+        no 至少, 以上, 起 or 左右 and no 个半月; a start is written {availability.start_date}, and no other time
+        is written by hand beside it. A promise the profile has no value for fails, and any promise needs the
+        segment to cite the availability.
         """
         availability = self.profile.get("availability")
         availability = availability if isinstance(availability, dict) else {}
@@ -409,19 +428,45 @@ class _Checker:
         spans, problems, promised = [], [], False
         for clause in _CLAUSE.finditer(masked):
             body, taken = clause.group(0), []
-            counts = [(match, "days_per_week", False) for regex in _DAYS for match in regex.finditer(body)]
+            found = [(match, "days_per_week", False) for regex in _DAYS for match in regex.finditer(body)]
             if _STAY.search(body):
-                counts += [(match, "months", regex is _YEARS) for regex in (_MONTHS, _YEARS)
-                           for match in regex.finditer(body)]
-            for match, field, years in counts:
+                found += [(match, "months", regex is _YEARS) for regex in (_MONTHS, _YEARS)
+                          for match in regex.finditer(body)]
+            # By position; of two reads of one count (每周 4 天, 4 天/周) the longer, so what follows is read after it.
+            for match, field, years in sorted(found, key=lambda item: (item[0].start("count"), -item[0].end())):
                 span = (match.start("count"), match.end())  # 4 天, not 每周可以到岗: 到岗 may still tell a start
                 if any(span[0] < end and start < span[1] for start, end in taken):
                     continue
-                taken.append(span)
                 promised = True
-                problem = _count_problem(match, field, years, availability)
+                # 至少 before an earlier count of the clause is that count's: look back to the count before.
+                problem = _count_problem(match, field, years, availability, body[_since(taken, span[0]):span[0]])
+                taken.append(span)
                 if problem:
                     problems.append(f"{where}: {problem}")
+            for match in _COUNT_PLACEHOLDER.finditer(body):
+                # A placeholder the rules above did not read as a count still says the profile's value only with
+                # its own unit: not {availability.months}月, not {availability.months}个月以内.
+                if any(match.start() < end and start < match.end() for start, end in taken):
+                    continue
+                field = match.group("field")
+                unit = _UNIT_AFTER[field].match(body, match.end())
+                end = unit.end() if unit else match.end()
+                quote = text[clause.start() + match.start():clause.start() + end].strip()
+                if unit is None:
+                    problems.append(f"{where}: {quote!r}: {_FIELD_WORDS[field]} are written "
+                                    f"{match.group(0)}{_UNITS[field]}")
+                else:
+                    word = _bound(body[_since(taken, match.start()):match.start()], body, end)
+                    if word:
+                        problems.append(f"{where}: {_bound_problem(quote, word, field, availability)}")
+                taken.append((match.start(), end))
+            for match in re.finditer(re.escape(_START_PLACEHOLDER), body):
+                bound = _DATE_BOUND_BEFORE.search(body, _since(taken, match.start()), match.start()) \
+                    or _DATE_BOUND_AFTER.match(body, match.end())
+                if bound:
+                    problems.append(f"{where}: {bound.group(0).strip()!r} with {_START_PLACEHOLDER}: the profile gives "
+                                    "the earliest day you can start, so write that day or from it on "
+                                    f"({_START_PLACEHOLDER}起), not by it, before it, around it or earlier")
             if _START.search(body) or _STAY.search(body):
                 for match in _WEEKDAYS.finditer(body):
                     taken.append(match.span())
@@ -436,17 +481,20 @@ class _Checker:
                     [match.span() for match in _WITHIN.finditer(rest) if verbs and match.end() <= verbs[-1]]
             if verbs and times:
                 promised = True
-                if "{availability.start_date}" not in rest:
+                # The placeholder vouches for itself only: 明天 beside it is still written by hand.
+                by_hand = sorted(span for span in times if rest[span[0]:span[1]] != _START_PLACEHOLDER)
+                if by_hand:
                     quote = text[clause.start():clause.end()].strip()
+                    pieces = ", ".join(dict.fromkeys(repr(rest[start:end].strip()) for start, end in by_hand))
                     start = availability.get("start_date")
                     if not isinstance(start, str) or not start:
                         problems.append(f"{where}: {quote!r} promises when you can start; it is "
-                                        f"availability.start_date, {_NOT_GIVEN}")
+                                        f"availability.start_date, {_NOT_GIVEN} (written by hand: {pieces})")
                     else:
                         problems.append(f"{where}: {quote!r} promises when you can start; write the date as "
                                         f"{{availability.start_date}} (the profile gives {start}), not by hand "
-                                        "and not as a word like 随时 or 明天")
-                    taken += times
+                                        f"and not as a word like 随时 or 明天 (written by hand: {pieces})")
+                    taken += by_hand
             spans += [(clause.start() + start, clause.start() + end) for start, end in taken]
         if promised and AVAILABILITY not in refs:
             self.errors.append(f"{where}: commits to a start date, days a week or a length of stay without "
@@ -499,26 +547,52 @@ def _blank(text: str, spans) -> str:
     return "".join(chars)
 
 
-def _count_problem(match, field: str, years: bool, availability: dict):
-    """What is wrong with one count of days a week or months a message promises, or None."""
+def _since(taken: list, start: int) -> int:
+    """Where the text before start that belongs to it begins: the end of the last span checked before it."""
+    return max((end for _, end in taken if end <= start), default=0)
+
+
+def _bound(before: str, string: str, end: int, unit: str = ""):
+    """The word that makes a count a bound or a guess rather than the profile's value, or None: 至少 or 最多 in
+    the text before it, 约 right before it, 以上, 起 or 左右 right after its unit, or the unit 个半月 or 个多月."""
+    if unit in ("个半月", "个多月"):
+        return unit
+    for found in (_BOUND_BEFORE.search(before), _BOUND_RIGHT_BEFORE.search(before), _BOUND_AFTER.match(string, end)):
+        if found:
+            return found.group(0).strip()
+    return None
+
+
+def _bound_problem(quote: str, word: str, field: str, availability: dict) -> str:
+    value, unit, placeholder = availability.get(field), _UNITS[field], f"{{{AVAILABILITY}.{field}}}"
+    exact = f"{value}{unit} or {placeholder}{unit}" if _positive(value) else f"{placeholder}{unit}"
+    return (f"{quote!r}: {word!r} does not promise exactly the profile's availability.{field}; write {exact}, "
+            "with nothing like 至少, 以上, 起, 左右 or 半")
+
+
+def _count_problem(match, field: str, years: bool, availability: dict, before: str):
+    """What is wrong with one count of days a week or months a message promises, or None. before is the text
+    of its clause before it, back to the count before."""
     count, unit = match.group("count"), _UNITS[field]
     quote = match.string[match.start("count"):match.end()].strip()
     placeholder = f"{{{AVAILABILITY}.{field}}}"
+    value = availability.get(field)
     if count.startswith("{"):
         if count != placeholder or years:
             return f"{quote!r}: {_FIELD_WORDS[field]} are written {placeholder}{unit}"
-        return None  # filled from the profile, and fill() reports a value the profile does not give
-    value = availability.get(field)
-    if value is None or isinstance(value, bool):
+    elif value is None or isinstance(value, bool):
         return f"{quote!r} promises {_FIELD_WORDS[field]}; it is availability.{field}, {_NOT_GIVEN}"
-    if not count[0].isdigit():
+    elif not count[0].isdigit():
         return (f"{quote!r}: write {_FIELD_WORDS[field]} in Arabic digits ({value}{unit}) or as {placeholder}{unit}, "
                 "so they can be checked against the profile")
+    word = _bound(before, match.string, match.end(), (match.groupdict().get("unit") or "").replace(" ", ""))
+    if word:
+        return _bound_problem(quote, word, field, availability)
+    if count.startswith("{"):
+        return None  # filled from the profile, and fill() reports a value the profile does not give
     figures = [Fraction(figure) for figure in re.findall(r"\d+(?:\.\d+)?", count)]
     if years:
         figures = [figure * 12 for figure in figures]
-    elif (match.groupdict().get("unit") or "") == "个半月":
-        figures = [figure + Fraction(1, 2) for figure in figures]
     if any(figure != value for figure in figures):
         return (f"{quote!r} is not the profile's availability.{field} ({value}); write {value}{unit} "
                 f"or {placeholder}{unit}")
