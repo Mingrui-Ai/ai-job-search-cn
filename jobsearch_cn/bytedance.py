@@ -24,6 +24,22 @@ CITY_CODES = {"广州": "CT_45"}
 CITY_CODE = re.compile(r"CT_[0-9]{1,10}")
 CITY_CODE_HELP = "--city-code 应为官网 location 参数中的 CT_数字；请先在官网选好城市核对"
 
+# Whole-section UI notices may put the object before or after the status. A status
+# signal is also required, so short duties such as "加载数据" remain valid content.
+_UI_OBJECT = ("职位|岗位|工作|描述|详情|要求|内容|信息|数据|页面|jobs?|positions?|descriptions?|"
+              "details?|requirements?|content|data|pages?|information")
+_UI_STATE = ("正在|加载|载入|读取|获取|中|失败|错误|异常|暂无|loading|loaded|load|failed|failure|error|"
+             "unavailable|unable|couldnot|couldnt|cannot|cant")
+_UI_PROMPT = ("请|您|稍候|稍后|稍等|片刻|一下|一会儿?|一小会|几|秒钟?|分钟|耐心|等待|刷新|重试|再试|重新|为您|抱歉|"
+              "please|wait|waiting|a|an|the|your|this|for|while|we|are|is|be|to|of|and|just|moments?|seconds?|"
+              "minutes?|few|short|little|bit|refresh|reload|retry|try|again|later|sorry")
+_PLACEHOLDER_DESCRIPTION = re.compile(f"(?:{_UI_OBJECT}|{_UI_STATE}|{_UI_PROMPT})+", re.I)
+_UI_STATUS_SIGNAL = re.compile(
+    r"正在(?:为您)?(?:加载|载入|读取|获取)|(?:加载|载入|读取|获取)中|失败|错误|异常|"
+    r"请(?:您)?(?:稍候|稍后|稍等|耐心|等待|刷新|重试)|稍候|稍后|稍等|暂无|"
+    r"loading|failed|failure|error|unavailable|unable|couldnot|couldnt|cannot|cant|pleasewait|waiting|wait(?:for)?a?moment|"
+    r"justamoment|refresh|reload|retry|tryagain", re.I)
+
 SELECTORS = {
     "card": ['.positionList-content a[href*="/campus/position/"]'],
     "card_title": [".positionItem-title-text"],
@@ -75,7 +91,12 @@ def _visible(node) -> bool:
 
 
 def _nodes(root, rule):
-    return [node for node in htmltext.select_first_rule(root, SELECTORS[rule]) if _visible(node)]
+    # A hidden placeholder for the first selector must not mask a visible fallback.
+    for selector in SELECTORS[rule]:
+        nodes = [node for node in htmltext.select(root, selector) if _visible(node)]
+        if nodes:
+            return nodes
+    return []
 
 
 def _text(root, rule):
@@ -120,8 +141,14 @@ def list_is_empty(root) -> bool:
 def is_closed(root) -> bool:
     # Only an explicit standalone notice counts, never a phrase inside the JD.
     notices = htmltext.select(root, ".jobDetail") + htmltext.select(root, ".atsx-result-subtitle")
-    return any(htmltext.text(node).strip("。！ ") in ("职位已关闭", "职位已下线", "该职位已停止招聘")
+    return any(htmltext.text(node).strip("。！ ") in ("职位已关闭", "职位已下线", "该职位已下线", "该职位已停止招聘")
                for node in notices if _visible(node))
+
+
+def _placeholder(content: str) -> bool:
+    """Recognise an entire loading notice, not these words embedded in real duties."""
+    compact = "".join(char for char in content.casefold() if char.isalpha())
+    return bool(_UI_STATUS_SIGNAL.search(compact) and _PLACEHOLDER_DESCRIPTION.fullmatch(compact))
 
 
 def parse_detail(root) -> dict:
@@ -133,7 +160,7 @@ def parse_detail(root) -> dict:
         if heading is None or "block-title" not in heading.classes():
             continue
         label, content = htmltext.text(heading), htmltext.text(block, keep_newlines=True)
-        if label in ("职位描述", "职位要求") and content:
+        if label in ("职位描述", "职位要求") and content and not _placeholder(content):
             sections.append((label, content))
     # A partial render must not become a complete JD.
     description = "\n".join(value for section in sections for value in section)

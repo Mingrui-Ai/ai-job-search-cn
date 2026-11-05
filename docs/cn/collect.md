@@ -1,21 +1,19 @@
-# 从专用浏览器采集岗位：`collect boss / bytedance`（M6-3）
+# 用本机浏览器采集岗位：`collect boss / bytedance`（M6-3）
 
-一条命令，从你自己已经登录 BOSS 直聘的 Chrome 里，按搜索词和城市慢速读取岗位列表和详情页，每个岗位存一个文件到本机的收件夹。之后由批量初筛（M6-4）导入、过滤、评分，给出短名单。
-
-字节跳动官网的公开校招 / 实习岗位用 `collect bytedance`，无需登录，见第 9 节。两个来源共用采集循环和浏览器接口。
+一条命令，按搜索词和城市慢速读取岗位列表和详情页，每个岗位存一个文件到本机的收件夹。共享框架默认在后台启动本机 Chrome（无窗口、临时资料目录，用完关闭）；需要登录的网站加 `--cdp`，借用你自己登录过的专用 Chrome。BOSS 直聘按下面的 CDP 示例使用；字节跳动公开校招 / 实习页用 `collect bytedance`，默认无窗口且无需登录，见第 9 节。之后由批量初筛（M6-4）导入、过滤、评分，给出短名单。
 
 依据：经理意见书-007 第 2 条（岗位由工具自己找，首要来源 BOSS 直聘）；[M6 调研](worklog/2026-11-04-m6-discovery-research.md) 第 3–5 节；收件夹格式见 [screen.md](screen.md) 第 2 节（M6-4）；架构上的例外见 [cn-migration-plan.md](cn-migration-plan.md) 的 ADR-4、ADR-9。
 
 ## 1. 先知道风险
 
 - BOSS 直聘的用户协议限制插件、第三方工具和"拟人程序"。用这个命令有账号被限制甚至封号的风险，工具只能压低频率，**不能保证不被限制**。是否使用由你决定。
-- 用的是你自己的账号，只读你登录后本来就能看到的页面；岗位只存在本机的数据目录（`data/`，不进 git）。
-- 遇到安全检查、验证码或登录页，工具会停下交给你，不会去破解或绕过。如果反复出现，先停几天再用，或者减少 `--max`。
+- 写 `--cdp` 时，用的是你自己的账号，只读你登录后本来就能看到的页面；默认无窗口模式不使用你的浏览器资料或登录状态。岗位只存在本机的数据目录（`data/`，不进 git）。
+- 遇到安全检查、验证码、HTTP 403/429 或登录页就停下，不破解、不绕过、不自动重试。无窗口模式遇到限制时至少等几个小时再试；需要登录则按提示使用 `--cdp`。
 
 ## 2. 一次性准备
 
-1. **装 Playwright**（可选依赖，只有这个命令要用）：在 `ai-job-search-cn` 环境里运行 `python -m pip install playwright`。不用运行 `playwright install`：工具连的是你自己的 Chrome，不下载浏览器。没装时命令会提示怎么装，别的命令不受影响。
-2. **用专用资料目录和调试端口启动 Chrome**。Chrome 136 起，默认的资料目录不接受调试端口，所以要单独建一个目录，例如：
+1. **装 Playwright 和本机 Chrome**（Playwright 是可选依赖，只有这个命令要用）：在 `ai-job-search-cn` 环境里运行 `python -m pip install playwright`。不用运行 `playwright install`：工具使用本机已经安装的 Google Chrome，不下载浏览器。没装时命令会提示，别的命令不受影响。公开且不要求登录的网站只需这一步。
+2. **需要登录时，用专用资料目录和调试端口启动 Chrome**。Chrome 136 起，默认的资料目录不接受调试端口，所以要单独建一个目录，例如：
 
    ```powershell
    & "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="D:\chrome-boss"
@@ -24,13 +22,13 @@
    可以把这一行做成桌面快捷方式，以后都从它启动。
 3. **在这个窗口里登录 BOSS 直聘**（扫码或验证码，自己操作）。登录状态保存在这个资料目录里，下次用同一个快捷方式启动还在。
 
-注意：调试端口开着的时候，本机上的程序都能控制这个浏览器。所以这个资料目录只用来登录招聘网站，不要登录网银、邮箱等其他账号；不用的时候把这个 Chrome 关掉。工具只连本机地址（`127.0.0.1`、`localhost`），不连别的机器。
+注意：调试端口开着的时候，本机上的程序都能控制这个浏览器。所以这个资料目录只用来登录招聘网站，不要登录网银、邮箱等其他账号；不用的时候把这个 Chrome 关掉。`--cdp` 只接受 `http://127.0.0.1:<端口>`、`http://localhost:<端口>` 或 `http://[::1]:<端口>`，端口为 1–65535，可带一个末尾 `/`。用户信息、反斜杠、路径、查询和片段一律拒绝；连接前重建规范地址，不转交原始输入。
 
 ## 3. 命令
 
 ```powershell
-python -m jobsearch_cn collect boss --query "Java 实习" --city 广州
-python -m jobsearch_cn collect boss --query "数据分析 实习" --city 广州 --max 10 --data-dir D:\某处\data
+python -m jobsearch_cn collect boss --query "Java 实习" --city 广州 --cdp http://127.0.0.1:9222
+python -m jobsearch_cn collect boss --query "数据分析 实习" --city 广州 --max 10 --data-dir D:\某处\data --cdp http://127.0.0.1:9222
 ```
 
 | 参数 | 说明 |
@@ -42,17 +40,17 @@ python -m jobsearch_cn collect boss --query "数据分析 实习" --city 广州 
 | `--max-pages` | 搜索结果最多加载几屏（往下滚动一次算一屏），默认 3，最多 10 |
 | `--batch` | 批次名，默认是开始的时间 `YYYYMMDD-HHMMSS`。写一个已有的批次名，就接着往那个批次里存 |
 | `--data-dir` | 数据目录，默认是仓库下的 `data/` 或环境变量 `JOBSEARCH_CN_DATA_DIR` |
-| `--cdp` | 浏览器的调试地址，默认 `http://127.0.0.1:9222`，只能是本机 |
+| `--cdp` | 不写时启动本机无窗口 Chrome，临时资料目录，用完关闭；写本机调试地址时只开关自己的标签，保留已有浏览器和登录状态 |
 
 建议第一次先用 `--max 3` 试一次，看看结果对不对。
 
 ## 4. 它做什么、不做什么
 
-- **只用自己的标签**：在你启动的 Chrome 窗口里开一个新标签，做完关掉这个标签（停下时也关）。不动你的其他标签，也不关浏览器。采集时不要在这个标签里操作。
+- **只用自己的标签**：默认使用本次启动的无窗口 Chrome，结束或停下时关闭它；指定 `--cdp` 时在你的 Chrome 里开一个新标签，结束时只关这个标签，不动其他标签或已有浏览器。采集时不要在采集标签里操作。
 - **只读**：只打开搜索结果页和岗位详情页，详情页按列表卡片上的真实链接打开；只翻页（滚动），不点击、不输入，不碰"立即沟通""感兴趣"、投递、收藏、关注等任何按钮，所以不会发出任何消息。
 - **慢**：每次翻页、打开详情之前随机等 4–9 秒；一次最多打开 50 个详情页、加载 10 屏列表。
-- **遇到检查就停**：安全检查页、验证码、登录页、HTTP 403/429、页面跳到别的网站，都会立刻停下：已经存的岗位保留，输出"请在浏览器里处理后重跑"，退出码 3。不刷新、不重试、不破解。处理方法：在这个 Chrome 里自己打开 BOSS 直聘，按页面提示完成验证或登录，正常浏览几下没问题了，再运行同一条命令（已存的会跳过）。
-- **认不出页面就停**：搜索结果页上找不到岗位卡片，详情页上找不到岗位名或职位描述，打开链接后不是这个岗位（岗位名对不上）时停下，退出码 4，避免用空内容继续跑完一整批。
+- **遇到检查就停**：安全检查页、验证码、登录页、HTTP 403/429、页面跳到别的网站，退出码 3，已经存的岗位保留。会被动监听自己标签中同站页面及数据响应（document、xhr、fetch）的 403/429；即使原卡片还在，或拒绝响应在操作间隔到达，也不再导航或滚动。不刷新、不重试、不破解。CDP 模式提示在已有浏览器中自行处理；无窗口模式遇到限制提示等待，遇到登录要求提示改用 `--cdp`。
+- **认不出页面就停**：任何一屏列表（包括第二屏以后）找不到岗位卡片，又没有明确可见的空结果提示，就退出 4，不继续导航详情。隐藏空态节点、空壳及加载占位文字都不表示没有结果；明确显示“没有找到相关职位”“没有更多职位”或“暂无职位”才正常结束。详情缺少岗位名或描述、打开后不是对应岗位时也退出 4。
 - **不碰账号信息**：不读取、不保存 Cookie、密码和请求头，不拦截网络请求，不逆向加密参数。要构造的只有搜索页地址（搜索词 + 城市代码），和你在搜索框里搜索得到的一样。
 - **断点续抓**：岗位 ID 已经在任何一个收件夹批次里、或者已经在岗位库里（`source.url` 是这个岗位的详情页）的，不再打开，计入"跳过"。中途停下以后重跑，已经存过的不会重复打开。
 
@@ -82,7 +80,7 @@ python -m jobsearch_cn collect boss --query "数据分析 实习" --city 广州 
 
 | 字段 | 内容 |
 | --- | --- |
-| `status` | `done`（正常结束）、`needs_user`（要你在浏览器里处理）、`page_changed`（页面结构认不出） |
+| `status` | `done`（正常结束）、`needs_user`（按提示等待、使用 CDP 或自行处理）、`page_changed`（页面结构认不出） |
 | `finished` | 正常结束的原因：`max_jobs`（到了 `--max`）、`max_pages`（到了 `--max-pages`）、`end_of_list`（没有更多结果）、`no_results`（搜索没有结果） |
 | `message` | 一句话说明，停下时写明原因和停在哪 |
 | `stopped_at` | 停在哪：搜索结果第几次加载，或第几个新岗位 |
@@ -92,7 +90,7 @@ python -m jobsearch_cn collect boss --query "数据分析 实习" --city 广州 
 | `batch` / `batch_dir` / `files` | 批次名、批次目录（一个都没存时为 `null`，不建目录）、这次写的文件 |
 | `warnings` | 提醒，例如一半以上的岗位不在搜索的城市（城市代码可能不对）、收件夹里有读不了的文件 |
 
-退出码：0 正常结束；2 没能开始（参数不对、没装 Playwright、连不上浏览器，`{"error": ...}` 写在标准错误）；3 停下等你处理；4 页面结构认不出。
+退出码：0 正常结束；2 没能开始（参数不对、没装 Playwright、启动不了本机 Chrome 或连不上 CDP，`{"error": ...}` 写在标准错误）；3 停下按提示处理；4 页面结构认不出。
 
 ## 6. 之后
 
@@ -112,16 +110,18 @@ python -m jobsearch_cn jd screen data/inbox/boss/<批次>           # 导入、�
 - `SELECTORS`：每个字段一组选择器，按顺序试，第一个找到东西的生效；`detail_remove` 是读字段之前先删掉的部分（招聘者、推荐职位等）。
 - `PAGINATION`：结果列表是滚动加载（`scroll`）还是地址里带页码（`url`）。
 - `CITY_CODES`、`BLOCKED_PATHS`、`BLOCKED_TITLES`：城市代码，安全检查页和登录页的地址、标题。
+- `EMPTY_WORDS`、`list_is_empty()`：空结果提示。节点及祖先必须不带 `hidden` 或隐藏内联样式，并有明确空结果文字；不能只判断选择器存在。空态会逐一检查候选选择器，隐藏的首选占位符不会遮住可见的备用空态。
 
 改的时候，同时更新 `tests/fixtures/cn/boss/` 里的样例页面，再跑 `tests/test_cn_collect.py`。样例只能是按真实结构**自己编写的虚构内容**，不要把真实页面或真实岗位文字放进仓库。
 
 ## 8. 已知局限
 
 - **还没有在真实的 BOSS 页面上跑过**：选择器和翻页方式（第 7 节）只对着自己编写的虚构样例测过。第一次用先 `--max 3`，看收件夹里的内容对不对；退出码 4 或内容不对，按第 7 节改。
-- 目前有 BOSS 直聘和字节跳动校招官网两个适配；可访问性以各来源的实测记录为准。
+- 当前包含 BOSS 直聘和字节跳动公开校招 / 实习官网两个适配；真实可用性以各来源的实测结果为准。
 - 一次只按一个搜索词、一个城市；多个搜索词就多跑几次（已抓过的会跳过）。
 - 列表卡片上的岗位名、薪资和地点只存在 `extra` 里，不和详情页核对数值。
 - 没有每天的总量上限：一天里多次运行，请自己控制总数（调研建议每天不超过 50 个详情页）。
+- 离线 DOM 规则不计算外部样式表；可见性只按标签、`hidden` 和内联 `display:none` / `visibility:hidden` 判断。真实站点使用其他隐藏机制时，需要核对并更新站点规则。
 
 ## 9. 字节跳动校招 / 实习官网
 
@@ -130,12 +130,21 @@ python -m jobsearch_cn collect bytedance --query "后端" --city 广州 --max 3
 python -m jobsearch_cn collect bytedance --query "Java" --city 广州 --max 30 --data-dir D:\某处\data
 ```
 
-- 使用第 2 节的专用 Chrome 和 Playwright。读取 `https://jobs.bytedance.com/campus/position` 的公开列表及详情，无需登录；不读取内推页面。2026-11-05 robots.txt 返回 200，`User-agent: *` 允许 `/campus`、禁止 `/referral`，完整访问结果见[工作记录](worklog/2026-11-05-m6-3-bytedance.md)。
+- 只需本机 Chrome 和 Playwright，默认在后台启动临时浏览器并在结束时关闭，不需专用调试端口。读取 `https://jobs.bytedance.com/campus/position` 的公开列表及详情，无需登录；不读取内推页面。2026-11-05 robots.txt 返回 200，`User-agent: *` 允许 `/campus`、禁止 `/referral`，完整访问结果见[工作记录](worklog/2026-11-05-m6-3-bytedance.md)。
 - `--query` 对应官网的 `keywords`；广州为 `location=CT_45`。其他城市先在官网选好，使用 `--city-code CT_数字`。当前只内置了现场确认过的广州代码。
 - 覆盖校招页中的实习和正式校招项目，不进入社招。按官网的 `current` 翻页，每页 `limit=10`；默认最多 3 页。其余上限、4–9 秒间隔、退出码、断点续抓、标签关闭规则与 BOSS 相同。遇验证码、登录拦截、HTTP 401/403/429、站外或非公开路径跳转即停止；列表加载中的“0”不算无结果，必须出现明确的“暂无职位”。
 - 直接读页面 DOM；只保留岗位名、岗位标签、职位描述、职位要求。不访问正文链接，不保留导航、投递按钮、相关职位和求职助手。官网公开正文没有的薪资、公司等字段保持未知，不补造标签。
+- 职位描述和职位要求必须都存在且不是整段加载/等待占位语；未就绪时退出 4，不保存该条。真实短正文或正文中提到“加载”“Loading”等词不受影响；明确的独立下线提示计入关闭并跳过。
 - 存储路径为 `inbox/official/bytedance-<时间>/`，可用 `--batch` 指定批次。文件名取详情链接 `/campus/position/<ID>/detail` 的长数字 ID，`extra.collector` 标记字节适配版本。
 - **与当前 master 的兼容约定**：`site` 为 `official`。官网原始 ID 放在 `extra.site_job_id` 和文件名里，不填顶层 `site_job_id`：后者目前只允许招聘门户，`official` 下各家公司 ID 可能相撞。导入和续抓按完整官网 URL 去重；不改 Schema、不冒用其他平台。页面展示的“职位 ID”标签仍原样保留在正文。
 - 采集后的批次直接交给 `jd screen <批次目录> --data-dir ...`。首次运行先加 `--check` 核对。当前规则可能漏读以顿号并列的多城市标签；缺失字段及待确认事项以 `screen` 输出为准，选择器不会改写原文来迁就解析规则。
 
-网站改版时改 `jobsearch_cn/bytedance.py`，开发检查在 `tests/test_cn_bytedance.py`（全部虚构 HTML）；`collect.py` 接受 `adapter`，默认仍为 BOSS，复用限速、上限、状态检查、保存与去重。`browser.py` 无来源专属代码。
+网站改版时改 `jobsearch_cn/bytedance.py`，开发检查在 `tests/test_cn_bytedance.py`（全部虚构 HTML）；`collect.make_options(..., site=bytedance)` 通过 `Options.site` 选择站点，默认仍为 BOSS，复用限速、上限、状态检查、保存与去重。`browser.py` 无来源专属代码。
+
+## 10. 接入共享框架
+
+站点模块的完整契约以 `jobsearch_cn/collect.py` 顶部说明为准。调用 `collect.make_options(..., site=站点模块)`，模块保存在 `Options.site`；随后调用 `collect.run(tab, options, data_root)`，不再传 `adapter=`。CLI 子命令设置 `handler=cmd_collect, collect_rules=站点模块`，复用公共选项和可选 CDP 逻辑。
+
+站点提供自己的 `CITY_CODE` / `CITY_CODE_HELP`、`NAME` 和可选 `SOURCE_NAME` / `COLLECTOR`（默认批次前缀 / 采集器标识）；`CITY_CODES=None` 表示直接用城市名。浏览器类型为 `browser.Tab`，`open_tab()` / `open_tab(None)` 默认无窗口模式，显式本机地址走 CDP。运行中拒绝、空白列表和节奏限制由共享框架负责，站点提供页面解析和明确空态判定。
+
+`SITE` 同时用于收件夹目录和记录来源。`official` 覆盖多个公司，仅从本站认可的完整 URL 获取去重 ID；原始 ID 放在 `extra.site_job_id`，不填门户专用的顶层 `site_job_id`。官网模块可用 `SOURCE_NAME` 区分默认批次名；显式 `--batch` 由调用者命名。
