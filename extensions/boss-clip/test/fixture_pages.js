@@ -157,13 +157,19 @@ const results = {
   heading_description: described("职位描述"),
   headings_description: described("岗位职责：\n任职要求："),
   loading_description: described("正在加载..."),
+  loading_wait_description: described("正在加载，请稍候..."),
+  loading_english_description: described("Loading..."),
   none_description: described("暂无"),
   one_letter_description: described("无"),
   punctuation_description: described("-- 1. 2."),
   // Controls: short or heading-led, but something to read.
   short_description: described("负责整理数据"),
+  shortest_description: described("写周报"),
   headed_description: described("岗位职责：写周报\n任职要求：会 SQL"),
   english_description: described("Write SQL"),
+  loading_work_description: described("开发加载中的提示组件，优化数据加载性能"),
+  waiting_work_description: described("Implement Loading and Please wait messages"),
+  mixed_loading_description: described("正在加载，请稍候...\n岗位职责：写周报"),
   full_detail: described("负责整理业务数据，每周写周报，维护数据看板"),
   card_of_full_detail: clip.clipPage(n([], "", [n("li.job-card-box", "", [
     n(["a.job-name[href]", ".job-name"], "数据分析实习生", [], { href: "/job_detail/bx0002.html" }),
@@ -178,4 +184,14 @@ const results = {
   ],
   fetched_at: clip.isoLocal(NOW),
 };
+// Whole-block UI placeholders vary by punctuation, casing, line breaks and progress numbers.
+// Keep them separate from actual short duties that happen to mention loading or waiting.
+results.placeholder_descriptions = [
+  "正在加载，请稍候...", "正在加载，请稍后…", "加载中，请稍等", "正在加载中...",
+  "请稍候", "请稍后", "请耐心等待", "数据加载中，请稍候", "正在加载数据，请稍后",
+  "职位描述：\n正在加载，请稍候...\n岗位职责：\n任职要求：",
+  "正在加载 50%，请稍候…", "正在\u200b加载，请稍候", "暂无内容，请稍后",
+  "Loading...", "LOADING…", "Loading, please wait...", "Please wait...",
+  "Loading content… Please wait", "Please wait, loading data...", "Just a moment...",
+].map((text) => ({ text, result: described(text) }));
 process.stdout.write(JSON.stringify(results));

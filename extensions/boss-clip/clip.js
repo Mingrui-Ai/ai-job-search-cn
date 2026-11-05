@@ -52,7 +52,11 @@
   const CLOSED_WORDS = ["已关闭", "已下线", "停止招聘", "已失效", "已过期"];
   const REMOVED = SELECTORS.detail_remove.join(", ");
   // What a description block can hold before its text has loaded: headings and placeholders.
-  const NOT_A_DESCRIPTION = /职位描述|岗位描述|职位详情|岗位详情|岗位职责|工作职责|工作内容|任职要求|任职资格|岗位要求|职位要求|加载中|正在加载|暂无描述|暂无内容|暂无/g;
+  const DESCRIPTION_HEADINGS = /职位描述|岗位描述|职位详情|岗位详情|岗位职责|工作职责|工作内容|任职要求|任职资格|岗位要求|职位要求/g;
+  const EMPTY_DESCRIPTION_WORDS = /加载中|正在加载|暂无描述|暂无内容|暂无/g;
+  // Match the entire block after removing headings and presentation characters. Matching a
+  // loading word anywhere would reject real duties such as "开发加载中的提示组件" or "Write SQL".
+  const PLACEHOLDER_DESCRIPTION = /^(?:(?:(?:数据|内容)?(?:正在)?加载(?:数据|内容)?中?)|请(?:稍候|稍后|稍等|耐心等待)|暂无(?:描述|内容)?|loading(?:data|content)?|pleasewait|justamoment)+$/iu;
 
   function jobIdFromUrl(href, base) {
     let url;
@@ -161,7 +165,10 @@
   }
 
   function hasDescription(text) {
-    return (text.replace(NOT_A_DESCRIPTION, "").match(/\p{L}/gu) || []).length >= 2;
+    const body = text.replace(DESCRIPTION_HEADINGS, "");
+    const letters = body.replace(/[^\p{L}]/gu, "");
+    if (PLACEHOLDER_DESCRIPTION.test(letters)) return false;
+    return (body.replace(EMPTY_DESCRIPTION_WORDS, "").match(/\p{L}/gu) || []).length >= 2;
   }
 
   // The inbox text of a detail page, laid out like a whole-page copy (jd-parse.md): title and

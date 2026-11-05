@@ -93,8 +93,17 @@ class ClipPageTest(unittest.TestCase):
 
     def test_short_or_heading_led_description_still_saves(self):
         for name, words in (("short_description", "负责整理数据"), ("headed_description", "岗位职责：写周报\n任职要求：会 SQL"),
-                            ("english_description", "Write SQL")):
+                            ("english_description", "Write SQL"), ("shortest_description", "写周报"),
+                            ("loading_work_description", "开发加载中的提示组件，优化数据加载性能"),
+                            ("waiting_work_description", "Implement Loading and Please wait messages"),
+                            ("mixed_loading_description", "岗位职责：写周报")):
             self.assertIn(words, self.results[name]["items"][0]["item"]["text"], name)
+
+    def test_loading_and_waiting_prompts_alone_do_not_become_job_descriptions(self):
+        for case in self.results["placeholder_descriptions"]:
+            with self.subTest(text=case["text"]):
+                self.assertIn("职位描述", case["result"].get("problem", ""))
+                self.assertNotIn("items", case["result"])
 
     def test_incomplete_detail_cannot_reach_a_saved_job_and_a_complete_one_still_updates(self):
         tmp = Path(tempfile.mkdtemp())
@@ -117,7 +126,8 @@ class ClipPageTest(unittest.TestCase):
 
         self.assertEqual(screen_page(1, "full_detail")["imported"]["created"], 1)
         full = saved()
-        for number, name in enumerate(("no_description", "heading_description", "empty_h1_with_text"), 2):
+        for number, name in enumerate(("no_description", "heading_description", "empty_h1_with_text",
+                                       "loading_wait_description", "loading_english_description"), 2):
             self.assertEqual(screen_page(number, name)["imported"]["updated"], 0, name)
             self.assertEqual(saved(), full, name)
         self.assertEqual(screen_page(9, "edited_detail")["imported"]["updated"], 1)

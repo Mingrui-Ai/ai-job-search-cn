@@ -42,4 +42,6 @@ python -m jobsearch_cn jd screen <上一步输出的 batch> --data-dir <这次�
 
 选择器都在 [clip.js](../../extensions/boss-clip/clip.js) 的 `SELECTORS` 里，规则和 M6-3 采集程序的 `boss.py`（PR #142）相同，每条规则按顺序试、第一个匹配的生效。插件读不到职位名、职位描述或卡片时会显示 `×` 和原因；把那一页另存为 HTML（去掉个人信息）交给开发会话，改 `SELECTORS` 和 [离线测试](../../tests/test_cn_boss_clip.py) 即可。列表卡片上的标签和公司名（`card_tags`、`card_company`）是按常见写法猜的，还没在真实页面上核对过。
 
+描述栏如果整段只有标题和常见加载、等待提示（如“正在加载，请稍候…”、“Loading, please wait…”），不会生成可覆盖旧岗位的详情文件。检查忽略提示中的标点、换行和进度数字；“写周报”“Write SQL”等短职责仍可保存，真实职责里提到加载或等待组件也可保存。这是针对常见占位提示的检查，不能保证识别网站未来所有提示文案。
+
 设计和取舍见[工作记录](worklog/2026-11-05-m6-boss-clip.md)。
