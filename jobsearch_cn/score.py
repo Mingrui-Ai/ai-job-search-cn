@@ -57,8 +57,10 @@ _UNIT = {"CNY/hour": "元/小时", "CNY/day": "元/天", "CNY/month": "元/月",
 
 
 def job_hash(job: dict) -> str:
-    """A digest of the job record; its status is the user's bookkeeping, not the job."""
-    return _digest({key: value for key, value in job.items() if key != "status"})
+    """A digest of the job record; its status is the user's bookkeeping, not the job. Its source is left out too
+    (M6-4): neither the rules nor an agent's judgment read it, so filling in a link, a job board's id or a fetch
+    time later does not make a match stale."""
+    return _digest({key: value for key, value in job.items() if key not in ("status", "source")})
 
 
 def profile_hash(profile: dict) -> str:

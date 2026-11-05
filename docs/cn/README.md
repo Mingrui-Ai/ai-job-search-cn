@@ -23,6 +23,7 @@
 | [resume-workflow.md](resume-workflow.md) | 生成简历工作流 cn-resume（三个 Agent 共用，M3-3）：起草材料、生成 PDF 和 Word、独立审核（最多 2 轮）、交给用户 |
 | [applications.md](applications.md) | 投递记录（M4-1）：SQLite 数据库、事件和状态表、先预览再写入、投出时归档材料、`application record / submit / status / reply / note / followup / void / show / list / validate / export / backup`；第 16 节是 Agent 工作流 cn-application（三个 Agent 共用，M4-1b） |
 | [match.md](match.md) | 匹配：评分工作流 cn-match（三个 Agent 共用）；`match filter` 硬性条件过滤（符合 / 冲突 / 未知 及依据）；可解释评分 `match score / validate / save / show / list` 和匹配记录 |
+| [screen.md](screen.md) | 批量初筛 `jd screen`（M6-4）：收件夹批次的格式（给采集程序）、去重、按规则评分、短名单的输出和 Agent 工作流 |
 | [jd-parse.md](jd-parse.md) | `jd parse`：用法、编码处理、各字段能识别的写法、补全流程、防注入检查 |
 | [collect.md](collect.md) | 从已登录的浏览器采集岗位（M6-3）：`collect boss` 的风险、一次性准备（Playwright、带调试端口的专用 Chrome）、只读和限速的底线、收件夹文件格式、输出和退出码、页面结构变了怎么改 |
 | [baseline-report.md](baseline-report.md) | Day 0 环境、测试基线、已知问题与 Windows 兼容性记录 |
@@ -64,6 +65,7 @@ python -m jobsearch_cn --version
 python -m jobsearch_cn jd parse jd.txt --site boss   # 从 JD 文本抽取岗位记录（多份用一行 === 分隔）
 python -m jobsearch_cn jd validate job.json          # 按 job-schema.md 校验一条岗位记录
 python -m jobsearch_cn jd parse jd.txt --save        # 解析并保存到本地岗位库 data/jobs/（自动去重）
+python -m jobsearch_cn jd screen data/inbox/boss/<批次>  # 批量初筛：导入一个收件夹批次、按规则评分、给出短名单（docs/cn/screen.md）
 python -m jobsearch_cn jd list                       # 列出岗位库；jd show <id>、jd status <id> <状态>
 python -m jobsearch_cn match filter <id>             # 用个人档案过滤一个已保存的岗位（硬性条件）
 python -m jobsearch_cn match report                  # 把已保存的评分生成可读的报告（HTML）和反馈表（CSV），写到 data/reports/

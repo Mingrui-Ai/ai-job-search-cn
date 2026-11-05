@@ -127,7 +127,7 @@
    - **排序**：评了几个岗位时，用 `python -m jobsearch_cn match list` 按等级、总分排序给出；标为 `stale` 的记录先重新评分：`stale_reasons` 只有 `weights` 的运行 `match score <岗位id> --save` 即可，其他原因的回到第 2 步。`ineligible` 的岗位不算推荐；可投的岗位不到 3 个时如实告诉用户，不拿 `ineligible` 的岗位凑数。用户想看换一组权重排序会怎样，用 `match list --weights` 试算（见上文"[评一批岗位前](#评分工作流三个-agent-共用)"），说明这是试算，档案和记录都没改。
    - **报告和反馈表**：评了几个岗位时，再运行 `python -m jobsearch_cn match report <岗位id ...>`（不写 id 时包括所有已保存的记录），把输出里的 `report` 和 `feedback` 两个路径告诉用户：报告用浏览器打开；反馈表用 Excel 或 WPS 打开，填"你的等级""认可""原因"三列，保存时保持 CSV（UTF-8）格式。输出的 `stale` 不为空时，先说明这些记录已过期，重新评分后再生成。用户说填好了以后，读反馈表，向用户汇总：哪些岗位认可、部分认可、不认可，各自的原因，以及你的等级和工具给的等级不同的地方。不改匹配记录。用户想调整权重的，按上文"评一批岗位前"换算、确认后改档案；想改意向城市等其他偏好的，按建档工作流改档案；改完都要重新评分。报告只显示已保存的记录，不显示试算。详见下文[评分报告和反馈表](#评分报告和反馈表m2-6a)。
 
-**评多个岗位**：可以先对每个岗位运行 `python -m jobsearch_cn match score <岗位id> --save`，只保存规则部分（经历留空），再挑用户关心的岗位按第 2–5 步补上经历。岗位摘要、档案摘要和评分规则版本（`rules_version`）都没变时，重新评分会保留已保存记录里 Agent 补的经历和方向；只改了权重不算档案变了。
+**评多个岗位**：可以先对每个岗位运行 `python -m jobsearch_cn match score <岗位id> --save`，只保存规则部分（经历留空），再挑用户关心的岗位按第 2–5 步补上经历。岗位摘要、档案摘要和评分规则版本（`rules_version`）都没变时，重新评分会保留已保存记录里 Agent 补的经历和方向；只改了权重不算档案变了。一整批新岗位（收件夹批次）用 `jd screen` 一次导入、评规则分、给出短名单，见 [screen.md](screen.md)。
 
 ## 硬性条件过滤：`match filter`
 
@@ -297,7 +297,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 - 实现补充（M2-4b）：
   - `direction`、`experience` 都带 `evidence`，规则给出时为 null；`experience` 还有 `hints`，列出档案里用到 JD 技能的经历 id，供 Agent 参考：先是技能的 `used_in`，再是 `name`、`role`、`bullets` 里写到这个技能（同名或同义）的经历，每段经历只列一次。档案的 `used_in` 全空时也有提示（M2-5 第二轮）。`hints` 不影响任何分数；
   - 缺口里 `filter` 一类另带 `result`、`reason`；JD 没写的项 `jd` 为 null；
-  - 岗位的摘要不含 `status`（改岗位状态不算岗位变了），档案的摘要不含 `contact`（M2-6d 起也不含 `target.weights`）；`rules_version` 和现在的不同也算过期；
+  - 岗位的摘要不含 `status`（改岗位状态不算岗位变了），M6-4 起也不含 `source`（过滤和评分都不读它，后来补上链接、平台岗位 ID 或抓取时间不算岗位变了；这次改动让之前保存的记录都过期一次）；档案的摘要不含 `contact`（M2-6d 起也不含 `target.weights`）；`rules_version` 和现在的不同也算过期；
   - `match validate` 先核对两个摘要，岗位或档案改过就要求重新评分；再重算规则部分（过滤、技能、薪资、地点、规则给出的方向、权重、缺口），和记录不一致即报错；
   - 算分全程用分数运算，四舍五入取整（62.5 记 63），同一输入重复运行只有 `scored_at` 不同。
 
