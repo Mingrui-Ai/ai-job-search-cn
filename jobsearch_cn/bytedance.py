@@ -6,6 +6,7 @@ Only the campus listing and its detail links are accepted; referral pages are ex
 """
 
 import re
+import unicodedata
 from urllib.parse import urlencode, urljoin, urlsplit
 
 from jobsearch_cn import htmltext
@@ -26,19 +27,24 @@ CITY_CODE_HELP = "--city-code 应为官网 location 参数中的 CT_数字；请
 
 # Whole-section UI notices may put the object before or after the status. A status
 # signal is also required, so short duties such as "加载数据" remain valid content.
-_UI_OBJECT = ("职位|岗位|工作|描述|详情|要求|内容|信息|数据|页面|jobs?|positions?|descriptions?|"
-              "details?|requirements?|content|data|pages?|information")
-_UI_STATE = ("正在|加载|载入|读取|获取|中|失败|错误|异常|暂无|loading|loaded|load|failed|failure|error|"
-             "unavailable|unable|couldnot|couldnt|cannot|cant")
+_DESCRIPTION_HEADINGS = re.compile(
+    r"职位描述|岗位描述|职位详情|岗位详情|岗位职责|工作职责|工作内容|任职要求|任职资格|岗位要求|职位要求|"
+    # Bound modifier lookback so repeated "job " in a long JD is still linear to scan.
+    r"\b(?:(?:job|position|role|candidate|key|main|required|preferred|minimum|basic|essential|desired)[\s_-]+){0,4}"
+    r"(?:descriptions?|details?|responsibilities|requirements|qualifications|duties|skills|overview|summary)\b", re.I)
+_UI_OBJECT = ("职位|岗位|工作|描述|详情|要求|内容|信息|数据|页面|网络|系统|服务器|请求|jobs?|positions?|descriptions?|"
+              "details?|requirements?|content|data|pages?|information|network|system|server|requests?")
+_UI_STATE = ("正在|加载|载入|读取|获取|中|失败|错误|异常|暂无|超时|loading|loaded|load|failed|failure|error|"
+             "unavailable|unable|couldnot|couldnt|cannot|cant|timeout|timedout|somethingwentwrong")
 _UI_PROMPT = ("请|您|稍候|稍后|稍等|片刻|一下|一会儿?|一小会|几|秒钟?|分钟|耐心|等待|刷新|重试|再试|重新|为您|抱歉|"
-              "please|wait|waiting|a|an|the|your|this|for|while|we|are|is|be|to|of|and|just|moments?|seconds?|"
+              "点击|please|wait|waiting|a|an|the|your|this|for|while|we|are|is|be|to|of|and|just|moments?|seconds?|"
               "minutes?|few|short|little|bit|refresh|reload|retry|try|again|later|sorry")
 _PLACEHOLDER_DESCRIPTION = re.compile(f"(?:{_UI_OBJECT}|{_UI_STATE}|{_UI_PROMPT})+", re.I)
 _UI_STATUS_SIGNAL = re.compile(
-    r"正在(?:为您)?(?:加载|载入|读取|获取)|(?:加载|载入|读取|获取)中|失败|错误|异常|"
+    r"正在(?:为您)?(?:加载|载入|读取|获取)|(?:加载|载入|读取|获取)中|失败|错误|异常|超时|"
     r"请(?:您)?(?:稍候|稍后|稍等|耐心|等待|刷新|重试)|稍候|稍后|稍等|暂无|"
     r"loading|failed|failure|error|unavailable|unable|couldnot|couldnt|cannot|cant|pleasewait|waiting|wait(?:for)?a?moment|"
-    r"justamoment|refresh|reload|retry|tryagain", re.I)
+    r"justamoment|refresh|reload|retry|tryagain|timeout|timedout|somethingwentwrong", re.I)
 
 SELECTORS = {
     "card": ['.positionList-content a[href*="/campus/position/"]'],
@@ -55,12 +61,14 @@ LIST_READY = SELECTORS["card"] + SELECTORS["list_empty"] + SELECTORS["blocked"] 
 DETAIL_READY = SELECTORS["detail_blocks"] + SELECTORS["blocked"] + SELECTORS["login"]
 
 
-def _parts(url):
+def _parts(url, *, allow_http=False):
     if not isinstance(url, str):
         return None
     try:
         parts = urlsplit(url)
-        if (parts.scheme != "https" or parts.hostname != HOST or parts.port not in (None, 443)
+        schemes = ("https", "http") if allow_http else ("https",)
+        default_port = 80 if parts.scheme == "http" else 443
+        if (parts.scheme not in schemes or parts.hostname != HOST or parts.port not in (None, default_port)
                 or parts.username is not None or parts.password is not None):
             return None
         return parts
@@ -78,13 +86,20 @@ def job_id_from_url(url):
     return match.group(1) if match else None
 
 
+def known_job_id_from_url(url):
+    """Legacy stored HTTP URLs name the same job, but are never accepted for navigation."""
+    parts = _parts(url, allow_http=True)
+    match = DETAIL_PATH.fullmatch(parts.path) if parts else None
+    return match.group(1) if match else None
+
+
 def canonical_url(job_id: str) -> str:
     return f"{ORIGIN}{SEARCH_PATH}/{job_id}/detail"
 
 
-def _visible(node) -> bool:
+def _visible(node, *, include_nontext=False) -> bool:
     while node is not None:
-        if not htmltext.visible(node):
+        if not htmltext.visible(node, include_nontext=include_nontext):
             return False
         node = node.parent
     return True
@@ -93,7 +108,8 @@ def _visible(node) -> bool:
 def _nodes(root, rule):
     # A hidden placeholder for the first selector must not mask a visible fallback.
     for selector in SELECTORS[rule]:
-        nodes = [node for node in htmltext.select(root, selector) if _visible(node)]
+        nodes = [node for node in htmltext.select(root, selector)
+                 if _visible(node, include_nontext=rule in ("blocked", "login"))]
         if nodes:
             return nodes
     return []
@@ -147,8 +163,13 @@ def is_closed(root) -> bool:
 
 def _placeholder(content: str) -> bool:
     """Recognise an entire loading notice, not these words embedded in real duties."""
-    compact = "".join(char for char in content.casefold() if char.isalpha())
-    return bool(_UI_STATUS_SIGNAL.search(compact) and _PLACEHOLDER_DESCRIPTION.fullmatch(compact))
+    # Only the check is normalised; accepted JD text is saved verbatim. Match headings
+    # before removing separators so English word boundaries remain meaningful.
+    normalized = unicodedata.normalize("NFKC", content)
+    normalized = "".join(char for char in normalized if unicodedata.category(char) != "Cf")
+    body = _DESCRIPTION_HEADINGS.sub("", normalized)
+    compact = "".join(char for char in body.casefold() if char.isalpha())
+    return not compact or bool(_UI_STATUS_SIGNAL.search(compact) and _PLACEHOLDER_DESCRIPTION.fullmatch(compact))
 
 
 def parse_detail(root) -> dict:

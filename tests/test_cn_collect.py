@@ -159,6 +159,16 @@ class Run(unittest.TestCase):
 
 
 class HtmlText(unittest.TestCase):
+    def test_security_visibility_is_separate_from_text_extraction(self):
+        for tag in ("iframe", "canvas", "svg", "object"):
+            node = htmltext.Node(tag, {"id": "captcha"})
+            self.assertFalse(htmltext.visible(node))
+            self.assertTrue(htmltext.visible(node, include_nontext=True))
+            for attrs in ({"hidden": ""}, {"style": "display:none"}, {"style": "visibility:hidden !important"}):
+                self.assertFalse(htmltext.visible(htmltext.Node(tag, attrs), include_nontext=True))
+        markup = "<div>keep<canvas>omit</canvas><svg>omit</svg><object>omit</object></div>"
+        self.assertEqual(htmltext.text(htmltext.parse(markup)), "keep")
+
     def test_selectors(self):
         root = htmltext.parse('<div id="a" class="x y"><p class="x"><a href="/job_detail/1.html" ka="k-1">t</a></p>'
                               '<span><a href="https://e.com/">u</a></span></div>')

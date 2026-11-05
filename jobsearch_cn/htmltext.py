@@ -208,9 +208,13 @@ def first(root: Node, selectors):
     return found[0] if found else None
 
 
-def visible(node: Node) -> bool:
-    """False for elements innerText leaves out, judged from the element's own markup only."""
-    if node.tag in SKIP or "hidden" in node.attrs:
+def visible(node: Node, *, include_nontext: bool = False) -> bool:
+    """Markup visibility; text extraction also skips non-text tags by default.
+
+    Security markers can live on iframe/canvas/svg elements, which do not supply
+    innerText but must not be treated as hidden merely because of their tag.
+    """
+    if (not include_nontext and node.tag in SKIP) or "hidden" in node.attrs:
         return False
     return not _HIDDEN_STYLE.search(node.attrs.get("style", ""))
 

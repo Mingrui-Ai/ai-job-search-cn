@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -36,6 +37,32 @@ class StoreCase(unittest.TestCase):
         self.addCleanup(directory.cleanup)
         self.root = Path(directory.name)
         self.store = store.Store(self.root)
+
+
+class AtomicWrites(StoreCase):
+    def test_create_only_preserves_existing_bytes_and_default_still_updates(self):
+        target = self.root / "item.json"
+        store._write_json(self.root, target, {"text": "完整虚构原文"}, overwrite=False)
+        original = target.read_bytes()
+        with self.assertRaises(FileExistsError):
+            store._write_json(self.root, target, {"text": "不同原文"}, overwrite=False)
+        self.assertEqual(target.read_bytes(), original)
+        self.assertFalse(list(self.root.glob(".tmp-*")))
+        store._write_json(self.root, target, {"text": "明确请求更新"})
+        self.assertEqual(json.loads(target.read_text(encoding="utf-8")), {"text": "明确请求更新"})
+
+    def test_create_only_refuses_a_destination_created_at_publication_time(self):
+        target = self.root / "item.json"
+        real_link = os.link
+
+        def competing_writer(source, destination):
+            target.write_bytes(b"other complete original")
+            return real_link(source, destination)
+
+        with mock.patch.object(store.os, "link", side_effect=competing_writer), self.assertRaises(FileExistsError):
+            store._write_json(self.root, target, {"text": "new record"}, overwrite=False)
+        self.assertEqual(target.read_bytes(), b"other complete original")
+        self.assertEqual([p.name for p in self.root.iterdir()], ["item.json"])
 
 
 class Dedup(StoreCase):

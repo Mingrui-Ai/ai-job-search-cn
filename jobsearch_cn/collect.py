@@ -35,6 +35,8 @@ as Options.site. A site module has these names:
   page_problem(url, title, root, status) -> None or ("blocked" | "login", reason),
   is_closed(root), parse_detail(root) -> fields with title and description,
   detail_text(fields), same_job(card_title, detail_title), location_matches(location, city).
+  Optional known_job_id_from_url(url) recognises legacy stored URLs for deduplication
+  without relaxing the URLs accepted for navigation.
 
 Standard library only. The browser is behind a small interface - open(url, ready) and
 load_more(item_selectors, ready), each returning a Snapshot, close(), and headless (True when
@@ -143,7 +145,8 @@ def _job_ids_in(record, site=boss) -> set:
         if (site.SITE in schema.PORTAL_SITES and source.get("site", site.SITE) == site.SITE
                 and isinstance(source.get("site_job_id"), str)):
             found.add(source["site_job_id"])
-        job_id = site.job_id_from_url(source.get("url"))
+        known_id = getattr(site, "known_job_id_from_url", site.job_id_from_url)
+        job_id = known_id(source.get("url"))
         if job_id:
             found.add(job_id)
     return found
@@ -307,7 +310,14 @@ class _Run:
             self.batch_dir = store.safe_dir(self.data_root, "inbox", self.site.SITE, self.batch)
             self.summary["batch_dir"] = str(self.batch_dir)
         name = f"{job_id}.json"
-        store._write_json(self.batch_dir, self.batch_dir / name, record)
+        try:
+            store._write_json(self.batch_dir, self.batch_dir / name, record, overwrite=False)
+        except FileExistsError:
+            raise _Stop("needs_user", f"收件夹已有同名文件 {name}，为保留原件没有写入",
+                        "请核对原件或换一个 --batch，不要删除原件后直接重跑") from None
+        except OSError as exc:
+            raise _Stop("needs_user", f"无法安全写入收件文件 {name}：{exc.strerror or type(exc).__name__}",
+                        "请检查收件目录的权限和文件系统是否支持原子创建，已有原件不会被覆盖") from None
         self.summary["files"].append(name)
         self.summary["saved"] += 1
         self.known.add(job_id)

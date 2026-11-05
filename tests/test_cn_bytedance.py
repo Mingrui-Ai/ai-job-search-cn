@@ -66,6 +66,23 @@ class SiteRules(unittest.TestCase):
         self.assertEqual(cards[0]["href"], site.canonical_url("900001"))
         self.assertEqual(cards[0]["location"], "广州")
 
+    def test_legacy_http_is_known_only_not_a_navigation_url(self):
+        good = site.canonical_url("900001")
+        for url in (good, good.replace("https:", "http:"),
+                    good.replace("https://jobs.bytedance.com", "http://jobs.bytedance.com:80") + "?utm_source=x"):
+            with self.subTest(url=url):
+                self.assertEqual(site.known_job_id_from_url(url), "900001")
+                if url.startswith("http:"):
+                    self.assertIsNone(site.job_id_from_url(url))
+                    self.assertIsNotNone(site.page_problem(url, "校园招聘", htmltext.parse(listing()), 200))
+        for url in (good.replace("https:", "ftp:"), good.replace(".com/", ".com:80/"),
+                    good.replace("https://", "http://user@"), good.replace(".com/", ".com.example.invalid/"),
+                    good.replace("jobs.bytedance.com", "other.bytedance.com"),
+                    good.replace("https://jobs.bytedance.com", "http://jobs.bytedance.com:443"),
+                    good.replace("/campus/", "/referral/"), None, 42):
+            with self.subTest(url=url):
+                self.assertIsNone(site.known_job_id_from_url(url))
+
     def test_detail_keeps_requirements_and_omits_recommendations_and_controls(self):
         fields = site.parse_detail(htmltext.parse(DETAIL))
         text = site.detail_text(fields)
@@ -120,6 +137,43 @@ class SiteRules(unittest.TestCase):
                 self.assertIsNotNone(site.page_problem(address, title, htmltext.parse(html), status))
         hidden = '<div hidden><div class="captcha">占位</div></div>'
         self.assertIsNone(site.page_problem(url, "校园招聘", htmltext.parse(hidden), 200))
+
+    def test_public_review_placeholders_are_rejected_in_either_required_section(self):
+        originals = ("参与示例系统开发。\n维护 Java 服务。", "本科，每周到岗4天，实习3个月。<br>熟悉 Java 和 MySQL。")
+        notices = ("Job description", "Requirements", "职位要求", "岗位职责", "任职资格", "工作内容",
+                   "JOB_DESCRIPTION", "Required Qualifications", "Key Responsibilities", "Role Overview",
+                   "Ｌｏａｄｉｎｇ...", "加载失败，点击重试", "网络异常，请稍后再试",
+                   "Something went wrong. Please try again.", "请求超时，请稍后再试", "Server error. Please retry.",
+                   "...", "&#8203;", "\u200bＬｏａｄｉｎｇ\u200d...", "职位描述：Job description...")
+        for original in originals:
+            for notice in notices:
+                with self.subTest(section=original, notice=notice):
+                    self.assertFalse(site.parse_detail(htmltext.parse(DETAIL.replace(original, notice)))["description"])
+
+    def test_placeholder_normalization_does_not_rewrite_real_content(self):
+        for content in ("Ｊａｖａ", "C++", "写测试", "加载数据", "读取数据", "刷新页面",
+                        "维护网络异常诊断工具。", "Implement Job description rendering and retries.",
+                        "开发\u200b工具", "Investigate something went wrong errors in the test suite."):
+            with self.subTest(content=content):
+                page = DETAIL.replace("参与示例系统开发。\n维护 Java 服务。", content)
+                self.assertIn(content, site.parse_detail(htmltext.parse(page))["description"])
+
+    def test_nontext_security_markers_only_ignore_explicit_hidden_markup(self):
+        url = site.search_url("Java", "CT_45")
+        for tag in ("iframe", "canvas", "svg", "object"):
+            marker = f'<{tag} id="captcha-frame"></{tag}>'
+            with self.subTest(tag=tag):
+                problem = site.page_problem(url, "校园招聘", htmltext.parse(listing() + marker), 200)
+                self.assertEqual(problem[0], "blocked")
+                if tag != "iframe":  # iframe fallback markup is raw text, not child DOM
+                    nested = f'<{tag}><div class="captcha">验证</div></{tag}>'
+                    self.assertEqual(site.page_problem(url, "校园招聘", htmltext.parse(nested), 200)[0], "blocked")
+            for hidden in ("hidden", 'style="display: none"', 'style="visibility: hidden !important"'):
+                for html in (f'<div {hidden}>{marker}</div>', f'<{tag} id="captcha-frame" {hidden}></{tag}>'):
+                    with self.subTest(tag=tag, html=html):
+                        self.assertIsNone(site.page_problem(url, "校园招聘", htmltext.parse(html), 200))
+        login = '<iframe class="login-dialog"></iframe>'
+        self.assertEqual(site.page_problem(url, "校园招聘", htmltext.parse(login), 200)[0], "login")
 
     def test_empty_state_is_explicit_not_the_loading_zero(self):
         self.assertFalse(site.list_is_empty(htmltext.parse('<div class="listTitle">开启新的工作（0）</div>')))
@@ -283,6 +337,79 @@ class SharedCollector(unittest.TestCase):
             self.assertEqual((result["saved"], result["skipped_known"]), (1, 1))
             self.assertEqual([site.job_id_from_url(url) for url in tab.calls[1:]], ["900001"])
 
+    def test_http_known_sources_are_skipped_and_cannot_replace_complete_text(self):
+        for location in ("inbox", "jobs"):
+            for authority in ("jobs.bytedance.com", "jobs.bytedance.com:80"):
+                with self.subTest(location=location, authority=authority), tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    url = f"http://{authority}/campus/position/900001/detail"
+                    if location == "inbox":
+                        folder = root / "inbox" / "official" / "older"
+                        folder.mkdir(parents=True)
+                        original = folder / "900001.json"
+                        original.write_text(json.dumps({"site": "official", "url": url,
+                                                       "text": "完整虚构正文：维护示例服务。"}), encoding="utf-8")
+                    else:
+                        records, _ = jd_parser.parse_text("示例实习生\n完整虚构正文：维护示例服务。",
+                                                         site="official", url=url, now=NOW)
+                        store.Store(root).save(records[0])
+                        original = next((root / "jobs").glob("job_*.json"))
+                    before = original.read_bytes()
+                    partial = DETAIL.replace("参与示例系统开发。\n维护 Java 服务。", "Job description")
+                    tab = FakeTab(pages=[listing(("900001",))], details={"900001": partial})
+                    result = self.run_batch(root, tab, max_jobs=1, max_pages=1, batch="older")
+                    self.assertEqual((result["saved"], result["skipped_known"]), (0, 1))
+                    self.assertEqual(len(tab.calls), 1, "known HTTP source must not be requested again")
+                    self.assertEqual(original.read_bytes(), before)
+
+    def test_same_batch_collisions_preserve_other_sources_and_unreadable_originals(self):
+        other = json.dumps({"site": "official", "url": "https://example.invalid/job/900002",
+                            "text": "完整虚构的另一官网原件"}).encode("utf-8")
+        for original in (other, b"{broken-json", b"\xff\xfe"):
+            with self.subTest(original=original), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                batch = root / "inbox" / "official" / "shared"
+                batch.mkdir(parents=True)
+                target = batch / "900002.json"
+                target.write_bytes(original)
+                tab = FakeTab(pages=[listing(("900001", "900002", "900003"))])
+                result = self.run_batch(root, tab, batch="shared", max_jobs=3)
+                self.assertEqual((collect.exit_code(result), result["saved"]), (3, 1))
+                self.assertIn("同名文件", result["message"])
+                self.assertIn("--batch", result["message"])
+                self.assertEqual(target.read_bytes(), original)
+                self.assertEqual(result["files"], ["900001.json"])
+                self.assertNotIn(site.canonical_url("900003"), tab.calls)
+                self.assertFalse(list(batch.glob(".tmp-*")))
+
+    def test_file_created_after_collection_started_is_not_replaced(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "inbox" / "official" / "shared" / "900001.json"
+
+            class OtherWriter(FakeTab):
+                def open(self, url, ready):
+                    if site.job_id_from_url(url):
+                        target.parent.mkdir(parents=True)
+                        target.write_bytes(b"complete original from another writer")
+                    return super().open(url, ready)
+
+            result = self.run_batch(root, OtherWriter(), batch="shared", max_jobs=1)
+            self.assertEqual((collect.exit_code(result), result["saved"]), (3, 0))
+            self.assertEqual(target.read_bytes(), b"complete original from another writer")
+            self.assertFalse(list(target.parent.glob(".tmp-*")))
+
+    def test_unsupported_atomic_publication_stops_without_a_partial_record(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            tab = FakeTab()
+            with mock.patch.object(store.os, "link", side_effect=OSError("hard links unavailable")):
+                result = self.run_batch(root, tab, max_jobs=2)
+            self.assertEqual((collect.exit_code(result), result["saved"]), (3, 0))
+            self.assertIn("无法安全写入", result["message"])
+            self.assertNotIn(site.canonical_url("900002"), tab.calls)
+            self.assertFalse(list(root.rglob("*.json")))
+
     def test_headless_login_advice_does_not_suggest_waiting_as_a_login_fix(self):
         with tempfile.TemporaryDirectory() as directory:
             result = self.run_batch(Path(directory), FakeTab(pages=['<div class="login-dialog">登录</div>']), max_jobs=1)
@@ -358,6 +485,21 @@ class SharedCollector(unittest.TestCase):
             self.assertEqual(len(tab.calls), 1)
             self.assertIsNone(result["batch_dir"])
 
+    def test_nontext_captcha_stops_navigation_and_keeps_prior_saved_job(self):
+        for tag in ("iframe", "canvas", "svg", "object"):
+            marker = f'<{tag} id="captcha-frame"></{tag}>'
+            for phase in ("list", "detail"):
+                with self.subTest(tag=tag, phase=phase), tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    tab = (FakeTab(pages=[listing() + marker]) if phase == "list" else
+                           FakeTab(pages=[listing(("900001", "900002", "900003"))],
+                                   details={"900002": DETAIL + marker}))
+                    result = self.run_batch(root, tab, max_jobs=2 if phase == "list" else 3)
+                    self.assertEqual(collect.exit_code(result), 3)
+                    self.assertEqual(result["saved"], 0 if phase == "list" else 1)
+                    self.assertEqual(len(tab.calls), 1 if phase == "list" else 3)
+                    self.assertNotIn(site.canonical_url("900003"), tab.calls)
+
     def test_closed_detail_is_counted_and_never_imported(self):
         with tempfile.TemporaryDirectory() as directory:
             tab = FakeTab(details={"900001": '<div class="atsx-result-subtitle">该职位已下线</div>'})
@@ -375,6 +517,17 @@ class SharedCollector(unittest.TestCase):
             first = Path(result["batch_dir"]) / "900001.json"
             self.assertIn("维护 Java 服务。", json.loads(first.read_text(encoding="utf-8"))["text"])
             self.assertFalse((first.parent / "900002.json").exists())
+
+    def test_public_review_placeholder_stops_after_first_complete_detail(self):
+        for notice in ("Job description", "Ｌｏａｄｉｎｇ...", "网络异常，请稍后再试", "...", "&#8203;"):
+            with self.subTest(notice=notice), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                partial = DETAIL.replace("参与示例系统开发。\n维护 Java 服务。", notice)
+                tab = FakeTab(pages=[listing(("900001", "900002", "900003"))], details={"900002": partial})
+                result = self.run_batch(root, tab, max_jobs=3)
+                self.assertEqual((collect.exit_code(result), result["saved"]), (4, 1))
+                self.assertEqual(result["files"], ["900001.json"])
+                self.assertNotIn(site.canonical_url("900003"), tab.calls)
 
     def test_empty_result_does_not_create_batch_and_wrong_detail_stops(self):
         empty = '<div class="positionList-content"><p class="listNoData-text">暂无职位</p></div>'
