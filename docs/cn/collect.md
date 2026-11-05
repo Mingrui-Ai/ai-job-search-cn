@@ -1,6 +1,8 @@
-# 从已登录的浏览器采集岗位：`collect boss`（M6-3）
+# 从专用浏览器采集岗位：`collect boss / bytedance`（M6-3）
 
 一条命令，从你自己已经登录 BOSS 直聘的 Chrome 里，按搜索词和城市慢速读取岗位列表和详情页，每个岗位存一个文件到本机的收件夹。之后由批量初筛（M6-4）导入、过滤、评分，给出短名单。
+
+字节跳动官网的公开校招 / 实习岗位用 `collect bytedance`，无需登录，见第 9 节。两个来源共用采集循环和浏览器接口。
 
 依据：经理意见书-007 第 2 条（岗位由工具自己找，首要来源 BOSS 直聘）；[M6 调研](worklog/2026-11-04-m6-discovery-research.md) 第 3–5 节；收件夹格式见 [screen.md](screen.md) 第 2 节（M6-4）；架构上的例外见 [cn-migration-plan.md](cn-migration-plan.md) 的 ADR-4、ADR-9。
 
@@ -116,7 +118,24 @@ python -m jobsearch_cn jd screen data/inbox/boss/<批次>           # 导入、�
 ## 8. 已知局限
 
 - **还没有在真实的 BOSS 页面上跑过**：选择器和翻页方式（第 7 节）只对着自己编写的虚构样例测过。第一次用先 `--max 3`，看收件夹里的内容对不对；退出码 4 或内容不对，按第 7 节改。
-- 只做了 BOSS 直聘一个网站。
+- 目前有 BOSS 直聘和字节跳动校招官网两个适配；可访问性以各来源的实测记录为准。
 - 一次只按一个搜索词、一个城市；多个搜索词就多跑几次（已抓过的会跳过）。
 - 列表卡片上的岗位名、薪资和地点只存在 `extra` 里，不和详情页核对数值。
 - 没有每天的总量上限：一天里多次运行，请自己控制总数（调研建议每天不超过 50 个详情页）。
+
+## 9. 字节跳动校招 / 实习官网
+
+```powershell
+python -m jobsearch_cn collect bytedance --query "后端" --city 广州 --max 3
+python -m jobsearch_cn collect bytedance --query "Java" --city 广州 --max 30 --data-dir D:\某处\data
+```
+
+- 使用第 2 节的专用 Chrome 和 Playwright。读取 `https://jobs.bytedance.com/campus/position` 的公开列表及详情，无需登录；不读取内推页面。2026-11-05 robots.txt 返回 200，`User-agent: *` 允许 `/campus`、禁止 `/referral`，完整访问结果见[工作记录](worklog/2026-11-05-m6-3-bytedance.md)。
+- `--query` 对应官网的 `keywords`；广州为 `location=CT_45`。其他城市先在官网选好，使用 `--city-code CT_数字`。当前只内置了现场确认过的广州代码。
+- 覆盖校招页中的实习和正式校招项目，不进入社招。按官网的 `current` 翻页，每页 `limit=10`；默认最多 3 页。其余上限、4–9 秒间隔、退出码、断点续抓、标签关闭规则与 BOSS 相同。遇验证码、登录拦截、HTTP 401/403/429、站外或非公开路径跳转即停止；列表加载中的“0”不算无结果，必须出现明确的“暂无职位”。
+- 直接读页面 DOM；只保留岗位名、岗位标签、职位描述、职位要求。不访问正文链接，不保留导航、投递按钮、相关职位和求职助手。官网公开正文没有的薪资、公司等字段保持未知，不补造标签。
+- 存储路径为 `inbox/official/bytedance-<时间>/`，可用 `--batch` 指定批次。文件名取详情链接 `/campus/position/<ID>/detail` 的长数字 ID，`extra.collector` 标记字节适配版本。
+- **与当前 master 的兼容约定**：`site` 为 `official`。官网原始 ID 放在 `extra.site_job_id` 和文件名里，不填顶层 `site_job_id`：后者目前只允许招聘门户，`official` 下各家公司 ID 可能相撞。导入和续抓按完整官网 URL 去重；不改 Schema、不冒用其他平台。页面展示的“职位 ID”标签仍原样保留在正文。
+- 采集后的批次直接交给 `jd screen <批次目录> --data-dir ...`。首次运行先加 `--check` 核对。当前规则可能漏读以顿号并列的多城市标签；缺失字段及待确认事项以 `screen` 输出为准，选择器不会改写原文来迁就解析规则。
+
+网站改版时改 `jobsearch_cn/bytedance.py`，开发检查在 `tests/test_cn_bytedance.py`（全部虚构 HTML）；`collect.py` 接受 `adapter`，默认仍为 BOSS，复用限速、上限、状态检查、保存与去重。`browser.py` 无来源专属代码。

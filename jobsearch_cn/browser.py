@@ -122,5 +122,5 @@ def open_tab(cdp_url: str = DEFAULT_CDP) -> CdpTab:
     except PlaywrightError:
         playwright.stop()
         raise BrowserUnavailable(f"连不上 {cdp_url} 的浏览器。先用带调试端口的专用快捷方式启动 Chrome"
-                                 "（docs/cn/collect.md 第 2 节），在里面登录 BOSS 直聘，再重跑") from None
+                                 "（docs/cn/collect.md 第 2 节），再重跑；是否需要登录见对应来源说明") from None
     return CdpTab(playwright, page, PlaywrightError)
