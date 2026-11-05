@@ -22,6 +22,7 @@ from html.parser import HTMLParser
 
 VOID = frozenset("area base br col embed hr img input link meta param source track wbr".split())
 SKIP = frozenset("script style noscript template svg head iframe object canvas select".split())
+RENDERED_NONTEXT = frozenset("iframe canvas svg object".split())
 BLOCK = frozenset("""address article aside blockquote body dd details dialog div dl dt fieldset
     figcaption figure footer form h1 h2 h3 h4 h5 h6 header hr html li main nav ol p pre section
     summary table tbody tfoot thead tr ul""".split())
@@ -211,10 +212,13 @@ def first(root: Node, selectors):
 def visible(node: Node, *, include_nontext: bool = False) -> bool:
     """Markup visibility; text extraction also skips non-text tags by default.
 
-    Security markers can live on iframe/canvas/svg elements, which do not supply
-    innerText but must not be treated as hidden merely because of their tag.
+    Security markers can live on iframe/canvas/svg/object elements, which do not
+    supply innerText. Only these tags can opt in; script/template and other
+    skipped contexts remain invisible.
     """
-    if (not include_nontext and node.tag in SKIP) or "hidden" in node.attrs:
+    if node.tag in SKIP and not (include_nontext and node.tag in RENDERED_NONTEXT):
+        return False
+    if "hidden" in node.attrs:
         return False
     return not _HIDDEN_STYLE.search(node.attrs.get("style", ""))
 

@@ -166,6 +166,9 @@ class HtmlText(unittest.TestCase):
             self.assertTrue(htmltext.visible(node, include_nontext=True))
             for attrs in ({"hidden": ""}, {"style": "display:none"}, {"style": "visibility:hidden !important"}):
                 self.assertFalse(htmltext.visible(htmltext.Node(tag, attrs), include_nontext=True))
+        for tag in ("script", "style", "noscript", "template", "head", "select"):
+            with self.subTest(tag=tag):
+                self.assertFalse(htmltext.visible(htmltext.Node(tag), include_nontext=True))
         markup = "<div>keep<canvas>omit</canvas><svg>omit</svg><object>omit</object></div>"
         self.assertEqual(htmltext.text(htmltext.parse(markup)), "keep")
 

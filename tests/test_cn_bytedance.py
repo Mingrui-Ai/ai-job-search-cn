@@ -181,6 +181,18 @@ class SiteRules(unittest.TestCase):
         self.assertTrue(site.list_is_empty(htmltext.parse(html)))
         self.assertFalse(site.list_is_empty(htmltext.parse('<div hidden>' + html + '</div>')))
 
+    def test_nonrendered_security_markers_and_ancestors_are_ignored(self):
+        url = site.search_url("Java", "CT_45")
+        for tag in ("script", "style", "noscript", "template", "head", "select"):
+            for marker, kind in (('<iframe id="captcha-frame"></iframe>', "blocked"),
+                                 ('<div class="login-dialog">登录</div>', "login")):
+                for html in (f'<{tag} class="captcha login-dialog"></{tag}>',
+                             f'<{tag}>{marker}</{tag}>'):
+                    with self.subTest(tag=tag, html=html):
+                        self.assertIsNone(site.page_problem(url, "校园招聘", htmltext.parse(listing() + html), 200))
+                        problem = site.page_problem(url, "校园招聘", htmltext.parse(listing() + html + marker), 200)
+                        self.assertEqual(problem[0], kind)
+
     def test_hidden_first_selector_does_not_mask_a_visible_security_or_login_wall(self):
         for kind, html in (
                 ("blocked", '<div hidden class="captcha">占位</div><div id="captcha">验证</div>'),
@@ -506,6 +518,21 @@ class SharedCollector(unittest.TestCase):
             result = self.run_batch(Path(directory), tab, max_jobs=2)
             self.assertEqual((collect.exit_code(result), result["saved"], result["closed"]), (0, 1, 1))
             self.assertEqual(result["files"], ["900002.json"])
+
+    def test_nonrendered_captcha_placeholders_do_not_stop_normal_collection(self):
+        for marker in ('<script id="captcha-sdk" type="application/json">{}</script>',
+                       '<template id="captcha-placeholder">...</template>',
+                       '<template><iframe id="captcha-frame"></iframe></template>'):
+            for phase in ("list", "detail"):
+                with self.subTest(marker=marker, phase=phase), tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    tab = FakeTab(pages=[listing(("900001",)) + (marker if phase == "list" else "")],
+                                  details={"900001": DETAIL + (marker if phase == "detail" else "")})
+                    result = self.run_batch(root, tab, max_jobs=1, max_pages=1)
+                    self.assertEqual((collect.exit_code(result), result["saved"]), (0, 1))
+                    self.assertEqual([site.job_id_from_url(url) for url in tab.calls], [None, "900001"])
+                    saved = json.loads((Path(result["batch_dir"]) / "900001.json").read_text(encoding="utf-8"))
+                    self.assertIn("维护 Java 服务。", saved["text"])
 
     def test_placeholder_detail_stops_without_saving_and_keeps_previous_record(self):
         partial = DETAIL.replace("参与示例系统开发。\n维护 Java 服务。", "正在加载，请稍候...")
