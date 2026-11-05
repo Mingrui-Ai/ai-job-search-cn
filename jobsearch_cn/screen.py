@@ -25,6 +25,9 @@ DEFAULT_TOP = 10
 NOT_LISTED = ("skipped", "expired", "unreachable")
 _READ = (".json", ".txt")
 _ACTION_RANK = {"unchanged": 0, "updated": 1, "created": 2}
+LIST_PAGE = "list"
+SUMMARY_KEPT = ("a list summary does not replace the text saved for this job, so it did not change; "
+                "clip the job's detail page to refresh it")
 _UNREAD = (("title", "职位名"), ("company", "公司"), ("cities", "城市"), ("salary", "薪资"))
 
 
@@ -107,12 +110,19 @@ def read_item(data: bytes, site: str) -> dict:
 
 def read_file(path: Path, site: str, vocabulary, now=None):
     """(job records, warnings) from one inbox file; raises ItemError."""
+    return _read_file(path, site, vocabulary, now)[:2]
+
+
+def _read_file(path: Path, site: str, vocabulary, now=None):
+    """read_file, plus whether the file says it holds only a list page's summary (extra.page, set by boss-clip)."""
+    summary = False
     try:
         data = path.read_bytes()
     except OSError as exc:
         raise ItemError(f"cannot read: {exc.strerror or exc}") from None
     if path.suffix.lower() == ".json":
         item = read_item(data, site)
+        summary = item.get("extra", {}).get("page") == LIST_PAGE
         records, warnings = jd_parser.parse_text(
             item["text"], source_type="portal", site=site, url=item.get("url"), now=now, vocabulary=vocabulary,
             single=True, site_job_id=item.get("site_job_id"), fetched_at=item["fetched_at"])
@@ -129,7 +139,7 @@ def read_file(path: Path, site: str, vocabulary, now=None):
     if not records:
         raise ItemError("; ".join(w["message"] for w in warnings if w["kind"] in ("empty", "too_long"))
                         or "no JD text found")
-    return records, [w for w in warnings if w["kind"] != "empty"]
+    return records, [w for w in warnings if w["kind"] != "empty"], summary
 
 
 def _label(path: Path, number: int, count: int) -> str:
@@ -203,7 +213,7 @@ def run(path, site: str, profile: dict, vocabulary, job_store: store.Store, matc
     index = job_store.index()
     for file in files:
         try:
-            records, file_warnings = read_file(file, site, vocabulary, now)
+            records, file_warnings, summary = _read_file(file, site, vocabulary, now)
         except ItemError as exc:
             skipped.append({"file": file.name, "reason": str(exc)})
             continue
@@ -211,12 +221,17 @@ def run(path, site: str, profile: dict, vocabulary, job_store: store.Store, matc
         for number, record in enumerate(records, 1):
             label = _label(file, number, len(records))
             existing, same_text = job_store.find_existing(record, index)
-            try:
-                action, stored = job_store.save(record, index)
-            except store.StoreError as exc:
-                skipped.append({"file": label, "reason": str(exc)})
-                continue
             changed = existing is not None and not same_text
+            if summary and changed:
+                # A list card must not replace the full text of the job it links to (screen.md 3).
+                action, stored, changed = "unchanged", existing, False
+                warnings.append({"file": label, "kind": "summary_kept", "message": SUMMARY_KEPT})
+            else:
+                try:
+                    action, stored = job_store.save(record, index)
+                except store.StoreError as exc:
+                    skipped.append({"file": label, "reason": str(exc)})
+                    continue
             entry = jobs.get(stored["id"])
             if entry is None:
                 jobs[stored["id"]] = {"action": action, "jd_changed": changed, "files": [label]}

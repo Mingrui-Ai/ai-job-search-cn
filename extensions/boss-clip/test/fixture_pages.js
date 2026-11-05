@@ -165,6 +165,10 @@ const results = {
   headed_description: described("岗位职责：写周报\n任职要求：会 SQL"),
   english_description: described("Write SQL"),
   full_detail: described("负责整理业务数据，每周写周报，维护数据看板"),
+  card_of_full_detail: clip.clipPage(n([], "", [n("li.job-card-box", "", [
+    n(["a.job-name[href]", ".job-name"], "数据分析实习生", [], { href: "/job_detail/bx0002.html" }),
+    n(".job-salary", "150-200元/天"),
+  ])]), LIST_URL, NOW),
   edited_detail: described("负责整理业务数据，每周写周报，维护数据看板，并参与需求评审"),
   ids: [
     clip.jobIdFromUrl("https://zhipin.com/job_detail/A.b_c~d-e.html"),

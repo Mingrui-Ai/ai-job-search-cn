@@ -56,7 +56,7 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--che
 | `url` | 建议 | 岗位详情页的链接，只能是 http(s)，端口读不出（如 `:abc`）的算格式错误，去重的依据之一（第 3 节） |
 | `site_job_id` | 建议 | 平台自己的岗位 ID，去重的第一依据。1–128 个字符，只能是英文字母、数字和 `. _ ~ -`（遇到别的字符先告诉我们）。只有来源是 `boss`、`shixiseng`、`nowcoder`、`liepin`、`zhaopin`、`51job`、`lagou` 时才能写：官网和招聘系统各家的 ID 会撞 |
 | `site` | 否 | 写了就必须和批次的来源相同，用来发现放错文件夹 |
-| `extra` | 否 | 任意 JSON 对象，例如搜索词、城市、第几页、列表页上的职位名和薪资。导入时忽略、不保存 |
+| `extra` | 否 | 任意 JSON 对象，例如搜索词、城市、第几页、列表页上的职位名和薪资。导入时不保存，只看一项：`page` 正好是 `"list"` 时，这个文件算列表摘要（第 3 节） |
 
 - 除了上表的字段，出现别的字段算格式不对（这样能发现 `fetchedAt` 这类拼写错误），别的信息放进 `extra`。
 - 一个文件有几处问题时一次全部列出，例如 `fetched_at: missing; url: must be null or an http(s) URL`。
@@ -104,6 +104,7 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--che
 
 - 找到以后，和库里**当前**原文相同（按指纹的口径比较：全半角、大小写、空白不算差别）的按出处优先级逐字段合并；原文改过的用新内容替换，保留原来的 `id`、状态和首次导入时间。因为改过原文的记录保留的是第一版的 `id`，是否相同不看 `id`：改回第一版的原文也是一次替换。
 - 岗位 ID 和抓取时间只在旧值为 null 时填入，所以 `fetched_at` 是"当前这份原文第一次抓到的时间"，同一个岗位再抓一次、原文没变时是 `unchanged`。
+- **列表摘要不替换已存的岗位**：文件的 `extra.page` 是 `"list"`（BOSS 一键收藏插件存的列表卡片）、库里已经有这个岗位且原文不同时，这个文件不写入，岗位算 `unchanged`，`warnings` 写一条 `summary_kept`。不管库里的是详情还是更早的摘要都这样，所以只存过卡片的岗位，卡片变了也不更新，要存一次详情页才刷新；详情照常替换摘要。岗位库里还没有的，卡片照常新建。其他文件（没有这个标记的、`.txt`）不受影响，按上面的规则替换。
 - **批次内重复**：同一个岗位在一个批次里出现两次（翻页时列表变了），后面的文件按上面的规则合并到前面的，这一行的 `files` 列出两个文件，`warnings` 写一条 `duplicate`。
 - **例外**：岗位 ID 指向 A、新原文的指纹恰好等于另一条 B 时，按 ID 更新 A，岗位库里会有两条原文相同的记录。跨平台的同一个岗位（BOSS 和实习僧各发一次）不合并。
 - 批量导入只读一遍岗位库，在内存里建索引。一条记录更新后换了岗位 ID 或链接，旧的键随之移除，后面的文件和逐条保存时找到的一样。
@@ -141,7 +142,7 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--che
 - `shortlist`：过滤结论为符合或待确认的岗位，按等级、总分从高到低（和 `match list` 相同），列出前 `--top` 条；`total` 是全部条数；
 - `ruled_out`：过滤结论为不符合的岗位，全部列出，按总分从高到低；`by_check` 按冲突项计数，一个岗位冲突两项时两项各算一次；
 - `profile_gaps`：档案那一方没写、因而判"未知"的项，每个岗位都一样，汇总在这里（影响几个岗位），不在每行重复；
-- `warnings`：`kind` 为 `guard` 的是 JD 里像是写给 AI 的句子（摘录在 `excerpts`），`encoding` 是按 GBK 读的 `.txt`，`no_key` 是没有链接和岗位 ID 的 JSON，`duplicate` 是批次内重复。
+- `warnings`：`kind` 为 `guard` 的是 JD 里像是写给 AI 的句子（摘录在 `excerpts`），`encoding` 是按 GBK 读的 `.txt`，`no_key` 是没有链接和岗位 ID 的 JSON，`duplicate` 是批次内重复，`summary_kept` 是列表摘要没有替换已存的岗位（第 3 节）。
 - 不另写文件。要详细报告和反馈表，用短名单里的 id 运行 `match report <id ...>`。
 
 ### 5.2 短名单的一行
@@ -217,7 +218,7 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--che
 Claude Code 的 `cn-jd-import` 技能、Codex 读取的 `AGENTS.md` 都指向 jd-import.md，一批岗位从那里指到本节。
 
 1. 用户要"看看这批岗位""给我短名单""筛一下收件夹"，或者采集刚结束：运行 `python -m jobsearch_cn jd screen <批次目录>`。用户没说是哪一批时，列出 `data/inbox/<来源>/` 下的批次，问用户，或者取最新的一批并说明。
-2. `skipped` 不为空：告诉用户哪些文件没导入、为什么（多半是采集那边的格式问题）。`warnings` 里有 `guard` 的，照 [jd-import.md](jd-import.md#安全前提) 把摘录原样给用户看。
+2. `skipped` 不为空：告诉用户哪些文件没导入、为什么（多半是采集那边的格式问题）。`warnings` 里有 `guard` 的，照 [jd-import.md](jd-import.md#安全前提) 把摘录原样给用户看。`warnings` 里有 `summary_kept` 的，说明这些岗位用的还是库里原来的内容，卡片上的变化（比如薪资）没有写入，想刷新就打开详情页再存一次。
 3. 汇报：先转述 `summary`，再列出 `shortlist.rows` 的 `line` 和 `url`，然后是过滤统计，提醒用户扫一眼 `ruled_out` 的理由：冲突来自规则读出的字段，读错了会误删好岗位。最后是 `profile_gaps`：补上档案再筛一遍，待确认的会少。不夸大，不替用户决定投不投；可投的岗位不到 3 个时如实说，不拿过滤掉的凑数。
 4. 权重：照用档案现在的权重，不先问；汇报时说明用的是哪组权重（`summary` 第 2 句）。用户想换个排法，用 `match list --weights` 试算，确认后按[评分工作流](match.md#评分工作流三个-agent-共用)改档案。
 5. 用户挑中的岗位：按评分工作流第 2–5 步补经历，需要时运行 `match report <id ...>` 生成详细报告；要投的转 cn-resume。用户说不看的，用 `jd status <id> skipped` 标上，以后不再列出。

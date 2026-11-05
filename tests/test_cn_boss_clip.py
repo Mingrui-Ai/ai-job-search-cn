@@ -125,6 +125,24 @@ class ClipPageTest(unittest.TestCase):
         self.assertEqual(saved()["title"], full["title"])
         self.assertEqual(saved()["id"], full["id"])
 
+    def test_a_clipped_list_card_does_not_replace_a_clipped_detail(self):
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, True)
+        data = tmp / "data"
+        shutil.copytree(REPO / "tests" / "fixtures" / "cn" / "profile" / "tech", data / "profile")
+        for number, name, action in ((1, "full_detail", "created"), (2, "card_of_full_detail", "unchanged")):
+            batch = tmp / "inbox" / "boss" / f"batch{number}"
+            batch.mkdir(parents=True)
+            [entry] = self.results[name]["items"]
+            (batch / entry["name"]).write_text(json.dumps(entry["item"], ensure_ascii=False), encoding="utf-8")
+            out = subprocess.run([sys.executable, "-X", "utf8", "-m", "jobsearch_cn", "jd", "screen", str(batch),
+                                  "--data-dir", str(data)], capture_output=True, cwd=REPO)
+            payload = json.loads(out.stdout.decode("utf-8"))
+            self.assertEqual(payload["imported"][action], 1, name)
+        self.assertEqual([w["kind"] for w in payload["warnings"]], ["summary_kept"])
+        [path] = (data / "jobs").glob("job_*.json")
+        self.assertIn("维护数据看板", json.loads(path.read_text(encoding="utf-8"))["raw_text"])
+
     def test_job_ids_and_time(self):
         self.assertEqual(self.results["ids"], ["A.b_c~d-e", None, None, "rel"])
         self.assertRegex(self.results["fetched_at"], r"^2026-11-05T10:31:20[+-]\d\d:\d\d$")
