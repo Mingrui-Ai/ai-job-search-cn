@@ -1047,16 +1047,17 @@ def _add_application_parser(commands, stored) -> None:
     export_parser.set_defaults(handler=cmd_application_export)
 
 
-def cmd_collect_boss(args) -> int:
+def cmd_collect(args) -> int:
+    site = args.collect_rules
     try:
-        options = collect.make_options(args.query, city=args.city, city_code=args.city_code, max_jobs=args.max,
-                                       max_pages=args.max_pages, batch=args.batch)
-        browser.check_cdp_url(args.cdp)
+        options = collect.make_options(args.query, city=args.city, city_code=getattr(args, "city_code", None),
+                                       max_jobs=args.max, max_pages=args.max_pages, batch=args.batch, site=site)
+        cdp = browser.check_cdp_url(args.cdp) if args.cdp is not None else None
     except (collect.CollectError, browser.BrowserUnavailable) as exc:
         raise InputError(str(exc)) from None
     root = store.data_dir(args.data_dir)
     try:
-        tab = browser.open_tab(args.cdp)
+        tab = browser.open_tab(cdp)
     except browser.BrowserUnavailable as exc:
         raise InputError(str(exc)) from None
     try:
@@ -1069,37 +1070,43 @@ def cmd_collect_boss(args) -> int:
     return collect.exit_code(summary)
 
 
-def _add_collect_parser(commands, stored) -> None:
-    group = commands.add_parser(
-        "collect", help="从你自己已登录的浏览器读取招聘网站上的岗位，存进收件夹（要装 Playwright）",
-        description="接管你用调试端口启动的 Chrome，在一个新标签里按搜索词和城市慢速读列表和详情页，"
-                    "每个岗位存一个文件到 <数据目录>/inbox/<网站>/<批次>/。只读、不点任何按钮；"
-                    "遇到安全检查或登录页就停下。说明见 docs/cn/collect.md。",
-    )
-    group.set_defaults(help_parser=group)
-    sites = group.add_subparsers(dest="collect_site", metavar="<site>")
-    parser = sites.add_parser(
-        "boss", parents=[stored], help="BOSS 直聘：按搜索词和城市读取岗位",
-        description="退出码：0 读完（到了上限或没有更多结果）；2 没能开始（参数不对、没装 Playwright、连不上浏览器）；"
-                    "3 遇到安全检查、验证码或没登录，已抓的已保存，请在浏览器里处理后重跑；"
-                    "4 页面结构认不出，已抓的已保存。",
-    )
+COLLECT_EXIT_CODES = ("退出码：0 读完（到了上限或没有更多结果）；2 没能开始（参数不对、没装 Playwright、启动或连不上浏览器）；"
+                      "3 遇到安全检查、验证码、HTTP 403/429 或要登录，已抓的已保存；4 页面结构认不出，已抓的已保存。")
+
+
+def _add_collect_options(parser) -> None:
+    """The options every site takes; --city and the site's own options are added by the caller."""
     parser.add_argument("--query", required=True, help="搜索词，例如 \"Java 实习\"")
-    parser.add_argument("--city", help=f"城市，认得的有：{'、'.join(boss.CITY_CODES)}")
-    parser.add_argument("--city-code", help="别的城市：网站的 9 位城市代码（在网站上选好城市后，地址栏里 city= 后面那一串）")
     parser.add_argument("--max", type=int, default=collect.DEFAULT_MAX_JOBS,
                         help=f"这次最多打开几个新岗位的详情页（默认 {collect.DEFAULT_MAX_JOBS}，最多 {collect.MAX_JOBS_CAP}）")
     parser.add_argument("--max-pages", type=int, default=collect.DEFAULT_MAX_PAGES,
-                        help=f"搜索结果最多加载几屏（默认 {collect.DEFAULT_MAX_PAGES}，最多 {collect.MAX_PAGES_CAP}）")
+                        help=f"搜索结果最多加载几屏或几页（默认 {collect.DEFAULT_MAX_PAGES}，最多 {collect.MAX_PAGES_CAP}）")
     parser.add_argument("--batch", help="批次名，默认用开始的时间 YYYYMMDD-HHMMSS；写已有的批次名就接着往里存")
-    parser.add_argument("--cdp", default=browser.DEFAULT_CDP, help=f"浏览器的调试地址，只能是本机（默认 {browser.DEFAULT_CDP}）")
-    parser.set_defaults(handler=cmd_collect_boss)
+    parser.add_argument("--cdp", help="不写时在后台启动本机 Chrome（无窗口、临时资料目录，用完关掉）。"
+                                      f"要登录的网站才写：接管你用调试端口启动的 Chrome，只能是本机地址，例如 {browser.DEFAULT_CDP}")
+
+
+def _add_collect_parser(commands, stored) -> None:
+    group = commands.add_parser(
+        "collect", help="从招聘网站读取岗位，存进收件夹（要装 Playwright）",
+        description="在后台无窗口的本机 Chrome 里（或用 --cdp 接管你自己登录过的 Chrome），按搜索词和城市慢速读列表和详情页，"
+                    "每个岗位存一个文件到 <数据目录>/inbox/<网站>/<批次>/。只读、不点任何按钮；"
+                    "遇到安全检查、限流或登录页就停下。说明见 docs/cn/collect.md。",
+    )
+    group.set_defaults(help_parser=group)
+    sites = group.add_subparsers(dest="collect_site", metavar="<site>")
+    parser = sites.add_parser("boss", parents=[stored], help="BOSS 直聘：按搜索词和城市读取岗位（要登录，加 --cdp）",
+                              description=COLLECT_EXIT_CODES)
+    _add_collect_options(parser)
+    parser.add_argument("--city", help=f"城市，认得的有：{'、'.join(boss.CITY_CODES)}")
+    parser.add_argument("--city-code", help="别的城市：网站的 9 位城市代码（在网站上选好城市后，地址栏里 city= 后面那一串）")
+    parser.set_defaults(handler=cmd_collect, collect_rules=boss)
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m jobsearch_cn",
-        description="AI Job Search CN 本地工具（离线处理用户提供的岗位数据；只有 collect 会读取你自己已登录的浏览器）",
+        description="AI Job Search CN 本地工具（离线处理用户提供的岗位数据；只有 collect 会用浏览器读取招聘网站）",
     )
     parser.add_argument("--version", action="version", version=f"jobsearch_cn {__version__}")
     commands = parser.add_subparsers(dest="command", metavar="<command>")

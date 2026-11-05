@@ -8,16 +8,22 @@ What these pin is what the collector promised the user and the batch screening (
   navigation - laid out so that `jd parse --site boss` reads the fields;
 * the run is slow and read only: a 4-9 s pause before every action but the first, nothing but
   open / load_more / close is ever asked of the browser, at most --max detail pages;
-* it stops at a security check, captcha, sign-in page or unknown page, keeps what it saved,
-  and says "请在浏览器里处理后重跑";
-* a job already in the inbox or the job store is never opened again.
+* it stops at a security check, captcha, sign-in page, HTTP 403/429 (a data request of its own
+  tab included) or unknown page (a blank later result page included), keeps what it saved, and
+  says what to do: "请在浏览器里处理后重跑", or with the default headless browser, wait or use --cdp;
+* a job already in the inbox or the job store is never opened again;
+* the browser is a headless Chrome of this machine unless --cdp names a debugging address on
+  this machine, and that address is refused unless it is unambiguous;
+* any site rules module with the names collect.py lists drives the same run.
 """
 import ast
 import io
 import json
 import random
+import re
 import sys
 import tempfile
+import types
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timedelta, timezone
@@ -71,6 +77,12 @@ def detail_page(title: str) -> str:
 
 def detail_url(job_id: str) -> str:
     return f"https://www.zhipin.com/job_detail/{job_id}.html"
+
+
+def site_like_boss(**changes):
+    """A site rules module that is boss.py with some names changed: what collect needs of another site."""
+    names = {name: getattr(boss, name) for name in dir(boss) if not name.startswith("_")}
+    return types.SimpleNamespace(**{**names, **changes})
 
 
 class FakeTab:
@@ -283,6 +295,20 @@ class Options(unittest.TestCase):
             with self.subTest(case=case), self.assertRaises(collect.CollectError):
                 collect.make_options(arguments.pop("query"), **arguments)
 
+    def test_city_rules_come_from_the_site(self):
+        coded = site_like_boss(CITY_CODES={"广州": "CT_45"}, CITY_CODE=re.compile(r"CT_[0-9]{1,10}"),
+                               CITY_CODE_HELP="--city-code 是 CT_ 加数字")
+        self.assertEqual(collect.make_options("x", city="广州", site=coded).city_code, "CT_45")
+        self.assertEqual(collect.make_options("x", city_code="CT_7", site=coded).city_code, "CT_7")
+        with self.assertRaises(collect.CollectError) as caught:
+            collect.make_options("x", city_code="101280100", site=coded)
+        self.assertEqual(str(caught.exception), "--city-code 是 CT_ 加数字")
+        named = site_like_boss(CITY_CODES=None)  # the search takes the city's name
+        self.assertEqual(collect.make_options("x", city="佛山", site=named).city_code, "佛山")
+        for case in (dict(city="佛山", city_code="101280800"), dict(city=""), dict(city="Foshan"), dict(city="广" * 11)):
+            with self.subTest(case=case), self.assertRaises(collect.CollectError):
+                collect.make_options("x", site=named, **case)
+
 
 class Collecting(Run):
     def test_saves_one_inbox_file_per_job(self):
@@ -411,6 +437,123 @@ class Collecting(Run):
                 self.assertEqual(collect.exit_code(summary), collect.EXIT_PAGE_CHANGED)
                 self.assertEqual(summary["saved"], 0)
 
+    def test_denied_list_request_stops_before_any_detail(self):
+        # Codex B, PR #142 P2-2: a 403/429 on the scroll's data request (the page keeps its old
+        # cards) stops the run with exit 3; no detail page is opened after it.
+        for status in (403, 429):
+            class Denied(FakeTab):
+                def load_more(self, item_selectors, ready):
+                    snapshot = super().load_more(item_selectors, ready)
+                    snapshot.status = status
+                    return snapshot
+
+            with self.subTest(status=status):
+                tab = Denied(list_pages=[LIST_HTML, LIST_HTML])
+                summary = self.run_collect(tab, max_pages=3, batch=f"denied{status}")
+                self.assertEqual((summary["status"], collect.exit_code(summary)), ("needs_user", collect.EXIT_NEEDS_USER))
+                self.assertIn(f"HTTP {status}", summary["message"])
+                self.assertEqual(tab.opened(), [])
+                self.assertEqual(summary["saved"], 0)
+
+    def test_403_or_429_stops_even_where_the_sites_rules_miss_it(self):
+        # The stop on 403/429 is the collector's own rule, not left to each site's page_problem.
+        lax = site_like_boss(page_problem=lambda url, title, root, status=None: None)
+        for status in (403, 429):
+            denied = collect.Snapshot(url=detail_url("fakeB002-x"), title="详情", html=detail_page(JOBS["fakeB002-x"]),
+                                      status=status)
+            tab = FakeTab(details={"fakeB002-x": denied})
+            with self.subTest(status=status), mock.patch.object(self, "root", self.root / str(status)):
+                summary = self.run_collect(tab, batch=f"lax{status}", site=lax)
+                self.assertEqual((summary["status"], summary["saved"]), ("needs_user", 1))
+                self.assertIn(f"HTTP {status}", summary["message"])
+                self.assertEqual(tab.opened(), ["fakeA001~", "fakeB002-x"], "nothing is opened after it")
+
+    def test_blank_or_unknown_later_list_page_is_page_changed(self):
+        # Codex B, PR #142 P2-3: the second load came back blank (or in a layout the rules do not
+        # know). That is not the end of the list: stop with exit 4 before opening any detail.
+        for name, later in (("blank", "<html><body></body></html>"),
+                            ("unknown", "<html><body><div class=\"new-layout\">岗位</div></body></html>")):
+            with self.subTest(name):
+                tab = FakeTab(list_pages=[LIST_HTML, later])
+                summary = self.run_collect(tab, batch=name)
+                self.assertEqual((summary["status"], collect.exit_code(summary)), ("page_changed", collect.EXIT_PAGE_CHANGED))
+                self.assertIn("第 2 次加载", summary["stopped_at"])
+                self.assertEqual(tab.opened(), [])
+        # A later page that says "no more results" is the end of the list, as before.
+        empty = LIST_HTML.replace('<ul class="rec-job-list">', '<div class="job-empty-wrapper">没有更多职位</div><ul>')
+        empty = empty.replace('class="job-card-box"', 'class="other"')
+        summary = self.run_collect(FakeTab(list_pages=[LIST_HTML, empty]), batch="end")
+        self.assertEqual((summary["status"], summary["finished"], summary["saved"]), ("done", "end_of_list", 3))
+
+    def test_empty_placeholders_stop_before_any_detail(self):
+        # An empty-state container can exist while the list is still loading. Only a
+        # visible, explicit empty result may end the list, on its first or later load.
+        notice = '<div class="job-empty-wrapper">没有更多职位</div>'
+        placeholders = [
+            '<div class="job-empty-wrapper"></div>',
+            '<div class="job-empty-wrapper"> \n </div>',
+            '<div class="job-empty-wrapper">正在加载</div>',
+            notice.replace('<div ', '<div hidden '),
+            '<section hidden>' + notice + '</section>',
+            '<section style="display:none">' + notice + '</section>',
+            '<section style="visibility: hidden !important">' + notice + '</section>',
+            '<template>' + notice + '</template>',
+            '<div class="job-empty-wrapper"><span hidden>没有更多职位</span></div>',
+        ]
+        for index, placeholder in enumerate(placeholders):
+            for first in (True, False):
+                with self.subTest(index=index, first=first):
+                    pages = [placeholder] if first else [LIST_HTML, placeholder]
+                    tab = FakeTab(list_pages=pages)
+                    summary = self.run_collect(tab)
+                    self.assertEqual((summary["status"], collect.exit_code(summary)), ("page_changed", 4))
+                    self.assertEqual(summary["stopped_at"], f"搜索结果第 {1 if first else 2} 次加载")
+                    self.assertEqual((summary["saved"], summary["batch_dir"], tab.opened()), (0, None, []))
+
+    def test_visible_empty_notice_works_after_hidden_fallback(self):
+        # A hidden match for the first selector must not mask a visible fallback.
+        empty = ('<div class="job-empty-wrapper" hidden>没有更多职位</div>'
+                 '<div class="job-empty-box"><p>没有更多职位</p></div>')
+        summary = self.run_collect(FakeTab(list_pages=[empty]))
+        self.assertEqual((summary["status"], summary["finished"], summary["saved"]), ("done", "no_results", 0))
+        tab = FakeTab(list_pages=[LIST_HTML, empty])
+        summary = self.run_collect(tab)
+        self.assertEqual((summary["status"], summary["finished"], summary["saved"]), ("done", "end_of_list", 3))
+        self.assertEqual(len(tab.opened()), 3)
+
+    def test_a_site_paged_by_url_through_the_same_run(self):
+        # The interface #144 and the next sites plug into: SITE, NAME, COLLECTOR, city by name,
+        # pages by URL. A blank page 2 stops there too (P2-3), before any detail is opened.
+        paged = site_like_boss(SITE="lagou", NAME="示例站", COLLECTOR="jobsearch_cn.collect.example/1", CITY_CODES=None,
+                               PAGINATION="url",
+                               search_url=lambda query, city, page=1: boss.search_url(query, city) + f"&page={page}")
+        tab = FakeTab(list_pages=[LIST_HTML, MORE_HTML, MORE_HTML])
+        summary = self.run_collect(tab, site=paged, max_jobs=4)
+        searches = [url for kind, url in tab.calls if kind == "open" and url.startswith(boss.ORIGIN + boss.SEARCH_PATH)]
+        self.assertEqual([url[-7:] for url in searches], ["&page=1", "&page=2"])
+        self.assertIn("city=%E5%B9%BF%E5%B7%9E", searches[0], "the city's name is the city code")
+        self.assertNotIn("load_more", [kind for kind, url in tab.calls])
+        self.assertEqual((summary["status"], summary["site"], summary["saved"]), ("done", "lagou", 4))
+        record = json.loads((self.root / "inbox" / "lagou" / "20261105-103000" / "fakeA001~.json").read_text(encoding="utf-8"))
+        self.assertEqual((record["site"], record["extra"]["collector"]), ("lagou", "jobsearch_cn.collect.example/1"))
+        tab = FakeTab(list_pages=[LIST_HTML, "<html><body></body></html>"])
+        summary = self.run_collect(tab, site=paged, batch="blank")
+        self.assertEqual((summary["status"], summary["stopped_at"], tab.opened()), ("page_changed", "搜索结果第 2 次加载", []))
+
+    def test_headless_run_gives_advice_the_user_can_follow(self):
+        tab = FakeTab(details={"fakeB002-x": SECURITY})
+        tab.headless = True
+        summary = self.run_collect(tab)
+        self.assertEqual(summary["status"], "needs_user")
+        self.assertIn(collect.NEEDS_USER_HEADLESS, summary["message"])
+        self.assertNotIn(collect.NEEDS_USER, summary["message"])
+        signed_out = LIST_HTML.replace('<div class="user-nav">', '<div class="user-nav"><a ka="header-login" href="/web/user/">登录</a>')
+        tab = FakeTab(list_pages=[signed_out])
+        tab.headless = True
+        message = self.run_collect(tab, batch="h2")["message"]
+        self.assertIn(collect.SIGN_IN_HEADLESS, message)  # use --cdp; waiting would not help
+        self.assertNotIn(collect.NEEDS_USER_HEADLESS, message)
+
     def test_empty_search_and_closed_jobs(self):
         empty = LIST_HTML.replace('<ul class="rec-job-list">', '<div class="job-empty-wrapper">没有找到相关职位</div><ul>')
         empty = empty.replace('class="job-card-box"', 'class="other"')
@@ -438,31 +581,204 @@ class Collecting(Run):
                          ["1 张卡片里没有认得的岗位详情链接（可能是广告），跳过了"])
 
 
+class FakeError(Exception):
+    """Stands in for playwright.sync_api.Error."""
+
+
+class FakeRequest:
+    def __init__(self, resource_type):
+        self.resource_type = resource_type
+
+
+class FakeResponse:
+    def __init__(self, url, status, resource_type="fetch"):
+        self.url, self.status, self.request = url, status, FakeRequest(resource_type)
+
+
+class FakeLocator:
+    def __init__(self, page):
+        self.page = page
+
+    def count(self):
+        return 3
+
+    def nth(self, index):
+        return self
+
+    def scroll_into_view_if_needed(self, timeout):
+        pass
+
+
+class FakeMouse:
+    def __init__(self, page):
+        self.page = page
+
+    def wheel(self, dx, dy):
+        """Scrolling makes the site fetch the next cards; the fake site answers with page.more_status."""
+        for listener in self.page.listeners:
+            listener(FakeResponse("https://api.zhipin.com/wapi/joblist.json", self.page.more_status))
+
+
+class FakePage:
+    """The few Playwright page calls browser.Tab makes."""
+
+    def __init__(self, more_status=200):
+        self.url = boss.ORIGIN + boss.SEARCH_PATH
+        self.listeners, self.more_status, self.closed = [], more_status, False
+        self.mouse = FakeMouse(self)
+
+    def on(self, event, listener):
+        assert event == "response"
+        self.listeners.append(listener)
+
+    def goto(self, url, wait_until, timeout):
+        self.url = url
+        return FakeResponse(url, 200, "document")
+
+    def wait_for_selector(self, selector, state, timeout):
+        pass
+
+    def locator(self, selector):
+        return FakeLocator(self)
+
+    def title(self):
+        return "搜索"
+
+    def content(self):
+        return LIST_HTML
+
+    def is_closed(self):
+        return self.closed
+
+    def close(self):
+        self.closed = True
+
+
+class FakeBrowser:
+    def __init__(self, page):
+        self.page, self.closed, self.contexts = page, False, [self]
+
+    def new_page(self):
+        return self.page
+
+    def close(self):
+        self.closed = True
+
+
+class FakeChromium:
+    def __init__(self, browser):
+        self.browser, self.calls = browser, []
+
+    def launch(self, **options):
+        self.calls.append(("launch", options))
+        return self.browser
+
+    def connect_over_cdp(self, url, timeout):
+        self.calls.append(("connect_over_cdp", url))
+        return self.browser
+
+
+class FakePlaywright:
+    def __init__(self, page):
+        self.browser = FakeBrowser(page)
+        self.chromium = FakeChromium(self.browser)
+        self.stopped = False
+
+    def stop(self):
+        self.stopped = True
+
+
 class Browser(unittest.TestCase):
     def test_only_local_debugging_addresses(self):
         for url in ("http://127.0.0.1:9222", "http://localhost:9333", "http://[::1]:9222"):
             self.assertEqual(browser.check_cdp_url(url), url)
+        self.assertEqual(browser.check_cdp_url("http://127.0.0.1:9222/"), "http://127.0.0.1:9222")
         for url in ("http://192.168.1.5:9222", "https://127.0.0.1:9222", "http://127.0.0.1", "ws://127.0.0.1:9222",
-                    "http://127.0.0.1.example.com:9222", "", "http://127.0.0.1:99999"):
+                    "http://127.0.0.1.example.com:9222", "", "http://127.0.0.1:99999", "http://127.0.0.1:0",
+                    "http://user@127.0.0.1:9222", "http://127.0.0.1:9222/json/version", "http://127.0.0.1:9222?x=1",
+                    "HTTP://127.0.0.1:9222", " http://127.0.0.1:9222", "http://127.0.0.1:9222\n"):
             with self.subTest(url=url), self.assertRaises(browser.BrowserUnavailable):
                 browser.check_cdp_url(url)
 
+    def test_cdp_address_python_and_the_browser_would_read_differently_is_refused(self):
+        # Codex B, PR #142 P2-1: Python's urlsplit reads this host as 127.0.0.1, the WHATWG URL
+        # parser Playwright uses reads it as 192.0.2.1. Such input is refused, not normalised.
+        tricky = "http://192.0.2.1\\@127.0.0.1:9222"
+        self.assertEqual(browser.urlsplit(tricky).hostname, "127.0.0.1", "sanity: Python is fooled")
+        with self.assertRaises(browser.BrowserUnavailable):
+            browser.check_cdp_url(tricky)
+        page = FakePage()
+        playwright = FakePlaywright(page)
+        with mock.patch.object(browser, "_playwright", return_value=(playwright, FakeError)):
+            with self.assertRaises(browser.BrowserUnavailable):
+                browser.open_tab(tricky)
+            browser.open_tab("http://localhost:9222/")
+        self.assertEqual(playwright.chromium.calls, [("connect_over_cdp", "http://localhost:9222")],
+                         "the browser gets the checked address, rebuilt, never the raw string")
+
+    def test_default_is_a_headless_local_chrome_closed_afterwards(self):
+        page = FakePage()
+        playwright = FakePlaywright(page)
+        with mock.patch.object(browser, "_playwright", return_value=(playwright, FakeError)):
+            tab = browser.open_tab()
+        self.assertEqual(playwright.chromium.calls, [("launch", {"channel": "chrome", "headless": True,
+                                                                  "timeout": browser.LAUNCH_TIMEOUT_MS})])
+        self.assertTrue(tab.headless)
+        tab.close()
+        self.assertTrue(page.closed and playwright.browser.closed and playwright.stopped)
+
+    def test_cdp_tab_leaves_the_users_browser_open(self):
+        page = FakePage()
+        playwright = FakePlaywright(page)
+        with mock.patch.object(browser, "_playwright", return_value=(playwright, FakeError)):
+            tab = browser.open_tab("http://127.0.0.1:9222")
+        self.assertFalse(tab.headless)
+        tab.close()
+        self.assertTrue(page.closed and playwright.stopped)
+        self.assertFalse(playwright.browser.closed)
+
+    def test_denied_data_request_while_scrolling_shows_in_the_snapshot(self):
+        # Codex B, PR #142 P2-2: the scroll's own fetch got 403/429 while the page kept its old
+        # cards; the snapshot must carry the status so the run stops (see Collecting).
+        for status in (403, 429):
+            with self.subTest(status=status), mock.patch.object(browser, "SETTLE_S", 0), \
+                    mock.patch.object(browser, "MORE_TIMEOUT_S", 0):
+                tab = browser.Tab(FakePlaywright(None), FakePage(more_status=status), FakeError)
+                self.assertEqual(tab.open(boss.search_url("Java", "101280100"), boss.LIST_READY).status, 200)
+                self.assertEqual(tab.load_more(boss.SELECTORS["card"], boss.LIST_READY).status, status)
+        with mock.patch.object(browser, "SETTLE_S", 0), mock.patch.object(browser, "MORE_TIMEOUT_S", 0):
+            page = FakePage()
+            tab = browser.Tab(FakePlaywright(None), page, FakeError)
+            tab.open(boss.search_url("Java", "101280100"), boss.LIST_READY)
+            for listener in page.listeners:  # other sites' requests and images do not count
+                listener(FakeResponse("https://analytics.example.com/collect", 403))
+                listener(FakeResponse("https://img.zhipin.com/a.png", 403, "image"))
+            self.assertIsNone(tab.load_more(boss.SELECTORS["card"], boss.LIST_READY).status)
+
     def test_missing_playwright_is_explained(self):
         with mock.patch.dict(sys.modules, {"playwright": None, "playwright.sync_api": None}):
-            with self.assertRaises(browser.BrowserUnavailable) as caught:
-                browser.open_tab("http://127.0.0.1:9222")
-        self.assertIn("pip install playwright", str(caught.exception))
+            for cdp in (None, "http://127.0.0.1:9222"):
+                with self.subTest(cdp=cdp), self.assertRaises(browser.BrowserUnavailable) as caught:
+                    browser.open_tab(cdp)
+                self.assertIn("pip install playwright", str(caught.exception))
 
     def test_driver_only_reads(self):
-        # Tripwire: the driver navigates, scrolls and reads. Calling anything that types, clicks,
-        # submits, intercepts requests, runs page scripts or touches cookies is a reviewed change.
+        # Tripwire: the driver starts a headless browser or connects to the user's, then navigates,
+        # scrolls and reads. Calling anything that types, clicks, submits, intercepts requests, runs
+        # page scripts, touches cookies or reuses a profile is a reviewed change.
         forbidden = {"click", "dblclick", "fill", "type", "press", "press_sequentially", "check", "uncheck", "tap",
                      "select_option", "set_input_files", "dispatch_event", "keyboard", "route", "unroute", "cookies",
                      "add_cookies", "clear_cookies", "storage_state", "evaluate", "evaluate_handle", "add_init_script",
-                     "expose_function", "set_extra_http_headers", "new_context", "launch", "launch_persistent_context"}
+                     "expose_function", "set_extra_http_headers", "new_context", "launch_persistent_context"}
         tree = ast.parse((REPO / "jobsearch_cn" / "browser.py").read_text(encoding="utf-8"))
         used = {node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)}
         self.assertEqual(used & forbidden, set())
+        launches = [node for node in ast.walk(tree) if isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute) and node.func.attr == "launch"]
+        self.assertEqual(len(launches), 1)
+        options = {keyword.arg: ast.literal_eval(keyword.value) for keyword in launches[0].keywords
+                   if keyword.arg in ("channel", "headless")}
+        self.assertEqual(options, {"channel": "chrome", "headless": True}, "headless, this machine's Chrome only")
 
 
 class Command(Run):
@@ -474,7 +790,8 @@ class Command(Run):
 
     def test_bad_arguments_exit_2_before_touching_the_browser(self):
         with mock.patch.object(browser, "open_tab") as open_tab:
-            for argv in (["--city", "火星"], ["--city", "广州", "--max", "100"], ["--city", "广州", "--cdp", "http://10.0.0.1:9222"]):
+            for argv in (["--city", "火星"], ["--city", "广州", "--max", "100"], ["--city", "广州", "--cdp", "http://10.0.0.1:9222"],
+                         ["--city", "广州", "--cdp", "http://192.0.2.1\\@127.0.0.1:9222"]):
                 with self.subTest(argv=argv):
                     code, out, err = self.call("collect", "boss", "--query", "Java", "--data-dir", str(self.root), *argv)
                     self.assertEqual(code, 2)
@@ -496,6 +813,15 @@ class Command(Run):
         summary = json.loads(out)
         self.assertEqual((summary["status"], summary["saved"]), ("needs_user", 1))
         self.assertTrue(tab.closed)
+
+    def test_headless_unless_cdp_is_given(self):
+        for extra, expected in (([], None), (["--cdp", "http://localhost:9222/"], "http://localhost:9222")):
+            with self.subTest(extra=extra), mock.patch.object(browser, "open_tab", return_value=FakeTab()) as open_tab, \
+                    mock.patch.object(collect, "DELAY_RANGE", (0, 0)):
+                code, out, err = self.call("collect", "boss", "--query", "Java 实习", "--city", "广州", "--max", "1",
+                                           "--batch", f"b{len(extra)}", "--data-dir", str(self.root), *extra)
+                self.assertEqual(code, 0, err)
+                open_tab.assert_called_once_with(expected)
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@
 | [match.md](match.md) | 匹配：评分工作流 cn-match（三个 Agent 共用）；`match filter` 硬性条件过滤（符合 / 冲突 / 未知 及依据）；可解释评分 `match score / validate / save / show / list` 和匹配记录 |
 | [screen.md](screen.md) | 批量初筛 `jd screen`（M6-4）：收件夹批次的格式（给采集程序）、去重、按规则评分、短名单的输出和 Agent 工作流 |
 | [jd-parse.md](jd-parse.md) | `jd parse`：用法、编码处理、各字段能识别的写法、补全流程、防注入检查 |
-| [collect.md](collect.md) | 从已登录的浏览器采集岗位（M6-3）：`collect boss` 的风险、一次性准备（Playwright、带调试端口的专用 Chrome）、只读和限速的底线、收件夹文件格式、输出和退出码、页面结构变了怎么改 |
+| [collect.md](collect.md) | 本机浏览器采集岗位（M6-3）：默认无窗口 Chrome、需登录时显式 CDP、拒绝和空白列表停止、收件夹格式、站点模块接口 |
 | [baseline-report.md](baseline-report.md) | Day 0 环境、测试基线、已知问题与 Windows 兼容性记录 |
 | [oss-privacy-review.md](oss-privacy-review.md) | 开源前隐私审查（2026-10-28）：公开范围、各类扫描结果和处理结论、转为公开前的操作 |
 | [resume-pdf.md](resume-pdf.md) | 生成简历：安装 Typst（便携版）、字体、`resume sample`、压成一页和检查；`resume build` 从材料生成 PDF 和 Word 版 |
@@ -76,7 +76,7 @@ python -m jobsearch_cn material render greeting-1.json   # 检查通过后输出
 python -m jobsearch_cn resume build resume-1.json    # 从检查过的材料生成一页 PDF 和 Word 版，写到 data/resumes/<岗位id>/
 python -m jobsearch_cn application list              # 投递记录；先 --preview 再带 --request-id 写入（docs/cn/applications.md）
 python -m jobsearch_cn profile validate              # 校验 data/profile/ 下的个人档案；profile show 查看（隐去联系方式）
-python -m jobsearch_cn collect boss --query "Java 实习" --city 广州 --max 3   # 从已登录的专用 Chrome 慢速读取岗位到 data/inbox/boss/<批次>/（要装 Playwright，docs/cn/collect.md）
+python -m jobsearch_cn collect boss --query "Java 实习" --city 广州 --max 3 --cdp http://127.0.0.1:9222   # 借用已登录的专用 Chrome（要装 Playwright，docs/cn/collect.md）
 ```
 
 ## 仓库与分支约定

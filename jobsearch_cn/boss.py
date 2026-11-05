@@ -17,6 +17,8 @@ from urllib.parse import urlencode, urljoin, urlsplit
 from jobsearch_cn import htmltext
 
 SITE = "boss"
+NAME = "BOSS 直聘"
+COLLECTOR = "jobsearch_cn.collect.boss/1"  # extra.collector of the inbox files
 HOST = "www.zhipin.com"
 ORIGIN = "https://www.zhipin.com"
 SEARCH_PATH = "/web/geek/jobs"
@@ -58,6 +60,8 @@ CITY_CODES = {
     "济南": "101120100",
     "青岛": "101120200",
 }
+CITY_CODE = re.compile(r"\d{9}")
+CITY_CODE_HELP = "--city-code 是 9 位数字（在网站上选好城市后，地址栏里 city= 后面那一串）"
 
 SELECTORS = {
     # Search results: one card per job, and inside it the link to the job's detail page.
@@ -101,6 +105,7 @@ LOGIN_PATHS = ("/web/user/",)
 BLOCKED_TITLES = ("请稍候", "安全验证", "验证码", "访问异常")
 CLOSED_STATUS_SELECTORS = [".job-status"]
 CLOSED_WORDS = ("已关闭", "已下线", "停止招聘", "已失效", "已过期")
+EMPTY_WORDS = ("没有找到相关职位", "没有更多职位", "暂无职位")
 
 LIST_READY = SELECTORS["card"] + SELECTORS["list_empty"] + SELECTORS["blocked"] + SELECTORS["login"]
 DETAIL_READY = SELECTORS["detail_title"] + SELECTORS["detail_closed"] + SELECTORS["blocked"] + SELECTORS["login"]
@@ -182,8 +187,21 @@ def parse_cards(root, page_url: str):
     return cards, unreadable
 
 
+def _visible(node) -> bool:
+    while node is not None:
+        if not htmltext.visible(node):
+            return False
+        node = node.parent
+    return True
+
+
 def list_is_empty(root) -> bool:
-    return bool(htmltext.select_first_rule(root, SELECTORS["list_empty"]))
+    """Only a visible, explicit empty result ends the list; loading placeholders do not."""
+    for selector in SELECTORS["list_empty"]:
+        for node in htmltext.select(root, selector):
+            if _visible(node) and any(word in htmltext.text(node) for word in EMPTY_WORDS):
+                return True
+    return False
 
 
 def is_closed(root) -> bool:

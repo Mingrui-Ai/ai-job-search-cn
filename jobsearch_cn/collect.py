@@ -1,8 +1,9 @@
-"""collect: read job postings from the user's signed-in browser into the inbox (docs/cn/collect.md).
+"""collect: read job postings from a job site into the inbox (docs/cn/collect.md).
 
-One run: open the search results in a tab of its own, read the job cards (scrolling for more
-up to the page limit), open each new job's detail page by the link its card carries, and write
-one JSON file per job into <data>/inbox/boss/<batch>/ in the inbox format that the batch
+One run: open the search results in a tab of its own (in a headless Chrome started for the run,
+or with --cdp in the user's own signed-in Chrome), read the job cards (scrolling or paging for
+more up to the page limit), open each new job's detail page by the link its card carries, and
+write one JSON file per job into <data>/inbox/<site>/<batch>/ in the inbox format that the batch
 screening reads (jobsearch_cn.inbox/1, docs/cn/screen.md §2). Then report what was saved, what was
 skipped and where the run stopped.
 
@@ -12,15 +13,33 @@ The ground rules are enforced here, not left to the caller:
   message, application, follow or favourite is ever sent.
 * Slow. A random 4-9 s pause before every navigation and every scroll after the first; at most
   MAX_JOBS_CAP detail pages and MAX_PAGES_CAP list loads per run.
-* Stop, don't fight. A security check, captcha, sign-in page, browser error, or a page whose
-  structure is not recognised ends the run at once. What was saved stays saved; the user deals
-  with the page in the browser and runs the command again. Nothing is retried.
+* Stop, don't fight. A security check, captcha, sign-in page, HTTP 403/429 (on the page or on a
+  list or data request of its own tab), browser error, or a page whose structure is not
+  recognised (a blank later result page included) ends the run at once. What was saved stays
+  saved; the user deals with it and runs the command again. Nothing is retried.
 * Resume without reopening. A job id already in any batch of the inbox, or in the job store, is
   skipped without opening its page.
 
+Everything that depends on one site's pages is in that site's rules module (boss.py), passed in
+as Options.site. A site module has these names:
+
+* SITE (the inbox folder and the record's site, one of schema.SITES), NAME (for messages) and
+  COLLECTOR (extra.collector of its files).
+* CITY_CODES: city name -> the code its search takes, with CITY_CODE (the pattern a --city-code
+  must match) and CITY_CODE_HELP (the message when it does not); or None when the search takes
+  the city's name itself.
+* PAGINATION ("scroll": the list grows as it is scrolled; "url": search_url takes a page
+  number), SELECTORS["card"], LIST_READY and DETAIL_READY (the selectors a page is ready on).
+* search_url(query, city_code, page), job_id_from_url(url), canonical_url(job_id),
+  parse_cards(root, page_url) -> (cards, unreadable), list_is_empty(root),
+  page_problem(url, title, root, status) -> None or ("blocked" | "login", reason),
+  is_closed(root), parse_detail(root) -> fields with title and description,
+  detail_text(fields), same_job(card_title, detail_title), location_matches(location, city).
+
 Standard library only. The browser is behind a small interface - open(url, ready) and
-load_more(item_selectors, ready), each returning a Snapshot, and close() - implemented with
-Playwright in browser.py and faked in the tests.
+load_more(item_selectors, ready), each returning a Snapshot, close(), and headless (True when
+the user cannot see the browser) - implemented with Playwright in browser.py and faked in the
+tests.
 """
 
 import json
@@ -34,7 +53,6 @@ from pathlib import Path
 from jobsearch_cn import boss, htmltext, schema, store
 
 INBOX_FORMAT = "jobsearch_cn.inbox/1"
-COLLECTOR = "jobsearch_cn.collect.boss/1"
 DELAY_RANGE = (4.0, 9.0)
 DEFAULT_MAX_JOBS = 30
 MAX_JOBS_CAP = 50
@@ -43,10 +61,13 @@ MAX_PAGES_CAP = 10
 MAX_QUERY = 50
 MAX_INBOX_FILE = 1_000_000
 BATCH_NAME = re.compile(r"[0-9A-Za-z][0-9A-Za-z._-]{0,63}")
-CITY_CODE = re.compile(r"\d{9}")
+CITY_NAME = re.compile(r"[\u4e00-\u9fff]{2,10}")
 
 EXIT_DONE, EXIT_NEEDS_USER, EXIT_PAGE_CHANGED = 0, 3, 4
+DENIED_STATUSES = (403, 429)  # the site refuses or rate-limits: stop, whatever the site's rules say
 NEEDS_USER = "请在浏览器里处理后重跑"
+NEEDS_USER_HEADLESS = "过一段时间（至少几个小时）再重跑，不要马上重试"
+SIGN_IN_HEADLESS = "要登录的网站加 --cdp，接管你自己登录过的 Chrome 再重跑（docs/cn/collect.md 第 2 节）"
 FINISHED = {"max_jobs": "到了 --max 上限", "max_pages": "到了 --max-pages 上限", "end_of_list": "搜索结果没有更多了",
             "no_results": "这个搜索没有结果"}
 
@@ -77,22 +98,33 @@ class Options:
     max_jobs: int = DEFAULT_MAX_JOBS
     max_pages: int = DEFAULT_MAX_PAGES
     batch: str | None = None
+    site: object = boss
 
 
 def make_options(query, city=None, city_code=None, max_jobs=DEFAULT_MAX_JOBS, max_pages=DEFAULT_MAX_PAGES,
-                 batch=None) -> Options:
-    """Options checked against the limits; CollectError names the first problem."""
+                 batch=None, site=boss) -> Options:
+    """Options checked against the limits; CollectError names the first problem.
+
+    site is the site's rules module (boss.py). Where its search takes the city's name
+    (CITY_CODES is None), the name is the city code and there is no --city-code.
+    """
     query = (query or "").strip()
     if not query or len(query) > MAX_QUERY:
         raise CollectError(f"--query 要写搜索词，最多 {MAX_QUERY} 个字")
     city = (city or "").strip()
-    if city_code:
-        if not CITY_CODE.fullmatch(city_code):
-            raise CollectError("--city-code 是 9 位数字（在网站上选好城市后，地址栏里 city= 后面那一串）")
-    elif city in boss.CITY_CODES:
-        city_code = boss.CITY_CODES[city]
+    if site.CITY_CODES is None:
+        if city_code:
+            raise CollectError("这个网站按城市名搜索，不用 --city-code")
+        if not CITY_NAME.fullmatch(city):
+            raise CollectError("--city 要写城市名，例如 广州（2 到 10 个汉字）")
+        city_code = city
+    elif city_code:
+        if not site.CITY_CODE.fullmatch(city_code):
+            raise CollectError(site.CITY_CODE_HELP)
+    elif city in site.CITY_CODES:
+        city_code = site.CITY_CODES[city]
     else:
-        known = "、".join(boss.CITY_CODES)
+        known = "、".join(site.CITY_CODES)
         raise CollectError(f"不认识城市\"{city}\"。认识的城市：{known}；别的城市用 --city-code 给出城市代码")
     if not 1 <= max_jobs <= MAX_JOBS_CAP:
         raise CollectError(f"--max 要在 1 到 {MAX_JOBS_CAP} 之间：一次只读少量详情页，降低账号被限制的风险")
@@ -100,44 +132,45 @@ def make_options(query, city=None, city_code=None, max_jobs=DEFAULT_MAX_JOBS, ma
         raise CollectError(f"--max-pages 要在 1 到 {MAX_PAGES_CAP} 之间")
     if batch is not None and not BATCH_NAME.fullmatch(batch):
         raise CollectError("--batch 只能用字母、数字和 . _ -，不能以 . 开头，最多 64 个字符")
-    return Options(query=query, city=city, city_code=city_code, max_jobs=max_jobs, max_pages=max_pages, batch=batch)
+    return Options(query=query, city=city, city_code=city_code, max_jobs=max_jobs, max_pages=max_pages, batch=batch,
+                   site=site)
 
 
-def _job_ids_in(record) -> set:
+def _job_ids_in(record, site=boss) -> set:
     found = set()
     if isinstance(record, dict):
         source = record.get("source") if isinstance(record.get("source"), dict) else record
-        if source.get("site", boss.SITE) == boss.SITE and isinstance(source.get("site_job_id"), str):
+        if source.get("site", site.SITE) == site.SITE and isinstance(source.get("site_job_id"), str):
             found.add(source["site_job_id"])
-        job_id = boss.job_id_from_url(source.get("url"))
+        job_id = site.job_id_from_url(source.get("url"))
         if job_id:
             found.add(job_id)
     return found
 
 
-def known_job_ids(data_root: Path) -> tuple:
-    """(ids, warnings): the BOSS job ids already collected into any inbox batch or stored as jobs."""
+def known_job_ids(data_root: Path, site=boss) -> tuple:
+    """(ids, warnings): the site's job ids already collected into any inbox batch or stored as jobs."""
     ids, warnings = set(), []
-    inbox = Path(data_root) / "inbox" / boss.SITE
+    inbox = Path(data_root) / "inbox" / site.SITE
     for path in sorted(inbox.glob("*/*.json")) if inbox.is_dir() else []:
         if path.name.startswith((".", "~")) or path.is_symlink():
             continue
         try:
             if path.stat().st_size > MAX_INBOX_FILE:
                 continue
-            ids |= _job_ids_in(json.loads(path.read_text(encoding="utf-8-sig")))
+            ids |= _job_ids_in(json.loads(path.read_text(encoding="utf-8-sig")), site)
         except (OSError, UnicodeDecodeError, json.JSONDecodeError):
             warnings.append(f"{path.relative_to(inbox).as_posix()}: unreadable, its job is not counted as collected")
     records, store_warnings = store.Store(data_root).all()
     for record in records:
-        ids |= _job_ids_in(record)
+        ids |= _job_ids_in(record, site)
     return ids, warnings + store_warnings
 
 
-def inbox_record(*, text: str, fetched_at: str, job_id: str, extra: dict) -> dict:
+def inbox_record(*, text: str, fetched_at: str, job_id: str, extra: dict, site=boss) -> dict:
     """One inbox file's content (docs/cn/screen.md §2.2): the job's text plus where and when it was read."""
-    record = {"format": INBOX_FORMAT, "site": boss.SITE, "fetched_at": fetched_at, "text": text,
-              "url": boss.canonical_url(job_id), "extra": extra}
+    record = {"format": INBOX_FORMAT, "site": site.SITE, "fetched_at": fetched_at, "text": text,
+              "url": site.canonical_url(job_id), "extra": extra}
     if schema.is_site_job_id(job_id):
         record["site_job_id"] = job_id
     return record
@@ -156,9 +189,9 @@ class _Pacer:
 
 
 class _Stop(Exception):
-    def __init__(self, status: str, reason: str):
+    def __init__(self, status: str, reason: str, advice: str | None = None):
         super().__init__(reason)
-        self.status, self.reason = status, reason
+        self.status, self.reason, self.advice = status, reason, advice
 
 
 def _now() -> datetime:
@@ -168,14 +201,16 @@ def _now() -> datetime:
 class _Run:
     def __init__(self, tab, options: Options, data_root: Path, *, sleep, uniform, clock):
         self.tab, self.options, self.data_root, self.clock = tab, options, Path(data_root), clock
+        self.site = site = options.site
+        self.headless = getattr(tab, "headless", False)  # a browser the user cannot see or act in
         self.pacer = _Pacer(sleep, uniform)
         started = clock()
         self.batch = options.batch or started.strftime("%Y%m%d-%H%M%S")
         self.batch_dir = None
         self.unreadable = 0
-        self.known, self.warnings = known_job_ids(self.data_root)
+        self.known, self.warnings = known_job_ids(self.data_root, site)
         self.summary = {
-            "site": boss.SITE, "query": options.query, "city": options.city, "city_code": options.city_code,
+            "site": site.SITE, "query": options.query, "city": options.city, "city_code": options.city_code,
             "batch": self.batch, "batch_dir": None, "status": "done", "finished": None, "message": None,
             "stopped_at": None, "saved": 0, "skipped_known": 0, "closed": 0, "failed": [], "list_loads": 0,
             "cards_seen": 0, "files": [], "warnings": self.warnings,
@@ -190,21 +225,29 @@ class _Run:
             raise _Stop("needs_user", f"浏览器出错：{exc}") from None
 
     def _check(self, snapshot: Snapshot, root) -> None:
-        problem = boss.page_problem(snapshot.url, snapshot.title, root, snapshot.status)
+        if snapshot.status in DENIED_STATUSES:
+            raise _Stop("needs_user", f"网站返回 HTTP {snapshot.status}")
+        problem = self.site.page_problem(snapshot.url, snapshot.title, root, snapshot.status)
         if problem:
             kind, reason = problem
-            raise _Stop("needs_user", reason if kind == "blocked" else f"{reason}：请先在这个浏览器里登录 BOSS 直聘")
+            if kind == "blocked":
+                raise _Stop("needs_user", reason)
+            if self.headless:
+                raise _Stop("needs_user", f"{reason}：{self.site.NAME}要登录才能看", SIGN_IN_HEADLESS)
+            raise _Stop("needs_user", f"{reason}：请先在这个浏览器里登录{self.site.NAME}")
 
     # -- list phase --------------------------------------------------------------------------
     def _read_list(self, snapshot: Snapshot, first: bool):
         root = htmltext.parse(snapshot.html)
         self._check(snapshot, root)
-        cards, unreadable = boss.parse_cards(root, snapshot.url)
+        cards, unreadable = self.site.parse_cards(root, snapshot.url)
         if not cards:
-            if first and boss.list_is_empty(root):
-                return None
-            if first or unreadable:
-                raise _Stop("page_changed", "搜索结果页上找不到岗位卡片或卡片里的详情链接，页面结构可能变了")
+            # No cards at all is the end only where the site says so (its "no results" box). A
+            # blank or unknown later page is not the end of the list: the page has changed, or
+            # the site stopped serving it.
+            if self.site.list_is_empty(root):
+                return None if first else []
+            raise _Stop("page_changed", "搜索结果页上找不到岗位卡片或卡片里的详情链接，页面结构可能变了")
         # A list that grows by scrolling shows the same odd cards (ads, say) again on every load.
         self.unreadable = max(self.unreadable, unreadable)
         return cards
@@ -213,9 +256,9 @@ class _Run:
         self.summary["stopped_at"] = f"搜索结果第 {number} 次加载"
         self.summary["list_loads"] = number
         options = self.options
-        if number == 1 or boss.PAGINATION == "url":
-            return self._act(self.tab.open, boss.search_url(options.query, options.city_code, number), boss.LIST_READY)
-        return self._act(self.tab.load_more, boss.SELECTORS["card"], boss.LIST_READY)
+        if number == 1 or self.site.PAGINATION == "url":
+            return self._act(self.tab.open, self.site.search_url(options.query, options.city_code, number), self.site.LIST_READY)
+        return self._act(self.tab.load_more, self.site.SELECTORS["card"], self.site.LIST_READY)
 
     def collect_cards(self) -> list:
         """The new jobs to open, in list order, at most max_jobs of them."""
@@ -245,7 +288,7 @@ class _Run:
             if not any(card["id"] not in seen for card in cards):
                 self.summary["finished"] = "end_of_list"
                 break
-        mismatched = [card for card in candidates if not boss.location_matches(card["location"], options.city)]
+        mismatched = [card for card in candidates if not self.site.location_matches(card["location"], options.city)]
         if candidates and len(mismatched) * 2 > len(candidates):
             self.warnings.append(f"一半以上的岗位不在{options.city}：城市代码 {options.city_code} 可能不对")
         if self.unreadable:
@@ -255,7 +298,7 @@ class _Run:
     # -- detail phase ------------------------------------------------------------------------
     def _save(self, record: dict, job_id: str) -> None:
         if self.batch_dir is None:
-            self.batch_dir = store.safe_dir(self.data_root, "inbox", boss.SITE, self.batch)
+            self.batch_dir = store.safe_dir(self.data_root, "inbox", self.site.SITE, self.batch)
             self.summary["batch_dir"] = str(self.batch_dir)
         name = f"{job_id}.json"
         store._write_json(self.batch_dir, self.batch_dir / name, record)
@@ -264,29 +307,30 @@ class _Run:
         self.known.add(job_id)
 
     def read_detail(self, card: dict, position: int) -> None:
-        snapshot = self._act(self.tab.open, card["href"], boss.DETAIL_READY)
+        snapshot = self._act(self.tab.open, card["href"], self.site.DETAIL_READY)
         fetched_at = self.clock().isoformat(timespec="seconds")
         root = htmltext.parse(snapshot.html)
         self._check(snapshot, root)
-        if boss.is_closed(root):
+        if self.site.is_closed(root):
             self.summary["closed"] += 1
             return
-        landed = boss.job_id_from_url(snapshot.url)
+        landed = self.site.job_id_from_url(snapshot.url)
         if landed != card["id"]:
             raise _Stop("page_changed", "打开岗位链接后没有停在这个岗位的详情页上")
-        fields = boss.parse_detail(root)
+        fields = self.site.parse_detail(root)
         if not fields["title"] or not fields["description"]:
             raise _Stop("page_changed", "详情页上找不到岗位名称或职位描述，页面结构可能变了")
-        if not boss.same_job(card["title"], fields["title"]):
+        if not self.site.same_job(card["title"], fields["title"]):
             raise _Stop("page_changed", f"详情页的岗位名\"{fields['title']}\"和列表里的\"{card['title']}\"对不上")
-        text = boss.detail_text(fields)
+        text = self.site.detail_text(fields)
         if len(text) > schema.MAX_RAW_TEXT:
             self.summary["failed"].append({"job": card["id"], "reason": f"岗位文字超过 {schema.MAX_RAW_TEXT} 字，没有保存"})
             return
-        extra = {"collector": COLLECTOR, "query": self.options.query, "city": self.options.city,
+        extra = {"collector": self.site.COLLECTOR, "query": self.options.query, "city": self.options.city,
                  "list_title": card["title"], "list_salary": card["salary"], "list_location": card["location"],
                  "position": position}
-        self._save(inbox_record(text=text, fetched_at=fetched_at, job_id=card["id"], extra=extra), card["id"])
+        self._save(inbox_record(text=text, fetched_at=fetched_at, job_id=card["id"], extra=extra, site=self.site),
+                   card["id"])
 
     def run(self) -> dict:
         summary = self.summary
@@ -303,7 +347,12 @@ class _Run:
                                   f"跳过 {summary['skipped_known']} 个以前抓过的")
         except _Stop as stop:
             summary["status"] = stop.status
-            tail = NEEDS_USER if stop.status == "needs_user" else "已存的岗位不受影响；页面结构的规则要更新（docs/cn/collect.md）"
+            if stop.advice:
+                tail = stop.advice
+            elif stop.status != "needs_user":
+                tail = "已存的岗位不受影响；页面结构的规则要更新（docs/cn/collect.md）"
+            else:
+                tail = NEEDS_USER_HEADLESS if self.headless else NEEDS_USER
             summary["message"] = f"{stop.reason}。停在{summary['stopped_at']}，已新存 {summary['saved']} 个岗位。{tail}"
         return summary
 

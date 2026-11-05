@@ -8,8 +8,8 @@
   list, this is a tripwire rather than a wall: it makes adding a network path
   a visible, reviewed change instead of an incidental import.
 * One named exception (OPTIONAL_IMPORTS, 2026-11-05, M6-3): jobsearch_cn/browser.py
-  drives the user's own signed-in Chrome for `collect` over a loopback debugging
-  port with Playwright, an optional dependency imported inside a function. The
+  starts this machine's Chrome headless or, with explicit CDP, drives the user's
+  Chrome over loopback with Playwright, imported optionally inside a function. The
   page reading, inbox writing and every other command stay standard library only
   and offline (docs/cn/collect.md; ADR-4 and ADR-9 in cn-migration-plan.md).
 * UTF-8 output whatever the console code page. A Chinese Windows console
