@@ -96,7 +96,12 @@ class ClipPageTest(unittest.TestCase):
                             ("english_description", "Write SQL"), ("shortest_description", "写周报"),
                             ("loading_work_description", "开发加载中的提示组件，优化数据加载性能"),
                             ("waiting_work_description", "Implement Loading and Please wait messages"),
-                            ("mixed_loading_description", "岗位职责：写周报")):
+                            ("mixed_loading_description", "岗位职责：写周报"),
+                            ("load_data_description", "加载数据"), ("read_data_description", "读取数据"),
+                            ("java_description", "Java"), ("implement_loading_description", "实现 Loading 状态"),
+                            ("retry_work_description", "负责刷新缓存并重试失败请求"),
+                            ("numbered_work_description", "每天读取3次数据并核对２张报表"),
+                            ("numbered_load_description", "加载3组数据")):
             self.assertIn(words, self.results[name]["items"][0]["item"]["text"], name)
 
     def test_loading_and_waiting_prompts_alone_do_not_become_job_descriptions(self):
@@ -127,10 +132,12 @@ class ClipPageTest(unittest.TestCase):
         self.assertEqual(screen_page(1, "full_detail")["imported"]["created"], 1)
         full = saved()
         for number, name in enumerate(("no_description", "heading_description", "empty_h1_with_text",
-                                       "loading_wait_description", "loading_english_description"), 2):
+                                       "loading_wait_description", "loading_english_description",
+                                       "loading_moment_description", "loading_brief_description",
+                                       "loading_object_description", "loading_failed_description"), 2):
             self.assertEqual(screen_page(number, name)["imported"]["updated"], 0, name)
             self.assertEqual(saved(), full, name)
-        self.assertEqual(screen_page(9, "edited_detail")["imported"]["updated"], 1)
+        self.assertEqual(screen_page(20, "edited_detail")["imported"]["updated"], 1)
         self.assertIn("并参与需求评审", saved()["raw_text"])
         self.assertEqual(saved()["title"], full["title"])
         self.assertEqual(saved()["id"], full["id"])

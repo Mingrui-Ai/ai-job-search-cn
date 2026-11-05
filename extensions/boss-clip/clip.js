@@ -54,9 +54,14 @@
   // What a description block can hold before its text has loaded: headings and placeholders.
   const DESCRIPTION_HEADINGS = /职位描述|岗位描述|职位详情|岗位详情|岗位职责|工作职责|工作内容|任职要求|任职资格|岗位要求|职位要求/g;
   const EMPTY_DESCRIPTION_WORDS = /加载中|正在加载|暂无描述|暂无内容|暂无/g;
-  // Match the entire block after removing headings and presentation characters. Matching a
-  // loading word anywhere would reject real duties such as "开发加载中的提示组件" or "Write SQL".
-  const PLACEHOLDER_DESCRIPTION = /^(?:(?:(?:数据|内容)?(?:正在)?加载(?:数据|内容)?中?)|请(?:稍候|稍后|稍等|耐心等待)|暂无(?:描述|内容)?|loading(?:data|content)?|pleasewait|justamoment)+$/iu;
+  // A status-only block can combine an object, state and instructions in either order.
+  // Require both this whole-block grammar and a UI status signal: "加载数据" and "读取数据"
+  // are short duties, whereas "正在加载数据，请稍等片刻" is a page state.
+  const UI_OBJECT = "职位|岗位|工作|描述|详情|内容|信息|数据|页面|jobs?|positions?|descriptions?|details?|content|data|pages?|information";
+  const UI_STATE = "正在|加载|载入|读取|获取|中|失败|错误|异常|暂无|loading|loaded|load|failed|failure|error|unavailable|unable|couldnot|couldnt|cannot|cant";
+  const UI_PROMPT = "请|您|稍候|稍后|稍等|片刻|一下|一会儿?|一小会|几|秒钟?|分钟|耐心|等待|刷新|重试|再试|重新|为您|抱歉|please|wait|waiting|a|an|the|your|this|for|while|we|are|is|be|to|of|and|just|moments?|seconds?|minutes?|few|short|little|bit|refresh|reload|retry|try|again|later|sorry";
+  const PLACEHOLDER_DESCRIPTION = new RegExp(`^(?:${UI_OBJECT}|${UI_STATE}|${UI_PROMPT})+$`, "iu");
+  const UI_STATUS_SIGNAL = /正在(?:为您)?(?:加载|载入|读取|获取)|(?:加载|载入|读取|获取)中|失败|错误|异常|请(?:您)?(?:稍候|稍后|稍等|耐心|等待|刷新|重试)|稍候|稍后|稍等|暂无|loading|failed|failure|error|unavailable|unable|couldnot|couldnt|cannot|cant|pleasewait|waiting|wait(?:for)?a?moment|justamoment|refresh|reload|retry|tryagain/iu;
 
   function jobIdFromUrl(href, base) {
     let url;
@@ -167,7 +172,7 @@
   function hasDescription(text) {
     const body = text.replace(DESCRIPTION_HEADINGS, "");
     const letters = body.replace(/[^\p{L}]/gu, "");
-    if (PLACEHOLDER_DESCRIPTION.test(letters)) return false;
+    if (UI_STATUS_SIGNAL.test(letters) && PLACEHOLDER_DESCRIPTION.test(letters)) return false;
     return (body.replace(EMPTY_DESCRIPTION_WORDS, "").match(/\p{L}/gu) || []).length >= 2;
   }
 

@@ -159,6 +159,10 @@ const results = {
   loading_description: described("正在加载..."),
   loading_wait_description: described("正在加载，请稍候..."),
   loading_english_description: described("Loading..."),
+  loading_moment_description: described("Loading, please wait a moment..."),
+  loading_brief_description: described("正在加载，请稍等片刻..."),
+  loading_object_description: described("Loading job description, please wait..."),
+  loading_failed_description: described("加载失败，请刷新重试"),
   none_description: described("暂无"),
   one_letter_description: described("无"),
   punctuation_description: described("-- 1. 2."),
@@ -170,6 +174,13 @@ const results = {
   loading_work_description: described("开发加载中的提示组件，优化数据加载性能"),
   waiting_work_description: described("Implement Loading and Please wait messages"),
   mixed_loading_description: described("正在加载，请稍候...\n岗位职责：写周报"),
+  load_data_description: described("加载数据"),
+  read_data_description: described("读取数据"),
+  java_description: described("Java"),
+  implement_loading_description: described("实现 Loading 状态"),
+  retry_work_description: described("负责刷新缓存并重试失败请求"),
+  numbered_work_description: described("每天读取3次数据并核对２张报表"),
+  numbered_load_description: described("加载3组数据"),
   full_detail: described("负责整理业务数据，每周写周报，维护数据看板"),
   card_of_full_detail: clip.clipPage(n([], "", [n("li.job-card-box", "", [
     n(["a.job-name[href]", ".job-name"], "数据分析实习生", [], { href: "/job_detail/bx0002.html" }),
@@ -193,5 +204,18 @@ results.placeholder_descriptions = [
   "正在加载 50%，请稍候…", "正在\u200b加载，请稍候", "暂无内容，请稍后",
   "Loading...", "LOADING…", "Loading, please wait...", "Please wait...",
   "Loading content… Please wait", "Please wait, loading data...", "Just a moment...",
+  "Loading, please wait a moment...", "正在加载，请稍等片刻...",
+  "Loading job description, please wait...", "加载失败，请刷新重试",
+  "正在为您加载职位信息...", "内容加载中，请稍等一会", "加载中，请稍等几秒钟",
+  "Loading job details, please wait a few seconds...", "Unable to load job description. Please try again later.",
+  "Sorry, we couldn't load your job details. Please reload this page.",
+  "正在加载，请稍等3秒", "正在加载，请稍等３秒",
+  "Loading, please wait 3 seconds...", "Loading, please wait ３ seconds...",
+  ...["正在加载", "内容正在加载", "正在加载岗位描述", "职位详情加载失败", "数据获取失败"]
+    .flatMap((state) => ["请稍等片刻", "请耐心等待", "请刷新重试", "稍后再试"]
+      .map((prompt) => `${state}，${prompt}…`)),
+  ...["Loading", "Loading job description", "Job details are loading", "Failed to load job content", "Job description loading failed"]
+    .flatMap((state) => ["please wait a moment", "please wait for a moment", "Please refresh the page and try again", "please retry"]
+      .map((prompt) => `${state}. ${prompt}...`)),
 ].map((text) => ({ text, result: described(text) }));
 process.stdout.write(JSON.stringify(results));
