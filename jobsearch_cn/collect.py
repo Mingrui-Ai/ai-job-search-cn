@@ -2,7 +2,7 @@
 
 One run: open the search results in a tab of its own, read the job cards (scrolling for more
 up to the page limit), open each new job's detail page by the link its card carries, and write
-one JSON file per job into <data>/inbox/boss/<batch>/ in the inbox format that the batch
+one JSON file per job into <data>/inbox/<site>/<batch>/ in the inbox format that the batch
 screening reads (jobsearch_cn.inbox/1, docs/cn/screen.md §2). Then report what was saved, what was
 skipped and where the run stopped.
 
@@ -80,19 +80,20 @@ class Options:
 
 
 def make_options(query, city=None, city_code=None, max_jobs=DEFAULT_MAX_JOBS, max_pages=DEFAULT_MAX_PAGES,
-                 batch=None) -> Options:
+                 batch=None, *, adapter=boss) -> Options:
     """Options checked against the limits; CollectError names the first problem."""
     query = (query or "").strip()
     if not query or len(query) > MAX_QUERY:
         raise CollectError(f"--query 要写搜索词，最多 {MAX_QUERY} 个字")
     city = (city or "").strip()
     if city_code:
-        if not CITY_CODE.fullmatch(city_code):
-            raise CollectError("--city-code 是 9 位数字（在网站上选好城市后，地址栏里 city= 后面那一串）")
-    elif city in boss.CITY_CODES:
-        city_code = boss.CITY_CODES[city]
+        if not getattr(adapter, "CITY_CODE", CITY_CODE).fullmatch(city_code):
+            raise CollectError(getattr(adapter, "CITY_CODE_HELP",
+                                      "--city-code 是 9 位数字（在网站上选好城市后，地址栏里 city= 后面那一串）"))
+    elif city in adapter.CITY_CODES:
+        city_code = adapter.CITY_CODES[city]
     else:
-        known = "、".join(boss.CITY_CODES)
+        known = "、".join(adapter.CITY_CODES)
         raise CollectError(f"不认识城市\"{city}\"。认识的城市：{known}；别的城市用 --city-code 给出城市代码")
     if not 1 <= max_jobs <= MAX_JOBS_CAP:
         raise CollectError(f"--max 要在 1 到 {MAX_JOBS_CAP} 之间：一次只读少量详情页，降低账号被限制的风险")
@@ -103,43 +104,49 @@ def make_options(query, city=None, city_code=None, max_jobs=DEFAULT_MAX_JOBS, ma
     return Options(query=query, city=city, city_code=city_code, max_jobs=max_jobs, max_pages=max_pages, batch=batch)
 
 
-def _job_ids_in(record) -> set:
+def _job_ids_in(record, adapter=boss) -> set:
     found = set()
     if isinstance(record, dict):
         source = record.get("source") if isinstance(record.get("source"), dict) else record
-        if source.get("site", boss.SITE) == boss.SITE and isinstance(source.get("site_job_id"), str):
+        if (adapter.SITE in schema.PORTAL_SITES and source.get("site", adapter.SITE) == adapter.SITE
+                and isinstance(source.get("site_job_id"), str)):
             found.add(source["site_job_id"])
-        job_id = boss.job_id_from_url(source.get("url"))
+        job_id = adapter.job_id_from_url(source.get("url"))
         if job_id:
             found.add(job_id)
     return found
 
 
-def known_job_ids(data_root: Path) -> tuple:
-    """(ids, warnings): the BOSS job ids already collected into any inbox batch or stored as jobs."""
+def known_job_ids(data_root: Path, adapter=boss) -> tuple:
+    """(ids, warnings): this adapter's ids already in the inbox or job store."""
     ids, warnings = set(), []
-    inbox = Path(data_root) / "inbox" / boss.SITE
+    inbox = Path(data_root) / "inbox" / adapter.SITE
     for path in sorted(inbox.glob("*/*.json")) if inbox.is_dir() else []:
         if path.name.startswith((".", "~")) or path.is_symlink():
             continue
         try:
             if path.stat().st_size > MAX_INBOX_FILE:
                 continue
-            ids |= _job_ids_in(json.loads(path.read_text(encoding="utf-8-sig")))
+            ids |= _job_ids_in(json.loads(path.read_text(encoding="utf-8-sig")), adapter)
         except (OSError, UnicodeDecodeError, json.JSONDecodeError):
             warnings.append(f"{path.relative_to(inbox).as_posix()}: unreadable, its job is not counted as collected")
     records, store_warnings = store.Store(data_root).all()
     for record in records:
-        ids |= _job_ids_in(record)
+        ids |= _job_ids_in(record, adapter)
     return ids, warnings + store_warnings
 
 
-def inbox_record(*, text: str, fetched_at: str, job_id: str, extra: dict) -> dict:
+def inbox_record(*, text: str, fetched_at: str, job_id: str, extra: dict, adapter=boss) -> dict:
     """One inbox file's content (docs/cn/screen.md §2.2): the job's text plus where and when it was read."""
-    record = {"format": INBOX_FORMAT, "site": boss.SITE, "fetched_at": fetched_at, "text": text,
-              "url": boss.canonical_url(job_id), "extra": extra}
+    record = {"format": INBOX_FORMAT, "site": adapter.SITE, "fetched_at": fetched_at, "text": text,
+              "url": adapter.canonical_url(job_id), "extra": extra}
     if schema.is_site_job_id(job_id):
-        record["site_job_id"] = job_id
+        if adapter.SITE in schema.PORTAL_SITES:
+            record["site_job_id"] = job_id
+        else:
+            # The schema scopes board ids by site. "official" covers many companies, so
+            # its raw ids stay in extra; the full official URL is the import/dedup key.
+            record["extra"] = dict(extra, site_job_id=job_id)
     return record
 
 
@@ -166,16 +173,18 @@ def _now() -> datetime:
 
 
 class _Run:
-    def __init__(self, tab, options: Options, data_root: Path, *, sleep, uniform, clock):
+    def __init__(self, tab, options: Options, data_root: Path, *, sleep, uniform, clock, adapter):
+        self.adapter = adapter
         self.tab, self.options, self.data_root, self.clock = tab, options, Path(data_root), clock
         self.pacer = _Pacer(sleep, uniform)
         started = clock()
-        self.batch = options.batch or started.strftime("%Y%m%d-%H%M%S")
+        prefix = f"{adapter.SOURCE_NAME}-" if hasattr(adapter, "SOURCE_NAME") else ""
+        self.batch = options.batch or prefix + started.strftime("%Y%m%d-%H%M%S")
         self.batch_dir = None
         self.unreadable = 0
-        self.known, self.warnings = known_job_ids(self.data_root)
+        self.known, self.warnings = known_job_ids(self.data_root, adapter)
         self.summary = {
-            "site": boss.SITE, "query": options.query, "city": options.city, "city_code": options.city_code,
+            "site": adapter.SITE, "query": options.query, "city": options.city, "city_code": options.city_code,
             "batch": self.batch, "batch_dir": None, "status": "done", "finished": None, "message": None,
             "stopped_at": None, "saved": 0, "skipped_known": 0, "closed": 0, "failed": [], "list_loads": 0,
             "cards_seen": 0, "files": [], "warnings": self.warnings,
@@ -190,20 +199,21 @@ class _Run:
             raise _Stop("needs_user", f"浏览器出错：{exc}") from None
 
     def _check(self, snapshot: Snapshot, root) -> None:
-        problem = boss.page_problem(snapshot.url, snapshot.title, root, snapshot.status)
+        problem = self.adapter.page_problem(snapshot.url, snapshot.title, root, snapshot.status)
         if problem:
             kind, reason = problem
-            raise _Stop("needs_user", reason if kind == "blocked" else f"{reason}：请先在这个浏览器里登录 BOSS 直聘")
+            name = getattr(self.adapter, "NAME", "BOSS 直聘")
+            raise _Stop("needs_user", reason if kind == "blocked" else f"{reason}：请先在这个浏览器里处理{name}登录提示")
 
     # -- list phase --------------------------------------------------------------------------
     def _read_list(self, snapshot: Snapshot, first: bool):
         root = htmltext.parse(snapshot.html)
         self._check(snapshot, root)
-        cards, unreadable = boss.parse_cards(root, snapshot.url)
+        cards, unreadable = self.adapter.parse_cards(root, snapshot.url)
         if not cards:
-            if first and boss.list_is_empty(root):
-                return None
-            if first or unreadable:
+            if self.adapter.list_is_empty(root):
+                return None if first else []
+            if first or unreadable or getattr(self.adapter, "STRICT_LIST", False):
                 raise _Stop("page_changed", "搜索结果页上找不到岗位卡片或卡片里的详情链接，页面结构可能变了")
         # A list that grows by scrolling shows the same odd cards (ads, say) again on every load.
         self.unreadable = max(self.unreadable, unreadable)
@@ -213,9 +223,10 @@ class _Run:
         self.summary["stopped_at"] = f"搜索结果第 {number} 次加载"
         self.summary["list_loads"] = number
         options = self.options
-        if number == 1 or boss.PAGINATION == "url":
-            return self._act(self.tab.open, boss.search_url(options.query, options.city_code, number), boss.LIST_READY)
-        return self._act(self.tab.load_more, boss.SELECTORS["card"], boss.LIST_READY)
+        adapter = self.adapter
+        if number == 1 or adapter.PAGINATION == "url":
+            return self._act(self.tab.open, adapter.search_url(options.query, options.city_code, number), adapter.LIST_READY)
+        return self._act(self.tab.load_more, adapter.SELECTORS["card"], adapter.LIST_READY)
 
     def collect_cards(self) -> list:
         """The new jobs to open, in list order, at most max_jobs of them."""
@@ -245,7 +256,7 @@ class _Run:
             if not any(card["id"] not in seen for card in cards):
                 self.summary["finished"] = "end_of_list"
                 break
-        mismatched = [card for card in candidates if not boss.location_matches(card["location"], options.city)]
+        mismatched = [card for card in candidates if not self.adapter.location_matches(card["location"], options.city)]
         if candidates and len(mismatched) * 2 > len(candidates):
             self.warnings.append(f"一半以上的岗位不在{options.city}：城市代码 {options.city_code} 可能不对")
         if self.unreadable:
@@ -255,7 +266,7 @@ class _Run:
     # -- detail phase ------------------------------------------------------------------------
     def _save(self, record: dict, job_id: str) -> None:
         if self.batch_dir is None:
-            self.batch_dir = store.safe_dir(self.data_root, "inbox", boss.SITE, self.batch)
+            self.batch_dir = store.safe_dir(self.data_root, "inbox", self.adapter.SITE, self.batch)
             self.summary["batch_dir"] = str(self.batch_dir)
         name = f"{job_id}.json"
         store._write_json(self.batch_dir, self.batch_dir / name, record)
@@ -264,29 +275,30 @@ class _Run:
         self.known.add(job_id)
 
     def read_detail(self, card: dict, position: int) -> None:
-        snapshot = self._act(self.tab.open, card["href"], boss.DETAIL_READY)
+        adapter = self.adapter
+        snapshot = self._act(self.tab.open, card["href"], adapter.DETAIL_READY)
         fetched_at = self.clock().isoformat(timespec="seconds")
         root = htmltext.parse(snapshot.html)
         self._check(snapshot, root)
-        if boss.is_closed(root):
+        if adapter.is_closed(root):
             self.summary["closed"] += 1
             return
-        landed = boss.job_id_from_url(snapshot.url)
+        landed = adapter.job_id_from_url(snapshot.url)
         if landed != card["id"]:
             raise _Stop("page_changed", "打开岗位链接后没有停在这个岗位的详情页上")
-        fields = boss.parse_detail(root)
+        fields = adapter.parse_detail(root)
         if not fields["title"] or not fields["description"]:
             raise _Stop("page_changed", "详情页上找不到岗位名称或职位描述，页面结构可能变了")
-        if not boss.same_job(card["title"], fields["title"]):
+        if not adapter.same_job(card["title"], fields["title"]):
             raise _Stop("page_changed", f"详情页的岗位名\"{fields['title']}\"和列表里的\"{card['title']}\"对不上")
-        text = boss.detail_text(fields)
+        text = adapter.detail_text(fields)
         if len(text) > schema.MAX_RAW_TEXT:
             self.summary["failed"].append({"job": card["id"], "reason": f"岗位文字超过 {schema.MAX_RAW_TEXT} 字，没有保存"})
             return
-        extra = {"collector": COLLECTOR, "query": self.options.query, "city": self.options.city,
+        extra = {"collector": getattr(adapter, "COLLECTOR", COLLECTOR), "query": self.options.query, "city": self.options.city,
                  "list_title": card["title"], "list_salary": card["salary"], "list_location": card["location"],
                  "position": position}
-        self._save(inbox_record(text=text, fetched_at=fetched_at, job_id=card["id"], extra=extra), card["id"])
+        self._save(inbox_record(text=text, fetched_at=fetched_at, job_id=card["id"], extra=extra, adapter=adapter), card["id"])
 
     def run(self) -> dict:
         summary = self.summary
@@ -308,9 +320,9 @@ class _Run:
         return summary
 
 
-def run(tab, options: Options, data_root, *, sleep=time.sleep, uniform=random.uniform, clock=_now) -> dict:
+def run(tab, options: Options, data_root, *, sleep=time.sleep, uniform=random.uniform, clock=_now, adapter=boss) -> dict:
     """Collect one batch through tab. Returns the summary; status is done, needs_user or page_changed."""
-    return _Run(tab, options, data_root, sleep=sleep, uniform=uniform, clock=clock).run()
+    return _Run(tab, options, data_root, sleep=sleep, uniform=uniform, clock=clock, adapter=adapter).run()
 
 
 def exit_code(summary: dict) -> int:

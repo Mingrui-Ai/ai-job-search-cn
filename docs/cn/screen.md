@@ -61,6 +61,7 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--che
 - 除了上表的字段，出现别的字段算格式不对（这样能发现 `fetchedAt` 这类拼写错误），别的信息放进 `extra`。
 - 一个文件有几处问题时一次全部列出，例如 `fetched_at: missing; url: must be null or an http(s) URL`。
 - `url` 和 `site_job_id` 都没有时照样导入，只能按原文去重，`warnings` 里提示。
+- 官网采集适配（例如 `collect bytedance`）使用 `site: "official"`，完整详情页 URL 参与去重；官网原始 ID 可放在 `extra.site_job_id` 和文件名里，不能放在顶层 `site_job_id`。这样不同公司的数字 ID 不会冲突，也兼容现有 `jd screen`。
 
 ```json
 {

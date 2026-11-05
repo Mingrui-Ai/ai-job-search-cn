@@ -15,7 +15,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import (__version__, boss, browser, collect, jd_parser, match, material, messages, profile, report,
+from jobsearch_cn import (__version__, boss, browser, bytedance, collect, jd_parser, match, material, messages, profile, report,
                           resume_docx, resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
 from jobsearch_cn import applications as applications_mod
 
@@ -1047,10 +1047,11 @@ def _add_application_parser(commands, stored) -> None:
     export_parser.set_defaults(handler=cmd_application_export)
 
 
-def cmd_collect_boss(args) -> int:
+def cmd_collect(args) -> int:
+    adapter = bytedance if args.collect_site == "bytedance" else boss
     try:
         options = collect.make_options(args.query, city=args.city, city_code=args.city_code, max_jobs=args.max,
-                                       max_pages=args.max_pages, batch=args.batch)
+                                       max_pages=args.max_pages, batch=args.batch, adapter=adapter)
         browser.check_cdp_url(args.cdp)
     except (collect.CollectError, browser.BrowserUnavailable) as exc:
         raise InputError(str(exc)) from None
@@ -1060,7 +1061,7 @@ def cmd_collect_boss(args) -> int:
     except browser.BrowserUnavailable as exc:
         raise InputError(str(exc)) from None
     try:
-        summary = collect.run(tab, options, root)
+        summary = collect.run(tab, options, root, adapter=adapter)
     except store.StoreError as exc:
         raise InputError(f"收件夹写不进去：{exc}") from None
     finally:
@@ -1071,7 +1072,7 @@ def cmd_collect_boss(args) -> int:
 
 def _add_collect_parser(commands, stored) -> None:
     group = commands.add_parser(
-        "collect", help="从你自己已登录的浏览器读取招聘网站上的岗位，存进收件夹（要装 Playwright）",
+        "collect", help="从你自己的专用浏览器读取招聘网站上的岗位，存进收件夹（要装 Playwright）",
         description="接管你用调试端口启动的 Chrome，在一个新标签里按搜索词和城市慢速读列表和详情页，"
                     "每个岗位存一个文件到 <数据目录>/inbox/<网站>/<批次>/。只读、不点任何按钮；"
                     "遇到安全检查或登录页就停下。说明见 docs/cn/collect.md。",
@@ -1084,22 +1085,35 @@ def _add_collect_parser(commands, stored) -> None:
                     "3 遇到安全检查、验证码或没登录，已抓的已保存，请在浏览器里处理后重跑；"
                     "4 页面结构认不出，已抓的已保存。",
     )
-    parser.add_argument("--query", required=True, help="搜索词，例如 \"Java 实习\"")
+    _add_collect_options(parser)
     parser.add_argument("--city", help=f"城市，认得的有：{'、'.join(boss.CITY_CODES)}")
     parser.add_argument("--city-code", help="别的城市：网站的 9 位城市代码（在网站上选好城市后，地址栏里 city= 后面那一串）")
+    parser = sites.add_parser(
+        "bytedance", parents=[stored], help="字节跳动官网：公开的校招 / 实习岗位",
+        description="只读取公开的 /campus 页面，无需登录；节奏、上限和退出码同 collect boss。"
+                    "存入 inbox/official/，官网 ID 保存在文件名和 extra.site_job_id，按官网 URL 去重。",
+    )
+    _add_collect_options(parser)
+    parser.add_argument("--city", help=f"城市，认得的有：{'、'.join(bytedance.CITY_CODES)}")
+    parser.add_argument("--city-code", help=bytedance.CITY_CODE_HELP)
+
+
+def _add_collect_options(parser) -> None:
+    """Shared limits and browser/inbox arguments for every source adapter."""
+    parser.add_argument("--query", required=True, help="搜索词，例如 \"Java 实习\"")
     parser.add_argument("--max", type=int, default=collect.DEFAULT_MAX_JOBS,
                         help=f"这次最多打开几个新岗位的详情页（默认 {collect.DEFAULT_MAX_JOBS}，最多 {collect.MAX_JOBS_CAP}）")
     parser.add_argument("--max-pages", type=int, default=collect.DEFAULT_MAX_PAGES,
                         help=f"搜索结果最多加载几屏（默认 {collect.DEFAULT_MAX_PAGES}，最多 {collect.MAX_PAGES_CAP}）")
     parser.add_argument("--batch", help="批次名，默认用开始的时间 YYYYMMDD-HHMMSS；写已有的批次名就接着往里存")
     parser.add_argument("--cdp", default=browser.DEFAULT_CDP, help=f"浏览器的调试地址，只能是本机（默认 {browser.DEFAULT_CDP}）")
-    parser.set_defaults(handler=cmd_collect_boss)
+    parser.set_defaults(handler=cmd_collect)
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m jobsearch_cn",
-        description="AI Job Search CN 本地工具（离线处理用户提供的岗位数据；只有 collect 会读取你自己已登录的浏览器）",
+        description="AI Job Search CN 本地工具（离线处理用户提供的岗位数据；只有 collect 会读取你自己的专用浏览器）",
     )
     parser.add_argument("--version", action="version", version=f"jobsearch_cn {__version__}")
     commands = parser.add_subparsers(dest="command", metavar="<command>")
