@@ -15,6 +15,7 @@ from pathlib import Path
 
 from jobsearch_cn import (__version__, jd_parser, match, material, messages, profile, report, resume_docx,
                           resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
+from jobsearch_cn import inbox
 from jobsearch_cn import applications as applications_mod
 
 
@@ -196,6 +197,16 @@ def cmd_jd_screen(args) -> int:
     _emit(payload)
     imported = payload["imported"]
     return 0 if imported["created"] + imported["updated"] + imported["unchanged"] else 1
+
+
+def cmd_jd_inbox_import(args) -> int:
+    folder = Path(args.folder) if args.folder else inbox.default_folder()
+    try:
+        payload = inbox.import_folder(folder, store.data_dir(args.data_dir), site=args.site)
+    except (screen.BatchError, store.StoreError) as exc:
+        raise InputError(str(exc)) from None
+    _emit(payload)
+    return 0 if payload["moved"] else 1
 
 
 def _count(text: str) -> int:
@@ -1119,6 +1130,16 @@ def build_parser() -> argparse.ArgumentParser:
                                help="只检查文件格式，列出规则读出的职位名、公司、城市、薪资；不读档案，不写岗位库和匹配记录")
     screen_parser.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     screen_parser.set_defaults(handler=cmd_jd_screen)
+
+    inbox_parser = jd_commands.add_parser(
+        "inbox-import", parents=[stored], help="把浏览器插件存的岗位文件搬进一个新的收件夹批次",
+        description="把 BOSS 一键收藏插件存在 <下载目录>/jobsearch-boss-clip/ 里的岗位文件（收件夹格式的 .json）"
+                    "搬进新批次 <数据目录>/inbox/<来源>/<YYYYMMDD-HHMMSS>/，之后用 jd screen 初筛。"
+                    "格式不对的文件留在原处，列在 left 里。见 docs/cn/boss-clip.md。")
+    inbox_parser.add_argument("folder", nargs="?",
+                              help=f"插件存文件的文件夹；默认为 ~/Downloads/{inbox.CLIP_FOLDER}")
+    inbox_parser.add_argument("--site", choices=schema.SITES, default="boss", help="批次的来源，默认 boss")
+    inbox_parser.set_defaults(handler=cmd_jd_inbox_import)
 
     prof = commands.add_parser("profile", help="个人档案相关命令", description="个人档案相关命令（data/profile/）")
     prof.set_defaults(help_parser=prof)
