@@ -28,7 +28,7 @@ REPO = Path(__file__).resolve().parent.parent
 FIXTURES = REPO / "tests" / "fixtures" / "cn" / "boss"
 
 sys.path.insert(0, str(REPO))
-from jobsearch_cn import boss, browser, cli, collect, htmltext, jd_parser, schema  # noqa: E402
+from jobsearch_cn import boss, browser, cli, collect, htmltext, jd_parser, schema, screen, vocab  # noqa: E402
 
 CST = timezone(timedelta(hours=8))
 NOW = datetime(2026, 11, 5, 10, 30, 0, tzinfo=CST)
@@ -59,7 +59,7 @@ EXPECTED_TEXT = "\n".join([
     "未融资 20-99人 互联网",
     "示例星图数据科技有限公司",
 ])
-# What M6-4 accepts in an inbox JSON file (design §3.2).
+# What M6-4 accepts in an inbox JSON file (docs/cn/screen.md §2.2).
 INBOX_KEYS = {"format", "text", "fetched_at", "url", "site_job_id", "site", "extra"}
 SECURITY = collect.Snapshot(url="https://www.zhipin.com/web/passport/zp/security.html?callbackUrl=x",
                             title="请稍候", html="<html><head><title>请稍候</title></head><body></body></html>")
@@ -112,7 +112,7 @@ class FakeTab:
 
 
 def check_inbox_record(test, record):
-    """The M6-4 inbox rules (design §3.2) a collected file must pass."""
+    """The M6-4 inbox rules (docs/cn/screen.md §2.2) a collected file must pass."""
     test.assertLessEqual(set(record), INBOX_KEYS)
     test.assertEqual(record["format"], "jobsearch_cn.inbox/1")
     test.assertEqual(record["site"], "boss")
@@ -302,6 +302,18 @@ class Collecting(Run):
         self.assertEqual(first["extra"]["query"], "Java 实习")
         self.assertNotIn("FAKE-SEC", json.dumps(saved, ensure_ascii=False), "per-visit link parameters are not kept")
         self.assertEqual([path.name for path in self.batch_dir().iterdir() if path.name.startswith(".")], [])
+
+    def test_jd_screen_check_takes_the_batch(self):
+        """Read back by the batch screening's own reader (`jd screen --check`), not a copy of its rules."""
+        summary = self.run_collect(FakeTab(list_pages=[LIST_HTML, MORE_HTML]), max_pages=2)
+        site = screen.batch_site(self.batch_dir())
+        payload = screen.check(self.batch_dir(), site, vocab.load(), NOW)
+        self.assertEqual((site, payload["ok"], payload["failed"], payload["jobs"]), ("boss", summary["saved"], 0, 5))
+        self.assertEqual((payload["duplicates"], payload["ignored"]), ([], []))
+        for entry in payload["files"]:
+            [job] = entry["jobs"]
+            self.assertEqual((entry["type"], entry["warnings"], job["unread"], job["guard"]), ("portal", [], [], "clean"),
+                             entry["file"])
 
     def test_is_slow_and_read_only(self):
         tab = FakeTab(list_pages=[LIST_HTML, MORE_HTML])

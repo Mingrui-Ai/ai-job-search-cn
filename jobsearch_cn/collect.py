@@ -3,7 +3,7 @@
 One run: open the search results in a tab of its own, read the job cards (scrolling for more
 up to the page limit), open each new job's detail page by the link its card carries, and write
 one JSON file per job into <data>/inbox/boss/<batch>/ in the inbox format that the batch
-screening reads (jobsearch_cn.inbox/1, M6-4 design §3). Then report what was saved, what was
+screening reads (jobsearch_cn.inbox/1, docs/cn/screen.md §2). Then report what was saved, what was
 skipped and where the run stopped.
 
 The ground rules are enforced here, not left to the caller:
@@ -42,7 +42,6 @@ DEFAULT_MAX_PAGES = 3
 MAX_PAGES_CAP = 10
 MAX_QUERY = 50
 MAX_INBOX_FILE = 1_000_000
-SITE_JOB_ID = re.compile(r"[A-Za-z0-9._~-]{1,128}")
 BATCH_NAME = re.compile(r"[0-9A-Za-z][0-9A-Za-z._-]{0,63}")
 CITY_CODE = re.compile(r"\d{9}")
 
@@ -136,10 +135,10 @@ def known_job_ids(data_root: Path) -> tuple:
 
 
 def inbox_record(*, text: str, fetched_at: str, job_id: str, extra: dict) -> dict:
-    """One inbox file's content (M6-4 design §3.2): the job's text plus where and when it was read."""
+    """One inbox file's content (docs/cn/screen.md §2.2): the job's text plus where and when it was read."""
     record = {"format": INBOX_FORMAT, "site": boss.SITE, "fetched_at": fetched_at, "text": text,
               "url": boss.canonical_url(job_id), "extra": extra}
-    if SITE_JOB_ID.fullmatch(job_id):
+    if schema.is_site_job_id(job_id):
         record["site_job_id"] = job_id
     return record
 

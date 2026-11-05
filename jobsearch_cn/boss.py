@@ -81,7 +81,7 @@ SELECTORS = {
     # Removed from the detail page before any field is read: the recruiter (name, title, the
     # "刚刚活跃" online status), counters, recommendations and labels that are not the job. They
     # change from one visit to the next or describe other jobs, and the inbox text must not
-    # (M6-4 design §3.3).
+    # (docs/cn/screen.md §2.3).
     "detail_remove": [
         ".job-boss-info", ".boss-info-attr", ".boss-active-time", ".boss-online-tag",
         ".look-job-list", ".similar-job-list", ".promotion-img",

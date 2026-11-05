@@ -12,7 +12,7 @@
   - `boss.py`：BOSS 的站点规则，选择器全在 `SELECTORS` 一个常量里，另有城市代码、安全检查页和登录页的地址与标题、岗位 ID 的取法；
   - `collect.py`：一次采集的流程、限速、停止、断点续抓、写收件夹；
   - `browser.py`：Playwright 驱动，唯一导入第三方包的文件，在函数里导入。
-- `tests/test_cn_collect.py`（33 个测试）和 `tests/fixtures/cn/boss/` 的虚构样例页面；`tests/test_cn_package.py` 加了 `OPTIONAL_IMPORTS` 例外和三个守护测试。
+- `tests/test_cn_collect.py`（34 个测试）和 `tests/fixtures/cn/boss/` 的虚构样例页面；`tests/test_cn_package.py` 加了 `OPTIONAL_IMPORTS` 例外和三个守护测试。
 - ADR-4、ADR-9 各加一条 2026-11-05 的修订说明（见"要裁定的问题"第 1 条）。
 
 ## 决定
@@ -46,3 +46,5 @@
 - 03:10 上一个会话中断，新会话接手。查过进程：登录监视脚本和上一个会话的全量测试都已经不在（当时在跑的全量测试是 `cn` 工作树的，没有动），端口 9222 的 Chrome 没有动。对接 M6-4 用的临时工作树 `tmp/m63-m64wt` 已删；M6-4 的远端分支从对接以后没有新提交。
 - `browser.py` 的真实路径，离线测试和 CI 都跑不到（测试用假标签页，CI 不装 Playwright），所以在一次性的环境里跑了一遍：临时 venv 装 Playwright 1.64.1，单独起一个 headless Chrome 156（临时资料目录、端口 9345、除本机外的域名全部解析失败），本机服务虚构样例，把 `boss.ORIGIN` 指过去，跑真的 `collect boss`。结果：5 个岗位存下，滚动后卡片增加能等到，`text` 和离线读取一字不差；重跑不再打开详情；跳到安全检查页和 HTTP 429 都是退出码 3、已存的保留、不重试；连不上和没装 Playwright 都是退出码 2；每次跑完标签页和跑之前一样，浏览器还在。脚本没有进仓库。
 - 经理今晚可能不登录，规划者定不等实测，先交审。**待做：登录后的小量实测**（`--max 3`）：选择器和翻页方式只对着虚构样例测过，样例又是按选择器写的，所以对不对得上真实页面还不知道，可能要改 `boss.py`。本机 `ai-job-search-cn` 环境还没装 Playwright，实测前先装。实测通过后删掉 collect.md 第 8 节第一条。
+- 上一个会话 API 断线，新会话接手收尾。合入 master dc77a10（#141 M6-4 `jd screen`、#143 v0.2.0），`cli.py` 的导入冲突两边都留。用 master 上的 `jd screen --check` 读采集流程用虚构样例写出的 5 个岗位的批次：ok 5、failed 0、jobs 5，没有重复和忽略的文件，`unread` 全空，`guard` 全是 clean。这一项写成了测试 `test_jd_screen_check_takes_the_batch`：用 `screen.check` 本身来读，不照抄它的规则，把 `INBOX_FORMAT` 改成 `/2` 时这个测试失败。测试加到 34 个。
+- 同时：`collect.py` 改用 `schema.is_site_job_id`，不再自己写一份岗位 ID 的正则；collect.md 第 6 节补上 `jd screen` 的命令和第一次实测后先看 `unread`；代码和文档里引用 M6-4 设计稿的地方改指 screen.md 第 2 节，screen.md 开头指到 collect.md。

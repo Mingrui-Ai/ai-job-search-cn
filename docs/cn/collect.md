@@ -2,7 +2,7 @@
 
 一条命令，从你自己已经登录 BOSS 直聘的 Chrome 里，按搜索词和城市慢速读取岗位列表和详情页，每个岗位存一个文件到本机的收件夹。之后由批量初筛（M6-4）导入、过滤、评分，给出短名单。
 
-依据：经理意见书-007 第 2 条（岗位由工具自己找，首要来源 BOSS 直聘）；[M6 调研](worklog/2026-11-04-m6-discovery-research.md) 第 3–5 节；收件夹格式按 M6-4 的设计（`2026-11-04-m6-4-batch-screen.md` 第 3 节）；架构上的例外见 [cn-migration-plan.md](cn-migration-plan.md) 的 ADR-4、ADR-9。
+依据：经理意见书-007 第 2 条（岗位由工具自己找，首要来源 BOSS 直聘）；[M6 调研](worklog/2026-11-04-m6-discovery-research.md) 第 3–5 节；收件夹格式见 [screen.md](screen.md) 第 2 节（M6-4）；架构上的例外见 [cn-migration-plan.md](cn-migration-plan.md) 的 ADR-4、ADR-9。
 
 ## 1. 先知道风险
 
@@ -58,7 +58,7 @@ python -m jobsearch_cn collect boss --query "数据分析 实习" --city 广州 
 
 ### 5.1 收件夹文件
 
-`<数据目录>/inbox/boss/<批次>/<岗位ID>.json`，一个文件一个岗位，UTF-8，先写临时文件再改名，读的一方不会读到写了一半的文件。格式是 `jobsearch_cn.inbox/1`（M6-4 设计第 3.2 节）：
+`<数据目录>/inbox/boss/<批次>/<岗位ID>.json`，一个文件一个岗位，UTF-8，先写临时文件再改名，读的一方不会读到写了一半的文件。格式是 `jobsearch_cn.inbox/1`（[screen.md](screen.md) 第 2.2 节）：
 
 | 字段 | 内容 |
 | --- | --- |
@@ -94,7 +94,14 @@ python -m jobsearch_cn collect boss --query "数据分析 实习" --city 广州 
 
 ## 6. 之后
 
-收件夹里的批次交给批量初筛（M6-4）：一条命令导入岗位库、去重、过滤、评分、给出短名单。M6-4 合并后，这里补上命令。
+收件夹里的批次交给批量初筛 `jd screen`（M6-4，见 [screen.md](screen.md)）：导入岗位库、去重、过滤、评分、给出短名单。批次目录就是采集输出里的 `batch_dir`：
+
+```text
+python -m jobsearch_cn jd screen data/inbox/boss/<批次> --check   # 只检查文件：不读档案，什么也不写
+python -m jobsearch_cn jd screen data/inbox/boss/<批次>           # 导入、评分、短名单
+```
+
+`--check` 的输出里，每个岗位的 `unread` 列出规则没读出的岗位名、公司、城市、薪资。在真实页面上第一次采集后先看它：不为空，多半是 `text` 的排法和真实页面对不上，按第 7 节改。
 
 ## 7. 页面结构变了怎么办
 
