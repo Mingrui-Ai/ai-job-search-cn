@@ -51,6 +51,8 @@
   const CLOSED_STATUS = ".job-status";
   const CLOSED_WORDS = ["已关闭", "已下线", "停止招聘", "已失效", "已过期"];
   const REMOVED = SELECTORS.detail_remove.join(", ");
+  // What a description block can hold before its text has loaded: headings and placeholders.
+  const NOT_A_DESCRIPTION = /职位描述|岗位描述|职位详情|岗位详情|岗位职责|工作职责|工作内容|任职要求|任职资格|岗位要求|职位要求|加载中|正在加载|暂无描述|暂无内容|暂无/g;
 
   function jobIdFromUrl(href, base) {
     let url;
@@ -158,9 +160,13 @@
     return CLOSED_WORDS.some((word) => status.includes(word));
   }
 
+  function hasDescription(text) {
+    return (text.replace(NOT_A_DESCRIPTION, "").match(/\p{L}/gu) || []).length >= 2;
+  }
+
   // The inbox text of a detail page, laid out like a whole-page copy (jd-parse.md): title and
   // salary, the tag line, the description, the work address, then the company.
-  function detailText(doc, title) {
+  function detailText(doc, title, description) {
     const skip = REMOVED;
     const company = textsOf(doc, "detail_company", skip)[0] || "";
     const companyFull = textOf(doc, "detail_company_full", skip);
@@ -172,7 +178,7 @@
     if (tags.length) out.push(tags.join(" "));
     out.push("职位描述");
     if (keywords.length) out.push(keywords.join(" "));
-    out.push(textOf(doc, "detail_description", skip, true));
+    out.push(description);
     if (address) out.push("工作地址", address);
     if (company) out.push(company);
     if (info.length) out.push(info.join(" "));
@@ -213,10 +219,13 @@
     const detailId = jobIdFromUrl(pageUrl);
     if (detailId) {
       if (isClosed(doc)) return { problem: "这个岗位已经关闭或下线" };
-      // An empty heading is a page still loading; its item would replace the saved job's text.
+      // A heading or description with nothing to read is a page still loading; its item would
+      // replace the saved job's text.
       const title = textOf(doc, "detail_title", REMOVED);
       if (!/[\p{L}\p{N}]/u.test(title)) return { problem: "没在这一页读到职位名，页面可能还没加载完或结构变了" };
-      const text = detailText(doc, title);
+      const description = textOf(doc, "detail_description", REMOVED, true);
+      if (!hasDescription(description)) return { problem: "没在这一页读到职位描述，页面可能还没加载完或结构变了" };
+      const text = detailText(doc, title, description);
       return { page: "detail", items: [{ name: `${time}-${detailId}.json`, item: item(detailId, text, now, { page: "detail" }) }] };
     }
     const seen = new Set();

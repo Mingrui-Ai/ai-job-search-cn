@@ -84,6 +84,47 @@ class ClipPageTest(unittest.TestCase):
             self.assertIn("职位名", self.results[name].get("problem", ""), name)
             self.assertNotIn("items", self.results[name], name)
 
+    def test_title_without_a_description_saves_nothing(self):
+        for name in ("no_description", "no_description_with_company", "other_jobs_description", "empty_description",
+                     "blank_description", "heading_description", "headings_description", "loading_description",
+                     "none_description", "one_letter_description", "punctuation_description"):
+            self.assertIn("职位描述", self.results[name].get("problem", ""), name)
+            self.assertNotIn("items", self.results[name], name)
+
+    def test_short_or_heading_led_description_still_saves(self):
+        for name, words in (("short_description", "负责整理数据"), ("headed_description", "岗位职责：写周报\n任职要求：会 SQL"),
+                            ("english_description", "Write SQL")):
+            self.assertIn(words, self.results[name]["items"][0]["item"]["text"], name)
+
+    def test_incomplete_detail_cannot_reach_a_saved_job_and_a_complete_one_still_updates(self):
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, True)
+        data = tmp / "data"
+        shutil.copytree(REPO / "tests" / "fixtures" / "cn" / "profile" / "tech", data / "profile")
+
+        def screen_page(number: int, name: str) -> dict:
+            batch = tmp / "inbox" / "boss" / f"batch{number}"
+            batch.mkdir(parents=True)
+            for entry in self.results[name].get("items", []):
+                (batch / entry["name"]).write_text(json.dumps(entry["item"], ensure_ascii=False), encoding="utf-8")
+            out = subprocess.run([sys.executable, "-X", "utf8", "-m", "jobsearch_cn", "jd", "screen", str(batch),
+                                  "--data-dir", str(data)], capture_output=True, cwd=REPO)
+            return json.loads(out.stdout.decode("utf-8"))
+
+        def saved() -> dict:
+            [path] = (data / "jobs").glob("job_*.json")
+            return json.loads(path.read_text(encoding="utf-8"))
+
+        self.assertEqual(screen_page(1, "full_detail")["imported"]["created"], 1)
+        full = saved()
+        for number, name in enumerate(("no_description", "heading_description", "empty_h1_with_text"), 2):
+            self.assertEqual(screen_page(number, name)["imported"]["updated"], 0, name)
+            self.assertEqual(saved(), full, name)
+        self.assertEqual(screen_page(9, "edited_detail")["imported"]["updated"], 1)
+        self.assertIn("并参与需求评审", saved()["raw_text"])
+        self.assertEqual(saved()["title"], full["title"])
+        self.assertEqual(saved()["id"], full["id"])
+
     def test_job_ids_and_time(self):
         self.assertEqual(self.results["ids"], ["A.b_c~d-e", None, None, "rel"])
         self.assertRegex(self.results["fetched_at"], r"^2026-11-05T10:31:20[+-]\d\d:\d\d$")

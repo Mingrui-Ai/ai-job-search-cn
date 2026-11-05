@@ -106,6 +106,9 @@ const detailWith = (...extra) => clip.clipPage(n([], "", [...extra, ...jobParts(
 const titled = (title) => clip.clipPage(
   n([], "", [n(".job-banner .name h1", title), n(".job-sec-text", "负责整理数据")]), DETAIL_URL, NOW);
 
+const TITLE = () => n(".job-banner .name h1", "数据分析实习生");
+const described = (text) => clip.clipPage(n([], "", [TITLE(), n(".job-sec-text", text)]), DETAIL_URL, NOW);
+
 const results = {
   detail: clip.clipPage(detail, "https://www.zhipin.com/job_detail/bx0001.html?ka=x", NOW),
   list: clip.clipPage(list, "https://www.zhipin.com/web/geek/jobs?query=x&city=101280600", NOW),
@@ -141,6 +144,28 @@ const results = {
     n(".job-boss-info", "", [n(".job-banner .name h1", "王女士")]),
     n(".job-sec-text", "负责整理数据"),
   ]), DETAIL_URL, NOW),
+  // A title but no description to read: its item would empty the description of a saved job.
+  no_description: clip.clipPage(n([], "", [TITLE()]), DETAIL_URL, NOW),
+  no_description_with_company: clip.clipPage(n([], "", [
+    TITLE(), n(".job-keyword-list > li", "SQL"), n(".sider-company .company-info a", "示例数据科技"),
+  ]), DETAIL_URL, NOW),
+  other_jobs_description: clip.clipPage(n([], "", [
+    TITLE(), n(".similar-job-list", "", [n(".job-sec-text", "别的岗位 300元/天")]),
+  ]), DETAIL_URL, NOW),
+  empty_description: described(""),
+  blank_description: described(" \n\u3000\u00a0\t"),
+  heading_description: described("职位描述"),
+  headings_description: described("岗位职责：\n任职要求："),
+  loading_description: described("正在加载..."),
+  none_description: described("暂无"),
+  one_letter_description: described("无"),
+  punctuation_description: described("-- 1. 2."),
+  // Controls: short or heading-led, but something to read.
+  short_description: described("负责整理数据"),
+  headed_description: described("岗位职责：写周报\n任职要求：会 SQL"),
+  english_description: described("Write SQL"),
+  full_detail: described("负责整理业务数据，每周写周报，维护数据看板"),
+  edited_detail: described("负责整理业务数据，每周写周报，维护数据看板，并参与需求评审"),
   ids: [
     clip.jobIdFromUrl("https://zhipin.com/job_detail/A.b_c~d-e.html"),
     clip.jobIdFromUrl("http://www.zhipin.com/job_detail/a%2Fb.html"),
