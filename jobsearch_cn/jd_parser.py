@@ -23,6 +23,7 @@ validated against the schema before it is returned.
 """
 
 import calendar
+import codecs
 import hashlib
 import re
 from datetime import date, datetime
@@ -455,6 +456,44 @@ def _builtin_patterns() -> list:
     return _BUILTIN_PATTERNS
 
 
+_HAN_FIRST, _HAN_LAST = chr(0x4E00), chr(0x9FFF)
+
+
+def decode(data: bytes, name: str):
+    """JD text as Windows users actually save it. Returns (text, warnings); raises ValueError.
+
+    UTF-8 with or without a BOM; UTF-16 with a BOM, which is what Windows
+    PowerShell 5.1's `>` and Out-File write; otherwise GB18030 (a superset of
+    GBK, the Chinese ANSI code page) with a warning. Text with no Chinese but
+    runs of "?" is refused: that is what Windows PowerShell 5.1 delivers when it
+    pipes Chinese to a program as ASCII, and parsing it would store garbage.
+    name names the input in the messages.
+    """
+    warnings = []
+    try:
+        if data.startswith(codecs.BOM_UTF8):
+            text = data[len(codecs.BOM_UTF8):].decode("utf-8")
+        elif data.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)):
+            text = data.decode("utf-16")
+        else:
+            try:
+                text = data.decode("utf-8")
+            except UnicodeDecodeError:
+                text = data.decode("gb18030")
+                warnings.append({"segment": None, "kind": "encoding",
+                                 "message": f"{name} is not UTF-8; decoded as GB18030 (GBK)"})
+    except UnicodeDecodeError:
+        raise ValueError(f"{name} is neither UTF-8, UTF-16 nor GBK text") from None
+    has_han = any(_HAN_FIRST <= char <= _HAN_LAST for char in text)
+    if not has_han and "??" in text and text.count("?") >= 4:
+        raise ValueError(
+            f"{name} has no Chinese characters but many '?': Windows PowerShell 5.1 pipes text "
+            "to programs as ASCII. Pass the file path instead, or run "
+            "$OutputEncoding = [System.Text.UTF8Encoding]::new() first."
+        )
+    return text, warnings
+
+
 def split_jds(text: str) -> list[str]:
     """The JDs in a paste, split on lines of three or more "=".
 
@@ -471,14 +510,21 @@ def job_id(text: str) -> str:
     return f"job_{digest[:12]}"
 
 
-def parse_text(text: str, *, source_type: str = "paste", site=None, url=None, now=None, vocabulary=None):
+def parse_text(text: str, *, source_type: str = "paste", site=None, url=None, now=None, vocabulary=None,
+               single=False, site_job_id=None, fetched_at=None):
     """Parse text holding one or more JDs. Returns (records, warnings).
 
     Raises ValueError when url is given for more than one JD: a URL names a
     single posting. vocabulary is a vocab.Vocabulary; the built-in one by default.
+    single: the text is one posting (an inbox file, M6-4), so a line of "===" inside it does not split it.
+    site_job_id and fetched_at go into the record's source as they are.
     """
     patterns = _skill_patterns(vocabulary) if vocabulary is not None else _builtin_patterns()
-    parts = split_jds(text)
+    if single:
+        whole = text.replace("\r\n", "\n").replace("\r", "\n").strip()
+        parts = [whole] if whole else []
+    else:
+        parts = split_jds(text)
     if url is not None and len(parts) > 1:
         raise ValueError(f"--url names one posting, but the input holds {len(parts)} JDs")
     imported_at = (now or datetime.now().astimezone()).isoformat(timespec="seconds")
@@ -492,7 +538,8 @@ def parse_text(text: str, *, source_type: str = "paste", site=None, url=None, no
                              "message": f"JD {number} is longer than {schema.MAX_RAW_TEXT} characters; skipped"})
             continue
         record = build_record(cleaned, findings, source_type=source_type, site=site, url=url,
-                              imported_at=imported_at, skill_patterns=patterns)
+                              imported_at=imported_at, skill_patterns=patterns,
+                              site_job_id=site_job_id, fetched_at=fetched_at)
         if record["guard"]["verdict"] == "warn":
             warnings.append({"segment": number, "kind": "guard", "message": findings["verdict"],
                              "excerpts": list(findings["instruction_like"])})
@@ -503,7 +550,7 @@ def parse_text(text: str, *, source_type: str = "paste", site=None, url=None, no
 
 
 def build_record(text: str, findings: dict, *, source_type: str, site, url, imported_at: str,
-                 skill_patterns=None) -> dict:
+                 skill_patterns=None, site_job_id=None, fetched_at=None) -> dict:
     """One schema record from one cleaned JD."""
     evidence = {}
 
@@ -526,7 +573,8 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
     record = {
         "schema_version": schema.SCHEMA_VERSION,
         "id": job_id(text),
-        "source": {"type": source_type, "site": site, "url": url, "imported_at": imported_at},
+        "source": {"type": source_type, "site": site, "url": url, "imported_at": imported_at,
+                   "site_job_id": site_job_id, "fetched_at": fetched_at},
         "title": title,
         "company": cite("company", company),
         "cities": cite("cities", _cities(text, lines, tag)) or [],

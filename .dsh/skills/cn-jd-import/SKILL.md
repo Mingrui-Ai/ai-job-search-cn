@@ -4,7 +4,7 @@ description: >
   Imports Chinese job postings (JD) pasted or saved by the user into the local job store:
   rule-based parsing, completion of empty fields with cited evidence, validation, dedup and
   status tracking via `python -m jobsearch_cn jd ...`. Triggers on: 导入JD, 导入岗位, 解析JD,
-  保存岗位, 岗位库, 中文JD, jd import, jd parse
+  保存岗位, 岗位库, 中文JD, 批量导入, 收件夹, 初筛, 短名单, jd import, jd parse, jd screen
 ---
 
 # CN JD Import

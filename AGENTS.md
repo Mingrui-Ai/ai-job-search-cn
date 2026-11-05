@@ -32,7 +32,7 @@ To prevent duplication and configuration drift across different AI agent framewo
 - 每完成一步（通常对应一个 PR），在 `docs/cn/worklog/` 下新建一个文件写工作记录：做了什么、关键决策、验证结果、遗留问题、下一步。文件名和格式见 `docs/cn/worklog.md` 开头；不要再往 `docs/cn/worklog.md` 里追加。
 - 多个 Agent 并行工作时，每个 Agent 使用自己的 `git worktree`（见 [docs/cn/README.md](docs/cn/README.md#多个-agent-并行工作)），只在自己的目录里切换分支、提交；不要在别的 Agent 的目录里改文件或切分支。
 
-**导入中文 JD**：用户要导入、解析或保存岗位时，按 [docs/cn/jd-import.md](docs/cn/jd-import.md) 执行（与 Claude Code 的 `cn-jd-import` 技能共用这一份说明）。
+**导入中文 JD**：用户要导入、解析或保存岗位时，按 [docs/cn/jd-import.md](docs/cn/jd-import.md) 执行（与 Claude Code 的 `cn-jd-import` 技能共用这一份说明）；一批岗位（收件夹批次、要短名单）按其中指向的 [docs/cn/screen.md](docs/cn/screen.md) 第 6 节执行。
 
 **建立个人档案**：用户要建档或更新档案时，按 [docs/cn/profile-setup.md](docs/cn/profile-setup.md) 执行（与 Claude Code 的 `cn-setup` 技能共用），不要运行上游 `/setup`。
 
