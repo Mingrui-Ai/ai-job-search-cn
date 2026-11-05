@@ -42,6 +42,6 @@ python -m jobsearch_cn jd screen <上一步输出的 batch> --data-dir <这次�
 
 选择器都在 [clip.js](../../extensions/boss-clip/clip.js) 的 `SELECTORS` 里，规则和 M6-3 采集程序的 `boss.py`（PR #142）相同，每条规则按顺序试、第一个匹配的生效。插件读不到职位名、职位描述或卡片时会显示 `×` 和原因；把那一页另存为 HTML（去掉个人信息）交给开发会话，改 `SELECTORS` 和 [离线测试](../../tests/test_cn_boss_clip.py) 即可。列表卡片上的标签和公司名（`card_tags`、`card_company`）是按常见写法猜的，还没在真实页面上核对过。
 
-描述栏如果整段只有界面对象名（职位、内容、job description 等）、加载／失败状态、等待／刷新／重试提示，且有明确的界面状态信号，不会生成可覆盖旧岗位的详情文件。检查忽略标点、换行和进度数字，支持“Loading job description, please wait a moment…”和“加载失败，请刷新重试”等组合。“写周报”“Write SQL”“加载数据”“读取数据”等短职责仍可保存，真实职责里提到加载或等待组件也可保存。词法规则不会判断任意文本的语义，未来未知提示仍需补充规则。
+描述栏如果只有中英文标题（如“职位描述”“Job description”“Responsibilities”“Requirements”），或整段只有界面对象名、加载／失败状态、等待／刷新／重试提示且有明确状态信号，不会生成可覆盖旧岗位的详情文件。检查统一全角字符，忽略标点、换行和进度数字，支持“Loading job description, please wait a moment…”和“加载失败，请刷新重试”等组合；这些归一只用于判断，保存的原文不改。“Job description: Write SQL”“写周报”“加载数据”“读取数据”等实际职责仍可保存，真实职责里提到加载或等待组件也可保存。词法规则不会判断任意文本的语义，未来未知标题和提示仍需补充规则。
 
 设计和取舍见[工作记录](worklog/2026-11-05-m6-boss-clip.md)。

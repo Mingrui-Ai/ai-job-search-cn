@@ -101,7 +101,11 @@ class ClipPageTest(unittest.TestCase):
                             ("java_description", "Java"), ("implement_loading_description", "实现 Loading 状态"),
                             ("retry_work_description", "负责刷新缓存并重试失败请求"),
                             ("numbered_work_description", "每天读取3次数据并核对２张报表"),
-                            ("numbered_load_description", "加载3组数据")):
+                            ("numbered_load_description", "加载3组数据"),
+                            ("headed_english_description", "Job description: Write SQL"),
+                            ("headed_short_english_description", "Requirements: Java"),
+                            ("heading_word_in_duty_description", "Gather requirements and write job descriptions"),
+                            ("fullwidth_headed_duty_description", "Ｊｏｂ Ｄｅｓｃｒｉｐｔｉｏｎ：Write SQL")):
             self.assertIn(words, self.results[name]["items"][0]["item"]["text"], name)
 
     def test_loading_and_waiting_prompts_alone_do_not_become_job_descriptions(self):
@@ -134,7 +138,9 @@ class ClipPageTest(unittest.TestCase):
         for number, name in enumerate(("no_description", "heading_description", "empty_h1_with_text",
                                        "loading_wait_description", "loading_english_description",
                                        "loading_moment_description", "loading_brief_description",
-                                       "loading_object_description", "loading_failed_description"), 2):
+                                       "loading_object_description", "loading_failed_description",
+                                       "english_heading_description", "english_responsibilities_description",
+                                       "english_requirements_description"), 2):
             self.assertEqual(screen_page(number, name)["imported"]["updated"], 0, name)
             self.assertEqual(saved(), full, name)
         self.assertEqual(screen_page(20, "edited_detail")["imported"]["updated"], 1)

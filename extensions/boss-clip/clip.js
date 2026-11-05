@@ -53,6 +53,7 @@
   const REMOVED = SELECTORS.detail_remove.join(", ");
   // What a description block can hold before its text has loaded: headings and placeholders.
   const DESCRIPTION_HEADINGS = /职位描述|岗位描述|职位详情|岗位详情|岗位职责|工作职责|工作内容|任职要求|任职资格|岗位要求|职位要求/g;
+  const ENGLISH_DESCRIPTION_HEADINGS = /\b(?:(?:job|position|role|candidate|key|main|required|preferred|minimum|basic|essential|desired)[\s_-]+)*(?:descriptions?|details?|responsibilities|requirements|qualifications|duties|skills|overview|summary)\b/giu;
   const EMPTY_DESCRIPTION_WORDS = /加载中|正在加载|暂无描述|暂无内容|暂无/g;
   // A status-only block can combine an object, state and instructions in either order.
   // Require both this whole-block grammar and a UI status signal: "加载数据" and "读取数据"
@@ -170,7 +171,8 @@
   }
 
   function hasDescription(text) {
-    const body = text.replace(DESCRIPTION_HEADINGS, "");
+    // Normalise for the check only; the saved description retains its original spelling.
+    const body = text.normalize("NFKC").replace(DESCRIPTION_HEADINGS, "").replace(ENGLISH_DESCRIPTION_HEADINGS, "");
     const letters = body.replace(/[^\p{L}]/gu, "");
     if (UI_STATUS_SIGNAL.test(letters) && PLACEHOLDER_DESCRIPTION.test(letters)) return false;
     return (body.replace(EMPTY_DESCRIPTION_WORDS, "").match(/\p{L}/gu) || []).length >= 2;

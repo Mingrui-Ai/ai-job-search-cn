@@ -163,6 +163,13 @@ const results = {
   loading_brief_description: described("正在加载，请稍等片刻..."),
   loading_object_description: described("Loading job description, please wait..."),
   loading_failed_description: described("加载失败，请刷新重试"),
+  english_heading_description: described("Job description"),
+  english_responsibilities_description: described("Responsibilities"),
+  english_requirements_description: described("Requirements"),
+  headed_english_description: described("Job description: Write SQL"),
+  headed_short_english_description: described("Requirements: Java"),
+  heading_word_in_duty_description: described("Gather requirements and write job descriptions"),
+  fullwidth_headed_duty_description: described("Ｊｏｂ Ｄｅｓｃｒｉｐｔｉｏｎ：Write SQL"),
   none_description: described("暂无"),
   one_letter_description: described("无"),
   punctuation_description: described("-- 1. 2."),
@@ -211,6 +218,12 @@ results.placeholder_descriptions = [
   "Sorry, we couldn't load your job details. Please reload this page.",
   "正在加载，请稍等3秒", "正在加载，请稍等３秒",
   "Loading, please wait 3 seconds...", "Loading, please wait ３ seconds...",
+  ...["Job description", "JOB DESCRIPTION:", "Job-Description", "Job_Description", "Position description",
+      "Description", "Job details", "Responsibilities", "Key Responsibilities", "Main duties",
+      "Requirements", "Job Requirements", "Candidate Requirements", "Required Qualifications",
+      "Preferred qualifications", "Required Skills", "Role overview", "Job summary",
+      "Ｊｏｂ Ｄｅｓｃｒｉｐｔｉｏｎ", "Job description / Responsibilities / Requirements"]
+    .flatMap((heading) => [heading, `## ${heading}\nLoading, please wait a moment...`]),
   ...["正在加载", "内容正在加载", "正在加载岗位描述", "职位详情加载失败", "数据获取失败"]
     .flatMap((state) => ["请稍等片刻", "请耐心等待", "请刷新重试", "稍后再试"]
       .map((prompt) => `${state}，${prompt}…`)),
