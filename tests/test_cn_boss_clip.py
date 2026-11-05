@@ -6,6 +6,7 @@ check jd screen applies. The node part is skipped when node is not installed.
 """
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -15,7 +16,7 @@ import unittest
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import inbox, jd_parser, screen, vocab
+from jobsearch_cn import inbox, jd_parser, screen, store, vocab
 
 REPO = Path(__file__).resolve().parent.parent
 EXTENSION = REPO / "extensions" / "boss-clip"
@@ -59,6 +60,28 @@ class ClipPageTest(unittest.TestCase):
     def test_pages_it_refuses(self):
         for name in ("captcha", "closed", "signed_out", "other_site", "empty"):
             self.assertIn("problem", self.results[name], name)
+            self.assertNotIn("items", self.results[name], name)
+
+    def test_what_stands_in_the_way_wins_over_old_job_content(self):
+        for name in ("dialog_over_title", "form_over_title", "dialog_over_cards", "form_over_cards",
+                     "second_dialog_shown"):
+            self.assertIn("登录", self.results[name].get("problem", ""), name)
+            self.assertNotIn("items", self.results[name], name)
+        self.assertIn("验证", self.results["captcha_over_title"]["problem"])
+        self.assertIn("关闭", self.results["closed_with_title"]["problem"])
+        self.assertNotIn("items", self.results["captcha_over_title"])
+        self.assertNotIn("items", self.results["closed_with_title"])
+
+    def test_what_does_not_block_the_page_still_saves(self):
+        for name in ("hidden_dialog", "zero_size_dialog", "header_link_detail", "header_link_list", "jd_words"):
+            self.assertNotIn("problem", self.results[name], name)
+            self.assertEqual(len(self.results[name]["items"]), 1, name)
+        self.assertIn("开发登录弹窗和验证码", self.results["jd_words"]["items"][0]["item"]["text"])
+
+    def test_heading_without_a_title_saves_nothing(self):
+        # Such an item would pass read_item and replace a saved job's title and text in jd screen.
+        for name in ("empty_h1", "empty_h1_with_text", "blank_h1", "zero_width_h1", "punctuation_h1", "removed_h1"):
+            self.assertIn("职位名", self.results[name].get("problem", ""), name)
             self.assertNotIn("items", self.results[name], name)
 
     def test_job_ids_and_time(self):
@@ -125,6 +148,7 @@ class InboxImportTest(unittest.TestCase):
         payload = json.loads(out.stdout.decode("utf-8"))
         self.assertEqual(payload["moved"], 1)
         self.assertTrue(payload["next"].startswith("python -m jobsearch_cn jd screen "))
+        self.assertIn("--data-dir", payload["next"])
         missing = subprocess.run([sys.executable, "-X", "utf8", "-m", "jobsearch_cn", "jd",
                                   "inbox-import", str(self.tmp / "nope"), "--data-dir", str(self.data)],
                                  capture_output=True, cwd=REPO)
@@ -132,6 +156,87 @@ class InboxImportTest(unittest.TestCase):
 
     def test_default_folder(self):
         self.assertEqual(inbox.default_folder(), Path.home() / "Downloads" / "jobsearch-boss-clip")
+
+
+class NextCommandTest(unittest.TestCase):
+    """The next command is run as printed, by a shell, the way an agent or the user would run it."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        self.clips = self.tmp / "clips"
+        self.clips.mkdir()
+        self.other = self.data_folder("other data")
+
+    def data_folder(self, name: str) -> Path:
+        folder = self.tmp / name
+        shutil.copytree(REPO / "tests" / "fixtures" / "cn" / "profile" / "tech", folder / "profile")
+        return folder
+
+    def env(self, data_dir=None) -> dict:
+        env = dict(os.environ, PYTHONUTF8="1", PYTHONPATH=str(REPO))
+        env.pop(store.DATA_DIR_ENV, None)
+        if data_dir is not None:
+            env[store.DATA_DIR_ENV] = str(data_dir)
+        return env
+
+    def import_clips(self, *options, cwd=REPO, env=None) -> dict:
+        (self.clips / "a1.json").write_text(inbox_json("a1"), encoding="utf-8")
+        out = subprocess.run([sys.executable, "-m", "jobsearch_cn", "jd", "inbox-import", str(self.clips), *options],
+                             capture_output=True, cwd=cwd, env=env or self.env(self.other))
+        self.assertEqual(out.returncode, 0, out.stderr.decode("utf-8", "replace"))
+        return json.loads(out.stdout.decode("utf-8"))
+
+    def run_next(self, command: str, env: dict, powershell: bool = False) -> dict:
+        self.assertTrue(command.startswith("python "), command)
+        rest = command[len("python"):]
+        if powershell:
+            argv = [shutil.which("powershell"), "-NoProfile", "-Command", f"& '{sys.executable}'{rest}"]
+            out = subprocess.run(argv, capture_output=True, cwd=REPO, env=env)
+        else:
+            out = subprocess.run(inbox._shell_arg(sys.executable) + rest, shell=True, capture_output=True,
+                                 cwd=REPO, env=env)
+        self.assertEqual(out.returncode, 0, out.stderr.decode("utf-8", "replace"))
+        return json.loads(out.stdout.decode("utf-8"))
+
+    def assert_stored_only_in(self, data: Path) -> None:
+        self.assertEqual(len(list((data / "jobs").glob("job_*.json"))), 1)
+        self.assertEqual(len(list((data / "matches").glob("*.json"))), 1)
+        self.assertFalse((self.other / "jobs").exists())
+        self.assertFalse((self.other / "matches").exists())
+
+    def test_named_data_folder_with_spaces_is_kept(self):
+        data = self.data_folder("指定 的 数据")
+        payload = self.import_clips("--data-dir", str(data))
+        screened = self.run_next(payload["next"], self.env(self.other))
+        self.assertEqual(screened["imported"]["created"], 1)
+        self.assert_stored_only_in(data)
+
+    @unittest.skipUnless(os.name == "nt" and shutil.which("powershell"), "Windows PowerShell only")
+    def test_named_data_folder_with_spaces_in_powershell(self):
+        data = self.data_folder("指定 的 数据")
+        payload = self.import_clips("--data-dir", str(data))
+        self.run_next(payload["next"], self.env(self.other), powershell=True)
+        self.assert_stored_only_in(data)
+
+    def test_folder_from_the_environment_does_not_rest_on_the_next_environment(self):
+        data = self.data_folder("from env")
+        payload = self.import_clips(env=self.env(data))
+        self.run_next(payload["next"], self.env(self.other))
+        self.assert_stored_only_in(data)
+
+    def test_relative_data_folder_is_made_absolute(self):
+        data = self.data_folder("relative data")
+        payload = self.import_clips("--data-dir", "relative data", cwd=self.tmp)
+        self.run_next(payload["next"], self.env(self.other))  # run from another folder
+        self.assert_stored_only_in(data)
+
+    def test_arguments_survive_the_shell(self):
+        show = [sys.executable, "-c", "import json, sys; print(json.dumps(sys.argv[1:]))"]
+        for text in (os.path.abspath(os.sep), str(self.tmp / "a b")):  # a drive root ends in a backslash
+            command = " ".join(inbox._shell_arg(part) for part in [*show, text]) + " after"
+            out = subprocess.run(command, shell=True, capture_output=True, check=True)
+            self.assertEqual(json.loads(out.stdout), [text, "after"])
 
 
 class ManifestTest(unittest.TestCase):

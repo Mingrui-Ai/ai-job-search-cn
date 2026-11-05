@@ -43,7 +43,10 @@
     ],
     detail_closed: [".job-closed", ".job-status-closed"],
     blocked: ["[class*=captcha]", "[id*=captcha]", "[class*=geetest]", ".page-verify", "#verify-wrap"],
-    login: ["a[ka=header-login]", "[class*=login-dialog]", ".sign-form"],
+    // A dialog or form in the way stops the clip whatever is behind it; the header's 登录 link is
+    // on signed-out pages that still show jobs, so it counts only when the page has no jobs.
+    login_wall: ["[class*=login-dialog]", ".sign-form"],
+    login_link: ["a[ka=header-login]"],
   };
   const CLOSED_STATUS = ".job-status";
   const CLOSED_WORDS = ["已关闭", "已下线", "停止招聘", "已失效", "已过期"];
@@ -127,12 +130,23 @@
       `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}-${pad(now.getMilliseconds(), 3)}`;
   }
 
+  // Pages can keep a closed dialog in the DOM, so only one the user can see counts.
+  function isShown(node) {
+    if (node.checkVisibility && !node.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return false;
+    const box = node.getBoundingClientRect();
+    return box.width > 0 && box.height > 0;
+  }
+
+  // Page markup only, never the words of the job text: a JD may well say 登录 or 验证码.
   function pageProblem(doc) {
     for (const selector of SELECTORS.blocked) {
       if (doc.querySelector(selector)) return "页面上有验证码或安全验证，先在页面上完成验证再点";
     }
+    for (const selector of SELECTORS.login_wall) {
+      if (Array.from(doc.querySelectorAll(selector)).some(isShown)) return "页面被登录弹窗或登录表单挡住，先登录，刷新页面再点";
+    }
     if (select(doc, "detail_title").length || select(doc, "card").length) return null;
-    for (const selector of SELECTORS.login) {
+    for (const selector of SELECTORS.login_link) {
       if (doc.querySelector(selector)) return "页面显示没有登录";
     }
     return null;
@@ -146,7 +160,7 @@
 
   // The inbox text of a detail page, laid out like a whole-page copy (jd-parse.md): title and
   // salary, the tag line, the description, the work address, then the company.
-  function detailText(doc) {
+  function detailText(doc, title) {
     const skip = REMOVED;
     const company = textsOf(doc, "detail_company", skip)[0] || "";
     const companyFull = textOf(doc, "detail_company_full", skip);
@@ -154,7 +168,7 @@
     const keywords = textsOf(doc, "detail_keywords", skip);
     const address = textOf(doc, "detail_address", skip);
     const info = textsOf(doc, "detail_company_info", skip);
-    const out = [[textOf(doc, "detail_title", skip), textOf(doc, "detail_salary", skip)].filter((x) => x).join(" ")];
+    const out = [[title, textOf(doc, "detail_salary", skip)].filter((x) => x).join(" ")];
     if (tags.length) out.push(tags.join(" "));
     out.push("职位描述");
     if (keywords.length) out.push(keywords.join(" "));
@@ -199,8 +213,10 @@
     const detailId = jobIdFromUrl(pageUrl);
     if (detailId) {
       if (isClosed(doc)) return { problem: "这个岗位已经关闭或下线" };
-      const text = detailText(doc);
-      if (!select(doc, "detail_title", REMOVED).length || !text) return { problem: "没在这一页读到职位名，页面结构可能变了" };
+      // An empty heading is a page still loading; its item would replace the saved job's text.
+      const title = textOf(doc, "detail_title", REMOVED);
+      if (!/[\p{L}\p{N}]/u.test(title)) return { problem: "没在这一页读到职位名，页面可能还没加载完或结构变了" };
+      const text = detailText(doc, title);
       return { page: "detail", items: [{ name: `${time}-${detailId}.json`, item: item(detailId, text, now, { page: "detail" }) }] };
     }
     const seen = new Set();

@@ -7,6 +7,8 @@ moves every file there that is in the inbox format (screen.read_item) into a new
 where they are and are listed with the reason. Nothing is parsed into the job store here.
 """
 
+import os
+import shlex
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -31,6 +33,24 @@ def _batch_dir(root: Path, site: str, now: datetime) -> Path:
         except FileExistsError:
             continue
     raise screen.BatchError(f"cannot make a new batch folder in {parent}")
+
+
+def _shell_arg(path) -> str:
+    """One path as a command-line argument for this system's shells, whatever spaces it holds.
+
+    On Windows the double quotes suit cmd, PowerShell and Git Bash alike. A backslash right before
+    the closing quote (a drive root as the data folder) would escape it, so it is doubled.
+    """
+    text = str(path)
+    if os.name != "nt":
+        return shlex.quote(text)
+    return '"' + text + "\\" * (len(text) - len(text.rstrip("\\"))) + '"'
+
+
+def _next_command(batch: Path, root) -> str:
+    """jd screen on the batch, in the data folder this import used, not whichever the next run defaults to."""
+    return (f"python -m jobsearch_cn jd screen {_shell_arg(os.path.abspath(batch))} "
+            f"--data-dir {_shell_arg(os.path.abspath(root))}")
 
 
 def import_folder(folder, root, site: str = "boss", now=None) -> dict:
@@ -66,5 +86,5 @@ def import_folder(folder, root, site: str = "boss", now=None) -> dict:
         "moved": len(moved),
         "files": moved,
         "left": left,
-        "next": f'python -m jobsearch_cn jd screen "{batch}"' if moved else None,
+        "next": _next_command(batch, root) if moved else None,
     }
