@@ -1,12 +1,64 @@
 """Synthetic regressions for the seven issues found during the first ATS collection."""
 import unittest
 
-from jobsearch_cn import jd_parser, report, score, screen
+from jobsearch_cn import jd_parser, match, report, score, screen
 from tests.test_cn_score import NOW, VOCABULARY, profile_from
 
 
 def parse(text):
     return jd_parser.parse_text(text, now=NOW, single=True)[0][0]
+
+
+def reviewer_candidate():
+    profile = profile_from("tech")
+    profile["graduation"]["year"] = 2026
+    profile["education"] = [e for e in profile["education"] if e["level"] == "bachelor"]
+    profile["target"]["employment_types"] = ["internship", "campus", "experienced"]
+    return profile
+
+
+class ReviewRegressions(unittest.TestCase):
+    """Codex B's five synthetic counterexamples, including both explicit cohort forms."""
+
+    def test_p2_salary_suffixes_preserve_explicit_rates(self):
+        for text, expected in (("180/天起", (180, "CNY/day")),
+                               ("180/天包午餐", (180, "CNY/day")),
+                               ("35/小时可协商", (35, "CNY/hour"))):
+            with self.subTest(text=text):
+                job = parse("职位名称：样品记录实习生\n工作地点：深圳\n薪资：" + text)
+                self.assertIsNotNone(job["salary"])
+                self.assertEqual((job["salary"]["min"], job["salary"]["unit"]), expected)
+                self.assertIsNotNone(score.score_job(job, reviewer_candidate(), VOCABULARY, now=NOW)["total"]["score"])
+
+    def test_p2_campus_heading_must_not_override_explicit_cohorts(self):
+        for requirement in ("面向2026/2027届毕业生", "2026年8月-2027年7月毕业"):
+            with self.subTest(requirement=requirement):
+                job = parse("【27校招】样本研究员\n任职资格\n" + requirement + "，本科及以上学历。")
+                self.assertEqual(job["requirements"]["graduation"], {"years": [2026, 2027], "strict": True})
+                self.assertEqual(job["evidence"]["requirements.graduation"]["text"], requirement)
+                self.assertNotEqual(match.filter_job(job, reviewer_candidate())["verdict"], "ineligible")
+
+    def test_p2_recruitment_activity_is_not_candidate_cohort(self):
+        job = parse("职位名称：招聘流程专员\n工作性质：社会招聘\n工作地点：深圳\n工作职责\n"
+                    "负责2027校园招聘活动的组织与执行。\n任职资格\n本科及以上学历。")
+        self.assertIsNone(job["requirements"]["graduation"])
+        self.assertNotIn("requirements.graduation", job["evidence"])
+        self.assertNotEqual(match.filter_job(job, reviewer_candidate())["verdict"], "ineligible")
+
+    def test_p2_education_describing_other_people_is_not_requirement(self):
+        for context in ("工作职责\n协助在读硕士/博士整理实验数据。", "团队介绍\n团队现有在读硕士/博士十余人。"):
+            with self.subTest(context=context):
+                job = parse("职位名称：课程助教\n" + context + "\n任职资格\n本科及以上学历。")
+                self.assertEqual(job["requirements"]["education"]["min"], "bachelor")
+                self.assertEqual(job["evidence"]["requirements.education"]["text"], "本科及以上")
+                self.assertNotEqual(match.filter_job(job, reviewer_candidate())["verdict"], "ineligible")
+
+    def test_p3_collected_headers_do_not_turn_navigation_into_titles(self):
+        for first in ("招聘首页", "欢迎加入我们"):
+            with self.subTest(first=first):
+                job = parse(first + "\n招聘频道：校园招聘\n工作地点：苏州\n工作职责\n协助登记样品。")
+                self.assertIsNone(job["title"])
+                self.assertNotIn("title", job["evidence"])
 
 
 class CollectionRegressions(unittest.TestCase):
