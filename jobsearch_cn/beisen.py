@@ -13,7 +13,11 @@ Two portal generations, both public and read without signing in:
   whose response the tab keeps (CAPTURE); nothing here builds or sends a request. More cards
   come by scrolling. A job's page, /{channel}/detail?jobAdId=<uuid>, is read from its DOM.
 * "legacy": server-rendered. The list is /search?r=<channel>&c=<city code>&k=<keyword>&PageIndex=<n>,
-  a table whose rows link /zpdetail/<number>; a job's page is read by its section headings.
+  a table whose rows link /zpdetail/<number>; a job's page is read from its own block: the
+  title, the "label：" / value pairs and the sections under their headings.
+
+The list response, the cards, the empty result pages and both detail pages are as recorded on
+the whitelisted portals on 2026-11-10 (docs/cn/worklog/2026-11-10-m6-3-beisen-live.md).
 
 A job's id is beisen.<tenant>.<the portal's id> (schema.ATS_SITE_JOB_ID), so two companies' ids
 never meet. City codes are the first four digits of the administrative division code (GB/T 2260),
@@ -71,7 +75,7 @@ _LEGACY_ID = re.compile(r"[0-9]{1,20}")
 _JOB_CODE = re.compile(r"\s*[（(]\s*(J[0-9]{3,10})\s*[)）]\s*$")
 _DAY = re.compile(r"(20[0-9]{2})\s*[-/.年]\s*([0-9]{1,2})\s*[-/.月]\s*([0-9]{1,2})")
 _PLACE = re.compile(r"[省市区县州]$|[·・]|^[一-鿿]+-[一-鿿]+$")
-_END_OF_LIST = "没有更多"
+_APPLY_STATUS = re.compile(r"\s*[（(]\s*(?:未申请|已申请)\s*[)）]\s*$")
 _CLOSED = ("职位已下线", "该职位已下线", "职位已关闭", "该职位已关闭", "职位已失效", "该职位已失效", "职位已过期",
            "该职位已过期", "职位已停止招聘", "该职位已停止招聘", "职位不存在", "该职位不存在")
 _SECTION_HEADINGS = ("职位描述", "岗位描述", "工作职责", "岗位职责", "职位职责", "工作内容", "职位要求", "岗位要求",
@@ -443,8 +447,7 @@ class NewPortal(_Portal):
     SELECTORS = {
         # styled-components keep their display names (STListItem) across builds; the hashes change.
         "card": ["[class*=STListItem-editor]"],
-        "list_end": ["#LIST_LAST_DOM"],
-        "list_count": ["[class*=STBreadJobInfo-editor]"],
+        "list_empty": ["[class*=STEmpty-editor]"],  # "暂时没有符合条件的职位~" in place of the cards
         "detail_title": ["[class*=STJobNameLeft-editor]"],
         "detail_salary": ["[class*=STJobNameRight-editor]"],
         "detail_tags": ["[class*=STJobTabInner-editor]"],
@@ -453,6 +456,8 @@ class NewPortal(_Portal):
         "section_title": ["[class*=STDutyTitle-editor]"],
         "section_content": ["[class*=STDutyContent-editor]"],
     }
+    # Not the empty box, nor "共 0 个": both can show before the list response has arrived, so an
+    # empty result is read only after the ready wait runs out, from the response and the page.
     LIST_READY = SELECTORS["card"] + _BLOCKED + _LOGIN
     DETAIL_READY = SELECTORS["detail_sections"] + _BLOCKED + _LOGIN
     _PATH = re.compile(r"/(campus|intern|social)/(jobs|detail)/?")
@@ -474,28 +479,21 @@ class NewPortal(_Portal):
     def canonical_url(self, job_id: str) -> str:
         return f"{self.origin}/{self.channel}/detail?{urlencode({'jobAdId': self._native(job_id)})}"
 
-    # The list response. Its shape was never recorded (only the request's), so it is read
-    # loosely and refused when unclear: the job ads are Data, or the one list inside Data;
-    # each needs a job ad id (a UUID under JobAdId or Id) and a name (JobAdName or Name).
+    # The list response, as recorded: {"Code": 200, "Message": ..., "Count": <jobs in the whole
+    # result>, "Data": [<job ad>, ...], "Total": 0, ...}, 20 job ads a page (PageIndex from 0).
+    # A job ad's Id is the UUID its detail page takes (jobAdId=); its JobAdId is an internal
+    # number, not that id. JobAdName is the name with its job code, Salary null or text such as
+    # 面议, LocNames a list of "省·市". Total stays 0: the total is Count. Any other shape is refused.
     def _list_responses(self, responses):
         return [response for response in responses if self.LIST_REQUEST.search(urlsplit(response.url).path)]
 
     @staticmethod
     def _payload_items(payload):
-        """(items, total) of one list response, or None when its shape is not recognised."""
-        data = _get(payload, "Data")
-        total = None
-        if isinstance(data, dict):
-            total = _get(data, "Total", "TotalCount", "RecordCount")
-            lists = [value for value in data.values() if isinstance(value, list)]
-            if len(lists) != 1:
-                return None
-            data = lists[0]
-        if not isinstance(data, list):
+        """(job ads, total) of one list response, or None when it is not shaped as recorded."""
+        data, total = _get(payload, "Data"), _get(payload, "Count")
+        if not isinstance(data, list) or not isinstance(total, int) or isinstance(total, bool) or total < 0:
             return None
-        if total is None:
-            total = _get(payload, "Total", "TotalCount", "RecordCount")
-        return data, (total if isinstance(total, int) and not isinstance(total, bool) and total >= 0 else None)
+        return data, total
 
     def _list(self, responses):
         """(items, unreadable, total, recognised): the job ads of every list response so far, once each."""
@@ -505,10 +503,10 @@ class NewPortal(_Portal):
             if found is None:
                 continue
             recognised = True
-            entries, total = found[0], found[1] if found[1] is not None else total
+            entries, total = found
             for entry in entries:
-                native = _get(entry, "JobAdId", "Id")
-                name = _get(entry, "JobAdName", "Name")
+                native = _get(entry, "Id")
+                name = _get(entry, "JobAdName")
                 if not isinstance(native, str) or not _UUID.fullmatch(native) or not isinstance(name, str) \
                         or not name.strip():
                     unreadable += 1
@@ -517,8 +515,7 @@ class NewPortal(_Portal):
                     continue
                 seen.add(native.lower())
                 items.append({"id": native.lower(), "name": name.strip(), "salary": _flat(_get(entry, "Salary")),
-                              "location": _flat(_get(entry, "LocNames", "LocName", "Location", "WorkLocation",
-                                                     "LocationName"))})
+                              "location": _flat(_get(entry, "LocNames"))})
         return items, unreadable, total, recognised
 
     def page_problem(self, url, title, root, status=None, responses=()):
@@ -539,7 +536,7 @@ class NewPortal(_Portal):
             if failure:
                 return "blocked", f"{failure}（{path}）"
             if self.LIST_REQUEST.search(path) and self._payload_items(payload) is None:
-                return "changed", "列表接口响应里找不到唯一的岗位列表，页面结构可能变了"
+                return "changed", "列表接口响应里没有岗位列表（Data）和总数（Count），页面结构可能变了"
         keyword = parse_qs(parts.query).get("KeyWords", [""])[0]
         for response in self._list_responses(responses) if keyword else ():
             sent = _get(_json(response.request), "KeyWords")
@@ -562,24 +559,19 @@ class NewPortal(_Portal):
         return cards, unreadable
 
     def list_is_empty(self, root, responses=()) -> bool:
-        items, unreadable, _, recognised = self._list(responses)
-        return recognised and not items and not unreadable
+        """Only the portal's own "no results": a list response with no job ads and a Count of 0, and
+        the page's empty box with no card. Job ads not recognised, or a page that disagrees, are not."""
+        items, unreadable, total, recognised = self._list(responses)
+        return (recognised and not items and not unreadable and total == 0
+                and not _nodes(root, self.SELECTORS["card"]) and bool(_nodes(root, self.SELECTORS["list_empty"])))
 
     def has_more(self, root, responses=()):
-        """Whether the list's own total (the list response's, else "共 N 个") is above the jobs read so far.
+        """Whether the list response's total (Count) is above the jobs read so far.
 
-        Without a total, the footer decides; it alone is not trusted, since a sample list showed
-        an end marker before all the jobs in its stated total had loaded.
+        The page's "没有更多了~" is not read: it shows under the first 20 jobs of a longer list.
         """
-        items, _, total, _ = self._list(responses)
-        if total is None:
-            match = re.search(r"共\s*([0-9]+)\s*个", _text(root, self.SELECTORS["list_count"]))
-            total = int(match.group(1)) if match else None
-        if total is not None:
-            return len(items) < total
-        if any(_END_OF_LIST in htmltext.text(node) for node in _nodes(root, self.SELECTORS["list_end"])):
-            return False
-        return None
+        items, _, total, recognised = self._list(responses)
+        return len(items) < total if recognised else None
 
     def parse_detail(self, root, responses=()) -> dict:
         title, code = split_job_code(_text(root, self.SELECTORS["detail_title"]))
@@ -608,18 +600,22 @@ class LegacyPortal(_Portal):
     SELECTORS = {
         "card": ["table.listtable a[href*=zpdetail]"],
         "rows": ["table.listtable tr"],
-        "count": [".tablenote"],
+        "count": [".tablenote"],  # 共N条记录
+        "no_results": [".zx_nojob", ".txtNoResut"],  # 没有搜索到相关应聘职位。 in the table
         "pager": [".tablefooter"],
-        # The detail page was not among the pages examined for this adapter: it is read by its
-        # section headings and labels, and refused (page changed) when those are not found.
-        "detail_title": [".boxSupertitle .title", "[class*=jobname]", "[class*=JobName]", "[class*=positionname]",
-                         "[class*=PositionName]", "h1", "h2"],
+        # A job's page: its own block (the page also has a search form with 工作地点：), the title
+        # followed by an apply status such as (未申请), "label：" / value pairs (li.ntitle and
+        # li.nvalue, then pairs of p), and the sections as a heading p followed by a content p.
+        "detail_block": [".positiondetail-simple", "[class*=positiondetail]"],
+        "detail_title": [".xiangqingtitle"],
+        "apply_status": ["[class*=applyStatus]"],
     }
     LIST_READY = ["table.listtable", ".tablenote"] + _BLOCKED + _LOGIN
-    DETAIL_READY = ["h1", "[class*=title]"] + _BLOCKED + _LOGIN
+    DETAIL_READY = [".xiangqingtitle", ".xiangqingtext"] + _BLOCKED + _LOGIN
     _DETAIL_PATH = re.compile(r"/zpdetail/([0-9]{1,20})/?")
-    _LABELS = {"places": ("工作地点", "工作城市", "工作地址"), "salary": ("薪资", "薪酬", "薪资范围", "月薪"),
+    _LABELS = {"places": ("工作地点", "工作城市", "工作地址"), "salary": ("薪资范围", "薪资", "薪酬", "月薪"),
                "published": ("发布时间", "发布日期", "更新时间"), "kinds": ("工作性质", "职位性质", "工作类型")}
+    _FACT = re.compile(r"^(?P<label>[一-鿿]{2,6})\s*[:：]\s*(?P<value>.*)$", re.S)
 
     def search_url(self, query: str, city_code: str, page: int = 1) -> str:
         params = [("r", LEGACY_CHANNEL[self.channel]), ("c", city_code)]
@@ -672,9 +668,15 @@ class LegacyPortal(_Portal):
         return cards, unreadable
 
     def list_is_empty(self, root) -> bool:
-        return (not _nodes(root, self.SELECTORS["card"])
-                and any(re.search(r"共\s*[0-9]+\s*条", htmltext.text(node))
-                        for node in _nodes(root, self.SELECTORS["count"])))
+        """Only the portal's own "no results": no job link, and 共0条 or its no-results box; never a
+        page whose count says it has jobs (rows not recognised are not an empty result)."""
+        if _nodes(root, self.SELECTORS["card"]):
+            return False
+        counts = [int(match.group(1)) for node in _nodes(root, self.SELECTORS["count"])
+                  for match in [re.search(r"共\s*([0-9]+)\s*条", htmltext.text(node))] if match]
+        if any(counts):
+            return False
+        return 0 in counts or bool(_nodes(root, self.SELECTORS["no_results"]))
 
     def has_more(self, root):
         pager = _text(root, self.SELECTORS["pager"])
@@ -684,27 +686,55 @@ class LegacyPortal(_Portal):
         return any(htmltext.text(node) == "下一页" and node.get("href") for node in htmltext.select(root, "a"))
 
     def parse_detail(self, root) -> dict:
-        title, code = split_job_code(_text(root, self.SELECTORS["detail_title"]))
+        found = _nodes(root, self.SELECTORS["detail_block"])
+        if not found:
+            return {"title": "", "job_code": None, "salary": "", "places": [], "kinds": [], "published": None,
+                    "description": ""}
+        block = found[0]
+        title, code = split_job_code(self._title(block))
         sections, complete = [], True
-        for node in root.iter():
+        for node in block.iter():
             heading = _own_text(node).strip(_HEADING_TRIM)
             if heading not in _SECTION_HEADINGS or not _visible(node) or len(htmltext.text(node)) > len(heading) + 4:
                 continue
-            content = self._section_content(node)
+            content = self._section_content(node, block)
             if not content or placeholder_description(content):
                 complete = False
                 continue
             sections.append(f"{heading}\n{content}")
-        facts = self._facts(root)
+        facts = self._facts(block)
         return {"title": title, "job_code": code, "salary": facts["salary"], "places": facts["places"],
                 "kinds": facts["kinds"], "published": _day(facts["published"]),
                 "description": "\n".join(sections) if sections and complete else ""}
 
-    @staticmethod
-    def _section_content(heading) -> str:
-        """The text after a heading, up to the next heading: its later siblings, else its parent's."""
+    def _title(self, block) -> str:
+        """The job's name, without the apply status (未申请) that follows it."""
+        node = next(iter(_nodes(block, self.SELECTORS["detail_title"])), None)
+        if node is None:
+            return ""
+        title = htmltext.text(node)
+        for status in _nodes(node, self.SELECTORS["apply_status"]):
+            status_text = htmltext.text(status)
+            if status_text and title.endswith(status_text):
+                title = title[:-len(status_text)]
+        return _APPLY_STATUS.sub("", title).strip()
+
+    @classmethod
+    def _label(cls, node):
+        """The text of node when it is a label on its own (a heading or a "label："), else None."""
+        own = _own_text(node)
+        heading = own.strip(_HEADING_TRIM)
+        if heading in _SECTION_HEADINGS:
+            return heading
+        match = cls._FACT.match(own)
+        return match.group("label") if match and not match.group("value").strip() else None
+
+    @classmethod
+    def _section_content(cls, heading, block) -> str:
+        """The text after a heading, up to the next heading or label: its later siblings, else its
+        parent's, never beyond the job's block."""
         node = heading
-        while node.parent is not None:
+        while node is not block and node.parent is not None:
             siblings = node.parent.children
             after = siblings[siblings.index(node) + 1:]
             pieces = []
@@ -712,27 +742,39 @@ class LegacyPortal(_Portal):
                 if isinstance(sibling, str):
                     pieces.append(sibling.strip())
                     continue
-                if _own_text(sibling).strip(_HEADING_TRIM) in _SECTION_HEADINGS:
+                if cls._label(sibling):
                     break
                 if _visible(sibling):
                     pieces.append(htmltext.text(sibling, keep_newlines=True))
             text = "\n".join(piece for piece in pieces if piece)
             if text:
                 return text
-            if node.parent.tag in ("body", "#document"):
-                return ""
             node = node.parent
         return ""
 
-    def _facts(self, root) -> dict:
-        """The first "label：value" line for each fact on the page (the job's own header comes first)."""
+    def _facts(self, block) -> dict:
+        """The first value of each fact in the job's block: a "label：" element followed by its
+        value's element (li.ntitle / li.nvalue, or two p), or "label：value" in one element."""
         facts = {"places": [], "salary": "", "published": "", "kinds": []}
-        lines = htmltext.text(root).split("\n")
-        for key, labels in self._LABELS.items():
-            pattern = re.compile(rf"^(?:{'|'.join(labels)})\s*[:：]\s*(\S.{{0,59}})$")
-            value = next((match.group(1).strip() for match in map(pattern.match, lines) if match), "")
-            if key in ("places", "kinds"):
-                facts[key] = [value] if value else []
-            else:
-                facts[key] = value
+        wanted = {label: key for key, labels in self._LABELS.items() for label in labels}
+        for node in block.iter():
+            if not isinstance(node, htmltext.Node) or not _visible(node):
+                continue
+            match = self._FACT.match(_own_text(node))
+            if not match or match.group("label") not in wanted:
+                continue
+            key, value = wanted[match.group("label")], match.group("value").strip()
+            if not value:
+                siblings = node.parent.children if node.parent is not None else []
+                following = [child for child in siblings[siblings.index(node) + 1:]
+                             if not isinstance(child, str) or child.strip()]
+                nxt = following[0] if following else None
+                if isinstance(nxt, str):
+                    value = nxt.strip()
+                elif nxt is not None and _visible(nxt) and not self._label(nxt):
+                    value = htmltext.text(nxt)
+            value = value[:60]
+            if not value or facts[key]:
+                continue
+            facts[key] = [value] if key in ("places", "kinds") else value
         return facts

@@ -1,6 +1,9 @@
 """Beisen portal rules and runs on fictional tenants (example.zhiye.com, 示例科技); offline.
 
 Every list response, page and job text here is hand-written; none is copied from a real portal.
+Their structure - the list response's keys, the cards, the empty result pages and both detail
+pages - follows what was recorded on real portals on 2026-11-10
+(docs/cn/worklog/2026-11-10-m6-3-beisen-live.md); every name, job and text is made up.
 """
 import io
 import json
@@ -33,55 +36,138 @@ NEW_HOST = "https://example.zhiye.com"
 OLD_HOST = "https://example-legacy.zhiye.com"
 
 
-def item(uuid, name, salary="面议", places=("广州市",)):
-    return {"JobAdId": uuid, "JobAdName": name, "Salary": salary, "LocNames": list(places), "Kind": "实习"}
+def item(uuid, name, salary="面议", places=("广东省·广州市",), kind="实习"):
+    """One job ad of the list response: Id is the UUID its detail page takes, JobAdId an internal number."""
+    return {"Id": uuid, "HeadCount": 0, "JobAdId": 151000000 + int(uuid[-3:], 16), "PostDateInt": 1788746400000,
+            "PostDate": "2026-09-07T10:00:00", "EndTimeInt": 0, "EndTime": "0001-01-01T00:00:00", "JobAdName": name,
+            "OrgId": 3000001, "Org": None, "Category": "实习生招聘", "CategoryId": "3", "LocId": None,
+            "LocNames": list(places), "Salary": salary or None, "Duty": "1. 参与示例平台开发。",
+            "Require": "1. 熟悉 Python。", "Kind": kind, "Status": 1, "IsCollect": False, "IsDelivered": False}
 
 
-def list_response(items, total=None, code=200, keyword=""):
-    body = {"Code": code, "Message": "成功" if code == 200 else "示例错误", "Data": {
-        "Total": len(items) if total is None else total, "List": items}}
+def list_response(items, total=None, code=200, keyword="", page=0):
+    """The page's own list request and its response: Count is the whole result's total, Total stays 0."""
+    body = {"Code": code, "Message": "operation success" if code == 200 else "示例错误", "MoreMessage": "",
+            "TipType": "Success" if code == 200 else "Error", "Count": len(items) if total is None else total,
+            "ReturnUrl": None, "Data": items, "Total": 0}
+    sent = {"PageIndex": page, "PageSize": 20, "LocId": ["4401"], "Category": ["3"], "KeyWords": keyword,
+            "SpecialType": 0, "PortalId": "", "DisplayFields": ["Category", "Kind", "LocId", "PostDate"]}
     return collect.Response(url=f"{NEW_HOST}/api/Jobad/GetJobAdPageList", status=200,
-                            request=json.dumps({"PageIndex": 1, "PageSize": 20, "KeyWords": keyword}),
+                            request=json.dumps(sent, ensure_ascii=False), body=json.dumps(body, ensure_ascii=False))
+
+
+def detail_response(uuid, name):
+    """The detail page's own GET /api/JobAd/GetJobAdInfo: the job ad under Data."""
+    body = {"Code": 200, "Message": "operation success", "MoreMessage": None, "TipType": None, "Count": 0,
+            "ReturnUrl": None, "Data": item(uuid, name), "Total": 0}
+    return collect.Response(url=f"{NEW_HOST}/api/JobAd/GetJobAdInfo?jobAdId={uuid}&category=3", status=200,
                             body=json.dumps(body, ensure_ascii=False))
 
 
-def new_list(url, *responses, total=None):
-    count = total if total is not None else sum(len(json.loads(r.body)["Data"]["List"]) for r in responses)
-    html = (f'<div class="style__STBreadJobInfo-editor__sc-x1 a"><div>全部职位（共 {count} 个）</div></div>'
-            '<div class="style__STListItem-editor__sc-x2 b"><span>示例卡片</span></div>'
-            '<div id="LIST_LAST_DOM"><div>没有更多了~</div></div>')
+def card(entry):
+    """One card of the list page, as rendered: no link and no id anywhere in it."""
+    salary = f'<div class="style__STJobSalary-editor__sc-x1-5 e">{entry["Salary"]}</div>' if entry.get("Salary") else ""
+    labels = "".join(f'<div class="style__STJobLabel-editor__sc-x1-12 g"><div class="style__STLabelText-editor__sc-x1-13 h">'
+                     f'{text}</div></div>' for text in (entry.get("Category"), entry.get("Kind"),
+                                                       ",".join(entry.get("LocNames") or [])) if text)
+    return ('<div class="style__STListItem-editor__sc-x1-0 a"><div class="style__STListItemContent-editor__sc-x1-1 b">'
+            '<div class="style__STTitleSection-editor__sc-x1-2 c"><div class="style__STJobTitle-editor__sc-x1-4 d">'
+            f'<span>{entry["JobAdName"]}</span></div>{salary}</div><div class="style__STOtherSection-editor__sc-x1-10 f">'
+            f'<div class="style__STLabelSection-editor__sc-x1-11 g">{labels}</div>'
+            f'<div class="style__STJobTime-editor__sc-x1-16 i">{(entry.get("PostDate") or "")[:10]} 发布</div></div></div>'
+            '<div class="style__STDetailPanel-editor__sc-x1-17 j"><div class="style__STDetailTitle-editor__sc-x1-18 k">'
+            f'工作职责</div><div class="style__STDetailDesc-editor__sc-x1-19 l">{entry.get("Duty") or ""}</div>'
+            '<div class="style__STDetailFooter-editor__sc-x1-22 m"><div class="phoenix-button__content">立即投递</div>'
+            '<div class="style__STDetailBtn-editor__sc-x1-29 n"><div>查看详情</div></div></div></div></div>')
+
+
+EMPTY_BOX = ('<div class="style__STEmpty-editor__sc-x2-2 c"><div class="style__STEmptyIcon-editor__sc-x2-3 d">'
+             '<svg width="200px" height="200px"><g id="搜索/筛选结果为空"></g></svg></div>'
+             '<span>暂时没有符合条件的职位~</span></div>')
+
+
+def new_list(url, *responses, total=None, cards=None):
+    """The list page as rendered: "共 N 个", a card per job ad in the page's own responses (or the
+    given cards) above a footer that says 没有更多了~ even when more would come by scrolling;
+    with no card, an empty footer and the empty box."""
+    entries, count = [], 0
+    for response in responses:
+        payload = beisen._json(response.body)
+        if isinstance(payload, dict) and isinstance(payload.get("Data"), list):
+            entries += [e for e in payload["Data"] if isinstance(e, dict) and isinstance(e.get("JobAdName"), str)]
+            count = payload.get("Count", count)
+    shown = "".join(card(entry) for entry in entries) if cards is None else cards
+    footer = '<div id="LIST_LAST_DOM" class="style__STListFooter-editor__sc-x2-1 b">{}</div>'
+    body = shown + footer.format("<div>没有更多了~</div>") if shown else footer.format("") + EMPTY_BOX
+    html = (f'<div class="style__STBreadJobInfo-editor__sc-x3-1 a"><div>全部职位（共 {count if total is None else total} 个）'
+            f'</div></div><div class="style__STJobList-editor__sc-x2-0 a">{body}</div>')
     return collect.Snapshot(url=url, title="实习生招聘", html=html, status=200, responses=tuple(responses))
 
 
 def tag(text):
-    return f'<span class="style__STJobTag-editor__sc-24"><span class="style__STJobTabInner-editor__sc-25">{text}</span></span>'
+    return (f'<span class="style__STJobTag-editor__sc-y1-24 a"><span class="style__STJobTabInner-editor__sc-y1-25 b">'
+            f'{text}</span></span><div class="style__STJobLabelSperator-editor__sc-y1-26 c"></div>')
 
 
 def new_detail(title, salary="面议", places=("广东省·广州市",), channel_label="实习生招聘"):
-    salary_html = f'<div class="style__STJobNameRight-editor__sc-20 b">{salary}</div>' if salary else ""
+    """A job's page as rendered: name and salary, tags, the date, and a container per section."""
+    salary_html = f'<div class="style__STJobNameRight-editor__sc-y1-20 b">{salary}</div>' if salary else ""
     sections = "".join(
-        f'<div class="style__STDutyContainer-editor__sc-28"><div class="style__STDutyTitle-editor__sc-29">{head}</div>'
-        f'<div class="style__STDutyContent-editor__sc-31"><div class="style__STDutyItem-editor__sc-32">{body}</div></div></div>'
+        f'<div class="style__STDutyContainer-editor__sc-y1-28 g"><div class="style__STDutyTitle-editor__sc-y1-29 h">{head}</div>'
+        f'<div class="style__STDutyContent-editor__sc-y1-31 i"><div class="style__STDutyItem-editor__sc-y1-32 j">{body}</div></div></div>'
         for head, body in (("工作职责", "1. 参与示例 Agent 平台开发。<br>2. 编写 Python 服务。"),
                            ("任职资格", "熟悉 Python，每周到岗4天，实习3个月。")))
-    return (f'<div class="sc-head">登录/注册</div><div class="style__STJobNameLeft-editor__sc-19 a"><span>{title}</span></div>'
-            f'{salary_html}{tag(channel_label)}{tag("实习")}{"".join(tag(place) for place in places)}'
-            f'<div class="style__STJobInfoRight-editor__sc-23">2026-09-07 发布</div>{sections}')
+    return ('<div class="sc-head">登录/注册</div><div class="style__STJobList-editor__sc-y1-0 pc-job-detail">'
+            '<div class="style__STComponentItemContainer-editor__sc-y1-10 style__STJobName-editor__sc-y1-18 a">'
+            f'<div class="style__STJobNameLeft-editor__sc-y1-19 a"><span>{title}</span></div>{salary_html}</div>'
+            '<div class="style__STJobInfo-editor__sc-y1-21 d"><span class="style__STJobInfoLeft-editor__sc-y1-22 e">'
+            f'{tag(channel_label)}{tag("实习")}{"".join(tag(place) for place in places)}</span>'
+            '<div class="style__STJobInfoRight-editor__sc-y1-23 f">2026-09-07 发布</div></div>'
+            f'<div class="style__STJobDuty-editor__sc-y1-27 g">{sections}<div class="style__STButtonGroup-editor__sc-y1-33 k">'
+            '<div class="phoenix-button__content">立即投递</div></div></div></div>')
 
 
-def legacy_list(rows, page, pages, total):
-    body = "".join(f'<tr><td class="tableleft joblsttitle"><a title="{title}" href="/zpdetail/{job}?c=4401">{title}</a>'
-                   '</td><td></td><td title="广东省-广州市">广东省-广州市</td><td>2026-09-14</td></tr>'
-                   for job, title in rows)
-    return (f'<a class="loginlink" href="/Portal/Account/Login?returnUrl=%2Fsearch">登录</a>'
-            f'<table class="listtable"><thead><tr><th>职位名称</th></tr></thead><tbody>{body}</tbody></table>'
-            f'<span class="tablenote">共{total}条记录</span><div class="tablefooter"><span>当前第{page}/{pages}页</span></div>')
+def legacy_list(rows, page, pages, total, link="/zpdetail/{job}?r=2&c=4401"):
+    """The server-rendered list: a table row per job, 共N条记录, a pager only when there are more
+    pages; with no job and a count of 0, the table's no-results box."""
+    body = "".join(
+        f'<tr><td class="tableleft joblsttitle"><a title="{title}" jobadid="{job}" href="{link.format(job=job)}">{title}</a>'
+        '</td><td class="tableleft joblsttitle" title=""></td><td title="广东省-广州市" class="tableleft joblsttitle">'
+        '广东省-广州市</td><td class="tableleft joblsttitle">2026-09-14</td></tr>' for job, title in rows)
+    if not rows and not total:
+        body = ('<tr><td colspan="10"><div class="zx_nojob"><div class="imgNoResult"></div>'
+                '<div class="txtNoResut">没有搜索到相关应聘职位。</div></div></td></tr>')
+    pager = ""
+    if pages > 1:
+        after = (f'<a href="/search/?r=2&amp;c=4401&amp;PageIndex={page + 1}" class="next">下一页</a>' if page < pages
+                 else '<a disabled="disabled" class="disabled next">下一页</a>')
+        pager = (f'<div class="tablefooter"><span>当前第{page}/{pages}页</span><div class="pager clearfix">'
+                 f'<span><a disabled="disabled" class="disabled next">首页</a></span><span>{after}</span></div></div>')
+    return ('<a class="loginlink" href="/Portal/Account/Login?returnUrl=%2Fsearch">登录</a>'
+            '<div class="clearfix tablecontain"><table class="listtable"><thead><tr class="tabletitle">'
+            '<th class="tableleft">职位名称</th><th class="tableleft" title="职位类型">职位类型</th>'
+            '<th class="tableleft">工作地点</th><th class="tableleft">发布时间</th></tr></thead>'
+            f'<tbody>{body}</tbody></table><span class="tablenote">共{total}条记录</span></div>{pager}')
 
 
-def legacy_detail(title):
-    return (f'<div class="boxSupertitle"><span class="title">{title}</span></div>'
-            '<ul><li>工作地点：广东省-广州市</li><li>发布时间：2026-09-14</li></ul>'
-            '<div><p>职位描述</p><div>负责示例系统开发。</div><p>职位要求</p><div>本科及以上学历，熟悉 Java。</div></div>'
+def legacy_detail(title, salary="8000-12000 元/月"):
+    """A job's page: the site's search form (with a 工作地点： of its own) beside the job's block,
+    whose title carries the apply status and whose labels and values are separate elements."""
+    return ('<div class="searchbox"><table><tr><td class="listtitle">工作地点：</td><td><a href="/search?c=-1">全部</a>'
+            '<a href="/search?c=1100">北京市</a></td></tr></table></div>'
+            '<div class="positiondetail-simple "><div class="xiangqingtitle">'
+            f'<span>{title}<b class="applyStatus" style="font-weight: normal;">(未申请)</b></span></div>'
+            '<div class="xiangqingcontain"><div class="xiangqingline"></div><ul class="xiangqinglist clearfix">'
+            '<li class="ntitle td-HasRecruitCategories">招聘类别：</li><li class="nvalue">校园招聘</li>'
+            '<li class="ntitle td-HasKind">工作性质：</li><li class="nvalue">全职</li>'
+            f'<li class="ntitle td-HasSalaries">薪资范围：</li><li class="nvalue">{salary}</li>'
+            '<li class="ntitle td-HasHeadCount">招聘人数：</li><li class="nvalue">2</li></ul>'
+            '<ul class="xiangqinglist clearfix"><li class="ntitle td-HasPostDate">发布时间：</li>'
+            '<li class="nvalue">2026-09-14</li><li class="ntitle td-HasEndTime">截止时间：</li><li class="nvalue"></li><br>'
+            '<div class="xiangqingtext"><p>工作地点：</p><p>广东省-广州市</p><br><p>工作职责：</p>'
+            '<p>1.负责示例系统开发。<br>2.参与示例接口联调。</p><br><p>任职资格：</p><p>本科及以上学历，熟悉 Java。</p></div>'
+            '<div class="xiangqingfooter clearfix"><div class="footerbtn fl"><a href="#this" id="apply">现在申请</a></div>'
+            '<a href="javascript:ReturnToJobList()" class="returnlist">返回职位列表</a></div></ul></div></div>'
             '<div class="footer">隐私政策</div>')
 
 
@@ -174,7 +260,7 @@ class DeferredErrorPage:
             self.emit(good, defer=self.next_action != "next_detail")
         else:
             self.html = new_detail("示例开发实习生" if url == detail_url(A) else "示例测试实习生")
-            good = collect.Response(f"{NEW_HOST}/api/Jobad/GetJobAdInfo", 200, body='{"Success":true}')
+            good = detail_response(A if url == detail_url(A) else B, "示例开发实习生")
             self.emit(good, defer=self.next_action == "next_detail")
         return SimpleNamespace(status=200)
 
@@ -245,7 +331,8 @@ class Runs(unittest.TestCase):
                     (200, None, "page_changed", "JSON"),
                     (200, "[]", "page_changed", "JSON")]
             if next_action != "next_detail":
-                failures.append((200, '{"Data":{"Unknown":true}}', "page_changed", "找不到唯一的岗位列表"))
+                failures += [(200, '{"Data":{"Unknown":true}}', "page_changed", "列表接口响应里没有岗位列表"),
+                             (200, '{"Code":200,"Data":[],"Total":0}', "page_changed", "列表接口响应里没有岗位列表")]
             for status, body, result, reason in failures:
                 with self.subTest(next_action=next_action, delivery=delivery, status=status, body=body), \
                         tempfile.TemporaryDirectory() as root, mock.patch.object(browser, "SETTLE_S", 0), \
@@ -285,7 +372,7 @@ class Runs(unittest.TestCase):
         self.assertEqual((summary["status"], summary["saved"], len(page.gotos)), ("done", 1, 2))
 
     def test_two_channels_negotiable_missing_salary_multi_city_and_last_page(self):
-        first = list_response([item(A, "示例Agent开发实习生(J10001)", places=("广州市", "武汉市")),
+        first = list_response([item(A, "示例Agent开发实习生(J10001)", places=("广东省·广州市", "湖北省·武汉市")),
                                item(B, "示例测试实习生", salary="")], total=3)
         second = list_response([item(C, "示例后端实习生", salary="15K-18K 元/月")], total=3)
         intern = f"{NEW_HOST}/intern/jobs"
@@ -300,6 +387,8 @@ class Runs(unittest.TestCase):
                          ("done", 3, "end_of_list", 3))
         self.assertEqual([s["finished"] for s in summary["searches"]], ["end_of_list", "no_results"])
         self.assertEqual(tab.patterns, beisen.NewPortal.CAPTURE)
+        # The page's footer says 没有更多了~ and every response's Total is 0: Count alone asked for the scroll.
+        self.assertEqual((tab.calls.count("scroll"), json.loads(first.body)["Total"]), (1, 0))
         self.assertTrue(all(4 <= delay <= 9 for delay in self.delays) and len(self.delays) == len(tab.calls) - 1)
         list_url = urlsplit(tab.calls[0])
         self.assertEqual(json.loads(parse_qs(list_url.query)["LocId"][0]), [{"id": "4401", "label": "广州市"}])
@@ -385,16 +474,16 @@ class Runs(unittest.TestCase):
         summary = self.run_tenant(again, channel="intern")
         self.assertEqual((summary["saved"], summary["skipped_known"], again.calls[1:]), (0, 2, []))
 
-    def test_recognised_empty_loads_with_remaining_total_stop_after_two(self):
-        empty = list_response([], total=3)
-        new = Tab(lists={"/intern/jobs": [lambda url: new_list(url, empty, total=3)]},
-                  scrolls=[new_list(f"{NEW_HOST}/intern/jobs", empty, empty, total=3)])
-        old = Tab(lists={"/search": [legacy_list([], 1, 3, 3), legacy_list([], 2, 3, 3)]})
+    def test_a_list_whose_total_says_jobs_but_shows_none_is_a_changed_page(self):
+        # Neither portal's explicit "no results": stop at the first load, never call it the end of the list.
+        new = Tab(lists={"/intern/jobs": [lambda url: new_list(url, list_response([], total=3), total=3)]})
+        old = Tab(lists={"/search": [legacy_list([], 1, 3, 3)]})
         for tenant, channel, tab in (("example", "intern", new), ("example-legacy", "campus", old)):
             with self.subTest(tenant=tenant):
                 summary = self.run_tenant(tab, tenant=tenant, channel=channel)
-                self.assertEqual((collect.exit_code(summary), summary["list_loads"], summary["saved"]), (4, 2, 0))
-                self.assertIn("连续 2 次加载", summary["message"])
+                self.assertEqual((collect.exit_code(summary), summary["list_loads"], summary["saved"]), (4, 1, 0))
+                self.assertIn("找不到岗位卡片", summary["message"])
+                self.assertNotEqual(summary["searches"][0]["finished"], "no_results")
 
     def test_overlapping_keyword_pages_still_reach_unseen_jobs(self):
         fourth = A[:-1] + "d"
@@ -466,23 +555,87 @@ class Runs(unittest.TestCase):
     def test_legacy_portal_pages_rows_and_sections(self):
         first = legacy_list([("151000002", "示例Java开发（校招,广州）"), ("151000001", "示例前端开发（校招，广州）")], 1, 2, 3)
         last = legacy_list([("151000000", "示例测试（校招，广州）")], 2, 2, 3)
-        details = {f"{OLD_HOST}/zpdetail/{job}": legacy_detail(title) for job, title in (
-            ("151000002", "示例Java开发（校招,广州）"), ("151000001", "示例前端开发（校招，广州）"),
-            ("151000000", "示例测试（校招，广州）"))}
+        details = {f"{OLD_HOST}/zpdetail/{job}": legacy_detail(title, salary) for job, title, salary in (
+            ("151000002", "示例Java开发（校招,广州）", "8000-12000 元/月"), ("151000001", "示例前端开发（校招，广州）", ""),
+            ("151000000", "示例测试（校招，广州）", "面议"))}
         tab = Tab(lists={"/search": [first, last]}, details=details)
         summary = self.run_tenant(tab, tenant="example-legacy")
         self.assertEqual((summary["status"], summary["saved"], summary["list_loads"], summary["finished"]),
                          ("done", 3, 2, "end_of_list"))
         self.assertEqual([parse_qs(urlsplit(url).query) for url in tab.calls[:2]],
                          [{"r": ["2"], "c": ["4401"]}, {"r": ["2"], "c": ["4401"], "PageIndex": ["2"]}])
-        record = self.saved(summary)["beisen.example-legacy.151000002.json"]
+        records = self.saved(summary)
+        record = records["beisen.example-legacy.151000002.json"]
+        # The title without its apply status; the job's own facts, not the search form's 工作地点：.
+        self.assertEqual(record["text"].split("\n")[:7],
+                         ["示例Java开发（校招,广州）", "招聘频道：校园招聘", "工作地点：广东省-广州市", "工作性质：全职",
+                          "薪资：8000-12000 元/月", "发布时间：2026-09-14", "公司名称：示例信息"])
+        self.assertEqual(record["text"].split("\n")[7:],
+                         ["工作职责", "1.负责示例系统开发。", "2.参与示例接口联调。", "任职资格", "本科及以上学历，熟悉 Java。"])
+        self.assertEqual(record["extra"]["list_published"], "2026-09-14")
         parsed = jd_parser.parse_text(record["text"], source_type="portal", site="ats", single=True)[0][0]
-        self.assertEqual((parsed["title"], parsed["cities"], parsed["employment_type"], parsed["published_at"],
-                          parsed["salary"], record["url"]),
-                         ("示例Java开发（校招,广州）", ["广州"], "campus", "2026-09-14", None, f"{OLD_HOST}/zpdetail/151000002"))
-        self.assertIn("本科及以上学历", record["text"])
-        empty = Tab(lists={"/search": [legacy_list([], 1, 1, 0)]})
-        self.assertEqual(self.run_tenant(empty, tenant="example-legacy")["finished"], "no_results")
+        self.assertEqual((parsed["title"], parsed["cities"], parsed["published_at"], record["url"]),
+                         ("示例Java开发（校招,广州）", ["广州"], "2026-09-14", f"{OLD_HOST}/zpdetail/151000002"))
+        self.assertEqual((parsed["salary"]["min"], parsed["salary"]["max"], parsed["salary"]["unit"]),
+                         (8000, 12000, "CNY/month"))
+        self.assertNotIn("薪资：", records["beisen.example-legacy.151000001.json"]["text"])
+        self.assertIn("薪资：面议", records["beisen.example-legacy.151000000.json"]["text"])
+
+    def test_legacy_empty_result_needs_the_portals_own_sign(self):
+        # The recorded empty page: 共0条记录 and the no-results box in the table. Rows whose links are
+        # not recognised, or no rows under a count above 0, are a changed page, not "no results".
+        no_box = legacy_list([], 1, 1, 0).replace('<div class="zx_nojob">', '<div class="other">')
+        no_count = legacy_list([], 1, 1, 0).replace("共0条记录", "")
+        for html, finished in ((legacy_list([], 1, 1, 0), "no_results"), (no_box, "no_results"),
+                               (no_count, "no_results"),
+                               (legacy_list([("151000002", "示例甲")], 1, 1, 1, link="/jobdetail/{job}"), None),
+                               (legacy_list([], 1, 1, 2), None)):
+            with self.subTest(html=html[-160:]):
+                summary = self.run_tenant(Tab(lists={"/search": [html]}), tenant="example-legacy")
+                self.assertEqual(summary["finished"], finished)
+                self.assertEqual(collect.exit_code(summary), 0 if finished else 4)
+
+    def test_new_empty_result_needs_the_response_and_the_page_to_say_so(self):
+        # The recorded empty page: Count 0 and no job ad in the page's own response, the empty box and
+        # no card on the page. Anything less, or a page and a response that disagree, is a changed page.
+        empty = list_response([])
+        one = card(item(A, "示例甲"))
+        no_box = new_list(f"{NEW_HOST}/intern/jobs", empty).html.replace("STEmpty-editor", "STOther-editor")
+        for snapshot, finished in (
+                (lambda url: new_list(url, empty), "no_results"),
+                (lambda url: new_list(url, empty, cards=one), None),  # a card the response does not have
+                (lambda url: collect.Snapshot(url, "实习生招聘", no_box, 200, (empty,)), None),  # no empty box
+                (lambda url: new_list(url, list_response([], total=2)), None),  # Count says there are jobs
+                (lambda url: new_list(url), None),  # the list response never came
+                (lambda url: new_list(url, list_response([{"JobAdId": 151000001, "JobAdName": "示例甲"}])), None)):
+            with self.subTest(finished=finished):
+                summary = self.run_tenant(Tab(lists={"/intern/jobs": [snapshot]}), channel="intern")
+                self.assertEqual((summary["finished"], collect.exit_code(summary)), (finished, 0 if finished else 4))
+                if not finished:
+                    self.assertIn("找不到岗位卡片", summary["message"])
+
+    def test_job_ads_without_a_uuid_id_are_a_changed_page_not_no_results(self):
+        # The first live run: Id holds the UUID; JobAdId, an internal number, is not the job's id.
+        misread = [{**item(A, "示例甲"), "Id": None}, {**item(B, "示例乙"), "Id": "151000002"}]
+        tab = Tab(lists={"/intern/jobs": [lambda url: new_list(url, list_response(misread, keyword="示例"))]})
+        summary = self.run_tenant(tab, keywords=["示例"], channel="intern")
+        self.assertEqual((collect.exit_code(summary), summary["status"], summary["searches"][0]["finished"]),
+                         (4, "page_changed", "stopped"))
+        self.assertIn("找不到岗位卡片", summary["message"])
+        rules = beisen.tenant_rules(TENANTS["example"], "intern")
+        both = list_response([item(A, "示例甲(J10001)"), item(B, "示例乙", salary="")], total=3)
+        cards, unreadable = rules.parse_cards(beisen.htmltext.parse(""), f"{NEW_HOST}/intern/jobs", responses=(both,))
+        self.assertEqual(([c["id"] for c in cards], unreadable), ([f"beisen.example.{A}", f"beisen.example.{B}"], 0))
+        self.assertEqual([(c["title"], c["salary"], c["location"], c["extra"].get("job_code")) for c in cards],
+                         [("示例甲", "面议", "广东省·广州市", "J10001"), ("示例乙", "", "广东省·广州市", None)])
+        self.assertTrue(rules.has_more(beisen.htmltext.parse(""), responses=(both,)))  # Count 3, Total 0
+        rest = list_response([item(C, "示例丙")], total=3, page=1)
+        self.assertFalse(rules.has_more(beisen.htmltext.parse(""), responses=(both, rest)))
+
+    def test_the_empty_box_is_not_a_ready_signal(self):
+        # The box (and 共 0 个) can show before the list response arrives: waiting for it would read too early.
+        self.assertFalse(any("Empty" in selector or "BreadJobInfo" in selector
+                             for selector in beisen.NewPortal.LIST_READY))
 
 
 class Rules(unittest.TestCase):
