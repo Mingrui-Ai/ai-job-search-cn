@@ -37,6 +37,9 @@ AVAILABILITY_KEYS = ("start_date", "days_per_week", "months", "cities", "accepta
 AVAILABILITY_OPTIONAL = ("interview_travel", "remote_unstated_as_conflict")
 TARGET_KEYS = ("employment_types", "roles", "industries", "salary_min", "salary_ideal", "salary_step", "meal_value",
                "salary_days_per_week", "one_meal_points", "directions", "weights")
+# Keys target may leave out (M2-6g): search_keywords, what to search job boards for, read as [] when absent.
+# No rule reads it, so it stays out of the profile's digest (score.profile_hash).
+TARGET_OPTIONAL = ("search_keywords",)
 SALARY_MIN_KEYS = ("amount", "unit")
 # The scoring dimensions (M2-4; location since M2-6b).
 WEIGHT_KEYS = ("skills", "direction", "experience", "salary", "location")
@@ -111,7 +114,7 @@ def validate(profile, sources=None, groups=None) -> list[str]:
         for key in ("remote_ok", "relocate", "interview_travel", "remote_unstated_as_conflict"):
             _check_bool(availability.get(key), f"availability.{key}", errors)
 
-    if _obj(profile, "target", TARGET_KEYS, errors):
+    if _obj(profile, "target", TARGET_KEYS, errors, optional=TARGET_OPTIONAL):
         target = profile["target"]
         types = target.get("employment_types")
         check.texts(types, "target.employment_types")
@@ -119,6 +122,8 @@ def validate(profile, sources=None, groups=None) -> list[str]:
             _check_enum(value, schema.EMPLOYMENT_TYPES, f"target.employment_types[{index}]", errors, nullable=False)
         check.texts(target.get("roles"), "target.roles")
         check.texts(target.get("industries"), "target.industries")
+        if "search_keywords" in target:
+            check.texts(target["search_keywords"], "target.search_keywords")
         salary = target.get("salary_min")
         if salary is not None and _obj(target, "salary_min", SALARY_MIN_KEYS, errors, path="target.salary_min"):
             amount = salary.get("amount")

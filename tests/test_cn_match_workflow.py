@@ -163,18 +163,19 @@ class DocumentedSteps(unittest.TestCase):
 # before H16 read "Golang 或 Java" as one choice); ops marketing: (30*20 + 25*50 + 25*70 +
 # 10*100) / 90 = 51.1 -> 51 moderate (44 weak before M2-6b: 上海 is ops' city).
 # Grades M2-6b moved: tech ai_product poor -> weak (21 -> 31: 广州 is a preferred city),
-# ops marketing weak -> moderate.
+# ops marketing weak -> moderate. M2-6g turns tech's three monthly-paid jobs at five days a week, all
+# above its daily minimum: salary null -> 100, totals 63 -> 67, 39 -> 45, 1 -> 11, all still ineligible.
 EXPECTED = {
     ("jd/boss_intern.txt", "tech"): (85, 82, "strong"),
     ("jd/shixiseng_intern.txt", "tech"): (50, 55, "ineligible"),
-    ("jd/nowcoder_campus.txt", "tech"): (80, 63, "ineligible"),
+    ("jd/nowcoder_campus.txt", "tech"): (80, 67, "ineligible"),
     ("jd/official_site.txt", "tech"): (45, 54, "moderate"),
-    ("jd/experienced_hire.txt", "tech"): (40, 39, "ineligible"),
+    ("jd/experienced_hire.txt", "tech"): (40, 45, "ineligible"),
     ("jd-m2-3/boss_ai_product_intern.txt", "tech"): (45, 31, "weak"),
     ("jd-m2-3/shixiseng_content_ops_intern.txt", "tech"): (5, 11, "ineligible"),
     ("jd-m2-3/ats_ui_design_intern.txt", "tech"): (5, 13, "poor"),
     ("jd-m2-3/nowcoder_test_dev_intern.txt", "tech"): (60, 56, "moderate"),
-    ("jd-m2-3/official_marketing_campus.txt", "tech"): (5, 1, "ineligible"),
+    ("jd-m2-3/official_marketing_campus.txt", "tech"): (5, 11, "ineligible"),
     ("jd/boss_intern.txt", "ops"): (5, 1, "ineligible"),
     ("jd/shixiseng_intern.txt", "ops"): (20, 17, "ineligible"),
     ("jd/nowcoder_campus.txt", "ops"): (5, 1, "ineligible"),
@@ -188,12 +189,13 @@ EXPECTED = {
 }
 
 # match list order (score.list_key): grade, then total, then job id for ties. M2-6b moved only
-# ops' ineligible tail: the two 上海 jobs (data intern, experienced hire) gained location points.
+# ops' ineligible tail: the two 上海 jobs (data intern, experienced hire) gained location points. M2-6g ties
+# tech's last two at 11; the job id puts marketing first.
 RANKINGS = {
     "tech": ["jd/boss_intern.txt", "jd-m2-3/nowcoder_test_dev_intern.txt", "jd/official_site.txt",
              "jd-m2-3/boss_ai_product_intern.txt", "jd-m2-3/ats_ui_design_intern.txt", "jd/nowcoder_campus.txt",
-             "jd/shixiseng_intern.txt", "jd/experienced_hire.txt", "jd-m2-3/shixiseng_content_ops_intern.txt",
-             "jd-m2-3/official_marketing_campus.txt"],
+             "jd/shixiseng_intern.txt", "jd/experienced_hire.txt", "jd-m2-3/official_marketing_campus.txt",
+             "jd-m2-3/shixiseng_content_ops_intern.txt"],
     "ops": ["jd-m2-3/shixiseng_content_ops_intern.txt", "jd-m2-3/official_marketing_campus.txt",
             "jd/shixiseng_intern.txt", "jd-m2-3/ats_ui_design_intern.txt", "jd/experienced_hire.txt",
             "jd-m2-3/boss_ai_product_intern.txt", "jd-m2-3/nowcoder_test_dev_intern.txt", "jd/boss_intern.txt",

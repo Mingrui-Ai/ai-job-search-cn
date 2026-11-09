@@ -40,7 +40,8 @@ SCHEMA_VERSION = 1
 # 11: without tiers a salary in another unit is turned into the profile's as the tiers do; Maven, Gradle, HTTP,
 #     TCP/IP, TCP, UDP, 计算机网络 and 数据结构 join the skill vocabulary; the location check can take a JD
 #     silent on remote work as a conflict, availability.remote_unstated_as_conflict (M2-5 round 2).
-RULES_VERSION = 11
+# 12: without tiers a day rate is turned at five days a week when neither the JD nor the profile says (M2-6g).
+RULES_VERSION = 12
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary, location
 DEFAULT_WEIGHTS = {"skills": 30, "direction": 25, "experience": 25, "salary": 10, "location": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.
@@ -65,10 +66,13 @@ def job_hash(job: dict) -> str:
 
 def profile_hash(profile: dict) -> str:
     """A digest of what the agent's judgments rest on: the profile without its contact details, which no match
-    record holds, and without its weights, which only the total uses and the record keeps itself (M2-6d)."""
+    record holds, without its weights, which only the total uses and the record keeps itself (M2-6d), and
+    without its search keywords, which only finding jobs uses (M2-6g). A profile with no search_keywords
+    key hashes as it did before M2-6g."""
     data = {key: value for key, value in profile.items() if key != "contact"}
     if isinstance(data.get("target"), dict):
-        data["target"] = {key: value for key, value in data["target"].items() if key != "weights"}
+        data["target"] = {key: value for key, value in data["target"].items()
+                          if key not in ("weights", "search_keywords")}
     return _digest(data)
 
 
@@ -301,7 +305,8 @@ def _salary(job, profile):
     With target.salary_ideal and salary_step the pay is scored in tiers (_salary_tiers); without them, as
     before M2-6e: the JD's upper figure reaches salary_min (100) or not (0). A JD paying in another unit is
     turned into the profile's first, as the tiers do it (_in_unit, the days a week by _days_a_week; M2-5
-    round 2); meals are not added.
+    round 2), except that a day rate neither the JD nor the profile gives the days a week for is turned at
+    _DEFAULT_DAYS (M2-6g); meals are not added.
     """
     target = profile.get("target") or {}
     if target.get("salary_min") and target.get("salary_ideal") and target.get("salary_step"):
@@ -320,7 +325,7 @@ def _salary(job, profile):
     unit, amount = _UNIT[wanted["unit"]], wanted["amount"]
     words = f"JD 上限 {_plain(upper)} {_UNIT[offered['unit']]}"
     if offered.get("unit") != wanted.get("unit"):
-        days, whose = _days_a_week(job, target)
+        days, whose = _days_a_week(job, target, default=_DEFAULT_DAYS)
         turned = _in_unit(_fraction(upper), offered["unit"], wanted["unit"], days)
         if turned is None:
             return result(None, f"{words}；{_not_turned(offered['unit'], wanted['unit'])}"), None
@@ -405,13 +410,21 @@ def _salary_tiers(job, target):
     return result(_round(score), "；".join(words) + f"，记 {_round(score)} 分"), gap
 
 
-def _days_a_week(job: dict, target: dict):
-    """(days, whose) a day rate is worked a week: the JD's own figure ("每周至少 4 天" is 4), else the profile's."""
+# The days a week a day rate is turned at when neither the JD nor the profile says, without tiers only (M2-6g,
+# 经理意见书-008: the manager chose five). The tiers still leave such a rate unscored.
+_DEFAULT_DAYS = 5
+
+
+def _days_a_week(job: dict, target: dict, default=None):
+    """(days, whose) a day rate is worked a week: the JD's own figure ("每周至少 4 天" is 4), else the profile's,
+    else default if given, else (None, None)."""
     stated = (job.get("requirements") or {}).get("days_per_week")
     if stated is not None:
         return _fraction(stated), "JD 写的"
     if target.get("salary_days_per_week") is not None:
         return _fraction(target["salary_days_per_week"]), "档案的"
+    if default is not None:
+        return _fraction(default), "默认"
     return None, None
 
 
