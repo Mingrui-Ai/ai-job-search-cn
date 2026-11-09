@@ -345,14 +345,22 @@ def safe_dir(root: Path, *parts: str) -> Path:
     return current
 
 
-def _write_json(directory: Path, path: Path, record: dict) -> None:
-    """Write atomically, so an interrupted save never leaves half a file. The caller checks directory (safe_dir)."""
+def _write_json(directory: Path, path: Path, record: dict, *, overwrite: bool = True) -> None:
+    """Publish a complete file atomically; optional create-only mode preserves any existing path.
+
+    The caller checks directory (safe_dir). A hard link publishes the temporary file
+    without replacing a destination created concurrently; both paths are in the same directory.
+    """
     text = json.dumps(record, ensure_ascii=False, indent=2) + "\n"
     fd, tmp = tempfile.mkstemp(dir=directory, prefix=".tmp-", suffix=".json")
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
             handle.write(text)
-        os.replace(tmp, path)
+        if overwrite:
+            os.replace(tmp, path)
+        else:
+            os.link(tmp, path)
+            Path(tmp).unlink()
     except BaseException:
         Path(tmp).unlink(missing_ok=True)
         raise

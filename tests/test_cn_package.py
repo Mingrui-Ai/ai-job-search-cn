@@ -7,6 +7,11 @@
   which carry the /add-portal robots/ToS checks. Like the settings.json deny
   list, this is a tripwire rather than a wall: it makes adding a network path
   a visible, reviewed change instead of an incidental import.
+* One named exception (OPTIONAL_IMPORTS, 2026-11-05, M6-3): jobsearch_cn/browser.py
+  starts this machine's Chrome headless or, with explicit CDP, drives the user's
+  Chrome over loopback with Playwright, imported optionally inside a function. The
+  page reading, inbox writing and every other command stay standard library only
+  and offline (docs/cn/collect.md; ADR-4 and ADR-9 in cn-migration-plan.md).
 * UTF-8 output whatever the console code page. A Chinese Windows console
   defaults to cp936 (GBK), a Western one to cp1252; the CLI must emit UTF-8
   under both, the same contract tests/test_tools_utf8_output.py pins for
@@ -41,12 +46,21 @@ NETWORK_MODULES = (
     "imaplib",
     "xmlrpc",
     "webbrowser",
+    "playwright",
 )
 
 # Upstream tools/ scripts the package may import. They are stdlib-only by the
 # upstream convention, so reusing one adds code, not a dependency. Name each
 # one: a new entry is a reviewed decision, like everything else in this file.
 UPSTREAM_TOOLS = {"posting_guard"}
+
+# The only third-party, network-capable imports, by file. A new entry is a reviewed
+# decision too: it widens what installing and running the package can reach.
+OPTIONAL_IMPORTS = {"jobsearch_cn/browser.py": {"playwright"}}
+
+
+def is_optional_import(rel: str, name: str) -> bool:
+    return name.split(".")[0] in OPTIONAL_IMPORTS.get(rel, set())
 
 
 def package_imports():
@@ -78,9 +92,30 @@ class PackageImports(unittest.TestCase):
         offenders = [
             f"{rel}:{line} imports {name}"
             for rel, line, name in package_imports()
-            if name.split(".")[0] not in allowed
+            if name.split(".")[0] not in allowed and not is_optional_import(rel, name)
         ]
         self.assertEqual(offenders, [], "jobsearch_cn must stay standard-library only")
+
+    def test_optional_imports_happen_inside_functions(self):
+        # Importing the module (cli.py does) must not need the optional package: only
+        # running a collection does.
+        for rel, names in OPTIONAL_IMPORTS.items():
+            tree = ast.parse((REPO / rel).read_text(encoding="utf-8"))
+            top_level = [node for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))]
+            imported = {alias.name for node in top_level if isinstance(node, ast.Import) for alias in node.names}
+            imported |= {node.module for node in top_level if isinstance(node, ast.ImportFrom) and node.module}
+            self.assertEqual({name for name in imported if name.split(".")[0] in names}, set(),
+                             f"{rel} imports an optional package at module level")
+
+    def test_cli_imports_without_the_optional_packages(self):
+        blocked = sorted({name for names in OPTIONAL_IMPORTS.values() for name in names})
+        code = ("import sys\n"
+                f"for name in {blocked!r}: sys.modules[name] = None\n"
+                "import jobsearch_cn.cli\n"
+                "print('ok')\n")
+        proc = subprocess.run([sys.executable, "-c", code], cwd=REPO, capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(proc.stdout.strip(), "ok")
 
     def test_allowed_upstream_tools_exist_and_stay_offline(self):
         # Follow imports between tools/ scripts (posting_guard imports page_decode),
@@ -104,9 +139,15 @@ class PackageImports(unittest.TestCase):
         offenders = [
             f"{rel}:{line} imports {name}"
             for rel, line, name in package_imports()
-            if is_network_module(name)
+            if is_network_module(name) and not is_optional_import(rel, name)
         ]
         self.assertEqual(offenders, [], "jobsearch_cn must stay offline; network access belongs to portal adapters")
+
+    def test_optional_import_exception_is_narrow(self):
+        self.assertTrue(is_optional_import("jobsearch_cn/browser.py", "playwright.sync_api"))
+        self.assertFalse(is_optional_import("jobsearch_cn/collect.py", "playwright.sync_api"))
+        self.assertFalse(is_optional_import("jobsearch_cn/browser.py", "urllib.request"))
+        self.assertTrue(is_network_module("playwright.sync_api"))
 
     def test_network_matcher_keeps_offline_url_parsing(self):
         self.assertTrue(is_network_module("urllib.request"))
