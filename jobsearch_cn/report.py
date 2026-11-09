@@ -127,7 +127,8 @@ def _settle(key: str, job, profile: dict) -> str:
         if not target.get("salary_min"):
             return FILL_PROFILE
         # The pay could not be turned into the profile's unit (M2-6e; without tiers too since M2-5 round 2):
-        # by the hour, or by the day with the days a week unknown.
+        # by the hour, or by the day with the days a week unknown - with tiers only, since without them such a
+        # day rate is turned at five days a week (M2-6g).
         tiers = bool(target.get("salary_ideal") and target.get("salary_step"))
         if target["salary_min"].get("unit") == "CNY/hour":
             wanted = "最低期望和理想薪资" if tiers else "最低期望薪资"

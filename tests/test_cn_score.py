@@ -224,10 +224,11 @@ class Choices(Case):
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
 
     def test_a_new_rules_version_marks_older_records_stale(self):
-        self.assertEqual(score.RULES_VERSION, 11)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
+        self.assertEqual(score.RULES_VERSION, 12)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
         # 5: M2-6c's two checks; 6: H26's statistical analysis; 7: H29's office vocabulary;
         # 8: H21's versioned skills; 9: M2-6e's salary tiers; 10: M2-6f's interview travel;
-        # 11: M2-5 round 2's salary in another unit without tiers, and Maven, HTTP, TCP/IP and the rest
+        # 11: M2-5 round 2's salary in another unit without tiers, and Maven, HTTP, TCP/IP and the rest;
+        # 12: M2-6g's five days a week for a day rate without tiers when neither side says
         old = setting(scored(self.job, self.tech), "rules_version", 7)
         reasons = score.stale_reasons(old, self.job, score.profile_hash(self.tech), score.weights_of(self.tech))
         self.assertEqual(reasons, ["rules"])
@@ -322,13 +323,11 @@ class Salary(Case):
 
     def test_null_cases(self):
         negotiable = {"min": None, "max": None, "unit": None, "months": None, "negotiable": True}
-        monthly = {"min": 8000, "max": 10000, "unit": "CNY/month", "months": None, "negotiable": False}
         cases = (
             (setting(self.job, "salary", None), self.tech, "JD 没写薪资"),
             (setting(self.job, "salary", negotiable), self.tech, "JD 薪资面议"),
-            # Another unit is turned as the tiers turn it (M2-5 round 2); null only when it cannot be.
-            (setting(setting(self.job, "salary", monthly), "requirements.days_per_week", None), self.tech,
-             "按天换算要知道每周几天：JD 没写，档案也没写（target.salary_days_per_week），不换算"),
+            # Another unit is turned as the tiers turn it (M2-5 round 2); null only when it cannot be. Since
+            # M2-6g a day rate with the days a week on neither side is turned at five, so only by the hour is.
             (setting(self.job, "salary", pay(40, 60, unit="CNY/hour")), self.tech, "按小时的不换算"),
             (self.job, setting(self.tech, "target.salary_min", None), "档案没写最低期望薪资"),
         )
@@ -370,6 +369,45 @@ class Salary(Case):
         reached = self.dimension("salary", setting(self.job, "salary", pay(2000, 2600, unit="CNY/month")))
         self.assertEqual(reached["score"], 100)
         self.assertIn("折合 150 元/天", reached["reason"])
+        # Meals are not added without tiers.
+        meals = setting(short, "benefits.meals", {"per_day": 2, "allowance": {"amount": 30, "unit": "CNY/day"}})
+        self.assertEqual(self.dimension("salary", meals, monthly)["score"], 0)
+
+    def test_a_day_rate_with_the_days_a_week_on_neither_side_is_turned_at_five(self):
+        # M2-6g (经理意见书-008): without tiers, five days a week when neither the JD nor the profile says.
+        monthly = setting(self.tech, "target.salary_min", {"amount": 3000, "unit": "CNY/month"})
+        self.assertIsNone(monthly["target"]["salary_days_per_week"])
+        silent = setting(setting(self.job, "salary", pay(100, 150)), "requirements.days_per_week", None)
+        # 150 * 5 * 52 / 12 = 3250, reaching 3000.
+        self.assertEqual(self.dimension("salary", silent, monthly),
+                         {"score": 100, "method": "rule",
+                          "reason": "JD 上限 150 元/天，折合 3250 元/月（按默认每周 5 天、一年 52 周），"
+                                    "达到你的最低期望 3000 元/月"})
+        # 130 * 5 * 52 / 12 = 2816.7, short of 3000: 0, and a gap with the sum turned.
+        short = setting(silent, "salary.max", 130)
+        record = scored(short, monthly)
+        self.assertEqual(record["dimensions"]["salary"]["score"], 0)
+        [gap] = [g for g in record["gaps"] if g["kind"] == "salary"]
+        self.assertEqual(gap["item"], "JD 上限 130 元/天，折合 2816.7 元/月（按默认每周 5 天、一年 52 周），"
+                                      "低于你的最低期望 3000 元/月")
+        self.assertEqual(score.validate(record, short, monthly, VOCABULARY), [])
+        # The other way round: 3000 a month is 3000 * 12 / (5 * 52) = 138.5 a day, short of the tech 150.
+        by_month = setting(silent, "salary", pay(2500, 3000, unit="CNY/month"))
+        dimension = self.dimension("salary", by_month)
+        self.assertEqual(dimension["score"], 0)
+        self.assertIn("折合 138.5 元/天（按默认每周 5 天、一年 52 周），低于", dimension["reason"])
+        # Either side's own figure still comes first: the JD's 4 (150 * 4 * 52 / 12 = 2600), the profile's 6.
+        self.assertIn("按JD 写的每周 4 天", self.dimension("salary", setting(silent, "requirements.days_per_week", 4),
+                                                       monthly)["reason"])
+        six = self.dimension("salary", short, setting(monthly, "target.salary_days_per_week", 6))
+        self.assertEqual(six["score"], 100)  # 130 * 6 * 52 / 12 = 3380
+        self.assertIn("按档案的每周 6 天", six["reason"])
+        # With tiers such a rate is still left unscored (SalaryTiers.test_pay_turns_into_the_profile_unit).
+        tiers = tiered(self.tech, 2600, 3400, 160, unit="CNY/month")
+        self.assertIsNone(self.dimension("salary", silent, tiers)["score"])
+        # And a year is twelve months whatever the days a week: no default in the reason.
+        yearly = self.dimension("salary", setting(silent, "salary", pay(36000, unit="CNY/year")), monthly)
+        self.assertNotIn("默认", yearly["reason"])
         # Meals are not added without tiers.
         meals = setting(short, "benefits.meals", {"per_day": 2, "allowance": {"amount": 30, "unit": "CNY/day"}})
         self.assertEqual(self.dimension("salary", meals, monthly)["score"], 0)
@@ -659,6 +697,19 @@ class Records(Case):
         self.assertEqual(record["weights"], heavier["target"]["weights"])
         self.assertNotEqual(record["total"], base["total"])
 
+    def test_the_profile_hash_leaves_out_the_search_keywords(self):
+        # M2-6g: only finding jobs reads them, so a record and a resume material keep their profile digest.
+        base = scored(self.job, self.tech)
+        self.assertNotIn("search_keywords", self.tech["target"])
+        for keywords in ([], ["后端开发实习"], ["后端开发实习", "Python 实习"]):
+            with self.subTest(keywords=keywords):
+                record = scored(self.job, setting(self.tech, "target.search_keywords", keywords))
+                self.assertEqual(record["profile_hash"], base["profile_hash"])
+                self.assertEqual(dict(record, scored_at=None), dict(base, scored_at=None))
+        # The other target keys still count.
+        self.assertNotEqual(score.profile_hash(setting(self.tech, "target.roles", ["后端开发实习"])),
+                            base["profile_hash"])
+
     def test_new_weights_keep_the_agents_work_and_redo_the_total(self):
         job = with_skills(self.job, ["Excel"])  # nothing grouped: the agent gives the direction as well
         filled = agent_filled(scored(job, self.tech))
@@ -818,11 +869,13 @@ class Validate(Case):
 #                           上海 -> 0; (750+2500+1000)/75 = 56.7 -> 57; the filter rules it out (每周5天 > 4)
 #                     ops   0, 0; 上海 -> 100; 1000/65 = 15.4 -> 15; ineligible
 #   nowcoder_campus   tech  8 skills: RAG 0.8 + Python 1 + PyTorch 0.5 + LangChain 0.8 = 3.1/8 -> 39; tech -> 100;
-#                           元/月 vs 元/天 -> null; 北京、杭州 -> 0; (1170+2500)/65 = 56.5 -> 56; 校招 -> ineligible
+#                           40000 元/月 at the default 5 days a week (M2-6g) = 1846.2 元/天 >= 150 -> 100;
+#                           北京、杭州 -> 0; (1170+2500+1000)/75 = 62.3 -> 62; 校招 -> ineligible
 #   official_site     tech  6 skills, PyTorch 0.5 -> 8; tech -> 100; 面议 -> null; 杭州, but remote and you accept
 #                           remote -> 100; (240+2500+1000)/65 = 57.5 -> 58; no 届别 -> needs_check: moderate
 #                     ops   杭州, remote, but ops does not accept remote -> 0; 0
-#   experienced_hire  tech  none of 8 held -> 0; tech -> 100; 元/月 -> null; 上海 -> 0; 2500/65 = 38.5 -> 38;
+#   experienced_hire  tech  none of 8 held -> 0; tech -> 100; 30000 元/月 at 5 days = 1384.6 元/天 -> 100; 上海 -> 0;
+#                           (2500+1000)/75 = 46.7 -> 47;
 #                           社招 -> ineligible
 #                     ops   0, 0; 上海 -> 100; 1000/65 = 15.4 -> 15; ineligible
 #   boss_ai_product   tech  none held -> 0; product 4 leads, no tech skill -> 0; 220 >= 150 -> 100; 广州 -> 100;
@@ -838,7 +891,8 @@ class Validate(Case):
 #                     ops   Photoshop 0.8/6 -> 13; design -> 0; 杭州 -> 0; 390/65 = 6; 杭州 -> ineligible
 #   nowcoder_test_dev tech  none of the 6 test skills held -> 0; tech -> 100; 元/小时 -> null; 深圳 -> 100;
 #                           3500/65 = 53.8 -> 54 moderate
-#   official_marketing tech none held -> 0; market 2 leads, no tech skill -> 0; 元/月 -> null; 上海 -> 0; 0;
+#   official_marketing tech none held -> 0; market 2 leads, no tech skill -> 0; 10000 元/月 at 5 days -> 100;
+#                           上海 -> 0; 1000/75 = 13.3 -> 13;
 #                           校招 -> ineligible
 #                     ops   Excel 1/5 -> 20; market leads, 活动策划 is ops -> 50; 上海 -> 100;
 #                           (600+1250+1000)/65 = 43.8 -> 44 weak
@@ -847,14 +901,14 @@ EXPECTED = {
     # (sample, profile): (skills, direction, salary, location, total, grade)
     ("jd/boss_intern.txt", "tech"): (52, 100, 100, 100, 81, "strong"),
     ("jd/shixiseng_intern.txt", "tech"): (25, 100, 100, 0, 57, "ineligible"),
-    ("jd/nowcoder_campus.txt", "tech"): (39, 100, None, 0, 56, "ineligible"),
+    ("jd/nowcoder_campus.txt", "tech"): (39, 100, 100, 0, 62, "ineligible"),
     ("jd/official_site.txt", "tech"): (8, 100, None, 100, 58, "moderate"),
-    ("jd/experienced_hire.txt", "tech"): (0, 100, None, 0, 38, "ineligible"),
+    ("jd/experienced_hire.txt", "tech"): (0, 100, 100, 0, 47, "ineligible"),
     ("jd-m2-3/boss_ai_product_intern.txt", "tech"): (0, 0, 100, 100, 27, "poor"),
     ("jd-m2-3/shixiseng_content_ops_intern.txt", "tech"): (0, 0, 100, 0, 13, "ineligible"),
     ("jd-m2-3/ats_ui_design_intern.txt", "tech"): (0, 0, None, 100, 15, "poor"),
     ("jd-m2-3/nowcoder_test_dev_intern.txt", "tech"): (0, 100, None, 100, 54, "moderate"),
-    ("jd-m2-3/official_marketing_campus.txt", "tech"): (0, 0, None, 0, 0, "ineligible"),
+    ("jd-m2-3/official_marketing_campus.txt", "tech"): (0, 0, 100, 0, 13, "ineligible"),
     ("jd/boss_intern.txt", "ops"): (0, 0, None, 0, 0, "ineligible"),
     ("jd/shixiseng_intern.txt", "ops"): (0, 0, None, 100, 15, "ineligible"),
     ("jd/nowcoder_campus.txt", "ops"): (0, 0, None, 0, 0, "ineligible"),

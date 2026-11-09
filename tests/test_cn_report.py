@@ -487,7 +487,8 @@ class FormAndPage(unittest.TestCase):
         })
         unit = {"salary": {"min": 5000, "max": 8000, "unit": "CNY/month", "negotiable": False}}
         wanted = {"target": {"salary_min": {"amount": 150, "unit": "CNY/day"}}}
-        # M2-5 round 2: without tiers too, a null salary in another unit is pay that could not be turned.
+        # M2-5 round 2: without tiers too, a null salary in another unit is pay that could not be turned. Since
+        # M2-6g a day rate without tiers is turned at five days a week, so this null is a record from before.
         self.assertIn("salary_days_per_week", report._settle("salary", unit, wanted))
         hourly_job = {"salary": {"min": 40, "max": 40, "unit": "CNY/hour", "negotiable": False}}
         self.assertIn("按小时的不换算", report._settle("salary", hourly_job, wanted))

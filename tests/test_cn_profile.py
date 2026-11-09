@@ -280,6 +280,30 @@ class Validate(unittest.TestCase):
         self.assert_error(with_value(self.example, "availability.remote_unstated_as_conflict", "是"),
                           "availability.remote_unstated_as_conflict")
 
+    def test_search_keywords_are_optional_and_checked_as_roles(self):
+        # M2-6g (经理意见书-008): what to search job boards for. Profiles without the key are valid, no warning.
+        self.assertEqual(self.example["target"]["search_keywords"], ["后端开发实习", "Python 实习"])
+        older = with_value(self.example, "target", {key: value for key, value in self.example["target"].items()
+                                                    if key != "search_keywords"})
+        self.assertEqual(profile.validate(older, sources={"resume.pdf"}), [])
+        self.assertEqual(profile.warnings(older), [])
+        self.assertEqual(profile.validate(with_value(self.example, "target.search_keywords", []),
+                                          sources={"resume.pdf"}), [])
+        cases = (
+            (None, "target.search_keywords: must be a list ([] when there is nothing)"),
+            ("后端开发实习", "target.search_keywords: must be a list ([] when there is nothing)"),
+            (["后端开发实习", " "], "target.search_keywords[1]: must be a non-empty string"),
+            (["后端开发实习", 3], "target.search_keywords[1]: must be a non-empty string"),
+            (["Python 实习", "ＰＹＴＨＯＮ实习"], "target.search_keywords[1]: duplicate of an earlier item"),
+            (["实习" * 101], "target.search_keywords[0]: longer than"),
+        )
+        for value, fragment in cases:
+            with self.subTest(value=value):
+                self.assert_error(with_value(self.example, "target.search_keywords", value), fragment)
+        # target.roles is held to the same rules.
+        self.assert_error(with_value(self.example, "target.roles", ["后端开发", "后端开发"]),
+                          "target.roles[1]: duplicate of an earlier item")
+
     def test_cities_compare_as_the_filter_and_the_score_compare_them(self):
         # Codex B on #68: the filter and the score take 深圳市 for 深圳 (match._city), so the validator does
         # too, across the two tiers either way round and within each.
