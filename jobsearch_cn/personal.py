@@ -15,6 +15,7 @@ from jobsearch_cn import schema
 MODULE_ENV = "JOBSEARCH_CN_PERSONAL_MODULE"
 _PACKAGE = "_jobsearch_cn_personal"
 _NAME = re.compile(r"[a-z][a-z0-9_-]{0,39}")
+RESERVED = ("beisen",)  # collect's own public adapters
 _FUNCTIONS = ("search_url", "job_id_from_url", "canonical_url", "parse_cards", "list_is_empty",
               "page_problem", "is_closed", "parse_detail", "detail_text", "same_job", "location_matches")
 
@@ -48,6 +49,8 @@ def _validate(adapters):
     for name, site in adapters.items():
         if not isinstance(name, str) or not _NAME.fullmatch(name):
             raise ModuleError("适配器名只能用小写字母、数字、下划线和短横线")
+        if name in RESERVED:
+            raise ModuleError(f"适配器名 {name} 已被公开适配器使用，换一个名字")
         if getattr(site, "SITE", None) not in schema.SITES:
             raise ModuleError(f"适配器 {name} 的 SITE 不属于收件格式")
         for attr in ("NAME", "CITY_CODES", "PAGINATION", "SELECTORS", "LIST_READY", "DETAIL_READY"):

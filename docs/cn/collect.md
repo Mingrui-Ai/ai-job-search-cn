@@ -39,3 +39,43 @@ python -m jobsearch_cn jd inbox-import 'D:\downloads\jobsearch-inbox' --site off
 结果包含 `batch`、`moved`、`files`、`left`、`next`、`next_shell` 和 `next_argv`。`next` 在 Windows 明确供 PowerShell 使用，路径里的空格、美元符号、反引号和单引号均按字面保留；其他系统用 POSIX shell。程序调用优先使用结构化的 `next_argv`。后续 `jd screen` 使用本次真实数据目录，不依赖下一次进程的默认值。
 
 `extra.page == "list"` 的摘要可以新增岗位，但不能覆盖已保存正文；完整详情仍可更新。目录错误按 CLI 的 JSON 错误契约返回，退出 2。没有文件成功移动时退出 1；失败后若因来源删除失败而留下完整副本，会保留批次供人工核对。
+
+## 北森招聘门户（`collect beisen`，M6-3）
+
+北森（`<子域名>.zhiye.com`）的平台条款没有禁止自动采集，robots 允许，列表和详情不登录就能看（来源核查见 [工作记录](worklog/2026-11-10-m6-3-beisen.md)）。适配器在公开项目里，但**只读用户本机白名单里的租户**，不做全网发现；不在名单里的子域名在打开浏览器之前就被拒绝。每加一家，先读这家门户自己的条款（门户页脚的“隐私政策”等），没有禁止自动采集才写进名单，并记下链接和核查日期。名单在数据目录里，不进仓库；仓库只放下面这份虚构示例。
+
+白名单位置固定为 `<数据目录>/collect/beisen.json`（数据目录同 `--data-dir`，默认仓库下的 `data/`，或环境变量 `JOBSEARCH_CN_DATA_DIR`），UTF-8 JSON：
+
+```json
+{
+  "format": "jobsearch_cn.beisen/1",
+  "city_codes": {"韶关": "4402"},
+  "tenants": [
+    {"subdomain": "example", "portal": "new", "company": "示例科技",
+     "channels": ["intern", "campus"], "cities": ["广州"],
+     "terms_url": "https://example.zhiye.com/privacy", "terms_checked": "2026-11-09"},
+    {"subdomain": "example-legacy", "portal": "legacy", "company": "示例信息",
+     "channels": ["campus"], "cities": ["广州", "韶关"],
+     "terms_url": "https://example-legacy.zhiye.com/Portal/Apply/PrivacyPolicy", "terms_checked": "2026-11-09",
+     "note": "可选：自己的备注"}
+  ]
+}
+```
+
+- `subdomain`：门户地址 `https://<子域名>.zhiye.com` 里的子域名；`portal`：`new` 新版（单页应用，列表 `/{频道}/jobs`）或 `legacy` 旧版（服务端渲染，列表 `/search`、详情 `/zpdetail/<数字>`）；`company`：写进岗位正文的公司名。
+- `channels`：`campus` 校招、`intern` 实习、`social` 社招，写这家门户实际有的；`cities`：城市名。常用城市的四位代码已内置（行政区划代码前四位，广州 4401），其他城市在 `city_codes` 里补。
+- `terms_url`、`terms_checked`：这家门户条款的链接和读条款的日期（不能晚于当天）。
+
+```powershell
+python -m jobsearch_cn collect beisen --tenant example --data-dir 'D:\local-jobs'
+# 只读一个频道；只搜一个词；不按关键词读全部
+python -m jobsearch_cn collect beisen --tenant example --channel intern --query 'Agent'
+python -m jobsearch_cn collect beisen --tenant example --all
+```
+
+一次运行读一家租户：白名单里的每个频道 × 每个城市 × 档案 `target.search_keywords` 的每个关键词各是一组搜索（档案没有关键词、或用 `--all` 时每个频道和城市读全部），按这个顺序读，组与组之间按岗位 ID 去重。所有组合计最多 5 次列表加载（`--max-pages`）、30 个详情页（`--max`），用完就停，结果的 `searches` 列出每组读了几次、怎么结束的（`not_run` 是额度用完没轮到，下次可用 `--channel`、`--query` 分开跑）。翻页和打开详情之间随机等 4–9 秒。
+
+- 新版门户的岗位卡片没有链接，岗位 ID 来自页面自己发出的列表请求的响应：浏览器只被动记下与当前门户同源（协议、主机和端口相同）的响应，不自己构造或发送请求，也不读取其他租户的响应。详情页从页面上读。门户没有按地址里的关键词搜索时（页面发出的列表请求里缺少关键词或不是这个词）停下并说明，改用 `--all`；响应不是可识别的 JSON 或列表结构不明确时，也会停下。
+- 旧版门户按 `r`（频道）、`c`（城市代码）、`k`（关键词）、`PageIndex`（页码）读列表；详情页按“职位描述”“任职要求”等标题读。旧版详情页的结构这次没有样本，第一次真实运行认不出时会按“页面结构变了”停下。
+- 停止：HTTP 403/429、验证码、跳到登录页、接口报错，或页面显示还有更多但连续两次加载都没有新岗位，都会停下这家租户，结果里写明原因；已存的不受影响。
+- 岗位 ID 是 `beisen.<子域名>.<门户的岗位 ID>`，写进收件文件的 `site_job_id`（见 [job-schema.md](job-schema.md)），是重跑时去重的第一依据。正文第一行是岗位名（去掉末尾的 `(J12345)` 编号，编号另记在 `extra.job_code`），后面是“招聘频道”“工作地点”“工作性质”“薪资”（“面议”照写）“发布时间”“公司名称”和职责、要求原文；页面没给的就不写，导入后保持 `null`。收件夹是 `<数据目录>/inbox/ats/<批次>/`，之后照常 `jd screen`。

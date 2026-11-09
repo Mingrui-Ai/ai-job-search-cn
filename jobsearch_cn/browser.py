@@ -19,6 +19,13 @@ What it does with the tab either way: navigate it, scroll it, read the rendered 
 it. It also watches the status codes of the responses its own tab receives (passively, it does
 not intercept them): after a 403 or 429 on a page, list or data request of the site, the tab is
 not navigated or scrolled again and every snapshot carries that status, so the run stops.
+For a site whose cards carry no link (collect's CAPTURE), it also keeps the responses to the
+page's own data requests whose path the site names - the same origin, xhr or fetch only - and
+reads their bodies and the bodies the page sent, as text, into the snapshot. It never sends a
+request itself and never changes one.
+Before the next navigation or scroll, collect checks a fresh snapshot of the current page,
+including responses delivered during its pause. Only after that check may navigation clear
+the old page's responses; the site's rules decide which bodies are errors.
 Nothing else: no clicks, no typing, no request interception, no reading of cookies or storage,
 never the user's other tabs.
 """
@@ -27,7 +34,7 @@ import re
 import time
 from urllib.parse import urlsplit
 
-from jobsearch_cn.collect import DENIED_STATUSES, BrowserError, Snapshot
+from jobsearch_cn.collect import DENIED_STATUSES, BrowserError, Response, Snapshot
 
 DEFAULT_CDP = "http://127.0.0.1:9222"
 # The whole address, nothing more: scheme, a loopback host, a port, an optional final slash.
@@ -35,6 +42,9 @@ DEFAULT_CDP = "http://127.0.0.1:9222"
 # because Python's and the browser's URL parsers do not agree on such input.
 CDP_URL = re.compile(r"http://(127\.0\.0\.1|localhost|\[::1\]):([0-9]{1,5})/?")
 WATCHED_REQUESTS = ("document", "xhr", "fetch")
+CAPTURED_REQUESTS = ("xhr", "fetch")
+MAX_CAPTURED = 50  # responses kept per page; a page that sends more is not one collect reads
+MAX_CAPTURED_TEXT = 2_000_000  # characters of one body; a longer one is kept as unreadable (None)
 CONNECT_TIMEOUT_MS = 10_000
 LAUNCH_TIMEOUT_MS = 30_000
 NAV_TIMEOUT_MS = 30_000
@@ -69,6 +79,17 @@ def _site_of(url: str) -> str:
     return ".".join(host.split(".")[-2:])
 
 
+def _origin_of(url: str) -> tuple | None:
+    """Keep hosted tenants separate when capturing data, including scheme and port."""
+    try:
+        parts = urlsplit(url)
+        if parts.scheme not in ("http", "https") or not parts.hostname:
+            return None
+        return parts.scheme, parts.hostname, parts.port or (443 if parts.scheme == "https" else 80)
+    except ValueError:
+        return None
+
+
 class Tab:
     """One tab of its own. Use open_tab() to get one.
 
@@ -81,16 +102,54 @@ class Tab:
         self._browser = browser  # set only when this module started the browser, so close() closes it
         self.headless = headless
         self.denied = None  # the first 403/429 this tab's own list or data requests got
+        self._capture = ()  # path patterns of the data responses to keep (capture())
+        self._captured = []  # the kept responses of the current page, in arrival order
+        self._check_before_action = None  # collect's check of the page we are about to leave/scroll
+        self._status = None  # the current main document's status, also kept across scrolls
         page.on("response", self._watch)
+
+    def capture(self, patterns) -> None:
+        """Keep this tab's same-origin xhr/fetch responses whose path matches a pattern."""
+        self._capture = tuple(patterns)
+
+    def check_before_action(self, check) -> None:
+        """Check the current page after queued responses arrive, before the next action.
+
+        collect supplies a callback that raises its stop exception on a page problem. It is
+        bound to the rules of the page already read, not those of the next search/channel.
+        """
+        self._check_before_action = check
 
     def _watch(self, response) -> None:
         try:
-            if self.denied is None and response.status in DENIED_STATUSES \
-                    and response.request.resource_type in WATCHED_REQUESTS \
-                    and _site_of(response.url) == _site_of(self._page.url):
+            same_site = _site_of(response.url) == _site_of(self._page.url)
+            kind = response.request.resource_type
+            if self.denied is None and response.status in DENIED_STATUSES and kind in WATCHED_REQUESTS and same_site:
                 self.denied = response.status
-        except self._errors:
+            origin = _origin_of(response.url)
+            if (self._capture and origin is not None and origin == _origin_of(self._page.url)
+                    and kind in CAPTURED_REQUESTS and len(self._captured) < MAX_CAPTURED):
+                path = urlsplit(response.url).path
+                if any(pattern.search(path) for pattern in self._capture):
+                    self._captured.append(response)
+        except (self._errors, ValueError):
             pass
+
+    def _text(self, read):
+        try:
+            text = read()
+        except (self._errors, UnicodeDecodeError, ValueError):
+            return None
+        return text if isinstance(text, str) and len(text) <= MAX_CAPTURED_TEXT else None
+
+    def _responses(self) -> tuple:
+        """The kept responses as plain values: address, status, the body sent and the body received."""
+        kept = []
+        for response in self._captured:
+            kept.append(Response(url=response.url, status=response.status,
+                                 request=self._text(lambda: response.request.post_data),
+                                 body=self._text(response.text)))
+        return tuple(kept)
 
     def _guard(self, action):
         try:
@@ -108,7 +167,10 @@ class Tab:
 
     def _snapshot(self, status=None) -> Snapshot:
         page = self._page
-        return Snapshot(url=page.url, title=page.title(), html=page.content(), status=self.denied or status)
+        title, html = page.title(), page.content()
+        responses = self._responses() if self._capture else ()
+        return Snapshot(url=page.url, title=title, html=html, status=self.denied or status,
+                        responses=responses)
 
     def _was_denied(self) -> bool:
         """True once this tab got a 403/429. Playwright hands over the responses that came in
@@ -117,20 +179,31 @@ class Tab:
             self._page.title()
         return self.denied is not None
 
+    def _before_action(self):
+        if self._was_denied():
+            return self._snapshot()
+        if self._check_before_action is not None:
+            self._check_before_action(self._snapshot(self._status))
+        return None
+
     def open(self, url: str, ready) -> Snapshot:
         def go():
-            if self._was_denied():  # go nowhere; the snapshot carries the status and the run stops
-                return self._snapshot()
+            stopped = self._before_action()
+            if stopped is not None:  # go nowhere; the snapshot carries the status and the run stops
+                return stopped
+            self._captured = []  # checked the old page, including responses delivered during the pause
             response = self._page.goto(url, wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)
+            self._status = response.status if response is not None else None
             self._wait_ready(ready)
-            return self._snapshot(response.status if response is not None else None)
+            return self._snapshot(self._status)
         return self._guard(go)
 
     def load_more(self, item_selectors, ready) -> Snapshot:
         """Scroll the result list to its end so the site loads more cards, then read the page."""
         def scroll():
-            if self._was_denied():
-                return self._snapshot()
+            stopped = self._before_action()
+            if stopped is not None:
+                return stopped
             items = self._page.locator(", ".join(item_selectors))
             before = items.count()
             if before:

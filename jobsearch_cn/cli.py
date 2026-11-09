@@ -17,7 +17,7 @@ from pathlib import Path
 
 from jobsearch_cn import (__version__, browser, collect, jd_parser, match, material, messages, profile, report,
                           resume_docx, resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
-from jobsearch_cn import inbox, personal
+from jobsearch_cn import beisen, inbox, personal
 from jobsearch_cn import applications as applications_mod
 
 
@@ -1066,17 +1066,55 @@ def cmd_collect(args) -> int:
         cdp = browser.check_cdp_url(args.cdp) if args.cdp is not None else None
     except (collect.CollectError, browser.BrowserUnavailable) as exc:
         raise InputError(str(exc)) from None
-    root = store.data_dir(args.data_dir)
+    summary = _collect_run(options, store.data_dir(args.data_dir), cdp)
+    _emit(summary)
+    return collect.exit_code(summary)
+
+
+def _collect_run(options, root, cdp) -> dict:
+    """Open the tab, run the collection, close the tab; the run's summary."""
     try:
         tab = browser.open_tab(cdp)
     except browser.BrowserUnavailable as exc:
         raise InputError(str(exc)) from None
     try:
-        summary = collect.run(tab, options, root)
+        return collect.run(tab, options, root)
     except store.StoreError as exc:
         raise InputError(f"收件夹写不进去：{exc}") from None
     finally:
         tab.close()
+
+
+def cmd_collect_beisen(args) -> int:
+    root = store.data_dir(args.data_dir)
+    try:
+        tenants = beisen.load_tenants(root)
+        tenant = tenants.get(args.tenant)
+        if tenant is None:
+            raise collect.CollectError(
+                f"{args.tenant} 不在北森租户白名单 {beisen.config_path(root)} 里（名单里有：{'、'.join(tenants)}）。"
+                "加一家之前先读它门户自己的条款，确认没有禁止自动采集")
+        if args.channel is not None and args.channel not in tenant.channels:
+            raise collect.CollectError(f"{tenant.subdomain} 的白名单只写了频道 {'、'.join(tenant.channels)}")
+        note = None
+        if args.all:
+            keywords = []
+        elif args.query is not None:
+            if not args.query.strip():
+                raise collect.CollectError("--query 不能是空的；要读全部岗位用 --all")
+            keywords = [args.query.strip()]
+        else:
+            keywords, note = beisen.profile_keywords(root)
+        options = collect.make_search_options(beisen.searches(tenant, keywords, args.channel), max_jobs=args.max,
+                                              max_pages=args.max_pages, batch=args.batch)
+        cdp = browser.check_cdp_url(args.cdp) if args.cdp is not None else None
+    except (collect.CollectError, browser.BrowserUnavailable) as exc:
+        raise InputError(str(exc)) from None
+    summary = _collect_run(options, root, cdp)
+    summary["tenant"] = {"subdomain": tenant.subdomain, "portal": tenant.portal, "company": tenant.company,
+                         "terms_url": tenant.terms_url, "terms_checked": tenant.terms_checked}
+    if note:
+        summary["warnings"].append(note)
     _emit(summary)
     return collect.exit_code(summary)
 
@@ -1101,10 +1139,11 @@ def _add_collect_parser(commands, stored, adapters) -> None:
     group = commands.add_parser(
         "collect", help="从已启用的来源读取公开岗位，存进收件夹",
         description="用户触发、低频、只读；遇到验证、限流或登录页就停止。"
-                    "默认没有个人适配器；本地配置见 docs/cn/collect.md。",
+                    "北森门户只读本机白名单里的租户；默认没有个人适配器。配置见 docs/cn/collect.md。",
     )
     group.set_defaults(help_parser=group)
     sites = group.add_subparsers(dest="collect_site", metavar="<site>")
+    _add_beisen_parser(sites, stored)
     for name, site in adapters.items():
         parser = sites.add_parser(name, parents=[stored], help=site.NAME, description=COLLECT_EXIT_CODES)
         _add_collect_options(parser)
@@ -1112,6 +1151,27 @@ def _add_collect_parser(commands, stored, adapters) -> None:
         if site.CITY_CODES is not None:
             parser.add_argument("--city-code", help=site.CITY_CODE_HELP)
         parser.set_defaults(handler=cmd_collect, collect_rules=site)
+
+
+def _add_beisen_parser(sites, stored) -> None:
+    parser = sites.add_parser(
+        "beisen", parents=[stored], help="北森招聘门户（<租户>.zhiye.com），只读白名单里的租户",
+        description="读一家北森门户的公开岗位：频道和城市取自本机白名单 <数据目录>/collect/beisen.json，"
+                    "关键词取自档案 target.search_keywords（每个关键词一组搜索，彼此去重），没有就读全部。"
+                    f"一次最多 {beisen.MAX_PAGES} 次列表加载、{beisen.MAX_JOBS} 个详情页。" + COLLECT_EXIT_CODES)
+    parser.add_argument("--tenant", required=True, help="白名单里的子域名，即 https://<子域名>.zhiye.com")
+    parser.add_argument("--channel", choices=tuple(beisen.CHANNELS),
+                        help="只读这个频道（campus 校招、intern 实习、social 社招）；默认读白名单写的全部频道")
+    words = parser.add_mutually_exclusive_group()
+    words.add_argument("--query", help="只搜这一个关键词，不用档案里的关键词")
+    words.add_argument("--all", action="store_true", help="不按关键词，读频道和城市下的全部岗位")
+    parser.add_argument("--max", type=int, help=f"这次最多打开几个新岗位的详情页（默认、最多 {beisen.MAX_JOBS}）")
+    parser.add_argument("--max-pages", type=int,
+                        help=f"所有频道、城市、关键词合计最多加载几次列表（默认、最多 {beisen.MAX_PAGES}）")
+    parser.add_argument("--batch", help="批次名，默认 beisen-<子域名>-<开始时间>；写已有的批次名就接着往里存")
+    parser.add_argument("--cdp", help="不写时在后台启动本机 Chrome（无窗口、临时资料目录，用完关掉）。"
+                                      f"显式连接专用 Chrome，只能是本机地址，例如 {browser.DEFAULT_CDP}；仍只读取免登录页面")
+    parser.set_defaults(handler=cmd_collect_beisen)
 
 
 def build_parser(adapters=None) -> argparse.ArgumentParser:
