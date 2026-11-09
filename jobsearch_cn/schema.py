@@ -24,6 +24,9 @@ Conventions:
   interview and requirements.start (M2-6c), which upgrade() adds as null, and
   benefits (M2-6e), which it adds with its meals null; and source.site_job_id and
   source.fetched_at (M6-4), which it adds as null.
+* source.site_job_id names one posting: a job board's own id, or on a hosted
+  recruitment system (ats) the platform's id scoped by platform and company
+  tenant, <platform>.<tenant>.<id> (M6-3), since each company's ids there restart.
 """
 
 import math
@@ -63,6 +66,10 @@ TOP_LEVEL_KEYS = (
 SOURCE_KEYS = ("type", "site", "url", "imported_at", "site_job_id", "fetched_at")
 # Job boards whose own job id names one posting (M6-4); company sites and hosted ATS pages reuse ids.
 PORTAL_SITES = ("boss", "shixiseng", "nowcoder", "liepin", "zhaopin", "51job", "lagou")
+# A hosted recruitment system (ats) numbers each company's postings on its own, so its id is written
+# with the platform and the company's tenant in front (M6-3): beisen.example.0f8e2c3a-... or
+# beisen.example.151000001. Dots separate the three parts; the id itself has none.
+ATS_SITE_JOB_ID = re.compile(r"[a-z][a-z0-9]{1,15}\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[A-Za-z0-9_-]{1,64}")
 SALARY_KEYS = ("min", "max", "unit", "months", "negotiable")
 REQUIREMENT_KEYS = ("graduation", "days_per_week", "min_months", "education", "skills", "skill_alternatives", "start")
 GRADUATION_KEYS = ("years", "strict")
@@ -105,6 +112,16 @@ def is_job_id(value) -> bool:
 def is_site_job_id(value) -> bool:
     """A job board's own id for a posting (source.site_job_id): ASCII letters, digits and . _ ~ -."""
     return isinstance(value, str) and _SITE_JOB_ID.fullmatch(value) is not None
+
+
+def site_job_id_allowed(site, value) -> bool:
+    """Whether value may be source.site_job_id beside this source.site: any well-formed id on a job
+    board, a <platform>.<tenant>.<id> one on a hosted recruitment system (ats), nothing elsewhere."""
+    if not is_site_job_id(value):
+        return False
+    if site in PORTAL_SITES:
+        return True
+    return site == "ats" and ATS_SITE_JOB_ID.fullmatch(value) is not None
 
 
 def normalize_for_match(text: str) -> str:
@@ -300,9 +317,15 @@ def _check_source(source, errors: list) -> None:
     if "site_job_id" in source and source["site_job_id"] is not None:
         if not is_site_job_id(source["site_job_id"]):
             errors.append("source.site_job_id: must be null or 1-128 letters, digits and . _ ~ -")
+        elif source.get("site") == "ats":
+            if not site_job_id_allowed("ats", source["site_job_id"]):
+                errors.append("source.site_job_id: on a hosted recruitment system (ats) it must name the platform "
+                              "and the company's tenant before the id, <platform>.<tenant>.<id>, "
+                              "e.g. beisen.example.151000001; a bare id is not unique there")
         elif source.get("site") not in PORTAL_SITES:
-            errors.append(f"source.site_job_id: only for a job board ({', '.join(PORTAL_SITES)}); "
-                          "ids on company sites and hosted pages are not unique")
+            errors.append(f"source.site_job_id: only for a job board ({', '.join(PORTAL_SITES)}) "
+                          "or, scoped by its tenant, a hosted recruitment system (ats); "
+                          "ids on company sites are not unique")
     if "fetched_at" in source and source["fetched_at"] is not None:
         _check_timestamp(source["fetched_at"], "source.fetched_at", errors)
 
