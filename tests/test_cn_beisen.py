@@ -16,6 +16,7 @@ from unittest import mock
 from urllib.parse import parse_qs, urlsplit
 
 from jobsearch_cn import beisen, browser, cli, collect, jd_parser, schema, screen, store
+from tests.test_cn_collect import FakeError
 
 REPO = Path(__file__).resolve().parent.parent
 NOW = datetime(2026, 11, 10, 21, 0, tzinfo=timezone(timedelta(hours=8)))
@@ -120,6 +121,72 @@ def detail_url(uuid, channel="intern"):
     return f"{NEW_HOST}/{channel}/detail?jobAdId={uuid}"
 
 
+class DeferredErrorPage:
+    """Reviewer's fictional Page: deliver a failure only after the first good snapshot.
+
+    title() dispatches queued responses as Playwright does after the pacing pause. No browser
+    or network is used; collect still runs through the real browser.Tab wrapper.
+    """
+
+    def __init__(self, failure, next_action):
+        self.failure, self.next_action = failure, next_action
+        self.url, self.html = "about:blank", ""
+        self.pending, self.gotos, self.scrolls = [], [], []
+        self.deferred = False
+        self.mouse = SimpleNamespace(wheel=lambda *args: self.scrolls.append(args))
+
+    def on(self, event, listener):
+        self.listener = listener
+
+    def title(self):
+        pending, self.pending = self.pending, []
+        for response in pending:
+            self.listener(response)
+        return "示例门户"
+
+    def content(self):
+        return self.html
+
+    def emit(self, response, defer=False):
+        def read():
+            if defer and not self.deferred:
+                self.deferred = True
+                self.queue_failure()
+            return response.body
+
+        self.listener(SimpleNamespace(url=response.url, status=response.status, text=read,
+                                     request=SimpleNamespace(resource_type="fetch", post_data=response.request)))
+
+    def queue_failure(self):
+        response = self.failure
+        self.pending.append(SimpleNamespace(url=response.url, status=response.status, text=lambda: response.body,
+                                            request=SimpleNamespace(resource_type="fetch", post_data=response.request)))
+
+    def goto(self, url, **kwargs):
+        self.gotos.append(url)
+        self.url = url
+        if urlsplit(url).path.endswith("/jobs"):
+            rows = [item(A, "示例开发实习生")]
+            if self.next_action == "next_detail":
+                rows.append(item(B, "示例测试实习生"))
+            good = list_response(rows, total=2 if self.next_action == "scroll" else len(rows))
+            self.html = new_list(url, good).html
+            self.emit(good, defer=self.next_action != "next_detail")
+        else:
+            self.html = new_detail("示例开发实习生" if url == detail_url(A) else "示例测试实习生")
+            good = collect.Response(f"{NEW_HOST}/api/Jobad/GetJobAdInfo", 200, body='{"Success":true}')
+            self.emit(good, defer=self.next_action == "next_detail")
+        return SimpleNamespace(status=200)
+
+    def wait_for_selector(self, *args, **kwargs):
+        pass
+
+    def locator(self, selector):
+        # The old driver can get this far; the regression asserts that no scroll was made.
+        return SimpleNamespace(count=lambda: 1, nth=lambda _: SimpleNamespace(
+            scroll_into_view_if_needed=lambda **kwargs: None))
+
+
 class Runs(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -135,6 +202,87 @@ class Runs(unittest.TestCase):
     def saved(self, summary):
         return {name: json.loads((Path(summary["batch_dir"]) / name).read_text(encoding="utf-8"))
                 for name in summary["files"]}
+
+    def test_non_2xx_main_documents_stop_before_parsing_or_saving(self):
+        # PR #149 P2-2: recognisable list/detail content must never override HTTP failure.
+        for tenant, channel, path, portal in (("example", "intern", "/intern/jobs", beisen.NewPortal),
+                                              ("example-legacy", "campus", "/search", beisen.LegacyPortal)):
+            rules = beisen.tenant_rules(TENANTS[tenant], channel)
+            url = detail_url(A) if tenant == "example" else rules.canonical_url("beisen.example-legacy.151000001")
+            for phase in ("list", "detail"):
+                for status in (199, 300, 302, 400, 404, 500, 503):
+                    with self.subTest(portal=tenant, phase=phase, status=status), tempfile.TemporaryDirectory() as root:
+                        def listing(address):
+                            if tenant == "example":
+                                snapshot = new_list(address, list_response([item(A, "示例开发实习生")]))
+                            else:
+                                snapshot = collect.Snapshot(address, "职位列表", legacy_list(
+                                    [("151000001", "示例开发实习生")], 1, 1, 1), 200)
+                            snapshot.status = status if phase == "list" else 200
+                            return snapshot
+
+                        html = (new_detail if tenant == "example" else legacy_detail)("示例开发实习生")
+                        tab = Tab(lists={path: [listing]}, details={url: collect.Snapshot(url, "职位详情", html, status)})
+                        options = collect.make_search_options(beisen.searches(TENANTS[tenant], channel=channel))
+                        method = "parse_cards" if phase == "list" else "parse_detail"
+                        with mock.patch.object(portal, method, autospec=True, side_effect=getattr(portal, method)) as parse:
+                            summary = collect.run(tab, options, root, sleep=lambda _: None, clock=lambda: NOW)
+                        self.assertEqual((summary["status"], summary["saved"], len(tab.calls)),
+                                         ("needs_user", 0, 1 if phase == "list" else 2))
+                        self.assertIn(f"HTTP {status}", summary["message"])
+                        parse.assert_not_called()
+                        self.assertFalse((Path(root) / "inbox").exists())
+
+    def check_deferred_errors(self, next_action):
+        for delivery in ("next_read", "pause"):
+            failures = [
+                    (403, "{}", "needs_user", "HTTP 403"),
+                    (429, "{}", "needs_user", "HTTP 429"),
+                    (500, "{}", "needs_user", "HTTP 500"),
+                    (503, "{}", "needs_user", "HTTP 503"),
+                    (200, '{"Success":false,"Message":"示例错误"}', "needs_user", "接口报错"),
+                    (200, "<html>示例错误</html>", "page_changed", "JSON"),
+                    (200, None, "page_changed", "JSON"),
+                    (200, "[]", "page_changed", "JSON")]
+            if next_action != "next_detail":
+                failures.append((200, '{"Data":{"Unknown":true}}', "page_changed", "找不到唯一的岗位列表"))
+            for status, body, result, reason in failures:
+                with self.subTest(next_action=next_action, delivery=delivery, status=status, body=body), \
+                        tempfile.TemporaryDirectory() as root, mock.patch.object(browser, "SETTLE_S", 0), \
+                        mock.patch.object(browser, "MORE_TIMEOUT_S", 0):
+                    path = "GetJobAdInfo" if next_action == "next_detail" else "GetJobAdPageList"
+                    failure = collect.Response(f"{NEW_HOST}/api/Jobad/{path}", status, body=body)
+                    page = DeferredErrorPage(failure, next_action)
+                    tab = browser.Tab(SimpleNamespace(stop=lambda: None), page, FakeError, headless=True)
+                    options = collect.make_search_options(beisen.searches(
+                        TENANTS["example"], channel=None if next_action == "channel" else "intern"))
+                    summary = collect.run(tab, options, root, clock=lambda: NOW,
+                                          sleep=lambda _: page.title() if delivery == "pause" else None)
+                    saved = 1 if next_action == "next_detail" else 0
+                    self.assertEqual((summary["status"], summary["saved"], len(page.gotos), page.scrolls),
+                                     (result, saved, saved + 1, []))
+                    self.assertIn(reason, summary["message"])
+                    self.assertEqual(len(list(Path(root).glob("inbox/ats/*/*.json"))), saved)
+
+    def test_deferred_api_errors_stop_before_detail_navigation(self):
+        self.check_deferred_errors("detail")
+
+    def test_deferred_api_errors_stop_before_channel_navigation(self):
+        self.check_deferred_errors("channel")
+
+    def test_deferred_api_errors_stop_before_scroll(self):
+        self.check_deferred_errors("scroll")
+
+    def test_deferred_detail_api_errors_preserve_saved_job_and_stop(self):
+        self.check_deferred_errors("next_detail")
+
+    def test_deferred_valid_response_allows_navigation_and_save(self):
+        good = list_response([item(A, "示例开发实习生")])
+        page = DeferredErrorPage(good, "detail")
+        tab = browser.Tab(SimpleNamespace(stop=lambda: None), page, FakeError, headless=True)
+        with mock.patch.object(browser, "SETTLE_S", 0):
+            summary = self.run_tenant(tab, channel="intern")
+        self.assertEqual((summary["status"], summary["saved"], len(page.gotos)), ("done", 1, 2))
 
     def test_two_channels_negotiable_missing_salary_multi_city_and_last_page(self):
         first = list_response([item(A, "示例Agent开发实习生(J10001)", places=("广州市", "武汉市")),

@@ -57,7 +57,9 @@ cities and keywords with one pacer, one page and detail budget, one dedup and on
 Standard library only. The browser is behind a small interface - open(url, ready) and
 load_more(item_selectors, ready), each returning a Snapshot, close(), and headless (True when
 the user cannot see the browser) - implemented with Playwright in browser.py and faked in the
-tests.
+tests. The live tab also implements check_before_action(callback): after a page passes its
+check, the callback rechecks it just before navigating or scrolling, including responses
+delivered during the pacing pause. A problem raises _Stop before that action can happen.
 """
 
 import json
@@ -345,6 +347,8 @@ class _Run:
             if self.headless:
                 raise _Stop("needs_user", f"{reason}：{site.NAME}要登录才能看", SIGN_IN_HEADLESS)
             raise _Stop("needs_user", reason, SIGN_IN_HEADLESS)
+        if hasattr(self.tab, "check_before_action"):
+            self.tab.check_before_action(lambda current: self._check(current, htmltext.parse(current.html), site))
 
     # -- list phase --------------------------------------------------------------------------
     def _read_list(self, snapshot: Snapshot, first: bool, search: Search):

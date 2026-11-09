@@ -23,6 +23,9 @@ For a site whose cards carry no link (collect's CAPTURE), it also keeps the resp
 page's own data requests whose path the site names - the same origin, xhr or fetch only - and
 reads their bodies and the bodies the page sent, as text, into the snapshot. It never sends a
 request itself and never changes one.
+Before the next navigation or scroll, collect checks a fresh snapshot of the current page,
+including responses delivered during its pause. Only after that check may navigation clear
+the old page's responses; the site's rules decide which bodies are errors.
 Nothing else: no clicks, no typing, no request interception, no reading of cookies or storage,
 never the user's other tabs.
 """
@@ -101,11 +104,21 @@ class Tab:
         self.denied = None  # the first 403/429 this tab's own list or data requests got
         self._capture = ()  # path patterns of the data responses to keep (capture())
         self._captured = []  # the kept responses of the current page, in arrival order
+        self._check_before_action = None  # collect's check of the page we are about to leave/scroll
+        self._status = None  # the current main document's status, also kept across scrolls
         page.on("response", self._watch)
 
     def capture(self, patterns) -> None:
         """Keep this tab's same-origin xhr/fetch responses whose path matches a pattern."""
         self._capture = tuple(patterns)
+
+    def check_before_action(self, check) -> None:
+        """Check the current page after queued responses arrive, before the next action.
+
+        collect supplies a callback that raises its stop exception on a page problem. It is
+        bound to the rules of the page already read, not those of the next search/channel.
+        """
+        self._check_before_action = check
 
     def _watch(self, response) -> None:
         try:
@@ -154,8 +167,10 @@ class Tab:
 
     def _snapshot(self, status=None) -> Snapshot:
         page = self._page
-        return Snapshot(url=page.url, title=page.title(), html=page.content(), status=self.denied or status,
-                        responses=self._responses() if self._capture else ())
+        title, html = page.title(), page.content()
+        responses = self._responses() if self._capture else ()
+        return Snapshot(url=page.url, title=title, html=html, status=self.denied or status,
+                        responses=responses)
 
     def _was_denied(self) -> bool:
         """True once this tab got a 403/429. Playwright hands over the responses that came in
@@ -164,21 +179,31 @@ class Tab:
             self._page.title()
         return self.denied is not None
 
+    def _before_action(self):
+        if self._was_denied():
+            return self._snapshot()
+        if self._check_before_action is not None:
+            self._check_before_action(self._snapshot(self._status))
+        return None
+
     def open(self, url: str, ready) -> Snapshot:
         def go():
-            if self._was_denied():  # go nowhere; the snapshot carries the status and the run stops
-                return self._snapshot()
-            self._captured = []  # a new page: only its own responses count
+            stopped = self._before_action()
+            if stopped is not None:  # go nowhere; the snapshot carries the status and the run stops
+                return stopped
+            self._captured = []  # checked the old page, including responses delivered during the pause
             response = self._page.goto(url, wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)
+            self._status = response.status if response is not None else None
             self._wait_ready(ready)
-            return self._snapshot(response.status if response is not None else None)
+            return self._snapshot(self._status)
         return self._guard(go)
 
     def load_more(self, item_selectors, ready) -> Snapshot:
         """Scroll the result list to its end so the site loads more cards, then read the page."""
         def scroll():
-            if self._was_denied():
-                return self._snapshot()
+            stopped = self._before_action()
+            if stopped is not None:
+                return stopped
             items = self._page.locator(", ".join(item_selectors))
             before = items.count()
             if before:

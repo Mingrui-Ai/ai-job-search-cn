@@ -367,7 +367,7 @@ class _Portal:
         return self._id_from(self._parts(url, allow_http=True))
 
     def _common_problem(self, url, title, root, status):
-        if status in (401, 403, 429):
+        if status is not None and not 200 <= status < 300:
             return "blocked", f"网站返回 HTTP {status}"
         parts = self._parts(url)
         if parts is None:
