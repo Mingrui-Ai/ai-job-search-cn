@@ -15,6 +15,7 @@
 | [cn-migration-plan.md](cn-migration-plan.md) | 上游审计结论、架构决策（ADR）、目录结构、上游同步流程 |
 | [job-schema.md](job-schema.md) | 岗位记录格式（Job Schema v1）：字段说明、出处规则、与上游字段的对应 |
 | [jd-import.md](jd-import.md) | JD 导入工作流（Codex 与 Claude Code 共用）：解析、补全、校验、保存、去重、查询 |
+| [collect.md](collect.md) | 通用采集框架、默认关闭的本地个人模块入口、通用收件导入 |
 | [profile.md](profile.md) | 个人档案格式（Profile v1）：字段、来源规则、与 JD 硬性条件的对照 |
 | [profile-setup.md](profile-setup.md) | 建档工作流 cn-setup（Codex 与 Claude Code 共用） |
 | [material.md](material.md) | 求职材料格式（M3-1）：简历材料怎么引用档案条目 id，`material validate` 的检查项；打招呼语、投递邮件、内推请求（M3-4）的格式、模板和 `material template`、`material render` |

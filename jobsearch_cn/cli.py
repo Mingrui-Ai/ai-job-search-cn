@@ -4,6 +4,8 @@ Every command prints JSON on stdout, so Codex, Claude Code and scripts read the
 same output. Exit codes: 0 success; 1 the input was read but is invalid, held
 no JD, or names no stored job; 2 the input could not be read, reported as
 {"error": ...} on stderr (argparse also exits 2 on a malformed command line).
+`collect` adds 3 (stopped at a security check or sign-in page: the user deals
+with it in the browser and reruns) and 4 (a page it could not recognise).
 """
 
 import argparse
@@ -13,8 +15,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import (__version__, jd_parser, match, material, messages, profile, report, resume_docx,
-                          resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
+from jobsearch_cn import (__version__, browser, collect, jd_parser, match, material, messages, profile, report,
+                          resume_docx, resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
+from jobsearch_cn import inbox, personal
 from jobsearch_cn import applications as applications_mod
 
 
@@ -196,6 +199,16 @@ def cmd_jd_screen(args) -> int:
     _emit(payload)
     imported = payload["imported"]
     return 0 if imported["created"] + imported["updated"] + imported["unchanged"] else 1
+
+
+def cmd_jd_inbox_import(args) -> int:
+    folder = Path(args.folder) if args.folder else inbox.default_folder()
+    try:
+        payload = inbox.import_folder(folder, store.data_dir(args.data_dir), site=args.site)
+    except (screen.BatchError, store.StoreError, OSError) as exc:
+        raise InputError(str(exc)) from None
+    _emit(payload)
+    return 0 if payload["moved"] else 1
 
 
 def _count(text: str) -> int:
@@ -1045,10 +1058,66 @@ def _add_application_parser(commands, stored) -> None:
     export_parser.set_defaults(handler=cmd_application_export)
 
 
-def build_parser() -> argparse.ArgumentParser:
+def cmd_collect(args) -> int:
+    site = args.collect_rules
+    try:
+        options = collect.make_options(args.query, city=args.city, city_code=getattr(args, "city_code", None),
+                                       max_jobs=args.max, max_pages=args.max_pages, batch=args.batch, site=site)
+        cdp = browser.check_cdp_url(args.cdp) if args.cdp is not None else None
+    except (collect.CollectError, browser.BrowserUnavailable) as exc:
+        raise InputError(str(exc)) from None
+    root = store.data_dir(args.data_dir)
+    try:
+        tab = browser.open_tab(cdp)
+    except browser.BrowserUnavailable as exc:
+        raise InputError(str(exc)) from None
+    try:
+        summary = collect.run(tab, options, root)
+    except store.StoreError as exc:
+        raise InputError(f"收件夹写不进去：{exc}") from None
+    finally:
+        tab.close()
+    _emit(summary)
+    return collect.exit_code(summary)
+
+
+COLLECT_EXIT_CODES = ("退出码：0 读完（到了上限或没有更多结果）；2 没能开始（参数不对、没装 Playwright、启动或连不上浏览器）；"
+                      "3 遇到安全检查、验证码、HTTP 403/429 或要登录，已抓的已保存；4 页面结构认不出，已抓的已保存。")
+
+
+def _add_collect_options(parser) -> None:
+    """The options every site takes; --city and the site's own options are added by the caller."""
+    parser.add_argument("--query", required=True, help="搜索词，例如 \"Java 实习\"")
+    parser.add_argument("--max", type=int, default=collect.DEFAULT_MAX_JOBS,
+                        help=f"这次最多打开几个新岗位的详情页（默认 {collect.DEFAULT_MAX_JOBS}，最多 {collect.MAX_JOBS_CAP}）")
+    parser.add_argument("--max-pages", type=int, default=collect.DEFAULT_MAX_PAGES,
+                        help=f"搜索结果最多加载几屏或几页（默认 {collect.DEFAULT_MAX_PAGES}，最多 {collect.MAX_PAGES_CAP}）")
+    parser.add_argument("--batch", help="批次名，默认用开始的时间 YYYYMMDD-HHMMSS；写已有的批次名就接着往里存")
+    parser.add_argument("--cdp", help="不写时在后台启动本机 Chrome（无窗口、临时资料目录，用完关掉）。"
+                                      f"显式连接专用 Chrome，只能是本机地址，例如 {browser.DEFAULT_CDP}；仍只读取免登录页面")
+
+
+def _add_collect_parser(commands, stored, adapters) -> None:
+    group = commands.add_parser(
+        "collect", help="从已启用的来源读取公开岗位，存进收件夹",
+        description="用户触发、低频、只读；遇到验证、限流或登录页就停止。"
+                    "默认没有个人适配器；本地配置见 docs/cn/collect.md。",
+    )
+    group.set_defaults(help_parser=group)
+    sites = group.add_subparsers(dest="collect_site", metavar="<site>")
+    for name, site in adapters.items():
+        parser = sites.add_parser(name, parents=[stored], help=site.NAME, description=COLLECT_EXIT_CODES)
+        _add_collect_options(parser)
+        parser.add_argument("--city", help="城市名")
+        if site.CITY_CODES is not None:
+            parser.add_argument("--city-code", help=site.CITY_CODE_HELP)
+        parser.set_defaults(handler=cmd_collect, collect_rules=site)
+
+
+def build_parser(adapters=None) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m jobsearch_cn",
-        description="AI Job Search CN 本地工具（离线处理用户提供的岗位数据）",
+        description="AI Job Search CN 本地工具（离线处理用户提供的岗位数据；只有 collect 会用浏览器读取招聘网站）",
     )
     parser.add_argument("--version", action="version", version=f"jobsearch_cn {__version__}")
     commands = parser.add_subparsers(dest="command", metavar="<command>")
@@ -1119,6 +1188,14 @@ def build_parser() -> argparse.ArgumentParser:
                                help="只检查文件格式，列出规则读出的职位名、公司、城市、薪资；不读档案，不写岗位库和匹配记录")
     screen_parser.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
     screen_parser.set_defaults(handler=cmd_jd_screen)
+
+    inbox_parser = jd_commands.add_parser(
+        "inbox-import", parents=[stored], help="将本地岗位 JSON 文件搬入新的收件批次",
+        description="只搬动通过收件格式校验的文件；无效文件留在原处。见 docs/cn/collect.md。",
+    )
+    inbox_parser.add_argument("folder", nargs="?", help=f"来源目录，默认 ~/Downloads/{inbox.CLIP_FOLDER}")
+    inbox_parser.add_argument("--site", choices=schema.SITES, default="official", help="批次来源，默认 official")
+    inbox_parser.set_defaults(handler=cmd_jd_inbox_import)
 
     prof = commands.add_parser("profile", help="个人档案相关命令", description="个人档案相关命令（data/profile/）")
     prof.set_defaults(help_parser=prof)
@@ -1288,12 +1365,19 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("--material", help="审核的材料文件；默认为审核结果同目录下 material 字段写的文件")
         sub.set_defaults(handler=handler)
     _add_application_parser(commands, stored)
+    _add_collect_parser(commands, stored, adapters or {})
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     _force_utf8_output()
-    parser = build_parser()
+    argv = list(sys.argv[1:] if argv is None else argv)
+    try:
+        adapters = personal.load_adapters() if argv[:1] == ["collect"] else {}
+    except personal.ModuleError as exc:
+        _emit({"error": str(exc)}, sys.stderr)
+        return 2
+    parser = build_parser(adapters)
     args = parser.parse_args(argv)
     handler = getattr(args, "handler", None)
     if handler is None:
