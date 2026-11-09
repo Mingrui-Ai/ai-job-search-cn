@@ -366,6 +366,8 @@ def _row(rank: int, job: dict, record: dict, entry: dict, points: list) -> dict:
     total = record.get("total") or {}
     grade = "没有总分" if total.get("score") is None else (
         f"{total['score']} 分，{report.GRADES.get(total.get('grade'), total.get('grade'))}")
+    if total.get("grade") == score.NEEDS_CHECK:
+        grade += "，" + report.GRADES[score.NEEDS_CHECK]
     cells = _cells(job) + [grade]
     if points:
         cells.append("待确认：" + "、".join(points))

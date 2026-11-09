@@ -241,7 +241,7 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
 ### 总分、等级和缺口
 
 - **权重**默认为技能 30、方向 25、经历 25、薪资 10、地点 10（M2-6b 起；之前是技能 35、方向 30、经历 25、薪资 10），可以在档案 `target.weights` 里改（为 null 时用默认值）。
-- **总分**：有分值的维度按权重加权平均，四舍五入取整，为 null 的维度不计入。`complete` 表示是否所有维度都有分值，`missing` 列出缺的维度。
+- **总分**：至少两个有分值且权重大于零的维度才计算加权平均，四舍五入取整；否则总分为 null、等级为 `needs_check`（硬性冲突仍优先记 `ineligible`）。为 null 的维度不计入平均，零权重维度不增加覆盖。两项是避免单项地点或薪资被归一化成“整体 100 分”的最小门槛；它不代表信息已完整。`complete` 仍表示是否所有维度都有分值，`missing` 列出缺的维度；只有一个正权重时，即使 `complete` 为 true，也暂不计算总分。补充 JD、档案或经历后重新评分；需要改变权重时仍走用户确认流程。
 - **等级**沿用上游 `04-job-evaluation.md`：`strong` ≥ 75，`good` 60–74，`moderate` 45–59，`weak` 30–44，`poor` < 30。向用户说明和在报告里显示时用下表的中文名，写成"较匹配（good）"。这张表是中文名的唯一出处，`match report` 用的就是它（`tests/test_cn_report.py` 核对两者一致）：
 
   | 等级 | 中文名 | 总分 |
@@ -251,9 +251,11 @@ python -m jobsearch_cn match filter <岗位id> [--profile 档案文件] [--data-
   | `moderate` | 一般 | 45–59 |
   | `weak` | 较弱 | 30–44 |
   | `poor` | 不匹配 | < 30 |
+  | `needs_check` | 待确认（评分信息不足） | 有分值且权重大于零的维度不足两项，总分 null |
   | `ineligible` | 不符合硬性条件 | 过滤结论为 `ineligible`，不看总分 |
 
-- 过滤结论为 `ineligible` 时，等级记为 `ineligible`，各维度的分值照常给出，供参考。为 `needs_check` 时等级照常，同时列出待确认的项。
+- 过滤结论为 `ineligible` 时，等级记为 `ineligible`，各维度的分值照常给出，供参考。过滤结论为 `needs_check` 时，达到覆盖门槛才按分数给等级，同时列出待确认项。硬性过滤和评分覆盖是两个独立判断，评分信息不足不会改写硬性过滤结果。
+- 排序为 `strong → good → moderate → weak → poor → needs_check → ineligible`，等级内按总分降序、岗位 id 打破同分。这样信息不足的单维度岗位不会超过达到覆盖门槛的岗位。`match list`、试算、HTML/CSV 报告和 `jd screen` 共用此规则。规则版本为 13，旧版记录先重新解析、评分。
 - **缺口**（`gaps`）包括：
   - JD 要求、档案里没有的技能；任选其一的一组，一个都没有时才算缺口，记成一条，例如"Golang 或 Java"；
   - 薪资低于期望；

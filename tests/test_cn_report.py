@@ -448,7 +448,7 @@ class FormAndPage(unittest.TestCase):
         text = text[start:text.index("\n- **", start + 1)]
         table = dict(re.findall(r"^\s*\| `(\w+)` \| ([^|]+?) \|", text, re.M))
         self.assertEqual(table, report.GRADES)
-        self.assertEqual(set(table), {name for name, _ in score.GRADES} | {score.INELIGIBLE})
+        self.assertEqual(set(table), {name for name, _ in score.GRADES} | {score.NEEDS_CHECK, score.INELIGIBLE})
         legend = report._legend()
         for name, floor in score.GRADES:
             self.assertIn(f"{report.GRADES[name]}（{name}）", legend)

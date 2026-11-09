@@ -416,6 +416,8 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 
 ## 4. M2 · v0.2 个人档案与可解释匹配
 
+- [ ] **M2 首采解析修复** `执行`（Codex A，PR 待编号）：七项虚构回归先失败后通过；补齐采集头部职位名、薪资括号、证书边界、在读学历、每周在职天数、毕业窗口/校招届别；至少两个正权重且有分值的维度才给总分，规则版本 13。冻结对照及真实数据只读统计见[工作记录](worklog/2026-11-10-m2-parse-fix.md)，实现完成后由规划者安排独立审核、合并。
+
 - [x] **M2-1** 个人档案 Profile v1 与建档流程 `cn-setup`（PR #8）
   - 实际做法：`data/profile/` 下放 `profile.json`（结构化信息，可以校验）、`notes.md`（自由文本素材）和 `sources/`（简历原件）；设计见 [profile.md](profile.md)，流程见 [profile-setup.md](profile-setup.md)；`profile validate`、`profile show`（默认隐去联系方式）；有测试守护上游模板仍是占位符。
   - 已定：联系方式放在 `profile.json` 里（D6）；技能分四档；`exclusions.keywords` 只匹配岗位标题。

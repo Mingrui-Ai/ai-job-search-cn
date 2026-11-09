@@ -1,7 +1,7 @@
 """Synthetic regressions for the seven issues found during the first ATS collection."""
 import unittest
 
-from jobsearch_cn import jd_parser, report, score
+from jobsearch_cn import jd_parser, report, score, screen
 from tests.test_cn_score import NOW, VOCABULARY, profile_from
 
 
@@ -56,6 +56,64 @@ class CollectionRegressions(unittest.TestCase):
         self.assertNotIn("很匹配", report.conclusion(sparse))
         ordered = report.order([report.entry(sparse, sparse_job, False), report.entry(full, full_job, False)])
         self.assertEqual(ordered[0]["record"]["job_id"], full_job["id"])
+
+    def test_titles_keep_role_brackets_and_reject_prose_headers(self):
+        for title in ("资料分析工程师（样本方向）", "资料分析工程师（样本方向） 180元/天",
+                      "资料分析工程师（样本方向）（12k-18k）"):
+            with self.subTest(title=title):
+                job = parse(title + "\n工作职责\n协助核验报告。")
+                self.assertEqual(job["title"], "资料分析工程师（样本方向）")
+        for first in ("欢迎来到样本之家", "负责整理记录，归档资料", "招聘首页"):
+            # No collected-header context, or sentence wording, must remain insufficient.
+            tail = "\n招聘频道：校园招聘\n工作地点：苏州" if "负责" in first else "\n工作职责\n归档样本。"
+            self.assertIsNone(parse(first + tail)["title"])
+
+    def test_day_and_hour_rates_need_complete_period_tokens(self):
+        for text in ("CET-6/日语N2", "N2/日语", "版本6/时间管理", "CET-6/日语N2\n每周可在职4天"):
+            with self.subTest(text=text):
+                self.assertIsNone(parse("任职资格\n" + text)["salary"])
+        for text, low, unit in (("180-240/天", 180, "CNY/day"), ("180元/天包午餐", 180, "CNY/day"),
+                                ("35/小时", 35, "CNY/hour"), ("35元/小时可协商", 35, "CNY/hour"),
+                                ("CET-6/日语N2，薪资180元/天", 180, "CNY/day")):
+            with self.subTest(text=text):
+                salary = parse(text)["salary"]
+                self.assertEqual((salary["min"], salary["unit"]), (low, unit))
+
+    def test_graduation_requires_a_valid_graduation_window(self):
+        for text in ("2026年8月-2027年7月实习", "2026年13月-2027年7月毕业", "2027年8月-2026年7月毕业"):
+            with self.subTest(text=text):
+                self.assertIsNone(parse(text)["requirements"]["graduation"])
+        self.assertEqual(parse("2026年8月-2027年7月毕业优先")["requirements"]["graduation"],
+                         {"years": [2026, 2027], "strict": False})
+
+    def test_current_graduate_choices_keep_minimum_and_preference_separate(self):
+        for text in ("在读博士或硕士", "在读硕士研究生/博士研究生"):
+            self.assertEqual(parse(text)["requirements"]["education"], {"min": "master", "preferred": None})
+        self.assertEqual(parse("在读硕士或博士优先")["requirements"]["education"],
+                         {"min": None, "preferred": "master"})
+
+    def test_coverage_counts_positive_weights_and_preserves_conflicts(self):
+        dims = {k: {"score": 100} for k in score.DIMENSIONS}
+        weights = dict.fromkeys(score.DIMENSIONS, 0)
+        weights['location'] = 10
+        for verdict, grade in (("eligible", "needs_check"), ("ineligible", "ineligible")):
+            total = score.total(dims, weights, verdict)
+            self.assertEqual((total['score'], total['grade'], total['complete']), (None, grade, True))
+        weights['skills'] = 10
+        dims['skills']['score'] = 0  # a known mismatch still supplies information
+        self.assertEqual(score.total(dims, weights, "eligible")['score'], 50)
+
+    def test_sparse_results_are_consistent_in_validation_trial_report_and_screen(self):
+        profile = profile_from("tech")
+        job = parse("职位名称：样本核验员\n工作地点：深圳")
+        record = score.score_job(job, profile, VOCABULARY, now=NOW)
+        self.assertEqual(score.validate(record, job, profile, VOCABULARY), [])
+        self.assertEqual(score.trial_total(record, record['weights']), record['total'])
+        page = report.build([report.entry(record, job, False)], profile, NOW.isoformat(), VOCABULARY)
+        self.assertIn("暂不计算总分", page)
+        self.assertNotIn("四舍五入为 <strong>None", page)
+        row = screen._row(1, job, record, {'action': 'created', 'jd_changed': False, 'files': []}, [])
+        self.assertIn("待确认（评分信息不足）", row['line'])
 
 
 if __name__ == "__main__":

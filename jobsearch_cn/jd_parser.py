@@ -80,11 +80,13 @@ _SALARY = (
     # numbers also occur in dates, phone numbers and company headcounts.
     (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*月"), "CNY/month", 1),
     (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*年"), "CNY/year", 1),
-    (re.compile(rf"(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元?\s*(?:/|每)\s*(?:天|日)"), "CNY/day", 1),
+    (re.compile(rf"(?<![\d.A-Za-z_])(?P<lo>{_N})[ \t]*元?(?:{_TO}(?P<hi>{_N}))?[ \t]*"
+                rf"(?:元[ \t]*(?:/|每)[ \t]*(?:天|日)|(?:/|每)[ \t]*(?:天|日)(?![{_HAN}A-Za-z\d]))"), "CNY/day", 1),
     # A label may be followed by a colon or 为 ("日薪：180-240 元"); both
     # ends of a range may carry 元 ("日薪：180元-240元").
     (re.compile(rf"(?:日薪|每天|每日)\s*[:：为]?\s*(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/day", 1),
-    (re.compile(rf"(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元?\s*(?:/|每)\s*(?:小时|时)"), "CNY/hour", 1),
+    (re.compile(rf"(?<![\d.A-Za-z_])(?P<lo>{_N})[ \t]*元?(?:{_TO}(?P<hi>{_N}))?[ \t]*"
+                rf"(?:元[ \t]*(?:/|每)[ \t]*(?:小时|时)|(?:/|每)[ \t]*(?:小时|时)(?![{_HAN}A-Za-z\d]))"), "CNY/hour", 1),
     (re.compile(rf"时薪\s*[:：为]?\s*(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/hour", 1),
     (re.compile(rf"月薪\s*[:：为]?\s*(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
 )
@@ -121,11 +123,17 @@ _GRADUATION = re.compile(
     rf"(?<!第)(?<!\d)(?P<years>{_YEAR}(?:\s*届)?(?:\s*(?:/|、|,|，|和|与|及|或|-|~|～|至|到)\s*{_YEAR}(?:\s*届)?)*)\s*届"
 )
 _YEAR_RANGE = re.compile(rf"^\s*{_YEAR}\s*(?:-|~|～|至|到)\s*{_YEAR}\s*$")
+# Explicit graduation windows name calendar years, not a single inferred cohort.
+_GRADUATION_WINDOW = re.compile(
+    rf"(?<!\d)(?P<y1>20\d{{2}})\s*年\s*(?P<m1>\d{{1,2}})\s*月{_TO}"
+    r"(?P<y2>20\d{2})\s*年\s*(?P<m2>\d{1,2})\s*月\s*(?:期间)?\s*毕业"
+)
+_CAMPUS_YEAR = re.compile(rf"(?<![\dA-Za-z])(?P<years>{_YEAR})\s*(?:校招|校园招聘)")
 
 _DAY = r"[1-7一二两三四五六七]"
 _DAYS = (
     re.compile(rf"(?:每周|一周|每星期|每个星期|周)\s*(?:至少|最少|不少于|保证|需要|需|要求|可|能)?\s*"
-               rf"(?:到岗|实习|出勤|工作|在岗|坐班)?\s*(?P<d>{_DAY})\s*(?:{_TO}{_DAY})?\s*个?\s*(?:天|日)"),
+               rf"(?:到岗|实习|出勤|工作|在岗|在职|坐班)?\s*(?P<d>{_DAY})\s*(?:{_TO}{_DAY})?\s*个?\s*(?:天|日)"),
     re.compile(rf"(?P<d>{_DAY})\s*(?:{_TO}{_DAY})?\s*(?:天|日)\s*/\s*周"),
 )
 
@@ -142,7 +150,8 @@ _LEVELS = {"大专": "associate", "专科": "associate", "本科": "bachelor", "
            "硕士": "master", "研究生": "master", "博士": "phd"}
 _LEVEL_WORD = "(大专|专科|本科|学士|硕士|研究生|博士)"
 _EDUCATION_MIN = re.compile(
-    rf"{_LEVEL_WORD}(?:研究生)?\s*(?:学历\s*)?(?:及|或)?\s*以上|{_LEVEL_WORD}\s*(?:学历|在读|应届|毕业)"
+    rf"{_LEVEL_WORD}(?:研究生)?\s*(?:学历\s*)?(?:及|或)?\s*以上"
+    rf"|{_LEVEL_WORD}\s*(?:学历|在读|应届|毕业)|在读\s*{_LEVEL_WORD}(?:研究生)?"
 )
 _EDUCATION_PREFERRED = re.compile(
     rf"{_LEVEL_WORD}(?:研究生)?\s*(?:及以上)?\s*(?:学历)?\s*者?\s*(?:优先|为佳)"
@@ -154,7 +163,7 @@ _LEVEL_ANY = "(?:大专|专科|本科|学士|硕士|研究生|博士)"
 # One option of a choice: "博士研究生" is one, a doctorate - its 研究生 qualifies it, and is no master's.
 _LEVEL_OPTION = re.compile(r"(博士|硕士)研究生|大专|专科|本科|学士|硕士|研究生|博士")
 _EDUCATION_CHOICE = re.compile(
-    rf"(?P<label>学历\s*(?:要求)?\s*[:：]\s*)?{_LEVEL_ANY}(?:研究生)?"
+    rf"(?P<label>学历\s*(?:要求)?\s*[:：]\s*|在读\s*)?{_LEVEL_ANY}(?:研究生)?"
     rf"(?:\s*(?:或者?|/|／|、)\s*{_LEVEL_ANY}(?:研究生)?)+"
     r"(?P<tail>\s*(?:学历\s*)?(?:及|或)?\s*以上|\s*(?:学历|在读|应届|毕业|学生)|\s*(?:均可|皆可|都可以?))?"
 )
@@ -286,6 +295,8 @@ _PROSE = re.compile(r"[，,。；;！!？?]|负责|熟悉|熟练|掌握|了解|�
 _BRACKETED = re.compile(r"（[^（）]*）|\([^()]*\)|【[^【】]*】|\[[^\[\]]*\]")
 # A copy can open with "标签：值" lines above the title: 职位链接：https://…, 采集日期：2026-10-28.
 _LABEL_LINE = re.compile(r"^[^:：，,。；;！!？?\s][^:：，,。；;！!？?]{0,9}[:：]")
+# A collected header supplies title context even for occupations outside the word list.
+_COLLECTED_HEADER = re.compile(r"^(招聘频道|工作地点|工作性质|公司名称|职位编号)\s*[:：]\s*\S")
 # How far into a copy to look for an unlabelled title: a whole-page copy puts
 # navigation first, and the title beside its salary ("java开发实习生 130-150元/天").
 _HEAD_LINES = 30
@@ -687,7 +698,20 @@ def _title(text: str, lines: list):
         if index > first and not priced:
             continue
         headline = line[:salary.start()].strip() if priced else line
-        if (len(headline) <= 40 and _JOB_WORD.search(headline) and not _NOT_TITLE.search(headline)
+        if priced and headline.endswith(("（", "(")):
+            closing = "）" if headline[-1] == "（" else ")"
+            if line[salary.end():].strip() == closing:
+                headline = headline[:-1].rstrip()
+        headers = set()
+        if index == first:
+            for following in lines[index + 1:index + 9]:
+                header = _COLLECTED_HEADER.match(following)
+                if header:
+                    headers.add(header.group(1))
+                elif not _LABEL_LINE.match(following):
+                    break
+        if (2 <= len(headline) <= 40 and (_JOB_WORD.search(headline) or len(headers) >= 2)
+                and not _NOT_TITLE.search(headline)
                 and not _PROSE.search(_BRACKETED.sub("", headline))):
             start = _offset(text, lines, index)
             return (headline, [headline]), (start, start + len(headline))
@@ -1076,11 +1100,18 @@ def _pay_months(text: str, salary):
 
 
 def _graduation(text: str):
-    for match in _GRADUATION.finditer(text):
-        found = re.findall(r"(?:20)?(\d{2})", match["years"])
-        years = sorted({2000 + int(two) for two in found})
-        if _YEAR_RANGE.match(match["years"]) and len(years) == 2:
-            years = list(range(years[0], years[1] + 1))
+    for match in sorted((m for p in (_GRADUATION, _GRADUATION_WINDOW, _CAMPUS_YEAR)
+                         for m in p.finditer(text)), key=lambda m: m.start()):
+        if "y1" in match.groupdict():
+            y1, y2, m1, m2 = (int(match[k]) for k in ("y1", "y2", "m1", "m2"))
+            if not (1 <= m1 <= 12 and 1 <= m2 <= 12 and (y1, m1) <= (y2, m2)):
+                continue
+            years = list(range(y1, y2 + 1))
+        else:
+            found = re.findall(r"(?:20)?(\d{2})", match["years"])
+            years = sorted({2000 + int(two) for two in found})
+            if _YEAR_RANGE.match(match["years"]) and len(years) == 2:
+                years = list(range(years[0], years[1] + 1))
         if not years or years[0] < 2015 or years[-1] > 2040:
             continue
         clause = _clause(text, match.start(), match.end())
@@ -1134,7 +1165,7 @@ def _education(text: str, tag: list):
             candidates.append(choices[-1])
     for match in _EDUCATION_MIN.finditer(text):
         if not any(start <= match.start() < end for start, end, _, _ in candidates):
-            candidates.append((match.start(), match.end(), _LEVELS[match.group(1) or match.group(2)],
+            candidates.append((match.start(), match.end(), _LEVELS[next(g for g in match.groups() if g)],
                                match.group(0).strip()))
     for _, end, level, snippet in sorted(candidates):
         if _PREFERENCE.search(text[end:end + 4]):
