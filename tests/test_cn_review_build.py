@@ -182,7 +182,9 @@ class GeneratedReview(unittest.TestCase):
     def test_declared_paths_are_rejected_but_explicit_outside_material_is_allowed(self):
         self.setup_case()
         self.assertEqual(self.run_cli("validate", "--material", self.source)[0], 0)
-        for name in ("../resume-1.json", "..\\resume-1.json", str(self.source), "C:\\resume-1.json"):
+        for name in ("../resume-1.json", "..\\resume-1.json", str(self.source), "C:\\resume-1.json",
+                     "resume-1.json\0", "resume-1.json\n", "NUL", "CON", "resume-01.json",
+                     "resume-1000000.json", "resume-１.json"):
             self.review["material"] = name
             self.review_file.write_text(json.dumps(self.review), encoding="utf-8")
             self.assert_pair(1, "bare file name")

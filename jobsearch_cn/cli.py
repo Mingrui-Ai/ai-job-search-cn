@@ -526,8 +526,8 @@ def _checked_review(args):
     """(review, errors, warnings) for a review file, checked against the material it names."""
     record = _read_material(args.file)  # a review is JSON read the same way as a material
     declared = record.get("material") if isinstance(record, dict) else None
-    if isinstance(declared, str) and (any(char in declared for char in "/\\:") or declared in (".", "..")):
-        return record, ["material: must be a bare file name, not a path"], []
+    if isinstance(declared, str) and not build_notes.MATERIAL_NAME.fullmatch(declared):
+        return record, ["material: must be a bare file name <kind>-<n>.json, not a path"], []
     if args.material:
         material_path = Path(args.material)
     elif isinstance(record, dict) and isinstance(record.get("material"), str) and args.file != "-":
