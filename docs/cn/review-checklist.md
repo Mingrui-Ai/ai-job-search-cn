@@ -53,7 +53,7 @@ M3-3 第一部分只写设计，不写代码。本文定两件事：
 
 ### D 一页与文本层
 
-D 类核对的必须是这一版材料生成的 PDF 和 Word：说明文件 `resume-<n>.build.json` 的 `material_hash` 等于 `review draft` 给的；材料改过以后要重新 `resume build`，旧文件不算（[resume-workflow.md](resume-workflow.md) 第 2 节）。
+D 类核对的必须是这一版材料生成的 PDF 和 Word：说明文件 `resume-<n>.build.json` 的 `material_hash` 等于 `review draft` 给的；材料改过以后要重新 `resume build`，旧文件不算。`review validate/show` 默认机器核对说明、材料版本和两份产物的字节摘要；仍须完成下面的版面与内容检查（[resume-workflow.md](resume-workflow.md) 第 2 节）。
 
 - **D1** `机器` PDF 正好一页（`verify_pdf`）；`resume build` 自动调间距压到一页，压不下会报错，这时由起草者删内容，不缩字号绕过。
 - **D2** `机器` 内容里的每个字段都能在 PDF 文本层里逐字找到；没有康熙部首和部首补充（U+2E80–U+2FDF）、私用区字符、`(cid:…)`、替换字符 U+FFFD，没有 Type 3 字体（见 [resume-pdf.md](resume-pdf.md#检查什么)）。
@@ -83,7 +83,7 @@ D 类核对的必须是这一版材料生成的 PDF 和 Word：说明文件 `res
 只用于这三种材料。同时适用的旧条目：A2、A5、B1–B5、E1、E2、E5、E6、F2、F3；不适用：C1、C2（没有覆盖表，审核结果的 `coverage` 写 `[]`）和 D 类（没有版面）。C4"缺口不藏也不硬补"由 G4 覆盖。
 
 - **G1** `机器` `material validate` 通过（M3-4 的检查）：槽位齐全、顺序对；引用都在，用到占位符的段引用了它所属的条目；没有编造数字和技能；代入后不超过字数上限；没有禁用说法和手写的联系方式；承诺的到岗时间、每周天数和档案一致（规则认得出的说法）。审核者核对结果，不重复查这些。
-- **G2** `机器` `material render --output` 成功（没有剩下的占位符），警告逐条处理：改掉，或者写明理由。警告包括套话、打招呼语里的链接、内推请求里的薪资、模板版本变了。核对的必须是这一版材料的渲染：说明文件的 `material_hash` 等于 `review draft` 给的；材料改过以后要重新渲染，旧的 `.txt` 不算（[resume-workflow.md](resume-workflow.md) 第 5 节）。
+- **G2** `机器` `material render --output` 成功（没有剩下的占位符），警告逐条处理：改掉，或者写明理由。警告包括套话、打招呼语里的链接、内推请求里的薪资、模板版本变了。核对的必须是这一版材料的渲染：说明文件的 `material_hash` 等于 `review draft` 给的；材料改过以后要重新渲染，旧的 `.txt` 不算。`review validate/show` 默认核对说明和 txt 字节摘要，不打印沟通正文（[resume-workflow.md](resume-workflow.md) 第 5 节）。
 - **G3** `审核` 经历段选的是和这个岗位最相关的一两条；这个岗位有审核通过的简历时，只从简历列出的经历里选，数字和说法与简历一致。邮件提到附件，必须简历已经生成并审核通过。
 - **G4** `审核` 缺口不写成会，也不编。可以用相邻的经历回应（"做过相近的 X"），但不写"熟悉 Y"。
 - **G5** `审核` 语气合乎这种材料：打招呼语短而直接；邮件有称呼，标题照模板；内推请求说清岗位和理由，对方能直接转发，不施压。三种都不卑微，不写用户没提过的薪资、加班、到岗承诺。

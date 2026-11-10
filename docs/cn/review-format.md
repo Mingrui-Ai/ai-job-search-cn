@@ -1,6 +1,6 @@
 # 审核结果格式（Review v1，M3-3 第二部分）
 
-"起草 + 审核"工作流（[review-checklist.md](review-checklist.md)）里，审核者对一份材料的意见写成一份 JSON，由 `review validate` 检查格式，用 `review show` 显示给用户看。审核者动笔之前，可以先用 `review draft` 拿到机器初稿。
+"起草 + 审核"工作流（[review-checklist.md](review-checklist.md)）里，审核者对一份材料的意见写成一份 JSON，由 `review validate` 检查格式、当前材料和生成文件，用 `review show` 核对后显示给用户看。审核者动笔之前，可以先用 `review draft` 拿到机器初稿。
 
 ## 1. 存放位置
 
@@ -71,8 +71,8 @@
 
 ```
 python -m jobsearch_cn review draft <材料文件> [--profile <档案>] [--data-dir <目录>]
-python -m jobsearch_cn review validate <审核结果> [--material <材料文件>]
-python -m jobsearch_cn review show <审核结果> [--material <材料文件>]
+python -m jobsearch_cn review validate <审核结果> [--material <材料文件>] [--data-dir <目录>]
+python -m jobsearch_cn review show <审核结果> [--material <材料文件>] [--data-dir <目录>]
 ```
 
 **`review draft`**：材料要先通过 `material validate`，否则退出码 1。只打印，不写文件。它只用材料检查的错误，不输出那里的警告（例如档案改过、`profile_hash` 和现在的不同），这些看 `material validate` 的输出。输出：
@@ -93,9 +93,13 @@ python -m jobsearch_cn review show <审核结果> [--material <材料文件>]
   学历、经验、业务词机器不列，由审核者补上（清单 C1）。岗位库里没有这个岗位时为 `[]`。
 - `style`：清单 E1、E3 的警告，包括要点结尾有句号、中文里夹着半角逗号分号冒号、中文和英文或数字之间有空格。只是警告，不影响 `material validate` 和退出码。
 
-**`review validate`**：检查格式，并核对审的是材料的当前版本。不写 `--material` 时，读审核结果同一目录下 `material` 字段写的文件，只取文件名。输出和其他校验命令一样：`{"valid": …, "errors": […], "warnings": […]}`。不通过时退出码 1，文件读不了时退出码 2。
+**`review validate`**：检查格式、材料的当前版本，并默认强制核对该版本的生成说明与产物。不写 `--material` 时，读审核结果同一目录下 `material` 字段写的文件；`material` 必须是与实际材料相同的裸文件名，不能写路径。显式 `--material` 可以指定数据目录外的材料，但文件名仍须相同。输出仍为 `{"valid": …, "errors": […], "warnings": […]}`。
 
-**`review show`**：先做同样的检查，不通过就输出错误，退出码 1；通过就把审核结果显示成 Markdown，包括结论、审核方式、问题（必改在前）和覆盖表。审核者写的文字（覆盖表的要求和说明，问题的理由和建议改法，以及标题里的材料文件名和岗位 id）原样显示，里面的换行一律写成 `<br>`，所以不会拆断所在的列表项、标题或表格行；表格单元格里的竖线和反斜杠还会转义。不另存文件。
+生成说明和产物只在所选数据目录的 `resumes/<岗位id>/` 或 `messages/<岗位id>/` 中查找。目录选择沿用显式 `--data-dir` > `JOBSEARCH_CN_DATA_DIR` > 仓库默认 `data/`，不会按审核文件位置猜测，也没有跳过生成物检查的开关。简历要求同名 PDF 和 Word 完整存在，沟通草稿要求同名 txt；说明须符合现有 v1 格式、材料和种类相符、材料摘要当前、文件名逐项对应且字节摘要一致。缺失、空文件、损坏、摘要不符或不安全路径都是错误、退出码 1；审核／材料输入本身读不了仍为退出码 2。
+
+所选数据根本身可为链接；根以下的链接或 junction 均拒绝。不会按说明里声明的任意路径读取文件。仅核对文件与材料的版本和字节一致性，不重新生成、不读取当前档案、不检查版面，也不打印产物正文；`profile_hash` 只校验格式，不要求与材料保存的旧档案摘要相同。当前档案检查仍由 `material validate` 完成。旧命令写法可继续用，但没有说明或完整产物的旧审核现在会失败；需按[共享审核工作流](resume-workflow.md)重新生成，并指定与生成命令相同的数据目录。审核 JSON 和生成说明版本不变。
+
+**`review show`**：先做同样的检查，`pass` 和 `revise` 均要求当前生成物；不通过就输出与 validate 相同的 JSON 错误，退出码 1，不显示通过结论。通过就把审核结果显示成 Markdown，包括结论、审核方式、问题（必改在前）和覆盖表。审核者写的文字（覆盖表的要求和说明，问题的理由和建议改法，以及标题里的材料文件名和岗位 id）原样显示，里面的换行一律写成 `<br>`，所以不会拆断所在的列表项、标题或表格行；表格单元格里的竖线和反斜杠还会转义。不另存文件。
 
 ## 4. 不通过的情况
 
@@ -107,4 +111,4 @@ python -m jobsearch_cn review show <审核结果> [--material <材料文件>]
 - 状态为 `gap` 的行列了位置，或者 `covered`、`synonym` 的行没列位置；
 - `reason`、`requirement` 为空或超过 300 字。
 
-**警告**只在没有错误时给出：`verdict` 是 `revise` 但没有 `must` 级的问题；`mode` 是 `self`。
+**警告**在审核格式和材料版本校验没有错误时给出：`verdict` 是 `revise` 但没有 `must` 级的问题；`mode` 是 `self`。后续生成物检查失败时，这些警告仍保留，但整体 `valid` 为 false。
