@@ -6,6 +6,8 @@
 
 **M4-1a** 做了 `record`、`submit`、`status`、`show`、`list`、`validate`、`export`；**M4-1b** 加了 `reply`、`note`、`followup`（含 `list --due`）、`void`、`backup`，以及第 16 节的 Agent 工作流、入口和命令授权。从导出恢复（import）v1 不做，恢复靠 `backup`（第 15 节）。
 
+**M4-3** 的只读复盘命令是 `python -m jobsearch_cn application retrospective [<投递id> ...] [--data-dir <数据目录>]`。按 [calibration.md](calibration.md) 安全整合投递事件和首次登记投出时的 job/match 快照，说明事实、历史评分和缺失/歧义；不写档案或重新评分。完整解释与权重试算交接只维护在该文档。
+
 ## 1. 存放位置
 
 都在数据目录下（默认 `cn\data`，`--data-dir` 或环境变量 `JOBSEARCH_CN_DATA_DIR` 可改）：
@@ -350,6 +352,8 @@ python -m jobsearch_cn application backup
 ## 16. Agent 工作流（`cn-application`）
 
 Claude Code 和 DeepSeek Harness 的 `cn-application` 技能、Codex 的 `AGENTS.md` 都按这一节做。
+
+用户要复盘投递、对比历史评分和已记录面试结果，或根据结果讨论偏好时，转 [calibration.md 的复盘工作流](calibration.md#1-agent-工作流)。`retrospective` 是只读命令，无需写入预览；需要调权时由该工作流显式交接 `cn-match`，不扩大 `cn-application` 的命令授权。
 
 **规则**
 

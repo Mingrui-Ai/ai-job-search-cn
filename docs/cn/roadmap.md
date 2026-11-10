@@ -687,7 +687,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
   - M4-1a 状态主线（PR #122，2026-11-03 合并）：投递记录存 SQLite，事件重放得出状态；`application` 命令组 record、submit、status、show、list、validate、export，预览加 `request_id` 两步写；发出的材料归档并核对 `resume build` 的说明文件。
   - M4-1b 其余（PR #126，2026-11-04 合并）：reply、note、followup、void、`list --due`、backup 和 `validate --backup`；`cn-application` 技能等入口和授权。说明见 [applications.md](applications.md)。
 - [ ] M4-2 跟进提醒和跟进消息起草，只起草不代发（实现中：只读投递 context、followup 材料及完整输入失效、生成与独立审核；共享流程 applications.md §17，真实连续使用仍由 M4-5 验收）
-- [ ] M4-3 复盘校准：对比评分和实际面试结果，提出权重调整建议，由用户决定是否采纳
+- [ ] M4-3 复盘校准（实现待独立审核）：只读 `application retrospective` 整合有效事件与首次投出归档，保留旧分/缺失/质量标签；Agent 按 [calibration.md](calibration.md) 区分事实和假设，权重试算及具体数字确认交回 cn-match，不自动调权或批量重评。见[工作记录](worklog/2026-11-11-m4-3-retrospective.md)。
 - [ ] M4-4 离线 HTML 看板（改造上游 `/html-report`）：岗位状态、投递漏斗、待跟进
 - [ ] M4-5 验收与 `v0.4.0`：用户连续两周用它记录真实投递，看板与实际一致
 
