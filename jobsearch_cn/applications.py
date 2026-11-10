@@ -851,6 +851,8 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
         # Check the content here: filenames and the caller's optional validator cannot enforce this boundary.
         if record.get("kind") == "followup":
             raise _invalid("followup materials cannot be archived as first-submission materials by record or submit")
+        if record.get("kind") == "interview-prep":
+            raise _invalid("interview preparation cannot be archived as submission materials by record or submit")
         if check_material is not None:
             errors, material_warnings = check_material(record)
             if errors:

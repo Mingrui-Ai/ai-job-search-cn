@@ -1,0 +1,30 @@
+# 2026-11-11 · M5-1 标识符隐私修复
+
+## 完成
+
+- 修复独立审核发现的 P2：合法 Profile experience.id 和题库 id 可嵌入手机号，旧安全目录与 Markdown 会直接输出这些标识符。原 cef67b58 失败证据保留在协调区，不以首个不合法夹具当故障证据。
+- 敏感经历 id 将整个条目从安全 catalog 扣留并计数；已保存包主动引用拒绝。题库 id、自定义方向、req/q/u、包与派生/审核文件名及审核字段路径接受同一 interview 本地敏感检测，错误不回显原值。
+- 新增真实 template/validate/render/render --output/review-draft/review-validate 路径回归，覆盖手机号及已知 contact 值重合；拒绝时不创建 Markdown/build。
+
+## 决策
+
+- 只修改 interview 本地投影与校验，不修改 Profile v1、全局 Job schema 或共享检测器。
+- 按规划者窄裁定，严格通过 schema 的固定 `job_[12hex]` 是机器 id，略过普通长数字启发式，但仍检查明确手机号和已知 contact；原公开生成 id 夹具保持不变，并补正反例。其他任意标识仍走完整规则。
+- 敏感经历标识不重命名、不截断，安全通用题仍可基于原有效档案练习。未批准的 runtime/权限文件继续不动。
+
+## 验证
+
+- 修复后 interview 公开定向共 68 项，4 项因当前 Windows 无符号链接创建权限跳过，其余通过；原生成岗位 id 夹具保持，明确手机/已知 contact 反例均拒绝且无敏感错误输出。
+- 生产/测试提交 `c610f58bd4b78c8bdfde4aa731a07a21b23b103c` 正式三检查通过：lint 14 skills/12 commands、security 通过，全量共 2253 项、42 项跳过、其余通过（498.868秒）。随后仅补本文档、错误分类说明和 roadmap P3 记录；最终 head 的生产/测试树与该 SHA 精确绑定，不重复无变化全量。
+- 公开回归和正式最终 SHA 三门禁结果由协调区本轮交付报告记录，旧 cef 全量日志与独立失败证据保留，不冒充修复后结果。
+
+## 遗留
+
+- 独立审核继续，标识符敏感检测具有与文本相同的保守误报限制；不宣称通用 PII 检测完整。
+- 按规划者错误码裁定记录 P3：绑定配置在读中删除的竞争窗口可能报 missing_input/exit2，而非 stale_context/exit1；未成功输出或接受旧 pass。原执行与期望证据保留，后续收尾处理，不在本轮扩大生产修复。
+- 独立 IR008 提示时点 P3：零 experience 的 template 目录为空但 warnings 未提示，validate 阶段已有 no_project_questions；未造项目、未放行零题，原冻结不计 pass，本轮只列后续模板提示待办。
+- 018 仍待批，M5-1 不标整体完成。
+
+## 下一步
+
+- 对稳定新 SHA 执行正式检查，更新 PR #166 并精确回读 head/正文，由规划者安排独立复验。

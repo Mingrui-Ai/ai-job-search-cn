@@ -1,0 +1,8 @@
+{
+  "schema_version": 1, "direction": "ops", "revision": 1,
+  "provenance": {"kind": "project_original", "source_ref": "Original prompts for this repository", "license": "MIT", "notice": "本项目原创运营练习提示，不是公司真题，也不依据面试频率统计。"},
+  "questions": [
+    {"id": "ops.audience", "prompt": "设计一项运营活动前，你会怎样确定目标人群、需求和观察指标？", "practice_kind": "general", "tags": ["活动准备"], "prep_prompts": ["区分业务目标与活动手段"]},
+    {"id": "ops.observation", "prompt": "活动表现与预期不同时，你会如何整理现象、提出解释并安排后续验证？", "practice_kind": "general", "tags": ["结果分析"], "prep_prompts": ["没有记录时不要补造效果数字"]}
+  ]
+}

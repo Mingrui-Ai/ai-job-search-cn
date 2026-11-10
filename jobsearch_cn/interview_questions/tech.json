@@ -1,0 +1,8 @@
+{
+  "schema_version": 1, "direction": "tech", "revision": 1,
+  "provenance": {"kind": "project_original", "source_ref": "Original prompts for this repository", "license": "MIT", "notice": "本项目原创技术练习提示，不是公司真题，也不依据面试频率统计。"},
+  "questions": [
+    {"id": "tech.failure", "prompt": "面对暂时无法复现的问题，你会先收集哪些信息，再如何缩小排查范围？", "practice_kind": "general", "tags": ["问题排查"], "prep_prompts": ["区分观察与猜测", "说明下一步验证方法"]},
+    {"id": "tech.tradeoff", "prompt": "比较两种技术方案时，你会如何界定约束、成本与验证标准？", "practice_kind": "general", "tags": ["方案取舍"], "prep_prompts": ["可用概念性例子，但不要包装成自己的项目经历"]}
+  ]
+}

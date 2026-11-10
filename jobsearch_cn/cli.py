@@ -19,6 +19,7 @@ from jobsearch_cn import (__version__, browser, collect, jd_parser, match, mater
                           resume_docx, resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
 from jobsearch_cn import application_report, beisen, build_notes, calibration, followups, inbox, personal, robots_policy
 from jobsearch_cn import applications as applications_mod
+from jobsearch_cn import interview, interview_files, interview_review
 
 
 class InputError(Exception):
@@ -1364,6 +1365,46 @@ def _add_beisen_parser(sites, stored) -> None:
     parser.set_defaults(handler=cmd_collect_beisen)
 
 
+def cmd_interview(args) -> int:
+    try:
+        root = store.data_dir(args.data_dir)
+        action = args.interview_command
+        if action == "template":
+            result = interview.template(root, args.job_id, args.direction)
+        elif action == "validate":
+            result = interview.validate(root, args.file)
+        elif action == "render":
+            result = interview.render(root, args.file, args.output)
+        elif action == "review-draft":
+            result = interview_review.draft(root, args.file, args.round)
+        else:
+            result = interview_review.validate(root, args.file)
+    except interview_files.Error as exc:
+        _emit({"error": {"code": exc.code, "message": exc.message}}, sys.stderr)
+        return exc.exit_code
+    except OSError:
+        _emit({"error": {"code": "io_error", "message": "interview local operation could not complete"}}, sys.stderr)
+        return 2
+    _emit(result)
+    return 0
+
+
+def _add_interview_parser(commands, stored):
+    group = commands.add_parser("interview", allow_abbrev=False, help="本地面试练习准备包（docs/cn/interview.md）")
+    group.set_defaults(help_parser=group)
+    actions = group.add_subparsers(dest="interview_command", metavar="<interview-command>")
+    for name in ("template", "validate", "render", "review-draft", "review-validate"):
+        action = actions.add_parser(name, parents=[stored], allow_abbrev=False)
+        action.add_argument("job_id" if name == "template" else "file")
+        if name == "template":
+            action.add_argument("--direction")
+        if name == "render":
+            action.add_argument("--output", action="store_true", help="写入包同目录的固定 Markdown 和生成说明")
+        if name == "review-draft":
+            action.add_argument("--round", type=int, choices=(1, 2), default=1)
+        action.set_defaults(handler=cmd_interview)
+
+
 def build_parser(adapters=None) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m jobsearch_cn",
@@ -1620,6 +1661,7 @@ def build_parser(adapters=None) -> argparse.ArgumentParser:
         sub.add_argument("--profile", help="仅 followup 核对当前档案；默认使用本次 --data-dir 中的档案")
         sub.set_defaults(handler=handler)
     _add_application_parser(commands, stored)
+    _add_interview_parser(commands, stored)
     _add_collect_parser(commands, stored, adapters or {})
     return parser
 
@@ -1639,8 +1681,11 @@ def main(argv: list[str] | None = None) -> int:
         _emit({"error": str(exc)}, sys.stderr)
         return 2
     parser = build_parser(adapters)
-    if single:
+    interview_args = argv[:1] == ["interview"]
+    if single or interview_args:
         def invalid_arguments(message):
+            if interview_args:
+                interview_files.fail("arguments", "invalid interview arguments; see interview --help", 2)
             raise InputError("单链接参数无效；请查看 collect beisen --help（未读取任何链接或个人模块）")
 
         def redact_errors(selected):
@@ -1652,6 +1697,9 @@ def main(argv: list[str] | None = None) -> int:
         redact_errors(parser)
     try:
         args = parser.parse_args(argv)
+    except interview_files.Error as exc:
+        _emit({"error": {"code": exc.code, "message": exc.message}}, sys.stderr)
+        return exc.exit_code
     except InputError as exc:
         _emit({"error": str(exc)}, sys.stderr)
         return 2

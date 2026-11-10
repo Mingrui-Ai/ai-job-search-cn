@@ -1,0 +1,8 @@
+{
+  "schema_version": 1, "direction": "product", "revision": 1,
+  "provenance": {"kind": "project_original", "source_ref": "Original prompts for this repository", "license": "MIT", "notice": "本项目原创产品练习提示，不是公司真题，也不依据面试频率统计。"},
+  "questions": [
+    {"id": "product.need", "prompt": "用户提出一个功能要求时，你会怎样确认背后的问题及优先级？", "practice_kind": "general", "tags": ["需求澄清"], "prep_prompts": ["区分用户原话与自己的解释"]},
+    {"id": "product.validation", "prompt": "资源有限时，你会怎样选择需要先验证的假设并设计验证方式？", "practice_kind": "general", "tags": ["假设验证"], "prep_prompts": ["说明验证不足时如何保留不确定性"]}
+  ]
+}
