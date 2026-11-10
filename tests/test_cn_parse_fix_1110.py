@@ -92,6 +92,55 @@ class SecondReviewRegressions(unittest.TestCase):
                 self.assertEqual(match.filter_job(job, reviewer_candidate())["verdict"], "ineligible")
 
 
+class ExplicitLabelBoundaries(unittest.TestCase):
+    def test_cohort_tags_override_all_prose_sections(self):
+        for section in ("工作职责", "团队介绍", "任职资格"):
+            for left, right in (("【", "】"), ("[", "]"), ("《", "》")):
+                with self.subTest(section=section, brackets=left + right):
+                    text = section + "\n负责" + left + "27校招" + right + "活动的执行。"
+                    job = parse(text)
+                    self.assertEqual(job["requirements"]["graduation"], {"years": [2027], "strict": True})
+                    self.assertIn(job["evidence"]["requirements.graduation"]["text"], text)
+                    self.assertEqual(match.filter_job(job, reviewer_candidate())["verdict"], "ineligible")
+
+    def test_cohort_fields_override_activity_and_team_context(self):
+        for field in ("届别：2027届", "毕业时间：2026年8月-2027年7月毕业", "届别：27校招",
+                      "毕业年份: 2027校园招聘", "招聘频道：2027校园招聘"):
+            for prefix in ("工作职责\n", "团队介绍\n", "团队负责活动，"):
+                with self.subTest(field=field, prefix=prefix):
+                    job = parse(prefix + field + "，参与活动执行。")
+                    years = [2026, 2027] if field.startswith("毕业时间") else [2027]
+                    self.assertEqual(job["requirements"]["graduation"], {"years": years, "strict": True})
+                    self.assertIn(field, job["evidence"]["requirements.graduation"]["text"])
+
+    def test_education_fields_override_other_people_before_or_inside_match(self):
+        for field in ("学历：硕士/博士在读", "学历要求: 在读硕士或博士", "学历：在读硕士", "学历：硕士在读",
+                      "学历：\n硕士/博士在读"):
+            for prefix in ("工作地点：深圳\n", "工作职责\n协助整理样品。\n", "团队介绍\n", "团队负责协助，",
+                           "团队负责协助 "):
+                with self.subTest(field=field, prefix=prefix):
+                    job = parse(prefix + field)
+                    self.assertEqual(job["requirements"]["education"], {"min": "master", "preferred": None})
+                    evidence = job["evidence"]["requirements.education"]["text"]
+                    self.assertIn(evidence, field)
+                    self.assertEqual(match.filter_job(job, reviewer_candidate())["verdict"], "ineligible")
+        job = parse("团队介绍\n学历：硕士/博士在读优先")
+        self.assertEqual(job["requirements"]["education"], {"min": None, "preferred": "master"})
+
+    def test_untagged_role_titles_and_activity_names_remain_distinct(self):
+        for role in ("活动策划专员", "执行助理"):
+            text = "职位名称：2027校园招聘" + role + "\n工作地点：深圳"
+            self.assertEqual(parse(text)["requirements"]["graduation"], {"years": [2027], "strict": True})
+        job = parse("任职资格\n面向2027校园招聘应届毕业生并要求具备活动策划能力。")
+        self.assertEqual(job["requirements"]["graduation"], {"years": [2027], "strict": True})
+        for event in ("活动", "大赛", "宣讲会", "开放日"):
+            for section in ("工作职责", "任职资格"):
+                with self.subTest(event=event, section=section):
+                    job = parse(section + "\n有参与2027校园招聘" + event + "的经验。")
+                    self.assertIsNone(job["requirements"]["graduation"])
+                    self.assertNotIn("requirements.graduation", job["evidence"])
+
+
 class ReviewBoundaries(unittest.TestCase):
     def test_salary_modifiers_without_labels_and_nonunit_words(self):
         for text, expected in (("3-4K", (3000, "CNY/month")), ("200/天", (200, "CNY/day")),

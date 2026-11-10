@@ -412,9 +412,10 @@ _REQUIREMENT_SECTION = re.compile(
 )
 _TEAM_SECTION = re.compile(r"(?m)^[ \t]*[【\[]?\s*(?:团队介绍|团队简介|部门介绍|部门简介)\s*[】\]]?\s*(?:[:：]|$)")
 _OTHER_PEOPLE = re.compile(r"负责|协助|服务|对接|指导|辅导|带领|团队|成员|现有")
+_EDUCATION_LABEL = re.compile(r"学历\s*(?:要求)?\s*[:：]\s*$")
 _EDUCATION_REQUIREMENT = re.compile(r"学历\s*(?:要求)?\s*[:：为]?|(?:应聘者|候选人|申请人)\s*(?:需|须|应|必须)|要求|须为|需为")
-_CAMPUS_ACTIVITY = re.compile(r"活动|宣讲|组织|策划|执行|负责|协助|参加|参与|筹备")
-_CAMPUS_LABEL = re.compile(r"^(?:招聘频道|招聘类型|招聘类别|工作性质)\s*[:：]\s*$")
+_CAMPUS_ACTIVITY = re.compile(r"(?:校招|校园招聘)\s*(?:活动|大赛|宣讲会|开放日)")
+_CAMPUS_LABEL = re.compile(r"(?:招聘频道|招聘类型|招聘类别|工作性质|届别|毕业时间|毕业年份)\s*[:：]\s*$")
 _CANDIDATE_COHORT = re.compile(r"面向|招聘对象|应聘者|候选人|申请人")
 _HEADER_END = re.compile(r"^(?:看过该职位的人还看了|相关职位|推荐职位|热门职位|公司基本信息)\s*[:：]?\s*$")
 _HEADER_PROSE = re.compile(r"^(?:请|可以|需要|需|要求|保证|欢迎|至少)|到岗|入职|连续")
@@ -1127,14 +1128,22 @@ def _requirement_section_at(text: str, position: int):
 
 
 def _campus_candidate(text: str, match, title_span):
+    # Explicit tags/fields override prose context wherever they occur. Only
+    # unlabelled prose is subject to activity and section exclusions.
+    before, after = text[:match.start()], text[match.end():]
+    if any(before.rstrip().endswith(left) and after.lstrip().startswith(right)
+           for left, right in (("【", "】"), ("[", "]"), ("《", "》"))):
+        return True
+    if _CAMPUS_LABEL.search(before):
+        return True
+    if title_span and title_span[0] <= match.start() < title_span[1]:
+        return True
     clause = _clause(text, match.start(), match.end())
     if _CAMPUS_ACTIVITY.search(clause):
         return False
-    if title_span and title_span[0] <= match.start() < title_span[1]:
-        return True
     line_start = text.rfind("\n", 0, match.start()) + 1
     prefix = text[line_start:match.start()].strip()
-    if _CAMPUS_LABEL.fullmatch(prefix) or _CANDIDATE_COHORT.search(prefix):
+    if _CANDIDATE_COHORT.search(prefix):
         return True
     section = _requirement_section_at(text, match.start())
     if section is not None:
@@ -1202,6 +1211,11 @@ def _min_months(text: str, tag: list):
 def _student_requirement(text: str, match):
     """Current students must describe the candidate, not colleagues or service recipients."""
     if "在读" not in match.group():
+        return True
+    # A choice can absorb its 学历： label; a single degree leaves it in the
+    # prefix. Check both before excluding descriptions of other people.
+    label = match.groupdict().get("label") or ""
+    if _EDUCATION_LABEL.fullmatch(label) or _EDUCATION_LABEL.search(text[:match.start()]):
         return True
     left, right = _clause_bounds(text, match.start(), match.end())
     prefix = _LIST_MARK.sub("", text[left:match.start()].strip())
