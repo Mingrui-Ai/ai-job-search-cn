@@ -62,6 +62,36 @@ class ReviewRegressions(unittest.TestCase):
                 self.assertNotIn("title", job["evidence"])
 
 
+class SecondReviewRegressions(unittest.TestCase):
+    """Codex B's two regressions caused by overly broad context exclusions."""
+
+    def test_explicit_campus_role_titles_keep_their_cohort(self):
+        for title, metadata in (
+                ("职位名称：【27校招】活动策划专员", ""),
+                ("职位名称：【27校招】执行助理", ""),
+                ("【27校招】活动策划专员", "招聘频道：校园招聘\n")):
+            with self.subTest(title=title):
+                text = title + "\n" + metadata + "工作地点：深圳\n任职资格\n本科及以上学历。"
+                job = parse(text)
+                self.assertEqual(job["requirements"]["graduation"], {"years": [2027], "strict": True})
+                evidence = job["evidence"]["requirements.graduation"]["text"]
+                self.assertIn("【27校招】", evidence)
+                self.assertIn(evidence, text)
+                self.assertEqual(match.filter_job(job, reviewer_candidate())["verdict"], "ineligible")
+
+    def test_labelled_student_degree_choices_are_requirements(self):
+        for context, requirement in (
+                ("工作地点：深圳\n", "学历：硕士/博士在读"),
+                ("", "学历：硕士/博士在读"),
+                ("工作职责\n整理样品。\n", "学历要求：硕士或博士在读")):
+            with self.subTest(context=context):
+                text = "职位名称：样本研究实习生\n" + context + requirement
+                job = parse(text)
+                self.assertEqual(job["requirements"]["education"], {"min": "master", "preferred": None})
+                self.assertEqual(job["evidence"]["requirements.education"]["text"], requirement)
+                self.assertEqual(match.filter_job(job, reviewer_candidate())["verdict"], "ineligible")
+
+
 class ReviewBoundaries(unittest.TestCase):
     def test_salary_modifiers_without_labels_and_nonunit_words(self):
         for text, expected in (("3-4K", (3000, "CNY/month")), ("200/天", (200, "CNY/day")),
