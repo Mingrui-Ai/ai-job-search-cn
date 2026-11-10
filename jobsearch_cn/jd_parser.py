@@ -424,7 +424,7 @@ _COHORT_TAG = re.compile("|".join(
 # A campus season in a requirements paragraph must name candidates. A year
 # embedded in an experience description does not match this positive grammar.
 _CAMPUS_REQUIREMENT = re.compile(
-    rf"(?:^|[\n，,。；;：:])[ \t]*(?:(?:\d+[.、)）]|[-*•·])[ \t]*)?"
+    rf"(?<![^\n，,。；;：:])[ \t]*(?:(?:\d+[.、)）]|[-*•·])[ \t]*)?"
     rf"(?:(?:面向|招聘对象|应聘者|候选人|申请人)\s*[:：]?\s*)?{_CAMPUS_YEAR.pattern}"
     r"(?=\s*(?:应届|毕业生|学生|同学|候选人|申请人|[，,。；;！!？?\n]|$))"
 )

@@ -109,9 +109,10 @@ class AllowlistBoundaries(unittest.TestCase):
     def test_candidate_sentences_in_requirements_and_tag_annotations(self):
         for heading in ("任职要求", "岗位要求", "任职资格"):
             for body in ("面向2027校园招聘应届毕业生。", "2027校园招聘毕业生。", "1. 2027校招学生。"):
-                with self.subTest(heading=heading, body=body):
-                    self.assertEqual(parse(heading + "\n" + body)["requirements"]["graduation"],
-                                     {"years": [2027], "strict": True})
+                for gap in ("\n", "："):
+                    with self.subTest(heading=heading, body=body, gap=gap):
+                        self.assertEqual(parse(heading + gap + body)["requirements"]["graduation"],
+                                         {"years": [2027], "strict": True})
         for tag in ("【27校招-技术类】", "[2027校招，技术/运营方向]", "《2027届（技术类）》"):
             self.assertEqual(parse("公司简介\n协助" + tag + "活动执行。")["requirements"]["graduation"],
                              {"years": [2027], "strict": True})
