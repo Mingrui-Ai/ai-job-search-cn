@@ -245,3 +245,26 @@ python -m jobsearch_cn material render data/materials/<岗位id>/greeting-1.json
 加 `--output`（M3-6）时不往标准输出打正文：文字写到 `<数据目录>/messages/<岗位id>/<种类>-<n>.txt`（UTF-8，先写临时文件再改名，那里是链接时拒绝），旁边写说明文件 `<种类>-<n>.build.json`，格式同 [applications.md 第 12 节](applications.md#12-resume-build-的说明文件m4-1a-第二部分)，`kind` 是 `message-build`。标准输出是 `{"text": 路径, "chars": 字数, "max_chars": 上限, "warnings": […], "build_note": 路径}`。`chars` 按 7.3 的口径算，是正文各段代入后的字数之和，和 `max_chars`（这份材料所用模板的正文上限）直接可比；它不是 `.txt` 文件的长度：邮件的"标题：…"一行和段与段之间的换行不算（标题另有 40 字上限，`material validate` 已经查过）。打招呼语各段连成一段，所以两者相同。材料文件名必须是 `<种类>-<n>.json`，种类和 `kind` 一致，否则退出码 2。工作流里一律加 `--output`，因为邮件签名有联系方式。
 
 `material validate`、`material render`、`resume build`、`review draft` 检查材料用的是同一个函数，对同一份材料结论相同。`resume build` 只收简历，给沟通材料时退出码 2；`review draft` 对沟通材料只给标点空格警告，覆盖表是 `[]`（M3-6）。
+
+## 8. 跟进正文（followup，M4-2）
+
+Material v1 新增 `kind:followup`，文件 `followup-<n>.json`。旧工具不因版本仍为 v1 就能读取新 kind。字段沿用第 7 节，另必填 `context`；旧 greeting/email/referral 不接受 context。完整起草、选择与审核步骤只在 [applications.md 第 17 节](applications.md#17-本地跟进提醒与草稿m4-2)。
+
+| context 字段 | 内容 |
+| --- | --- |
+| `application_id` | 已选择的一次投递，`app_` 加 32 位小写 hex |
+| `application_revision` | 正整数，当前最新事件 seq，bool 不接受 |
+| `application_hash` | id/job/origin、重放状态/投出/渠道/日期/revision、全部事件的 id/seq/type/occurred/source/payload/voided_by；不含归档字节、记录时间、actor/request id |
+| `job_hash` | 当前完整岗位对象，包含 status/source，不是 score.job_hash |
+| `profile_input_hash` | 当前完整有效 profile，包含 contact、偏好和权重；不在 context 里复制这些值 |
+| `template_hash` | 实际模板身份/来源/版本/spec 与有效禁用词配置，不包含编译后的正则对象 |
+
+四个摘要均为规范 JSON（键排序、紧凑分隔、UTF-8）的 SHA-256，小写 64 位。只改 JSON 排版不失效。顶层 `profile_hash` 仍为 score.profile_hash 口径，由 template 命令给出；完整输入的新鲜性由 context 补齐，不改变旧材料的警告语义。context 不存任意文件路径、联系方式副本或事件正文。
+
+模板固定 `direction:default`，显式其他方向拒绝。subject 必须 null。默认 300 字，用户只能降低上限；代入后各段字数相加，渲染插入的换行不计。槽位顺序 `context/progress/request`，context/request 必填，progress 可选。followup 在用户 default 模板中可选，缺少时只回退该 spec 到内置 default；旧三类覆盖和 revision 保留。`template` 与 `template_source` 输出真正提供 followup spec 的版本/来源，不把内置 spec 冠以用户版本。
+
+仅新 kind 允许引用绑定 application 中有效且未扣留的 submitted/reply_received/status_changed/note_added 的 `evt_<32位hex>`。context 段须含有效 submitted 引用，progress 段须有可用事件引用。`{evt_<32位hex>.occurred_date}` 只取真实发生日期（北京时间），未知报错；事件文本不进入候选人数字/技能/禁用词豁免证据，其他 event payload 占位符不支持。原有 job/profile/availability 引用及联系方式规则继续适用；引用存在不证明语义正确，仍需 H 类审核。
+
+`material template <job> --kind followup --application <app> --expected-revision N` 只读返回 spec、context、最小事实与 withheld 提示；两个新参数对 followup 必填，旧 kind 带它们报参数错误。全部新 kind 入口（validate/render/review draft/validate/show）核对同一上下文服务。来源不可用/过期输出安全字段和原因，退出 1，不回显来源正文；参数或材料文件不能读取沿用退出 2。
+
+`material render --output` 写无标题的纯文本与 message-build 说明，输出增加 `context_status:current_at_check`。生成与审核使用相同 data-dir 和可选 `--profile`；写前及产物核对后的来源复查、失败处理见共享流程。应用首次投递的 record/submit 归档范围没有扩展到 followup。

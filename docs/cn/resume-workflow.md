@@ -4,6 +4,8 @@
 
 为什么这样分工、清单每条查什么，见 [review-checklist.md](review-checklist.md)（下称"清单"）。格式见 [material.md](material.md)（材料）和 [review-format.md](review-format.md)（审核结果），生成 PDF 和 Word 见 [resume-pdf.md](resume-pdf.md)。本文只写步骤。
 
+跟进消息（M4-2）直接按 [applications.md 第 17 节](applications.md#17-本地跟进提醒与草稿m4-2)执行；查询/选择由 cn-application 转入 cn-resume，复用本文第 2–3 节的独立审核与两轮停止规则。followup 不要求 match 或简历，使用只读 `material template --kind followup --application --expected-revision` 获取当前投递上下文；生成用 `material render --output`，审核者也独立取同一上下文。不要把下面简历专用的“先评分/从 match 抄摘要”前提套给 followup。
+
 **前提**
 
 - 岗位已经保存在本地岗位库（[JD 导入工作流](jd-import.md)），档案能通过 `python -m jobsearch_cn profile validate`（[建档工作流](profile-setup.md)），Typst 和字体装好了（[resume-pdf.md](resume-pdf.md)）。

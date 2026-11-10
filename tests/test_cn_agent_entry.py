@@ -61,6 +61,19 @@ def frontmatter(path: Path) -> list[str]:
     return read(path).split("---", 2)[1].strip().splitlines()
 
 
+def workflow_stages(workflow, groups):
+    """The shared followup document hands off to the existing material skill, not a new grant.
+
+    Keep application commands within cn-application and check the post-selection
+    material stage against cn-resume's unchanged command groups.
+    """
+    text = read(REPO / workflow)
+    if workflow == "docs/cn/applications.md":
+        application_stage, material_stage = text.split("\n### 17.2 ", 1)
+        return ((application_stage, groups), (material_stage, WORKFLOWS["cn-resume"][1]))
+    return ((text, groups),)
+
+
 class EntryPoints(unittest.TestCase):
     def each(self):
         for skill, (workflow, groups) in WORKFLOWS.items():
@@ -108,15 +121,25 @@ class EntryPoints(unittest.TestCase):
             for group, required in groups.items():
                 used = set(re.findall(rf"python -m jobsearch_cn {group} (\w+)", text))
                 self.assertTrue(required <= used, f"{workflow} should document {group} {sorted(required - used)}")
-                for command in used:
+            for stage, _ in workflow_stages(workflow, groups):
+                for group, command in re.findall(r"python -m jobsearch_cn (\w+) (\w+)", stage):
                     with self.assertRaises(SystemExit) as raised, contextlib.redirect_stdout(io.StringIO()):
                         parser.parse_args([group, command, "--help"])
                     self.assertEqual(raised.exception.code, 0, f"{group} {command}")
 
     def test_the_workflow_uses_no_other_command_group(self):
         for _, workflow, groups in self.each():
-            used = set(re.findall(r"python -m jobsearch_cn (\w+)", read(REPO / workflow)))
-            self.assertTrue(used <= set(groups), f"{workflow} uses {sorted(used - set(groups))} without a grant")
+            for stage, allowed in workflow_stages(workflow, groups):
+                used = set(re.findall(r"python -m jobsearch_cn (\w+)", stage))
+                self.assertTrue(used <= set(allowed), f"{workflow} uses {sorted(used - set(allowed))} without a grant")
+
+    def test_followup_handoff_is_explicit_without_expanding_application_grants(self):
+        text = read(REPO / "docs/cn/applications.md")
+        stage = text.split("\n### 17.2 ", 1)[1]
+        self.assertIn("转入 `cn-resume` 后", stage)
+        for directory in SKILL_DIRS:
+            self.assertIn("hand over to `cn-resume`", read(REPO / directory / "cn-application/SKILL.md"))
+        self.assertEqual(set(WORKFLOWS["cn-application"][1]), {"application", "jd"})
 
 
 class ReviewerAgents(unittest.TestCase):

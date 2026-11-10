@@ -35,7 +35,7 @@
 | 字段 | 说明 |
 | --- | --- |
 | `schema_version` | 固定为 `1` |
-| `kind` | 简历是 `resume-review`；打招呼语、投递邮件、内推请求分别是 `greeting-review`、`email-review`、`referral-review`，必须和材料的种类对上 |
+| `kind` | 简历是 `resume-review`；打招呼语、投递邮件、内推请求、跟进正文分别是 `greeting-review`、`email-review`、`referral-review`、`followup-review`，必须和材料的种类对上 |
 | `job_id` | 必须和所审材料的 `job_id` 相同 |
 | `material` | 所审材料的文件名（只写文件名，例如 `resume-1.json`；材料和审核结果在同一目录） |
 | `material_hash` | 所审材料的摘要，`review draft` 会输出。材料后来改过，这份审核结果就不通过，要按当前版本重审 |
@@ -44,13 +44,13 @@
 | `created` | 写审核结果的时间，ISO 8601，要带时区 |
 | `verdict` | `pass`（通过）或 `revise`（需修改）。`pass` 不能带 `must` 级的问题 |
 | `findings[]` | 问题，没有就写 `[]`，每条见下表 |
-| `coverage[]` | 岗位要求的覆盖情况（清单 C2），每条见下表；JD 没列要求时写 `[]`；打招呼语、邮件、内推请求没有覆盖表，一律写 `[]` |
+| `coverage[]` | 岗位要求的覆盖情况（清单 C2），每条见下表；JD 没列要求时写 `[]`；全部沟通种类包括 followup 没有覆盖表，一律写 `[]` |
 
 `findings[]` 每条：
 
 | 字段 | 说明 |
 | --- | --- |
-| `item` | 清单编号，`A1`–`A5`、`B1`–`B6`、`C1`–`C6`、`D1`–`D6`、`E1`–`E6`、`F1`–`F4`、`G1`–`G8`（G 类只用于沟通草稿） |
+| `item` | 清单编号，`A1`–`A5`、`B1`–`B6`、`C1`–`C6`、`D1`–`D6`、`E1`–`E6`、`F1`–`F4`、`G1`–`G8`（G 类只用于沟通草稿）；`H1`–`H4` 仅 followup 接受 |
 | `path` | 问题在材料里的位置，例如 `summary.text`、`experience[0].bullets[1].text`、`skills[2]`，沟通草稿是 `segments[3].text`、`subject.text`；必须能在材料里找到。下标只认 ASCII 数字，`skills[１]`（全角）这类写法按找不到的位置报告。关于整份材料的问题（例如 D1 页数）写 `null` |
 | `severity` | `must` 是必改，`suggest` 是建议；界线见 [review-checklist.md §4.3](review-checklist.md#43-审核者读什么输出什么) |
 | `reason` | 理由，不超过 300 字 |
@@ -100,6 +100,14 @@ python -m jobsearch_cn review show <审核结果> [--material <材料文件>] [-
 所选数据根本身可为链接；根以下的链接或 junction 均拒绝。不会按说明里声明的任意路径读取文件。仅核对文件与材料的版本和字节一致性，不重新生成、不读取当前档案、不检查版面，也不打印产物正文；`profile_hash` 只校验格式，不要求与材料保存的旧档案摘要相同。当前档案检查仍由 `material validate` 完成。旧命令写法可继续用，但没有说明或完整产物的旧审核现在会失败；需按[共享审核工作流](resume-workflow.md)重新生成，并指定与生成命令相同的数据目录。审核 JSON 和生成说明版本不变。
 
 **`review show`**：先做同样的检查，`pass` 和 `revise` 均要求当前生成物；不通过就输出与 validate 相同的 JSON 错误，退出码 1，不显示通过结论。通过就把审核结果显示成 Markdown，包括结论、审核方式、问题（必改在前）和覆盖表。审核者写的文字（覆盖表的要求和说明，问题的理由和建议改法，以及标题里的材料文件名和岗位 id）原样显示，里面的换行一律写成 `<br>`，所以不会拆断所在的列表项、标题或表格行；表格单元格里的竖线和反斜杠还会转义。不另存文件。
+
+### 跟进审核的当前来源检查（M4-2）
+
+`followup-<n>.json` 对应 `review-followup-<n>-r<轮次>.json`，kind 为 `followup-review`，coverage 为空。material_hash 自然包含材料内 context，审核/生成说明不再复制一套 application 字段。
+
+对 followup，`review draft/validate/show` 还调用与材料相同的只读上下文校验：有效投出与开放资格、事件投影、完整岗位/档案/实际模板与禁用规则。`validate/show` 直接调用也能发现来源过期，在产物检查后再复查来源；错误不展示陈旧 pass 或来源正文。使用生成时相同的 `--data-dir` 和可选 `--profile`，不按材料位置猜根目录。旧 resume/greeting/email/referral 保留上面的 #156 行为，不因新增参数开始读取当前档案或投递库。
+
+结论截至本次本地核验；来源随后仍可能变化。不要手抄新摘要或修生成说明来复用旧审核，按 [共享跟进流程](applications.md#17-本地跟进提醒与草稿m4-2)重取来源、起草、生成并独立审核。
 
 ## 4. 不通过的情况
 

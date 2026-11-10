@@ -585,6 +585,50 @@ def show(data_root, application_id: str) -> dict:
         return {"application": _application(connection, _row(connection, application_id))}
 
 
+def read_context(data_root, application_id: str) -> dict:
+    """A checked, read-only event snapshot for followup materials, without archived file reads.
+
+    Keep the projection and its events in one SQLite read transaction. Errors deliberately
+    omit stored values: legacy event text may contain private information.
+    """
+    if not is_id(application_id, "app"):
+        raise _invalid("application_id: expected app_ and 32 lowercase hex digits")
+    connection = _reader(Paths(data_root))
+    if connection is None:
+        raise ApplicationError("not_found", "application: no saved record")
+    with _closing(connection):
+        connection.execute("BEGIN")
+        row = _row(connection, application_id)
+        try:
+            events = _events(connection, application_id)
+            errors = []
+            ids = {event["event_id"] for event in events}
+            if [event["seq"] for event in events] != list(range(1, len(events) + 1)) or len(ids) != len(events):
+                raise ValueError("event sequence")
+            for event in events:
+                _check_event(event, "event", ids, errors)
+            if not errors:
+                _check_voids(events, "events", errors)
+            if errors or not events:
+                raise ValueError("events")
+            state = replay(events)
+            stored = {"status": row["status"], "submitted": row["submitted"], "submitted_at": row["submitted_at"],
+                      "submitted_on": row["submitted_on"], "next_followup_on": row["next_followup_on"],
+                      "revision": row["revision"],
+                      "channel": {"kind": row["channel_kind"], "platform": row["channel_platform"]}}
+            created = events[0]["payload"]
+            if (state != stored or created.get("job_id") != row["job_id"]
+                    or created.get("record_origin") != row["record_origin"]
+                    or row["record_origin"] not in ORIGINS or not schema.is_job_id(row["job_id"])):
+                raise ValueError("projection")
+        except (ApplicationError, KeyError, TypeError, ValueError):
+            raise ApplicationError("invalid_context", "application: events or their projection are inconsistent") from None
+        snapshot = connection.execute("SELECT sha256 FROM snapshots WHERE application_id = ? AND kind = 'job'",
+                                      (application_id,)).fetchone()
+        return {"application_id": application_id, "job_id": row["job_id"], "record_origin": row["record_origin"],
+                **state, "events": events, "archived_job_sha256": snapshot[0] if snapshot else None}
+
+
 def _submission_key(item: dict):
     """Newest submission first; a moment sorts within its day after a bare date; never submitted or unknown last."""
     submission = item["submission"]
@@ -777,6 +821,10 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
             raise _invalid(f"{material_file}: a material is a JSON object (docs/cn/material.md)")
         if record.get("job_id") != job_id:
             raise _invalid(f"{material_file} is a material for {record.get('job_id')!r}, not for {job_id}")
+        # Followups are local drafts for an existing submission, not first-submission materials.
+        # Check the content here: filenames and the caller's optional validator cannot enforce this boundary.
+        if record.get("kind") == "followup":
+            raise _invalid("followup materials cannot be archived as first-submission materials by record or submit")
         if check_material is not None:
             errors, material_warnings = check_material(record)
             if errors:

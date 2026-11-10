@@ -11,12 +11,10 @@ allowed-tools: Read, Bash(python -m jobsearch_cn application:*), Bash(python -m 
 
 # CN Application
 
-Follow section 16 of `docs/cn/applications.md` exactly - read it first. It is the single workflow
-shared with Codex and DeepSeek Harness (ADR-7 in `docs/cn/cn-migration-plan.md`); do not restate or
-extend it here. For a retrospective follow `docs/cn/calibration.md`; weight trials hand off to cn-match.
+Follow section 16 of `docs/cn/applications.md` exactly - read it first. It is shared with Codex and DeepSeek Harness (ADR-7); do not restate or extend it here. For retrospectives follow `docs/cn/calibration.md`; weight trials hand off to cn-match.
 
-Every write is two runs: `--preview` first, shown to the user; then, only after the user agrees, the
-same arguments with the preview's `--request-id`. Never invent a request id, and pass
-`--actor claude_code`. Do not record applications with the upstream /outcome or /apply.
+Every write uses `--preview` first, shown to the user, then the same arguments with its `--request-id` only after user agreement. Never invent an id; pass `--actor claude_code`. Do not use upstream /outcome or /apply.
 
 Write only the user's own words into summaries, notes and reasons, never their contact details.
+
+For follow-up drafting, query and select under section 17, then hand over to `cn-resume`; this skill does not write materials or dispatch reviews.

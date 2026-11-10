@@ -17,8 +17,10 @@
 
 ## 验证
 
-- 共享 helper 的既有 schema/validate/events 回归 33 项通过；首轮复盘公开测试 27 项通过。
-- 新增独立范围、文件链接、真实 subprocess JSON/no-write 验证；正式 lint/security/全量在同步主线后的冻结 SHA 上执行，完整结果随交付记录提供。
+- 共享 helper 的既有 schema/validate/events 回归 33 项通过；复盘公开测试 30 项通过（文件 symlink 创建权限不可用时跳过 1 项，junction 串档场景已执行）。
+- 同步前检查点 lint/security 通过，全量 2,134 项通过、38 项跳过；包括独立选择范围、真实 subprocess JSON/no-write 和隐私/UTF-8 检查。
+- 集中合入 PR162 的主线 `aa01ce044023d57ba669f3a4150951ca1ec08241`。入口文字、相邻路线图行和 CLI 导入冲突同时保留跟进与复盘；原 read_context、prepare_materials 拒收 followup 的限制及完整跟进工作流保留。
+- 正式 lint/security/全量在同步后的冻结 SHA 上执行，完整结果随 PR 交付记录提供。
 - 作者不读取独立留出，不自审或合并；独立审查和 CI 由规划者安排。
 
 ## 遗留
@@ -28,4 +30,4 @@
 
 ## 下一步
 
-- 同步 PR162 合并主线，保留跟进功能；冻结 SHA，完成三项门禁、隐私与 UTF-8 检查，送独立审核和 CI。
+- 冻结同步后的 SHA，完成正式三项门禁，送独立审核和 CI；最终结果绑定完整提交摘要。
