@@ -6,6 +6,8 @@
 
 **M4-1a** 做了 `record`、`submit`、`status`、`show`、`list`、`validate`、`export`；**M4-1b** 加了 `reply`、`note`、`followup`（含 `list --due`）、`void`、`backup`，以及第 16 节的 Agent 工作流、入口和命令授权。从导出恢复（import）v1 不做，恢复靠 `backup`（第 15 节）。
 
+**M4-3** 的只读复盘命令是 `python -m jobsearch_cn application retrospective [<投递id> ...] [--data-dir <数据目录>]`。按 [calibration.md](calibration.md) 安全整合投递事件和首次登记投出时的 job/match 快照，说明事实、历史评分和缺失/歧义；不写档案或重新评分。完整解释与权重试算交接只维护在该文档。
+
 ## 1. 存放位置
 
 都在数据目录下（默认 `cn\data`，`--data-dir` 或环境变量 `JOBSEARCH_CN_DATA_DIR` 可改）：
@@ -352,6 +354,8 @@ python -m jobsearch_cn application backup
 
 Claude Code 和 DeepSeek Harness 的 `cn-application` 技能、Codex 的 `AGENTS.md` 都按这一节做。
 
+用户要复盘投递、对比历史评分和已记录面试结果，或根据结果讨论偏好时，转 [calibration.md 的复盘工作流](calibration.md#1-agent-工作流)。`retrospective` 是只读命令，无需写入预览；需要调权时由该工作流显式交接 `cn-match`，不扩大 `cn-application` 的命令授权。
+
 **规则**
 
 1. 只记用户说的事。不替用户投递，不联系招聘方，不联网查进展。
@@ -431,6 +435,10 @@ python -m jobsearch_cn review draft data/materials/<岗位id>/followup-<n>.json
 任一 application revision/事实、完整岗位、完整有效档案（包括联系方式、偏好）、有效模板或禁用配置变化都会使旧 followup 失效，即使旧 txt 和审核仍在。不只抄新摘要、不手改 build note、不复用旧 pass，也没有忽略过期参数。重新核对来源与措辞，再生成新材料和产物；审核中来源变化应结束旧上下文任务，以新版本承载，不无限换版本规避两轮停止规则。
 
 render 使用已检查的内存输入，发布前重查令牌；review 核对产物后也重查。跨 SQLite 与 JSON 不提供锁协议，结论只截至本次核验；外部此后仍可改变资料。写入失败不报告成功，部分产物须重新 render 后再审。此功能不代替 M4-5 连续两周真实使用验收。
+
+## 18. 投递复盘（M4-3）
+
+只读复盘与历史评分解释按 [calibration.md](calibration.md) 的唯一工作流执行；本节仅作索引，不复制规则。第 16 节的复盘路由、现有 `application retrospective` 入口和向 `cn-match` 的权重试算交接保持适用。
 
 ## 19. 离线投递看板（M4-4）
 

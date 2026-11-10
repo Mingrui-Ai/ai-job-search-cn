@@ -497,7 +497,7 @@ def _apply(state, event: dict) -> dict:
 
 # ---------------------------------------------------------------- reading records
 
-def _event(row) -> dict:
+def _event(row, payload_loader=json.loads) -> dict:
     return {
         "event_id": row["event_id"],
         "seq": row["seq"],
@@ -508,7 +508,7 @@ def _event(row) -> dict:
         "recorded_at": row["recorded_at"],
         "actor": row["actor"],
         "source": {"kind": row["source_kind"], "reference": None},
-        "payload": json.loads(row["payload"]),
+        "payload": payload_loader(row["payload"]),
         "voided_by": row["voided_by"],
     }
 
@@ -588,30 +588,15 @@ def show(data_root, application_id: str) -> dict:
 def _checked_context(connection, row) -> tuple:
     """Check events and their projection on the caller's read transaction; never expose event text on failure."""
     try:
-        if not is_id(row["application_id"], "app"):
-            raise ValueError("application id")
-        events = _events(connection, row["application_id"])
         errors = []
-        ids = {event["event_id"] for event in events}
-        if [event["seq"] for event in events] != list(range(1, len(events) + 1)) or len(ids) != len(events):
-            raise ValueError("event sequence")
-        for event in events:
-            _check_event(event, "event", ids, errors)
-        if not errors:
-            _check_voids(events, "events", errors)
-        if errors or not events:
+        checked = _check_record_events(connection, row, errors)
+        if checked is None or errors:
             raise ValueError("events")
-        state = replay(events)
-        stored = {"status": row["status"], "submitted": row["submitted"], "submitted_at": row["submitted_at"],
-                  "submitted_on": row["submitted_on"], "next_followup_on": row["next_followup_on"],
-                  "revision": row["revision"],
-                  "channel": {"kind": row["channel_kind"], "platform": row["channel_platform"]}}
-        created = events[0]["payload"]
-        if (state != stored or created.get("job_id") != row["job_id"]
-                or created.get("record_origin") != row["record_origin"]
-                or row["record_origin"] not in ORIGINS or not schema.is_job_id(row["job_id"])):
-            raise ValueError("projection")
-    except (ApplicationError, KeyError, TypeError, ValueError):
+        events, state = checked
+        # Preserve read_context's explicit event-id uniqueness check as well as the shared validator.
+        if len({event["event_id"] for event in events}) != len(events):
+            raise ValueError("event ids")
+    except (ApplicationError, KeyError, TypeError, ValueError, RecursionError):
         raise ApplicationError("invalid_context", "application: events or their projection are inconsistent") from None
     return state, events
 
@@ -1749,7 +1734,8 @@ def _finish_backup(paths: Paths, backups: Path, name: str, temp: Path) -> dict:
     return {"backup": name, "path": str(final), "manifest": manifest, "warnings": warnings}
 
 
-def _check_application(connection, row, errors: list, warnings: list, paths: Paths, registered: set) -> None:
+def _check_record_events(connection, row, errors: list, payload_loader=json.loads):
+    """Shared application/event validation; no material or archive file reads."""
     application_id = row["application_id"]
     where = application_id
     if not is_id(application_id, "app"):
@@ -1767,7 +1753,7 @@ def _check_application(connection, row, errors: list, warnings: list, paths: Pat
     for event_row in connection.execute("SELECT * FROM events WHERE application_id = ? ORDER BY seq",
                                         (application_id,)):
         try:
-            event = _event(event_row)
+            event = _event(event_row, payload_loader)
         except (TypeError, ValueError):
             errors.append(f"{where} event {event_row['seq']}: the payload is not JSON")
             return
@@ -1803,6 +1789,15 @@ def _check_application(connection, row, errors: list, warnings: list, paths: Pat
         errors.append(f"{where}: the created event names another job or origin than the record")
     if row["record_origin"] == "historical" and not state["submitted"]:
         errors.append(f"{where}: a historical record must be submitted")
+    return events, state
+
+
+def _check_application(connection, row, errors: list, warnings: list, paths: Paths, registered: set) -> None:
+    checked = _check_record_events(connection, row, errors)
+    if checked is None:
+        return
+    events, state = checked
+    application_id = where = row["application_id"]
     versions = {item["version_id"]: item for item in _material_versions(connection, application_id)}
     submitted = next((event for event in events if event["type"] == "submitted" and not event["voided_by"]), None)
     for event in events:

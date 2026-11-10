@@ -17,7 +17,7 @@ from pathlib import Path
 
 from jobsearch_cn import (__version__, browser, collect, jd_parser, match, material, messages, profile, report,
                           resume_docx, resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
-from jobsearch_cn import application_report, beisen, build_notes, followups, inbox, personal, robots_policy
+from jobsearch_cn import application_report, beisen, build_notes, calibration, followups, inbox, personal, robots_policy
 from jobsearch_cn import applications as applications_mod
 
 
@@ -1050,9 +1050,13 @@ def cmd_application_export(args) -> int:
     return _application_run(write)
 
 
+def cmd_application_retrospective(args) -> int:
+    return _application_run(calibration.retrospective, store.data_dir(args.data_dir), args.application_ids)
+
+
 def _add_application_parser(commands, stored) -> None:
     group = commands.add_parser("application", help="投递记录：记投递、投出、改状态、回复、备注、跟进、作废、查看、导出和备份",
-                                description="投递记录（docs/cn/applications.md）。写操作先 --preview 看要写什么，"
+                                description="投递记录（docs/cn/applications.md）。投递事件写操作先 --preview 看要写什么，"
                                             "用户确认后带预览给的 --request-id 再运行一次才写入。")
     group.set_defaults(help_parser=group)
     sub = group.add_subparsers(dest="application_command", metavar="<application-command>")
@@ -1172,6 +1176,11 @@ def _add_application_parser(commands, stored) -> None:
     export_parser.add_argument("application_ids", nargs="*", help="只导出这些投递；省略时导出全部")
     export_parser.add_argument("--out", help="文件名（不是路径），以 .json 结尾")
     export_parser.set_defaults(handler=cmd_application_export)
+
+    retrospective_parser = sub.add_parser("retrospective", parents=[stored], help="只读复盘投递事实和归档评分",
+        description="读取所选投递的有效事件与首次登记投出时的 job/match 归档，不重评、不改权重、不写文件。")
+    retrospective_parser.add_argument("application_ids", nargs="*", help="投递 id；省略时复盘全部，重复 id 只计一次")
+    retrospective_parser.set_defaults(handler=cmd_application_retrospective)
 
 
 def cmd_collect(args) -> int:

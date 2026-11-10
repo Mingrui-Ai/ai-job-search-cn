@@ -35,7 +35,7 @@ WORKFLOWS = {
         "jd": {"list", "show"}, "profile": {"validate", "show"}, "match": {"list", "show"}}),
     "cn-application": ("docs/cn/applications.md", {
         "application": {"record", "submit", "status", "reply", "note", "followup", "void", "show", "list",
-                        "validate", "backup", "export", "report"},
+                        "validate", "backup", "export", "retrospective", "report"},
         "jd": {"list", "show"}}),
 }
 # Subagents a workflow dispatches: agent name -> the workflow document it follows.

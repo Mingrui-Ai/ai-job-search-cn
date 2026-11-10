@@ -235,15 +235,15 @@ class SnapshotSafety(ReportData):
         self.remind(app, "2026-11-11")
         with closing(sqlite3.connect(self.paths.db)) as writer:
             writer.execute("PRAGMA journal_mode=WAL")
-        original = applications._events
-        def during_read(connection, identity):
+        original = applications._check_record_events
+        def during_read(connection, row, errors):
             with closing(sqlite3.connect(self.paths.db)) as writer:
                 writer.execute("UPDATE applications SET next_followup_on='2026-11-15' WHERE application_id=?", (app,))
                 writer.execute("UPDATE events SET payload=? WHERE application_id=? AND type='followup_scheduled'",
                                (json.dumps({"due_on": "2026-11-15"}), app))
                 writer.commit()
-            return original(connection, identity)
-        with mock.patch.object(applications, "_events", during_read):
+            return original(connection, row, errors)
+        with mock.patch.object(applications, "_check_record_events", during_read):
             snapshot = dashboard.load(self.data)
         self.assertEqual(snapshot.counts["due"], 1)
         self.assertEqual(dashboard.load(self.data).counts["future"], 1)

@@ -20,12 +20,14 @@
 - lint_skills/security_guards 通过；12 份变更的 UTF-8、BOM/替换/控制字符及隐私范围检查通过。
 - 真实 Chrome 157 隔离 headless、禁用 JS、离线打开虚构报告，计数为 8 记录/7 岗位/6 投出/5 投出岗位/3 开放，提醒三组各 1；桌面和 390px 窄屏实看可读，无整页横向溢出。实际四个页内导航及键盘展开/收起期间只有本地 file 主文档请求，0 网络请求、0 页面错误，不外推未执行操作或系统背景流量。
 - CSS 200% 放大与打印样式实看可读；Chrome 实际 A4 printToPDF 3 页，经已有 pypdfium2 逐页渲染检查，表头跨页重复、行未截断。headless 原生键盘缩放未改变视口，不声称原生 UI 200% 已验证。没有安装依赖，浏览器只用于可选验证，普通 CLI 仍是标准库且不依赖 Chrome。
+- 已集中同步 M4-3 合并提交 `cd61145c2725954a70a449fb860ede071461bb50`。保留复盘入口、calibration 唯一流程及全部原校验/归档行为；§18 只加薄索引，§19 为看板。临时重复核验改为调用 `_check_record_events`，保留 read_context 的额外事件 id 唯一性检查和安全错误合同。共享 helper、validate 后续材料检查、prepare_materials、状态机/void 检查与 M4-3 的 AST 完全一致。
+- 整合后 report/followups/applications/calibration/agent entries/package 定向 162 项、1 跳过，42.679 秒，OK；lint/security 通过。页面模块与已实看证据的字节摘要一致，未无故重跑相同视觉检查；最终完整 SHA 门禁结果以 PR 和作者交接记录为准。
 
 ## 遗留
 
-- M4-3 合并后送审前集中同步必要 helper、CLI 和共享文档；不读取其他作者未交付实现或独立冻结用例。
+- 不读取独立冻结用例；独立审核由规划者安排。
 - SQL 与岗位 JSON 没有跨源锁；快照报告不是历史重放或实时状态。M4-5 连续真实使用另行验收。
 
 ## 下一步
 
-- M4-3 合并后集中复用 `_check_record_events`，按差异完成最终回归、完整 SHA/CI 与独立审核交付。作者不自行合并。
+- 完成整合后的正式全量、完整 SHA/CI 与独立审核交付。作者不自行合并。
