@@ -1138,14 +1138,14 @@ def _pay_months(text: str, salary):
 
 
 def _requirement_spans(text: str):
-    """Contents of explicitly headed requirements, up to the next heading."""
+    """Contents of explicit requirements, up to the next heading or field."""
     # A field label is a boundary, not a second route past the field's end.
     # Use the field grammar itself, including whitespace/newlines before its
     # colon or value; standalone/bracketed section headings still open spans.
-    fields = [m.start() for m in _EDUCATION_FIELD.finditer(text)]
-    headings = sorted({m.start() for p in (_SECTION, _INTRO, _DESCRIPTION_HEADING, _REQUIREMENT_SECTION)
-                       for m in p.finditer(text)})
-    return [(m.end(), next((start for start in headings if start >= m.end()), len(text)))
+    fields = {m.start() for p in (_EDUCATION_FIELD, _COHORT_FIELD) for m in p.finditer(text)}
+    boundaries = sorted(fields | {m.start() for p in (_SECTION, _INTRO, _DESCRIPTION_HEADING, _REQUIREMENT_SECTION)
+                                  for m in p.finditer(text)})
+    return [(m.end(), next((start for start in boundaries if start >= m.end()), len(text)))
             for m in _REQUIREMENT_SECTION.finditer(text)
             if not any(m.start() <= start < m.end() for start in fields)]
 
