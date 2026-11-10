@@ -9,7 +9,7 @@ from pathlib import Path
 from unittest import mock
 
 from jobsearch_cn import applications, build_notes, cli, followups, messages, review, score
-from tests.test_cn_applications import Data
+from tests.test_cn_applications import Data, FIXTURE
 from tests.test_cn_messages import TECH_JOB, TECH_PROFILE, VOCABULARY
 
 
@@ -368,15 +368,13 @@ class Delivery(Data):
         self.assertIn("complete followup outputs", out)
         self.assertEqual(self.command("review", "validate", self.review_file)[0], 1)
 
-    def test_limits_h_checklist_and_no_submission_archive_expansion(self):
+    def test_limits_h_checklist_and_resume_build_rejection(self):
         record = self.prepare()
         for size, expected in ((300, 0), (301, 1)):
             record["segments"][1]["text"] = "谢" * (size - len(self.inputs().job["title"]) - len("您好，我此前提交了岗位的申请。"))
             self.save_record(record)
             self.assertEqual(self.command("material", "validate", self.source)[0], expected)
         self.prepare()
-        for regex in (applications._MATERIAL_NAME, applications._SENT_NAME, applications._REVIEW_NAME):
-            self.assertFalse(regex.fullmatch(self.source.name))
         self.assertEqual(self.command("resume", "build", self.source)[0], 2)
         report = json.loads(self.review_file.read_bytes())
         report["findings"] = [{"item": "H2", "path": "segments[0].text", "severity": "suggest",
@@ -416,3 +414,90 @@ class Delivery(Data):
                 self.assertEqual(before, {p.relative_to(target): p.read_bytes() for p in target.rglob("*") if p.is_file()})
                 path.rmdir()  # remove only this test-created junction, never its target
                 target.rename(path)
+
+
+class SubmissionArchive(Data):
+    """A valid followup is local drafting material, never a first-submission material."""
+
+    inputs = Context.inputs
+    record = Context.record
+    command = Delivery.command
+
+    def setUp(self):
+        super().setUp()
+        self.app = self.historical()
+        self.source = self.material.parent / "followup-1.json"
+        self.source.write_text(json.dumps(self.record(), ensure_ascii=False), encoding="utf-8")
+        code, out, err = self.command("material", "render", self.source, "--output")
+        self.assertEqual(code, 0, out + err)
+
+    def snapshot(self):
+        # Include directories, source files, database bytes (events/requests/projections) and archives.
+        return {p.relative_to(self.data).as_posix(): p.read_bytes() if p.is_file() else None
+                for p in self.data.rglob("*")}
+
+    def test_cli_record_and_submit_refuse_followup_before_preview_or_write_even_when_renamed(self):
+        draft = self.drafted()
+        routes = (("record", self.job, "--channel", "email", "--submitted"),
+                  ("submit", draft, "--expected-revision", 1))
+        for name in ("followup-1.json", "resume-2.json", "email-2.json", "renamed.json"):
+            source = self.source.with_name(name)
+            source.write_bytes(self.source.read_bytes())
+            for route in routes:
+                args = (*route, "--on", "2026-11-10", "--actor", "codex")
+                before = self.snapshot()
+                # A real supported-material preview supplies the unused request id for a write attempt.
+                code, preview, err = self.cli(*args, "--material", self.material, "--preview")
+                self.assertEqual(code, 0, err)
+                for mode in (("--preview",), ("--request-id", preview["request_id"])):
+                    with self.subTest(name=name, route=route[0], mode=mode[0]):
+                        code, out, err = self.cli(*args, "--material", source, *mode)
+                        self.assertEqual((code, out), (1, None), err)
+                        self.assertEqual(err["error"], "invalid")
+                        self.assertIn("followup", err["message"])
+                        self.assertIn("first-submission", err["message"])
+                        self.assertEqual(self.snapshot(), before)
+
+    def test_direct_api_cannot_bypass_the_boundary_by_omitting_or_relaxing_the_callback(self):
+        draft = self.drafted()
+        routes = ((applications.record, self.job, {"channel": "email", "submitted": True}),
+                  (applications.submit, draft, {"expected_revision": 1}))
+        for check in (None, mock.Mock(return_value=([], []))):
+            before = self.snapshot()
+            with self.assertRaisesRegex(applications.ApplicationError, "followup.*first-submission"):
+                applications.prepare_materials(self.data, self.job, self.source, check_material=check)
+            for call, identity, options in routes:
+                preview = call(self.data, identity, material=self.material, preview=True, **options)
+                for mode in ({"preview": True}, {"request_id": preview["request_id"]}):
+                    with self.subTest(route=call.__name__, mode=mode, callback=check is not None):
+                        with self.assertRaisesRegex(applications.ApplicationError, "followup.*first-submission"):
+                            call(self.data, identity, material=self.source, check_material=check, **options, **mode)
+                        self.assertEqual(self.snapshot(), before)
+            if check is not None:
+                check.assert_not_called()
+
+    def test_legacy_resume_and_three_messages_still_preview_and_archive_for_both_routes(self):
+        for kind in ("resume", "greeting", "email", "referral"):
+            source = self.material.with_name(f"{kind}-1.json")
+            record = {**json.loads((FIXTURE / source.name).read_bytes()), "job_id": self.job}
+            source.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+            draft = self.drafted()
+            routes = (("record", self.job, "--channel", "email", "--submitted"),
+                      ("submit", draft, "--expected-revision", 1))
+            for route in routes:
+                with self.subTest(kind=kind, route=route[0]):
+                    args = (*route, "--material", source, "--on", "2026-11-10", "--actor", "codex")
+                    before = self.snapshot()
+                    code, preview, err = self.cli(*args, "--preview")
+                    self.assertEqual(code, 0, err)
+                    self.assertEqual(self.snapshot(), before)
+                    self.assertEqual([item["file_id"] for item in preview["materials"]], ["material"])
+                    code, out, err = self.cli(*args, "--request-id", preview["request_id"])
+                    self.assertEqual(code, 0, err)
+                    application = out["application"]
+                    self.assertEqual(application["status"], "applied")
+                    [version] = application["material_versions"]
+                    self.assertEqual(version["material_hash"], review.material_hash(record))
+                    [archived] = version["files"]
+                    self.assertEqual((self.paths.dir / archived["path"]).read_bytes(), source.read_bytes())
+        self.assertEqual(self.cli("validate")[0], 0)

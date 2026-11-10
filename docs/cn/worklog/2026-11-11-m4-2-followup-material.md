@@ -9,7 +9,7 @@
 
 ## 决策
 
-- `followups.py` 统一只读上下文、完整输入摘要与资格；`applications.py` 只增加同一读事务内的事件/投影检查，不改数据库、事件或写入流程。
+- `followups.py` 统一只读上下文、完整输入摘要与资格；`applications.py` 增加同一读事务内的事件/投影检查，并在共享材料归档入口拒绝 followup，不改数据库结构或事件格式。
 - 旧三类模板仍必填，followup 为 default 可选扩展；缺失时只回退该 spec，返回实际来源及版本。旧材料/审核不开始依赖投递库或当前资料。
 - 新 kind 的五个校验入口共享上下文；render 使用同一内存输入，发布前复核；review 核验真实产物后复核。跨 SQLite/JSON 不承诺原子快照。
 - AGENTS 与 Claude/dsh 的现有 CN 入口只补路由；上游主体不改，权限字符串不增加。
@@ -22,6 +22,9 @@
 - 扩展到 application 全套与真实 Windows junction：238 项、3 跳过，57.336 秒，OK。自查确认完整 job 摘要须在 legacy upgrade 填默认值前计算；新增回归。末次消息/context 检查 89 项、1 跳过，23.013 秒，OK，包含用户模板可省略可选 progress、必填槽位 required 必须为 true。
 - lint_skills/security_guards 通过；24 份变更通过 UTF-8、BOM/替换字符/控制字符及范围检查，新增内容无机器路径或令牌特征。公开样例中的邮箱均为 example.com 虚构标记。
 - 首轮正式全量暴露入口契约问题后中止：skill 正文超过既有 15 行上限，旧静态检查把 §17 交接后的 material/review 误算为 cn-application 的命令。已压缩四个薄入口，保留行数限制和原权限；测试按明确的 §17.2 交接分别核对 cn-application 与 cn-resume 的原命令组，新增显式交接断言。入口 15 项通过（0.382 秒），lint/security 再次通过；产品代码未改，正式全量按新 SHA 重跑。
+- 上一提交 `6f7ad6d` 正式全量 2128 项、37 跳过，452.443 秒，OK；但独立审核随后发现 P2：通用材料校验新增 kind 隐式扩大首次投递归档范围。作者用虚构数据实际复现 record/submit 的预览和写入均 exit 0，数据库和归档被修改；保留正则不足以守住此边界，原正则断言已替换为行为回归。
+- P2 修复在 `prepare_materials` 读取 JSON 后、调用可选校验器前拒绝 `kind=followup`，覆盖预览、写入、改名及无校验回调的 Python 直调。仅收紧此次新增 kind，保留原有材料、外部已发送文件和数据库契约。新测试在修复前复现失败，修复后检查拒绝不改变数据库、目录、源文件和归档，以及 resume/greeting/email/referral 在两条路径均可预览并实际归档。
+- P2 修复后 followups/applications/messages/review/package 定向 200 项、1 跳过，48.183 秒，OK；lint_skills/security_guards 通过，全部 25 份变更通过 UTF-8、BOM/替换/控制字符及隐私范围检查。正式全量和独立复核以新提交的 PR 记录为准。
 
 ## 遗留
 
@@ -29,4 +32,4 @@
 
 ## 下一步
 
-- 完成只读 context 与旧模板兼容检查点，接齐材料/产物/审核，运行虚构闭环及正式检查，交规划者独立审核。
+- 完成 P2 修复后的定向及正式全量检查，推送新完整 SHA 交规划者复核；旧 `6f7ad6d` 不可合并，作者不自行合并。

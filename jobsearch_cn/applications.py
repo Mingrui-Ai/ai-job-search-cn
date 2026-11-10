@@ -821,6 +821,10 @@ def prepare_materials(data_root, job_id: str, material_path=None, sent_paths=(),
             raise _invalid(f"{material_file}: a material is a JSON object (docs/cn/material.md)")
         if record.get("job_id") != job_id:
             raise _invalid(f"{material_file} is a material for {record.get('job_id')!r}, not for {job_id}")
+        # Followups are local drafts for an existing submission, not first-submission materials.
+        # Check the content here: filenames and the caller's optional validator cannot enforce this boundary.
+        if record.get("kind") == "followup":
+            raise _invalid("followup materials cannot be archived as first-submission materials by record or submit")
         if check_material is not None:
             errors, material_warnings = check_material(record)
             if errors:
