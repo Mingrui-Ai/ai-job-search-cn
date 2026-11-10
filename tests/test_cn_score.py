@@ -224,11 +224,12 @@ class Choices(Case):
         self.assertEqual(self.dimension("direction", job=job)["jd_groups"], {"data": 1})
 
     def test_a_new_rules_version_marks_older_records_stale(self):
-        self.assertEqual(score.RULES_VERSION, 12)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
+        self.assertEqual(score.RULES_VERSION, 13)  # 2: H18's synonyms; 3: H16's choices; 4: M2-6b's location;
         # 5: M2-6c's two checks; 6: H26's statistical analysis; 7: H29's office vocabulary;
         # 8: H21's versioned skills; 9: M2-6e's salary tiers; 10: M2-6f's interview travel;
         # 11: M2-5 round 2's salary in another unit without tiers, and Maven, HTTP, TCP/IP and the rest;
         # 12: M2-6g's five days a week for a day rate without tiers when neither side says
+        # 13: collection parsing fixes and minimum scoring coverage
         old = setting(scored(self.job, self.tech), "rules_version", 7)
         reasons = score.stale_reasons(old, self.job, score.profile_hash(self.tech), score.weights_of(self.tech))
         self.assertEqual(reasons, ["rules"])
@@ -612,7 +613,8 @@ class Total(Case):
         for value, grade in ((75, "strong"), (74, "good"), (60, "good"), (59, "moderate"), (45, "moderate"),
                              (44, "weak"), (30, "weak"), (29, "poor"), (0, "poor")):
             with self.subTest(score=value):
-                self.assertEqual(score.total(self.dims(skills=value), score.DEFAULT_WEIGHTS, "needs_check")["grade"], grade)
+                self.assertEqual(score.total(self.dims(skills=value, direction=value),
+                                             score.DEFAULT_WEIGHTS, "needs_check")["grade"], grade)
 
     def test_ruled_out_jobs_are_ineligible_but_keep_their_scores(self):
         result = score.total(self.dims(skills=100, direction=100, experience=100, salary=100, location=100),
@@ -621,7 +623,7 @@ class Total(Case):
 
     def test_nothing_scored_has_no_total(self):
         self.assertEqual(score.total(self.dims(), score.DEFAULT_WEIGHTS, "needs_check"),
-                         {"score": None, "grade": None, "complete": False, "missing": list(score.DIMENSIONS)})
+                         {"score": None, "grade": "needs_check", "complete": False, "missing": list(score.DIMENSIONS)})
         # A weight of 0 leaves a dimension out too.
         zero = dict(score.DEFAULT_WEIGHTS, skills=0)
         self.assertIsNone(score.total(self.dims(skills=80), zero, "eligible")["score"])
@@ -764,7 +766,7 @@ class Trial(Case):
         del record["dimensions"]["location"]
         self.assertEqual(score.trial_total(record, score.DEFAULT_WEIGHTS)["missing"], ["location"])
         self.assertEqual(score.trial_total({}, score.DEFAULT_WEIGHTS),
-                         {"score": None, "grade": None, "complete": False, "missing": list(score.DIMENSIONS)})
+                         {"score": None, "grade": "needs_check", "complete": False, "missing": list(score.DIMENSIONS)})
 
     def test_shares_are_percentages_of_the_sum(self):
         self.assertEqual(score.shares(score.DEFAULT_WEIGHTS), score.DEFAULT_WEIGHTS)  # they add up to 100

@@ -41,12 +41,15 @@ SCHEMA_VERSION = 1
 #     TCP/IP, TCP, UDP, 计算机网络 and 数据结构 join the skill vocabulary; the location check can take a JD
 #     silent on remote work as a conflict, availability.remote_unstated_as_conflict (M2-5 round 2).
 # 12: without tiers a day rate is turned at five days a week when neither the JD nor the profile says (M2-6g).
-RULES_VERSION = 12
+# 13: collection parsing fixes and a minimum of two positively weighted scored dimensions.
+RULES_VERSION = 13
 DIMENSIONS = WEIGHT_KEYS  # skills, direction, experience, salary, location
 DEFAULT_WEIGHTS = {"skills": 30, "direction": 25, "experience": 25, "salary": 10, "location": 10}
 # The upstream 04-job-evaluation.md bands; a job the filter rules out is graded ineligible.
 GRADES = (("strong", 75), ("good", 60), ("moderate", 45), ("weak", 30), ("poor", 0))
 INELIGIBLE = "ineligible"
+NEEDS_CHECK = "needs_check"
+MIN_SCORED_DIMENSIONS = 2
 RECORD_KEYS = ("schema_version", "job_id", "rules_version", "scored_at", "job_hash", "profile_hash",
                "filter", "dimensions", "weights", "total", "gaps")
 AGENT_KEYS = ("jd", "profile")
@@ -555,16 +558,17 @@ def _first(evidence):
 
 
 def total(dimensions: dict, weights: dict, verdict: str) -> dict:
-    """The weighted mean of the scored dimensions, rounded half up; a job the filter rules out is ineligible."""
+    """A weighted mean only with two positively weighted scores; hard conflicts stay ineligible."""
     scored = [key for key in DIMENSIONS if dimensions[key]["score"] is not None]
     weight = sum((_fraction(weights[key]) for key in scored), Fraction(0))
     score = None
-    if weight > 0:
+    enough = sum(weights[key] > 0 for key in scored) >= MIN_SCORED_DIMENSIONS
+    if weight > 0 and enough:
         score = _round(sum((_fraction(weights[key]) * dimensions[key]["score"] for key in scored), Fraction(0)) / weight)
     if verdict == match.INELIGIBLE:
         grade = INELIGIBLE
     else:
-        grade = None if score is None else next(name for name, floor in GRADES if score >= floor)
+        grade = NEEDS_CHECK if score is None else next(name for name, floor in GRADES if score >= floor)
     return {"score": score, "grade": grade, "complete": len(scored) == len(DIMENSIONS),
             "missing": [key for key in DIMENSIONS if key not in scored]}
 
@@ -588,7 +592,7 @@ def shares(weights: dict) -> dict:
     return {key: _plain(Fraction(_round(_fraction(weights[key]) * 1000 / whole), 10)) for key in DIMENSIONS}
 
 
-_GRADE_ORDER = [name for name, _ in GRADES] + [INELIGIBLE]
+_GRADE_ORDER = [name for name, _ in GRADES] + [NEEDS_CHECK, INELIGIBLE]
 
 
 def list_key(grade, total_score, job_id) -> tuple:
