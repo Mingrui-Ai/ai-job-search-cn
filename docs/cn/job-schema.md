@@ -232,7 +232,7 @@ JD 让你在几个技能里选一个会就行时（"熟悉 Golang 或 Java""Pyth
 
 ## 版本记录
 
-- v1 evidence 新增可选 `clear: true`（2026-11-10，H22b）。不迁移旧记录、旧 null 和 H22 列表语义不变。未支持 H22b 的旧版本工具会拒绝此额外键，需先更新工具；不要为兼容旧工具删除已保存的清空标记。
+- v1 evidence 新增可选 `clear: true`（2026-11-10，H22b）。不迁移旧记录、旧 null 和 H22 列表语义不变。直接向旧 CLI 提交此键会被拒绝，但旧工具的普通重导入可能覆盖库内已保存的标记，不能继续写入采用 H22b 的数据目录。所有使用该目录的会话须先升级到支持版本，包含后续 parse/save/screen；不要删除标记来兼容旧工具。前置操作见 [JD 导入工作流](jd-import.md#明确清空标量和对象h22b)。
 - v1（2026-10-26）：首版。
 - v1 新增 `requirements.skill_alternatives`（2026-10-29，H16）。只是加了一个字段，版本号不变：本地岗位库里在这之前保存的记录读出时自动补上 `[]`；自己手写、没有这个字段的记录，`jd validate` 会报"missing"，补上 `"skill_alternatives": []` 即可。
 - v1 新增 `interview` 和 `requirements.start`（2026-10-30，M2-6c）。同样只是加字段，版本号不变：之前保存的记录读出时自动补上 null；手写、没有这两个字段的记录，补上 `"interview": null` 和 `requirements` 里的 `"start": null` 即可。
