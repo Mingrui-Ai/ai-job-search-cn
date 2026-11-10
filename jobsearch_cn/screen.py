@@ -12,6 +12,7 @@ condition. No parsing or scoring rule lives here, and nothing reads the network.
 
 import json
 from collections import Counter
+from datetime import date
 from pathlib import Path
 
 from jobsearch_cn import jd_parser, match, report, schema, score, store
@@ -205,9 +206,32 @@ def check(path, site: str, vocabulary, now=None) -> dict:
             "duplicates": duplicates, "ignored": ignored, "ok": len(entries) - failed, "failed": failed, "jobs": jobs}
 
 
+def reference_date(value=None) -> date:
+    """Resolve the local calendar day once per run, rejecting invalid dates before any write."""
+    if value is None:
+        return date.today()
+    errors = []
+    schema._check_date(value, "as_of", errors)
+    if errors:
+        raise BatchError("--as-of: must be a calendar date in YYYY-MM-DD format")
+    return date.fromisoformat(value)
+
+
+def _freshness(job: dict, as_of: date, maximum: int) -> dict:
+    """Use only the validated job's publication date, never fetch/import timestamps."""
+    published = job.get("published_at")
+    age = (as_of - date.fromisoformat(published)).days if published is not None else None
+    status = "unknown" if age is None else "future" if age < 0 else "too_old" if age > maximum else "recent"
+    return {"published_at": published, "age_days": age, "status": status}
+
+
 def run(path, site: str, profile: dict, vocabulary, job_store: store.Store, matches: store.MatchStore,
-        top: int = DEFAULT_TOP, now=None) -> dict:
+        top: int = DEFAULT_TOP, now=None, as_of=None) -> dict:
     """jd screen: import the batch, score what needs it, and the shortlist (docs/cn/screen.md)."""
+    day = reference_date(as_of)
+    maximum = profile["target"].get("max_job_age_days")
+    if maximum is not None and not (schema._is_int(maximum) and maximum > 0):
+        raise BatchError("target.max_job_age_days: must be null or a positive integer")
     files, ignored = list_files(path)
     skipped, warnings, jobs = [], [], {}
     index = job_store.index()
@@ -259,14 +283,30 @@ def run(path, site: str, profile: dict, vocabulary, job_store: store.Store, matc
 
     listed.sort(key=lambda item: score.list_key((item[1].get("total") or {}).get("grade"),
                                                  (item[1].get("total") or {}).get("score"), item[0]["id"]))
-    short, out, gaps = [], [], Counter()
+    short, out, old, gaps = [], [], [], Counter()
     for job, record, entry in listed:
         points, profile_side = confirm_points(job, record, profile)
         gaps.update(profile_side)
+        freshness = _freshness(job, day, maximum) if maximum is not None else None
         if (record.get("filter") or {}).get("verdict") == match.INELIGIBLE:
-            out.append(_ruled_out_row(job, record, entry))
+            row = _ruled_out_row(job, record, entry)
+            out.append(row)
+        elif freshness is not None and freshness["status"] == "too_old":
+            reason = f"发布已 {freshness['age_days']} 天，超过你设置的 {maximum} 天"
+            row = _row(0, job, record, entry, points)
+            del row["rank"]
+            row.update(reason=reason, line="- " + "｜".join(_cells(job) + [f"发布时间筛选：{reason}"]))
+            old.append(row)
         else:
-            short.append(_row(len(short) + 1, job, record, entry, points))
+            if freshness is not None:
+                if freshness["status"] == "unknown":
+                    points.append("发布时间（JD 没写，需确认是否仍在招）")
+                elif freshness["status"] == "future":
+                    points.append(f"发布时间（{freshness['published_at']} 晚于参考日期 {day.isoformat()}，需核实）")
+            row = _row(len(short) + 1, job, record, entry, points)
+            short.append(row)
+        if freshness is not None:
+            row["freshness"] = freshness
     shown = short if not top else short[:top]
     by_check = Counter(conflict["check"] for row in out for conflict in row["conflicts"])
     order = list(report.CHECKS)
@@ -277,6 +317,8 @@ def run(path, site: str, profile: dict, vocabulary, job_store: store.Store, matc
                      for action in ("created", "updated", "unchanged")} | {"skipped": len(skipped)},
         "scored": scored,
         "weights": weights,
+        "freshness": {"as_of": day.isoformat(), "max_job_age_days": maximum,
+                      "excluded": {"jobs": len(old), "rows": old}},
         "shortlist": {"total": len(short), "shown": len(shown), "rows": shown},
         "ruled_out": {"jobs": len(out),
                       "by_check": [{"check": check, "label": report.CHECKS.get(check, check), "jobs": count}
@@ -429,6 +471,14 @@ def _summary(payload: dict, jobs: int) -> list:
             f"{item['label']} {item['jobs']}" for item in out["by_check"]) + "（一个岗位可能有几项冲突）。")
     else:
         lines.append("没有岗位被硬性条件过滤掉。")
+    freshness = payload["freshness"]
+    if freshness["max_job_age_days"] is None:
+        lines.append(f"发布时间筛选未启用（参考日期 {freshness['as_of']}，未设置天数）。")
+    else:
+        lines.append(f"发布时间筛选：参考日期 {freshness['as_of']}，保留发布不超过 "
+                     f"{freshness['max_job_age_days']} 天的岗位（含当天）；另排除 "
+                     f"{freshness['excluded']['jobs']} 个过旧岗位（不重复计算硬条件冲突）。"
+                     "发布时间未知或晚于参考日期的不据此排除，保留待确认，不代表已确认是新岗位；旧岗位和评分仍保留。")
     hidden = sum(payload["not_listed"].values())
     if hidden:
         lines.append(f"你标过不看、过期或打不开的 {hidden} 个没有列出。")

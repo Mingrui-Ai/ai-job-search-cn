@@ -37,9 +37,9 @@ AVAILABILITY_KEYS = ("start_date", "days_per_week", "months", "cities", "accepta
 AVAILABILITY_OPTIONAL = ("interview_travel", "remote_unstated_as_conflict")
 TARGET_KEYS = ("employment_types", "roles", "industries", "salary_min", "salary_ideal", "salary_step", "meal_value",
                "salary_days_per_week", "one_meal_points", "directions", "weights")
-# Keys target may leave out (M2-6g): search_keywords, what to search job boards for, read as [] when absent.
-# No rule reads it, so it stays out of the profile's digest (score.profile_hash).
-TARGET_OPTIONAL = ("search_keywords",)
+# Search/screen preferences do not affect scoring or material facts (score.profile_hash).
+# Missing search_keywords means []; missing max_job_age_days means no freshness filter.
+TARGET_OPTIONAL = ("search_keywords", "max_job_age_days")
 SALARY_MIN_KEYS = ("amount", "unit")
 # The scoring dimensions (M2-4; location since M2-6b).
 WEIGHT_KEYS = ("skills", "direction", "experience", "salary", "location")
@@ -124,6 +124,9 @@ def validate(profile, sources=None, groups=None) -> list[str]:
         check.texts(target.get("industries"), "target.industries")
         if "search_keywords" in target:
             check.texts(target["search_keywords"], "target.search_keywords")
+        age = target.get("max_job_age_days")
+        if age is not None and not (_is_int(age) and age > 0):
+            errors.append("target.max_job_age_days: must be null or a positive integer")
         salary = target.get("salary_min")
         if salary is not None and _obj(target, "salary_min", SALARY_MIN_KEYS, errors, path="target.salary_min"):
             amount = salary.get("amount")
