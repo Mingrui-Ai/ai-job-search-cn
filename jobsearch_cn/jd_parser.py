@@ -302,7 +302,7 @@ _BRACKETED = re.compile(r"（[^（）]*）|\([^()]*\)|【[^【】]*】|\[[^\[\]]
 _LABEL_LINE = re.compile(r"^[^:：，,。；;！!？?\s][^:：，,。；;！!？?]{0,9}[:：]")
 # A collected header supplies title context even for occupations outside the word list.
 _COLLECTED_HEADER = re.compile(r"^(招聘频道|工作地点|工作性质|公司名称|职位编号)\s*[:：]\s*\S")
-_NAVIGATION_TITLE = re.compile(r"^(?:欢迎|加入我们|(?:招聘)?首页|(?:招聘|职位|岗位)(?:列表|搜索|查询)|关于我们|联系我们)")
+_NAVIGATION_TITLE = re.compile(r"^(?:欢迎.*|加入我们|(?:招聘)?首页|(?:招聘|职位|岗位)(?:列表|搜索|查询)|关于我们|联系我们)$")
 # How far into a copy to look for an unlabelled title: a whole-page copy puts
 # navigation first, and the title beside its salary ("java开发实习生 130-150元/天").
 _HEAD_LINES = 30

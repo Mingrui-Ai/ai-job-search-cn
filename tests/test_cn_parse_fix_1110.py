@@ -105,6 +105,9 @@ class ReviewBoundaries(unittest.TestCase):
             with self.subTest(first=first):
                 job = parse(first + "\n招聘频道：校园招聘\n工作地点：苏州\n样本研究员 3-4K\n工作职责\n整理样品。")
                 self.assertEqual(job["title"], "样本研究员")
+        for title in ("首页运营实习生", "职位搜索算法工程师"):
+            with self.subTest(title=title):
+                self.assertEqual(parse(title + "\n招聘频道：校园招聘\n工作地点：苏州")["title"], title)
 
 
 class CollectionRegressions(unittest.TestCase):
