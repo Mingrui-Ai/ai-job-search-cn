@@ -695,8 +695,8 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 ## 7. M5 · v0.5 面试准备
 
 - [ ] M5-1 面试准备包：JD 考点、根据档案项目生成的深挖问题、按方向的常见题（题库可配置）。2026-11-11 已完成设计裁定，核心/CLI/原创配置/单源流程及公开虚构验证实施中（[说明](interview.md)、[工作记录](worklog/2026-11-11-m5-1-interview-prep.md)）；五动作精确权限和运行时薄入口待批，独立验收尚未完成，不标记整体完成。
-  - P3 待收尾：绑定配置在读取途中被删除的竞争窗口，当前可能报 `missing_input/exit2` 而非 `stale_context/exit1`；仍安全拒绝，无成功输出或旧 pass 放行。标识符隐私 P2 修复及验证见 [修复记录](worklog/2026-11-11-m5-1-identifier-privacy.md)。
-  - P3 提示时点：零 experience 时 template 的 catalog 为空但未即时警告；validate 已有 `no_project_questions`。未编造项目或放行零题，后续补模板提示。
+  - P3 错误分类（实现完成，待独立审核/合并）：已选或已绑定输入明确消失统一 `stale_context/exit1`，含合法审核间接绑定的 prep；首次显式缺输入、其他 IO/JSON/大小/路径错误及派生产物分类保留。同次已选 local 消失不回退，不接受旧 pass。见[本项记录](worklog/2026-11-11-m5-1-errors-and-warnings.md)；原标识符隐私 P2 记录保留。
+  - P3 模板提示（实现完成，待独立审核/合并）：同一次安全 catalog 投影没有可完整引用的经历事实时，warnings 增加固定“没有可引用项目”提示，保留扣留标记、其他警告及 1–20 题/零考点合同；validate 的 `no_project_questions` 仍按包内项目题判断。见[本项记录](worklog/2026-11-11-m5-1-errors-and-warnings.md)。
 - [ ] M5-2 模拟面试（复用上游 `/interview` 和 `07-interview-prep.md`）
 - [ ] M5-3 面试复盘记录，供下一轮使用
 - [ ] M5-4 验收与 `v0.5.0`：用户在一次真实面试前使用，并记录准备包的命中情况

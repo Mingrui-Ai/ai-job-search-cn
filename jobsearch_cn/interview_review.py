@@ -66,7 +66,7 @@ def draft(root, filename, round_number=1):
 
 def validate(root, filename):
     review_parts, _ = files.locate(root, filename, review=True)
-    record = files.read(root, review_parts)
+    record = files.read(root, review_parts, bound=True)
     files.keys(record, KEYS, "review")
     named = files.REVIEW.fullmatch(review_parts[-1])
     pack_name = "prep-" + named.group(1) + ".json"
@@ -79,8 +79,8 @@ def validate(root, filename):
     for field in ("pack_hash", "context_hash", "output_sha256"):
         if not files.hash_value(record[field]):
             files.fail("invalid", "interview review digest is invalid")
-    pack_path = files.safe(root, (*review_parts[:-1], pack_name))
-    parts, pack, inputs, result = interview.prepared(root, pack_path)
+    pack_path = files.safe(root, (*review_parts[:-1], pack_name), required=False)
+    parts, pack, inputs, result = interview.prepared(root, pack_path, bound=True)
     interview.artifact_identifier(pack["job_id"], review_parts[-1], inputs.contacts)
     if record["pack_hash"] != files.digest(pack) or record["context_hash"] != files.digest(inputs.context):
         files.fail("stale_context", "interview review belongs to another pack or source version")
@@ -105,7 +105,7 @@ def validate(root, filename):
     if must and record["verdict"] == "pass":
         files.fail("invalid", "interview review cannot pass with required changes")
     interview.recheck_pack(root, parts, pack, inputs)
-    if files.read(root, review_parts) != record or outputs(root, parts, pack) != output_hash:
+    if files.read(root, review_parts, bound=True) != record or outputs(root, parts, pack) != output_hash:
         files.fail("stale_context", "interview review or output changed during validation")
     return {"valid": True, "verdict": record["verdict"], "mode": record["mode"],
             "warnings": result["warnings"] + (["self_review"] if record["mode"] == "self" else []),
