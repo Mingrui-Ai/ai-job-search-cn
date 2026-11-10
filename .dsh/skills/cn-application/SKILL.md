@@ -21,3 +21,6 @@ restate or extend it here.
 - Never run or emulate the upstream /setup that the root `CLAUDE.md` describes: it writes personal
   data into tracked files.
 - Never put the user's contact details into a summary, note, reason or reply.
+
+For follow-up drafting, query and select the application under section 17, then hand over to
+`cn-resume`. This skill does not write materials or dispatch reviews.

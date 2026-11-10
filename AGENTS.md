@@ -42,6 +42,8 @@ To prevent duplication and configuration drift across different AI agent framewo
 
 **记录投递**：用户说投了哪个岗位、收到了回复或面试邀请、要设跟进日期、要作废记错的一条、问哪些该跟进了或要备份投递记录时，按 [docs/cn/applications.md](docs/cn/applications.md) 第 16 节执行（与 Claude Code 的 `cn-application` 技能共用这一份说明）。每次写入先 `--preview` 给用户看，用户同意后才带预览给的 `--request-id` 写入，`--actor` 写 `codex`；不用上游的 `/outcome`、`/apply` 记投递。
 
+**跟进草稿**：查询与选择按 [docs/cn/applications.md](docs/cn/applications.md) 第 17 节，选定具体投递后转 `cn-resume` 生成 `followup` 材料；独立审核和重新 render 仍按 [docs/cn/resume-workflow.md](docs/cn/resume-workflow.md)，不要求先评分或生成简历，不发送或自动改日期。
+
 **工程底线（开发与运行时都适用）**
 
 1. 来源和事实可追溯：不编造职位、薪资、技能或项目成果；未知字段用 `null`，模型推断必须标注为推断，不得冒充事实。

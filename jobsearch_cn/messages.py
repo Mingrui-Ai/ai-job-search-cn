@@ -19,14 +19,15 @@ from pathlib import Path
 
 from jobsearch_cn import material, profile as profile_mod, schema, score
 
-KINDS = ("greeting", "email", "referral")
+LEGACY_KINDS = ("greeting", "email", "referral")
+KINDS = (*LEGACY_KINDS, "followup")
 TOP_LEVEL_KEYS = ("schema_version", "kind", "job_id", "profile_hash", "created", "direction", "template",
                   "subject", "segments")
 SEGMENT_KEYS = ("slot", "text", "refs")
 SUBJECT_KEYS = ("text", "refs")
 # The longest a message may be, in characters after its placeholders are filled. A template may set less,
 # never more.
-HARD_LIMITS = {"greeting": 150, "email": 600, "referral": 300}
+HARD_LIMITS = {"greeting": 150, "email": 600, "referral": 300, "followup": 300}
 HARD_SUBJECT_LIMIT = 40
 DEFAULT = "default"
 BUILTIN = Path(__file__).resolve().parent / "message_templates"
@@ -117,14 +118,24 @@ def load_templates(data_dir=None) -> dict:
     for path in sorted(BUILTIN.glob("*.json")):
         if path.name != "banned.json":
             found[path.stem] = _template(path)
+    builtin_default = found.get(DEFAULT)
+    followup_source = "builtin/default"
     if data_dir is not None:
         user = Path(data_dir) / USER_DIR
         if user.is_dir():
             for path in sorted(user.glob("*.json")):
                 if path.name != "banned.json":
                     found[path.stem] = _template(path)
+                    if path.stem == DEFAULT and "followup" in found[DEFAULT]:
+                        followup_source = "user/default"
     if DEFAULT not in found:
         raise TemplateError(f"no {DEFAULT} template")
+    provider = found[DEFAULT] if "followup" in found[DEFAULT] else builtin_default
+    if provider is None or "followup" not in provider:
+        raise TemplateError("no built-in default followup template")
+    # Only this optional spec falls back; legacy overrides retain their own revision.
+    found[DEFAULT]["followup"] = provider["followup"]
+    found[DEFAULT]["_followup_identity"] = {"revision": provider["revision"], "source": followup_source}
     return found
 
 
@@ -181,7 +192,7 @@ def _template(path: Path) -> dict:
     revision = doc.setdefault("revision", 1)
     if not _positive(revision):
         raise TemplateError(f"{where}: revision must be a positive integer")
-    for kind in KINDS:
+    for kind in (*LEGACY_KINDS, *(("followup",) if "followup" in doc else ())):
         spec = doc.get(kind)
         if not isinstance(spec, dict) or not isinstance(spec.get("slots"), list) or not spec["slots"]:
             raise TemplateError(f"{where}: {kind}.slots must be a non-empty list")
@@ -194,6 +205,11 @@ def _template(path: Path) -> dict:
             names.append(slot["slot"])
         if len(set(names)) != len(names):
             raise TemplateError(f"{where}: {kind}.slots names a slot twice")
+        if kind == "followup" and (not {"context", "request"} <= set(names)
+                                   or names != [name for name in ("context", "progress", "request") if name in names]
+                                   or any(slot.get("required") is not True for slot in spec["slots"]
+                                          if slot["slot"] in ("context", "request"))):
+            raise TemplateError("followup: ordered context, optional progress, request slots; context/request required")
         limit = spec.get("max_chars", HARD_LIMITS[kind])
         if not _positive(limit):
             raise TemplateError(f"{where}: {kind}.max_chars must be a positive integer")
@@ -211,6 +227,8 @@ def _positive(value) -> bool:
 
 
 def template_id(direction: str, kind: str, templates: dict) -> str:
+    if kind == "followup":
+        return f"default/followup@{templates[DEFAULT]['_followup_identity']['revision']}"
     return f"{direction}/{kind}@{templates[direction]['revision']}"
 
 
@@ -248,6 +266,12 @@ def template_for(job, profile: dict, vocabulary, templates: dict, kind: str, dir
     """What `material template` prints: the chosen template for one kind, and why it was chosen."""
     if kind not in KINDS:
         raise TemplateError(f"kind must be one of {', '.join(KINDS)}")
+    if kind == "followup":
+        if direction not in (None, DEFAULT):
+            raise TemplateError("followup only supports --direction default; no direction was silently changed")
+        return {"direction": DEFAULT, "label": "跟进正文", "reason": "通用无标题跟进正文", "kind": kind,
+                "template": template_id(DEFAULT, kind, templates), "spec": templates[DEFAULT][kind],
+                "template_source": templates[DEFAULT]["_followup_identity"]["source"]}
     picked, why = choose(job, profile, vocabulary, templates, direction)
     spec = templates[picked][kind]
     return {"direction": picked, "label": templates[picked].get("label"), "reason": why, "kind": kind,
@@ -256,11 +280,21 @@ def template_for(job, profile: dict, vocabulary, templates: dict, kind: str, dir
 
 # ---------------------------------------------------------------- placeholders
 
-def _resolve(name: str, profile: dict, job, entries: dict, slot: str, kind: str):
+def _resolve(name: str, profile: dict, job, entries: dict, slot: str, kind: str, followup=None):
     """(value, the ref it needs, error) for one placeholder; value is None when it cannot be filled."""
     head, _, field = name.partition(".")
     if not field:
         return None, None, f"{{{name}}} is not a placeholder (write {{entry.field}}, e.g. {{edu-1.school}})"
+    if head.startswith("evt_"):
+        if kind != "followup" or followup is None or head not in followup.events:
+            return None, None, "event placeholder: no usable effective event in this application's context"
+        if field != "occurred_date":
+            return None, None, "event placeholder: only occurred_date is supported"
+        value = followup.events[head]["occurred_date"]
+        if value is None:
+            return None, head, "event occurred_date is unknown; omit the date, never use recorded_at"
+        year, month, day = map(int, value.split("-"))
+        return f"{year}年{month}月{day}日", head, None
     if head == JOB:
         if field not in ("title", "company"):
             return None, None, f"{{{name}}}: a job placeholder is {{job.title}} or {{job.company}}"
@@ -306,12 +340,12 @@ def _resolve(name: str, profile: dict, job, entries: dict, slot: str, kind: str)
     return value, head, None
 
 
-def fill(text: str, profile: dict, job, entries: dict, slot: str, kind: str) -> tuple[str, list, list]:
+def fill(text: str, profile: dict, job, entries: dict, slot: str, kind: str, followup=None) -> tuple[str, list, list]:
     """(text with its placeholders filled, the refs they need, errors)."""
     needed, errors = [], []
 
     def one(match):
-        value, ref, error = _resolve(match.group(1), profile, job, entries, slot, kind)
+        value, ref, error = _resolve(match.group(1), profile, job, entries, slot, kind, followup)
         if ref and ref not in needed:
             needed.append(ref)
         if error:
@@ -333,12 +367,16 @@ def _source(ref: str, profile: dict, job, entries: dict) -> str:
         # Its days and months are checked field by field (_Checker._availability), its start date is written
         # {availability.start_date}; so it vouches for no other number, and a date's 12 is not 12 months.
         return ""
+    if ref.startswith("evt_"):
+        return ""  # progress/date refs never vouch for candidate numbers, skills or banned wording
     return material._source_text(*entries[ref])
 
 
 class _Checker:
-    def __init__(self, record: dict, profile: dict, vocabulary, job, banned: dict, errors: list, warnings: list):
+    def __init__(self, record: dict, profile: dict, vocabulary, job, banned: dict, errors: list, warnings: list,
+                 followup=None):
         self.kind = record.get("kind")
+        self.followup = followup
         self.profile, self.vocabulary, self.job, self.banned = profile, vocabulary, job, banned
         self.errors, self.warnings = errors, warnings
         self.entries = material._entries(profile)
@@ -361,6 +399,10 @@ class _Checker:
                 if not isinstance(self.profile.get("availability"), dict):
                     self.errors.append(f"{path}: the profile has no availability")
                     continue
+            elif self.kind == "followup" and isinstance(ref, str) and ref.startswith("evt_"):
+                if self.followup is None or ref not in self.followup.events:
+                    self.errors.append(f"{path}: not a usable effective event of the bound application")
+                    continue
             elif ref == material.NOTES_REF:
                 self.errors.append(f"{path}: a message does not cite {material.NOTES_REF}; only a CV's summary does")
                 continue
@@ -380,11 +422,16 @@ class _Checker:
         keys = SUBJECT_KEYS if slot is None else SEGMENT_KEYS
         profile_mod._keys(value, keys, where, self.errors)
         refs = self.refs(value.get("refs"), f"{where}.refs")
+        if self.kind == "followup" and self.followup is not None:
+            if slot == "context" and self.followup.submitted_id not in refs:
+                self.errors.append(f"{where}.refs: context must cite the effective submitted event")
+            if slot == "progress" and not any(ref in self.followup.events for ref in refs):
+                self.errors.append(f"{where}.refs: progress must cite a usable effective event")
         text = value.get("text")
         if not isinstance(text, str) or not text.strip():
             self.errors.append(f"{where}.text: must be a non-empty string")
             return ""
-        filled, needed, problems = fill(text, self.profile, self.job, self.entries, slot, self.kind)
+        filled, needed, problems = fill(text, self.profile, self.job, self.entries, slot, self.kind, self.followup)
         self.errors.extend(f"{where}.text: {problem}" for problem in problems)
         if not problems and ("{" in filled or "}" in filled):
             # { 回复 } or {{edu-1.school}} written by hand, or a profile or job value with braces in it.
@@ -612,7 +659,7 @@ def _hits(group: dict, text: str, source: str) -> list:
     return found
 
 
-def validate(record, profile: dict, vocabulary, job=None, templates: dict = None, banned: dict = None) \
+def validate(record, profile: dict, vocabulary, job=None, templates: dict = None, banned: dict = None, *, followup=None) \
         -> tuple[list, list]:
     """(errors, warnings) for a greeting, email or referral against the profile, the job and its template."""
     if not isinstance(record, dict):
@@ -620,17 +667,21 @@ def validate(record, profile: dict, vocabulary, job=None, templates: dict = None
     templates = templates if templates is not None else load_templates()
     banned = banned if banned is not None else load_banned()
     errors, warnings = [], []
-    profile_mod._keys(record, TOP_LEVEL_KEYS, "", errors)
+    kind = record.get("kind")
+    profile_mod._keys(record, TOP_LEVEL_KEYS + (("context",) if kind == "followup" else ()), "", errors)
     if record.get("schema_version") != material.MATERIAL_VERSION or isinstance(record.get("schema_version"), bool):
         errors.append(f"schema_version: must be {material.MATERIAL_VERSION}")
-    kind = record.get("kind")
     if kind not in KINDS:
         return errors + [f"kind: must be one of {', '.join(KINDS)}"], []
+    if kind == "followup" and (followup is None or followup.context != record.get("context")):
+        return errors + ["context: followup requires checked current source inputs"], []
     for key in ("job_id", "profile_hash"):
         schema._check_text(record.get(key), key, errors)
     schema._check_timestamp(record.get("created"), "created", errors)
 
     direction = record.get("direction")
+    if kind == "followup" and direction != DEFAULT:
+        return errors + ["direction: followup requires default"], []
     if not isinstance(direction, str) or direction not in templates:
         errors.append(f"direction: must be one of {', '.join(sorted(templates))}")
         return errors, []
@@ -642,8 +693,10 @@ def validate(record, profile: dict, vocabulary, job=None, templates: dict = None
         errors.append(f"template: must be {current!r} (the direction and kind of this material)")
     elif not re.fullmatch(r"[1-9]\d*", revision):
         errors.append(f"template: the revision after @ must be a positive integer, as in {current!r}")
+    if kind == "followup" and named != current:
+        errors.append("template: followup must name the current effective template")
 
-    checker = _Checker(record, profile, vocabulary, job, banned, errors, warnings)
+    checker = _Checker(record, profile, vocabulary, job, banned, errors, warnings, followup)
     subject = record.get("subject")
     subject_text = ""
     if kind == "email":
@@ -704,29 +757,29 @@ def _slots(segments: list, spec: dict, checker: _Checker, errors: list) -> list:
 
 # ---------------------------------------------------------------- rendering
 
-def _filled(record: dict, profile: dict, job) -> tuple:
+def _filled(record: dict, profile: dict, job, followup=None) -> tuple:
     """(the subject or None, the segments) with their placeholders filled."""
     entries = material._entries(profile)
     kind = record["kind"]
-    parts = [fill(segment["text"], profile, job, entries, segment["slot"], kind)[0]
+    parts = [fill(segment["text"], profile, job, entries, segment["slot"], kind, followup)[0]
              for segment in record["segments"]]
     subject = fill(record["subject"]["text"], profile, job, entries, None, kind)[0] if kind == "email" else None
     return subject, parts
 
 
-def render(record: dict, profile: dict, job) -> str:
+def render(record: dict, profile: dict, job, *, followup=None) -> str:
     """The message as plain text to copy, its placeholders filled. Validate it first."""
-    subject, parts = _filled(record, profile, job)
+    subject, parts = _filled(record, profile, job, followup)
     kind = record["kind"]
     if kind == "greeting":
         return "".join(parts)
-    if kind == "referral":
+    if kind in ("referral", "followup"):
         return "\n".join(parts)
     return f"标题：{subject}\n\n" + "\n\n".join(parts)
 
 
-def body_chars(record: dict, profile: dict, job) -> int:
+def body_chars(record: dict, profile: dict, job, *, followup=None) -> int:
     """The characters the length limit counts (material.md 7.3): the filled segments, without an email's
     subject, the 标题： line or the line breaks render puts between segments. Validate it first."""
-    return sum(len(part) for part in _filled(record, profile, job)[1])
+    return sum(len(part) for part in _filled(record, profile, job, followup)[1])
 

@@ -124,8 +124,8 @@ class Validate(unittest.TestCase):
         self.assertEqual(errors_of(data), [])
 
     def test_the_checklist_items(self):
-        self.assertEqual(len(review.ITEMS), 41)
-        self.assertEqual((review.ITEMS[0], review.ITEMS[-1]), ("A1", "G8"))
+        self.assertEqual(len(review.ITEMS), 45)
+        self.assertEqual((review.ITEMS[0], review.ITEMS[-1]), ("A1", "H4"))
         self.assertNotIn("A6", review.ITEMS)
 
     def test_paths(self):

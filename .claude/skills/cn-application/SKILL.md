@@ -20,3 +20,6 @@ same arguments with the preview's `--request-id`. Never invent a request id, and
 `--actor claude_code`. Do not record applications with the upstream /outcome or /apply.
 
 Write only the user's own words into summaries, notes and reasons, never their contact details.
+
+For follow-up drafting, query and select the application under section 17, then hand over to
+`cn-resume`. This skill does not write materials or dispatch reviews.

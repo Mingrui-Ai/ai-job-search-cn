@@ -6,7 +6,7 @@ description: >
   check it against the review checklist (at most two rounds), and hands the files and the review
   summary to the user; also drafts the greeting, application email or referral request for the posting
   the same way, written to a text file. Triggers on: 做简历, 写简历, 改简历, 生成简历, 审简历, 简历审核,
-  投递材料, 打招呼语, 投递邮件, 内推, 沟通的话, resume build, cn-resume
+  投递材料, 打招呼语, 投递邮件, 内推, 沟通的话, 跟进草稿, 跟进消息, resume build, cn-resume
 ---
 
 # CN Resume
@@ -23,3 +23,7 @@ extend it here. Review in a separate dsh session, as section 2 of that document 
 Write files only under `data/materials/<job id>/`, and never change the profile. After any change to
 a material, rerun the command that made its files before the next review round: `resume build` for a
 resume, `material render --output` for a greeting, email or referral (`resume build` refuses those).
+
+For followup materials, use the shared workflow in `docs/cn/applications.md` section 17 via
+`resume-workflow.md`: get current context through read-only `material template`, render with
+`material render --output`, and independently review current sources and outputs.

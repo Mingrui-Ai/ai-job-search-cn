@@ -16,9 +16,9 @@ import re
 from jobsearch_cn import jd_parser, material as material_mod, profile as profile_mod, schema, score
 
 REVIEW_VERSION = 1
-KINDS = ("resume-review", "greeting-review", "email-review", "referral-review")
+KINDS = ("resume-review", "greeting-review", "email-review", "referral-review", "followup-review")
 # The material kinds reviewed without a coverage table (M3-6): their review's coverage is [].
-MESSAGE_KINDS = ("greeting", "email", "referral")
+MESSAGE_KINDS = ("greeting", "email", "referral", "followup")
 TOP_LEVEL_KEYS = ("schema_version", "kind", "job_id", "material", "material_hash", "round", "mode",
                   "created", "verdict", "findings", "coverage")
 FINDING_KEYS = ("item", "path", "severity", "reason", "suggestion")
@@ -35,7 +35,7 @@ GAP_IN_CITED_TEXT = "技能列表未列，所引条目原文里有，材料没�
 GAP_UNCHECKED = "技能列表未列，需核对经历原文"
 MAX_TEXT = profile_mod.MAX_BULLET
 # The items of docs/cn/review-checklist.md §2, by section.
-CHECKLIST = {"A": 5, "B": 6, "C": 6, "D": 6, "E": 6, "F": 4, "G": 8}
+CHECKLIST = {"A": 5, "B": 6, "C": 6, "D": 6, "E": 6, "F": 4, "G": 8, "H": 4}
 ITEMS = tuple(f"{section}{n}" for section, count in CHECKLIST.items() for n in range(1, count + 1))
 
 # [0-9], not \d: \d also matches full-width and other Unicode digits, which int() would read as an index.
@@ -104,7 +104,8 @@ def validate(review, material) -> tuple[list, list]:
     must = _findings(review.get("findings"), material, errors) if "findings" in review else 0
     if "coverage" in review:
         if is_message(material) and review["coverage"] != []:
-            errors.append("coverage: a greeting, email or referral has no coverage table; write []")
+            kinds = "followup" if material.get("kind") == "followup" else "greeting, email or referral"
+            errors.append(f"coverage: a {kinds} has no coverage table; write []")
         else:
             _coverage(review["coverage"], material, errors)
     if review.get("verdict") == "pass" and must:
@@ -152,8 +153,11 @@ def _findings(value, material, errors: list) -> int:
             errors.append(f"{where}: must be an object")
             continue
         profile_mod._keys(finding, FINDING_KEYS, where, errors)
-        if finding.get("item") not in ITEMS:
-            errors.append(f"{where}.item: {finding.get('item')!r} is not a checklist item (A1-G8)")
+        followup = isinstance(material, dict) and material.get("kind") == "followup"
+        allowed = ITEMS if followup else tuple(item for item in ITEMS if not item.startswith("H"))
+        if finding.get("item") not in allowed:
+            last = "H4" if followup else "G8"
+            errors.append(f"{where}.item: {finding.get('item')!r} is not a checklist item (A1-{last})")
         if finding.get("path") is not None:
             _path(finding.get("path"), f"{where}.path", material, errors)
         schema._check_enum(finding.get("severity"), SEVERITIES, f"{where}.severity", errors, nullable=False)

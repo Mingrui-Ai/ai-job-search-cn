@@ -17,7 +17,7 @@ from pathlib import Path
 
 from jobsearch_cn import (__version__, browser, collect, jd_parser, match, material, messages, profile, report,
                           resume_docx, resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
-from jobsearch_cn import beisen, build_notes, inbox, personal, robots_policy
+from jobsearch_cn import beisen, build_notes, followups, inbox, personal, robots_policy
 from jobsearch_cn import applications as applications_mod
 
 
@@ -417,11 +417,37 @@ def _is_message(record) -> bool:
     return isinstance(record, dict) and record.get("kind") in messages.KINDS
 
 
+def _is_followup(record) -> bool:
+    return isinstance(record, dict) and record.get("kind") == "followup"
+
+
+def _checked_followup(args, record):
+    """One source-loading/validation path for every followup entry point."""
+    try:
+        inputs = followups.check(store.data_dir(args.data_dir), record, profile_path=getattr(args, "profile", None))
+    except followups.ContextError as exc:
+        return None, [str(exc)], []
+    errors, warnings = messages.validate(record, inputs.profile, inputs.vocabulary, inputs.job,
+                                         inputs.templates, inputs.banned, followup=inputs)
+    return inputs, errors, warnings
+
+
+def _recheck_followup(args, record, inputs, errors):
+    if inputs is not None and not errors:
+        try:
+            followups.recheck(store.data_dir(args.data_dir), record, inputs, profile_path=getattr(args, "profile", None))
+        except followups.ContextError as exc:
+            errors.append(str(exc))
+
+
 def _check_material(args, record, data, job, vocabulary=None):
     """(errors, warnings) for a CV, with the notes.md beside the profile that its summary may cite, or for a
     greeting, email or referral against its template (messages.py, which cites no notes.md). material validate,
     material render, resume build and review draft all check through here, so they come to one verdict."""
     vocabulary = _vocabulary(args) if vocabulary is None else vocabulary
+    if _is_followup(record):
+        _, errors, warnings = _checked_followup(args, record)
+        return errors, warnings
     if _is_message(record):
         # Unlike a CV, a message that cites the job or fills {job.title} needs it stored: messages.validate says so.
         templates, banned = _message_files(args)
@@ -434,6 +460,12 @@ def _check_material(args, record, data, job, vocabulary=None):
 
 def cmd_material_validate(args) -> int:
     record = _read_material(args.file)
+    if _is_followup(record):
+        inputs, errors, warnings = _checked_followup(args, record)
+        _recheck_followup(args, record, inputs, errors)
+        _emit({"valid": not errors, "errors": errors, "warnings": warnings,
+               "context_status": "invalid" if errors else "current_at_check"})
+        return 1 if errors else 0
     data = _match_profile(args)
     if data is None:
         return 1
@@ -443,6 +475,23 @@ def cmd_material_validate(args) -> int:
 
 
 def cmd_material_template(args) -> int:
+    application_id, revision = getattr(args, "application", None), getattr(args, "expected_revision", None)
+    if args.kind == "followup":
+        if application_id is None or revision is None:
+            raise InputError("followup requires --application and --expected-revision")
+        try:
+            inputs = followups.load(store.data_dir(args.data_dir), application_id, args.job_id, revision,
+                                    profile_path=args.profile, direction=args.direction)
+            result = followups.template_result(inputs)
+            followups.recheck(store.data_dir(args.data_dir), {"job_id": args.job_id, "direction": "default",
+                              "context": inputs.context}, inputs, profile_path=args.profile)
+        except followups.ContextError as exc:
+            _emit({"valid": False, "errors": [str(exc)], "context_status": "invalid"})
+            return 1
+        _emit(result)
+        return 0
+    if application_id is not None or revision is not None:
+        raise InputError("--application and --expected-revision are only accepted for --kind followup")
     job = _stored_job(_store(args), args.job_id)
     if job is None:
         _emit({"error": f"no stored job {args.job_id}"}, sys.stderr)
@@ -461,20 +510,29 @@ def cmd_material_template(args) -> int:
 
 def cmd_material_render(args) -> int:
     record = _read_material(args.file)
-    data = _match_profile(args)
-    if data is None:
-        return 1
+    inputs = None
     kind = record.get("kind") if isinstance(record, dict) else None
-    if not _is_message(record) and (kind in material.KINDS or not isinstance(kind, str)):
-        raise InputError(f"material render renders {', '.join(messages.KINDS)}; a CV is built with resume build")
     # A misspelled kind is checked as material validate checks it, so the two say the same.
-    job = _material_job(args, record)
-    errors, warnings = _check_material(args, record, data, job)
+    if _is_followup(record):
+        inputs, errors, warnings = _checked_followup(args, record)
+        data, job = (inputs.profile, inputs.job) if inputs else (None, None)
+    else:
+        data = _match_profile(args)
+        if data is None:
+            return 1
+        if not _is_message(record) and (kind in material.KINDS or not isinstance(kind, str)):
+            raise InputError(f"material render renders {', '.join(messages.KINDS)}; a CV is built with resume build")
+        job = _material_job(args, record)
+        errors, warnings = _check_material(args, record, data, job)
     if errors:
         _emit({"valid": False, "errors": errors, "warnings": warnings})
         return 1
-    text = messages.render(record, data, job)
+    text = messages.render(record, data, job, followup=inputs)
     if not args.output:
+        _recheck_followup(args, record, inputs, errors)
+        if errors:
+            _emit({"valid": False, "errors": errors, "warnings": warnings})
+            return 1
         print(text)
         for warning in warnings:
             print(f"警告：{warning}", file=sys.stderr)
@@ -491,33 +549,63 @@ def cmd_material_render(args) -> int:
         directory = store.safe_dir(store.data_dir(args.data_dir), "messages", record["job_id"])
     except store.StoreError as exc:
         raise InputError(str(exc)) from None
+    except OSError:
+        if inputs is None:
+            raise
+        _emit({"valid": False, "errors": ["output: cannot create the message directory"]})
+        return 1
     output = directory / f"{named.group(1)}.txt"
     if output.is_symlink():
         raise InputError(f"{output} is a link; nothing is written through it")
-    resume_pdf._replace(output, f"{text}\n".encode("utf-8"))
-    note = _write_build_note(directory, named.group(1), record, data, (output,), "message-build")
+    if inputs is not None:
+        note_path = directory / f"{named.group(1)}.build.json"
+        if store._is_link(output) or store._is_link(note_path):
+            raise InputError("output: followup output or build note is a link/junction")
+        _recheck_followup(args, record, inputs, errors)
+        if errors:
+            _emit({"valid": False, "errors": errors, "warnings": warnings})
+            return 1
+    try:
+        resume_pdf._replace(output, f"{text}\n".encode("utf-8"))
+        note = _write_build_note(directory, named.group(1), record, data, (output,), "message-build")
+    except OSError:
+        if inputs is None:
+            raise
+        _emit({"valid": False, "errors": ["output: could not publish complete followup outputs; render again before review"]})
+        return 1
     # chars is counted as the length limit counts it (material.md 7.3), and max_chars is that limit, so the
     # two can be shown side by side: not the .txt, whose 标题： line and line breaks the limit leaves out (#133).
-    templates, _ = _message_files(args)
-    _emit({"text": str(output), "chars": messages.body_chars(record, data, job),
+    templates = inputs.templates if inputs else _message_files(args)[0]
+    _emit({"text": str(output), "chars": messages.body_chars(record, data, job, followup=inputs),
            "max_chars": templates[record["direction"]][kind]["max_chars"], "warnings": warnings,
-           "build_note": str(note)})
+           "build_note": str(note), **({"context_status": "current_at_check"} if inputs else {})})
     return 0
 
 
 def cmd_review_draft(args) -> int:
     record = _read_material(args.file)
-    data = _match_profile(args)
-    if data is None:
-        return 1
-    vocabulary = _vocabulary(args)
-    job = _material_job(args, record)
-    errors, _ = _check_material(args, record, data, job, vocabulary)
+    inputs = None
+    if _is_followup(record):
+        inputs, errors, _ = _checked_followup(args, record)
+        data, job, vocabulary = (inputs.profile, inputs.job, inputs.vocabulary) if inputs else (None, None, None)
+    else:
+        data = _match_profile(args)
+        if data is None:
+            return 1
+        vocabulary = _vocabulary(args)
+        job = _material_job(args, record)
+        errors, _ = _check_material(args, record, data, job, vocabulary)
     if errors:
         _emit({"error": "the material is invalid; run material validate first", "errors": errors}, sys.stderr)
         return 1
     result = review.draft(record, data, job, vocabulary)
     result = {"material_hash": review.material_hash(record), "job_found": job is not None, **result}
+    _recheck_followup(args, record, inputs, errors)
+    if errors:
+        _emit({"valid": False, "errors": errors})
+        return 1
+    if inputs:
+        result["context_status"] = "current_at_check"
     _emit(result)
     return 0
 
@@ -537,8 +625,14 @@ def _checked_review(args):
         raise InputError("cannot tell which material this review is of; pass --material")
     target = _read_material(str(material_path))
     errors, warnings = review.validate(record, target)
+    inputs = None
+    if _is_followup(target):
+        inputs, context_errors, context_warnings = _checked_followup(args, target)
+        errors.extend(context_errors)
+        warnings.extend(context_warnings)
     if not errors:
         errors.extend(build_notes.check_outputs(store.data_dir(args.data_dir), material_path, target, declared))
+    _recheck_followup(args, target, inputs, errors)
     return record, errors, warnings
 
 
@@ -554,6 +648,8 @@ def cmd_review_show(args) -> int:
         _emit({"valid": False, "errors": errors, "warnings": warnings})
         return 1
     print(review.markdown(record), end="")
+    if record.get("kind") == "followup-review":
+        print("\n跟进资料与产物截至本次本地核验有效；此后来源变化需重新起草、生成和审核。")
     return 0
 
 
@@ -743,7 +839,7 @@ def cmd_resume_sample(args) -> int:
 # resume-<n>.json (docs/cn/material.md §1); the PDF and the Word version take its name.
 _MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
 # greeting-<n>.json, email-<n>.json, referral-<n>.json: material render --output names the text after it.
-_MESSAGE_NAME = re.compile(r"((?:greeting|email|referral)-[1-9][0-9]{0,5})\.json")
+_MESSAGE_NAME = re.compile(r"((?:greeting|email|referral|followup)-[1-9][0-9]{0,5})\.json")
 
 
 def _write_build_note(directory, stem: str, record: dict, data: dict, outputs, kind="resume-build"):
@@ -771,7 +867,8 @@ def cmd_resume_build(args) -> int:
     named = _MATERIAL_NAME.fullmatch(Path(args.file).name)
     if not named:
         raise InputError(f"{args.file}: resume build takes a material file named resume-<n>.json "
-                         "(docs/cn/material.md), and names the PDF and Word files after it")
+                         "(docs/cn/material.md), and names the PDF and Word files after it; "
+                         "message materials use material render --output")
     record = _read_material(args.file)
     data = _match_profile(args)
     if data is None:
@@ -1466,9 +1563,11 @@ def build_parser(adapters=None) -> argparse.ArgumentParser:
     material_template.add_argument("--direction", help="指定方向：模板名（例如 tech、ops、default），或者技能词表里"
                                                        "还没有模板的方向（例如 design、hr），这时用 default 模板")
     material_template.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    material_template.add_argument("--application", help="followup 必填：所选投递 application id")
+    material_template.add_argument("--expected-revision", type=int, help="followup 必填：查询时的 application revision")
     material_template.set_defaults(handler=cmd_material_template)
     material_render = material_commands.add_parser(
-        "render", parents=[stored], help="检查打招呼语、邮件或内推请求，通过后输出可以直接复制的文字",
+        "render", parents=[stored], help="检查打招呼语、邮件、内推或跟进正文，通过后输出可以直接复制的文字",
         description="先做和 material validate 相同的检查，有错误时输出错误，退出码 1；"
                     "通过时把占位符换成档案和岗位里的值，输出纯文本，警告写到 stderr。",
     )
@@ -1499,6 +1598,7 @@ def build_parser(adapters=None) -> argparse.ArgumentParser:
                                         description=summary + "，并核对当前生成说明和产物。通过时退出码 0，不通过时退出码 1。")
         sub.add_argument("file", help="审核结果文件（data/materials/<岗位id>/review-<n>-r<轮次>.json）")
         sub.add_argument("--material", help="审核的材料文件；默认为审核结果同目录下 material 字段写的文件")
+        sub.add_argument("--profile", help="仅 followup 核对当前档案；默认使用本次 --data-dir 中的档案")
         sub.set_defaults(handler=handler)
     _add_application_parser(commands, stored)
     _add_collect_parser(commands, stored, adapters or {})
