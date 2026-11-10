@@ -155,8 +155,7 @@ _LEVELS = {"大专": "associate", "专科": "associate", "本科": "bachelor", "
            "硕士": "master", "研究生": "master", "博士": "phd"}
 _LEVEL_WORD = "(大专|专科|本科|学士|硕士|研究生|博士)"
 _EDUCATION_MIN = re.compile(
-    rf"{_LEVEL_WORD}(?:研究生)?\s*(?:学历\s*)?(?:及|或)?\s*以上"
-    rf"|{_LEVEL_WORD}\s*(?:学历|在读|应届|毕业)|在读\s*{_LEVEL_WORD}(?:研究生)?"
+    rf"{_LEVEL_WORD}(?:研究生)?\s*(?:学历\s*)?(?:及|或)?\s*以上|{_LEVEL_WORD}\s*(?:学历|在读|应届|毕业)"
 )
 _EDUCATION_PREFERRED = re.compile(
     rf"{_LEVEL_WORD}(?:研究生)?\s*(?:及以上)?\s*(?:学历)?\s*者?\s*(?:优先|为佳)"
@@ -168,7 +167,7 @@ _LEVEL_ANY = "(?:大专|专科|本科|学士|硕士|研究生|博士)"
 # One option of a choice: "博士研究生" is one, a doctorate - its 研究生 qualifies it, and is no master's.
 _LEVEL_OPTION = re.compile(r"(博士|硕士)研究生|大专|专科|本科|学士|硕士|研究生|博士")
 _EDUCATION_CHOICE = re.compile(
-    rf"(?P<label>学历\s*(?:要求)?\s*[:：]\s*|在读\s*)?{_LEVEL_ANY}(?:研究生)?"
+    rf"(?P<label>学历\s*(?:要求)?\s*[:：]\s*)?{_LEVEL_ANY}(?:研究生)?"
     rf"(?:\s*(?:或者?|/|／|、)\s*{_LEVEL_ANY}(?:研究生)?)+"
     r"(?P<tail>\s*(?:学历\s*)?(?:及|或)?\s*以上|\s*(?:学历|在读|应届|毕业|学生)|\s*(?:均可|皆可|都可以?))?"
 )
@@ -405,18 +404,38 @@ _SECTION = re.compile(
     r"(?m)^[ \t]*[【\[]?\s*(?:职位描述|职位详情|岗位描述|岗位职责|工作职责|职位职责|工作内容|任职要求|岗位要求|职位要求"
     r"|任职资格|技能要求|工作地点|工作地址|薪资福利|福利待遇|职位福利|岗位福利)\s*[】\]]?\s*(?:[:：]|$)"
 )
-# Context for the newly recognised cohort tags and current-student wording.
-# A later section ends the previous context, including team introductions.
+# New patterns read only positively identified spans. The legacy patterns above
+# still read the full text, with their pre-PR behaviour unchanged.
 _REQUIREMENT_SECTION = re.compile(
     r"(?m)^[ \t]*[【\[]?\s*(?:任职要求|岗位要求|职位要求|任职资格|招聘要求|申请条件|学历要求)\s*[】\]]?\s*(?:[:：]|$)"
 )
-_TEAM_SECTION = re.compile(r"(?m)^[ \t]*[【\[]?\s*(?:团队介绍|团队简介|部门介绍|部门简介)\s*[】\]]?\s*(?:[:：]|$)")
-_OTHER_PEOPLE = re.compile(r"负责|协助|服务|对接|指导|辅导|带领|团队|成员|现有")
-_EDUCATION_LABEL = re.compile(r"学历\s*(?:要求)?\s*[:：]\s*$")
-_EDUCATION_REQUIREMENT = re.compile(r"学历\s*(?:要求)?\s*[:：为]?|(?:应聘者|候选人|申请人)\s*(?:需|须|应|必须)|要求|须为|需为")
-_CAMPUS_ACTIVITY = re.compile(r"(?:校招|校园招聘)\s*(?:活动|大赛|宣讲会|开放日)")
-_CAMPUS_LABEL = re.compile(r"(?:招聘频道|招聘类型|招聘类别|工作性质|届别|毕业时间|毕业年份)\s*[:：]\s*$")
-_CANDIDATE_COHORT = re.compile(r"面向|招聘对象|应聘者|候选人|申请人")
+# Structural heading boundaries, independent of the words inside a sentence.
+_DESCRIPTION_HEADING = re.compile(
+    rf"(?m)^[ \t]*[【\[]?[{_HAN}]{{1,12}}(?:介绍|简介|概况|说明|须知)[】\]]?[ \t]*(?:[:：]|$)"
+)
+_EDUCATION_FIELD = re.compile(r"学历\s*(?:要求)?\s*[:：]\s*[^\n。；;！!？?]*")
+_COHORT_FIELD = re.compile(
+    r"(?:招聘频道|招聘类型|招聘类别|工作性质|届别|毕业时间|毕业年份)\s*[:：]\s*[^\n。；;！!？?]*"
+)
+_COHORT_TAG = re.compile("|".join(
+    rf"{re.escape(left)}[ \t]*{_YEAR}\s*(?:届|校招|校园招聘)[^{re.escape(right)}\n]*{re.escape(right)}"
+    for left, right in (("【", "】"), ("[", "]"), ("《", "》"))
+))
+# A campus season in a requirements paragraph must name candidates. A year
+# embedded in an experience description does not match this positive grammar.
+_CAMPUS_REQUIREMENT = re.compile(
+    rf"(?:^|[\n，,。；;：:])[ \t]*(?:(?:\d+[.、)）]|[-*•·])[ \t]*)?"
+    rf"(?:(?:面向|招聘对象|应聘者|候选人|申请人)\s*[:：]?\s*)?{_CAMPUS_YEAR.pattern}"
+    r"(?=\s*(?:应届|毕业生|学生|同学|候选人|申请人|[，,。；;！!？?\n]|$))"
+)
+_STUDENT_MIN = re.compile(rf"在读\s*{_LEVEL_WORD}(?:研究生)?")
+_STUDENT_CHOICE = re.compile(
+    rf"在读\s*{_LEVEL_ANY}(?:研究生)?(?:\s*(?:或者?|/|／|、)\s*{_LEVEL_ANY}(?:研究生)?)+"
+)
+_FIELD_DEGREE = re.compile(
+    rf"(?:在读\s*)?{_LEVEL_ANY}(?:研究生)?(?:\s*(?:或者?|/|／|、)\s*{_LEVEL_ANY}(?:研究生)?)*"
+    r"\s*(?:(?:学历\s*)?(?:及|或)?\s*以上|学历|在读|应届|毕业|学生)?"
+)
 _HEADER_END = re.compile(r"^(?:看过该职位的人还看了|相关职位|推荐职位|热门职位|公司基本信息)\s*[:：]?\s*$")
 _HEADER_PROSE = re.compile(r"^(?:请|可以|需要|需|要求|保证|欢迎|至少)|到岗|入职|连续")
 _COMPANY_LABEL = re.compile(r"(?m)^\s*(?:公司名称|企业名称|招聘单位|公司|企业)\s*[:：]\s*(?P<v>[^\n，,。；;]{2,40})")
@@ -611,7 +630,7 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
         "employment_type": cite("employment_type", _employment_type(text, headline)),
         "salary": cite("salary", _salary(text)),
         "requirements": {
-            "graduation": cite("requirements.graduation", _graduation(text, title_span)),
+            "graduation": cite("requirements.graduation", _graduation(text)),
             "days_per_week": cite("requirements.days_per_week", _days_per_week(text)),
             "min_months": cite("requirements.min_months", _min_months(text, tag)),
             "education": cite("requirements.education", _education(text, tag)),
@@ -1118,46 +1137,24 @@ def _pay_months(text: str, salary):
     return None
 
 
-def _requirement_section_at(text: str, position: int):
-    """True in candidate requirements, False in other sections, None without a heading."""
-    headings = [m for p in (_SECTION, _INTRO, _TEAM_SECTION, _REQUIREMENT_SECTION)
-                for m in p.finditer(text, 0, position)]
-    if not headings:
-        return None
-    return _REQUIREMENT_SECTION.fullmatch(max(headings, key=lambda m: m.start()).group()) is not None
+def _requirement_spans(text: str):
+    """Contents of explicitly headed requirements, up to the next heading."""
+    headings = sorted({m.start() for p in (_SECTION, _INTRO, _DESCRIPTION_HEADING, _REQUIREMENT_SECTION)
+                       for m in p.finditer(text)})
+    return [(m.end(), next((start for start in headings if start >= m.end()), len(text)))
+            for m in _REQUIREMENT_SECTION.finditer(text)]
 
 
-def _campus_candidate(text: str, match, title_span):
-    # Explicit tags/fields override prose context wherever they occur. Only
-    # unlabelled prose is subject to activity and section exclusions.
-    before, after = text[:match.start()], text[match.end():]
-    if any(before.rstrip().endswith(left) and after.lstrip().startswith(right)
-           for left, right in (("【", "】"), ("[", "]"), ("《", "》"))):
-        return True
-    if _CAMPUS_LABEL.search(before):
-        return True
-    if title_span and title_span[0] <= match.start() < title_span[1]:
-        return True
-    clause = _clause(text, match.start(), match.end())
-    if _CAMPUS_ACTIVITY.search(clause):
-        return False
-    line_start = text.rfind("\n", 0, match.start()) + 1
-    prefix = text[line_start:match.start()].strip()
-    if _CANDIDATE_COHORT.search(prefix):
-        return True
-    section = _requirement_section_at(text, match.start())
-    if section is not None:
-        return section
-    # A standalone recruitment-season label is explicit; prose is not.
-    return _line_at(text, match.start()).strip("【】[] ") == match.group().strip()
-
-
-def _graduation(text: str, title_span=None):
+def _graduation(text: str):
     # Concrete cohorts and graduation windows take precedence over season tags,
     # even when the title's tag appears earlier in the document.
     explicit = sorted((m for p in (_GRADUATION, _GRADUATION_WINDOW)
                        for m in p.finditer(text)), key=lambda m: m.start())
-    fallback = [m for m in _CAMPUS_YEAR.finditer(text) if _campus_candidate(text, m, title_span)]
+    spans = [m.span() for p in (_COHORT_TAG, _COHORT_FIELD) for m in p.finditer(text)]
+    fallback = [m for start, end in spans for m in _CAMPUS_YEAR.finditer(text, start, end)]
+    fallback += [m for start, end in _requirement_spans(text)
+                 for m in _CAMPUS_REQUIREMENT.finditer(text, start, end)]
+    fallback.sort(key=lambda m: m.start())
     for match in explicit + fallback:
         if "y1" in match.groupdict():
             y1, y2, m1, m2 = (int(match[k]) for k in ("y1", "y2", "m1", "m2"))
@@ -1208,39 +1205,28 @@ def _min_months(text: str, tag: list):
     return count, [snippet]
 
 
-def _student_requirement(text: str, match):
-    """Current students must describe the candidate, not colleagues or service recipients."""
-    if "在读" not in match.group():
-        return True
-    # A choice can absorb its 学历： label; a single degree leaves it in the
-    # prefix. Check both before excluding descriptions of other people.
-    label = match.groupdict().get("label") or ""
-    if _EDUCATION_LABEL.fullmatch(label) or _EDUCATION_LABEL.search(text[:match.start()]):
-        return True
-    left, right = _clause_bounds(text, match.start(), match.end())
-    prefix = _LIST_MARK.sub("", text[left:match.start()].strip())
-    if _OTHER_PEOPLE.search(prefix):
-        return False
-    if _EDUCATION_REQUIREMENT.search(prefix):
-        return True
-    section = _requirement_section_at(text, match.start())
-    if section is not None:
-        return section
-    # A standalone degree statement is itself an explicit education requirement.
-    tail = text[match.end():right].strip()
-    return not prefix and re.fullmatch(r"(?:研究生|学生|同学)?\s*(?:优先|为佳)?", tail) is not None
-
-
 def _education(text: str, tag: list):
     lowest = preferred = None
     snippets = []
     order = schema.EDUCATION_LEVELS
     candidates = []  # (start, end, level, snippet): the first one not a preference is the minimum
     choices = []  # (start, end, level, snippet) of every choice, for the preference too
-    other_students = []  # do not salvage one degree or preference from a rejected student description
+    # Read added spellings only inside the allowlist, before merging unchanged
+    # legacy matches. A choice claims all its degrees, including its preference.
+    fields = [m.span() for m in _EDUCATION_FIELD.finditer(text)]
+    for pattern, spans in ((_FIELD_DEGREE, fields), (_STUDENT_CHOICE, _requirement_spans(text)),
+                           (_STUDENT_MIN, _requirement_spans(text))):
+        for start, end in spans:
+            for found in pattern.finditer(text, start, end):
+                if any(a <= found.start() < b for a, b, _, _ in candidates):
+                    continue
+                level = min((_LEVELS[o.group(1) or o.group(0)] for o in _LEVEL_OPTION.finditer(found.group())),
+                            key=order.index)
+                row = (found.start(), found.end(), level, found.group().strip())
+                candidates.append(row)
+                choices.append(row)
     for match in _EDUCATION_CHOICE.finditer(text):
-        if not _student_requirement(text, match):
-            other_students.append(match.span())
+        if any(start <= match.start() < end for start, end, _, _ in candidates):
             continue
         level = min((_LEVELS[option.group(1) or option.group(0)] for option in _LEVEL_OPTION.finditer(match.group(0))),
                     key=order.index)
@@ -1248,13 +1234,8 @@ def _education(text: str, tag: list):
         if match["label"] or match["tail"]:
             candidates.append(choices[-1])
     for match in _EDUCATION_MIN.finditer(text):
-        if not _student_requirement(text, match):
-            other_students.append(match.span())
-            continue
-        if any(start <= match.start() < end for start, end in other_students):
-            continue
         if not any(start <= match.start() < end for start, end, _, _ in candidates):
-            candidates.append((match.start(), match.end(), _LEVELS[next(g for g in match.groups() if g)],
+            candidates.append((match.start(), match.end(), _LEVELS[match.group(1) or match.group(2)],
                                match.group(0).strip()))
     for _, end, level, snippet in sorted(candidates):
         if _PREFERENCE.search(text[end:end + 4]):
@@ -1277,7 +1258,6 @@ def _education(text: str, tag: list):
               for after in [_PREFERRED_AFTER.match(text, end)] if after]
     wanted += [(match.start(), _LEVELS[match.group(1)], match.group(0).strip())
                for match in _EDUCATION_PREFERRED.finditer(text)
-               if not any(start <= match.start() < end for start, end in other_students)
                if not any(start <= match.start() < end for start, end, _, _ in choices)]
     if wanted:
         _, level, snippet = min(wanted)

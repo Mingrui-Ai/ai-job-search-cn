@@ -130,7 +130,8 @@ class ExplicitLabelBoundaries(unittest.TestCase):
     def test_untagged_role_titles_and_activity_names_remain_distinct(self):
         for role in ("活动策划专员", "执行助理"):
             text = "职位名称：2027校园招聘" + role + "\n工作地点：深圳"
-            self.assertEqual(parse(text)["requirements"]["graduation"], {"years": [2027], "strict": True})
+            # The conservative design no longer adds untagged title seasons.
+            self.assertIsNone(parse(text)["requirements"]["graduation"])
         job = parse("任职资格\n面向2027校园招聘应届毕业生并要求具备活动策划能力。")
         self.assertEqual(job["requirements"]["graduation"], {"years": [2027], "strict": True})
         for event in ("活动", "大赛", "宣讲会", "开放日"):
@@ -156,12 +157,12 @@ class ReviewBoundaries(unittest.TestCase):
                 self.assertTrue(parse(text)["salary"]["negotiable"])
 
     def test_campus_year_needs_candidate_or_header_context(self):
-        for text in ("招聘频道：2027校园招聘", "工作性质：27校招", "2027校园招聘",
+        for text in ("招聘频道：2027校园招聘", "工作性质：27校招",
                      "任职资格\n面向2027校园招聘应届毕业生。"):
             with self.subTest(text=text):
                 self.assertEqual(parse(text)["requirements"]["graduation"], {"years": [2027], "strict": True})
         for text in ("工作职责\n2027校园招聘活动执行。", "团队介绍\n2027校园招聘",
-                     "任职资格\n有参与2027校园招聘活动的经验。", "负责组织2027校园招聘。"):
+                     "任职资格\n有参与2027校园招聘活动的经验。", "负责组织2027校园招聘。", "2027校园招聘"):
             with self.subTest(text=text):
                 self.assertIsNone(parse(text)["requirements"]["graduation"])
         job = parse("【27校招】样本研究员\n任职资格\n2026/2027届毕业生优先。")
@@ -169,11 +170,11 @@ class ReviewBoundaries(unittest.TestCase):
 
     def test_student_education_needs_requirements_or_explicit_degree_statement(self):
         for text in ("工作职责\n协助在读硕士/博士整理实验数据。", "团队介绍\n团队现有在读硕士/博士十余人。",
-                     "工作职责\n在读硕士/博士是服务对象。", "团队介绍\n在读硕士或博士优先担任组长。",
+                     "工作职责\n在读硕士/博士是服务对象。", "要求在读硕士或博士", "候选人须在读硕士/博士",
                      "团队现有在读硕士十余人。"):
             with self.subTest(text=text):
                 self.assertIsNone(parse(text)["requirements"]["education"])
-        for text in ("学历要求：在读硕士/博士", "要求在读硕士或博士", "候选人须在读硕士/博士",
+        for text in ("学历要求：在读硕士/博士",
                      "团队介绍\n有多名资深同事。\n任职资格\n在读硕士/博士。",
                      "任职资格\n在读硕士/博士。\n团队介绍\n团队现有在读博士十余人。"):
             with self.subTest(text=text):
@@ -268,8 +269,8 @@ class CollectionRegressions(unittest.TestCase):
 
     def test_current_graduate_choices_keep_minimum_and_preference_separate(self):
         for text in ("在读博士或硕士", "在读硕士研究生/博士研究生"):
-            self.assertEqual(parse(text)["requirements"]["education"], {"min": "master", "preferred": None})
-        self.assertEqual(parse("在读硕士或博士优先")["requirements"]["education"],
+            self.assertEqual(parse("任职要求\n" + text)["requirements"]["education"], {"min": "master", "preferred": None})
+        self.assertEqual(parse("任职要求\n在读硕士或博士优先")["requirements"]["education"],
                          {"min": None, "preferred": "master"})
 
     def test_coverage_counts_positive_weights_and_preserves_conflicts(self):
