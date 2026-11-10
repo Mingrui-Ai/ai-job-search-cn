@@ -17,7 +17,7 @@ from pathlib import Path
 
 from jobsearch_cn import (__version__, browser, collect, jd_parser, match, material, messages, profile, report,
                           resume_docx, resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
-from jobsearch_cn import beisen, build_notes, calibration, followups, inbox, personal, robots_policy
+from jobsearch_cn import application_report, beisen, build_notes, calibration, followups, inbox, personal, robots_policy
 from jobsearch_cn import applications as applications_mod
 from jobsearch_cn import interview, interview_files, interview_review
 
@@ -996,6 +996,10 @@ def cmd_application_list(args) -> int:
                             statuses=args.status, job_id=args.job)
 
 
+def cmd_application_report(args) -> int:
+    return _application_run(application_report.generate, store.data_dir(args.data_dir))
+
+
 def _application_write(function, args, **kwargs) -> int:
     """reply, note, followup and void: the arguments every write on an existing application shares."""
     return _application_run(function, store.data_dir(args.data_dir), args.application_id,
@@ -1053,7 +1057,7 @@ def cmd_application_retrospective(args) -> int:
 
 def _add_application_parser(commands, stored) -> None:
     group = commands.add_parser("application", help="投递记录：记投递、投出、改状态、回复、备注、跟进、作废、查看、导出和备份",
-                                description="投递记录（docs/cn/applications.md）。写操作先 --preview 看要写什么，"
+                                description="投递记录（docs/cn/applications.md）。投递事件写操作先 --preview 看要写什么，"
                                             "用户确认后带预览给的 --request-id 再运行一次才写入。")
     group.set_defaults(help_parser=group)
     sub = group.add_subparsers(dest="application_command", metavar="<application-command>")
@@ -1153,6 +1157,12 @@ def _add_application_parser(commands, stored) -> None:
                              help="待跟进：已投出、没结束、跟进日期已到的（due）和没设跟进日期的（unset）")
     list_parser.add_argument("--as-of", help="和 --due 一起用：按这一天算（YYYY-MM-DD；默认 Asia/Shanghai 的今天）")
     list_parser.set_defaults(handler=cmd_application_list)
+
+    report_parser = sub.add_parser(
+        "report", parents=[stored], help="生成本次投递快照的离线 HTML 看板",
+        description="生成一个自包含静态 HTML 到 reports/applications/<本次目录>/report.html；"
+                    "不改变投递或提醒，不联网，不自动打开浏览器。")
+    report_parser.set_defaults(handler=cmd_application_report)
 
     validate_parser = sub.add_parser(
         "validate", parents=[stored], help="检查整个投递记录库和归档文件",

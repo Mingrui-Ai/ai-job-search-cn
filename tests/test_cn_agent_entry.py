@@ -35,7 +35,7 @@ WORKFLOWS = {
         "jd": {"list", "show"}, "profile": {"validate", "show"}, "match": {"list", "show"}}),
     "cn-application": ("docs/cn/applications.md", {
         "application": {"record", "submit", "status", "reply", "note", "followup", "void", "show", "list",
-                        "validate", "backup", "export", "retrospective"},
+                        "validate", "backup", "export", "retrospective", "report"},
         "jd": {"list", "show"}}),
 }
 # Subagents a workflow dispatches: agent name -> the workflow document it follows.
@@ -69,8 +69,10 @@ def workflow_stages(workflow, groups):
     """
     text = read(REPO / workflow)
     if workflow == "docs/cn/applications.md":
-        application_stage, material_stage = text.split("\n### 17.2 ", 1)
-        return ((application_stage, groups), (material_stage, WORKFLOWS["cn-resume"][1]))
+        application_stage, remainder = text.split("\n### 17.2 ", 1)
+        material_stage, separator, later_application_stage = remainder.partition("\n## ")
+        stages = ((application_stage, groups), (material_stage, WORKFLOWS["cn-resume"][1]))
+        return stages + ((later_application_stage, groups),) if separator else stages
     return ((text, groups),)
 
 
@@ -140,6 +142,13 @@ class EntryPoints(unittest.TestCase):
         for directory in SKILL_DIRS:
             self.assertIn("hand over to `cn-resume`", read(REPO / directory / "cn-application/SKILL.md"))
         self.assertEqual(set(WORKFLOWS["cn-application"][1]), {"application", "jd"})
+
+    def test_report_returns_to_application_workflow_without_expanding_grants(self):
+        stages = workflow_stages("docs/cn/applications.md", WORKFLOWS["cn-application"][1])
+        self.assertIn("python -m jobsearch_cn application report", stages[-1][0])
+        self.assertEqual(set(stages[-1][1]), {"application", "jd"})
+        for directory in SKILL_DIRS:
+            self.assertIn("report generation does not write events", read(REPO / directory / "cn-application/SKILL.md"))
 
 
 class ReviewerAgents(unittest.TestCase):
