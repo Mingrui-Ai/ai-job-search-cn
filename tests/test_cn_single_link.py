@@ -1,8 +1,10 @@
 """Single-link CLI and policy tests: fictional tenants, temporary data, no network."""
 
 import copy
+import errno
 import io
 import json
+import os
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -285,11 +287,13 @@ class SingleCli(unittest.TestCase):
         started.assert_not_called()
 
     def test_write_failure_preserves_files_and_stops(self):
-        for error in (OSError("no hardlinks"), store.StoreError("junction")):
+        for error in (OSError("no hardlinks"), store.StoreError("junction"), FileExistsError("concurrent file"),
+                      OSError(errno.EPERM, "fictional permission failure"), OSError(errno.ENOSPC, "fictional disk full")):
             with self.subTest(error=error), mock.patch.object(store, "_write_json", side_effect=error):
                 code, result, tab, _ = self.call("--diagnostics")
                 self.assertTrue(tab.closed)
                 self.assertEqual((code, result["status"], result["saved"]), (3, "needs_user", 0))
+                self.assertIsNone(result["batch_dir"])
                 self.assertEqual(result["diagnostics"]["status"], "not_applicable")
 
     def test_explicit_closed_page_does_not_write_or_change_state(self):
@@ -297,6 +301,121 @@ class SingleCli(unittest.TestCase):
         code, result, _, _ = self.call(tab=FakeSingle(collect.Snapshot(URL, TITLE, html, 200)))
         self.assertEqual((code, result["closed"], result["saved"]), (0, 1, 0))
         self.assertFalse((self.root / "inbox").exists())
+
+    def test_existing_file_in_directory_chain_is_rejected_before_dedup_or_browser(self):
+        for relative in ("inbox", "inbox/ats", "inbox/ats/preflight", "jobs", "collect/diagnostics"):
+            with self.subTest(relative=relative):
+                path = self.root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("fictional original", encoding="utf-8")
+                before = set(self.root.rglob("*"))
+                with mock.patch.object(collect, "known_job_ids") as known, mock.patch.object(store, "safe_dir") as make:
+                    code, result, tab, opened = self.call("--batch", "preflight", "--diagnostics")
+                self.assertEqual(code, 2)
+                self.assertIn("error", result)
+                opened.assert_not_called()
+                known.assert_not_called()
+                make.assert_not_called()
+                self.assertEqual(tab.calls, [])
+                self.assertEqual(set(self.root.rglob("*")), before)
+                self.assertEqual(path.read_text(encoding="utf-8"), "fictional original")
+                path.unlink()  # only this test's ordinary file, inside its temporary root
+
+    def test_preflight_of_missing_paths_creates_nothing(self):
+        site, source = beisen.detail_rules(TENANTS["example"], URL)
+        options = collect.make_detail_options(URL, site, source, batch="missing", diagnostics=True)
+        before = set(self.root.rglob("*"))
+        with mock.patch.object(Path, "mkdir", side_effect=AssertionError("preflight must not mkdir")), \
+                mock.patch.object(store, "safe_dir", side_effect=AssertionError("preflight must not safe_dir")):
+            collect.SingleRun(options, self.root)
+        self.assertEqual(set(self.root.rglob("*")), before)
+
+    def test_unreadable_metadata_is_a_prestart_json_error(self):
+        original = Path.lstat
+        def denied(path, *args, **kwargs):
+            if path == self.root / "inbox":
+                raise PermissionError("fictional denied metadata")
+            return original(path, *args, **kwargs)
+        with mock.patch.object(Path, "lstat", denied):
+            code, result, tab, opened = self.call()
+        self.assertEqual(code, 2)
+        self.assertIn("error", result)
+        self.assertEqual(tab.calls, [])
+        opened.assert_not_called()
+
+    @unittest.skipUnless(os.name == "nt", "real Windows junction")
+    def test_real_junction_is_rejected_before_dedup_or_browser(self):
+        import _winapi
+        target = self.root / "junction-target"
+        target.mkdir()
+        marker = target / "original.txt"
+        marker.write_text("fictional original", encoding="utf-8")
+        _winapi.CreateJunction(str(target), str(self.root / "inbox"))
+        with mock.patch.object(collect, "known_job_ids") as known:
+            code, result, tab, opened = self.call()
+        self.assertEqual(code, 2)
+        self.assertIn("error", result)
+        self.assertEqual(tab.calls, [])
+        opened.assert_not_called()
+        known.assert_not_called()
+        self.assertEqual(list(target.iterdir()), [marker])
+        self.assertEqual(marker.read_text(encoding="utf-8"), "fictional original")
+
+    def test_file_appearing_after_preflight_returns_json_without_overwriting(self):
+        tab = FakeSingle()
+        close = tab.freeze_and_close
+        def replace_path():
+            result = close()
+            (self.root / "inbox").write_text("racing original", encoding="utf-8")
+            return result
+        tab.freeze_and_close = replace_path
+        code, result, _, _ = self.call("--diagnostics", tab=tab)
+        self.assertEqual((code, result["status"], result["saved"]), (3, "needs_user", 0))
+        self.assertIsNone(result["batch_dir"])
+        self.assertEqual(result["diagnostics"]["status"], "not_applicable")
+        self.assertTrue(tab.closed)
+        self.assertEqual((self.root / "inbox").read_text(encoding="utf-8"), "racing original")
+
+    @unittest.skipUnless(os.name == "nt", "real Windows junction race")
+    def test_junction_appearing_after_preflight_returns_json_without_writing_through(self):
+        import _winapi
+        target = self.root / "junction-target"
+        target.mkdir()
+        tab = FakeSingle()
+        close = tab.freeze_and_close
+        def replace_path():
+            result = close()
+            _winapi.CreateJunction(str(target), str(self.root / "inbox"))
+            return result
+        tab.freeze_and_close = replace_path
+        code, result, _, _ = self.call(tab=tab)
+        self.assertEqual((code, result["status"], result["saved"]), (3, "needs_user", 0))
+        self.assertIsNone(result["batch_dir"])
+        self.assertTrue(tab.closed)
+        self.assertEqual(list(target.iterdir()), [])
+
+    @unittest.skipUnless(os.name == "nt", "explicit root junction remains supported")
+    def test_explicit_root_junction_remains_allowed(self):
+        import _winapi
+        chosen = self.root / "chosen-root"
+        _winapi.CreateJunction(str(self.root), str(chosen))
+        self.root = chosen
+        code, result, _, _ = self.call()
+        self.assertEqual((code, result["saved"]), (0, 1))
+
+    def test_concurrent_original_is_preserved_and_zero_saved_has_no_batch_dir(self):
+        original = b"fictional concurrent original"
+        paths = []
+        def collide(directory, path, record, **kwargs):
+            path.write_bytes(original)
+            paths.append(path)
+            raise FileExistsError("concurrent creator")
+        with mock.patch.object(store, "_write_json", collide):
+            code, result, _, _ = self.call()
+        self.assertEqual((code, result["saved"], result["files"]), (3, 0, []))
+        self.assertIsNone(result["batch_dir"])
+        self.assertEqual(len(paths), 1)
+        self.assertEqual(paths[0].read_bytes(), original)
 
 
 if __name__ == "__main__":

@@ -65,6 +65,7 @@ delivered during the pacing pause. A problem raises _Stop before that action can
 import json
 import random
 import re
+import stat
 import time
 from dataclasses import dataclass
 from datetime import datetime
@@ -584,8 +585,9 @@ class SingleRun(_Run):
         self.capture = bool(getattr(self.site, "CAPTURE", None))
         self.batch = options.batch or f"{self.site.SOURCE_NAME}-{clock():%Y%m%d-%H%M%S}-single"
         self.batch_dir = None
-        self.known, self.warnings = known_job_ids(self.data_root, self.site)
         self.job_id = self.site.job_id_from_url(options.url)
+        self._preflight_paths()
+        self.known, self.warnings = known_job_ids(self.data_root, self.site)
         known = self.job_id in self.known
         self.summary = {
             "site": self.site.SITE, "mode": "single_link", "url": options.url,
@@ -603,8 +605,52 @@ class SingleRun(_Run):
             self.summary.update(finished="known_job", skipped_known=1, stopped_at=None,
                                 message="这个岗位以前已保存，本次没有访问网页；要重新读取可显式使用 --reread-known")
 
+    def _preflight_paths(self):
+        """Read-only admission before dedup or browser work; never create directories.
+
+        The explicitly selected data root may be a link, as in Store. Existing
+        directories below it must be real directories. Recheck at write time via
+        the original safe_dir/_write_json contract; this is not a filesystem lock.
+        """
+        try:
+            real_root = self.data_root.resolve(strict=True)
+            if not self.data_root.is_dir():
+                raise CollectError("单链接数据根不是目录，未开始读取")
+
+            def check(path, *, directory):
+                try:
+                    info = path.lstat()
+                except FileNotFoundError:
+                    return False
+                if store._is_link(path) or stat.S_ISLNK(info.st_mode) or not store._inside(path, real_root):
+                    raise CollectError("单链接路径含符号链接、junction 或指向数据根外，未开始读取")
+                if not (stat.S_ISDIR(info.st_mode) if directory else stat.S_ISREG(info.st_mode)):
+                    raise CollectError("单链接收件或去重路径的文件类型不正确，未开始读取")
+                return True
+
+            directories = [("inbox", self.site.SITE, self.batch), ("jobs",)]
+            if self.options.diagnostics:
+                directories.append(("collect", "diagnostics", self.batch))
+            for parts in directories:
+                current = self.data_root
+                for part in parts:
+                    current = current / part
+                    if not check(current, directory=True):
+                        break
+            check(self.data_root / "inbox" / self.site.SITE / self.batch / f"{self.job_id}.json", directory=False)
+        except (OSError, RuntimeError):
+            raise CollectError("无法安全检查单链接收件或去重路径，未开始读取") from None
+
     def fail(self, reason):
         return self._stopped(_Stop("needs_user", reason, "已停止，不自动重试；也可按 docs/cn/jd-import.md 提供 JD 文本"))
+
+    def _stopped(self, stop):
+        # safe_dir may have created directories before atomic publication fails.
+        # In single mode batch_dir describes saved inbox records, not empty or
+        # pre-existing directories. Preserve the original batch collector's output.
+        if self.summary["saved"] == 0:
+            self.summary["batch_dir"] = None
+        return super()._stopped(stop)
 
     def finish(self, snapshot, *, fetched_at, stop_reason=None):
         """Called after the temporary browser is closed; never save a live page."""
@@ -642,8 +688,8 @@ class SingleRun(_Run):
                                 message="已保存这一页当时的岗位正文；页面可读不代表仍有招聘名额")
         except _Stop as stop:
             return self._stopped(stop)
-        except store.StoreError:
-            return self.fail("收件目录不安全，未写入岗位原件")
+        except (store.StoreError, OSError):
+            return self.fail("无法安全写入收件目录，未写入岗位原件")
         return self.summary
 
 
