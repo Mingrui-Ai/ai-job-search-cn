@@ -70,12 +70,12 @@ def job_hash(job: dict) -> str:
 def profile_hash(profile: dict) -> str:
     """A digest of what the agent's judgments rest on: the profile without its contact details, which no match
     record holds, without its weights, which only the total uses and the record keeps itself (M2-6d), and
-    without its search keywords, which only finding jobs uses (M2-6g). A profile with no search_keywords
-    key hashes as it did before M2-6g."""
+    without its search/screen preferences (search_keywords, max_job_age_days). Profiles without these
+    optional keys hash exactly as before they were introduced."""
     data = {key: value for key, value in profile.items() if key != "contact"}
     if isinstance(data.get("target"), dict):
         data["target"] = {key: value for key, value in data["target"].items()
-                          if key not in ("weights", "search_keywords")}
+                          if key not in ("weights", "search_keywords", "max_job_age_days")}
     return _digest(data)
 
 

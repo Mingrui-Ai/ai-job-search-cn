@@ -23,7 +23,7 @@ data/profile/
 
 ## 3. profile.json 字段
 
-沿用 Job Schema 的约定：所有键都必须出现，没有的填 `null` 或 `[]`；不认识的键报错；枚举值与 Job Schema 共用，以便直接比较。
+沿用 Job Schema 的约定：除明确标为可选的键外，所有键都必须出现，没有的填 `null` 或 `[]`；不认识的键报错；枚举值与 Job Schema 共用，以便直接比较。
 
 ```json
 {
@@ -44,6 +44,7 @@ data/profile/
     "roles": ["后端开发", "大模型应用开发"],
     "industries": ["互联网"],
     "search_keywords": ["后端开发实习", "Python 实习"],
+    "max_job_age_days": null,
     "salary_min": {"amount": 150, "unit": "CNY/day"},
     "salary_ideal": {"amount": 220, "unit": "CNY/day"},
     "salary_step": 20,
@@ -79,6 +80,7 @@ data/profile/
 | `education[]` | `level` 取值同 Job Schema：`associate` / `bachelor` / `master` / `phd`。最高学历用于和 JD 的 `requirements.education.min` 比较 |
 | `availability` | 可到岗日期、每周天数、可实习月数、意向城市、是否接受远程、是否愿意去其他城市。分别对应 JD 的 `days_per_week`、`min_months`、`cities`、`remote`，可到岗日期对应 `requirements.start`，意向城市（两档）也用来判断面试要不要出行。意向城市分两档：`cities` 是首选城市，`acceptable_cities` 是可以接受、但不是首选的城市（M2-6b），两者不能重复；硬性条件里两档都算意向城市，评分的地点维度首选记 100、可以接受记 60。`relocate` 指是否愿意去这两档以外的城市。写了意向城市时，`remote_ok`、`relocate` 也要写，留空会影响两档以外的岗位：硬性条件的地点检查可能判"未知"（另一项已经写明能远程或愿意搬家时，仍可能判符合）；评分时，`relocate` 没写，这类岗位的地点分是 0（JD 可远程、你接受远程的除外，这时是 100 分）。`profile validate` 会给出警告。`interview_travel` 是愿不愿意去意向城市以外的地方面试（M2-6f）：`true` 愿意，`false` 暂时不去，`null` 没说；可以不写这个键，不写按 null。写了 `false` 时，JD 只写了到意向城市以外现场面试、没有线上选项的岗位，面试一项判"未知"，提示投之前先问能不能线上面试；`true` 或 null 时照旧判符合，附上路费和时间成本的提示（见 [match.md](match.md#各项条件)）。`remote_unstated_as_conflict` 是"JD 没写能否远程时按不能远程算"的开关（M2-5 第二轮，经理意见书-007）：`true` 打开，`false` 或 `null` 关闭，可以不写，不写按关闭。打开后，岗位城市不在两档意向城市内、`relocate` 为 `false`、JD 又没写能否远程时，地点一项判"冲突"（原因写"JD 未写明可远程，按你的设置视为不符合"），不再判"未知"；关闭时照旧 |
 | `target` | 求职方向。`employment_types` 取值同 Job Schema；`salary_min.unit` 取值同 Job Schema 的薪资单位。`salary_ideal`、`salary_step`、`meal_value`、`salary_days_per_week`、`one_meal_points` 供薪资分档（M2-6e）：理想薪资 `{amount, unit}`，单位必须和 `salary_min` 相同、不低于它；步长是正数，单位同理想薪资，和 `salary_ideal` 要么都写、要么都为 null；包两餐、三餐或"包吃"折合多少钱 `{amount, unit}`，单位取 `CNY/day` 或 `CNY/month`；JD 没写每周几天时按天、按月互换用的每周天数，大于 0、不超过 7，可以带小数（不分档时也用；不分档、两边都没写时按每周 5 天，M2-6g）；只包一餐时加的分数，0 到 100。五个键都要写，值可以为 null，全为 null 时薪资照旧只有 0 和 100 两档。怎么打分见 [match.md](match.md#薪资分档m2-6e)。`directions` 是想做的方向，取[技能词表](jd-parse.md#技能词表)的分组键，例如 `["data", "product"]`；可以用自己词表里新增的分组，`general`（通用办公软件）不算方向；`profile validate` 会对照词表检查。`weights` 是评分五个维度的权重，为 null 时用默认值（技能 30、方向 25、经历 25、薪资 10、地点 10）；要改就写全五项，例如 `{"skills": 40, "direction": 20, "experience": 20, "salary": 10, "location": 10}`，每项不小于 0，至少一项大于 0。改了权重，已保存的匹配记录会标为过期；重新评分时 Agent 补的经历和方向保留，只按新权重重算总分。改之前可以用 `match list --weights` 试算（M2-6d）。评分方法见 [match.md](match.md#可解释评分m2-4-设计稿)。`search_keywords` 是在招聘网站上搜岗位用的关键词（M2-6g，经理意见书-008），例如 `["后端开发实习", "Python 实习"]`；可以不写这个键，不写和 `[]` 一样，`profile validate` 不提示；写了就要是列表（没有就写 `[]`，不写 null），每一项是非空字符串，不能重复（同 `roles`，只差大小写、全半角或空格的也算重复）。过滤、评分和简历材料都不读它，所以它不算进档案摘要，只改关键词不会让已保存的匹配记录和简历材料变成"档案已改" |
+| `target.max_job_age_days` | 可选的批量短名单偏好（M6-4）：缺失或 `null` 不按发布时间筛选；正整数表示最多发布多少天（例如用户确认 `60` 后才写 60）。不接受布尔值、0、负数、小数或字符串，不设通用默认天数，旧档案无需迁移。仅 `jd screen` 读取，按 `published_at` 和本机当天或 `--as-of` 比较，恰好阈值保留；未知和未来日期不据此排除，标为待确认。不是候选人硬性资格条件，不改评分或材料事实；像 `search_keywords` 一样不计入 `profile_hash`，改天数不会让已有评分或材料过期，screen 每次重算名单。旧岗位和匹配记录保留，岗位不会自动变为 expired。见 [screen.md §4.1](screen.md#41-发布时间筛选) |
 | `skills[]` | `level`：`familiar`（了解）、`working`（熟悉）、`proficient`（熟练）、`expert`（精通）。`used_in` 指向用到它的经历或项目的 `id`，写简历时据此给出事实依据。收录范围见下方"填写约定" |
 | `experience[]` | 实习、项目、科研、竞赛、校园经历都放这里，用 `type` 区分：`internship` / `project` / `research` / `competition` / `campus` / `work`。`name`、`org`、`role` 的分工见下方"填写约定" |
 | `awards[]`、`certificates[]`、`languages[]` | 奖项、证书、语言 |
