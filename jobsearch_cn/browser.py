@@ -26,15 +26,18 @@ request itself and never changes one.
 Before the next navigation or scroll, collect checks a fresh snapshot of the current page,
 including responses delivered during its pause. Only after that check may navigation clear
 the old page's responses; the site's rules decide which bodies are errors.
-Nothing else: no clicks, no typing, no request interception, no reading of cookies or storage,
-never the user's other tabs.
+Batch collection never intercepts requests. Explicit single-link reads use a separate
+temporary context and intercept documents to refuse redirects before following them.
+Neither path clicks, types, reads cookies/storage, or uses the user's other tabs.
 """
 
+import inspect
 import re
 import time
 from urllib.parse import urlsplit
 
 from jobsearch_cn.collect import DENIED_STATUSES, BrowserError, Response, Snapshot
+from jobsearch_cn import robots_policy
 
 DEFAULT_CDP = "http://127.0.0.1:9222"
 # The whole address, nothing more: scheme, a loopback host, a port, an optional final slash.
@@ -264,3 +267,179 @@ def open_tab(cdp_url: str | None = None) -> Tab:
                                      "先确认装了 Chrome") from None
         raise BrowserUnavailable(f"连不上 {cdp_url} 的浏览器。先用带调试端口的专用快捷方式启动 Chrome"
                                  "（docs/cn/collect.md 第 2 节），只读取免登录的公开页面") from None
+
+
+def _single_support():
+    """Check required APIs before starting a browser; never fall back to auto redirects."""
+    try:
+        from playwright.sync_api import APIRequest, APIRequestContext, Browser, BrowserContext, Route
+    except ImportError:
+        raise BrowserUnavailable(INSTALL_HINT) from None
+    if not hasattr(Route, "fetch"):
+        raise BrowserUnavailable("已安装 Playwright 缺少单链接所需的无重定向能力；未开始读取")
+    required = ((Route.fetch, {"max_redirects", "max_retries", "timeout"}),
+                (APIRequestContext.get, {"max_redirects", "max_retries", "timeout"}),
+                (APIRequest.new_context, {"user_agent"}),
+                (Browser.new_context, {"service_workers", "accept_downloads", "user_agent"}),
+                (BrowserContext.route, {"url", "handler"}))
+    if any(not names <= set(inspect.signature(method).parameters) for method, names in required):
+        raise BrowserUnavailable("已安装 Playwright 缺少单链接所需的无重定向/无重试或隔离 context 能力；未开始读取")
+
+
+class SingleTab(Tab):
+    """One temporary context. Only its first exact main-document GET can go out.
+
+    route.continue_ alone cannot prevent redirect chains: the route handler only
+    sees their first request. Fetch without redirects, then fulfill only 2xx.
+    All later documents, including popup/iframe/reload, are aborted before send.
+    Normal page resources and page-initiated data requests retain batch semantics.
+    """
+
+    def __init__(self, playwright, page, errors, *, browser, context):
+        self.stop_reason = None
+        self._context = context
+        self._expected = None
+        self._document_started = False
+        self._closed = False
+        super().__init__(playwright, page, errors, browser=browser, headless=True)
+        context.route("**/*", self._route)
+        page.on("framenavigated", self._navigated)
+
+    def _navigated(self, frame):
+        if frame == self._page.main_frame and self._expected is not None and frame.url != self._expected:
+            self._stop("详情地址发生改变，无法确认仍是请求的岗位")
+
+    def _stop(self, reason):
+        if self.stop_reason is None:
+            self.stop_reason = reason
+
+    def _watch(self, response):
+        super()._watch(response)
+        if self.denied is not None:
+            self._stop(f"网站返回 HTTP {self.denied}")
+
+    def _abort(self, route):
+        try:
+            route.abort()
+        except self._errors:
+            pass
+
+    def _route(self, route):
+        response = None
+        try:
+            if self.stop_reason is not None:
+                self._abort(route)
+                return
+            request = route.request
+            if not request.is_navigation_request():
+                route.continue_()
+                return
+            if (self._document_started or request.method != "GET" or request.url != self._expected
+                    or request.frame != self._page.main_frame):
+                self._stop("页面尝试额外的文档导航，已在请求发出前阻止")
+                self._abort(route)
+                return
+            self._document_started = True
+            response = route.fetch(max_redirects=0, max_retries=0, timeout=NAV_TIMEOUT_MS)
+            self._status = response.status
+            if not 200 <= response.status < 300:
+                self._stop("详情返回重定向，未访问跳转目标" if 300 <= response.status < 400
+                           else f"详情返回 HTTP {response.status}")
+                self._abort(route)
+                return
+            route.fulfill(response=response)
+        except self._errors:
+            self._stop("详情请求或导航保护执行失败，未继续访问")
+            self._abort(route)
+        finally:
+            if response is not None:
+                try:
+                    response.dispose()
+                except self._errors:
+                    self._stop("详情响应无法正常释放，未确认读取完成")
+
+    def read_robots(self, url):
+        """One fixed same-origin request, in a fresh cookie-free request context.
+
+        The policy's 64KB limit is checked after response.body(), so it limits
+        acceptance and parsing, not bytes transferred by Playwright itself.
+        """
+        parts = urlsplit(url)
+        context, response, status = None, None, None
+        try:
+            context = self._playwright.request.new_context(user_agent=robots_policy.USER_AGENT)
+            response = context.get(f"{parts.scheme}://{parts.netloc}/robots.txt", max_redirects=0, max_retries=0,
+                                   timeout=12_000)
+            status = response.status
+            return response.body() if status == 200 else None, status, None
+        except self._errors:
+            return None, status, "robots request failed"
+        finally:
+            try:
+                if response is not None:
+                    response.dispose()
+                if context is not None:
+                    context.dispose()
+            except self._errors:
+                self._stop("robots 临时请求 context 无法正常关闭")
+
+    def open_single(self, url, ready):
+        if self.stop_reason is not None:
+            return
+        self._expected = url
+        try:
+            self._page.goto(url, wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)
+            if self.stop_reason is None:
+                self._wait_ready(ready)
+        except self._errors:
+            self._stop("浏览器未完成单个详情读取")
+
+    def freeze_and_close(self):
+        """Freeze last snapshot, close the context, then return the final restriction state.
+
+        Closing pumps pending browser events: a late denied response/navigation is
+        still latched. A captured API response arriving after the snapshot makes
+        the result unconfirmed rather than trusting the earlier page.
+        """
+        snapshot, captured = None, 0
+        try:
+            if self._document_started and self.stop_reason is None:
+                snapshot = self._snapshot(self._status)
+                captured = len(snapshot.responses)
+        except self._errors:
+            self._stop("无法冻结当次详情页面")
+        finally:
+            try:
+                self._context.close()
+            except self._errors:
+                self._stop("临时浏览器 context 未正常关闭，无法确认读取结束")
+            try:
+                self._browser.close()
+            except self._errors:
+                self._stop("临时浏览器未正常关闭，无法确认读取结束")
+            try:
+                self._playwright.stop()
+            except self._errors:
+                self._stop("浏览器连接未正常结束")
+            self._closed = True
+        if snapshot is not None and len(self._captured) != captured:
+            self._stop("冻结页面后又收到详情接口响应，无法确认完整结果")
+        return snapshot, self.stop_reason
+
+
+def open_single_tab():
+    """Start only the installed Chrome, with no connection to a user's existing context."""
+    _single_support()
+    playwright, errors = _playwright()
+    chrome = None
+    try:
+        chrome = playwright.chromium.launch(channel="chrome", headless=True, timeout=LAUNCH_TIMEOUT_MS)
+        context = chrome.new_context(service_workers="block", accept_downloads=False, user_agent=robots_policy.USER_AGENT)
+        return SingleTab(playwright, context.new_page(), errors, browser=chrome, context=context)
+    except errors:
+        try:
+            if chrome is not None:
+                chrome.close()
+        finally:
+            playwright.stop()
+        raise BrowserUnavailable("无法启动支持单链接隔离和导航保护的本机 Chrome；未读取岗位") from None

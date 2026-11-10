@@ -20,13 +20,15 @@ Remove-Item Env:JOBSEARCH_CN_PERSONAL_MODULE
 
 仓库 `tests/fixtures/collect_personal/` 仅为虚构站点回归样例，不是实际来源。
 
+内置北森的 `--url` 单链接路径不加载个人模块，包括参数错误时；普通批量 `collect` 保留原有模块加载行为。
+
 ## 采集命令和边界
 
 配置适配器后运行 `python -m jobsearch_cn collect <适配器名> --query '搜索词' --city '广州' --max 10 --data-dir '<本地数据目录>'`。默认最多 30 个新详情、3 页列表；硬上限 50 个详情、10 页，每次导航或滚动之间随机等待 4–9 秒。`--batch` 可指定批次，已有同名原件不会覆盖；`--city-code` 仅在适配器声明城市代码规则时出现。
 
 浏览器依赖是可选的 `playwright` Python 包，只有采集时才导入；运行环境还需已安装 Google Chrome。不自动下载浏览器。默认启动临时无窗口 Chrome，用完关闭；`--cdp http://127.0.0.1:9222` 可显式连接专用本机 Chrome，只创建并关闭本次标签。仍只读取免登录的公开内容，不读取 Cookie、不自动登录、不点击、不发送、不绕验证。
 
-HTTP 403/429（包括本次标签的列表/数据请求）、验证码、登录墙、结构变化都会停止后续访问。空白的后续列表不视为正常结束，只有明确空态才算；整段加载提示、失败提示和纯标题不能当完整正文。历史收件和岗位库中已知的 URL 不重新打开；适配器可用 `known_job_id_from_url` 识别旧链接，但不得因此放宽实际导航地址。输出为 JSON，退出码：0 完成，2 无法开始，3 遇到限制或写入保护，4 页面结构无法识别。停止前保存的文件保留。
+HTTP 403/429（包括本次标签的列表/数据请求）、验证码、登录墙、结构变化都会停止后续访问。空白的后续列表不视为正常结束，只有明确空态才算；整段加载提示、失败提示和纯标题不能当完整正文。批量采集不重新打开历史收件和岗位库中已知的 URL；适配器可用 `known_job_id_from_url` 识别旧链接，但不得因此放宽实际导航地址。输出为 JSON，退出码：0 完成，2 无法开始，3 遇到限制或写入保护，4 页面结构无法识别。停止前保存的文件保留。
 
 ### 结构异常诊断（默认关闭）
 
@@ -91,3 +93,27 @@ python -m jobsearch_cn collect beisen --tenant example --all
 - 旧版另一个已核空态模板：`.positionlist-smallblue` 主模块内 `.joblist > table.jobsTable` 的同一空态行，须有可见 `span.noResult` 和确切文字“没有搜索到相应职位”。主表有链接、未知行、可见非零计数、多个不一致主表或混合可见列表模板时仍停止；侧栏职位不算搜索结果。该模板目前只支持明确空态，不支持非空卡片或详情。可见性沿用 hidden／隐藏内联样式检查，不计算外部 CSS。
 - 停止：HTTP 403/429、验证码、跳到登录页、接口报错，或页面显示还有更多但连续两次加载都没有新岗位，都会停下这家租户，结果里写明原因；已存的不受影响。
 - 岗位 ID 是 `beisen.<子域名>.<门户的岗位 ID>`，写进收件文件的 `site_job_id`（见 [job-schema.md](job-schema.md)），是重跑时去重的第一依据。正文第一行是岗位名（去掉末尾的 `(J12345)` 编号，编号另记在 `extra.job_code`），后面是“招聘频道”“工作地点”“工作性质”“薪资”（“面议”照写）“发布时间”“公司名称”和职责、要求原文；页面没给的就不写，导入后保持 `null`。收件夹是 `<数据目录>/inbox/ats/<批次>/`，之后照常 `jd screen`。
+
+## 用户提供一个北森详情链接（`collect beisen --url`，M6-1）
+
+只读取本机白名单中既有北森租户的一条详情，先检查当次 robots，保存 ATS 收件原件。以下是虚构租户示例，白名单格式同上：
+
+```powershell
+python -m jobsearch_cn collect beisen --tenant example --url 'https://example.zhiye.com/intern/detail?jobAdId=0f8e2c3a-1111-4abc-8def-00000000000a' --data-dir 'D:\local-jobs'
+# 使用结果给出的 batch_dir；先检查，不读档案、不写岗位或评分
+python -m jobsearch_cn jd screen '<batch_dir>' --check --data-dir 'D:\local-jobs'
+```
+
+接受最长 2048 字符的规范 HTTPS 详情 URL：新版为 `https://<租户>.zhiye.com/{intern|campus|social}/detail?jobAdId=<UUID>`；旧版为 `https://<租户>.zhiye.com/zpdetail/<1–20位数字>`。只接受小写租户、无显式端口、无用户信息的地址；拒绝其他主机、查询参数、重复参数、片段、尾斜杠、控制字符、空白和编码歧义，不静默清理后访问。新版频道必须在白名单里，显式 `--channel` 必须与 URL 相同；旧版白名单有多个频道时须指定 `--channel`。旧版频道只用于选择适配器，不插入正文冒充页面事实；来源记在 `extra.channel_source`。公司名来自已核白名单，记 `extra.company_source=whitelist`；城市、日期取正文，缺失不补猜测值。
+
+`--url` 与 `--query`、`--all`、`--max`、`--max-pages`、`--cdp` 互斥。首版仅使用本次临时无窗口 Chrome，不复用用户浏览器；仍需已安装 Playwright/Chrome，缺少所需的无重定向能力就明确失败，不自动安装、升级或降级实现。`--batch`、`--data-dir`、`--diagnostics` 沿用上面的含义。默认批次 `beisen-<租户>-<时间>-single`。
+
+已知岗位默认返回 `done/known_job`，不启动浏览器，也不读取 robots。用户明确希望重新核验这一条时加 `--reread-known`，可同时指定新的 `--batch`；仅此模式可用，不改变批量去重。重新读取另存收件原件，任何同名文件仍拒绝覆盖。此命令不写岗位、档案、匹配、投递或材料，不自动评分或起草。后续导入沿既有 `screen`/`jd parse`；同文重复导入的岗位 `source.fetched_at` 不会更新，新一次读取时间在新收件原件里。页面可读不代表还有招聘名额；明确下线只计 `closed=1`，不修改已有岗位状态。
+
+**robots：**固定读取目标同源 `/robots.txt`，使用无账号状态的独立请求 context，透明身份 `JobSearchCN/1`，一次 GET、12 秒超时、不跟跳转、不重试。HTTP 404 按未发布；HTTP 200 须能按严格 UTF-8 解释且不超过 64,000 字节，空白规则可接受。该上限用于接受和解析，并非底层下载字节上限。非空不可识别内容、损坏编码、超限、未知规则、所有其他状态、超时或读取失败均不确认许可并停止。按详情 path/query 同时保守检查 `JobSearchCN`、`*`、`Claude-User`、`ChatGPT-User`；任一适用规则禁止就停，不换身份重试。最长路径匹配，同长 Disallow 优先。遵守可解释的 Crawl-delay，超过既有 9 秒上限则停止；允许时在 robots 和详情间至少等待要求时长，仍按 4–9 秒节奏。
+
+**导航：**0 次列表、最多 1 次详情 document 导航、0 次滚动。单链接专用临时 context 禁用 Service Worker/下载；在浏览器接收 document 响应之前，以无重定向请求读取首个目标，3xx 不交给浏览器，也不访问 Location。额外 document、reload、JS/meta 跳转、iframe 和 popup 请求均在发出前阻止；无网络的地址改写也停止。正常资源和页面自己发出的 xhr/fetch 沿原有渲染边界，document 预算不是整个页面所有资源请求数的预算；不主动构造隐藏接口，不读 Cookie/存储，不打开正文链接。冻结当次快照、关闭临时 context 和浏览器、确认期间没有新的限制后，才离线检查和保存；冻结后收到无法纳入快照的接口响应会停止。
+
+结果仍有 `site/batch/batch_dir/status/finished/message/stopped_at/saved/skipped_known/closed/failed/files/warnings`，列表计数为 0；单链接新增 `mode=single_link`、`url`、`known`、`reread_known`、`robots`。robots 包含状态、固定地址、HTTP 状态、检查时间、原因、SHA256、检查身份和等待要求；未检查时值为 null。成功收件保留 requested_url/final_url、robots 和 guard 摘要于 extra；注入告警附原文摘录，但不执行指令，也不改写收件原文。
+
+退出 0 表示保存完成、默认跳过已知或明确关闭；2 表示开始前参数/配置/浏览器不具备条件；3 表示 robots 不确认/禁止、导航或访问受限、浏览器错误、原件写入保护；4 表示当次详情结构无法识别，包括不完整/占位/超长正文。只有真正的 `page_changed` 可按上面的 `--diagnostics` 保存当次快照；robots 失败、登录/验证/HTTP 限制、导航停止和正常结果不保存诊断 HTML。停止后不自动重试，也可改用用户提供 JD 文本的导入路径。

@@ -70,7 +70,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import collect_diagnostics, htmltext, schema, store
+from jobsearch_cn import collect_diagnostics, guard, htmltext, schema, store
 from jobsearch_cn.content import placeholder_description
 
 INBOX_FORMAT = "jobsearch_cn.inbox/1"
@@ -146,6 +146,22 @@ class Options:
     site: object = None
     searches: tuple = ()  # several lists (make_search_options); empty: the one search above
     diagnostics: bool = False  # save an existing structure-stop snapshot locally, only when requested
+
+
+@dataclass
+class DetailOptions:
+    url: str
+    site: object
+    channel_source: str
+    batch: str | None = None
+    reread_known: bool = False
+    diagnostics: bool = False
+
+
+def make_detail_options(url, site, channel_source, *, batch=None, reread_known=False, diagnostics=False):
+    if batch is not None and not BATCH_NAME.fullmatch(batch):
+        raise CollectError("--batch 只能用字母、数字和 . _ -，不能以 . 开头，最多 64 个字符")
+    return DetailOptions(url, site, channel_source, batch, reread_known, diagnostics)
 
 
 def make_options(query, city=None, city_code=None, max_jobs=DEFAULT_MAX_JOBS, max_pages=DEFAULT_MAX_PAGES,
@@ -488,21 +504,9 @@ class _Run:
         site = search.site
         snapshot = self._act(self.tab.open, card["href"], site.DETAIL_READY)
         fetched_at = self.clock().isoformat(timespec="seconds")
-        root, kw = htmltext.parse(snapshot.html), self._kw(snapshot)
-        self._check(snapshot, root, site, "detail")
-        if site.is_closed(root, **kw):
-            self.summary["closed"] += 1
+        fields = self._detail_fields(snapshot, site, card["id"], expected_title=card["title"])
+        if fields is None:
             return
-        landed = site.job_id_from_url(snapshot.url)
-        if landed != card["id"]:
-            raise _Stop("page_changed", "打开岗位链接后没有停在这个岗位的详情页上", snapshot=snapshot, phase="detail")
-        fields = site.parse_detail(root, **kw)
-        if not fields["title"] or not fields["description"] or placeholder_description(fields["description"]):
-            raise _Stop("page_changed", "详情页上找不到岗位名称或职位描述，页面结构可能变了",
-                        snapshot=snapshot, phase="detail")
-        if not site.same_job(card["title"], fields["title"]):
-            raise _Stop("page_changed", f"详情页的岗位名\"{fields['title']}\"和列表里的\"{card['title']}\"对不上",
-                        snapshot=snapshot, phase="detail")
         text = site.detail_text(fields)
         if len(text) > schema.MAX_RAW_TEXT:
             self.summary["failed"].append({"job": card["id"], "reason": f"岗位文字超过 {schema.MAX_RAW_TEXT} 字，没有保存"})
@@ -514,6 +518,40 @@ class _Run:
                  "position": position}
         self._save(inbox_record(text=text, fetched_at=fetched_at, job_id=card["id"], extra=extra, site=site),
                    card["id"])
+
+    def _detail_fields(self, snapshot, site, job_id, *, expected_title=None):
+        """Shared checks; only a real list card supplies expected_title in batch mode."""
+        root, kw = htmltext.parse(snapshot.html), self._kw(snapshot)
+        self._check(snapshot, root, site, "detail")
+        if site.is_closed(root, **kw):
+            self.summary["closed"] += 1
+            return
+        landed = site.job_id_from_url(snapshot.url)
+        if landed != job_id:
+            raise _Stop("page_changed", "打开岗位链接后没有停在这个岗位的详情页上", snapshot=snapshot, phase="detail")
+        fields = site.parse_detail(root, **kw)
+        if not fields["title"] or not fields["description"] or placeholder_description(fields["description"]):
+            raise _Stop("page_changed", "详情页上找不到岗位名称或职位描述，页面结构可能变了",
+                        snapshot=snapshot, phase="detail")
+        if expected_title is not None and not site.same_job(expected_title, fields["title"]):
+            raise _Stop("page_changed", f"详情页的岗位名\"{fields['title']}\"和列表里的\"{expected_title}\"对不上",
+                        snapshot=snapshot, phase="detail")
+        return fields
+
+    def _stopped(self, stop):
+        summary = self.summary
+        summary["status"] = stop.status
+        if self.options.diagnostics and stop.status == "page_changed":
+            summary["diagnostics"] = collect_diagnostics.save(
+                self.data_root, self.batch, stop.snapshot, phase=stop.phase, reason=stop.reason, at=self.clock())
+        if stop.advice:
+            tail = stop.advice
+        elif stop.status != "needs_user":
+            tail = "已存的岗位不受影响；页面结构的规则要更新（docs/cn/collect.md）"
+        else:
+            tail = NEEDS_USER_HEADLESS if self.headless else NEEDS_USER
+        summary["message"] = f"{stop.reason}。停在{summary['stopped_at']}，已新存 {summary['saved']} 个岗位。{tail}"
+        return summary
 
     def run(self) -> dict:
         summary = self.summary
@@ -529,18 +567,84 @@ class _Run:
             summary["message"] = (f"{FINISHED[summary['finished']]}：新存 {summary['saved']} 个岗位，"
                                   f"跳过 {summary['skipped_known']} 个以前抓过的")
         except _Stop as stop:
-            summary["status"] = stop.status
-            if self.options.diagnostics and stop.status == "page_changed":
-                summary["diagnostics"] = collect_diagnostics.save(
-                    self.data_root, self.batch, stop.snapshot, phase=stop.phase, reason=stop.reason, at=self.clock())
-            if stop.advice:
-                tail = stop.advice
-            elif stop.status != "needs_user":
-                tail = "已存的岗位不受影响；页面结构的规则要更新（docs/cn/collect.md）"
-            else:
-                tail = NEEDS_USER_HEADLESS if self.headless else NEEDS_USER
-            summary["message"] = f"{stop.reason}。停在{summary['stopped_at']}，已新存 {summary['saved']} 个岗位。{tail}"
+            self._stopped(stop)
         return summary
+
+
+class SingleRun(_Run):
+    """Prepare locally, then consume only a frozen snapshot after its browser is closed.
+
+    No fake Search/card or list budget. Shared parent methods only validate detail
+    fields, preserve originals and report a stop; this runner never drives a tab.
+    """
+
+    def __init__(self, options: DetailOptions, data_root, *, clock=_now):
+        self.options, self.site, self.data_root, self.clock = options, options.site, Path(data_root), clock
+        self.tab, self.headless = None, True
+        self.capture = bool(getattr(self.site, "CAPTURE", None))
+        self.batch = options.batch or f"{self.site.SOURCE_NAME}-{clock():%Y%m%d-%H%M%S}-single"
+        self.batch_dir = None
+        self.known, self.warnings = known_job_ids(self.data_root, self.site)
+        self.job_id = self.site.job_id_from_url(options.url)
+        known = self.job_id in self.known
+        self.summary = {
+            "site": self.site.SITE, "mode": "single_link", "url": options.url,
+            "query": None, "city": None, "city_code": None, "batch": self.batch, "batch_dir": None,
+            "status": "done", "finished": None, "message": None, "stopped_at": "robots 检查",
+            "saved": 0, "skipped_known": 0, "closed": 0, "failed": [], "list_loads": 0,
+            "cards_seen": 0, "files": [], "warnings": self.warnings,
+            "known": known, "reread_known": options.reread_known,
+            "robots": {"status": "not_checked", "url": None, "http_status": None, "checked_at": None,
+                       "reason": None, "sha256": None, "user_agents": None, "delay_seconds": None},
+        }
+        if options.diagnostics:
+            self.summary["diagnostics"] = {"status": "not_applicable"}
+        if known and not options.reread_known:
+            self.summary.update(finished="known_job", skipped_known=1, stopped_at=None,
+                                message="这个岗位以前已保存，本次没有访问网页；要重新读取可显式使用 --reread-known")
+
+    def fail(self, reason):
+        return self._stopped(_Stop("needs_user", reason, "已停止，不自动重试；也可按 docs/cn/jd-import.md 提供 JD 文本"))
+
+    def finish(self, snapshot, *, fetched_at, stop_reason=None):
+        """Called after the temporary browser is closed; never save a live page."""
+        self.summary["stopped_at"] = "单个岗位详情"
+        if stop_reason:
+            return self.fail(stop_reason)
+        try:
+            if snapshot is None:
+                return self.fail("没有可确认的详情快照")
+            if snapshot.url != self.options.url:
+                raise _Stop("page_changed", "详情地址在读取期间改变，无法确认仍是请求的岗位",
+                            snapshot=snapshot, phase="detail")
+            fields = self._detail_fields(snapshot, self.site, self.job_id)
+            if fields is None:
+                self.summary.update(finished="closed", stopped_at=None, message="页面明确显示该职位已关闭，本次没有保存岗位正文")
+                return self.summary
+            text = self.site.detail_text(fields, include_channel=self.options.channel_source == "url")
+            if len(text) > schema.MAX_RAW_TEXT:
+                raise _Stop("page_changed", f"岗位文字超过 {schema.MAX_RAW_TEXT} 字，没有保存",
+                            snapshot=snapshot, phase="detail")
+            _, findings = guard.check(text)
+            checked = guard.summary(findings)
+            if checked["verdict"] == "warn":
+                self.warnings.append({"kind": "guard", "message": "JD 中有像是写给 AI 的句子，只当外部数据处理",
+                                      "excerpts": list(findings.get("instruction_like") or [])})
+            extra = {"collector": self.site.COLLECTOR, "mode": "single_link", "page": "detail",
+                     "requested_url": self.options.url, "final_url": snapshot.url,
+                     "tenant": self.site.tenant.subdomain, "channel": self.site.channel,
+                     "channel_source": self.options.channel_source, "company_source": "whitelist",
+                     "robots": self.summary["robots"], "guard": checked}
+            if fields.get("job_code"):
+                extra["job_code"] = fields["job_code"]
+            self._save(inbox_record(text=text, fetched_at=fetched_at, job_id=self.job_id, extra=extra, site=self.site), self.job_id)
+            self.summary.update(finished="single_detail", stopped_at=None,
+                                message="已保存这一页当时的岗位正文；页面可读不代表仍有招聘名额")
+        except _Stop as stop:
+            return self._stopped(stop)
+        except store.StoreError:
+            return self.fail("收件目录不安全，未写入岗位原件")
+        return self.summary
 
 
 def run(tab, options: Options, data_root, *, sleep=time.sleep, uniform=random.uniform, clock=_now) -> dict:

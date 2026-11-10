@@ -247,11 +247,18 @@ class Browser(unittest.TestCase):
                      "add_cookies", "clear_cookies", "storage_state", "evaluate", "evaluate_handle", "add_init_script",
                      "expose_function", "set_extra_http_headers", "new_context", "launch_persistent_context"}
         tree = ast.parse((REPO / "jobsearch_cn" / "browser.py").read_text(encoding="utf-8"))
-        used = {node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)}
-        self.assertEqual(used & forbidden, set())
+        # M6-1 explicitly permits only these named single-link entry points to
+        # create an isolated context and intercept document navigation. Batch
+        # Tab/open_tab retain the original prohibition without exception.
+        exceptions = {"SingleTab", "open_single_tab", "_single_support"}
+        for owner in tree.body:
+            used = {node.attr for node in ast.walk(owner) if isinstance(node, ast.Attribute)}
+            banned = forbidden - {"route", "new_context"} if getattr(owner, "name", None) in exceptions else forbidden
+            self.assertEqual(used & banned, set(), getattr(owner, "name", "module"))
         launches = [node for node in ast.walk(tree) if isinstance(node, ast.Call)
                     and isinstance(node.func, ast.Attribute) and node.func.attr == "launch"]
-        self.assertEqual(len(launches), 1)
-        options = {keyword.arg: ast.literal_eval(keyword.value) for keyword in launches[0].keywords
-                   if keyword.arg in ("channel", "headless")}
-        self.assertEqual(options, {"channel": "chrome", "headless": True}, "headless, this machine's Chrome only")
+        self.assertEqual(len(launches), 2)
+        for launch in launches:
+            options = {keyword.arg: ast.literal_eval(keyword.value) for keyword in launch.keywords
+                       if keyword.arg in ("channel", "headless")}
+            self.assertEqual(options, {"channel": "chrome", "headless": True}, "headless, this machine's Chrome only")
