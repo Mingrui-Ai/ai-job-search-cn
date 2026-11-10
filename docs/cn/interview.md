@@ -84,7 +84,9 @@ Profile v1 的 experience.source 是 `user` 或来源裸文件名；catalog 的 
 
 完整岗位、档案原对象从同一次有界读取的字节严格解析，按排序键、无额外空白、UTF-8、禁止非有限数的 JSON 序列化后摘要；岗位 schema 升级仅作用于副本。源对象中时间、contact、权重等字段即使未用于题目，也参与摘要。bank_hash 包含实际完整配置以及 `{direction,origin:builtin或local,name:固定配置名}`。新增覆盖、删除覆盖、相同内容从 builtin 换 local、仅改来源说明都使旧 context 失效。JSON 排版和键顺序变化不失效。pack_hash 包含整个包，含 created；context 不含命令新生成的时间。
 
-工具在本地进程内读取完整档案作验证、摘要和敏感值检测；不会将 contact、来源路径或 provenance.source_ref 投影给 Agent，也不作为题目依据。统一敏感规则覆盖邮箱、链接前缀、www、UNC、盘符路径、手机号/长数字串、明确微信/QQ标签、已知 contact 值和控制字符；以 NFKC、去空白补充匹配。规则保守，可能扣留正常含长编号的文本，不声称识别一切隐私表达。
+工具在本地进程内读取完整档案作验证、摘要和敏感值检测；不会将 contact、来源路径或 provenance.source_ref 投影给 Agent，也不作为题目依据。敏感规则覆盖邮箱、链接前缀、www、UNC、盘符路径、手机号/长数字串、明确微信/QQ标签、已知 contact 值和控制字符；以 NFKC、去空白补充匹配。经历 id、题库 id、自定义方向、req/q/u 及会输出的包/派生/审核文件名、审核字段路径也经过敏感检查。敏感经历 id 使整个经历条目从 catalog 扣留，计入 withheld_count；主动引用拒绝，不生成替代 id。选中的题库 id 或方向敏感时安全报配置错误。规则保守，可能扣留正常含长编号的文本，不声称识别一切隐私表达。
+
+唯一窄例外是已经通过既有 schema 校验的固定机器岗位标识 `job_[12位hex]`：不应用普通“连续至少7位数字”的启发式，以保留正常生成的哈希 id；仍拒绝明确手机号等敏感模式及已知 contact 值。此例外不适用于任意经历、题库或自定义方向标识，不改全局 Profile/Job schema。
 
 命中敏感内容的来源行/字段整条 withheld，主动引用拒绝；不以部分遮盖冒充逐字引用。安全 catalog 的文本在机器 JSON 中保留原文，通过 JSON 序列化。生成 Markdown（包括默认 render 返回的 Markdown）统一将外部自由文本放入足够长、无语言标记的反引号围栏，以 CommonMark/GFM 纯文字显示，不生成活动外链、图片、HTML 资源或模板执行结构。工具不联网，不保证第三方编辑器不会另行探测网络。
 

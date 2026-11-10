@@ -15,9 +15,10 @@ _SLUG = re.compile(r"[a-z][a-z0-9-]{0,39}")
 _BANK_ID = re.compile(r"[a-z][a-z0-9-]{0,39}\.[a-z][a-z0-9-]{0,59}")
 _RESERVED = {"con", "prn", "aux", "nul", *("com" + str(i) for i in range(10)), *("lpt" + str(i) for i in range(10))}
 _PRIVATE = re.compile(r"(?:[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|(?:https?|mailto|data|file|ftp):|www\.|\\\\|"
-                      r"(?:\+?86[ -]?)?1[3-9](?:[ -]?\d){9}|(?:\d[ -]?){7,}|"
+                      r"(?:\+?86[ -]?)?1[3-9](?:[ -]?\d){9}|"
                       r"(?:微信|微\s*信|wechat|weixin|QQ|扣扣|手机号|电话号码)\s*[:：号IDid\s]|"
                       r"[A-Za-z]:[\\/])", re.IGNORECASE)
+_LONG_NUMBER = re.compile(r"(?:\d[ -]?){7,}")
 
 
 def _text(value, limit=300):
@@ -43,7 +44,7 @@ def _version(value):
     return type(value) is int and value == 1
 
 
-def sensitive(value, contacts=()):
+def _sensitive(value, contacts, *, long_numbers):
     if not isinstance(value, str):
         return True
     folded = unicodedata.normalize("NFKC", value)
@@ -51,8 +52,29 @@ def sensitive(value, contacts=()):
         return True
     compact = re.sub(r"\s+", "", folded).casefold()
     return bool(_PRIVATE.search(folded) or _PRIVATE.search(compact) or
+                (long_numbers and (_LONG_NUMBER.search(folded) or _LONG_NUMBER.search(compact))) or
                 any(re.sub(r"\s+", "", unicodedata.normalize("NFKC", item)).casefold() in compact
                     for item in contacts if isinstance(item, str) and item.strip()))
+
+
+def sensitive(value, contacts=()):
+    return _sensitive(value, contacts, long_numbers=True)
+
+
+def job_identifier(value, contacts):
+    # Only the existing fixed opaque schema id bypasses the generic long-number heuristic.
+    # Explicit phone patterns and known contact values remain prohibited.
+    if not schema.is_job_id(value) or _sensitive(value, contacts, long_numbers=False):
+        files.fail("unsafe_text", "interview job identifier is invalid or private")
+
+
+def artifact_identifier(job_id, name, contacts):
+    """Check both fixed path components and their outward relative representation."""
+    job_identifier(job_id, contacts)
+    text(name, contacts)
+    # Components were checked individually; retain the narrow opaque-job-id treatment.
+    if _sensitive("interviews/" + job_id + "/" + name, contacts, long_numbers=False):
+        files.fail("unsafe_text", "interview artifact identifier is private")
 
 
 def text(value, contacts=(), limit=300):
@@ -88,7 +110,8 @@ def _source(root, parts, *, bound):
 
 
 def _bank(root, direction, contacts):
-    if not isinstance(direction, str) or not _SLUG.fullmatch(direction) or direction in _RESERVED:
+    if (not isinstance(direction, str) or not _SLUG.fullmatch(direction) or direction in _RESERVED
+            or sensitive(direction, contacts)):
         files.fail("configuration", "interview direction must name a supported local configuration", 2)
     name = direction + ".json"
     parts = ("templates", "interviews", name)
@@ -125,6 +148,7 @@ def _bank(root, direction, contacts):
                 files.fail()
             if not item["id"].startswith(direction + ".") or item["practice_kind"] != "general":
                 files.fail()
+            text(item["id"], contacts)
             identities.append(item["id"])
             text(item["prompt"], contacts)
             for key in ("tags", "prep_prompts"):
@@ -148,6 +172,7 @@ def load(root, job_id, direction="default", *, bound=False):
     except (ValueError, TypeError, KeyError, AttributeError, OverflowError):
         files.fail("invalid_source", "interview requires a valid saved job and profile")
     contacts = tuple(value for value in (raw_profile.get("contact") or {}).values() if isinstance(value, str) and value.strip())
+    job_identifier(job_id, contacts)
     bank, selection = _bank(root, direction, contacts)
     context = {"binding_version": 1, "job_input_hash": files.digest(raw_job),
                "profile_input_hash": files.digest(raw_profile),
@@ -179,6 +204,9 @@ def catalog(inputs):
             lines.append({"line": index + 1, "text": safe, "withheld": safe is None})
     entries = []
     for entry in inputs.entries.values():
+        if sensitive(entry["id"], inputs.contacts):
+            withheld += 1
+            continue  # An unusable locator withholds the entire entry; never invent a replacement id.
         fields = {key: project(entry[key]) for key in ("name", "org", "role")}
         fields["bullets"] = [{"index": i, "text": project(value)} for i, value in enumerate(entry["bullets"])]
         entries.append({"ref": entry["id"], "type": entry["type"],
@@ -232,6 +260,7 @@ def check(pack, inputs):
         files.keys(item, "id quote", "requirement")
         if not _id(item["id"], "req") or item["id"] in requirements:
             files.fail("invalid", "requirement ids must be unique")
+        text(item["id"], inputs.contacts)
         text(item["quote"], inputs.contacts, 500)
         if item["quote"] not in inputs.job["raw_text"]:
             files.fail("invalid_reference", "requirement quote is not an exact job excerpt")
@@ -250,6 +279,7 @@ def check(pack, inputs):
         files.keys(question, QUESTION_KEYS, "question")
         if not _id(question["id"], "q"):
             files.fail("invalid", "question id is invalid")
+        text(question["id"], inputs.contacts)
         question_ids.append(question["id"])
         text(question["question"], inputs.contacts)
         category = question["category"]
@@ -267,6 +297,7 @@ def check(pack, inputs):
             reference = question["project_ref"]
             if not isinstance(reference, str) or reference not in inputs.entries or not facts:
                 files.fail("invalid_reference", "project question needs an existing experience and facts")
+            text(reference, inputs.contacts)
             entry = inputs.entries[reference]
             locators = []
             for fact in facts:
@@ -303,6 +334,7 @@ def check(pack, inputs):
             files.keys(item, "id prompt answer", "unknown")
             if not _id(item["id"], "u") or item["answer"] is not None:
                 files.fail("invalid", "unknown information must have a unique id and a null answer")
+            text(item["id"], inputs.contacts)
             unknown_ids.append(item["id"]); text(item["prompt"], inputs.contacts)
     _unique(question_ids); _unique(unknown_ids)
     covered = {}
@@ -332,6 +364,8 @@ def prepared(root, filename):
     if pack["job_id"] != parts[1]:
         files.fail("invalid_reference", "interview pack belongs to another job directory")
     inputs = load(root, pack["job_id"], pack["direction"], bound=True)
+    for name in (parts[-1], Path(parts[-1]).stem + ".md", Path(parts[-1]).stem + ".build.json"):
+        artifact_identifier(pack["job_id"], name, inputs.contacts)
     result = check(pack, inputs)
     return parts, pack, inputs, result
 

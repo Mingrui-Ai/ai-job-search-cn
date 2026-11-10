@@ -13,7 +13,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from jobsearch_cn import applications, cli, interview, interview_files as files, interview_review
+from jobsearch_cn import applications, cli, interview, interview_files as files, interview_review, profile, schema
 
 REPO = Path(__file__).resolve().parent.parent
 FIXTURE = REPO / "tests/fixtures/cn/material/tech-m3/profile"
@@ -253,6 +253,175 @@ class Binding(Data):
 
 
 class Privacy(Data):
+    def test_real_generated_job_id_with_long_number_is_not_rejected(self):
+        self.assertIsNotNone(interview._LONG_NUMBER.search(self.job_id))
+        self.assertIsNone(interview._PRIVATE.search(self.job_id))
+        self.assertTrue(schema.is_job_id(self.job_id))
+        result = interview.template(self.root, self.job_id, "tech")
+        self.assertEqual(result["catalog"]["job"]["id"], self.job_id)
+        self.assertEqual(interview.validate(self.root, self.path)["valid"], True)
+        self.reviewed()
+        self.assertEqual(interview_review.validate(self.root, self.review_path)["verdict"], "pass")
+
+    def test_generated_job_id_matching_known_contact_is_rejected(self):
+        candidate = json.loads(self.profile_path.read_text(encoding="utf-8"))
+        candidate["contact"]["name"] = self.job_id
+        write(self.profile_path, candidate)
+        status, output, error = self.call("template", self.job_id)
+        self.assertEqual(status, 1)
+        self.assertIsNone(output)
+        self.assertNotIn(self.job_id, json.dumps(error))
+        self.assert_private_calls_rejected(self.job_id, "unsafe_text")
+
+    def assert_private_calls_rejected(self, marker, code):
+        # A final review file ensures review-validate reaches the current pack, not just a missing file.
+        review = {"schema_version": 1, "kind": "interview-prep-review", "job_id": self.job_id,
+                  "pack": self.path.name, "pack_hash": files.digest(self.pack),
+                  "context_hash": files.digest(self.pack["context"]), "output_sha256": "0" * 64,
+                  "round": 1, "mode": "independent", "created": files.now(), "verdict": "pass",
+                  "checked_question_ids": [q["id"] for q in self.pack["questions"]], "findings": []}
+        write(self.review_path, review)
+        for action, target, extra in (("validate", self.path, ()), ("render", self.path, ()),
+                                      ("render", self.path, ("--output",)), ("review-draft", self.path, ()),
+                                      ("review-validate", self.review_path, ())):
+            with self.subTest(action=action, extra=extra):
+                status, output, error = self.call(action, target, *extra)
+                self.assertIn(status, (1, 2))
+                self.assertIsNone(output)
+                self.assertEqual(error["error"]["code"], code)
+                self.assertNotIn(marker, json.dumps(error, ensure_ascii=False))
+        self.assertFalse(self.path.with_suffix(".md").exists())
+        self.assertFalse(self.path.with_suffix(".build.json").exists())
+
+    def test_valid_profile_sensitive_experience_id_is_withheld_and_active_reference_rejected(self):
+        value = json.loads(self.profile_path.read_text(encoding="utf-8"))
+        private_id = "proj-13900001122"
+        value["experience"][1]["id"] = private_id
+        for skill in value["skills"]:
+            skill["used_in"] = [private_id if ref == "proj-1" else ref for ref in skill["used_in"]]
+        self.assertEqual(profile.validate(value), [])
+        write(self.profile_path, value)
+        status, template, error = self.call("template", self.job_id, "--direction", "tech")
+        self.assertEqual(status, 0, error)
+        encoded = json.dumps(template, ensure_ascii=False)
+        self.assertNotIn("13900001122", encoded)
+        self.assertNotIn(value["experience"][1]["name"], encoded)
+        self.assertGreater(template["catalog"]["withheld_count"], 0)
+        self.pack["context"] = template["context"]
+        self.pack["questions"][1]["project_ref"] = private_id
+        for fact in self.pack["questions"][1]["facts"]: fact["ref"] = private_id
+        self.save()
+        self.assert_private_calls_rejected("13900001122", "unsafe_text")
+        # An unrelated safe general practice pack remains usable with the valid profile unchanged.
+        self.pack["questions"] = self.pack["questions"][-1:]
+        self.pack["requirements"] = self.pack["coverage"] = []
+        self.save()
+        self.assertTrue(interview.validate(self.root, self.path)["valid"])
+        self.assertEqual(profile.validate(json.loads(self.profile_path.read_text(encoding="utf-8"))), [])
+
+    def test_sensitive_bank_id_rejected_in_template_and_all_bound_paths(self):
+        bank = deepcopy(self.inputs.bank)
+        bank["questions"][0]["id"] = "tech.phone-13900001122"
+        write(self.bank_path, bank)
+        self.pack["questions"][2]["bank_ref"]["id"] = bank["questions"][0]["id"]
+        self.save()
+        status, output, error = self.call("template", self.job_id, "--direction", "tech")
+        self.assertEqual(status, 2)
+        self.assertIsNone(output)
+        self.assertNotIn("13900001122", json.dumps(error))
+        self.assert_private_calls_rejected("13900001122", "configuration")
+
+    def test_sensitive_custom_direction_rejected_before_source_selection(self):
+        direction = "custom-13900001122"
+        bank = deepcopy(self.inputs.bank)
+        bank["direction"] = direction
+        for item in bank["questions"]:
+            item["id"] = item["id"].replace("tech.", direction + ".")
+        write(self.bank_path.with_name(direction + ".json"), bank)
+        self.pack["direction"] = direction
+        self.pack["questions"][2]["bank_ref"].update(direction=direction, id=bank["questions"][0]["id"])
+        self.save()
+        status, output, error = self.call("template", self.job_id, "--direction", direction)
+        self.assertEqual(status, 2)
+        self.assertIsNone(output)
+        self.assertNotIn("13900001122", json.dumps(error))
+        self.assert_private_calls_rejected("13900001122", "configuration")
+
+    def test_valid_job_id_containing_phone_is_not_projected_or_rendered(self):
+        self.job_id = "job_a13900001122"
+        job = json.loads(self.job_path.read_text(encoding="utf-8"))
+        job["id"] = self.job_id
+        self.assertEqual(schema.validate(job), [])
+        write(self.job_path.with_name(self.job_id + ".json"), job)
+        self.path = self.root / "interviews" / self.job_id / "prep-1.json"
+        self.review_path = self.path.with_name("review-prep-1-r1.json")
+        self.pack["job_id"] = self.job_id
+        self.save()
+        status, output, error = self.call("template", self.job_id)
+        self.assertEqual(status, 1)
+        self.assertIsNone(output)
+        self.assertNotIn("13900001122", json.dumps(error))
+        self.assert_private_calls_rejected("13900001122", "unsafe_text")
+
+    def test_known_contact_values_in_canonical_pack_ids_and_names_are_rejected(self):
+        original = deepcopy(self.pack)
+        for value in ("req-1", "q-1", "u-1", "prep-1.json", "prep-1.md", "prep-1.build.json",
+                      "interviews/" + self.job_id + "/prep-1.md"):
+            with self.subTest(value=value):
+                candidate = json.loads(self.profile_path.read_text(encoding="utf-8"))
+                candidate["contact"]["name"] = value
+                self.assertEqual(profile.validate(candidate), [])
+                write(self.profile_path, candidate)
+                self.pack = deepcopy(original)
+                self.pack["context"] = interview.template(self.root, self.job_id, "tech")["context"]
+                self.save()
+                self.assert_private_calls_rejected(value, "unsafe_text")
+
+    def test_known_contact_value_in_experience_id_is_withheld(self):
+        candidate = json.loads(self.profile_path.read_text(encoding="utf-8"))
+        candidate["contact"]["name"] = "proj-1"
+        write(self.profile_path, candidate)
+        result = interview.template(self.root, self.job_id, "tech")
+        self.assertNotIn("proj-1", json.dumps(result, ensure_ascii=False))
+        self.pack["context"] = result["context"]
+        self.save()
+        self.assert_private_calls_rejected("proj-1", "unsafe_text")
+
+    def test_known_contact_value_in_bank_id_and_direction_is_rejected(self):
+        for value in ("tech.failure", "tech"):
+            with self.subTest(value=value):
+                candidate = json.loads(self.profile_path.read_text(encoding="utf-8"))
+                candidate["contact"]["name"] = value
+                write(self.profile_path, candidate)
+                status, output, error = self.call("template", self.job_id, "--direction", "tech")
+                self.assertEqual(status, 2)
+                self.assertIsNone(output)
+                self.assertNotIn(value, json.dumps(error))
+                self.assert_private_calls_rejected(value, "configuration")
+
+    def test_review_filename_and_path_are_checked_against_known_contacts(self):
+        for contact in ("review-prep-1-r1.json", "questions[0].question"):
+            with self.subTest(contact=contact):
+                candidate = json.loads(self.profile_path.read_text(encoding="utf-8"))
+                candidate["contact"]["name"] = contact
+                write(self.profile_path, candidate)
+                self.pack["context"] = interview.template(self.root, self.job_id, "tech")["context"]
+                self.save()
+                interview.render(self.root, self.path, True)
+                if contact.startswith("review-"):
+                    self.rejected("unsafe_text", "review-draft")
+                record = {"schema_version": 1, "kind": "interview-prep-review", "job_id": self.job_id,
+                          "pack": self.path.name, "pack_hash": files.digest(self.pack),
+                          "context_hash": files.digest(self.pack["context"]),
+                          "output_sha256": hashlib.sha256(self.path.with_suffix(".md").read_bytes()).hexdigest(),
+                          "round": 1, "mode": "independent", "created": files.now(), "verdict": "pass",
+                          "checked_question_ids": [q["id"] for q in self.pack["questions"]],
+                          "findings": [{"item": "I3", "path": "questions[0].question", "severity": "suggest",
+                                        "reason": "练习时说明边界", "suggestion": None}]}
+                write(self.review_path, record)
+                error = self.rejected("unsafe_text", "review-validate", self.review_path)
+                self.assertNotIn(contact, json.dumps(error))
+
     def test_sensitive_strings_rejected_in_all_pack_text_slots(self):
         original = deepcopy(self.pack)
         samples = ["a@example.test", "https://example.test", "www.example.test", "mailto:a", "data:x", "file:x",

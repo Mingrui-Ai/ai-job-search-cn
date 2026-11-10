@@ -51,6 +51,8 @@ def draft(root, filename, round_number=1):
     if type(round_number) is not int or round_number not in (1, 2):
         files.fail("invalid", "interview review round must be one or two")
     parts, pack, inputs, result = interview.prepared(root, filename)
+    interview.artifact_identifier(pack["job_id"], "review-" + Path(parts[-1]).stem + "-r" + str(round_number) + ".json",
+                                  inputs.contacts)
     output_hash = outputs(root, parts, pack)
     interview.recheck_pack(root, parts, pack, inputs)
     if outputs(root, parts, pack) != output_hash:
@@ -79,6 +81,7 @@ def validate(root, filename):
             files.fail("invalid", "interview review digest is invalid")
     pack_path = files.safe(root, (*review_parts[:-1], pack_name))
     parts, pack, inputs, result = interview.prepared(root, pack_path)
+    interview.artifact_identifier(pack["job_id"], review_parts[-1], inputs.contacts)
     if record["pack_hash"] != files.digest(pack) or record["context_hash"] != files.digest(inputs.context):
         files.fail("stale_context", "interview review belongs to another pack or source version")
     output_hash = outputs(root, parts, pack)
@@ -95,6 +98,7 @@ def validate(root, filename):
                 finding["severity"] not in ("must", "suggest")):
             files.fail("invalid", "interview finding must cite a checklist item and existing pack field")
         interview.text(finding["reason"], inputs.contacts)
+        interview.text(finding["path"], inputs.contacts)
         if finding["suggestion"] is not None:
             interview.text(finding["suggestion"], inputs.contacts)
         must += finding["severity"] == "must"
