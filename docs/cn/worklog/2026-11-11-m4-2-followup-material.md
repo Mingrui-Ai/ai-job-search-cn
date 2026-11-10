@@ -21,6 +21,7 @@
 - 新 CLI 闭环及旧消息、审核、产物、包边界：154 项、3 跳过，32.050 秒，OK。来源变更覆盖五入口；渲染/审核中插入虚构事件会被末次检查拒绝，旧输出保留；txt/说明缺失或被换会拒绝旧审核。
 - 扩展到 application 全套与真实 Windows junction：238 项、3 跳过，57.336 秒，OK。自查确认完整 job 摘要须在 legacy upgrade 填默认值前计算；新增回归。末次消息/context 检查 89 项、1 跳过，23.013 秒，OK，包含用户模板可省略可选 progress、必填槽位 required 必须为 true。
 - lint_skills/security_guards 通过；24 份变更通过 UTF-8、BOM/替换字符/控制字符及范围检查，新增内容无机器路径或令牌特征。公开样例中的邮箱均为 example.com 虚构标记。
+- 首轮正式全量暴露入口契约问题后中止：skill 正文超过既有 15 行上限，旧静态检查把 §17 交接后的 material/review 误算为 cn-application 的命令。已压缩四个薄入口，保留行数限制和原权限；测试按明确的 §17.2 交接分别核对 cn-application 与 cn-resume 的原命令组，新增显式交接断言。入口 15 项通过（0.382 秒），lint/security 再次通过；产品代码未改，正式全量按新 SHA 重跑。
 
 ## 遗留
 
