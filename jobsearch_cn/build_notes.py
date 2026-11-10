@@ -6,7 +6,7 @@ import re
 
 from jobsearch_cn import review, schema, store
 
-MATERIAL_NAME = re.compile(r"((resume|greeting|email|referral)-[1-9][0-9]{0,5})\.json")
+MATERIAL_NAME = re.compile(r"((resume|greeting|email|referral|followup)-[1-9][0-9]{0,5})\.json")
 _HASH = re.compile(r"[0-9a-f]{64}")
 _KEYS = ("schema_version", "kind", "material", "material_hash", "profile_hash", "built_at", "files")
 

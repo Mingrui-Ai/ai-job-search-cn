@@ -107,7 +107,7 @@ class Samples(unittest.TestCase):
     def test_every_built_in_template_covers_the_three_kinds_within_the_hard_limits(self):
         self.assertEqual(set(TEMPLATES), {"tech", "data", "product", "ops", "default"})
         for direction, template in TEMPLATES.items():
-            for kind in messages.KINDS:
+            for kind in messages.LEGACY_KINDS:
                 self.assertLessEqual(template[kind]["max_chars"], messages.HARD_LIMITS[kind], (direction, kind))
             self.assertIn("signature", [slot["slot"] for slot in template["email"]["slots"]])
 
@@ -498,7 +498,7 @@ class Shape(unittest.TestCase):
         self.assertIn("direction: must be one of", errors_of(data)[0])
         data = copy.deepcopy(GREETING)
         data["kind"] = "poster"
-        self.assertEqual(errors_of(data)[-1], "kind: must be one of greeting, email, referral")
+        self.assertEqual(errors_of(data)[-1], "kind: must be one of greeting, email, referral, followup")
         data = copy.deepcopy(GREETING)
         data["extra"] = 1
         self.assertIn("extra: unknown field", errors_of(data))
@@ -776,20 +776,20 @@ class Cli(unittest.TestCase):
                 self.assertFalse(output["valid"])
                 self.assertEqual(len(output["errors"]), 1, (text, command, output))
 
-    def test_a_misspelled_kind_names_all_four(self):
+    def test_a_misspelled_kind_names_all_material_kinds(self):
         record = dict(GREETING, kind="greet")
         path = self.write(record)
         for command in (("material", "validate"), ("material", "render")):
             result = run_cli(*command, str(path), data_dir=self.data)
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
             self.assertEqual(json.loads(result.stdout),
-                             {"valid": False, "errors": ["kind: must be one of resume, greeting, email, referral"],
+                         {"valid": False, "errors": ["kind: must be one of resume, greeting, email, referral, followup"],
                               "warnings": []})
         resume = self.data / "resume-1.json"  # the name resume build asks for
         resume.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
         built = run_cli("resume", "build", str(resume), data_dir=self.data)
         self.assertEqual(built.returncode, 1, built.stdout + built.stderr)
-        self.assertEqual(json.loads(built.stderr)["errors"], ["kind: must be one of resume, greeting, email, referral"])
+        self.assertEqual(json.loads(built.stderr)["errors"], ["kind: must be one of resume, greeting, email, referral, followup"])
 
     def test_resume_build_takes_only_a_cv(self):
         path = self.data / "resume-1.json"  # the name resume build asks for, but a greeting inside

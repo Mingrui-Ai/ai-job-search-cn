@@ -18,7 +18,7 @@
 | [collect.md](collect.md) | 通用采集框架、默认关闭的本地个人模块入口、通用收件导入 |
 | [profile.md](profile.md) | 个人档案格式（Profile v1）：字段、来源规则、与 JD 硬性条件的对照 |
 | [profile-setup.md](profile-setup.md) | 建档工作流 cn-setup（Codex 与 Claude Code 共用） |
-| [material.md](material.md) | 求职材料格式（M3-1）：简历材料怎么引用档案条目 id，`material validate` 的检查项；打招呼语、投递邮件、内推请求（M3-4）的格式、模板和 `material template`、`material render` |
+| [material.md](material.md) | 求职材料格式：简历引用与检查；打招呼语、邮件、内推及跟进正文 followup 的格式、模板、来源绑定和 `material template/validate/render`；跟进共享流程在 applications.md 第 17 节 |
 | [review-checklist.md](review-checklist.md) | 中文简历审核清单（A–F，每条有编号）和"起草 + 审核"工作流设计（M3-3） |
 | [review-format.md](review-format.md) | 审核结果格式（M3-3）：`review draft` 机器初稿（技能覆盖、标点和空格警告）、`review validate`、`review show` |
 | [resume-workflow.md](resume-workflow.md) | 生成简历工作流 cn-resume（三个 Agent 共用，M3-3）：起草材料、生成 PDF 和 Word、独立审核（最多 2 轮）、交给用户 |

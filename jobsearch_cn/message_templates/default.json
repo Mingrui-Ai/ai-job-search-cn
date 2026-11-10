@@ -3,6 +3,15 @@
   "direction": "default",
   "revision": 1,
   "label": "通用",
+  "followup": {
+    "max_chars": 300,
+    "slots": [
+      {"slot": "context", "required": true, "hint": "说明此前申请的岗位；引用 job 和当前有效 submitted 事件，不知道日期就不写日期"},
+      {"slot": "progress", "required": false, "hint": "只引用本次投递已保存且有效的进展；用户备注不等于招聘方回复"},
+      {"slot": "request", "required": true, "hint": "简短询问进展、下一步或是否需补材料，表示感谢；不把本地提醒日写成对方承诺"}
+    ],
+    "examples": ["您好，我此前提交了{job.title}岗位的申请。想请问目前的招聘进展，是否还有需要我补充的材料？谢谢。"]
+  },
   "greeting": {
     "max_chars": 150,
     "slots": [
