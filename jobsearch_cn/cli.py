@@ -181,6 +181,7 @@ def cmd_jd_screen(args) -> int:
     if not path.is_dir():
         raise InputError(f"{args.batch} is not a folder; name a batch folder, like data/inbox/boss/20261105-103000")
     try:
+        as_of = screen.reference_date(args.as_of)
         site = screen.batch_site(path, args.site)
         vocabulary = _vocabulary(args)
         if args.check:
@@ -193,7 +194,8 @@ def cmd_jd_screen(args) -> int:
         root = store.data_dir(args.data_dir)
         for folder in ("jobs", "matches"):
             store.safe_dir(root, folder)  # before anything is stored (H25b)
-        payload = screen.run(path, site, data, vocabulary, store.Store(root), store.MatchStore(root), top=args.top)
+        payload = screen.run(path, site, data, vocabulary, store.Store(root), store.MatchStore(root),
+                             top=args.top, as_of=as_of.isoformat())
     except (screen.BatchError, store.StoreError) as exc:
         raise InputError(str(exc)) from None
     _emit(payload)
@@ -1244,6 +1246,7 @@ def build_parser(adapters=None) -> argparse.ArgumentParser:
     screen_parser.add_argument("--site", choices=schema.SITES, help="批次的来源；默认取批次目录上一级的文件夹名")
     screen_parser.add_argument("--top", type=_count, default=screen.DEFAULT_TOP,
                                help=f"短名单列出前几条，默认 {screen.DEFAULT_TOP}；0 表示全部")
+    screen_parser.add_argument("--as-of", help="发布时间筛选的参考日期 YYYY-MM-DD，默认本机当天")
     screen_parser.add_argument("--check", action="store_true",
                                help="只检查文件格式，列出规则读出的职位名、公司、城市、薪资；不读档案，不写岗位库和匹配记录")
     screen_parser.add_argument("--profile", help="档案文件；默认为 <数据目录>/profile/profile.json")
