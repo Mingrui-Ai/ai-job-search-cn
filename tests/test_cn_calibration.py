@@ -252,7 +252,8 @@ class Retrospective(fixtures.Data):
             if sys.platform != "win32": self.skipTest("symlinks unavailable")
             import _winapi
             _winapi.CreateJunction(str(second_path.parent), str(first_path.parent))
-        self.addCleanup(lambda: os.rmdir(first_path.parent))
+        self.addCleanup(lambda: first_path.parent.unlink() if first_path.parent.is_symlink()
+                        else os.rmdir(first_path.parent))
         self.refused(first, error="archive_integrity")
 
     def test_leaf_symlink_cannot_borrow_context(self):
@@ -300,6 +301,38 @@ class Retrospective(fixtures.Data):
         self.assertIsNone(row["title"])
         self.assertIsNotNone(row["historical_score"])
         self.assertFalse(row["descriptive_comparison"]["eligible"])
+
+    def test_unrepresentable_timezone_conversion_keeps_the_whole_batch(self):
+        import subprocess
+        import sys
+        from pathlib import Path
+        ordinary = self.submitted()
+        affected = []
+        # The first overflows UTC and Shanghai; the second only Shanghai; the third both upper bounds.
+        for stamp in ("0001-01-01T00:00:00+23:59", "9999-12-31T23:59:59Z",
+                      "9999-12-31T23:59:59-23:59"):
+            identity = self.submitted("--on", "2026-11-01")
+            affected.append(identity)
+            value = deepcopy(self.old_score); value["scored_at"] = stamp
+            self.change_archive(identity, value)
+        result = subprocess.run([sys.executable, "-m", "jobsearch_cn", "application", "retrospective",
+                                 "--data-dir", str(self.data)], cwd=Path(__file__).resolve().parents[1],
+                                capture_output=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8"))
+        self.assertEqual(result.stderr, b"")
+        out = json.loads(result.stdout)
+        self.assertEqual(out["summary"]["submitted_application_count"], 4)
+        self.assertEqual(out["summary"]["historical_score_count"], 1)
+        self.assertEqual(out["summary"]["comparison_count"], 1)
+        self.assertEqual({warning["application_id"] for warning in out["warnings"]}, set(affected))
+        for row in out["rows"]:
+            self.assertTrue(row["submission"]["confirmed"])
+            if row["application_id"] == ordinary:
+                self.assertEqual(row["historical_score"]["total"]["score"], 87)
+            else:
+                self.assertIsNone(row["historical_score"])
+                self.assertEqual(row["quality"]["readability"]["match"], "unsupported")
+                self.assertFalse(row["descriptive_comparison"]["eligible"])
 
     def test_contact_labels_and_untrusted_text_are_not_exposed(self):
         identity = self.submitted()

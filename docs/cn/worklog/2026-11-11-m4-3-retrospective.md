@@ -21,6 +21,8 @@
 - 同步前检查点 lint/security 通过，全量 2,134 项通过、38 项跳过；包括独立选择范围、真实 subprocess JSON/no-write 和隐私/UTF-8 检查。
 - 集中合入 PR162 的主线 `aa01ce044023d57ba669f3a4150951ca1ec08241`。入口文字、相邻路线图行和 CLI 导入冲突同时保留跟进与复盘；原 read_context、prepare_materials 拒收 followup 的限制及完整跟进工作流保留。
 - 正式 lint/security/全量在同步后的冻结 SHA 上执行，完整结果随 PR 交付记录提供。
+- 首个同步候选 `479a005` 本地全量 2,161 项、38 跳过通过；CI 发现 Linux 目录 symlink 清理应 unlink（Windows junction 仍 rmdir），已按链接种类修正测试清理。
+- 独立审核指出 ISO 极端年份转换到 UTC/上海时区可能溢出。历史评分解释阶段预检两个时区的可表示性，失败按 unsupported 保留整批事实、排除历史数值并警告；新增真实 CLI 的混合批次回归，含正常评分和三个极端时区时间。
 - 作者不读取独立留出，不自审或合并；独立审查和 CI 由规划者安排。
 
 ## 遗留

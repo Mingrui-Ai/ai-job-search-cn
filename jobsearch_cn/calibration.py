@@ -4,7 +4,7 @@ No current profile/job/match reads, no scoring, writes, or outcome prediction.
 See docs/cn/calibration.md for the interpretation and confirmation boundary.
 """
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import json
 import math
@@ -163,6 +163,10 @@ def _time(value):
     parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     if parsed.utcoffset() is None:
         raise ValueError("timestamp has no timezone")
+    # Both comparison bases must be representable before exposing a historical score.
+    # An ISO year at either endpoint can overflow after applying its timezone offset.
+    parsed.astimezone(timezone.utc)
+    parsed.astimezone(app.LOCAL_TZ)
     return parsed
 
 
