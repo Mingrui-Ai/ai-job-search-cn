@@ -381,12 +381,19 @@ def _is_explicit_list_clear(value, evidence) -> bool:
             and bool(evidence.get("text")))
 
 
+def _is_explicit_scalar_clear(path, value, evidence) -> bool:
+    """A validated null carrying H22b's deliberate correction marker."""
+    return (path in schema.SCALAR_CLEAR_FIELDS and value is None
+            and evidence is not None and evidence.get("clear") is True)
+
+
 def merge_same_text(old: dict, new: dict) -> dict:
     """Merge a re-import of the same JD text into the stored record.
 
     Fill unknown fields, but do not erase a value with an ordinary empty import.
-    A list explicitly cleared with user/agent evidence counts as a known value,
-    both when clearing it and on later imports. Only equal or higher evidence
+    A list explicitly cleared with user/agent evidence, or a scalar with the
+    clear marker, counts as a known value both when clearing it and on later
+    imports. Only equal or higher evidence
     priority can replace a known value: user > agent > rule. Evidence follows
     the winning value, even when the two values are equal. Status and first
     import time stay unchanged. An explicit skills clear that would strand
@@ -396,14 +403,20 @@ def merge_same_text(old: dict, new: dict) -> dict:
     for path in schema.EVIDENCE_FIELDS:
         value = schema._field(new, path)
         new_evidence = new["evidence"].get(path)
-        if not schema._has_value(value) and not _is_explicit_list_clear(value, new_evidence):
+        scalar_clear = _is_explicit_scalar_clear(path, value, new_evidence)
+        if not schema._has_value(value) and not _is_explicit_list_clear(value, new_evidence) and not scalar_clear:
             continue
         old_evidence = old["evidence"].get(path)
         old_value = schema._field(old, path)
-        if schema._has_value(old_value) or _is_explicit_list_clear(old_value, old_evidence):
+        if (schema._has_value(old_value) or _is_explicit_list_clear(old_value, old_evidence)
+                or _is_explicit_scalar_clear(path, old_value, old_evidence)):
             old_priority = _EVIDENCE_PRIORITY.get((old_evidence or {}).get("method"), 0)
             new_priority = _EVIDENCE_PRIORITY.get((new_evidence or {}).get("method"), 0)
             if new_priority < old_priority:
+                if scalar_clear:
+                    raise StoreError(f"cannot clear {path}: source {new_evidence['method']!r} has lower priority "
+                                     f"than stored {old_evidence['method']!r}; use an authorized correction "
+                                     "from the same or a higher source")
                 continue
         _set_field(merged, path, value)
         merged["evidence"][path] = new_evidence

@@ -139,6 +139,8 @@ def cmd_jd_save(args) -> int:
     if invalid:
         _emit({"saved": [], "invalid": invalid})
         return 1
+    if len(records) > 1 and any("clear" in entry for record in records for entry in record["evidence"].values()):
+        raise InputError("explicit scalar/object clearing requires a single job record; split the batch before saving")
     _emit({"saved": _save_all(_store(args), records), "invalid": []})
     return 0
 

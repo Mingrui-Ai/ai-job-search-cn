@@ -90,6 +90,14 @@ EVIDENCE_FIELDS = (
     "requirements.skill_alternatives", "requirements.start", "interview", "benefits.meals", "return_offer",
     "published_at", "deadline",
 )
+# H22b: nullable fields corrected as one unit. Containers, object children and
+# H22's list fields cannot carry the optional evidence.clear marker.
+SCALAR_CLEAR_FIELDS = (
+    "title", "company", "remote", "employment_type", "salary",
+    "requirements.graduation", "requirements.days_per_week", "requirements.min_months",
+    "requirements.education", "requirements.start", "interview", "benefits.meals",
+    "return_offer", "published_at", "deadline",
+)
 # List fields whose every item must appear in the field's own evidence.
 ITEMIZED_FIELDS = ("cities", "requirements.skills")
 # Skill groups the JD asks for one of; their snippets must offer each group as one choice.
@@ -193,13 +201,13 @@ def validate(record) -> list[str]:
     return errors
 
 
-def _check_keys(obj: dict, expected, path: str, errors: list) -> None:
+def _check_keys(obj: dict, expected, path: str, errors: list, optional=()) -> None:
     prefix = f"{path}." if path else ""
     for key in expected:
         if key not in obj:
             errors.append(f"{prefix}{key}: missing (use null, or [] for a list, when the JD does not say)")
     for key in obj:
-        if key not in expected:
+        if key not in expected and key not in optional:
             errors.append(f"{prefix}{key}: unknown field")
 
 
@@ -583,21 +591,34 @@ def _check_evidence(record: dict, errors: list) -> None:
         if not isinstance(entry, dict):
             errors.append(f"{where}: must be an object with text and method")
             continue
-        _check_keys(entry, EVIDENCE_KEYS, where, errors)
+        _check_keys(entry, EVIDENCE_KEYS, where, errors, optional=("clear",))
         method = entry.get("method")
         if "method" in entry:
             _check_enum(method, EVIDENCE_METHODS, f"{where}.method", errors, nullable=False)
-        if "text" not in entry or (entry["text"] is None and method == "user"):
+        clearing = "clear" in entry
+        if clearing:
+            if entry["clear"] is not True:
+                errors.append(f"{where}.clear: must be true when present; omit it for ordinary values")
+            if path not in SCALAR_CLEAR_FIELDS:
+                errors.append(f"{where}.clear: only supported for independent nullable scalar/object fields")
+            if _field(record, path) is not None:
+                errors.append(f"{where}.clear: the whole field must be null")
+            if method not in ("agent", "user"):
+                errors.append(f"{where}.clear: requires agent or user evidence")
+        if "text" not in entry or (entry["text"] is None and method == "user" and not clearing):
             continue
         snippets = [entry["text"]] if isinstance(entry["text"], str) else entry["text"]
         if not (isinstance(snippets, list) and snippets and all(isinstance(s, str) and s.strip() for s in snippets)):
-            errors.append(f"{where}.text: must be a non-empty string or list of strings (null only for user)")
+            suffix = " (clearing requires a non-empty reason)" if clearing else " (null only for user)"
+            errors.append(f"{where}.text: must be a non-empty string or list of strings" + suffix)
             continue
         if method not in ("rule", "agent") or haystack is None:
             continue
         for snippet in snippets:
             if normalize_for_match(snippet) not in haystack:
                 errors.append(f"{where}.text: not found in raw_text: {snippet!r}")
+            elif clearing and method == "agent" and snippet not in raw:
+                errors.append(f"{where}.text: clearing requires an exact quotation from raw_text: {snippet!r}")
         folded = [normalize_for_match(snippet) for snippet in snippets]
         if path in ITEMIZED_FIELDS and isinstance(_field(record, path), list):
             for item in _field(record, path):
