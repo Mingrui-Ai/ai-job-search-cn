@@ -17,7 +17,7 @@ from pathlib import Path
 
 from jobsearch_cn import (__version__, browser, collect, jd_parser, match, material, messages, profile, report,
                           resume_docx, resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
-from jobsearch_cn import beisen, build_notes, inbox, personal
+from jobsearch_cn import beisen, build_notes, inbox, personal, robots_policy
 from jobsearch_cn import applications as applications_mod
 
 
@@ -1096,6 +1096,8 @@ def _collect_run(options, root, cdp) -> dict:
 
 
 def cmd_collect_beisen(args) -> int:
+    if args.url is not None or args.reread_known:
+        return cmd_collect_beisen_detail(args)
     root = store.data_dir(args.data_dir)
     try:
         tenants = beisen.load_tenants(root)
@@ -1127,6 +1129,59 @@ def cmd_collect_beisen(args) -> int:
         summary["warnings"].append(note)
     _emit(summary)
     return collect.exit_code(summary)
+
+
+def cmd_collect_beisen_detail(args) -> int:
+    root = store.data_dir(args.data_dir)
+    try:
+        if args.url is None:
+            raise collect.CollectError("--reread-known 只能与 --url 一起使用")
+        if args.query is not None or args.all or args.max is not None or args.max_pages is not None or args.cdp is not None:
+            raise collect.CollectError("--url 不接受 --query、--all、--max、--max-pages 或 --cdp")
+        subdomain, _, _ = beisen.detail_address(args.url)
+        if args.tenant != subdomain:
+            raise collect.CollectError("--tenant 与详情链接的租户不一致")
+        tenants = beisen.load_tenants(root)
+        if subdomain not in tenants:
+            raise collect.CollectError("详情租户不在本机北森白名单中；未启动浏览器")
+        tenant = tenants[subdomain]
+        site, source = beisen.detail_rules(tenant, args.url, args.channel)
+        options = collect.make_detail_options(args.url, site, source, batch=args.batch,
+                                              reread_known=args.reread_known, diagnostics=args.diagnostics)
+        run = collect.SingleRun(options, root)
+    except (collect.CollectError, store.StoreError) as exc:
+        raise InputError(str(exc)) from None
+    if run.summary["finished"] != "known_job":
+        _collect_single_read(run)
+    run.summary["tenant"] = {"subdomain": tenant.subdomain, "portal": tenant.portal, "company": tenant.company,
+                             "terms_url": tenant.terms_url, "terms_checked": tenant.terms_checked}
+    _emit(run.summary)
+    return collect.exit_code(run.summary)
+
+
+def _collect_single_read(run):
+    try:
+        tab = browser.open_single_tab()
+    except browser.BrowserUnavailable as exc:
+        raise InputError(str(exc)) from None
+    reason = None
+    try:
+        if run.capture:
+            tab.capture(run.site.CAPTURE)
+        body, status, error = tab.read_robots(run.options.url)
+        policy = robots_policy.decide(run.options.url, body, status,
+                                      checked_at=collect._now().isoformat(timespec="seconds"), error=error)
+        run.summary["robots"] = policy
+        if policy["status"] == "allowed":
+            collect.time.sleep(max(collect.random.uniform(*collect.DELAY_RANGE), policy["delay_seconds"]))
+            tab.open_single(run.options.url, run.site.DETAIL_READY)
+    except collect.BrowserError:
+        reason = "浏览器无法完成单个详情读取"
+    finally:
+        snapshot, closing_reason = tab.freeze_and_close()
+    if run.summary["robots"]["status"] != "allowed":
+        return run.fail(run.summary["robots"]["reason"] or reason or closing_reason or "robots 访问许可未确认")
+    return run.finish(snapshot, fetched_at=collect._now().isoformat(timespec="seconds"), stop_reason=closing_reason or reason)
 
 
 COLLECT_EXIT_CODES = ("退出码：0 读完（到了上限或没有更多结果）；2 没能开始（参数不对、没装 Playwright、启动或连不上浏览器）；"
@@ -1181,6 +1236,8 @@ def _add_beisen_parser(sites, stored) -> None:
     words = parser.add_mutually_exclusive_group()
     words.add_argument("--query", help="只搜这一个关键词，不用档案里的关键词")
     words.add_argument("--all", action="store_true", help="不按关键词，读频道和城市下的全部岗位")
+    words.add_argument("--url", help="只读取这一个规范 HTTPS 详情链接；先查 robots，不访问列表")
+    parser.add_argument("--reread-known", action="store_true", help="仅用于 --url：重新读取已知岗位，另存收件原件")
     parser.add_argument("--max", type=int, help=f"这次最多打开几个新岗位的详情页（默认、最多 {beisen.MAX_JOBS}）")
     parser.add_argument("--max-pages", type=int,
                         help=f"所有频道、城市、关键词合计最多加载几次列表（默认、最多 {beisen.MAX_PAGES}）")
@@ -1451,13 +1508,34 @@ def build_parser(adapters=None) -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     _force_utf8_output()
     argv = list(sys.argv[1:] if argv is None else argv)
+    # Detect even malformed/abbreviated single-link switches before loading executable
+    # personal modules. Ordinary batch beisen retains its existing module behavior.
+    switches = [value.split("=", 1)[0] for value in argv[1:] if value.startswith("--")]
+    single = argv[:1] == ["collect"] and any(
+        len(value) > 2 and (name.startswith(value) or value.startswith(name))
+        for value in switches for name in ("--url", "--reread-known"))
     try:
-        adapters = personal.load_adapters() if argv[:1] == ["collect"] else {}
+        adapters = personal.load_adapters() if argv[:1] == ["collect"] and not single else {}
     except personal.ModuleError as exc:
         _emit({"error": str(exc)}, sys.stderr)
         return 2
     parser = build_parser(adapters)
-    args = parser.parse_args(argv)
+    if single:
+        def invalid_arguments(message):
+            raise InputError("单链接参数无效；请查看 collect beisen --help（未读取任何链接或个人模块）")
+
+        def redact_errors(selected):
+            selected.error = invalid_arguments
+            for action in selected._actions:
+                if isinstance(action, argparse._SubParsersAction):
+                    for child in action.choices.values():
+                        redact_errors(child)
+        redact_errors(parser)
+    try:
+        args = parser.parse_args(argv)
+    except InputError as exc:
+        _emit({"error": str(exc)}, sys.stderr)
+        return 2
     handler = getattr(args, "handler", None)
     if handler is None:
         getattr(args, "help_parser", parser).print_help()

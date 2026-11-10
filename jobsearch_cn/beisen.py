@@ -203,6 +203,43 @@ def tenant_rules(tenant: Tenant, channel: str):
     return (NewPortal if tenant.portal == "new" else LegacyPortal)(tenant, channel)
 
 
+def detail_address(url):
+    """Strict user-link admission, separate from the more permissive identity lookup.
+
+    Returns (tenant, portal, channel or None). Do not include rejected input in errors.
+    """
+    if not isinstance(url, str) or len(url) > 2048:
+        raise CollectError("--url 要写一条不超过 2048 字符的北森 HTTPS 详情链接")
+    match = re.fullmatch(r"https://([a-z0-9][a-z0-9-]*[a-z0-9]|[a-z0-9])\.zhiye\.com/(.+)", url)
+    if not match or not _SUBDOMAIN.fullmatch(match[1]) or match[1] == "www":
+        raise CollectError("--url 只接受无端口、无用户信息的北森租户 HTTPS 详情地址")
+    tenant, tail = match.groups()
+    new = re.fullmatch(r"(campus|intern|social)/detail\?jobAdId=(" + _UUID.pattern + r")", tail)
+    if new:
+        return tenant, "new", new[1]
+    if re.fullmatch(r"zpdetail/[0-9]{1,20}", tail):
+        return tenant, "legacy", None
+    raise CollectError("--url 不是支持的规范详情路径，或含多余参数、片段、空白及转义")
+
+
+def detail_rules(tenant, url, channel=None):
+    """(rules, channel provenance) for an already allowlisted tenant's explicit link."""
+    subdomain, portal, url_channel = detail_address(url)
+    if subdomain != tenant.subdomain or portal != tenant.portal:
+        raise CollectError("--url 的租户或门户版本与所选白名单条目不一致")
+    if url_channel is not None:
+        if channel is not None and channel != url_channel:
+            raise CollectError("--channel 与详情链接的频道不一致")
+        channel, provenance = url_channel, "url"
+    elif channel is not None:
+        provenance = "argument"
+    elif len(tenant.channels) == 1:
+        channel, provenance = tenant.channels[0], "whitelist_single"
+    else:
+        raise CollectError("旧版详情链接没有频道；白名单有多个频道时须显式指定 --channel")
+    return tenant_rules(tenant, channel), provenance
+
+
 def searches(tenant: Tenant, keywords=(), channel=None) -> list:
     """One Search per channel, city and keyword ("" for the whole list), in the whitelist's order."""
     found = []
@@ -402,14 +439,16 @@ class _Portal:
                 return True
         return False
 
-    def detail_text(self, fields: dict) -> str:
+    def detail_text(self, fields: dict, *, include_channel=True) -> str:
         """The job's text for the inbox: its title, its labelled facts, then its sections.
 
         The labels are the ones jd parse reads (工作地点, 薪资, 发布时间, 公司名称); a fact the
         page does not show is left out, so it stays unknown (null). 面议 is written as the page
         shows it. The channel names the kind of hiring (校园招聘, 实习生招聘, 社会招聘).
         """
-        lines = [fields["title"], f"招聘频道：{CHANNELS[self.channel]}"]
+        lines = [fields["title"]]
+        if include_channel:
+            lines.append(f"招聘频道：{CHANNELS[self.channel]}")
         if fields.get("places"):
             lines.append("工作地点：" + "、".join(fields["places"]))
         if fields.get("kinds"):
