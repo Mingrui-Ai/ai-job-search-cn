@@ -22,6 +22,7 @@
 
 - 独立审核继续，标识符敏感检测具有与文本相同的保守误报限制；不宣称通用 PII 检测完整。
 - 按规划者错误码裁定记录 P3：绑定配置在读中删除的竞争窗口可能报 missing_input/exit2，而非 stale_context/exit1；未成功输出或接受旧 pass。原执行与期望证据保留，后续收尾处理，不在本轮扩大生产修复。
+- 独立 IR008 提示时点 P3：零 experience 的 template 目录为空但 warnings 未提示，validate 阶段已有 no_project_questions；未造项目、未放行零题，原冻结不计 pass，本轮只列后续模板提示待办。
 - 018 仍待批，M5-1 不标整体完成。
 
 ## 下一步
