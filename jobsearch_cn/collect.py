@@ -70,7 +70,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from jobsearch_cn import htmltext, schema, store
+from jobsearch_cn import collect_diagnostics, htmltext, schema, store
 from jobsearch_cn.content import placeholder_description
 
 INBOX_FORMAT = "jobsearch_cn.inbox/1"
@@ -145,10 +145,11 @@ class Options:
     batch: str | None = None
     site: object = None
     searches: tuple = ()  # several lists (make_search_options); empty: the one search above
+    diagnostics: bool = False  # save an existing structure-stop snapshot locally, only when requested
 
 
 def make_options(query, city=None, city_code=None, max_jobs=DEFAULT_MAX_JOBS, max_pages=DEFAULT_MAX_PAGES,
-                 batch=None, site=None) -> Options:
+                 batch=None, site=None, diagnostics=False) -> Options:
     """Options checked against the limits; CollectError names the first problem.
 
     site is the site's rules module . Where its search takes the city's name
@@ -178,7 +179,7 @@ def make_options(query, city=None, city_code=None, max_jobs=DEFAULT_MAX_JOBS, ma
         raise CollectError(f"不认识城市\"{city}\"。认识的城市：{known}；别的城市用 --city-code 给出城市代码")
     _check_limits(site, max_jobs, max_pages, batch)
     return Options(query=query, city=city, city_code=city_code, max_jobs=max_jobs, max_pages=max_pages, batch=batch,
-                   site=site)
+                   site=site, diagnostics=diagnostics)
 
 
 def _caps(site) -> tuple:
@@ -197,7 +198,7 @@ def _check_limits(site, max_jobs, max_pages, batch) -> None:
         raise CollectError("--batch 只能用字母、数字和 . _ -，不能以 . 开头，最多 64 个字符")
 
 
-def make_search_options(searches, max_jobs=None, max_pages=None, batch=None) -> Options:
+def make_search_options(searches, max_jobs=None, max_pages=None, batch=None, diagnostics=False) -> Options:
     """Options for a run over several lists with one page and detail budget; CollectError names the first problem.
 
     Every Search names its own rules (search.site), all for the same inbox site; the first one's
@@ -223,7 +224,7 @@ def make_search_options(searches, max_jobs=None, max_pages=None, batch=None) -> 
     max_pages = getattr(site, "DEFAULT_MAX_PAGES", DEFAULT_MAX_PAGES) if max_pages is None else max_pages
     _check_limits(site, max_jobs, max_pages, batch)
     return Options(query="", city="", city_code="", max_jobs=max_jobs, max_pages=max_pages, batch=batch, site=site,
-                   searches=searches)
+                   searches=searches, diagnostics=diagnostics)
 
 
 def _job_ids_in(record, site=None) -> set:
@@ -283,9 +284,10 @@ class _Pacer:
 
 
 class _Stop(Exception):
-    def __init__(self, status: str, reason: str, advice: str | None = None):
+    def __init__(self, status: str, reason: str, advice: str | None = None, *, snapshot=None, phase=None):
         super().__init__(reason)
         self.status, self.reason, self.advice = status, reason, advice
+        self.snapshot, self.phase = snapshot, phase
 
 
 def _now() -> datetime:
@@ -317,6 +319,8 @@ class _Run:
             "stopped_at": None, "saved": 0, "skipped_known": 0, "closed": 0, "failed": [], "list_loads": 0,
             "cards_seen": 0, "files": [], "warnings": self.warnings,
         }
+        if options.diagnostics:
+            self.summary["diagnostics"] = {"status": "not_applicable"}
         if several:
             self.summary["searches"] = [
                 {"label": search.label, "query": search.query, "city": search.city, "city_code": search.city_code,
@@ -334,7 +338,7 @@ class _Run:
         """What a site that reads the page's own data responses gets besides the DOM."""
         return {"responses": tuple(snapshot.responses)} if self.capture else {}
 
-    def _check(self, snapshot: Snapshot, root, site) -> None:
+    def _check(self, snapshot: Snapshot, root, site, phase) -> None:
         if snapshot.status in DENIED_STATUSES:
             raise _Stop("needs_user", f"网站返回 HTTP {snapshot.status}")
         problem = site.page_problem(snapshot.url, snapshot.title, root, snapshot.status, **self._kw(snapshot))
@@ -343,19 +347,20 @@ class _Run:
             if kind == "blocked":
                 raise _Stop("needs_user", reason)
             if kind == "changed":  # the page is not what the rules expect: not a block, not a sign-in
-                raise _Stop("page_changed", reason)
+                raise _Stop("page_changed", reason, snapshot=snapshot, phase=phase)
             if self.headless:
                 raise _Stop("needs_user", f"{reason}：{site.NAME}要登录才能看", SIGN_IN_HEADLESS)
             raise _Stop("needs_user", reason, SIGN_IN_HEADLESS)
         if hasattr(self.tab, "check_before_action"):
-            self.tab.check_before_action(lambda current: self._check(current, htmltext.parse(current.html), site))
+            self.tab.check_before_action(
+                lambda current: self._check(current, htmltext.parse(current.html), site, phase))
 
     # -- list phase --------------------------------------------------------------------------
     def _read_list(self, snapshot: Snapshot, first: bool, search: Search):
         """(cards, more): None for an explicitly empty first page; more is the site's has_more, if it has one."""
         site, kw = search.site, self._kw(snapshot)
         root = htmltext.parse(snapshot.html)
-        self._check(snapshot, root, site)
+        self._check(snapshot, root, site, "list")
         cards, unreadable = site.parse_cards(root, snapshot.url, **kw)
         more = site.has_more(root, **kw) if hasattr(site, "has_more") else None
         if not cards:
@@ -366,7 +371,8 @@ class _Run:
                 if more is True:
                     return [], True  # a recognised empty load while the site's total says more
                 return (None if first else []), False
-            raise _Stop("page_changed", "搜索结果页上找不到岗位卡片或卡片里的详情链接，页面结构可能变了")
+            raise _Stop("page_changed", "搜索结果页上找不到岗位卡片或卡片里的详情链接，页面结构可能变了",
+                        snapshot=snapshot, phase="list")
         # A list that grows by scrolling shows the same odd cards (ads, say) again on every load.
         self.unreadable = max(self.unreadable, unreadable)
         return cards, more
@@ -387,7 +393,8 @@ class _Run:
         """Read one search's list into candidates; returns how it ended (a FINISHED key)."""
         options, number, empty = self.options, 1, 0
         search_seen = set()  # another search's duplicates still count as progress through this list
-        cards, more = self._read_list(self._load_list(search, 1, entry), True, search)
+        snapshot = self._load_list(search, 1, entry)
+        cards, more = self._read_list(snapshot, True, search)
         if cards is None:
             return "no_results"
         while True:
@@ -412,7 +419,8 @@ class _Run:
                 empty += 1  # the site says there is more, yet this load brought nothing new
                 if empty >= EMPTY_LOADS:
                     raise _Stop("page_changed", f"连续 {EMPTY_LOADS} 次加载都没有新岗位，页面却显示还有更多："
-                                                "翻页方式可能变了，或网站不再给出后面的结果")
+                                                "翻页方式可能变了，或网站不再给出后面的结果",
+                                snapshot=snapshot, phase="list")
             else:
                 empty = 0
             if len(candidates) >= options.max_jobs:
@@ -422,7 +430,8 @@ class _Run:
             if self.loads >= options.max_pages:
                 return "max_pages"
             number += 1
-            cards, more = self._read_list(self._load_list(search, number, entry), False, search)
+            snapshot = self._load_list(search, number, entry)
+            cards, more = self._read_list(snapshot, False, search)
 
     def collect_cards(self) -> list:
         """The new jobs to open, in list order, at most max_jobs of them, each with the search that found it."""
@@ -480,18 +489,20 @@ class _Run:
         snapshot = self._act(self.tab.open, card["href"], site.DETAIL_READY)
         fetched_at = self.clock().isoformat(timespec="seconds")
         root, kw = htmltext.parse(snapshot.html), self._kw(snapshot)
-        self._check(snapshot, root, site)
+        self._check(snapshot, root, site, "detail")
         if site.is_closed(root, **kw):
             self.summary["closed"] += 1
             return
         landed = site.job_id_from_url(snapshot.url)
         if landed != card["id"]:
-            raise _Stop("page_changed", "打开岗位链接后没有停在这个岗位的详情页上")
+            raise _Stop("page_changed", "打开岗位链接后没有停在这个岗位的详情页上", snapshot=snapshot, phase="detail")
         fields = site.parse_detail(root, **kw)
         if not fields["title"] or not fields["description"] or placeholder_description(fields["description"]):
-            raise _Stop("page_changed", "详情页上找不到岗位名称或职位描述，页面结构可能变了")
+            raise _Stop("page_changed", "详情页上找不到岗位名称或职位描述，页面结构可能变了",
+                        snapshot=snapshot, phase="detail")
         if not site.same_job(card["title"], fields["title"]):
-            raise _Stop("page_changed", f"详情页的岗位名\"{fields['title']}\"和列表里的\"{card['title']}\"对不上")
+            raise _Stop("page_changed", f"详情页的岗位名\"{fields['title']}\"和列表里的\"{card['title']}\"对不上",
+                        snapshot=snapshot, phase="detail")
         text = site.detail_text(fields)
         if len(text) > schema.MAX_RAW_TEXT:
             self.summary["failed"].append({"job": card["id"], "reason": f"岗位文字超过 {schema.MAX_RAW_TEXT} 字，没有保存"})
@@ -519,6 +530,9 @@ class _Run:
                                   f"跳过 {summary['skipped_known']} 个以前抓过的")
         except _Stop as stop:
             summary["status"] = stop.status
+            if self.options.diagnostics and stop.status == "page_changed":
+                summary["diagnostics"] = collect_diagnostics.save(
+                    self.data_root, self.batch, stop.snapshot, phase=stop.phase, reason=stop.reason, at=self.clock())
             if stop.advice:
                 tail = stop.advice
             elif stop.status != "needs_user":

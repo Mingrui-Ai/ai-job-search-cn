@@ -1064,7 +1064,8 @@ def cmd_collect(args) -> int:
     site = args.collect_rules
     try:
         options = collect.make_options(args.query, city=args.city, city_code=getattr(args, "city_code", None),
-                                       max_jobs=args.max, max_pages=args.max_pages, batch=args.batch, site=site)
+                                       max_jobs=args.max, max_pages=args.max_pages, batch=args.batch, site=site,
+                                       diagnostics=args.diagnostics)
         cdp = browser.check_cdp_url(args.cdp) if args.cdp is not None else None
     except (collect.CollectError, browser.BrowserUnavailable) as exc:
         raise InputError(str(exc)) from None
@@ -1108,7 +1109,7 @@ def cmd_collect_beisen(args) -> int:
         else:
             keywords, note = beisen.profile_keywords(root)
         options = collect.make_search_options(beisen.searches(tenant, keywords, args.channel), max_jobs=args.max,
-                                              max_pages=args.max_pages, batch=args.batch)
+                                              max_pages=args.max_pages, batch=args.batch, diagnostics=args.diagnostics)
         cdp = browser.check_cdp_url(args.cdp) if args.cdp is not None else None
     except (collect.CollectError, browser.BrowserUnavailable) as exc:
         raise InputError(str(exc)) from None
@@ -1133,8 +1134,14 @@ def _add_collect_options(parser) -> None:
     parser.add_argument("--max-pages", type=int, default=collect.DEFAULT_MAX_PAGES,
                         help=f"搜索结果最多加载几屏或几页（默认 {collect.DEFAULT_MAX_PAGES}，最多 {collect.MAX_PAGES_CAP}）")
     parser.add_argument("--batch", help="批次名，默认用开始的时间 YYYYMMDD-HHMMSS；写已有的批次名就接着往里存")
+    _add_collect_diagnostics(parser)
     parser.add_argument("--cdp", help="不写时在后台启动本机 Chrome（无窗口、临时资料目录，用完关掉）。"
                                       f"显式连接专用 Chrome，只能是本机地址，例如 {browser.DEFAULT_CDP}；仍只读取免登录页面")
+
+
+def _add_collect_diagnostics(parser) -> None:
+    parser.add_argument("--diagnostics", action="store_true",
+                        help="结构异常时把当次已有页面和元数据保存到数据目录的 collect/diagnostics/；默认不保存")
 
 
 def _add_collect_parser(commands, stored, adapters) -> None:
@@ -1171,6 +1178,7 @@ def _add_beisen_parser(sites, stored) -> None:
     parser.add_argument("--max-pages", type=int,
                         help=f"所有频道、城市、关键词合计最多加载几次列表（默认、最多 {beisen.MAX_PAGES}）")
     parser.add_argument("--batch", help="批次名，默认 beisen-<子域名>-<开始时间>；写已有的批次名就接着往里存")
+    _add_collect_diagnostics(parser)
     parser.add_argument("--cdp", help="不写时在后台启动本机 Chrome（无窗口、临时资料目录，用完关掉）。"
                                       f"显式连接专用 Chrome，只能是本机地址，例如 {browser.DEFAULT_CDP}；仍只读取免登录页面")
     parser.set_defaults(handler=cmd_collect_beisen)
