@@ -597,6 +597,7 @@ class NewPortal(_Portal):
 class LegacyPortal(_Portal):
     PORTAL = "legacy"
     PAGINATION = "url"
+    _EMPTY_TABLE = ".positionlist-smallblue .joblist > table.jobsTable"
     SELECTORS = {
         "card": ["table.listtable a[href*=zpdetail]"],
         "rows": ["table.listtable tr"],
@@ -610,7 +611,7 @@ class LegacyPortal(_Portal):
         "detail_title": [".xiangqingtitle"],
         "apply_status": ["[class*=applyStatus]"],
     }
-    LIST_READY = ["table.listtable", ".tablenote"] + _BLOCKED + _LOGIN
+    LIST_READY = ["table.listtable", ".tablenote", _EMPTY_TABLE] + _BLOCKED + _LOGIN
     DETAIL_READY = [".xiangqingtitle", ".xiangqingtext"] + _BLOCKED + _LOGIN
     _DETAIL_PATH = re.compile(r"/zpdetail/([0-9]{1,20})/?")
     _LABELS = {"places": ("工作地点", "工作城市", "工作地址"), "salary": ("薪资范围", "薪资", "薪酬", "月薪"),
@@ -642,6 +643,9 @@ class LegacyPortal(_Portal):
         path = self._parts(url).path
         if path.rstrip("/") != "/search" and not self._DETAIL_PATH.fullmatch(path):
             return "changed", "页面离开了门户公开的职位搜索和详情路径"
+        if path.rstrip("/") == "/search" and _nodes(root, [self._EMPTY_TABLE]) \
+                and _nodes(root, ["table.listtable"]):
+            return "changed", "页面同时包含多种职位列表模板，无法确认搜索结果"
         return None
 
     def parse_cards(self, root, page_url: str):
@@ -676,7 +680,37 @@ class LegacyPortal(_Portal):
                   for match in [re.search(r"共\s*([0-9]+)\s*条", htmltext.text(node))] if match]
         if any(counts):
             return False
+        # This variant is evidenced only for an explicit empty table. Never let an old
+        # template's count or empty box fill in missing evidence for this one.
+        tables = htmltext.select(root, self._EMPTY_TABLE)
+        if tables:
+            visible = [table for table in tables if _visible(table)]
+            return bool(visible) and not _nodes(root, ["table.listtable"]) \
+                and all(self._empty_jobs_table(table) for table in visible)
         return 0 in counts or bool(_nodes(root, self.SELECTORS["no_results"]))
+
+    @staticmethod
+    def _empty_jobs_table(table) -> bool:
+        """Only the observed main-table empty row, never a sidebar, job or unknown row."""
+        module = table.parent
+        while module is not None and "positionlist-smallblue" not in module.classes():
+            module = module.parent
+        if module is None or any(int(value) for value in re.findall(r"共\s*([0-9]+)\s*条", htmltext.text(module))):
+            return False
+        if _nodes(table, ["a[href]"]):
+            return False
+        empty_rows = 0
+        for row in _nodes(table, ["tr"]):
+            cells = [node for node in row.children if isinstance(node, htmltext.Node)
+                     and node.tag in ("td", "th") and _visible(node)]
+            if "title" in row.classes() and [htmltext.text(cell) for cell in cells] == [
+                    "职位名称", "职位类型", "工作地点", "发布时间"]:
+                continue
+            markers = _nodes(row, ["td.tcenter > p > span.noResult"])
+            if not markers or htmltext.text(row).strip() != "没有搜索到相应职位":
+                return False
+            empty_rows += 1
+        return empty_rows == 1
 
     def has_more(self, root):
         pager = _text(root, self.SELECTORS["pager"])
