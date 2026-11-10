@@ -17,7 +17,7 @@ from pathlib import Path
 
 from jobsearch_cn import (__version__, browser, collect, jd_parser, match, material, messages, profile, report,
                           resume_docx, resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
-from jobsearch_cn import beisen, inbox, personal
+from jobsearch_cn import beisen, build_notes, inbox, personal
 from jobsearch_cn import applications as applications_mod
 
 
@@ -525,6 +525,9 @@ def cmd_review_draft(args) -> int:
 def _checked_review(args):
     """(review, errors, warnings) for a review file, checked against the material it names."""
     record = _read_material(args.file)  # a review is JSON read the same way as a material
+    declared = record.get("material") if isinstance(record, dict) else None
+    if isinstance(declared, str) and (any(char in declared for char in "/\\:") or declared in (".", "..")):
+        return record, ["material: must be a bare file name, not a path"], []
     if args.material:
         material_path = Path(args.material)
     elif isinstance(record, dict) and isinstance(record.get("material"), str) and args.file != "-":
@@ -534,6 +537,8 @@ def _checked_review(args):
         raise InputError("cannot tell which material this review is of; pass --material")
     target = _read_material(str(material_path))
     errors, warnings = review.validate(record, target)
+    if not errors:
+        errors.extend(build_notes.check_outputs(store.data_dir(args.data_dir), material_path, target, declared))
     return record, errors, warnings
 
 
@@ -1433,7 +1438,8 @@ def build_parser(adapters=None) -> argparse.ArgumentParser:
     for name, handler, summary in (
             ("validate", cmd_review_validate, "检查一份审核结果的格式，以及它审的是不是材料的当前版本"),
             ("show", cmd_review_show, "把一份审核结果显示成 Markdown（先检查，不通过就列出错误）")):
-        sub = review_commands.add_parser(name, help=summary, description=summary + "。通过时退出码 0，不通过时退出码 1。")
+        sub = review_commands.add_parser(name, parents=[stored], help=summary,
+                                        description=summary + "，并核对当前生成说明和产物。通过时退出码 0，不通过时退出码 1。")
         sub.add_argument("file", help="审核结果文件（data/materials/<岗位id>/review-<n>-r<轮次>.json）")
         sub.add_argument("--material", help="审核的材料文件；默认为审核结果同目录下 material 字段写的文件")
         sub.set_defaults(handler=handler)

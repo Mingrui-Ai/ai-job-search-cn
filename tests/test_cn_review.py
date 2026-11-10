@@ -22,7 +22,7 @@ REPO = Path(__file__).resolve().parent.parent
 SAMPLE = REPO / "tests" / "fixtures" / "cn" / "material" / "tech-m3"
 
 sys.path.insert(0, str(REPO))
-from jobsearch_cn import review, score, store, vocab  # noqa: E402
+from jobsearch_cn import cli, review, score, store, vocab  # noqa: E402
 
 VOCABULARY = vocab.load()
 
@@ -355,6 +355,12 @@ class Command(unittest.TestCase):
         self.material = self.folder / "resume-1.json"
         self.material.write_text(json.dumps(MATERIAL, ensure_ascii=False), encoding="utf-8")
         self.review = self.folder / "review-1-r1.json"
+        outputs = self.data / "resumes" / MATERIAL["job_id"]
+        outputs.mkdir(parents=True)
+        files = [outputs / f"resume-1.{ext}" for ext in ("pdf", "docx")]
+        for path in files:
+            path.write_bytes(b"Synthetic review fixture: " + path.suffix.encode())
+        cli._write_build_note(outputs, "resume-1", MATERIAL, PROFILE, files)
 
     def write_review(self, data) -> None:
         self.review.write_text(data if isinstance(data, str) else json.dumps(data, ensure_ascii=False),
@@ -421,8 +427,8 @@ class Command(unittest.TestCase):
         changed["skills"].pop()
         elsewhere.write_text(json.dumps(changed), encoding="utf-8")
         self.write_review(make_review(material="../../other.json"))
-        # The directory part is dropped, so it looks for <review folder>/other.json, which does not exist.
-        self.assertEqual(run_cli("review", "validate", str(self.review), data_dir=self.data).returncode, 2)
+        # A declared path is rejected without reading it, including with an explicit material override.
+        self.assertEqual(run_cli("review", "validate", str(self.review), data_dir=self.data).returncode, 1)
         proc = run_cli("review", "validate", str(self.review), "--material", str(elsewhere), data_dir=self.data)
         self.assertEqual(proc.returncode, 1)
 
