@@ -8,6 +8,7 @@ from html import escape
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import tempfile
 
@@ -27,6 +28,15 @@ JOB_LABELS = {"new": "新入库", "skipped": "已跳过", "ranked": "已有评�
               "expired": "已过期", "unreachable": "暂不可达", None: "当前岗位资料未知"}
 GROUP_LABELS = {"due": "提醒已到", "unset": "未设提醒", "future": "未来提醒", "other": "其他记录"}
 WITHHELD = "含联系信息，未展示"
+
+# Unicode word boundaries/whitespace, but ASCII-only label folding and account values.
+# Keep this display-only extension separate from shared application contact warnings.
+_CONTACT_PREFIX = r"(?<!\w)(?:(?:联系|添加|请加|加)\s*)?"
+_LABELED_CONTACTS = (
+    re.compile(_CONTACT_PREFIX + r"(?:微信号?|(?ai:wechat))\s*[:：=]\s*"
+               r"[A-Za-z][A-Za-z0-9_-]{5,19}(?![\w.-])"),
+    re.compile(_CONTACT_PREFIX + r"(?ai:qq)号?\s*[:：=]\s*[1-9][0-9]{4,11}(?![\w.-])"),
+)
 
 
 @dataclass(frozen=True)
@@ -102,7 +112,8 @@ def _job(root: Path, job_id: str, warnings: list) -> dict:
     shown = {"status": record["status"]}
     for field, missing in (("title", "岗位名称未记录"), ("company", "公司未记录")):
         value = record[field]
-        if applications.contact_warnings(value, field):
+        labeled_contact = isinstance(value, str) and any(pattern.search(value) for pattern in _LABELED_CONTACTS)
+        if applications.contact_warnings(value, field) or labeled_contact:
             shown[field] = WITHHELD
             warnings.append(f"{job_id} 的{'岗位名称' if field == 'title' else '公司名称'}：含联系信息，整字段未展示。")
         else:
