@@ -8,6 +8,8 @@ import io
 import os
 from pathlib import Path
 import sqlite3
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -218,6 +220,143 @@ class Facts(ReportData):
         ids = ["app_" + "1" * 26 + "abcdef", "app_" + "2" * 26 + "abcdef"]
         self.assertEqual(len(set(dashboard._short_ids(ids).values())), 2)
         self.assertTrue(all(len(value) == 7 for value in dashboard._short_ids(ids).values()))
+
+
+class LabeledContacts(ReportData):
+    def setUp(self):
+        super().setUp()
+        self.app = self.sent()
+        self.job_path = self.data / "jobs" / f"{self.job}.json"
+        self.original_job = self.job_path.read_bytes()
+        self.original_counts = dashboard.load(self.data).counts
+
+    def names(self, **fields):
+        record = json.loads(self.original_job)
+        for field, value in fields.items():
+            record[field] = value
+            record["raw_text"] += "\n" + value
+            record["evidence"][field] = {"text": value, "method": "user"}
+        self.assertEqual(schema.validate(record), [])
+        self.job_path.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        return record
+
+    def real_report(self):
+        return subprocess.run([sys.executable, "-m", "jobsearch_cn", "application", "report",
+                               "--data-dir", str(self.data)], capture_output=True, encoding="utf-8")
+
+    def test_explicit_labels_with_prefixes_and_complete_ascii_values_withhold_whole_field(self):
+        examples = [
+            ("微信：sample_team1", "sample_team1"), ("微信号:sample-team1", "sample-team1"),
+            ("Wechat:sampleteam", "sampleteam"), ("wEcHaT = Sample_Team2", "Sample_Team2"),
+            ("微信　：　sample_team1", "sample_team1"), ("微信\t:\n sample_team1", "sample_team1"),
+            ("虚构公司（微信：sample_team1）", "sample_team1"),
+            ("请加 微信：sample_team1；岗位咨询", "sample_team1"),
+            ("QQ：246813579", "246813579"), ("qq号 = 246813579", "246813579"),
+            ("虚构岗位 / Qq:246813579", "246813579"),
+            ("微信：A12345", "A12345"), ("微信：A1234567890123456789", "A1234567890123456789"),
+            ("QQ：24681", "24681"), ("QQ：246813579246", "246813579246"),
+            ("Wechat: Engineer", "Engineer"),
+        ]
+        for prefix in ("联系", "添加", "请加", "加"):
+            for space in ("", "\u3000\t"):
+                examples.extend(((f"{prefix}{space}微信：sample_team1", "sample_team1"),
+                                 (f"{prefix}{space}qQ号：246813579", "246813579")))
+        for field in ("title", "company"):
+            other = "company" if field == "title" else "title"
+            for value, token in examples:
+                with self.subTest(field=field, value=value):
+                    record = self.names(**{field: value})
+                    before = self.sources()
+                    snapshot, html = self.render()
+                    self.assertEqual(getattr(snapshot.records[0], field), dashboard.WITHHELD)
+                    self.assertEqual(getattr(snapshot.records[0], other), record[other])
+                    self.assertEqual(snapshot.counts, self.original_counts)
+                    self.assertEqual(len(snapshot.warnings), 1)
+                    self.assertNotIn(token, html)
+                    self.assertNotIn(token, json.dumps(snapshot.warnings, ensure_ascii=False))
+                    self.assertEqual(before, self.sources())
+                    self.assertEqual(applications.contact_warnings(value, field), [])
+
+    def test_products_unsupported_forms_and_incomplete_tokens_stay_text(self):
+        examples = [
+            "微信小程序开发工程师", "企业微信集成工程师", "QQ音乐客户端开发", "WeChat SDK Engineer",
+            "QQ Product Engineer", "微信：", "QQ号 =", "微信：小程序开发", "QQ：音乐客户端",
+            "微信 sample_team1", "QQ 246813579", "微信(sample_team1)", "微信-sample_team1",
+            "企业微信：sample_team1", "myWechat:sample_team1", "招聘微信：sample_team1",
+            "中Wechat:sample_team1", "_微信：sample_team1", "x联系微信：sample_team1",
+            "企业添加QQ：246813579", "_请加微信：sample_team1", "请联系微信：sample_team1",
+            "微信：A1234", "微信：A12345678901234567890", "QQ：2468", "QQ：2468135792468",
+            "QQ：0246813579", "QQ：246813579abc", "QQ：246813579后缀", "QQ：246813579_",
+            "QQ：246813579-1", "QQ：246813579.1", "微信：_sample_team", "微信：sample.team",
+            "微信：246813579", "微信：sample_team1求职", "微信：sample_team1.more",
+            "微信：sample_team1Ａ", "微信：İbc123", "微信：ſample1", "微信：Kample1",
+            "微信：sample_team1ＡＢ", "ＱＱ：２４６８１３５７９", "QQ：２４６８１３５７９",
+            "VX：sample_team1", "V信：sample_team1", "薇信：sample_team1", "Weixin:sample_team1",
+            "Wechat ID:sample_team1", "微信账号：sample_team1", "QQ账号：246813579",
+            "微\u200b信：sample_team1", "Wechat:\u200bsample_team1", "sample_team1", "246813579",
+            '<script>微信小程序</script> & "QQ音乐"',
+        ]
+        for field in ("title", "company"):
+            for value in examples:
+                with self.subTest(field=field, value=value):
+                    self.names(**{field: value})
+                    snapshot, html = self.render()
+                    self.assertEqual(getattr(snapshot.records[0], field), value)
+                    self.assertEqual(snapshot.warnings, ())
+                    self.assertIn(value, ''.join(Page(html).text))
+                    self.assertNotIn("script", Page(html).tags)
+
+    def test_real_cli_withholding_keeps_sources_counts_and_the_other_field(self):
+        for fields, tokens in (
+            ({"title": "联系微信：sample_hidden1", "company": "企业微信集成"}, ("sample_hidden1",)),
+            ({"title": "QQ音乐客户端", "company": "请加QQ：246813579"}, ("246813579",)),
+            ({"title": "添加 Wechat=sample_hidden2", "company": "加 QQ号:246813579"},
+             ("sample_hidden2", "246813579")),
+        ):
+            with self.subTest(fields=fields):
+                self.names(**fields)
+                before = self.sources()
+                process = self.real_report()
+                self.assertEqual(process.returncode, 0, process.stderr)
+                self.assertEqual(process.stderr, "")
+                result = json.loads(process.stdout)
+                html = Path(result["report"]).read_text(encoding="utf-8")
+                self.assertEqual(before, self.sources())
+                self.assertEqual({key: result[key] for key in self.original_counts}, self.original_counts)
+                self.assertEqual(len(result["warnings"]), len(tokens))
+                self.assertIn(dashboard.WITHHELD, html)
+                for token in tokens:
+                    self.assertNotIn(token, html + process.stdout + process.stderr)
+                for field, value in fields.items():
+                    if not any(token in value for token in tokens):
+                        self.assertIn(value, ''.join(Page(html).text))
+
+    def test_existing_contacts_still_withhold_even_in_unsupported_label_forms(self):
+        # Fictional phone, reserved-domain mail and links; no requests are made.
+        for value in ("企业微信：13800000000", "VX：sample@example.invalid",
+                      "微信账号：https://example.invalid/sample", "QQ账号：www.example.invalid"):
+            for field in ("title", "company"):
+                with self.subTest(field=field, value=value):
+                    self.names(**{field: value})
+                    snapshot, html = self.render()
+                    self.assertEqual(getattr(snapshot.records[0], field), dashboard.WITHHELD)
+                    self.assertNotIn(value, html)
+                    self.assertTrue(applications.contact_warnings(value, field))
+
+    def test_real_cli_error_does_not_echo_labeled_names_or_publish(self):
+        self.names(title="联系微信：sample_hidden3", company="请加QQ：246813579")
+        with closing(sqlite3.connect(self.paths.db)) as connection:
+            connection.execute("UPDATE applications SET revision=99 WHERE application_id=?", (self.app,))
+            connection.commit()
+        before = self.sources()
+        process = self.real_report()
+        self.assertEqual(process.returncode, 1)
+        self.assertEqual(process.stdout, "")
+        self.assertEqual(json.loads(process.stderr)["error"], "invalid_context")
+        self.assertNotIn("sample_hidden3", process.stderr)
+        self.assertNotIn("246813579", process.stderr)
+        self.assertFalse((self.data / "reports").exists())
+        self.assertEqual(before, self.sources())
 
 
 class SnapshotSafety(ReportData):
