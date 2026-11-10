@@ -25,7 +25,7 @@ CHECKS = {"graduation": "届别", "education": "学历", "days_per_week": "每�
           "interview": "面试", "start_date": "到岗时间"}
 DIMENSIONS = {"skills": "技能", "direction": "方向", "experience": "经历", "salary": "薪资", "location": "地点"}
 GRADES = {"strong": "很匹配", "good": "较匹配", "moderate": "一般", "weak": "较弱", "poor": "不匹配",
-          score.INELIGIBLE: "不符合硬性条件"}
+          score.NEEDS_CHECK: "待确认（评分信息不足）", score.INELIGIBLE: "不符合硬性条件"}
 METHODS = {"rule": "规则", "agent": "Agent"}
 FEEDBACK_HEADER = ("岗位id", "岗位", "公司", "等级", "总分", "一句话结论",
                    "你的等级", "认可（认可 / 部分认可 / 不认可）", "原因")
@@ -223,7 +223,8 @@ def _legend() -> str:
         else:
             bands.append(f"{grade_text(name)}{floor}–{ceiling}")
         ceiling = floor - 1
-    return "，".join(bands) + f"；有硬性条件冲突的记为{grade_text(score.INELIGIBLE)}"
+    return ("，".join(bands) + f"；有分值且权重大于零的维度不足 {score.MIN_SCORED_DIMENSIONS} 项时，"
+            f"总分暂缺、{grade_text(score.NEEDS_CHECK)}；有硬性条件冲突的记为{grade_text(score.INELIGIBLE)}")
 
 
 def _e(value) -> str:
@@ -351,7 +352,8 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
 
     rows, numerator, denominator = working(record)
     out += ["<h3>总分怎么算</h3>",
-            "<p class=\"muted\">有分数的维度按权重加权平均，四舍五入取整；没有分数的维度不计入，也不计入分母。</p>",
+            f"<p class=\"muted\">至少 {score.MIN_SCORED_DIMENSIONS} 个有分数且权重大于零的维度才计算总分。"
+            "有分数的维度按权重加权平均，四舍五入取整；没有分数的维度不计入，也不计入分母。</p>",
             "<table><tr><th>维度</th><th>分数</th><th>权重</th><th>分数 × 权重</th></tr>"]
     for key, value, weight, product in rows:
         out.append(f"<tr><td>{_e(_label(DIMENSIONS, key))}</td>"
@@ -359,7 +361,10 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
                    f"<td class=\"num\">{_e(_decimal(weight))}</td>"
                    f"<td class=\"num\">{_e('不计入' if product is None else _decimal(product))}</td></tr>")
     out.append("</table>")
-    if denominator:
+    if denominator and total.get("score") is None:
+        out.append(f"<p>有分值且权重大于零的维度不足 {score.MIN_SCORED_DIMENSIONS} 项，暂不计算总分；"
+                   "评分信息待确认，请补充 JD 或档案、按评分工作流补经历后重新评分。</p>")
+    elif denominator:
         exact = _decimal(numerator / denominator)
         cut = "；“…”表示后面还有位数，只截断显示、不进位" if exact.endswith("…") else ""
         out.append(f"<p>合计 {_e(_decimal(numerator))} ÷ 权重之和 {_e(_decimal(denominator))} = {_e(exact)}。"
@@ -367,7 +372,8 @@ def _job_section(item: dict, profile: dict, names: dict, vocabulary) -> list:
                    f"{_e(grade_text(total.get('grade')))}（中途不先取小数{cut}）。</p>")
     else:
         out.append(f"<p>合计 {_e(_decimal(numerator))} ÷ 已评分维度的权重之和 0：已评分维度的权重之和为 0，算不出总分。"
-                   "请补上权重大于 0 的维度（例如让 Agent 补经历），或在档案里调整权重（target.weights）。</p>")
+                   "请补上权重大于 0 的维度（例如让 Agent 补经历），或在档案里调整权重（target.weights）；"
+                   f"至少 {score.MIN_SCORED_DIMENSIONS} 个有分数且正权重的维度才计算总分。</p>")
 
     out.append("<h3>缺口</h3>")
     gaps = record.get("gaps") or []

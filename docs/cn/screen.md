@@ -139,7 +139,7 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--che
 ```
 
 - `imported` 按岗位计（批次内重复只算一次），`skipped` 是没导入的文件或 `.txt` 里的某一份 JD；
-- `shortlist`：过滤结论为符合或待确认的岗位，按等级、总分从高到低（和 `match list` 相同），列出前 `--top` 条；`total` 是全部条数；
+- `shortlist`：过滤结论为符合或待确认的岗位，按等级、总分从高到低（和 `match list` 相同），列出前 `--top` 条；`total` 是全部条数。有分值且权重大于零的维度不足两项时，总分为 null，等级为 `needs_check`，行内注明“待确认（评分信息不足）”，排在所有达到覆盖门槛的岗位之后；
 - `ruled_out`：过滤结论为不符合的岗位，全部列出，按总分从高到低；`by_check` 按冲突项计数，一个岗位冲突两项时两项各算一次；
 - `profile_gaps`：档案那一方没写、因而判"未知"的项，每个岗位都一样，汇总在这里（影响几个岗位），不在每行重复；
 - `warnings`：`kind` 为 `guard` 的是 JD 里像是写给 AI 的句子（摘录在 `excerpts`），`encoding` 是按 GBK 读的 `.txt`，`no_key` 是没有链接和岗位 ID 的 JSON，`duplicate` 是批次内重复。
