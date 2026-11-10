@@ -47,7 +47,7 @@
 4. **机器初稿**：`python -m jobsearch_cn review draft <材料>`，拿到 `material_hash`、关键词覆盖表初稿和标点空格警告（见 [review-format.md](review-format.md#3-命令)）。
 5. **按清单审**：第 1 轮审全部清单；第 2 轮只看改动和上一轮的问题，确认 `必改` 都解决了、没有引出新问题（清单 §4.4）。覆盖表在初稿上补学历、经验、业务词，逐行判断（C1、C2）。
 6. **写审核结果**：格式见 [review-format.md](review-format.md)，存为 `data/materials/<岗位id>/review-<n>-r<k>.json`（`k` 是轮次）；`mode` 是 `independent`，自审是 `self`。
-7. **检查格式**：`python -m jobsearch_cn review validate data/materials/<岗位id>/review-<n>-r<k>.json`，不通过就改审核结果，直到通过。Claude Code 上由起草者跑，不通过时把错误交回给同一个子代理改。
+7. **检查审核与生成文件**：`python -m jobsearch_cn review validate data/materials/<岗位id>/review-<n>-r<k>.json --data-dir data`。命令默认同时检查审核格式、材料摘要、生成说明及当前 PDF／Word（沟通草稿为 txt）的身份与字节摘要；缺少说明、旧产物或被替换的文件均不通过。`pass` 和 `revise` 都要核对，不能跳过。使用了其他数据目录时，必须和生成命令用同一个 `--data-dir`（或同一环境变量），不会按审核文件位置推断。审核 JSON 有错交同一审核者修正；生成物错误则由起草者重新 `resume build`（沟通草稿用 `material render --output`），再重新派审，不要只改摘要或手工改说明文件。
 
 审核者不改材料、不重新生成，只给意见；不联网，不拿用户信息去搜索（清单 F3、§6 裁定 2）。
 
@@ -62,7 +62,7 @@
 ## 4. 交给用户
 
 - `resume build` 输出的 PDF 和 Word 路径，并对用户说一句：投递优先用 PDF，Word 版可能因字体不同排到第二页（[resume-pdf.md](resume-pdf.md#word-版)，#120 裁定 5）。
-- 最后一轮审核结果的摘要：`python -m jobsearch_cn review show data/materials/<岗位id>/review-<n>-r<k>.json` 的结论、关键词缺口、没采纳的建议和理由、没解决的问题。
+- 最后一轮审核结果的摘要：`python -m jobsearch_cn review show data/materials/<岗位id>/review-<n>-r<k>.json --data-dir data` 的结论、关键词缺口、没采纳的建议和理由、没解决的问题。show 做与 validate 相同的生成物核对，失败时只输出错误，不展示通过结论。
 - 是自审的、页面没看过的（D5）、有材料改不了的问题的（第 3 节），都要说明。
 - 不替用户投递，不把简历发到任何地方。
 - 用户投出以后，按 [applications.md](applications.md) 第 16 节的投递记录工作流记一次（`cn-application`）。
@@ -96,6 +96,6 @@
 6. **修改**：采纳建议或处理必改项以后（第 3 节），重新运行 `python -m jobsearch_cn material validate data/materials/<岗位id>/<种类>-<n>.json` 和 `python -m jobsearch_cn material render data/materials/<岗位id>/<种类>-<n>.json --output`，把这次 render 的输出交给下一轮审核。不用 `resume build`：它只接受简历，给沟通草稿时退出码 2，`.txt` 和说明文件会停在旧版。审核者照旧不运行 `material render`，最多 2 轮。
 7. **交给用户**：
    - `.txt` 的路径，请用户打开文件复制（Windows 可以用记事本打开）。回复里不贴正文；用户想在对话里看，可以自己运行 `! python -m jobsearch_cn material render <材料>`。
-   - 字数；最后一轮审核的摘要（`python -m jobsearch_cn review show <审核结果>`）；没采纳的建议和理由；是不是自审。
+   - 字数；最后一轮审核的摘要（`python -m jobsearch_cn review show <审核结果> --data-dir data`，与 render 使用同一数据目录）；没采纳的建议和理由；是不是自审。
    - 邮件要附的简历：那份简历 `resume build` 输出的 PDF 路径，由用户自己附，优先 PDF。
    - 不自动发送：不调邮件客户端，不打开招聘网站，不往剪贴板写，不联网。

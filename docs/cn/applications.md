@@ -284,6 +284,7 @@ python -m jobsearch_cn application backup
   - 没有发出文件为 null。
 
   `mismatch` 和 `unchecked` 都给警告，照样记录；`validate` 也把这两种投递列在警告里，不算错误。发出的文件和 build 出来、审过的那份对不上，比没法核对更要提醒。
+- 上述是记录用户实际发出文件的归档口径，保留改名与手工修改文件的警告行为。交付前的 `review validate/show` 使用同一说明格式，但要求当前完整产物及逐文件名摘要一致，缺失或不符为错误；具体操作只维护在 [简历与沟通草稿工作流](resume-workflow.md)。
 - 说明文件只列这次 build 实际写出的文件。一个文件都没写出来（例如 PDF 生成失败）时不写说明文件，也不覆盖原来那份：原来的文件和原来的说明文件还对得上。build 失败时的退出码和输出照旧。
 - `resume build` 的输出里多一项 `build_note`，是说明文件的路径；没写说明文件时为 null。
 

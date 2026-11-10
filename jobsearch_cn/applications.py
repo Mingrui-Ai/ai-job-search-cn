@@ -26,7 +26,7 @@ import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from jobsearch_cn import review, schema, store
+from jobsearch_cn import build_notes, review, schema, store
 
 DB_VERSION = 1  # PRAGMA user_version
 EXPORT_VERSION = 1  # the schema_version of an export
@@ -843,8 +843,7 @@ def build_note_path(file: Path) -> Path:
 def material_note_path(folder: Path, material_file: Path) -> Path:
     """The note made for a material: <folder>/<material name without .json>.build.json, where folder is
     resumes/<job>/ (resume build) or, for a greeting, email or referral, messages/<job>/ (material render --output)."""
-    name = material_file.name
-    return folder / ((name[:-len(".json")] if name.endswith(".json") else name) + ".build.json")
+    return build_notes.material_note_path(folder, material_file)
 
 
 def _check_builds(folder: Path, material_file, material_hash, sent: list, warnings: list):
@@ -873,7 +872,7 @@ def _check_note(note_file: Path, sent: list, material_hash, warnings: list) -> s
                         "as the file(s) you say were sent")
         return "unchecked"
     try:
-        note = json.loads(note_file.read_text(encoding="utf-8-sig"))
+        note = build_notes.read_note(note_file)
         hashes = {item["sha256"] for item in note["files"]}
         note_hash = note["material_hash"]
     except (OSError, ValueError, KeyError, TypeError):

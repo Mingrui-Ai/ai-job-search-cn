@@ -58,7 +58,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 - [x] #123 P3：到岗日期占位符配"不早于"会被误拦。（PR #136："不早于""不会早于""不先于"放行；"早于""先于""不晚于"等照旧不通过）
 - #123 P3：档案联系方式缺 `contact.wechat` 字段，沟通草稿写不了微信号。
 - [x] #133 P3-03：`material render --output` 输出的 `chars` 和正文长度上限的计数口径不同。（PR #136：`chars` 改按上限的口径算，即正文各段代入后的字数之和，旁边加 `max_chars`；material.md 7.5 写明）
-- #127 待办（P2-1 的后续，规划者 2026-11-04 裁定，不在 M3-6 做）：`review validate` 自动发现交付文件是旧版：材料改过、但没重新 `resume build` / `material render --output`，说明文件（`.build.json`）的 `material_hash` 和材料对不上。现在只靠审核者先核对说明文件（#127 加的步骤），要机器检查得让 `review validate` 读数据目录；`review show` 也要核对。两条命令都要加 `--data-dir` 才能读到 `resumes/`、`messages/` 下的说明文件。
+- [x] #127 P2-1 后续（2026-11-10，Codex）：`review validate/show` 新增 `--data-dir`，默认强制核对当前材料、v1 生成说明及 PDF+Word／沟通 txt 的身份与逐文件摘要。缺失、过旧、被替换或不安全路径均报错，pass/revise 同要求；只读，不自动生成。共享说明读取原语，投递归档的宽松警告口径不变；流程见 `resume-workflow.md`，验证与独立审核绑定最终送审提交。
 - [x] V24 P3-1（#120 裁定 2）：`resume build` 遇到 OSError 时按项目惯例输出 JSON 错误，不带 traceback 和本机临时路径。（fix/cn-m3-resume-p3：临时目录、PDF、Word、说明文件、数据目录下的文件夹，写不了都输出 `{"error": …}`、退出码 1，只写文件名和系统给的原因）
 - [x] #132 P3：`review draft` 的警告说明写得比实际宽：它并不输出 `profile_hash` 当前值的警告。（fix/cn-m3-resume-p3：改说明，不改命令，加测试固定现有行为）
 - [x] `review.resolve` 把全角数字下标当作下标（例如 `skills[０]`）。（fix/cn-m3-resume-p3：只认 ASCII 数字，全角和其他 Unicode 数字按不存在的位置报告）
