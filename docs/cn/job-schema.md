@@ -170,7 +170,7 @@ JD 让你在几个技能里选一个会就行时（"熟悉 Golang 或 Java""Pyth
 
 规则怎么读出这两项，见 [jd-parse.md](jd-parse.md#规则能识别什么)；规则留空或读错的，Agent 按原文补或改，`method` 写 `agent`。
 
-两项都是对象，重新导入同一份 JD 时整个对象按出处优先级合并（`user` > `agent` > `rule`，见 [jd-import.md](jd-import.md#去重与合并)）。`interview.cities` 是 `interview` 的一部分，没有单独的出处，不适用下文的[明确清空列表](#出处evidence)：要改面试城市（包括改成 `[]`），把整个 `interview` 对象连同出处一起改写。把整个字段改回 `null` 不会抹掉已保存的值，和其他对象字段一样。
+两项都是对象，重新导入同一份 JD 时整个对象按出处优先级合并（`user` > `agent` > `rule`，见 [jd-import.md](jd-import.md#去重与合并)）。`interview.cities` 是 `interview` 的一部分，没有单独的出处，不适用下文的[明确清空列表](#出处evidence)：要改面试城市（包括改成 `[]`），把整个 `interview` 对象连同出处一起改写。只把整个字段改回 `null` 不会抹掉已保存的值；明确纠正需要下文的 `evidence.clear` 标记。
 
 ## 包餐和餐补
 
@@ -190,10 +190,11 @@ JD 让你在几个技能里选一个会就行时（"熟悉 Golang 或 Java""Pyth
 
 ## 出处（evidence）
 
-`evidence` 以字段路径为键，例如 `salary`、`requirements.skills`。每一项包含两个键：
+`evidence` 以字段路径为键，例如 `salary`、`requirements.skills`。每一项有两个必填键及一个可选标记：
 
 - `text`：出处原文片段，可以是字符串，也可以是字符串列表；
 - `method`：值是怎么得到的：`rule`（本项目的规则解析器）、`agent`（模型补全）、`user`（用户手动填写）。
+- `clear`（可选，H22b）：出现时只能为 `true`，表示将允许的整个标量／对象字段明确纠正为 `null`；字段范围和限制见下文。不写时沿用原行为。
 
 校验规则：
 
@@ -204,7 +205,11 @@ JD 让你在几个技能里选一个会就行时（"熟悉 Golang 或 Java""Pyth
 
 **明确清空列表（H22）**：列表值为 `[]`，且该字段的出处为 `agent` 或 `user`、`text` 非空时，存储层将它视为有意清空。`text` 写明清空依据，可以是非空字符串或非空字符串列表；Agent 仍须逐字引用支持纠正的原文片段，用户可写本人提供的说明。清空来源的优先级必须不低于旧值（`user` > `agent` > `rule`）；保存后这个带出处的 `[]` 继续受优先级保护，规则重新导入不能恢复旧列表。同级或更高优先级可以再纠正。
 
-普通未知列表仍可为 `[]` 且不带出处；`user` 的 `text: null` 也仍合法，但二者均不表示明确清空。规则来源的空列表不清空旧值。空字符串、仅空白、空出处列表不符合现有校验规则，不能用于清空。此路径适用于可取 `[]` 且独立记录出处的列表字段：`cities`、`requirements.skills`、`requirements.skill_alternatives`（`interview.cities` 不独立记录出处，不适用，见[面试和到岗时间](#面试和到岗时间)）。清空技能列表时，也要纠正引用这些技能的组；清空全部组时同样为组字段单独保留清空依据，来源不得低于组的旧来源。显式清空技能后若仍有受来源或理由保护的组，存储层拒绝该记录整次写入，不能用字段一致性处理绕过保护；这属于与旧记录合并时的检查，单独的 Schema 校验通过并不保证能保存。标量或对象 `null` 的合并规则不变，也不允许把要求非空的嵌套列表（如 `requirements.graduation.years`）改成 `[]`。操作步骤见 [JD 导入工作流](jd-import.md#明确清空列表字段h22)。
+普通未知列表仍可为 `[]` 且不带出处；`user` 的 `text: null` 也仍合法，但二者均不表示明确清空。规则来源的空列表不清空旧值。空字符串、仅空白、空出处列表不符合现有校验规则，不能用于清空。此路径适用于可取 `[]` 且独立记录出处的列表字段：`cities`、`requirements.skills`、`requirements.skill_alternatives`（`interview.cities` 不独立记录出处，不适用，见[面试和到岗时间](#面试和到岗时间)）。清空技能列表时，也要纠正引用这些技能的组；清空全部组时同样为组字段单独保留清空依据，来源不得低于组的旧来源。显式清空技能后若仍有受来源或理由保护的组，存储层拒绝该记录整次写入，不能用字段一致性处理绕过保护；这属于与旧记录合并时的检查，单独的 Schema 校验通过并不保证能保存。无标记的标量或对象 `null` 合并规则不变，也不允许把要求非空的嵌套列表（如 `requirements.graduation.years`）改成 `[]`。操作步骤见 [JD 导入工作流](jd-import.md#明确清空列表字段h22)。
+
+**明确清空标量／对象（H22b）**：仅 15 个独立 nullable 字段允许 `clear: true`：`title`、`company`、`remote`、`employment_type`、`salary`、`requirements.graduation`、`requirements.days_per_week`、`requirements.min_months`、`requirements.education`、`requirements.start`、`interview`、`benefits.meals`、`return_offer`、`published_at`、`deadline`。对应值必须整体为 null，method 只能 agent/user，text 必须非空；Agent 的每个片段还必须严格逐字包含在当前 raw_text 中。不能给列表、子字段、容器、身份、source、status、raw_text、guard 添加此标记。缺失标记的 null 即使带出处，也不表示明确清空。
+
+标记与出处持久保留，并按 `user > agent > rule` 保护空值；低优先级显式清空会拒绝整条记录，低优先级非空重导入不会恢复旧错误。同级或高级可用新值和新出处纠正，并移除 marker。新记录可以带合法明确空值；不同原文替换仍采用新记录，不自动继承旧 marker。单条的格式／证据／合并错误不会部分写入；CLI 带标记仅接受单条，拒绝多条载荷。操作步骤和限制只维护在 [JD 导入工作流](jd-import.md#明确清空标量和对象h22b)。
 
 这样模型就没法凭空编造字段：编出来的值找不到原文出处，校验就过不了。不过这条规则只保证出处真实存在，不保证从出处推出的值一定正确，例如把"10-15K"换算成 10000–15000 是否正确，由解析器自己的测试保证（第 2 步）。
 
@@ -227,6 +232,7 @@ JD 让你在几个技能里选一个会就行时（"熟悉 Golang 或 Java""Pyth
 
 ## 版本记录
 
+- v1 evidence 新增可选 `clear: true`（2026-11-10，H22b）。不迁移旧记录、旧 null 和 H22 列表语义不变。直接向旧 CLI 提交此键会被拒绝，但旧工具的普通重导入可能覆盖库内已保存的标记，不能继续写入采用 H22b 的数据目录。所有使用该目录的会话须先升级到支持版本，包含后续 parse/save/screen；不要删除标记来兼容旧工具。前置操作见 [JD 导入工作流](jd-import.md#明确清空标量和对象h22b)。
 - v1（2026-10-26）：首版。
 - v1 新增 `requirements.skill_alternatives`（2026-10-29，H16）。只是加了一个字段，版本号不变：本地岗位库里在这之前保存的记录读出时自动补上 `[]`；自己手写、没有这个字段的记录，`jd validate` 会报"missing"，补上 `"skill_alternatives": []` 即可。
 - v1 新增 `interview` 和 `requirements.start`（2026-10-30，M2-6c）。同样只是加字段，版本号不变：之前保存的记录读出时自动补上 null；手写、没有这两个字段的记录，补上 `"interview": null` 和 `requirements` 里的 `"start": null` 即可。
