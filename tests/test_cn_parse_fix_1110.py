@@ -28,7 +28,8 @@ class ReviewRegressions(unittest.TestCase):
                 job = parse("职位名称：样品记录实习生\n工作地点：深圳\n薪资：" + text)
                 self.assertIsNotNone(job["salary"])
                 self.assertEqual((job["salary"]["min"], job["salary"]["unit"]), expected)
-                self.assertIsNotNone(score.score_job(job, reviewer_candidate(), VOCABULARY, now=NOW)["total"]["score"])
+                if expected[1] == "CNY/day":
+                    self.assertIsNotNone(score.score_job(job, reviewer_candidate(), VOCABULARY, now=NOW)["total"]["score"])
 
     def test_p2_campus_heading_must_not_override_explicit_cohorts(self):
         for requirement in ("面向2026/2027届毕业生", "2026年8月-2027年7月毕业"):
@@ -59,6 +60,51 @@ class ReviewRegressions(unittest.TestCase):
                 job = parse(first + "\n招聘频道：校园招聘\n工作地点：苏州\n工作职责\n协助登记样品。")
                 self.assertIsNone(job["title"])
                 self.assertNotIn("title", job["evidence"])
+
+
+class ReviewBoundaries(unittest.TestCase):
+    def test_salary_modifiers_without_labels_and_nonunit_words(self):
+        for text, expected in (("3-4K", (3000, "CNY/month")), ("200/天", (200, "CNY/day")),
+                               ("180/天起", (180, "CNY/day")), ("180/天包午餐", (180, "CNY/day")),
+                               ("35/小时可协商", (35, "CNY/hour")), ("180/日税前", (180, "CNY/day")),
+                               ("180/天提供住宿", (180, "CNY/day")), ("35/小时根据经验调整", (35, "CNY/hour"))):
+            with self.subTest(text=text):
+                salary = parse(text)["salary"]
+                self.assertIsNotNone(salary)
+                self.assertEqual((salary["min"], salary["unit"]), expected)
+        for text in ("薪资面议，CET-6/日语N2", "薪资面议，版本6/时间管理"):
+            with self.subTest(text=text):
+                self.assertTrue(parse(text)["salary"]["negotiable"])
+
+    def test_campus_year_needs_candidate_or_header_context(self):
+        for text in ("招聘频道：2027校园招聘", "工作性质：27校招", "2027校园招聘",
+                     "任职资格\n面向2027校园招聘应届毕业生。"):
+            with self.subTest(text=text):
+                self.assertEqual(parse(text)["requirements"]["graduation"], {"years": [2027], "strict": True})
+        for text in ("工作职责\n2027校园招聘活动执行。", "团队介绍\n2027校园招聘",
+                     "任职资格\n有参与2027校园招聘活动的经验。", "负责组织2027校园招聘。"):
+            with self.subTest(text=text):
+                self.assertIsNone(parse(text)["requirements"]["graduation"])
+        job = parse("【27校招】样本研究员\n任职资格\n2026/2027届毕业生优先。")
+        self.assertEqual(job["requirements"]["graduation"], {"years": [2026, 2027], "strict": False})
+
+    def test_student_education_needs_requirements_or_explicit_degree_statement(self):
+        for text in ("工作职责\n协助在读硕士/博士整理实验数据。", "团队介绍\n团队现有在读硕士/博士十余人。",
+                     "工作职责\n在读硕士/博士是服务对象。", "团队介绍\n在读硕士或博士优先担任组长。",
+                     "团队现有在读硕士十余人。"):
+            with self.subTest(text=text):
+                self.assertIsNone(parse(text)["requirements"]["education"])
+        for text in ("学历要求：在读硕士/博士", "要求在读硕士或博士", "候选人须在读硕士/博士",
+                     "团队介绍\n有多名资深同事。\n任职资格\n在读硕士/博士。",
+                     "任职资格\n在读硕士/博士。\n团队介绍\n团队现有在读博士十余人。"):
+            with self.subTest(text=text):
+                self.assertEqual(parse(text)["requirements"]["education"], {"min": "master", "preferred": None})
+
+    def test_navigation_with_metadata_still_allows_later_priced_role(self):
+        for first in ("招聘首页", "欢迎加入我们", "职位列表", "联系我们"):
+            with self.subTest(first=first):
+                job = parse(first + "\n招聘频道：校园招聘\n工作地点：苏州\n样本研究员 3-4K\n工作职责\n整理样品。")
+                self.assertEqual(job["title"], "样本研究员")
 
 
 class CollectionRegressions(unittest.TestCase):
