@@ -688,7 +688,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
   - M4-1b 其余（PR #126，2026-11-04 合并）：reply、note、followup、void、`list --due`、backup 和 `validate --backup`；`cn-application` 技能等入口和授权。说明见 [applications.md](applications.md)。
 - [ ] M4-2 跟进提醒和跟进消息起草，只起草不代发（实现中：只读投递 context、followup 材料及完整输入失效、生成与独立审核；共享流程 applications.md §17，真实连续使用仍由 M4-5 验收）
 - [ ] M4-3 复盘校准：对比评分和实际面试结果，提出权重调整建议，由用户决定是否采纳
-- [ ] M4-4 离线 HTML 看板（改造上游 `/html-report`）：岗位状态、投递漏斗、待跟进
+- [ ] M4-4 离线 HTML 看板（实现中）：`application report` 同批投递快照、当前岗位资料、待跟进、互斥状态与已记录里程碑；无脚本/评分/外链，不推导漏斗，不改上游 `/html-report`，共享流程 applications.md §19
 - [ ] M4-5 验收与 `v0.4.0`：用户连续两周用它记录真实投递，看板与实际一致
 
 ## 7. M5 · v0.5 面试准备

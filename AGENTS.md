@@ -44,6 +44,8 @@ To prevent duplication and configuration drift across different AI agent framewo
 
 **跟进草稿**：查询与选择按 [docs/cn/applications.md](docs/cn/applications.md) 第 17 节，选定具体投递后转 `cn-resume` 生成 `followup` 材料；独立审核和重新 render 仍按 [docs/cn/resume-workflow.md](docs/cn/resume-workflow.md)，不要求先评分或生成简历，不发送或自动改日期。
 
+**离线投递看板**：用户要投递看板、当前状态或待跟进的可读汇总时，按 [docs/cn/applications.md](docs/cn/applications.md) 第 19 节运行 `application report`。只生成新的本地快照 HTML，不写事件，不使用事件写入的预览参数。
+
 **工程底线（开发与运行时都适用）**
 
 1. 来源和事实可追溯：不编造职位、薪资、技能或项目成果；未知字段用 `null`，模型推断必须标注为推断，不得冒充事实。

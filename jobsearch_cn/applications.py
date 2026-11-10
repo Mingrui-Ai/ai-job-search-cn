@@ -585,6 +585,37 @@ def show(data_root, application_id: str) -> dict:
         return {"application": _application(connection, _row(connection, application_id))}
 
 
+def _checked_context(connection, row) -> tuple:
+    """Check events and their projection on the caller's read transaction; never expose event text on failure."""
+    try:
+        if not is_id(row["application_id"], "app"):
+            raise ValueError("application id")
+        events = _events(connection, row["application_id"])
+        errors = []
+        ids = {event["event_id"] for event in events}
+        if [event["seq"] for event in events] != list(range(1, len(events) + 1)) or len(ids) != len(events):
+            raise ValueError("event sequence")
+        for event in events:
+            _check_event(event, "event", ids, errors)
+        if not errors:
+            _check_voids(events, "events", errors)
+        if errors or not events:
+            raise ValueError("events")
+        state = replay(events)
+        stored = {"status": row["status"], "submitted": row["submitted"], "submitted_at": row["submitted_at"],
+                  "submitted_on": row["submitted_on"], "next_followup_on": row["next_followup_on"],
+                  "revision": row["revision"],
+                  "channel": {"kind": row["channel_kind"], "platform": row["channel_platform"]}}
+        created = events[0]["payload"]
+        if (state != stored or created.get("job_id") != row["job_id"]
+                or created.get("record_origin") != row["record_origin"]
+                or row["record_origin"] not in ORIGINS or not schema.is_job_id(row["job_id"])):
+            raise ValueError("projection")
+    except (ApplicationError, KeyError, TypeError, ValueError):
+        raise ApplicationError("invalid_context", "application: events or their projection are inconsistent") from None
+    return state, events
+
+
 def read_context(data_root, application_id: str) -> dict:
     """A checked, read-only event snapshot for followup materials, without archived file reads.
 
@@ -599,34 +630,44 @@ def read_context(data_root, application_id: str) -> dict:
     with _closing(connection):
         connection.execute("BEGIN")
         row = _row(connection, application_id)
-        try:
-            events = _events(connection, application_id)
-            errors = []
-            ids = {event["event_id"] for event in events}
-            if [event["seq"] for event in events] != list(range(1, len(events) + 1)) or len(ids) != len(events):
-                raise ValueError("event sequence")
-            for event in events:
-                _check_event(event, "event", ids, errors)
-            if not errors:
-                _check_voids(events, "events", errors)
-            if errors or not events:
-                raise ValueError("events")
-            state = replay(events)
-            stored = {"status": row["status"], "submitted": row["submitted"], "submitted_at": row["submitted_at"],
-                      "submitted_on": row["submitted_on"], "next_followup_on": row["next_followup_on"],
-                      "revision": row["revision"],
-                      "channel": {"kind": row["channel_kind"], "platform": row["channel_platform"]}}
-            created = events[0]["payload"]
-            if (state != stored or created.get("job_id") != row["job_id"]
-                    or created.get("record_origin") != row["record_origin"]
-                    or row["record_origin"] not in ORIGINS or not schema.is_job_id(row["job_id"])):
-                raise ValueError("projection")
-        except (ApplicationError, KeyError, TypeError, ValueError):
-            raise ApplicationError("invalid_context", "application: events or their projection are inconsistent") from None
+        state, events = _checked_context(connection, row)
         snapshot = connection.execute("SELECT sha256 FROM snapshots WHERE application_id = ? AND kind = 'job'",
                                       (application_id,)).fetchone()
         return {"application_id": application_id, "job_id": row["job_id"], "record_origin": row["record_origin"],
                 **state, "events": events, "archived_job_sha256": snapshot[0] if snapshot else None}
+
+
+def read_report_records(data_root) -> list:
+    """One checked SQLite snapshot, reduced to report facts; no material or archive reads."""
+    connection = _reader(Paths(data_root))
+    if connection is None:
+        return []
+    try:
+        with _closing(connection):
+            connection.execute("BEGIN")
+            rows = connection.execute("SELECT * FROM applications ORDER BY application_id").fetchall()
+            orphan = connection.execute("SELECT 1 FROM events e LEFT JOIN applications a "
+                                        "ON a.application_id = e.application_id "
+                                        "WHERE a.application_id IS NULL LIMIT 1").fetchone()
+            if orphan:
+                raise ApplicationError("invalid_context", "application report: an event has no application")
+            records = []
+            for row in rows:
+                state, events = _checked_context(connection, row)
+                progress = [{"type": event["type"], "status": event["payload"].get("to"),
+                             "occurred_at": event["occurred_at"], "occurred_on": event["occurred_on"]}
+                            for event in events if not event["voided_by"]
+                            and event["type"] in ("submitted", "status_changed", "reply_received")]
+                records.append({"application_id": row["application_id"], "job_id": row["job_id"],
+                                "status": state["status"], "submitted": bool(state["submitted"]),
+                                "submitted_at": state["submitted_at"], "submitted_on": state["submitted_on"],
+                                "next_followup_on": state["next_followup_on"],
+                                "channel": state["channel"]["kind"], "progress": progress})
+            return records
+    except sqlite3.OperationalError as exc:
+        raise _busy(exc) from None
+    except sqlite3.DatabaseError:
+        raise StorageError("application report: the database is unreadable") from None
 
 
 def _submission_key(item: dict):
