@@ -1,0 +1,8 @@
+{
+  "schema_version": 1, "direction": "default", "revision": 1,
+  "provenance": {"kind": "project_original", "source_ref": "Original prompts for this repository", "license": "MIT", "notice": "本项目原创通用练习提示，不是公司真题，也不依据面试频率统计。"},
+  "questions": [
+    {"id": "default.problem", "prompt": "遇到信息不足的任务时，你会先确认什么，再如何安排下一步？", "practice_kind": "general", "tags": ["问题澄清"], "prep_prompts": ["区分已知事实和待确认信息", "没有实际经历时只说明思考方法"]},
+    {"id": "default.learning", "prompt": "面对尚未掌握的工作方法，你会如何制定学习计划并检查理解是否准确？", "practice_kind": "general", "tags": ["学习方法"], "prep_prompts": ["说明验证步骤，不编造已经取得的成果"]}
+  ]
+}

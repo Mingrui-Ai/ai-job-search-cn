@@ -1,0 +1,8 @@
+{
+  "schema_version": 1, "direction": "data", "revision": 1,
+  "provenance": {"kind": "project_original", "source_ref": "Original prompts for this repository", "license": "MIT", "notice": "本项目原创数据练习提示，不是公司真题，也不依据面试频率统计。"},
+  "questions": [
+    {"id": "data.metric", "prompt": "业务问题比较含糊时，你会怎样定义指标并确认数据能回答这个问题？", "practice_kind": "general", "tags": ["指标定义"], "prep_prompts": ["说明假设、口径和限制"]},
+    {"id": "data.quality", "prompt": "分析结果与直觉不符时，你会怎样检查数据质量与分析过程？", "practice_kind": "general", "tags": ["分析核验"], "prep_prompts": ["把观察、解释和进一步验证分开"]}
+  ]
+}
