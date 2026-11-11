@@ -32,7 +32,12 @@
       "Bash(python -m jobsearch_cn material:*)",
       "Bash(python -m jobsearch_cn resume:*)",
       "Bash(python -m jobsearch_cn review:*)",
-      "Bash(python -m jobsearch_cn application:*)"
+      "Bash(python -m jobsearch_cn application:*)",
+      "Bash(python -m jobsearch_cn interview template:*)",
+      "Bash(python -m jobsearch_cn interview validate:*)",
+      "Bash(python -m jobsearch_cn interview render:*)",
+      "Bash(python -m jobsearch_cn interview review-draft:*)",
+      "Bash(python -m jobsearch_cn interview review-validate:*)"
     ],
     "ask": [],
     "deny": [

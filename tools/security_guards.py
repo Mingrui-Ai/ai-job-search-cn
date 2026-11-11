@@ -126,6 +126,13 @@ ALLOWED_PERMISSIONS = {
     # <data dir>/applications/ only after the user has seen the preview and agreed; backup
     # writes under applications/backups/. No network.
     "Bash(python -m jobsearch_cn application:*)",
+    # CN interview: five offline actions; only render --output publishes
+    # derived files under <data dir>/interviews/. No profile or DB writes.
+    "Bash(python -m jobsearch_cn interview template:*)",
+    "Bash(python -m jobsearch_cn interview validate:*)",
+    "Bash(python -m jobsearch_cn interview render:*)",
+    "Bash(python -m jobsearch_cn interview review-draft:*)",
+    "Bash(python -m jobsearch_cn interview review-validate:*)",
 }
 
 # Rules that must stay in .claude/settings.json permissions.ask. An ask rule
@@ -316,6 +323,13 @@ ALLOWED_SKILL_TOOLS = {
     "Bash(python -m jobsearch_cn resume:*)",  # CN fork: .claude/skills/cn-resume
     "Bash(python -m jobsearch_cn review:*)",  # CN fork: .claude/skills/cn-resume
     "Bash(python -m jobsearch_cn application:*)",  # CN fork: .claude/skills/cn-application
+    # CN interview: five offline actions; only render --output publishes
+    # derived files under <data dir>/interviews/. No profile or DB writes.
+    "Bash(python -m jobsearch_cn interview template:*)",
+    "Bash(python -m jobsearch_cn interview validate:*)",
+    "Bash(python -m jobsearch_cn interview render:*)",
+    "Bash(python -m jobsearch_cn interview review-draft:*)",
+    "Bash(python -m jobsearch_cn interview review-validate:*)",
 }
 
 # The tools a shipped .claude/agents/*.md may list. These agents read untrusted
