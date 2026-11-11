@@ -694,7 +694,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 
 ## 7. M5 · v0.5 面试准备
 
-- [ ] M5-1 面试准备包：JD 考点、根据档案项目生成的深挖问题、按方向的常见题（题库可配置）。2026-11-11 核心、五动作 CLI、原创配置及单源流程已由 PR #166 独立审核并合并（[说明](interview.md)、[工作记录](worklog/2026-11-11-m5-1-interview-prep.md)）；五动作精确权限已获批准并配置（[权限记录](worklog/2026-11-11-m5-1-permissions.md)）。Codex 的 AGENTS 指引与 Claude Code 的 `cn-interview` 薄入口已接入共用流程，#171 原提交与集成提交已独立审核并合并（[入口记录](worklog/2026-11-11-m5-1-entry.md)、[集成记录](worklog/2026-11-11-m5-1-entry-integration.md)）；既有虚构样张已独立审核通过（0 must、2 suggest），不重复列为待审。两项 P3 已由 #169 交付；M5-1 整体、用户真实使用与 M5-4 仍未验收。
+- [ ] M5-1 面试准备包：JD 考点、根据档案项目生成的深挖问题、按方向的常见题（题库可配置）。2026-11-11 核心、五动作 CLI、原创配置及单源流程已由 PR #166 独立审核并合并（[说明](interview.md)、[工作记录](worklog/2026-11-11-m5-1-interview-prep.md)）；五动作精确权限已获批准并配置（[权限记录](worklog/2026-11-11-m5-1-permissions.md)）。Codex 的 AGENTS 指引与 Claude Code 的 `cn-interview` 薄入口已接入共用流程，#171 原提交与集成提交已独立审核并合并（[入口记录](worklog/2026-11-11-m5-1-entry.md)、[集成记录](worklog/2026-11-11-m5-1-entry-integration.md)）；既有虚构样张已独立审核通过（0 must、2 suggest），不重复列为待审。两项 P3 已由 #169 交付。一份虚构技术方向的新会话验收完成准备与独立审核，同时发现额外开发工作记录 P3；本次明确本地任务产物边界，修复效果待非作者新会话复验（[边界记录](worklog/2026-11-11-m5-1-runtime-boundary.md)）。M5-1 整体、用户真实使用与 M5-4 仍未验收。
   - P3 错误分类（PR #169 已独立审核并合并）：已选或已绑定输入明确消失统一 `stale_context/exit1`，含合法审核间接绑定的 prep；首次显式缺输入、其他 IO/JSON/大小/路径错误及派生产物分类保留。同次已选 local 消失不回退，不接受旧 pass。见[本项记录](worklog/2026-11-11-m5-1-errors-and-warnings.md)；原[标识符隐私 P2 记录](worklog/2026-11-11-m5-1-identifier-privacy.md)保留。
   - P3 模板提示（PR #169 已独立审核并合并）：同一次安全 catalog 投影没有可完整引用的经历事实时，warnings 增加固定“没有可引用项目”提示，保留扣留标记、其他警告及 1–20 题/零考点合同；validate 的 `no_project_questions` 仍按包内项目题判断。见[本项记录](worklog/2026-11-11-m5-1-errors-and-warnings.md)。
 - [ ] M5-2 模拟面试（复用上游 `/interview` 和 `07-interview-prep.md`）
