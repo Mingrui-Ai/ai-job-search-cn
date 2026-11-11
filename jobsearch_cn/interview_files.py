@@ -106,7 +106,20 @@ def safe(root, parts, *, required=True):
         fail("io_error", "interview path cannot be inspected", 2)
 
 
-def locate(root, filename, *, review=False):
+def disappeared():
+    fail("stale_context", "interview input disappeared after selection; reload sources and render again before review")
+
+
+def _input_path(root, parts, *, bound=False):
+    try:
+        return safe(root, parts)
+    except Error as exc:
+        if bound and exc.code == "missing_input":
+            disappeared()
+        raise
+
+
+def locate(root, filename, *, review=False, bound=False):
     path = Path(filename)
     if ".." in path.parts:
         fail("unsafe_path", "interview file must use its fixed location")
@@ -117,7 +130,7 @@ def locate(root, filename, *, review=False):
     pattern = REVIEW if review else PACK
     if len(parts) != 3 or parts[0] != "interviews" or not schema.is_job_id(parts[1]) or not pattern.fullmatch(parts[2]):
         fail("unsafe_path", "interview file must use its fixed job directory and numbered name")
-    return parts, safe(root, parts)
+    return parts, _input_path(root, parts, bound=bound)
 
 
 def identity(path):
@@ -125,8 +138,8 @@ def identity(path):
     return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns
 
 
-def read_bytes(root, parts):
-    path = safe(root, parts)
+def read_bytes(root, parts, *, bound=False):
+    path = _input_path(root, parts, bound=bound)
     try:
         before = identity(path)
         if before[2] > LIMIT:
@@ -135,16 +148,18 @@ def read_bytes(root, parts):
             raw = source.read(LIMIT + 1)
         if len(raw) > LIMIT:
             fail("too_large", "interview input exceeds the size limit", 2)
-        safe(root, parts)
+        _input_path(root, parts, bound=True)
         if identity(path) != before:
             fail("stale_context", "interview input changed during reading")
         return raw
+    except FileNotFoundError:
+        disappeared()
     except OSError:
         fail("io_error", "interview input could not be read", 2)
 
 
-def read(root, parts):
-    return decode(read_bytes(root, parts))
+def read(root, parts, *, bound=False):
+    return decode(read_bytes(root, parts, bound=bound))
 
 
 def _remove_owned(root, parts, token):

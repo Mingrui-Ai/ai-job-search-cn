@@ -102,25 +102,26 @@ class Inputs:
 
 def _source(root, parts, *, bound):
     try:
-        return files.read(root, parts)
+        return files.read(root, parts, bound=bound)
     except files.Error as exc:
         if exc.code == "missing_input":
-            files.fail("stale_context" if bound else "not_found", "required interview source is missing")
+            files.fail("not_found", "required interview source is missing")
         raise
 
 
-def _bank(root, direction, contacts):
+def _bank(root, direction, contacts, *, bound=False, selection=None):
     if (not isinstance(direction, str) or not _SLUG.fullmatch(direction) or direction in _RESERVED
             or sensitive(direction, contacts)):
         files.fail("configuration", "interview direction must name a supported local configuration", 2)
     name = direction + ".json"
     parts = ("templates", "interviews", name)
     local = files.safe(root, parts, required=False)
-    if local.exists():
-        bank, origin = files.read(root, parts), "local"
+    if local.exists() or (selection is not None and selection["origin"] == "local"):
+        # Once selected, losing a local override must not silently select builtin.
+        bank, origin = files.read(root, parts, bound=True), "local"
     else:
         try:
-            bank = files.read(Path(__file__).parent, ("interview_questions", name))
+            bank = files.read(Path(__file__).parent, ("interview_questions", name), bound=bound)
         except files.Error as exc:
             if exc.code == "missing_input":
                 files.fail("configuration", "interview direction has no question configuration", 2)
@@ -160,7 +161,7 @@ def _bank(root, direction, contacts):
     return bank, {"direction": direction, "origin": origin, "name": name}
 
 
-def load(root, job_id, direction="default", *, bound=False):
+def load(root, job_id, direction="default", *, bound=False, selection=None):
     if not schema.is_job_id(job_id):
         files.fail("invalid", "interview job id is invalid")
     raw_job = _source(root, ("jobs", job_id + ".json"), bound=bound)
@@ -173,7 +174,7 @@ def load(root, job_id, direction="default", *, bound=False):
         files.fail("invalid_source", "interview requires a valid saved job and profile")
     contacts = tuple(value for value in (raw_profile.get("contact") or {}).values() if isinstance(value, str) and value.strip())
     job_identifier(job_id, contacts)
-    bank, selection = _bank(root, direction, contacts)
+    bank, selection = _bank(root, direction, contacts, bound=bound, selection=selection)
     context = {"binding_version": 1, "job_input_hash": files.digest(raw_job),
                "profile_input_hash": files.digest(raw_profile),
                "bank_hash": files.digest({"selection": selection, "bank": bank}), "policy_version": 1}
@@ -182,7 +183,7 @@ def load(root, job_id, direction="default", *, bound=False):
 
 
 def recheck(root, inputs):
-    latest = load(root, inputs.job["id"], inputs.selection["direction"], bound=True)
+    latest = load(root, inputs.job["id"], inputs.selection["direction"], bound=True, selection=inputs.selection)
     if latest.context != inputs.context:
         files.fail("stale_context", "interview sources or selected question configuration changed")
 
@@ -221,8 +222,14 @@ def catalog(inputs):
 
 def template(root, job_id, direction=None):
     inputs = load(root, job_id, direction or "default")
-    result = {"draft_ready": False, "context": inputs.context, "catalog": catalog(inputs),
-              "warnings": ["direction_unspecified"] if direction is None else [],
+    sources = catalog(inputs)
+    warnings = ["direction_unspecified"] if direction is None else []
+    if not any(_text(value, 500) for entry in sources["experience"]
+               for value in [entry["name"], entry["org"], entry["role"],
+                             *(bullet["text"] for bullet in entry["bullets"])]):
+        warnings.append("没有可引用项目：当前安全来源目录中没有可供逐条引用的项目事实；可先准备通用练习，或补充、核对项目记录。")
+    result = {"draft_ready": False, "context": inputs.context, "catalog": sources,
+              "warnings": warnings,
               "guard": guard.summary(guard.check(inputs.job["raw_text"])[1]),
               "draft": {"schema_version": 1, "kind": "interview-prep", "job_id": job_id, "created": files.now(),
                         "context": inputs.context, "direction": inputs.selection["direction"],
@@ -358,9 +365,9 @@ def check(pack, inputs):
             "pack_hash": files.digest(pack), "context_hash": files.digest(inputs.context)}
 
 
-def prepared(root, filename):
-    parts, _ = files.locate(root, filename)
-    pack = files.read(root, parts); shape(pack)
+def prepared(root, filename, *, bound=False):
+    parts, _ = files.locate(root, filename, bound=bound)
+    pack = files.read(root, parts, bound=True); shape(pack)
     if pack["job_id"] != parts[1]:
         files.fail("invalid_reference", "interview pack belongs to another job directory")
     inputs = load(root, pack["job_id"], pack["direction"], bound=True)
@@ -371,7 +378,7 @@ def prepared(root, filename):
 
 
 def recheck_pack(root, parts, pack, inputs):
-    if files.read(root, parts) != pack:
+    if files.read(root, parts, bound=True) != pack:
         files.fail("stale_context", "interview pack changed during this operation")
     recheck(root, inputs)
 
