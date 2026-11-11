@@ -1,10 +1,10 @@
 """The agent entry points (ADR-7, ADR-10) stay thin and agree with the CLI.
 
-For each CN workflow, Claude Code's skill, DeepSeek Harness's skill and Codex's
-AGENTS.md all point at one document under docs/cn/. These pin that all three
+For each CN workflow, its supported runtime skills and Codex's
+AGENTS.md all point at one document under docs/cn/. These pin that all entries
 point there, that every command the document tells an agent to run exists, and
 that each Claude Code skill carries a Bash grant for exactly the command groups
-its document uses, each registered in both permission allowlists. Review
+its document uses (or the approved individual actions), each registered in both permission allowlists. Review
 subagents point at the same document and have no Edit, Write or web tools.
 dsh has no per-skill grants (it uses its own permission
 presets), so its entries carry only a name and a description. A changed
@@ -37,11 +37,15 @@ WORKFLOWS = {
         "application": {"record", "submit", "status", "reply", "note", "followup", "void", "show", "list",
                         "validate", "backup", "export", "retrospective", "report"},
         "jd": {"list", "show"}}),
+    "cn-interview": ("docs/cn/interview.md", {
+        "interview": {"template", "validate", "render", "review-draft", "review-validate"}}),
 }
 # Subagents a workflow dispatches: agent name -> the workflow document it follows.
 REVIEWERS = {"cn-resume-reviewer": "docs/cn/resume-workflow.md"}
 # Where each runtime looks for project skills.
 SKILL_DIRS = (".claude/skills", ".dsh/skills")
+# The interview slice integrates Codex and Claude Code only.
+RUNTIME_DIRS = {"cn-interview": (".claude/skills",)}
 # dsh skips, with only a log warning, a skill whose name does not match this.
 DSH_SKILL_NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 # What every dsh entry must say, since dsh also reads the upstream CLAUDE.md.
@@ -59,6 +63,14 @@ def read(path: Path) -> str:
 
 def frontmatter(path: Path) -> list[str]:
     return read(path).split("---", 2)[1].strip().splitlines()
+
+
+def workflow_grants(groups):
+    return {
+        f"Bash(python -m jobsearch_cn {group}{suffix}:*)"
+        for group, commands in groups.items()
+        for suffix in ([f" {command}" for command in commands] if group == "interview" else [""])
+    }
 
 
 def workflow_stages(workflow, groups):
@@ -84,7 +96,7 @@ class EntryPoints(unittest.TestCase):
 
     def every_entry(self):
         for skill, (workflow, _) in WORKFLOWS.items():
-            for skill_dir in SKILL_DIRS:
+            for skill_dir in RUNTIME_DIRS.get(skill, SKILL_DIRS):
                 with self.subTest(skill=skill, runtime=skill_dir):
                     yield REPO / skill_dir / skill / "SKILL.md", workflow
 
@@ -94,6 +106,8 @@ class EntryPoints(unittest.TestCase):
             self.assertTrue(skill.is_file(), f"missing entry {skill.relative_to(REPO)}")
             self.assertIn(workflow, read(skill))
             self.assertIn(workflow, read(REPO / "AGENTS.md"))
+        for skill in WORKFLOWS:
+            self.assertFalse((REPO / ".agents/skills" / skill).exists(), "CN workflows are not portals")
 
     def test_the_skill_stays_a_thin_pointer(self):
         for skill, _ in self.every_entry():
@@ -104,8 +118,7 @@ class EntryPoints(unittest.TestCase):
     def test_the_skill_grant_is_in_both_allowlists(self):
         allow = json.loads(read(REPO / ".claude" / "settings.json"))["permissions"]["allow"]
         for skill, _, groups in self.each():
-            for group in groups:
-                grant = f"Bash(python -m jobsearch_cn {group}:*)"
+            for grant in workflow_grants(groups):
                 self.assertIn(grant, read(skill).split("---", 2)[1])
                 self.assertIn(grant, security_guards.ALLOWED_PERMISSIONS)
                 self.assertIn(grant, security_guards.ALLOWED_SKILL_TOOLS)
@@ -113,18 +126,18 @@ class EntryPoints(unittest.TestCase):
 
     def test_the_skill_grants_only_its_workflow_groups(self):
         for skill, _, groups in self.each():
-            granted = set(re.findall(r"Bash\(python -m jobsearch_cn (\w+):\*\)", read(skill).split("---", 2)[1]))
-            self.assertEqual(granted, set(groups))
+            granted = set(re.findall(r"Bash\([^)]*\)", read(skill).split("---", 2)[1]))
+            self.assertEqual(granted, workflow_grants(groups))
 
     def test_every_command_in_the_workflow_exists(self):
         parser = cli.build_parser()
         for _, workflow, groups in self.each():
             text = read(REPO / workflow)
             for group, required in groups.items():
-                used = set(re.findall(rf"python -m jobsearch_cn {group} (\w+)", text))
+                used = set(re.findall(rf"python -m jobsearch_cn {group} ([\w-]+)", text))
                 self.assertTrue(required <= used, f"{workflow} should document {group} {sorted(required - used)}")
             for stage, _ in workflow_stages(workflow, groups):
-                for group, command in re.findall(r"python -m jobsearch_cn (\w+) (\w+)", stage):
+                for group, command in re.findall(r"python -m jobsearch_cn (\w+) ([\w-]+)", stage):
                     with self.assertRaises(SystemExit) as raised, contextlib.redirect_stdout(io.StringIO()):
                         parser.parse_args([group, command, "--help"])
                     self.assertEqual(raised.exception.code, 0, f"{group} {command}")
@@ -213,6 +226,8 @@ class DshEntryPoints(unittest.TestCase):
 
     def each(self):
         for skill in WORKFLOWS:
+            if ".dsh/skills" not in RUNTIME_DIRS.get(skill, SKILL_DIRS):
+                continue
             with self.subTest(skill=skill):
                 yield skill, REPO / ".dsh" / "skills" / skill / "SKILL.md"
 

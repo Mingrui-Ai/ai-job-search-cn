@@ -48,6 +48,8 @@ To prevent duplication and configuration drift across different AI agent framewo
 
 **离线投递看板**：用户要投递看板、当前状态或待跟进的可读汇总时，按 [docs/cn/applications.md](docs/cn/applications.md) 第 19 节运行 `application report`。只生成新的本地快照 HTML，不写事件，不使用事件写入的预览参数。
 
+**面试准备**：用户要给已保存岗位准备面试、生成或修改面试准备包时，按 [docs/cn/interview.md](docs/cn/interview.md) 第 2 节执行（与 Claude Code 的 `cn-interview` 技能共用），不用上游 `/interview`。按共用流程独立审核；改包后先重新 `validate` 和 `render --output`，再进入下一轮审核。未知保留 `answer:null`，只引用安全目录，不读取联系方式或来源原文件，不改档案。
+
 **工程底线（开发与运行时都适用）**
 
 1. 来源和事实可追溯：不编造职位、薪资、技能或项目成果；未知字段用 `null`，模型推断必须标注为推断，不得冒充事实。
