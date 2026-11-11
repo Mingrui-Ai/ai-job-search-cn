@@ -90,6 +90,8 @@ Profile v1 的 experience.source 是 `user` 或来源裸文件名；catalog 的 
 
 命中敏感内容的来源行/字段整条 withheld，主动引用拒绝；不以部分遮盖冒充逐字引用。安全 catalog 的文本在机器 JSON 中保留原文，通过 JSON 序列化。生成 Markdown（包括默认 render 返回的 Markdown）统一将外部自由文本放入足够长、无语言标记的反引号围栏，以 CommonMark/GFM 纯文字显示，不生成活动外链、图片、HTML 资源或模板执行结构。工具不联网，不保证第三方编辑器不会另行探测网络。
 
+`template` 在同一次安全 catalog 投影中检查可引用项目事实：经历 ref 已安全保留，且至少有一个非空、可完整引用的 name/org/role 或 bullet（不超过 500 字符）。所有可供 `project_ref` 引用的经历类型都算；仅有 ref 不算。零经历、全部标识被扣留或剩余经历没有可引用事实时，既有 warnings 增加固定提示：“没有可引用项目：当前安全来源目录中没有可供逐条引用的项目事实；可先准备通用练习，或补充、核对项目记录。”不改变 catalog、withheld 标记或其他警告，也不表示用户没有经验。警告不使模板失败，`draft_ready=false`、可交付 1–20 题和零 JD 考点的合同不变。`validate` 的 `no_project_questions` 仍只表示包内未选择项目题，与安全来源是否有事实分开。
+
 每个操作结束重新选择配置并复查完整来源、包与产物。这里只保证读取和末次核验相符，不提供跨来源文件的事务快照，也不能检测 A→B→A 的历史变化。
 
 ## 5. 生成与审核
@@ -121,4 +123,4 @@ Profile v1 的 experience.source 是 `user` 或来源裸文件名；catalog 的 
 
 成功 stdout 为 JSON；失败 stderr 固定安全 `{error:{code,message}}`，不反射原值或绝对路径。退出码 1 表示结构/引用/隐私/路径/过期/并发不满足合同，或初次不存在岗位/档案；2 表示参数、显式文件缺失、IO、非法 JSON、读取字节超限或坏配置。用户显式传入的 prep/review 文件非法 JSON、无法读取、超过文件字节上限归 2；可解析后的字段长度、数组数量等领域校验归 1。审核间接依赖的 build/Markdown 缺失、build 坏 JSON、摘要不匹配或不安全路径统一 `invalid_output/exit1`，要求重新 render；真实 IO 或读取字节超限仍归 2。
 
-已有绑定的源后来缺失原则上报 `stale_context/exit1`。当前已知 P3：配置在读取途中被删除的一个竞争窗口可能报 `missing_input/exit2`；仍拒绝输出及旧审核，不表示成功或可继续投用，待 M5-1 收尾统一分类。错误优先级依次为参数/路径/读取、包结构、当前来源合法性、context、引用与文本、末次复查。
+已选择或已绑定的输入在读取途中或末次复查时明确缺失，报 `stale_context/exit1`，固定提示为 `interview input disappeared after selection; reload sources and render again before review`。审核记录通过既有身份、时间戳及摘要格式校验后，其 pack_hash 绑定的间接 prep 缺失也归此类；任意含 pack_hash 的坏对象不能跳过结构校验。用户首次显式指定的 prep/review 不存在仍为 `missing_input/exit2`，首次 template 缺岗位/档案仍为 `not_found/exit1`。从未选择的本地题库不存在时可正常使用内置题库；首次指定方向两者均不存在为 `configuration/exit2`。同次操作已经选择 local 后消失，不回退内置；已有包只有不透明 bank_hash，仍通过包含选择来源的摘要拒绝替代题库。只改变明确缺失的分类，现存但非法的来源/配置、其他 IO、字节超限和 unsafe_path 保留具体错误；派生 build/Markdown 沿用上段合同。不重试、不修复原件、不接受旧 pass。错误优先级依次为参数/路径/读取、包结构、当前来源合法性、context、引用与文本、末次复查。
