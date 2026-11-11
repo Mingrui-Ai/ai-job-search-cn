@@ -25,7 +25,7 @@ conda activate ai-job-search-cn
 - `git status` 如果有跟踪文件改动或未跟踪的代码、文档，先停下，由改动的所有者处理；不要暂存、覆盖或删除。
 - `HEAD` 必须与刚拉取的 `origin/master` 一致；本地领先或分叉时先由工作树使用者处理，不重置覆盖。记下完整提交号，作为本轮验收基线。
 - 确认 M3-6 和整条流程工程验收已合并（参考[两轮工程验收记录](worklog/2026-11-04-m3-flow-acceptance.md)）；公开样例通过不等于本轮真实验收通过。
-- 本轮固定使用真实数据目录 `D:\06_Projects\ai-job-search\cn\data`。支持 `--data-dir` 的命令都显式带上它，手工读写也使用这个目录下的完整路径。`review validate`、`review show` 当前不接受 `--data-dir`，直接传审核文件的完整路径。
+- 本轮固定使用真实数据目录 `D:\06_Projects\ai-job-search\cn\data`。支持 `--data-dir` 的命令都显式带上它，手工读写也使用这个目录下的完整路径。`review validate`、`review show` 同样显式使用这一数据目录，不会按审核文件的位置推断；规则见 [resume-workflow.md 第 2 节](resume-workflow.md#2-审核)。
 
 ### 2. 先备份真实数据
 
@@ -126,13 +126,13 @@ python -m jobsearch_cn resume build data/materials/<岗位id>/resume-<n>.json --
 数据目录固定为 D:\06_Projects\ai-job-search\cn\data。使用同一代码基线、ai-job-search-cn 环境，只写本份审核结果，不改材料，不运行 build/render。
 ```
 
-后面附上代码基线、岗位 id、本次 `resume build` 输出和简短的选材说明。审核会话自己读取原始资料，先运行 `material validate`、`review draft`（均带 `--data-dir`），核对 `review draft` 的 `material_hash` 与 `build_note` 指向的 `.build.json` 一致。不一致时不写审核结果，交回起草者重新生成，再派这一轮（不计轮次）；`review validate` 本身不会替代这一步核对输出文件版本。
+后面附上代码基线、岗位 id、本次 `resume build` 输出和简短的选材说明。审核会话自己读取原始资料，先运行 `material validate`、`review draft`（均带 `--data-dir`），核对 `review draft` 的 `material_hash` 与 `build_note` 指向的 `.build.json` 一致。不一致时不写审核结果，交回起草者重新生成，再派这一轮（不计轮次）。`review validate` 默认还会核对当前生成说明及 PDF/Word 的身份与字节摘要；事实来源和页面仍须独立审核。
 
 审核结果写到 `data/materials/<岗位id>/review-<n>-r<k>.json`，其中 `k` 为 1 或 2，再运行（新会话用完整路径）：
 
 ```powershell
-python -m jobsearch_cn review validate data/materials/<岗位id>/review-<n>-r<k>.json
-python -m jobsearch_cn review show data/materials/<岗位id>/review-<n>-r<k>.json
+python -m jobsearch_cn review validate data/materials/<岗位id>/review-<n>-r<k>.json --data-dir $dataDir
+python -m jobsearch_cn review show data/materials/<岗位id>/review-<n>-r<k>.json --data-dir $dataDir
 ```
 
 有必改项或采纳建议时，回到起草会话处理，重新 `material validate`、`resume build`，再做第 2 轮；交接附上上一轮审核和逐条处理说明。最多 2 轮；第 2 轮仍有必改项或还需改材料时停止，记为待补，交经理和规划者处理，不开第三轮或重置编号绕过上限。
