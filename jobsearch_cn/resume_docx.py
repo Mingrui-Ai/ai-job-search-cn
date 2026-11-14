@@ -13,6 +13,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape
 
 from . import resume_extract, resume_pdf
+from . import resume_photo, resume_photo_docx
 
 # 等线 is the East Asian font Office has installed since 2016, on Windows and on the Mac alike, so a
 # resume opened on either shows the same face. The Noto fonts the PDF uses are not on every machine.
@@ -104,36 +105,67 @@ def _section(section: dict) -> list:
     return paragraphs
 
 
-def _document(content: dict) -> str:
+def _document(content: dict, photo=None) -> str:
     paragraphs = [
         _paragraph(_run(content.get("name", ""), bold=True, size=_NAME), '<w:jc w:val="center"/>'),
         _paragraph(_run(content.get("contact", ""), size=_SMALL), '<w:jc w:val="center"/>'),
         _paragraph(_run(content.get("intent", ""), size=_SMALL), '<w:jc w:val="center"/>'),
     ]
+    namespaces = f'xmlns:w="{_W}"'
+    if photo is not None:
+        namespaces = " ".join(f'xmlns:{key}="{value}"' for key, value in resume_photo_docx.NS.items())
+        # Fixed grid reserves 25 mm + 3 mm; inline picture sets row height naturally.
+        left, right = _TEXT_WIDTH - 1588, 1588
+        picture = _paragraph('<w:r>' + resume_photo_docx.drawing_xml(photo) + '</w:r>',
+                             '<w:jc w:val="right"/>')
+        paragraphs = [f'<w:tbl><w:tblPr><w:tblW w:w="{_TEXT_WIDTH}" w:type="dxa"/>'
+                      '<w:tblLayout w:type="fixed"/><w:tblBorders>'
+                      + ''.join(f'<w:{side} w:val="nil"/>' for side in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'))
+                      + f'</w:tblBorders><w:tblCellMar><w:top w:w="0" w:type="dxa"/>'
+                      '<w:bottom w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/>'
+                      '<w:right w:w="0" w:type="dxa"/></w:tblCellMar></w:tblPr>'
+                      f'<w:tblGrid><w:gridCol w:w="{left}"/><w:gridCol w:w="{right}"/></w:tblGrid>'
+                      f'<w:tr><w:tc><w:tcPr><w:tcW w:w="{left}" w:type="dxa"/>'
+                      '<w:vAlign w:val="center"/></w:tcPr>' + ''.join(paragraphs)
+                      + f'</w:tc><w:tc><w:tcPr><w:tcW w:w="{right}" w:type="dxa"/>'
+                      '<w:tcMar><w:left w:w="170" w:type="dxa"/></w:tcMar>'
+                      '<w:vAlign w:val="center"/></w:tcPr>' + picture + '</w:tc></w:tr></w:tbl>']
     for section in content.get("sections") or []:
         paragraphs += _section(section)
     page = (f'<w:sectPr><w:pgSz w:w="{_PAGE_WIDTH}" w:h="{_PAGE_HEIGHT}"/>'
             f'<w:pgMar w:top="{_MARGIN}" w:right="{_MARGIN}" w:bottom="{_MARGIN}" w:left="{_MARGIN}"'
             ' w:header="0" w:footer="0" w:gutter="0"/></w:sectPr>')
     return (f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
-            f'<w:document xmlns:w="{_W}"><w:body>{"".join(paragraphs)}{page}</w:body></w:document>')
+            f'<w:document {namespaces}><w:body>{"".join(paragraphs)}{page}</w:body></w:document>')
 
 
-def build(content: dict, font: str = FONT) -> bytes:
+def build(content: dict, font: str = FONT, *, photo: resume_photo.PhotoAsset | None = None) -> bytes:
     """The .docx for the content, as bytes."""
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr("[Content_Types].xml", _CONTENT_TYPES)
+        types, rels = _CONTENT_TYPES, _DOCUMENT_RELS
+        if photo is not None:
+            types = types.replace('</Types>', '<Default Extension="png" ContentType="image/png"/></Types>')
+            rels = rels.replace('</Relationships>', '<Relationship Id="rId2" Type="'
+                                + resume_photo_docx.NS['r'] + '/image" Target="media/portrait.png"/></Relationships>')
+        archive.writestr("[Content_Types].xml", types)
         archive.writestr("_rels/.rels", _PACKAGE_RELS)
-        archive.writestr("word/_rels/document.xml.rels", _DOCUMENT_RELS)
+        archive.writestr("word/_rels/document.xml.rels", rels)
         archive.writestr("word/styles.xml", _styles(font))
-        archive.writestr("word/document.xml", _document(content))
-    return buffer.getvalue()
+        archive.writestr("word/document.xml", _document(content, photo))
+        if photo is not None:
+            archive.writestr("word/media/portrait.png", photo.embedded_bytes)
+    result = buffer.getvalue()
+    if photo is not None:
+        errors = resume_photo.check_docx_photo(result, photo)
+        if errors:
+            raise resume_photo.PhotoError(errors[0])
+    return result
 
 
-def write(content: dict, output: Path) -> dict:
+def write(content: dict, output: Path, *, photo: resume_photo.PhotoAsset | None = None) -> dict:
     """Write the .docx for the content to output, by the PDF's safe write (resume_pdf._replace)."""
-    resume_pdf._replace(output, build(content))
+    resume_pdf._replace(output, build(content, photo=photo))
     return {"docx": str(output), "font": FONT}
 
 

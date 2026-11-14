@@ -45,12 +45,13 @@
 | `profile_hash` | 写材料时档案的摘要（和匹配记录用的是同一种），档案后来改过时，`material validate`、`material render`、`resume build` 会给警告，警告末尾附上现在的值（没有命令单独输出它；`review draft` 不输出材料检查的警告） |
 | `created` | 写材料的时间，ISO 8601，要带时区，例如 `2026-11-01T10:00:00+08:00`（结尾写 `Z` 也行）；日期或时间不存在的不通过 |
 | `summary` | 个人简介：`text` 是正文，`refs` 是它依据的条目，至少一条；还可以写 `"notes.md"`，表示依据是用户在建档时说过、记进 `notes.md` 的话（见第 6 节）。默认写，见第 6 节；用户对这个岗位说了不要简介时为 `null` |
+| `photo` | 仅resume可选，缺失/null表示不放；固定ref与原图绑定摘要，见第9节。图片不进入纯文字渲染或关键词正文 |
 | `education[]` | 列出的教育条目：`ref`，以及要列出的课程 `courses`（只能是该条目 `courses` 里有的） |
 | `experience[]` | 列出的经历：`ref`，以及改写后的要点 `bullets[]`，每条有 `text` 和 `refs`；`refs` 必须包含所在经历自己的 `id`，可以再引用别的条目 |
 | `skills[]` | 列出的技能名，只能是档案 `skills[]` 里有的（同义写法算同一项，不能重复） |
 | `awards[]`、`certificates[]`、`languages[]` | 列出的条目，每项只有 `ref` |
 
-所有字段都要写；某一节不列就写 `[]`。同一条目在一节里不能列两次。
+除photo外所有字段都要写；某一节不列就写 `[]`。同一条目在一节里不能列两次。
 
 ## 4. `material validate`
 
@@ -268,3 +269,11 @@ Material v1 新增 `kind:followup`，文件 `followup-<n>.json`。旧工具不�
 `material template <job> --kind followup --application <app> --expected-revision N` 只读返回 spec、context、最小事实与 withheld 提示；两个新参数对 followup 必填，旧 kind 带它们报参数错误。全部新 kind 入口（validate/render/review draft/validate/show）核对同一上下文服务。来源不可用/过期输出安全字段和原因，退出 1，不回显来源正文；参数或材料文件不能读取沿用退出 2。
 
 `material render --output` 写无标题的纯文本与 message-build 说明，输出增加 `context_status:current_at_check`。生成与审核使用相同 data-dir 和可选 `--profile`；写前及产物核对后的来源复查、失败处理见共享流程。应用首次投递的 record/submit 归档范围没有扩展到 followup。
+
+## 9. 简历照片选择（M3-2b）
+
+Material v1 的 `kind:resume` 可选 `photo:{"ref":"profile.photo","binding_hash":"<64位小写SHA-256>"}`，恰好两键。ref只能是profile.photo；Hash必须全文匹配 `[0-9a-f]{64}`，不接受大写、尾部换行、非字符串或额外键。缺失/null表示本份不放，空对象拒绝。其他kind连photo:null也拒绝；旧材料不补字段、不改摘要。
+
+binding_hash对规范JSON `{"file":登记basename,"source_sha256":SHA256(原图全部字节)}` 做键排序、紧凑分隔和UTF-8后计算SHA-256。不绑定绝对路径/mtime；source与embedded是不同摘要，后者是允许清理元数据后的实际规范PNG字节。材料选择必须与当前档案和原图一致，不能自动填当前值、退回无图或只拿像素一致作依据。material_hash自然包含photo，选图、换绑定或去图都使旧审核失效；score.profile_hash排除photo。
+
+选图、同一替代档案贯穿所有命令、失败重建及独立页面审核的唯一操作说明在 [resume-workflow.md 第6节](resume-workflow.md#6-可选简历照片m3-2b)。纯 `material.render` 仍只返回文字content，PDF/Word通过独立不可变PhotoAsset输入放图；`material render`仍拒绝简历，不用它生成照片简历。

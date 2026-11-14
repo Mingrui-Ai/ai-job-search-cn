@@ -276,6 +276,7 @@ python -m jobsearch_cn application backup
   ```
 
   `material_hash` 是 `review.material_hash`，`profile_hash` 是当前档案的 `score.profile_hash`，`built_at` 带时区，`files` 列出这次输出的每个文件名和字节 SHA-256。
+  M3-2b照片resume-build还带可选photo，恰好binding_hash/source_sha256/embedded_sha256/width_px/height_px/policy六项，policy为png-v1；无图省略，null拒绝，message-build不接受。精确形状见 [照片契约第1节](resume-photo-contract.md#1-p3-1值与服务契约)，当前来源/完整DOCX核验步骤只在 [简历工作流第6节](resume-workflow.md#6-可选简历照片m3-2b)。已投归档仍按当时实际文件字节和原有警告口径记录，不要求当前原图存在，不因换图重写历史审核或材料快照。
 - 投出时用哪个说明文件核对：
   - 给了 `--material`：用这份材料的说明文件核对所有发出的文件。说明文件在 `resumes/<岗位id>/` 下（沟通草稿在 `messages/<岗位id>/` 下），名字是材料文件名去掉 `.json` 再加 `.build.json`，就是 `resume build`（沟通草稿是 `material render --output`）写的那个。发出的文件改了名字（例如另存为"姓名-岗位.pdf"）也照样核对。
   - 没给 `--material`：按每个发出文件自己的名字找它旁边的说明文件。`resume-<n>.<扩展名>` 找 `resume-<n>.build.json`（`greeting-<n>.txt` 找 `greeting-<n>.build.json`，邮件、内推同理），别的名字找去掉扩展名再加 `.build.json` 的那个。

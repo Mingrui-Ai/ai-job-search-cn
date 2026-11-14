@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import re
 
-from jobsearch_cn import review, schema, store
+from jobsearch_cn import review, schema, store, resume_photo
 
 MATERIAL_NAME = re.compile(r"((resume|greeting|email|referral|followup)-[1-9][0-9]{0,5})\.json")
 _HASH = re.compile(r"[0-9a-f]{64}")
@@ -51,7 +51,13 @@ def _note_errors(note, material, filename: str, expected: tuple, maker: str) -> 
     errors = []
     if not isinstance(note, dict):
         return ["build_note: must be a JSON object"]
-    schema._check_keys(note, _KEYS, "build_note", errors)
+    schema._check_keys(note, _KEYS + (("photo",) if maker == "resume build" and "photo" in note else ()), "build_note", errors)
+    selected = material.get("photo") is not None
+    if selected:
+        errors.extend(resume_photo.selection_errors(material.get("photo")))
+        errors.extend(resume_photo.note_errors(note.get("photo")))
+    elif "photo" in note:
+        errors.append("build_note.photo: photo.unselected")
     if type(note.get("schema_version")) is not int or note["schema_version"] != 1:
         errors.append("build_note.schema_version: must be 1")
     wanted_kind = "resume-build" if maker == "resume build" else "message-build"
@@ -93,11 +99,12 @@ def _note_errors(note, material, filename: str, expected: tuple, maker: str) -> 
     return errors
 
 
-def check_outputs(root, material_file: Path, material, declared_name: str) -> list:
+def check_outputs(root, material_file: Path, material, declared_name: str, *, profile_path=None) -> list:
     """Strict review check of the current material and its complete generated outputs; no writes.
 
-    This proves identity and byte consistency with the note, not rendering quality or current profile
-    facts. Submission archives intentionally retain their separate warning-only policy.
+    This proves identity and byte consistency with the note, not rendering quality. Opt-in photos
+    additionally check the explicit current profile/source and fixed DOCX structure; other current
+    profile facts are not checked here. Archives retain their separate warning-only policy.
     """
     errors = []
     named = MATERIAL_NAME.fullmatch(material_file.name)
@@ -111,6 +118,16 @@ def check_outputs(root, material_file: Path, material, declared_name: str) -> li
         errors.append("build_note.job_id: the material must name a valid job id")
     if errors:
         return errors
+    asset = None
+    if kind == "resume" and material.get("photo") is not None:
+        try:
+            data = resume_photo.load_profile(root, profile_path)
+            asset = resume_photo.prepare_photo(root, profile_path, data)
+            resume_photo.require_photo_binding(material["photo"], asset)
+        except resume_photo.ProfileInputError:
+            raise
+        except resume_photo.PhotoError as exc:
+            return [str(exc)]
     stem = named.group(1)
     folder = "resumes" if kind == "resume" else "messages"
     maker = "resume build" if kind == "resume" else "material render --output"
@@ -125,6 +142,8 @@ def check_outputs(root, material_file: Path, material, declared_name: str) -> li
     except (OSError, ValueError):
         return [f"build_note: {note_name} is unreadable or invalid JSON; rerun {maker}"]
     errors = _note_errors(note, material, material_file.name, expected, maker)
+    if asset is not None and not errors and note["photo"] != asset.note():
+        errors.append("build_note.photo: photo.note_mismatch")
     if errors:
         return errors
     hashes = {item["name"]: item["sha256"] for item in note["files"]}
@@ -133,7 +152,15 @@ def check_outputs(root, material_file: Path, material, declared_name: str) -> li
         if path is None:
             continue
         try:
-            content = path.read_bytes()
+            if asset is not None and name.endswith(".docx"):
+                # CC23/CC27: guard first, one limited read, one immutable hash/structure input.
+                with path.open("rb") as stream:
+                    content = stream.read(resume_photo.DOCX_LIMIT + 1)
+                if len(content) > resume_photo.DOCX_LIMIT:
+                    errors.append("outputs.docx.photo: photo.container_budget")
+                    continue
+            else:
+                content = path.read_bytes()
         except OSError:
             errors.append(f"outputs: cannot read {name}; rerun {maker}")
             continue
@@ -141,4 +168,11 @@ def check_outputs(root, material_file: Path, material, declared_name: str) -> li
             errors.append(f"outputs: {name} is empty; rerun {maker}")
         elif hashlib.sha256(content).hexdigest() != hashes[name]:
             errors.append(f"outputs: {name} differs from its build note; rerun {maker}")
+        elif asset is not None and name.endswith(".docx"):
+            errors.extend(resume_photo.check_docx_photo(content, asset))
+    if asset is not None:
+        try:
+            resume_photo.recheck_photo(root, profile_path, asset)
+        except resume_photo.PhotoError as exc:
+            errors.append(str(exc))
     return errors
