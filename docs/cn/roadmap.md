@@ -663,7 +663,8 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
   - 兼容：`summary` 为 `null` 时，输出和 M3-2 第二部分完全一样。V22 的冻结期望不改，按合并 #111 后的 `201475a` 对照；新行为另写测试。
   - **验收**：有简介和没有简介的材料，都能生成一页的 PDF 和 Word，两份文字一致；没有依据的简介（引用找不到、数字或技能对不上、引了 `notes.md` 但文件缺失、数字只出现在偏好记录里）被拒绝；`material validate`、`resume build`、`review draft` 对引了 `notes.md` 的材料结论一致。
 - [ ] M3-2b 简历上的照片（头像，用户 2026-10-30 提出，M3-2 之后）
-  - 2026-11-14：经理020已选受限PNG方案A；实现候选包含安全登记/材料字节绑定、PDF/Word同源生成、当前来源及受限DOCX核验。已审设计/接口见 [resume-photo-design.md](resume-photo-design.md) 和 [resume-photo-contract.md](resume-photo-contract.md)，用户流程只在 [resume-workflow.md 第6节](resume-workflow.md#6-可选简历照片m3-2b)。作者真实Typst三比例样张及PDF页面已实看，实际junction/硬链接边界已测；独立审核/留出验收待规划者安排，Word/WPS原生页面未验，保持未完成。
+  - 2026-11-14：经理020已选受限PNG方案A；实现候选包含安全登记/材料字节绑定、PDF/Word同源生成、当前来源及受限DOCX核验。已审设计/接口见 [resume-photo-design.md](resume-photo-design.md) 和 [resume-photo-contract.md](resume-photo-contract.md)，用户流程只在 [resume-workflow.md 第6节](resume-workflow.md#6-可选简历照片m3-2b)。作者真实Typst三比例样张及PDF页面已实看，实际junction/硬链接边界已测；独立工程审核完成，无确认P1/P2，保留1项非阻塞P3：相对junction数据根与相对缺失档案路径的退出码1/预期2诊断差异，无不安全读取或假通过。独立66个PNG用例、47种DOCX变异及4份PDF实页已验；主要探针/页面实际运行在9ddfef2，末次补充探针在77dfa，1590个Git路径对象字节相同。Word/WPS原生页面及2项无法建立的Windows symlink未验，完整照片/用户验收保持未完成。
+  - P3 后续最小修正：缺失档案路径回退中的 `parent`/`root` 统一使用 absolute 词法路径；保留显式选定根可以是 junction 与后代链接拒绝规则，另作修正及回归验证。
   - 照片放在 `data/profile/` 下，只在本机，不进 git；档案里记照片的文件名；生成时由用户决定放不放，默认不放。
   - PDF：模板 `resume-header` 的 `profile-image` 参数（放在页头右上角）；Typst 只读得到 `--root` 内的文件，编译前把照片复制到临时编译目录。Word 版：标准库写图片部件和定位。
   - **验收**：放和不放两种都有测试（用合成的图片）；照片不出现在任何会被提交或公开的地方。
