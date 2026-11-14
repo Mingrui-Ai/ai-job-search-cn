@@ -38,6 +38,10 @@ class Page(HTMLParser):
 class ReportData(Data):
     def setUp(self):
         super().setUp()
+        # Fixture writes validate reminder dates against the business clock too.
+        self.business_day = mock.patch.object(applications, "_today", return_value=NOW.date())
+        self.business_day.start()
+        self.addCleanup(self.business_day.stop)
         self.clock = mock.patch.object(dashboard, "_now", return_value=NOW)
         self.clock.start()
         self.addCleanup(self.clock.stop)
