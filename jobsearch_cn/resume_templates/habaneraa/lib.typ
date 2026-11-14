@@ -77,33 +77,17 @@
     // 生成联系方式内容（纯文本，不用图标字体）
     let contacts = (telephone, wechat-id, email, github-id, other-link, location).filter(item => item != "")
 
-    // 右上角图像
+    // 照片采用占位两列；正文从较高的一列之后开始（CN M3-2b）。
     if profile-image != none {
-      let header-height = 3em + 2.1em * element-spaciness
-      if basic-info.len() > 0 {
-        header-height += 1em + 0.5em * element-spaciness
-      }
-      context {
-        let target-height = measure(block(height: header-height)[]).height
-        let image-size = measure(profile-image)
-        let scale-factor = if image-size.height == 0pt {
-          100%
-        } else {
-          ((target-height / 1pt) / (image-size.height / 1pt)) * 100%
-        }
-
-        place(
-          top + right,
-          dx: -0.5em,
-          scale(
-            x: scale-factor,
-            y: scale-factor,
-            origin: top + right,
-            profile-image,
-          ),
-        )
-      }
-    }
+      grid(columns: (1fr, 25mm), column-gutter: 3mm, align: (left + horizon, right + horizon),
+        block(width: 100%, inset: 0.5em, {
+          text(font: sans-serif-font, weight: 700, 2.0em, author)
+          linebreak()
+          v(0.2em * element-spaciness)
+          if basic-info.len() > 0 { basic-info.join(separator); linebreak() }
+          contacts.join(separator)
+        }), profile-image)
+    } else {
     // 标题和基础信息
     block(
       height: auto,
@@ -120,6 +104,7 @@
         contacts.join(separator)
       },
     )
+    }
 
     body
   }

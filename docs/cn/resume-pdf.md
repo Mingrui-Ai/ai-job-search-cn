@@ -100,6 +100,12 @@ python -m jobsearch_cn resume build data/materials/<岗位id>/resume-1.json [--p
 
 部首和私用区是直接读 PDF 字体的 ToUnicode 映射查的，只用标准库。`pdftotext` 会把部首折回正常汉字，所以不能靠它查；`pypdf` 能读出原样，但它是可选依赖。
 
+## 可选照片与页面边界
+
+照片版仍由 `resume build` 同时生成PDF和Word。选图/绑定/档案参数只按 [resume-workflow.md 第6节](resume-workflow.md#6-可选简历照片m3-2b)；没有任意图片路径的build参数。两份使用同一规范PNG，最大25×32 mm、右列间隔3 mm，完整等比包含并为文字预留空间。无图分支保持旧布局。照片版先在受控目录生成和检查两份、发布前重查来源，再逐文件原子替换，最后原子写说明；不是跨三文件事务，途中失败不报告成功，旧说明与新产物不符时当前审核拒绝。
+
+PDF机器一页、作者/审核者实看PDF、实际Word/WPS版本页数分别记录。Word没有分页引擎，XML/媒体相同和文本对照不能保证一页；没有原生Word/WPS实看不能宣称完整照片验收。PDF生产链和最终摘要没有独立提取图像逐像素证明的能力。真实含照片页面由用户本机确认，不能自动上传模型或外部查看服务。
+
 ## CI 上的真实渲染
 
 工作流 `.github/workflows/cn-resume-pdf.yml` 的任务 "Resume PDF real render (Linux)" 在 Ubuntu 上跑 `tests/test_cn_resume_pdf.py`，真的编译 PDF 再检查，而不是跳过：

@@ -21,6 +21,7 @@ import zlib
 from pathlib import Path
 
 from . import resume_extract
+from . import resume_photo
 
 TYPST_ENV = "JOBSEARCH_CN_TYPST"
 MIN_TYPST = (0, 13)  # the compiler habaneraa's typst.toml declares
@@ -112,6 +113,8 @@ def _compile(folder: Path, typst: str, fonts: dict, spaciness: float) -> bytes:
                "--package-path", str(folder / "no-packages"), "--package-cache-path", str(folder / "no-packages"),
                "--input", f"spaciness={spaciness}", "--input", f"serif={fonts['serif']}",
                "--input", f"sans={fonts['sans']}", str(folder / "main.typ"), str(out)]
+    if (folder / "photo.json").is_file():
+        command[2:2] = ["--input", "photo=true"]
     try:
         result = _run(command, _COMPILE_TIMEOUT)
     except (OSError, subprocess.TimeoutExpired):
@@ -176,7 +179,7 @@ def os_reason(exc: OSError) -> str:
     return f"[WinError {winerror}] {reason}" if winerror else reason
 
 
-def render(content: dict, output: Path, typst: str | None = None) -> dict:
+def render(content: dict, output: Path, typst: str | None = None, *, photo: resume_photo.PhotoAsset | None = None) -> dict:
     """Write content to output as a one-page PDF; nothing is written when it does not fit.
     A folder or file that cannot be made is a ResumeError, said without its path."""
     program = find_typst(typst)
@@ -184,7 +187,20 @@ def render(content: dict, output: Path, typst: str | None = None) -> dict:
     try:
         with tempfile.TemporaryDirectory(prefix="jobsearch-cn-resume-") as temp:
             folder = _build_folder(temp, content)
-            spaciness, data = _fit(lambda value: _compile(folder, program, fonts, value))
+            if photo is not None:
+                (folder / photo.asset_name).write_bytes(photo.embedded_bytes)
+                cx, cy = resume_photo.dimensions_emu(photo.width_px, photo.height_px)
+                (folder / 'photo.json').write_text(json.dumps({'width_emu': cx, 'height_emu': cy}), encoding='utf-8')
+
+            def compile_at(value):
+                if photo is not None and (folder / photo.asset_name).read_bytes() != photo.embedded_bytes:
+                    raise ResumeError('photo: photo.copy_changed')
+                result = _compile(folder, program, fonts, value)
+                if photo is not None and (folder / photo.asset_name).read_bytes() != photo.embedded_bytes:
+                    raise ResumeError('photo: photo.copy_changed')
+                return result
+
+            spaciness, data = _fit(compile_at)
     except OSError as exc:
         raise ResumeError(f"临时目录里建不了编译用的文件夹（{os_reason(exc)}）；可能是沙盒或权限不让写系统临时目录，"
                           "Codex 的情况见 docs/cn/resume-workflow.md 第 2 节") from None

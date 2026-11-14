@@ -155,7 +155,9 @@ def validate(material, profile: dict, vocabulary, job: dict = None, notes: str =
     if not isinstance(material, dict):
         return ["material: must be a JSON object"], []
     errors, warnings = [], []
-    profile_mod._keys(material, TOP_LEVEL_KEYS, "", errors)
+    profile_mod._keys(material, TOP_LEVEL_KEYS, "", errors, optional=("photo",))
+    from . import resume_photo
+    errors.extend(resume_photo.selection_errors(material.get("photo")))
     if material.get("schema_version") != MATERIAL_VERSION or isinstance(material.get("schema_version"), bool):
         errors.append(f"schema_version: must be {MATERIAL_VERSION}")
     if material.get("kind") not in KINDS:

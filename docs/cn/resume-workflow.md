@@ -101,3 +101,17 @@
    - 字数；最后一轮审核的摘要（`python -m jobsearch_cn review show <审核结果> --data-dir data`，与 render 使用同一数据目录）；没采纳的建议和理由；是不是自审。
    - 邮件要附的简历：那份简历 `resume build` 输出的 PDF 路径，由用户自己附，优先 PDF。
    - 不自动发送：不调邮件客户端，不打开招聘网站，不往剪贴板写，不联网。
+
+## 6. 可选简历照片（M3-2b）
+
+默认不放照片。Profile登记照片不等于用户为这份材料选图；Material缺失或null `photo` 时不打开、检查或复制照片文件，旧JSON、无图输出和外部 `--profile` 用法保持。只支持静态8-bit RGB/RGBA、非交错PNG，原文件≤5 MiB、每边1–4096、总像素≤4,000,000；JPEG、APNG、EXIF、ICC和其他未支持色彩配置明确拒绝。用户须在本机将像素转正并另存受支持PNG；工具不旋转、裁剪、美化或修改原图。精确格式和预算见 [已审设计](resume-photo-design.md#4-建议的路径格式与元数据边界)及[接口契约](resume-photo-contract.md)。
+
+1. **登记与选择。** 用户主动提供并确认登记时转[cn-setup](profile-setup.md)，照片和照片版档案必须在本次数据根的 `profile/` 内，为普通文件，子路径不能是链接/junction或可识别硬链接。登记名只能是安全basename，不是任意路径；照片放本机非同步、非git跟踪目录。cn-resume不写Profile。用户明确为本份简历选择放图后，运行 `python -m jobsearch_cn profile validate "<D>/profile/alternate.json" --photo --data-dir "<D>"`。这只读检查，成功输出安全photo描述，不回显原名、原路径或元数据内容；不要在对话打开或上传真实照片。
+2. **绑定材料。** 从成功结果原样取 `binding_hash`，在 `resume-<n>.json` 写 `photo:{"ref":"profile.photo","binding_hash":"<64位小写SHA-256>"}`；缺失/null表示不放。绑定包含登记basename和原图全部字节，不能用规范副本摘要、mtime或自行猜值代替。其他材料kind连 `photo:null` 也不接受。字段定义见 [material.md 第9节](material.md#9-简历照片选择m3-2b)。
+3. **同一档案贯穿生成。** 对同一D和选定档案运行 `material validate`、`resume build`、`review draft`，都加 `--data-dir "<D>" --profile "<D>/profile/alternate.json"`；省略档案参数只会选择D的 `profile/profile.json`，不会按材料位置猜。显式档案不存在、越界或绑定不符就失败，不退回默认档案或无图。两个输出使用同一不可变规范PNG字节；允许文字/DPI元数据经CRC检查后去除，原图保留。照片区最大25×32 mm，右侧留3 mm间隔，等比完整包含，不缩字号或丢图凑一页。失败后先重新生成，不能手改产物或说明摘要。
+4. **独立审核。** 仍按第2节另开上下文，派活附相同D、档案参数、材料、build输出及选择说明。审核者不重建文件；独立运行相同参数的 `profile validate --photo`、`material validate` 和 `review draft`，核对材料绑定、build note全部六项photo值和输出SHA。最终 `review validate/show` 也传同一 `--data-dir/--profile`：照片分支核对当前来源、完整产物摘要和DOCX固定六部件、内部关系、实际图片引用、媒体字节及EMU尺寸；只读检查末尾再查来源。来源不可用或产物被替换，show不展示通过结论。
+5. **页面与交付。** 按D5看实际生成PDF；PDF机器页数和来源摘要不能代替看图，也没有从PDF独立提取照片逐像素证明。用原生Word/WPS打开同一DOCX，记录实际版本、页数、完整图像比例/方向和无重叠；XML或文本对照不能证明Word一页。真实含照片页面由用户本机实看；会上传给模型/外部服务的页面工具不自动使用。缺查看能力明确“未目检/未完成照片页面验收”，交用户本机确认。仍按第3节两轮规则处理，材料/照片变更后重新生成再审，不使用无图样张替代照片验收。
+
+同名换字节（包括只换允许移除的元数据）、删除、登记名改变或换成链接，当前照片材料与审核均失效；必须由用户重新确认选图、取绑定、更新材料、生成并重审。仅mtime变化或整个数据根等内容搬家不改变绑定。去掉Material.photo会改变material_hash并使旧审核失效，重新生成后才是无图材料。历史已投归档保留当时字节和事实，不要求旧原图仍存在，也不重写历史结论。
+
+评分的profile_hash排除photo，选图不重评岗位。followup和interview既有完整Profile摘要包含photo：登记字段新增/改名会保守使它们的当前上下文过期；单改原图字节而Profile未变不影响这两个摘要。按各自流程重新取上下文，不修改历史快照。原图、规范副本与导出仍是个人数据；移除元数据不等于匿名化。临时副本随正常/异常退出清理，不能承诺系统崩溃后的安全擦除或检查点后阻止本机并发修改。
