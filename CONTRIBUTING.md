@@ -1,5 +1,7 @@
 # Contributing
 
+本仓库的中文扩展贡献请先读 [AI Job Search CN 贡献指南](docs/cn/contributing.md)。以下保留上游模板的贡献政策，适用于向 `ai-job-search-dev/ai-job-search` 贡献。
+
 Thanks for considering a contribution! This repo has a deliberate, narrow philosophy, and most declined PRs are well-executed work that simply didn't know about it. Read this first; it will save you effort and tell you where your work will land best.
 
 ## The one rule everything follows from

@@ -262,23 +262,18 @@ ai-job-search-cn/
 | 文档 | 内容 |
 | --- | --- |
 | [docs/cn/README.md](docs/cn/README.md) | 开发者入口：文档索引、开发环境、常用命令、分支约定 |
+| [architecture.md](docs/cn/architecture.md) | 当前 CN 实现：命令到代码的索引、本地数据、校验和可选依赖 |
+| [contributing.md](docs/cn/contributing.md) | CN 贡献指南：开发环境、隔离复现、检查、PR 与审核 |
 | [roadmap.md](docs/cn/roadmap.md) | 完整计划：目标、里程碑、每一步的交付与验收、风险 |
 | [worklog.md](docs/cn/worklog.md) | 工作记录：每一步做了什么、验证结果、遗留问题；2026-10-28 起每条一个文件，放在 `docs/cn/worklog/` |
-| [cn-migration-plan.md](docs/cn/cn-migration-plan.md) | 上游审计结论与架构决策（ADR-1 至 ADR-9） |
+| [cn-migration-plan.md](docs/cn/cn-migration-plan.md) | 上游审计结论与架构决策（ADR） |
 | [job-schema.md](docs/cn/job-schema.md) | 岗位记录格式：字段说明、出处规则、与上游字段的对应 |
 | [jd-parse.md](docs/cn/jd-parse.md) | `jd parse` 的用法、编码处理、识别规则、防注入说明 |
 | [baseline-report.md](docs/cn/baseline-report.md) | 开发基线、已知问题与 Windows 兼容性记录 |
 
 ## 参与开发
 
-```bash
-python tools/lint_skills.py
-python tools/security_guards.py
-python -m unittest discover -s tests -t .                       # 全部测试
-python -m unittest discover -s tests -t . -p "test_cn_*.py" -v  # 只跑 CN 测试
-```
-
-每一步在 `feat/cn-*` 分支开发并开 PR，合并前以上检查都要通过，并在 `docs/cn/worklog/` 新建一条[工作记录](docs/cn/worklog.md)。提交信息沿用 Conventional Commits，例如 `feat(cn): add Chinese JD import`。更多约定见 [docs/cn/README.md](docs/cn/README.md) 和 [AGENTS.md](AGENTS.md)。
+从 [CN 贡献指南](docs/cn/contributing.md)开始：确认任务范围、准备开发环境、在独立工作树修改并验证，再向 `Mingrui-Ai/ai-job-search-cn` 的 `master` 提 PR。代码定位见[架构索引](docs/cn/architecture.md)，任务与验收标准见[路线图](docs/cn/roadmap.md)。
 
 ## 致谢与许可
 
