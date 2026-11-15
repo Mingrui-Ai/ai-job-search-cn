@@ -5,6 +5,7 @@
 - 在 `master@7287f5c`、Windows / Python 3.13.12 下复现 `OlderPython.test_the_reparse_attribute_finds_a_junction` 失败：删除 `Path.is_junction` 后，父类 `PathBase` 的同名方法仍存在，测试在模拟旧版 API 的断言处提前失败。
 - 模拟时遍历整个继承链，移除每处定义，并为每处注册恢复操作，使测试能实际走到文件属性的 junction 检测。
 - Windows CI 扩展为 Python 3.13 / 3.14 两项，覆盖此次实际失败的版本。
+- 已提交 [PR #177](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/177)。
 
 ## 决策
 
@@ -27,4 +28,4 @@
 
 ## 下一步
 
-- 提交维护者独立审核，核对新增的 Windows 3.13 CI 结果。
+- 等待维护者独立审核；线上验证结果附在 PR 的验证说明中。
