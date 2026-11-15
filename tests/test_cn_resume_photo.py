@@ -283,14 +283,56 @@ class Workflow(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(value, ensure_ascii=False), encoding='utf-8')
 
-    def call(self, *args, alternate=True):
-        argv = [*map(str, args), '--data-dir', str(self.root)]
+    def call(self, *args, alternate=True, root=None, profile_path=None):
+        argv = [*map(str, args), '--data-dir', str(self.root if root is None else root)]
         if alternate:
-            argv += ['--profile', str(self.profile_path)]
+            argv += ['--profile', str(self.profile_path if profile_path is None else profile_path)]
         out, err = io.StringIO(), io.StringIO()
         with redirect_stdout(out), redirect_stderr(err):
             code = cli.main(argv)
         return code, out.getvalue(), err.getvalue()
+
+    def directory_link(self, path, target):
+        if os.name == 'nt':
+            quote = lambda value: "'" + str(value).replace("'", "''") + "'"
+            command = 'New-Item -ItemType Junction -Path ' + quote(path) + ' -Target ' + quote(target) + ' -ErrorAction Stop | Out-Null'
+            run = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', command],
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+            if run.returncode:
+                self.fail('Windows junction creation failed; do not treat this fixture as passed')
+            self.addCleanup(os.rmdir, path)  # remove only the junction, before the temporary root
+        else:
+            path.symlink_to(target, target_is_directory=True)
+            self.addCleanup(path.unlink)
+        self.assertTrue(p.store._is_link(path))
+
+    @staticmethod
+    def profile_path_forms(root, path):
+        return ((selected_root, selected_path)
+                for selected_root in (root, root.relative_to(Path.cwd()))
+                for selected_path in (path, path.relative_to(Path.cwd())))
+
+    def assert_profile_path_error(self, root, path, error_type, code, diagnostic):
+        with self.subTest(root=str(root), path=str(path), command='load_profile'):
+            with mock.patch.object(Path, 'open', side_effect=AssertionError('invalid profile read entered')):
+                with self.assertRaises(p.PhotoError) as caught:
+                    p.load_profile(root, path)
+            self.assertIs(type(caught.exception), error_type)
+            self.assertEqual(str(caught.exception), diagnostic)
+        material_path = root / self.material_path.relative_to(self.root)
+        review_path = root / self.review_path.relative_to(self.root)
+        for args in (('profile', 'validate', path, '--photo'),
+                     ('material', 'validate', material_path), ('resume', 'build', material_path),
+                     ('review', 'draft', material_path), ('review', 'validate', review_path),
+                     ('review', 'show', review_path)):
+            with self.subTest(root=str(root), path=str(path), command=args[:2]):
+                result = self.call(*args, alternate=args[0] != 'profile', root=root, profile_path=path)
+                self.assertEqual(result[0], code, result)
+                self.assertIn(diagnostic, result[1] + result[2])
+                self.assertNotIn(str(self.root), result[1] + result[2])
+                if code == 2:
+                    self.assertEqual(result[1], '')
+                    self.assertEqual(json.loads(result[2]), {'error': diagnostic})
 
     def check(self):
         return build_notes.check_outputs(self.root, self.material_path, self.record, 'resume-1.json',
@@ -393,35 +435,60 @@ class Workflow(unittest.TestCase):
         chosen_root.symlink_to(self.root, target_is_directory=True)
         self.assertEqual(p.prepare_photo(chosen_root, chosen_root / 'profile/alternate.json', self.profile), self.asset)
 
+    def test_missing_profiles_keep_input_errors_for_plain_and_linked_roots(self):
+        selected = self.root / 'selected-root'
+        self.directory_link(selected, self.root)
+        self.addCleanup(os.chdir, Path.cwd())
+        os.chdir(self.root.parent)
+        for root in (self.root, selected):
+            for selected_root, path in self.profile_path_forms(root, root / 'profile/alternate.json'):
+                with self.subTest(root=str(selected_root), path=str(path), existing=True):
+                    self.assertEqual(p.load_profile(selected_root, path), self.profile)
+                    self.assertEqual(p.prepare_photo(selected_root, path, self.profile), self.asset)
+            for missing in ('profile/missing.json', 'profile/missing-parent/missing.json'):
+                for selected_root, path in self.profile_path_forms(root, root / missing):
+                    self.assert_profile_path_error(selected_root, path, p.ProfileInputError, 2,
+                                                   'photo: photo.profile_unreadable')
+
+    def test_missing_profile_below_descendant_link_keeps_boundary_error(self):
+        nested = self.root / 'profile/nested'
+        self.directory_link(nested, self.root / 'profile')
+        selected = self.root / 'selected-root'
+        self.directory_link(selected, self.root)
+        self.addCleanup(os.chdir, Path.cwd())
+        os.chdir(self.root.parent)
+        for root in (self.root, selected):
+            for selected_root, path in self.profile_path_forms(root, root / 'profile/nested/missing.json'):
+                self.assert_profile_path_error(selected_root, path, p.PhotoError, 1,
+                                               'photo: photo.profile_outside_root')
+
+    def test_missing_profile_with_parent_traversal_keeps_boundary_error(self):
+        self.addCleanup(os.chdir, Path.cwd())
+        os.chdir(self.root.parent)
+        path = self.root / 'profile/../profile/missing.json'
+        for selected_root, selected_path in self.profile_path_forms(self.root, path):
+            self.assert_profile_path_error(selected_root, selected_path, p.PhotoError, 1,
+                                           'photo: photo.profile_outside_root')
+
     @unittest.skipUnless(os.name == 'nt', 'Windows junction fixture')
     def test_actual_junction_descendants_refused_and_chosen_root_allowed(self):
-        def junction(path, target):
-            quote = lambda value: "'" + str(value).replace("'", "''") + "'"
-            command = 'New-Item -ItemType Junction -Path ' + quote(path) + ' -Target ' + quote(target) + ' | Out-Null'
-            run = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', command],
-                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
-            if run.returncode:
-                self.fail('Windows junction creation failed; do not treat this fixture as passed')
-            self.addCleanup(os.rmdir, path)  # removes only the exact junction, never traverses its target
-            self.assertTrue(p.store._is_link(path))
-
         child_root = self.root / 'child-root'
         child_root.mkdir()
-        junction(child_root / 'profile', self.root / 'profile')
+        self.directory_link(child_root / 'profile', self.root / 'profile')
         with mock.patch.object(Path, 'open', side_effect=AssertionError('junction read entered')):
             with self.assertRaises(p.PhotoError):
                 p.load_profile(child_root, child_root / 'profile/alternate.json')
             with self.assertRaises(p.PhotoError):
                 p.prepare_photo(child_root, child_root / 'profile/alternate.json', self.profile)
         nested = self.root / 'profile/nested'
-        junction(nested, self.root / 'profile')
+        self.directory_link(nested, self.root / 'profile')
         with self.assertRaises(p.PhotoError):
             p.load_profile(self.root, nested / 'alternate.json')
-        junction(self.root / 'profile/directory.png', self.root / 'profile')
+        self.directory_link(self.root / 'profile/directory.png', self.root / 'profile')
         with self.assertRaises(p.PhotoError):
             p.prepare_photo(self.root, self.profile_path, {**self.profile, 'photo': {'file': 'directory.png'}})
         selected = self.root / 'selected-root'
-        junction(selected, self.root)
+        self.directory_link(selected, self.root)
         self.assertEqual(p.prepare_photo(selected, selected / 'profile/alternate.json', self.profile), self.asset)
 
     def test_docx_single_limited_read_and_path_swap_use_identical_bytes(self):
