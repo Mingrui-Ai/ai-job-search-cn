@@ -34,7 +34,7 @@ BUILTIN = Path(__file__).resolve().parent / "message_templates"
 USER_DIR = Path("templates") / "messages"
 TEMPLATE_VERSION = 1
 JOB, AVAILABILITY = "job", "availability"
-SIGNATURE = "signature"  # the email slot where the candidate's phone and email belong
+SIGNATURE = "signature"  # the email slot where private contact placeholders belong
 
 # Placeholder -> (what it reads, the ref a segment must cite to use it).
 _PLACEHOLDER = re.compile(r"\{([^{}\s]*)\}")
@@ -42,7 +42,7 @@ _ENTRY_FIELDS = {"education": ("school", "major", "level"), "experience": ("name
 _AVAILABILITY_FIELDS = ("start_date", "days_per_week", "months")
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _CONTACT_ANYWHERE = ("name", "github", "website")
-_CONTACT_SIGNATURE = ("phone", "email")
+_CONTACT_SIGNATURE = ("phone", "email", "wechat")
 _LINK_PLACEHOLDER = re.compile(r"\{contact\.(?:github|website)\}")  # filled with a link
 # Contact details typed by hand rather than through a placeholder.
 _PHONE = re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")
@@ -317,11 +317,11 @@ def _resolve(name: str, profile: dict, job, entries: dict, slot: str, kind: str,
     if head == "contact":
         if field in _CONTACT_SIGNATURE:
             if kind != "email" or slot != SIGNATURE:
-                return None, None, (f"{{{name}}}: the phone and the email belong only in an email's "
+                return None, None, (f"{{{name}}}: phone, email and wechat belong only in an email's "
                                     f"{SIGNATURE} segment")
         elif field not in _CONTACT_ANYWHERE:
-            return None, None, (f"{{{name}}}: contact placeholders are {', '.join(_CONTACT_ANYWHERE)}, and phone "
-                                "and email in a signature")
+            return None, None, (f"{{{name}}}: contact placeholders are {', '.join(_CONTACT_ANYWHERE)}, and "
+                                f"{', '.join(_CONTACT_SIGNATURE)} in an email's signature")
         value = (profile.get("contact") or {}).get(field)
         if not isinstance(value, str) or not value.strip():
             return None, None, f"{{{name}}}: the profile has no contact.{field}"

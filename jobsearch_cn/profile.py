@@ -29,6 +29,8 @@ TOP_LEVEL_KEYS = (
     "skills", "experience", "awards", "certificates", "languages", "exclusions",
 )
 CONTACT_KEYS = ("name", "phone", "email", "github", "website")
+# Older v1 profiles may omit WeChat; it is still a private contact when present.
+CONTACT_OPTIONAL = ("wechat",)
 GRADUATION_KEYS = ("year", "month")
 EDUCATION_KEYS = ("level", "school", "major", "start", "end", "gpa", "rank", "courses", "source")
 AVAILABILITY_KEYS = ("start_date", "days_per_week", "months", "cities", "acceptable_cities", "remote_ok", "relocate")
@@ -76,8 +78,8 @@ def validate(profile, sources=None, groups=None) -> list[str]:
     if "schema_version" in profile and not (_is_int(profile["schema_version"])
                                             and profile["schema_version"] == PROFILE_VERSION):
         errors.append(f"schema_version: must be {PROFILE_VERSION}")
-    if _obj(profile, "contact", CONTACT_KEYS, errors, name_unknown=False):
-        for key in CONTACT_KEYS:
+    if _obj(profile, "contact", CONTACT_KEYS, errors, name_unknown=False, optional=CONTACT_OPTIONAL):
+        for key in (*CONTACT_KEYS, *CONTACT_OPTIONAL):
             _check_text(profile["contact"].get(key), f"contact.{key}", errors)
     if _obj(profile, "graduation", GRADUATION_KEYS, errors, nullable=True):
         graduation = profile["graduation"]
@@ -270,7 +272,8 @@ def redacted(profile: dict) -> dict:
     copy = {key: (value if key in TOP_LEVEL_KEYS or value is None else "***") for key, value in profile.items()}
     contact = profile.get("contact")
     if isinstance(contact, dict):
-        masked = {key: (None if contact[key] is None else "***") for key in CONTACT_KEYS if key in contact}
+        masked = {key: (None if contact[key] is None else "***")
+                  for key in (*CONTACT_KEYS, *CONTACT_OPTIONAL) if key in contact}
         if len(masked) < len(contact):
             masked["unknown_fields"] = len(contact) - len(masked)
         copy["contact"] = masked
@@ -288,7 +291,8 @@ def _keys(obj: dict, expected, path: str, errors: list, name_unknown: bool = Tru
     if name_unknown:
         errors.extend(f"{prefix}{key}: unknown field" for key in unknown)
     elif unknown:  # the name may be a contact detail typed as a key, so only the count goes out
-        errors.append(f"{path}: {len(unknown)} unknown field(s), not named here; only {', '.join(expected)} belong")
+        allowed = ", ".join((*expected, *optional))
+        errors.append(f"{path}: {len(unknown)} unknown field(s), not named here; only {allowed} belong")
 
 
 def _obj(parent: dict, key: str, expected, errors: list, nullable: bool = False, path: str = None,

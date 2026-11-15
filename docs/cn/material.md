@@ -169,7 +169,7 @@ python -m jobsearch_cn material validate data/materials/<岗位id>/resume-1.json
 | `{availability.start_date}`、`{availability.days_per_week}`、`{availability.months}` | 到岗日期（写成"2026年11月15日"）、每周天数、实习月数 | `availability` |
 | `{contact.name}` | 姓名 | 不用写 |
 | `{contact.github}`、`{contact.website}` | GitHub、个人主页（档案里写的原样）；放在 `greeting` 里会得到"招呼语里放链接"的警告 | 不用写 |
-| `{contact.phone}`、`{contact.email}` | 电话、邮箱；只能写在 `email` 的 `signature` 段 | 不用写 |
+| `{contact.phone}`、`{contact.email}`、`{contact.wechat}` | 电话、邮箱、微信号；只能写在 `email` 的 `signature` 段。微信号须先由用户确认并保存为档案的 `contact.wechat`；缺失、`null` 或空白时拒绝生成，不猜测、不自动加入模板 | 不用写 |
 
 ### 7.2 模板和方向
 
@@ -213,7 +213,7 @@ python -m jobsearch_cn material template <岗位id> --kind greeting|email|referr
 - `refs` 找不到，或者引了 `job`，岗位库里却没有这个岗位；用了占位符，却没在本段的 `refs` 里引用它所属的条目；占位符不在上表里或取不到值；电话、邮箱的占位符写在了 `email` 的 `signature` 段以外；
 - 代入以后文字里还有 `{` 或 `}`：手写的 `{ 回复 }`、`{{edu-1.school}}`，或者档案、岗位库里的值本身带花括号；
 - **编了数字或技能**：规则同第 4 节，对照本段所引条目的原文。引了 `job` 时原文加上岗位名和公司名。`availability` 不给任何数字作依据：到岗信息里的数按下一条逐项核对，日期 2026-12-07 里的 12 不能当成 12 个月。技能只认档案里的：岗位要求的技能，哪怕写在岗位名里，也不算候选人会。占位符代入的值不查数字和技能；
-- 手写了联系方式：手机号、邮箱（应该用 `{contact.phone}`、`{contact.email}`，写在 `email` 的 `signature` 段），以及"微信""vx""wx""WeChat""QQ"后面跟着的号码或 ID（"微信号：li_ming_2024""加微信 shili_handle""QQ：123456789"）。档案里没有微信号，所以哪一段都不能写；"微信小程序"这类说法不算；
+- 手写了联系方式：手机号、邮箱，以及"微信""vx""wx""WeChat""QQ"后面跟着的号码或 ID（"微信号：li_ming_2024""加微信 shili_handle""QQ：123456789"）。电话、邮箱和微信号应分别用 `{contact.phone}`、`{contact.email}`、`{contact.wechat}`，只写在 `email` 的 `signature` 段；即使手写值与档案相同也不通过。QQ 号仍无支持的占位符；"微信小程序"这类说法不算；
 - **到岗承诺**和档案对不上。按句子看（逗号、句号等分开的一句），每种承诺只和档案里对应的那一项比：
   - 每周天数："每周""一周"后面几个字以内的"N 天"（"每周可以到岗 4 天""一周能来两天"），或者写成"N 天/周"，是每周天数，只和 `availability.days_per_week` 比；"每周""一周"本身不算天数。"周一至周五"这类写法和"到岗""实习"写在一句里时也算每周天数，要改写成天数。
   - 实习时长：句子里有"实习""到岗""入职"等词时，"N 个月"、"N 年"是实习时长，只和 `availability.months` 比，N 年按 12N 个月算。"实习了""实习期间""实习的 3 个月里"说的是做过的实习，不算；"三天内""两个月后"说的是什么时候，也不算天数、月数。
