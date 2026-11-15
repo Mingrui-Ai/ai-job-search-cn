@@ -37,7 +37,7 @@
 | 原则 | 具体做法 |
 | --- | --- |
 | **本地运行，自带 Agent** | 不托管服务，不提供模型 API。你用自己的 Codex 或 Claude Code（自己的订阅或 API Key），模型调用都发生在你的 Agent 里 |
-| **数据不出本机** | 导入的 JD、岗位库、个人档案都放在 `data/`，日志放在 `logs/`，两者都已被 `.gitignore` 忽略 |
+| **资料在本地保存** | 导入的 JD、岗位库、个人档案都放在 `data/`，日志放在 `logs/`，两者都已被 `.gitignore` 忽略。Agent 读取的内容如何发送给模型服务，取决于你选用的 Agent 和模型配置 |
 | **不编造** | 每个从 JD 读出的值都要附原文出处，出处在原文里找不到就过不了校验；读不准的字段留空（`null`），不猜 |
 | **JD 是数据，不是指令** | 每份 JD 先过防注入检查，中英文的注入句式都会被标出来交给你查看 |
 | **对外发送先确认** | 投递、消息、邮件一律由你确认后再发（可以批量确认），不做未经确认的批量投递 |
@@ -50,17 +50,30 @@
 | **M1 · v0.1 中文 JD 入库** | Job Schema 与出处校验、规则解析、中文防注入、本地岗位库与去重、两个 Agent 的入口、验收测试；Codex 端实测和真实 JD 自用验收通过 | ✅ 已完成（PR #1–#5、#13、#15，2026-10-28 自用验收），版本 `v0.1.0` |
 | **M2 · v0.2 个人档案与可解释匹配** | 本地个人档案与建档流程、硬性条件过滤、技能词表按求职方向分组、可解释评分、评分报告和反馈表；真实岗位自用验收通过（验收用的岗位不在目标城市，参考价值有限） | ✅ 已完成（2026-11-04 自用验收），版本 `v0.2.0` |
 | **M3 · v0.3** | 中文简历与打招呼语 | ⏳ 进行中（功能已合并，真实验收待做） |
-| **M4 · v0.4** | 投递记录、跟进与看板 | ⏳ 进行中（投递记录已合并） |
+| **M4 · v0.4** | 投递记录、跟进草稿、复盘与离线看板 | 进行中（功能已合并，连续真实使用待验收） |
 | **M5 · v0.5** | 面试准备 | ⏳ 进行中（准备包核心、收尾及薄入口已独立审核合并，真实使用未验收） |
-| **M6 · v0.6** | 岗位发现：单链接与合规来源 | ⏳ 调研中 |
+| **M6 · v0.6** | 岗位发现：北森采集、单链接读取与批量初筛 | 部分已实现（仅已核实的本机白名单，来源扩展和总体验收未完成） |
 | **M7 · v0.7** | 一键编排与可观测 | 计划中 |
 | **M8 · v1.0** | 开源发布 | 计划中 |
 
-测试：1775 个全部通过（少数按环境跳过），CI 覆盖 Python 3.10–3.14 和 Windows。目标和每个里程碑的完成标准见[总体规划](docs/cn/master-plan.md)。完整计划见[路线图](docs/cn/roadmap.md)，每一步的过程和验证结果见[工作记录](docs/cn/worklog.md)。
+CI 运行全量测试，覆盖 Python 3.10–3.14 和 Windows，另有简历 PDF 的真实渲染检查。最新结果见 [CI](https://github.com/Mingrui-Ai/ai-job-search-cn/actions/workflows/ci.yml) 和 [CN resume PDF](https://github.com/Mingrui-Ai/ai-job-search-cn/actions/workflows/cn-resume-pdf.yml)。目标和每个里程碑的完成标准见[总体规划](docs/cn/master-plan.md)。完整计划见[路线图](docs/cn/roadmap.md)，每一步的过程和验证结果见[工作记录](docs/cn/worklog.md)。
 
 ## 现在能用什么
 
-两个命令行工具，只用 Python 标准库，完全离线，不需要安装任何依赖。
+`python -m jobsearch_cn` 提供以下已合并能力。解析、校验、匹配、存储和投递记录在本地处理；只有 `collect` 会访问招聘网站。工具不直接调用模型，资料理解、内容起草和独立审核由你自己的 Agent 完成。各项的可选依赖见[快速开始](#快速开始)。
+
+| 你要做什么 | 已有能力 | 共用流程 |
+| --- | --- | --- |
+| 整理岗位 | 中文 JD 解析、校验、入库去重；收件批次导入和初筛 | [JD 导入](docs/cn/jd-import.md)、[批量初筛](docs/cn/screen.md) |
+| 建立档案 | 从 DOCX、PDF 或问答整理可追溯的个人档案，确认后保存 | [建档](docs/cn/profile-setup.md) |
+| 判断是否合适 | 硬性条件过滤、可解释匹配、评分报告和偏好调整 | [岗位匹配](docs/cn/match.md) |
+| 准备材料 | 一页 PDF 简历及同内容 Word 版、打招呼语、投递邮件、内推请求；生成后独立审核 | [简历与沟通草稿](docs/cn/resume-workflow.md) |
+| 记录与跟进 | 投递事件、回复、跟进日期和草稿、导出备份、离线 HTML 看板 | [投递记录](docs/cn/applications.md) |
+| 复盘投递 | 结合本地投递事实与历史评分复盘，保留缺失和不确定信息 | [投递复盘](docs/cn/calibration.md) |
+| 准备面试 | 根据 JD 和档案生成带事实引用的面试准备包，经过独立审核 | [面试准备](docs/cn/interview.md) |
+| 读取公开岗位 | 本地收件导入、北森白名单租户采集及单链接读取 | [采集与来源边界](docs/cn/collect.md) |
+
+下面用最基础的 JD 解析和校验展示命令的输入与输出。
 
 ### `jd parse`：把中文 JD 变成结构化记录
 
@@ -154,7 +167,13 @@ python -m jobsearch_cn jd validate job.json
 
 ## 快速开始
 
-**环境要求**：Python 3.10 及以上、Git。CN 工具只用标准库，不需要 `pip install`。上游的简历编译、门户搜索等功能另需 Bun 和 LaTeX，见 [SETUP.md](SETUP.md)。
+**基础环境**：Python 3.10 及以上、Git。JD 解析、档案校验、规则匹配、投递记录和 DOCX 文本提取只用标准库。先运行下面的样例即可，不需要安装可选依赖。
+
+- **读取 PDF 简历**：需要 `pypdf` 或 Poppler 的 `pdftotext`，只提取文本层，不做 OCR，见[建档流程](docs/cn/profile-setup.md)。
+- **生成 PDF 和 Word 简历**：需要 Typst、中文字体，以及用于 PDF 文本检查的 `pypdf` 或 Poppler，见[简历生成](docs/cn/resume-pdf.md)。
+- **采集公开岗位**：需要可选的 Playwright Python 包和已安装的 Google Chrome，并先核实来源、配置本机白名单，见[采集文档](docs/cn/collect.md)。
+
+上游的丹麦门户 CLI 和 LaTeX 简历模板使用 Bun、LaTeX，安装方法见 [SETUP.md](SETUP.md)。
 
 ```bash
 git clone https://github.com/Mingrui-Ai/ai-job-search-cn.git
@@ -165,6 +184,8 @@ python -m jobsearch_cn jd parse tests/fixtures/cn/jd/boss_intern.txt --site boss
 ```
 
 想解析自己的 JD：把 JD 文本存成一个 `.txt` 文件（多份用一行 `===` 隔开），把文件路径传给 `jd parse`。更方便的做法是直接把 JD 粘贴给 Agent：Claude Code 用 `cn-jd-import` 技能，Codex 按 `AGENTS.md` 找到同一份[导入流程](docs/cn/jd-import.md)，会帮你解析、补全、校验并保存到本地岗位库（`jd list`、`jd show` 查询）。
+
+随后可以让 Agent 按[建档流程](docs/cn/profile-setup.md)整理你已有的简历或口述经历，再按[评分流程](docs/cn/match.md)判断已保存的岗位。决定准备投递时，进入[简历与沟通草稿流程](docs/cn/resume-workflow.md)；你实际投出后，再按[投递记录流程](docs/cn/applications.md)预览并确认记录。单独运行上面的 `jd parse` 样例只输出解析结果，不保存岗位。
 
 已保存岗位并建好档案后，可以说“帮我给这个岗位准备面试”：Codex 按 `AGENTS.md` 的面试准备指引、Claude Code 按 `cn-interview` 技能进入同一份[面试准备流程](docs/cn/interview.md)。准备包引用 JD 与安全档案事实，未知信息保留为空，经过独立审核后交付 JSON 和 Markdown；改包后重新生成再审核，不用上游 `/interview`。既有虚构样张已独立审核通过，入口的真实使用仍待验收。
 
@@ -179,7 +200,7 @@ python -m jobsearch_cn jd parse tests/fixtures/cn/jd/boss_intern.txt --site boss
 
 ### 用 DeepSeek 上手
 
-也可以用 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（`dsh`）配合你自己的 DeepSeek API Key 来用这三个工作流。dsh 会读 `AGENTS.md`，并从 `.dsh/skills/` 找到 `cn-jd-import`、`cn-setup`、`cn-match` 三个技能，它们和 Claude Code、Codex 用的是同一份流程说明（[ADR-10](docs/cn/cn-migration-plan.md#2-架构决策)）。
+也可以用 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（`dsh`）配合你自己的 DeepSeek API Key。仓库已提供 `cn-jd-import`、`cn-setup`、`cn-match`、`cn-resume`、`cn-application` 五个技能入口，它们从 `.dsh/skills/` 指向共用流程说明（[ADR-10](docs/cn/cn-migration-plan.md#2-架构决策)）。入口存在不代表各工作流已在 dsh 上通过实际验收，当前范围见下方说明和路线图。
 
 1. 安装 Node.js 24.9.0 或更高版本。
 2. 打开终端，先激活能运行 `python -m jobsearch_cn` 的 Python 环境（本项目开发用 conda 环境 `ai-job-search-cn`：`conda activate ai-job-search-cn`），再在这个终端里启动 dsh：
@@ -200,31 +221,31 @@ python -m jobsearch_cn jd parse tests/fixtures/cn/jd/boss_intern.txt --site boss
 
 ## 数据来源与合规
 
-岗位数据分三层获取，逐步放开：
+当前支持的岗位输入和读取方式：
 
-1. **你粘贴或导入 JD 文本**：适用于所有平台，是 v0.1 的主路径；
-2. **你给出单个公开岗位链接**：Agent 只读这一页，并遵守 robots.txt（v0.3）；
-3. **逐个核实过的公司官网和招聘系统**（如 Moka、飞书招聘、各大厂校招官网）：只在你触发时低频访问（v0.3）。接入前必须确认三点：用户协议不禁止，不登录就能公开访问，不需要绕过任何防爬措施。
+1. **你粘贴或导入 JD 文本**：由本地命令解析、校验和保存；符合[收件格式](docs/cn/screen.md)的 JSON 也可以批量导入和初筛。
+2. **北森招聘门户**：内置 `collect beisen`，支持批量读取和 `--url` 单详情读取，仅访问你逐家核实后放进本机白名单的租户。不会自动发现新租户，具体设置见[采集文档](docs/cn/collect.md)。
+3. **新增来源**：接入前逐个核对用户协议和 robots，确认免登录即可公开访问、无需绕过防护。来源接入与真实可用性仍按 M6 验收，见[路线图](docs/cn/roadmap.md#8-m6--v06-岗位发现)。
 
 工具没有自己的账号体系，**不索取、不保存、不使用**你在招聘平台的账号密码或 Cookie。
 
 **不做的事**：破解验证码、伪装浏览器指纹、逆向平台加密参数、未经确认的批量投递、托管服务或提供模型 API。
 
-招聘平台站内的自动操作（例如在 BOSS 直聘上自动打招呼）违反平台用户协议，可能导致账号受限。是否使用由你自己决定，项目最多在核心流程跑通后提供一个默认关闭的个人模块，并设置真人节奏、每日上限、发送前确认、遇到验证码即停等护栏。
+协议禁止的站点适配器、插件和专用操作说明不在公开仓库提供。公开框架只保留默认关闭的通用本地模块入口，不联网寻找或安装模块；当前来源决定和配置方式见[采集文档](docs/cn/collect.md)与[ADR-9](docs/cn/cn-migration-plan.md#2-架构决策)。
 
 ## 项目结构
 
 ```text
 ai-job-search-cn/
-├── jobsearch_cn/            # CN 核心包：只用标准库、离线、输出 JSON
+├── jobsearch_cn/            # CN 命令：本地数据处理、可选岗位采集，输出 JSON
 │   ├── cli.py               #   命令行入口（python -m jobsearch_cn）
 │   ├── schema.py            #   Job Schema v1 与出处校验
 │   ├── jd_parser.py         #   中文 JD 规则抽取
 │   └── guard.py             #   防注入：上游 posting_guard + 中文句式
-├── tests/test_cn_*.py       # CN 测试（含"不联网、不引第三方库"的边界守卫）
+├── tests/test_cn_*.py       # CN 测试（含依赖、联网和个人数据的边界守卫）
 ├── tests/fixtures/cn/jd/    # 5 份脱敏样例 JD（BOSS、实习僧、牛客、官网、社招）
 ├── docs/cn/                 # 中文文档：路线图、工作记录、架构决策、格式说明
-├── .dsh/skills/             # DeepSeek Harness 的三个技能入口（只指向 docs/cn/ 的流程说明）
+├── .dsh/skills/             # DeepSeek Harness 的薄入口（只指向 docs/cn/ 的流程说明）
 ├── data/  logs/             # 本地数据与日志，不进 git，按需创建
 └── ……                       # 上游原有结构：.claude/、tools/、cv/、cover_letters/ 等
 ```
