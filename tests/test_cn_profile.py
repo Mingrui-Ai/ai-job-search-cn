@@ -354,7 +354,7 @@ class Validate(unittest.TestCase):
         # Codex B on #86: the error repeated a phone number or email typed as a field name.
         data = with_value(self.example, "contact", {"canary@example.com": "13900001111", **self.example["contact"]})
         errors = profile.validate(data)
-        self.assertIn("contact: 1 unknown field(s), not named here; only name, phone, email, github, website belong",
+        self.assertIn("contact: 1 unknown field(s), not named here; only name, phone, email, github, website, wechat belong",
                       errors)
         self.assertNotIn("canary@example.com", " ".join(errors))
         self.assert_error(dict(self.example, hobbies=[]), "hobbies: unknown field")  # elsewhere names still help

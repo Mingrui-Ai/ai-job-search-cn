@@ -59,7 +59,7 @@
     }
   ],
   "contact_errors": {
-    "reason": "手写了微信号、QQ 号这类联系方式；材料里不写，电话和邮箱用 {contact.phone}、{contact.email} 写在邮件的 signature 段",
+    "reason": "手写了微信号、QQ 号这类联系方式；电话、邮箱和微信号用 {contact.phone}、{contact.email}、{contact.wechat} 写在邮件的 signature 段，QQ 号仍不支持",
     "patterns": [
       "(?:微信|威信|[vV]信|(?<![A-Za-z])(?:[vVwW][xX]|[wW]ei[xX]in|[wW]e[cC]hat)(?![A-Za-z]))\\s*(?:号|ID|id|Id)?\\s*(?:[:：]|是|为)\\s*(?:[A-Za-z][-_A-Za-z0-9]{5,19}(?![-_A-Za-z0-9])|\\d{5,12}(?!\\d))",
       "(?:微信|威信|[vV]信|(?<![A-Za-z])(?:[vVwW][xX]|[wW]ei[xX]in|[wW]e[cC]hat)(?![A-Za-z]))\\s*(?:号|ID|id|Id)\\s*(?:[A-Za-z][-_A-Za-z0-9]{5,19}(?![-_A-Za-z0-9])|\\d{5,12}(?!\\d))",

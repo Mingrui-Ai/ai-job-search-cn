@@ -28,7 +28,7 @@ data/profile/
 ```json
 {
   "schema_version": 1,
-  "contact": {"name": "张三", "phone": "13800000000", "email": "a@example.com", "github": null, "website": null},
+  "contact": {"name": "张三", "phone": "13800000000", "email": "a@example.com", "github": null, "website": null, "wechat": null},
   "graduation": {"year": 2027, "month": 6},
   "education": [
     {"level": "master", "school": "某大学", "major": "计算机技术", "start": "2025-09", "end": "2027-06",
@@ -75,7 +75,8 @@ data/profile/
 
 | 字段 | 说明 |
 | --- | --- |
-| `contact` | 写简历用。只存在本地；除简历外，任何输出（日志、报告、Agent 汇总）都不应复制它 |
+| `contact` | 写用户选择的简历和邮件签名用。只存在本地；日志、报告、Agent 汇总不应复制它 |
+| `contact.wechat` | 可选的微信号，`null` 或非空字符串，沿用联系方式的 200 字符上限。旧版 v1 档案可以省略，不需要迁移；原来该字段会被当成未知字段拒绝。只填写用户确认的值，不从手机号推断。默认 `profile show` 隐去它；邮件签名可以用 `{contact.wechat}` 引用（[material.md §7.1](material.md#71-字段)），不自动加入已有邮件或 PDF/Word 简历，不参与岗位评分 |
 | `graduation` | 毕业年月。与 JD 的 `requirements.graduation.years` 比较 |
 | `education[]` | `level` 取值同 Job Schema：`associate` / `bachelor` / `master` / `phd`。最高学历用于和 JD 的 `requirements.education.min` 比较 |
 | `availability` | 可到岗日期、每周天数、可实习月数、意向城市、是否接受远程、是否愿意去其他城市。分别对应 JD 的 `days_per_week`、`min_months`、`cities`、`remote`，可到岗日期对应 `requirements.start`，意向城市（两档）也用来判断面试要不要出行。意向城市分两档：`cities` 是首选城市，`acceptable_cities` 是可以接受、但不是首选的城市（M2-6b），两者不能重复；硬性条件里两档都算意向城市，评分的地点维度首选记 100、可以接受记 60。`relocate` 指是否愿意去这两档以外的城市。写了意向城市时，`remote_ok`、`relocate` 也要写，留空会影响两档以外的岗位：硬性条件的地点检查可能判"未知"（另一项已经写明能远程或愿意搬家时，仍可能判符合）；评分时，`relocate` 没写，这类岗位的地点分是 0（JD 可远程、你接受远程的除外，这时是 100 分）。`profile validate` 会给出警告。`interview_travel` 是愿不愿意去意向城市以外的地方面试（M2-6f）：`true` 愿意，`false` 暂时不去，`null` 没说；可以不写这个键，不写按 null。写了 `false` 时，JD 只写了到意向城市以外现场面试、没有线上选项的岗位，面试一项判"未知"，提示投之前先问能不能线上面试；`true` 或 null 时照旧判符合，附上路费和时间成本的提示（见 [match.md](match.md#各项条件)）。`remote_unstated_as_conflict` 是"JD 没写能否远程时按不能远程算"的开关（M2-5 第二轮，经理意见书-007）：`true` 打开，`false` 或 `null` 关闭，可以不写，不写按关闭。打开后，岗位城市不在两档意向城市内、`relocate` 为 `false`、JD 又没写能否远程时，地点一项判"冲突"（原因写"JD 未写明可远程，按你的设置视为不符合"），不再判"未知"；关闭时照旧 |
