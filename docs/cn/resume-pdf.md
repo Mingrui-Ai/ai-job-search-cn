@@ -106,6 +106,8 @@ python -m jobsearch_cn resume build data/materials/<岗位id>/resume-1.json [--p
 
 PDF机器一页、作者/审核者实看PDF、实际Word/WPS版本页数分别记录。Word没有分页引擎，XML/媒体相同和文本对照不能保证一页；没有原生Word/WPS实看不能宣称完整照片验收。PDF生产链和最终摘要没有独立提取图像逐像素证明的能力。真实含照片页面由用户本机确认，不能自动上传模型或外部查看服务。
 
+2026-11-15 已补 Windows 11 / Microsoft Word 16.0.20527.20196 的原生分页检查：无图、竖图、横图、方图长抬头及密集正文五份虚构样例均为一页，编辑副本保存后重新打开也通过文字和图片检查。Word 原生导出的页面已逐页查看，方法、样例与范围见[本次工作记录](worklog/2026-11-15-m3-2b-word-native-check.md)。这份证据只覆盖该版本与这些样例；WPS 和真实用户材料仍未验，Word 的通用分页承诺不变。
+
 ## CI 上的真实渲染
 
 工作流 `.github/workflows/cn-resume-pdf.yml` 的任务 "Resume PDF real render (Linux)" 在 Ubuntu 上跑 `tests/test_cn_resume_pdf.py`，真的编译 PDF 再检查，而不是跳过：
