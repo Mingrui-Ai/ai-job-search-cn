@@ -24,8 +24,10 @@ class TriageRepoFixture(unittest.TestCase):
     """
 
     def setUp(self):
-        self.root = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
+        # Also remove read-only Git objects on Windows.
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
 
         (self.root / "tools").mkdir()
         shutil.copy(SCRIPT, self.root / "tools" / "upstream_triage.py")

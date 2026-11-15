@@ -30,8 +30,10 @@ class GuardRepoFixture(unittest.TestCase):
     """
 
     def setUp(self):
-        self.root = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
+        # Subclasses also create read-only Git objects on Windows.
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
 
         (self.root / "tools").mkdir()
         shutil.copy(GUARD_SCRIPT, self.root / "tools" / "security_guards.py")
