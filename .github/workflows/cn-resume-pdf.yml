@@ -39,10 +39,10 @@ jobs:
       NOTO_SANS_SC_SHA256: d68bafcb48a2707749396aa12bbbd833cb70401f3a9a689fd2902c7e0d295964
       NOTO_SERIF_SC_SHA256: 5326cfb097e3ab26fcb39329752b5c0a439bf8d5c4649520e4b492939c352a09
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
       - name: Install pypdf (one test compares the PDF's font maps with its reading)
