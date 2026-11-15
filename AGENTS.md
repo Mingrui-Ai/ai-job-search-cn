@@ -26,7 +26,7 @@ To prevent duplication and configuration drift across different AI agent framewo
 
 - 工具同时兼容 Codex 和 Claude Code：确定性逻辑做成 `python -m jobsearch_cn` 子命令（输出 JSON），Agent 层只做薄入口；CN 工作流说明只写一份，另一端引用它。
 - 本项目不提供模型 API：用户使用自己的 Codex / Claude 订阅或 API Key。工具代码不直接调用模型，也不读取、不保存任何密钥。
-- CN 解析、规则、存储：`jobsearch_cn/` 包（仅标准库、离线、确定性），测试放 `tests/test_cn_*.py`。
+- CN 解析、规则、存储：`jobsearch_cn/` 包（默认仅标准库、离线、确定性），测试放 `tests/test_cn_*.py`。可选采集的限定例外见 [ADR-4](docs/cn/cn-migration-plan.md#2-架构决策)。
 - `.agents/skills/` 只放符合 `/add-portal` 契约的招聘门户适配器——`/scrape` 会把这里的每个 `SKILL.md` 都当作门户调用，本地导入类工具不能放进去。
 - 必须修改上游文件时保持最小 diff，并在 `docs/cn/` 记录原因。本段落追加在上游 `AGENTS.md` 末尾，`framework_version` 保持与上游一致，以便 `tools/check_upstream_updates.py` 正确提示上游更新。
 - 仅在仓库开发任务中，每完成一步（通常对应一个 PR），在 `docs/cn/worklog/` 下新建一个文件写工作记录：做了什么、关键决策、验证结果、遗留问题、下一步。文件名和格式见 `docs/cn/worklog.md` 开头；不要再往 `docs/cn/worklog.md` 里追加。本地求职工作流按各自说明保存任务产物，不创建开发工作记录。

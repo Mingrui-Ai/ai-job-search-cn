@@ -1,4 +1,4 @@
-# 2026-11-15 · M8-4：README 与已合并能力对齐
+# 2026-11-15 · M8-4：入口文档与已合并能力对齐
 
 PR：[#179](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/179)。
 
@@ -9,20 +9,23 @@ PR：[#179](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/179)。
 - 来源说明改为当前已有的北森本机白名单与单链接路径，删除尚未接入来源的可用性暗示；按既有 ADR-9 说明公开框架与本地个人模块的边界。
 - “数据不出本机”改为准确的本地存储说明，补充 Agent 与所选模型服务之间的数据处理取决于运行时配置；更新实际已有的五个 dsh 入口，继续保留真实验收限制。
 - 移除固定的旧测试数量，改为当前 CI 结果入口；更新 M4、M6 的工程进度描述，未把真实使用或整个里程碑标为完成。
+- 同步 AGENTS 的 CN 段落、目录说明和路线图工程约定，引用 ADR-4 已有的可选采集例外；中文文档索引补充北森白名单与单链接，开发环境说明区分基础 CLI、开发检查和简历生成依赖，移除过时的安装排期。
 
 ## 决策
 
 - 本项只维护已合并能力的入口说明，不新增功能线，不把待审的照片或微信字段当作已发布能力。
 - 详细步骤继续以 `docs/cn/` 共用流程为准，README 提供能力概览、依赖和入口，不复制全部工作流。
-- 上游英文 README 的折叠区保持原内容，修改只在中文介绍区；不修改现有技能、权限或工具实现。
+- 上游英文 README 的折叠区、AGENTS 的上游段落与 `framework_version` 保持原内容；CN 边界引用既有 ADR-4，不修改现有技能、权限或工具实现。
 
 ## 验证
 
 - Python 3.14.9 使用 `-S` 禁用第三方包加载后，CLI 帮助与 JD 样例解析均成功；样例记录与原 README 的 JSON 节选一致。
-- 核对中文 README 中 51 处本地链接及其锚点、5 个 dsh 技能到共用流程的指针，均有效；规范化换行后，上游英文折叠区与基线内容完全一致。
-- `tests.test_readme_assets`、`tests.test_onboarding_privacy`、`tests.test_cn_package` 共 17 项通过；技能 lint、安全守卫和 framework version 检查通过。
-- Windows / Python 3.14.9 基础解释器完整回归：`python -m unittest discover -s tests -t . -v` 共 2285 项，2256 项通过、29 项因环境或仅上游适用而跳过，耗时 546.183 秒。
-- 本次完整回归留下 36 个临时 Git 残片目录与 9 个 JSON，符合主线已知问题（修复在 #178 单独审核）；确认无链接、无有效 Git HEAD、无文件占用后已清理。
+- 核对中文 README、AGENTS 的 CN 段落、中文文档索引和本次工程约定变动中的 105 处本地引用及锚点，均有效。
+- 规范化换行后，上游英文 README 折叠区、AGENTS 上游段落和版号、既有架构决策均与基线相同；五个 dsh 入口继续指向共用流程。
+- `tests.test_readme_assets`、`tests.test_onboarding_privacy`、`tests.test_cn_package` 共 17 项通过；技能 lint 和安全守卫通过。
+- 以 `origin/master` 为基线运行 `check_framework_version.py` 时，整文件守卫只报告 AGENTS 未升版。CN 开发约定要求保留上游 `framework_version`，既有 CI 也只在上游仓库运行该项；本次以保留上游段落和版号的逐字比较核对 CN 文案变动，不改版号或守卫实现。
+- Windows / Python 3.14.9 基础解释器完整回归：`python -m unittest discover -s tests -t . -v` 共 2285 项，2256 项通过、29 项因环境或仅上游适用而跳过，耗时 595.213 秒。
+- 主线已知的测试临时残留仍在 #178 单独修复；本次的 36 个 Git 残片目录与 9 个 JSON 经路径、链接、Git HEAD 和占用检查后已清理。
 - 修改文件按 UTF-8 读取无误，无 U+FFFD 替换字符；`git diff --check` 通过。
 
 ## 遗留

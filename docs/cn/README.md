@@ -2,7 +2,7 @@
 
 面向中国互联网招聘市场的多 Agent 求职系统，基于上游 [ai-job-search-dev/ai-job-search](https://github.com/ai-job-search-dev/ai-job-search) 增量开发。MVP 闭环为：**导入中文 JD → 结构化提取 → 个人档案匹配 → 中文简历生成与审核 → 岗位状态保存**。
 
-本项目是本地工具：不托管服务、不提供模型 API，用户使用自己的 Codex 或 Claude Code（自带订阅或 API Key）；工具同时兼容这两个 Agent；个人档案只存在本地。
+本项目是本地工具：不托管服务、不提供模型 API，用户使用自己的 Codex 或 Claude Code（自带订阅或 API Key）；工具同时兼容这两个 Agent；个人档案在本地保存。Agent 读取的内容如何发送给模型服务，取决于所选 Agent 和模型配置。
 
 ## 文档索引
 
@@ -15,7 +15,7 @@
 | [cn-migration-plan.md](cn-migration-plan.md) | 上游审计结论、架构决策（ADR）、目录结构、上游同步流程 |
 | [job-schema.md](job-schema.md) | 岗位记录格式（Job Schema v1）：字段说明、出处规则、与上游字段的对应 |
 | [jd-import.md](jd-import.md) | JD 导入工作流（Codex 与 Claude Code 共用）：解析、补全、校验、保存、去重、查询 |
-| [collect.md](collect.md) | 通用采集框架、默认关闭的本地个人模块入口、通用收件导入 |
+| [collect.md](collect.md) | 北森本机白名单采集、单链接读取、通用收件导入，以及默认关闭的本地个人模块入口 |
 | [profile.md](profile.md) | 个人档案格式（Profile v1）：字段、来源规则、与 JD 硬性条件的对照 |
 | [profile-setup.md](profile-setup.md) | 建档工作流 cn-setup（Codex 与 Claude Code 共用） |
 | [material.md](material.md) | 求职材料格式：简历引用与检查；打招呼语、邮件、内推及跟进正文 followup 的格式、模板、来源绑定和 `material template/validate/render`；跟进共享流程在 applications.md 第 17 节 |
@@ -41,15 +41,17 @@
 
 ## 开发环境（Windows）
 
+基础 CLI 环境及按需依赖见[根 README 的快速开始](../../README.md#快速开始)。下面是已有 Conda 环境的启动示例，仓库路径按本机调整。
+
 ```powershell
-conda activate ai-job-search-cn          # Python 3.12；Anaconda base 是 3.9，版本不够
+conda activate ai-job-search-cn          # 使用 Python 3.10 及以上的环境
 cd D:\06_Projects\ai-job-search\cn
 codex                                    # 或 claude；要从已激活环境的终端启动
 ```
 
-- 用 `python`，不要用 `python3`：本机的 `python3` 是微软商店占位程序。
-- Bun 通过 winget 安装；如果提示找不到 `bun`，重开终端即可。
-- LaTeX 第二周再装。
+- `python --version` 应为 3.10 及以上；以下命令使用已激活环境中的 `python`。
+- 技能 lint 需要 PyYAML；Excel 集成测试使用 `openpyxl==3.1.5`，与 [CI](../../.github/workflows/ci.yml) 的依赖保持一致。
+- CN 简历生成使用 Typst，安装与字体见 [resume-pdf.md](resume-pdf.md)。上游门户 CLI 和 LaTeX 模板的 Bun、LaTeX 依赖见 [SETUP.md](../../SETUP.md)。
 
 ## 常用命令
 
@@ -75,7 +77,7 @@ python -m jobsearch_cn resume sample                 # 用固定的虚构内容�
 python -m jobsearch_cn material validate resume-1.json   # 对照个人档案检查一份简历材料（docs/cn/material.md）
 python -m jobsearch_cn material template <id> --kind greeting   # 打招呼语、邮件、内推请求：按方向选模板（material.md 第 7 节）
 python -m jobsearch_cn material render greeting-1.json   # 检查通过后输出可以直接复制的文字；只生成，不发送
-python -m jobsearch_cn resume build resume-1.json    # 从检查过的材料生成一页 PDF 和 Word 版，写到 data/resumes/<岗位id>/
+python -m jobsearch_cn resume build resume-1.json    # 生成一页 PDF 及同内容 Word 版，写到 data/resumes/<岗位id>/
 python -m jobsearch_cn application list              # 投递记录；先 --preview 再带 --request-id 写入（docs/cn/applications.md）
 python -m jobsearch_cn application report            # 新建离线投递看板 HTML；只写报告文件，不写事件
 python -m jobsearch_cn profile validate              # 校验 data/profile/ 下的个人档案；profile show 查看（隐去联系方式）
