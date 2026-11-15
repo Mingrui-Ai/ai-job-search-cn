@@ -6,6 +6,7 @@
 - 框架版本、上游更新、上游分流和安全守卫的四个测试基类改用 `tempfile.TemporaryDirectory()`，创建后立即通过 `addCleanup(directory.cleanup)` 注册清理，随后取目录路径。跨引用测试随继承关系得到相同修复。
 - 岗位键审计的两个临时文件入口在创建文件后、序列化之前注册 `Path.unlink` 清理；文件仍在启动 CLI 前关闭，兼容 Windows 文件共享规则。
 - 原有 CLI、Git 历史构造和业务断言保持原样。
+- 已提交 [PR #178](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/178)。
 
 ## 决策
 
