@@ -5,6 +5,7 @@
 - 在未修改的 `master@7287f5c` 上复现：Windows / CPython 3.14.9 虚拟环境运行 `ProcessTree.test_the_child_waits_for_the_job_even_when_the_parent_is_slow`，耗时 4.743 秒，超过原有 4 秒断言。
 - 沿 H25b 的既有要求修复 PDF 提取进程树；本项独立于微信签名支持。
 - 增加两项真实 venv 与 `profile extract` CLI 的回归，确认后代已启动、超时后无法继续写入，且虚拟环境中独有的 PDF 后端仍能读取；同步建档说明和 H25b 路线图条目。
+- 已提交 [PR #176](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/176)。
 
 ## 决策
 
@@ -25,4 +26,4 @@
 
 ## 下一步
 
-- 提交维护者独立审核，并核对 CI 的 Windows 与各 Python 版本结果。
+- 等待维护者独立审核；线上验证结果附在 PR 的验证说明中。
