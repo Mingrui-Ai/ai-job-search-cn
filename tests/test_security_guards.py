@@ -639,8 +639,9 @@ class GitignorePatternBehaviorTests(unittest.TestCase):
     """
 
     def setUp(self):
-        self.root = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
         subprocess.run(
             ["git", "init", "-q", str(self.root)], check=True, capture_output=True
         )

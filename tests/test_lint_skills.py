@@ -21,8 +21,9 @@ def run_linter(root: Path) -> subprocess.CompletedProcess:
 
 class LinterRepoFixture(unittest.TestCase):
     def setUp(self):
-        self.root = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
 
         tools = self.root / "tools"
         tools.mkdir()

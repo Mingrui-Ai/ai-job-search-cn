@@ -22,8 +22,9 @@ def inbox_json(job_id: str, **fields) -> str:
 
 class InboxImportTest(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, self.tmp, True)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.tmp = Path(directory.name)
         self.clips = self.tmp / "Downloads" / inbox.CLIP_FOLDER
         self.clips.mkdir(parents=True)
         self.data = self.tmp / "data"
@@ -128,8 +129,9 @@ class NextCommandTest(unittest.TestCase):
     """The next command is run as printed, by a shell, the way an agent or the user would run it."""
 
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, self.tmp, True)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.tmp = Path(directory.name)
         self.clips = self.tmp / "clips"
         self.clips.mkdir()
         self.other = self.data_folder("other data")
