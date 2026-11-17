@@ -11,7 +11,6 @@ SSH-administrator posting is flagged with the line quoted, not rejected.
 import contextlib
 import io
 import json
-import shutil
 import sys
 import tempfile
 import unittest

@@ -109,8 +109,9 @@ class OlderPython(LinkCase):
     def without_is_junction(self):
         # Python 3.13 also defines this on PathBase: deleting only Path's method
         # exposes the inherited one, so it no longer models Python before 3.12.
-        # #177 review (P3-1): _is_link asks the instance, so walk the instance's own
-        # class chain (WindowsPath and PureWindowsPath come before Path), not Path's.
+        # #177 review (P3-1): _is_link asks the instance, so walk the instance's own class
+        # chain, not Path's. On Windows under Python 3.12 that chain is WindowsPath, Path,
+        # PureWindowsPath, PurePath; Path's own leaves out WindowsPath and PureWindowsPath.
         for owner in type(self.root).__mro__:
             if "is_junction" in vars(owner):
                 saved = vars(owner)["is_junction"]

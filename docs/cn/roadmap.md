@@ -75,6 +75,13 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 - [ ] #177 备注：新增的 `Python tool tests (Windows, Python 3.13)` CI 任务目前不是必需检查，它失败不会挡合并；要不要加入分支保护由维护者决定。
 - [ ] #180 未验 1：Dependency review 的实际扫描一直被跳过：仓库没开 Dependency graph，探测返回 404，升级前的运行也是同样被跳过。已确认的只有运行器能下载固定的提交、它声明 `node24`、`fail-on-severity` 输入还在。
 - [ ] #180 未验 2：`upstream-watch.yml` 升级后还没有在定时或手工触发下实际运行过，包括写 issue 的步骤。
+- [ ] #176 未验：`virtualenv`、Microsoft Store 版 Python、符号链接方式的 venv、python.org 安装版上的 venv 没有验证，只是按标准库同样的做法推断；Job Object 无法建立时的退路（该 PR 没有改动）和真实的 pypdf / Poppler 后端也没有验证。
+- [ ] #178 备注：清理不能完成时（例如用例结束时还有文件句柄没关），现在的表现是用例多出一条 `PermissionError` 报错并留下目录，改动前是不报错。各轮运行中没有出现，记在这里方便以后识别。
+- [ ] #183 遗留：CI 里 LaTeX 任务的 `container:` 镜像（`texlive/texlive:latest`、`debian:bookworm`）只有标签、没有固定摘要，也不在守卫范围内。该任务只读、不留凭据、不用机密，`latest` 是有意跟随最新版本；要不要固定摘要需要单独决定。
+- [x] #183 P2-1：工作流检查只取 `.github/workflows/*.yml`，`.yaml` 扩展名的工作流不受检查。（2026-11-17：两种扩展名都读，并用临时目录里的 `extra.yaml` 固定；见[工作记录](worklog/2026-11-17-review-p3-cleanup.md)）
+- [x] #183 P3-1：`uses` 数目核对失败时不指出是哪一行。（2026-11-17：改成逐行核对，报出文件名和行号；见[工作记录](worklog/2026-11-17-review-p3-cleanup.md)）
+- [ ] #183 P3-2：本地复合 Action（`.github/actions/*/action.yml`）里的 `uses:` 不在读取范围内（现在没有这类文件）；流式写法前面同一行有带引号的 `#` 时，核对会漏。
+- [x] #183 P3-3、P3-4、P3-5：工作记录没写明改到的四个上游测试文件和理由；路线图补记不全；继承链注释的顺序不对，留有不用的导入。（2026-11-17：三处都已补正；见[工作记录](worklog/2026-11-17-review-p3-cleanup.md)）
 
 ## 2. 收尾与维护
 

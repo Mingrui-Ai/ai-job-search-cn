@@ -45,9 +45,21 @@
 
 - CI 里 LaTeX 任务的容器镜像用的是标签（`texlive/texlive:latest`、`debian:bookworm`），没有固定摘要，也没有测试约束。固定摘要会让镜像不再自动更新，是否这样做需要单独决定。
 - 新检查按行读工作流，不是 YAML 解析；多行的 `uses` 值之类的写法靠数目核对兜住，不是逐一识别。
+- 本地复合 Action（`.github/actions/*/action.yml`）里的 `uses:` 不在读取范围内；仓库现在没有这类文件（#183 P3-2）。
+- 流式写法前面同一行有带引号的 `#` 时（例如 `- {name: "a # b", uses: …}`），去注释会把后面的 `uses` 一起去掉，逐行核对发现不了（#183 P3-2）。
 - pathlib 探针只在 Python 3.12 上运行；3.13、3.14 上的行为依靠 CI。
 - 这次没处理的 P3 见路线图“审核留下的 P3”一节。
 
+## 审核后修改（#183 独立审核 193abe9：P2 一条、P3 五条）
+
+- **P2-1：`.yaml` 工作流也受检查。** 原来的列表只取 `*.yml`，GitHub 同样执行 `*.yaml`。“列出工作流文件”和三项检查（固定 SHA、`persist-credentials`、`matrix.tool` 不进脚本）改成对一组文件调用的函数，列表同时取两种扩展名；真实目录和用例自己的临时目录走同一套函数。新用例在临时目录里写一个含 `uses: actions/checkout@v7` 的 `extra.yaml`，断言它被列出并被三项检查分别报出；另一个用例写固定完整 SHA 的 `extra.yaml`，断言通过。仓库的工作流目录里没有放测试文件。
+- **P3-1：数目核对失败时指出行。** 原来比较整个文件里 `uses` 一词的次数和读到的引用数，失败信息只有 `15 != 16 : ci.yml`。改成逐行比较：一行里（去掉注释后）`uses` 出现的次数多于这一行被读到的引用数，就报出文件名和行号。判定范围与原来相同，步骤名或脚本里只是提到这个词也照样报，只会多报、不会漏过。固定 SHA 的失败信息现在也是“文件:行号: 原因: 引用”的列表。
+- **P3-5。** `tests/test_cn_store_links.py` 的注释改成实际的继承链（Windows、Python 3.12 上是 `WindowsPath`、`Path`、`PureWindowsPath`、`PurePath`，打印核对过）；`tests/test_posting_guard.py` 去掉不再使用的 `import shutil`（文件里没有别处用到）。
+- **P3-3：这次改到的上游测试文件。** `tests/test_fetch_page.py`、`tests/test_lint_skills.py`、`tests/test_posting_guard.py`、`tests/test_workflow_hardening.py` 来自上游，主干历史里它们只有上游作者的提交，这个 PR 是本仓库第一次修改。前三个只换了 `setUp` 里临时目录的建立和清理（`test_posting_guard.py` 另去掉随之不用的一行导入）：原来忽略错误的 `rmtree` 会吞掉清理错误，换成 `TemporaryDirectory` 后清理失败会上报；断言和被测调用没有变化。`test_workflow_hardening.py` 是守卫扩展：它本来就遍历全部工作流，新检查接在同一处，没有另放到 `tests/test_cn_*.py`。以后同步上游时这四个文件可能需要手工合并。
+- **P3-4：路线图补全。** 补上 #176 评论里的未验项、#178 的备注和 `container:` 镜像没有固定摘要这条遗留，另记 #183 自己的各条。
+- **P3-2：只记录，不实现。** 见“遗留”里标了 #183 P3-2 的两条和路线图。
+- **验证。** 新用例先在只取 `*.yml` 的代码上运行，2 项失败；改读取范围后 `tests.test_workflow_hardening` 9 项通过。在仓库外的副本里重做审核的复现（每次复制测试文件和三个工作流，再加一个文件，运行真实的测试模块）：改动前的测试文件加 `extra.yaml`（`@v7`）仍然通过，复现了问题；改动后同一文件失败并报出 `extra.yaml:7`；固定完整 SHA 并设 `persist-credentials: false` 的 `extra.yaml` 通过；固定了 SHA 但保留凭据、把 `matrix.tool` 写进脚本、步骤名里带 `uses` 一词的各自失败并报出行号；`extra.txt` 不算工作流。第一轮的五种变异重跑后仍全部失败。改动的三个测试模块各跑 3 遍，`tools/lint_skills.py`、`tools/security_guards.py`、`git diff --check` 在提交前通过。完整回归在提交后分片运行，结果随 PR 说明给出。
+
 ## 下一步
 
-- 等待独立审核。
+- 等待对返工提交的独立审核。
