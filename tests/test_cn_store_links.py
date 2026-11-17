@@ -108,12 +108,13 @@ class OlderPython(LinkCase):
 
     def without_is_junction(self):
         import pathlib
-        owner = next((cls for cls in pathlib.Path.__mro__ if "is_junction" in vars(cls)), None)
-        if owner is None:
-            return
-        saved = vars(owner)["is_junction"]
-        delattr(owner, "is_junction")
-        self.addCleanup(setattr, owner, "is_junction", saved)
+        # Python 3.13 also defines this on PathBase: deleting only Path's method
+        # exposes the inherited one, so it no longer models Python before 3.12.
+        for owner in pathlib.Path.__mro__:
+            if "is_junction" in vars(owner):
+                saved = vars(owner)["is_junction"]
+                delattr(owner, "is_junction")
+                self.addCleanup(setattr, owner, "is_junction", saved)
 
     def test_the_reparse_attribute_finds_a_junction(self):
         self.junction(self.root / "matches", self.outside)
