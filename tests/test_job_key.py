@@ -219,6 +219,7 @@ class AuditCLI(unittest.TestCase):
         import tempfile
 
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+            self.addCleanup(Path(fh.name).unlink, missing_ok=True)
             json.dump({"seen": seen}, fh)
             path = fh.name
         proc = subprocess.run(
@@ -260,6 +261,7 @@ class AuditCLI(unittest.TestCase):
         import tempfile
 
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+            self.addCleanup(Path(fh.name).unlink, missing_ok=True)
             json.dump(document, fh)
             path = fh.name
         return subprocess.run(

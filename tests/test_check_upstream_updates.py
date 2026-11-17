@@ -32,8 +32,10 @@ FRONTMATTER = "---\nframework_version: 1.0.0\n---\n"
 
 class UpstreamCheckerRepoFixture(unittest.TestCase):
     def setUp(self):
-        self.root = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
+        # Also remove read-only Git objects on Windows.
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
 
         tools = self.root / "tools"
         tools.mkdir()
