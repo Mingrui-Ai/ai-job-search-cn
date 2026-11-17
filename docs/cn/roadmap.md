@@ -665,7 +665,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 - [ ] M3-2b 简历上的照片（头像，用户 2026-10-30 提出，M3-2 之后）
   - 2026-11-15：补齐 Word 16.0.20527.20196 的五份虚构样例原生分页与编辑保存检查；五份 Typst PDF、五份 Word 原稿导出及五份编辑副本导出共15页均已逐页查看，无图片重叠、裁切或比例异常。详见[工作记录](worklog/2026-11-15-m3-2b-word-native-check.md)。仅更新本机 Word 样例证据；WPS、真实用户材料与完整照片验收仍未完成。
   - 2026-11-14：经理020已选受限PNG方案A；实现候选包含安全登记/材料字节绑定、PDF/Word同源生成、当前来源及受限DOCX核验。已审设计/接口见 [resume-photo-design.md](resume-photo-design.md) 和 [resume-photo-contract.md](resume-photo-contract.md)，用户流程只在 [resume-workflow.md 第6节](resume-workflow.md#6-可选简历照片m3-2b)。作者真实Typst三比例样张及PDF页面已实看，实际junction/硬链接边界已测；独立工程审核完成，无确认P1/P2，保留1项非阻塞P3：相对junction数据根与相对缺失档案路径的退出码1/预期2诊断差异，无不安全读取或假通过。独立66个PNG用例、47种DOCX变异及4份PDF实页已验；主要探针/页面实际运行在9ddfef2，末次补充探针在77dfa，1590个Git路径对象字节相同。Word/WPS原生页面及2项无法建立的Windows symlink未验，完整照片/用户验收保持未完成。
-  - P3 后续最小修正：缺失档案路径回退中的 `parent`/`root` 统一使用 absolute 词法路径；保留显式选定根可以是 junction 与后代链接拒绝规则，另作修正及回归验证。
+  - P3 诊断修正（2026-11-15，待独立审核）：缺失档案路径回退中的 `parent`/`root` 已统一使用 absolute 词法路径，普通缺失档案在相对/绝对路径组合下均返回输入错误、退出 2；显式选定根可以是目录链接，后代链接及词法 `..` 仍拒绝。实现、六个 CLI 入口和边界回归见[工作记录](worklog/2026-11-15-m3-photo-profile-diagnostic.md)。
   - 照片放在 `data/profile/` 下，只在本机，不进 git；档案里记照片的文件名；生成时由用户决定放不放，默认不放。
   - PDF：模板 `resume-header` 的 `profile-image` 参数（放在页头右上角）；Typst 只读得到 `--root` 内的文件，编译前把照片复制到临时编译目录。Word 版：标准库写图片部件和定位。
   - **验收**：放和不放两种都有测试（用合成的图片）；照片不出现在任何会被提交或公开的地方。

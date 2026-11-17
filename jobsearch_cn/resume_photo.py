@@ -247,10 +247,11 @@ def load_profile(root, profile_path) -> dict:
     except PhotoError:
         # A missing in-root ordinary path is an input error, not an implicit default.
         try:
-            parts = path.absolute().relative_to(Path(root).absolute()).parts
+            absolute_root = Path(root).absolute()
+            parts = path.absolute().relative_to(absolute_root).parts
             inside = len(parts) >= 2 and parts[0] == "profile" and ".." not in parts
-            parent = path.parent
-            while parent != Path(root).absolute() and parent != parent.parent:
+            parent = path.absolute().parent
+            while parent != absolute_root and parent != parent.parent:
                 if store._is_link(parent):
                     inside = False
                 parent = parent.parent
