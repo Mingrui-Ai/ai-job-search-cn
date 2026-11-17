@@ -817,5 +817,129 @@ class Cli(unittest.TestCase):
         self.assertEqual((validated.returncode, drafted.returncode), (1, 1))
         self.assertEqual(json.loads(drafted.stderr)["errors"], json.loads(validated.stdout)["errors"])
 
+
+def fragments(value: str, size: int = 4) -> set:
+    """A value and every run of `size` characters in it: none of them may show in what a command prints."""
+    return {value} | {value[start:start + size] for start in range(len(value) - size + 1)}
+
+
+BRACE = "once filled it still has a brace"
+AS_WRITTEN = ("as written, before the placeholders are filled); write each placeholder exactly as {entry.field} "
+              "and no other braces")
+IN_A_VALUE = "which is not quoted here); fix the profile or job value that has braces in it"
+
+
+class BraceErrors(unittest.TestCase):
+    """A brace left once the placeholders are filled is reported with the text as written, where a placeholder
+    is still its name, and never with the phone, the email, the name or any other value it is filled with
+    (found by the independent review of #175). Every name, number and address here is made up."""
+
+    NAME = "欧阳明远志"
+    PHONE, ADDRESS = TECH_PROFILE["contact"]["phone"], TECH_PROFILE["contact"]["email"]
+    BRACED_TITLE = "后端开发{待定}实习生"
+
+    def setUp(self):
+        self.data = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.data)
+        (self.data / "profile").mkdir()
+        (self.data / "jobs").mkdir()
+        self.profile = copy.deepcopy(TECH_PROFILE)
+        self.profile["contact"]["name"] = self.NAME
+        self.job = copy.deepcopy(TECH_JOB)
+
+    def refused(self, record, values, count=1) -> list:
+        """The errors `material validate` and `material render` both give, with exit code 1, once neither is
+        seen to print a value a placeholder is filled with: the whole value or any 4 characters of it."""
+        for name, stored in ((Path("profile") / "profile.json", self.profile),
+                             (Path("jobs") / f"{self.job['id']}.json", self.job),
+                             (Path(f"{record['kind']}-1.json"), record)):
+            (self.data / name).write_text(json.dumps(stored, ensure_ascii=False), encoding="utf-8")
+        found = []
+        for command in ("validate", "render"):
+            result = run_cli("material", command, str(self.data / f"{record['kind']}-1.json"), data_dir=self.data)
+            printed = result.stdout + result.stderr
+            self.assertEqual(result.returncode, 1, (command, printed))
+            for value in values:
+                self.assertEqual(sorted(piece for piece in fragments(value) if piece in printed), [],
+                                 (command, printed))
+            output = json.loads(result.stdout)
+            self.assertFalse(output["valid"])
+            found.append(output["errors"])
+        self.assertEqual(found[0], found[1])
+        self.assertEqual(len(found[0]), count, found[0])
+        return found[0]
+
+    def test_a_doubled_brace_around_the_phone(self):
+        record = with_segment(EMAIL, 6, EMAIL["segments"][6]["text"] + "\n电话：{{contact.phone}}")
+        errors = self.refused(record, [self.PHONE])
+        self.assertEqual(errors, [f"segments[6].text: {BRACE} ('{{contact.email}}\\n电话：{{{{contact.phone}}}}' "
+                                  f"{AS_WRITTEN}"])
+        # review draft checks a material the same way, and prints the same errors.
+        drafted = run_cli("review", "draft", str(self.data / "email-1.json"), data_dir=self.data)
+        self.assertEqual(drafted.returncode, 1, drafted.stdout + drafted.stderr)
+        self.assertEqual(json.loads(drafted.stderr)["errors"], errors)
+        self.assertEqual([piece for piece in fragments(self.PHONE) if piece in drafted.stdout + drafted.stderr], [])
+
+    def test_a_brace_after_the_email(self):
+        record = with_segment(EMAIL, 6, "{contact.name}\n电话：{contact.phone}\n邮箱：{contact.email}}")
+        errors = self.refused(record, [self.ADDRESS])
+        self.assertEqual(errors, [f"segments[6].text: {BRACE} ('{{contact.email}}}}' {AS_WRITTEN}"])
+
+    def test_a_doubled_brace_around_the_name(self):
+        # The name may stand anywhere in a message, but the error still gives the placeholder, not the name.
+        errors = self.refused(with_segment(GREETING, 3, "期待您的回复，{{contact.name}}"), [self.NAME])
+        self.assertEqual(errors, [f"segments[3].text: {BRACE} ('期待您的回复，{{{{contact.name}}}}' {AS_WRITTEN}"])
+
+    def test_a_job_or_profile_value_with_braces_is_named_not_quoted(self):
+        self.job["title"] = self.BRACED_TITLE
+        self.assertEqual(self.refused(GREETING, [self.BRACED_TITLE]),
+                         [f"segments[0].text: {BRACE} (in the value of {{job.title}}, {IN_A_VALUE}"])
+        self.job = copy.deepcopy(TECH_JOB)
+        self.profile["education"][0]["school"] = "示例理工{筹}大学"
+        self.assertEqual(self.refused(GREETING, [self.profile["education"][0]["school"]]),
+                         [f"segments[0].text: {BRACE} (in the value of {{edu-1.school}}, {IN_A_VALUE}"])
+
+    def test_a_contact_typed_by_hand_beside_the_brace_is_not_quoted(self):
+        # A phone typed by hand is refused without being quoted; the brace beside it does not quote it either.
+        record = with_segment(EMAIL, 6, f"{{contact.name}}\n电话：{self.PHONE}}}")
+        errors = self.refused(record, [self.PHONE], count=2)
+        self.assertEqual(errors[0], f"segments[6].text: {BRACE} (not quoted, as the text also has contact details "
+                                    "typed by hand); write each placeholder exactly as {entry.field} and no other "
+                                    "braces")
+        self.assertIn("a phone number or email typed by hand", errors[1])
+
+    def test_a_brace_written_by_hand_and_one_in_a_value_are_both_told(self):
+        job = dict(TECH_JOB, title=self.BRACED_TITLE)
+        errors = errors_of(with_segment(GREETING, 3, "期待加入{{job.title}}团队。", ["job"]), job=job)
+        self.assertEqual(errors, [f"segments[0].text: {BRACE} (in the value of {{job.title}}, {IN_A_VALUE}",
+                                  f"segments[3].text: {BRACE} ('期待加入{{{{job.title}}}}' {AS_WRITTEN}",
+                                  f"segments[3].text: {BRACE} (in the value of {{job.title}}, {IN_A_VALUE}"])
+        for error in errors:
+            self.assertEqual([piece for piece in fragments(self.BRACED_TITLE) if piece in error], [])
+
+    def test_a_contact_value_with_braces_and_a_brace_in_the_subject(self):
+        data = copy.deepcopy(TECH_PROFILE)
+        data["contact"]["github"] = "github.com/{example}"
+        record = with_segment(EMAIL, 4, "我的代码都在 {contact.github}。", [], slot="fit")
+        self.assertEqual(errors_of(record, profile_data=data),
+                         [f"segments[4].text: {BRACE} (in the value of {{contact.github}}, {IN_A_VALUE}"])
+        record = copy.deepcopy(EMAIL)
+        record["subject"]["text"] = "应聘{job.title}}-{contact.name}"
+        self.assertEqual(errors_of(record),
+                         [f"subject.text: {BRACE} ('{{job.title}}}}-{{contact.name}}' {AS_WRITTEN}"])
+
+    def test_the_error_is_the_same_whatever_the_values_are(self):
+        other = copy.deepcopy(TECH_PROFILE)
+        other["contact"].update(name=self.NAME, phone="13900000000", email="ouyang@example.org")
+        other["education"][0]["school"] = "虚构科技大学"
+        for record in (with_segment(EMAIL, 6, EMAIL["segments"][6]["text"] + "\n电话：{{contact.phone}}"),
+                       with_segment(EMAIL, 6, "{contact.name}\n电话：{contact.phone}\n邮箱：{contact.email}}"),
+                       with_segment(GREETING, 3, "期待您的回复，{{contact.name}}"),
+                       with_segment(GREETING, 0, "您好，我是{{edu-1.school}}的学生。", ["edu-1"])):
+            errors = errors_of(record)
+            self.assertEqual(len(errors), 1, errors)
+            self.assertEqual(errors, errors_of(record, profile_data=other))
+
+
 if __name__ == "__main__":
     unittest.main()
