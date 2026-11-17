@@ -44,6 +44,11 @@ _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _CONTACT_ANYWHERE = ("name", "github", "website")
 _CONTACT_SIGNATURE = ("phone", "email")
 _LINK_PLACEHOLDER = re.compile(r"\{contact\.(?:github|website)\}")  # filled with a link
+# A brace left once the placeholders are filled (_Checker._braces): the error quotes the text as written, this
+# many characters on each side of the brace and a few more braces written after them, never the filled text.
+_BRACE = re.compile(r"[{}]")
+_BRACES_AFTER = re.compile(r"[{}]{0,8}")
+_NEAR = 8
 # Contact details typed by hand rather than through a placeholder.
 _PHONE = re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
@@ -433,12 +438,8 @@ class _Checker:
             return ""
         filled, needed, problems = fill(text, self.profile, self.job, self.entries, slot, self.kind, self.followup)
         self.errors.extend(f"{where}.text: {problem}" for problem in problems)
-        if not problems and ("{" in filled or "}" in filled):
-            # { 回复 } or {{edu-1.school}} written by hand, or a profile or job value with braces in it.
-            at = min(index for index in (filled.find("{"), filled.find("}")) if index >= 0)
-            self.errors.append(f"{where}.text: once filled it still has a brace ({filled[max(0, at - 8):at + 9]!r}); "
-                               "write each placeholder exactly as {entry.field} and no other braces, and fix a "
-                               "profile or job value that has braces in it")
+        if not problems and _BRACE.search(filled):
+            self._braces(text, slot, where)
         for ref in needed:
             if ref not in refs:
                 self.errors.append(f"{where}.refs: must include {ref!r}, whose placeholder the text uses")
@@ -452,6 +453,34 @@ class _Checker:
             for link in _LINK_PLACEHOLDER.findall(text):
                 self.warnings.append(f"{where}.text: {link!r} - {self.banned['greeting_warnings']['reason']}")
         return filled
+
+    def _braces(self, text: str, slot, where: str) -> None:
+        """Report the brace the filled text still has, without quoting the filled text: next to a brace it
+        holds the phone, the email or whatever else a placeholder was filled with, and an error goes to the
+        command's output and the logs.
+
+        { 回复 } or {{edu-1.school}} written by hand is quoted from the text as written, where a placeholder is
+        still its name. A profile or job value with braces in it is told by its placeholder, the value unquoted.
+        """
+        written = _PLACEHOLDER.sub(lambda match: " " * len(match.group(0)), text)  # positions stay the same
+        stray = _BRACE.search(written)
+        if stray:
+            if self._without_contacts(written) != written:
+                # A phone typed by hand is refused without being quoted (_wording); nor is it quoted here.
+                shown = "not quoted, as the text also has contact details typed by hand"
+            else:
+                shown = f"{_brace_quote(text, written, stray.start())!r} as written, before the placeholders are filled"
+            self.errors.append(f"{where}.text: once filled it still has a brace ({shown}); write each placeholder "
+                               "exactly as {entry.field} and no other braces")
+        names = dict.fromkeys(match.group(1) for match in _PLACEHOLDER.finditer(text))
+        braced = [f"{{{name}}}" for name in names if _BRACE.search(
+            _resolve(name, self.profile, self.job, self.entries, slot, self.kind, self.followup)[0] or "")]
+        if braced or not stray:
+            # A brace left is one written by hand or one in a value, so there is a placeholder to name; were
+            # there none, the error would still be given, so that no brace goes out.
+            self.errors.append(f"{where}.text: once filled it still has a brace (in the value of "
+                               f"{' and of '.join(braced) or 'a placeholder'}, which is not quoted here); fix the "
+                               "profile or job value that has braces in it")
 
     def _without_contacts(self, text: str) -> str:
         text = _EMAIL.sub(" ", _PHONE.sub(" ", text))
@@ -585,6 +614,19 @@ class _Checker:
             group = self.banned[extra]
             for hit in _hits(group, text, source):
                 self.warnings.append(f"{where}: {hit!r} - {group['reason']}")
+
+
+def _brace_quote(text: str, written: str, at: int) -> str:
+    """The text as written around its first brace that is no placeholder, at `at`; written is the text with
+    its placeholders blanked. A placeholder at either end of the quote is given whole, with the braces
+    written right after it, so that {{edu-1.school}} is not cut short."""
+    start, end = max(0, at - _NEAR), min(len(text), at + _NEAR + 1)
+    for match in _PLACEHOLDER.finditer(text):
+        if match.start() < start < match.end():
+            start = match.start()
+        if match.start() < end < match.end():
+            end = match.end()
+    return text[start:_BRACES_AFTER.match(written, end).end()]
 
 
 def _blank(text: str, spans) -> str:
