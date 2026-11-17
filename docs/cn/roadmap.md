@@ -64,12 +64,19 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 - [x] V24 P3-1（#120 裁定 2）：`resume build` 遇到 OSError 时按项目惯例输出 JSON 错误，不带 traceback 和本机临时路径。（fix/cn-m3-resume-p3：临时目录、PDF、Word、说明文件、数据目录下的文件夹，写不了都输出 `{"error": …}`、退出码 1，只写文件名和系统给的原因）
 - [x] #132 P3：`review draft` 的警告说明写得比实际宽：它并不输出 `profile_hash` 当前值的警告。（fix/cn-m3-resume-p3：改说明，不改命令，加测试固定现有行为）
 - [x] `review.resolve` 把全角数字下标当作下标（例如 `skills[０]`）。（fix/cn-m3-resume-p3：只认 ASCII 数字，全角和其他 Unicode 数字按不存在的位置报告）
+- [x] #180 P3-1：路线图里 H34 插在第 2 节开头、H1 之前，其他条目按编号升序。（2026-11-17：挪到 H33 之后，内容没改；见[工作记录](worklog/2026-11-17-review-p3-cleanup.md)）
+- [x] #180 P3-2：检查“Action 引用固定完整提交 SHA”的测试只覆盖 `upstream-watch.yml`，`ci.yml` 和 `cn-resume-pdf.yml` 没有同样的守卫。（2026-11-17：`tests/test_workflow_hardening.py` 对全部工作流的每个 `uses:` 检查；见[工作记录](worklog/2026-11-17-review-p3-cleanup.md)）
+- [x] #177 P3-1：旧版 pathlib 的模拟和前提断言看的是 `pathlib.Path` 的继承链，被测代码问的是具体子类的实例，`WindowsPath`、`PureWindowsPath` 两层不在范围内。（2026-11-17：改为遍历实例所属类的继承链，前提断言改查实例；见[工作记录](worklog/2026-11-17-review-p3-cleanup.md)）
+- [x] #178 P3-1：`tests/test_security_guards.py` 的 `GitignorePatternBehaviorTests.setUp` 仍是 `mkdtemp()` 加忽略错误的 `rmtree`，清理错误被吞。（2026-11-17：换成 `TemporaryDirectory`，另有四个测试模块的同样写法一并换；见[工作记录](worklog/2026-11-17-review-p3-cleanup.md)）
+- [ ] #176 P3-1：新的超时用例要求后代在放行后 0.8 秒内启动并写出 started 文件，很慢的机器上可能以“后代从未启动”误报失败（不会误报通过）。以后在 CI 上偶发时放宽这个时限。
+- [ ] #176 P3-2：判断“命令是不是当前解释器”只做大小写和斜杠归一，`command[0]` 写成 8.3 短路径时识别不出来，退回修复前的行为。目前唯一的调用方传的是 `sys.executable`，不受影响。
+- [ ] #176 P3-3：做法依赖 `sys._base_executable` 和 `__PYVENV_LAUNCHER__` 两个非公开接口（标准库 `multiprocessing` 用的是同一做法，属性缺失时安全退回）。升级 Python 大版本时留意。
+- [ ] #181 P3：Word 原生页面检查的页面、测试日志和虚构导出在核验后已清理，之后无法回查。以后把输入清单、页面截图或它们的摘要留在本地证据里，并把摘要写进记录。
+- [ ] #177 备注：新增的 `Python tool tests (Windows, Python 3.13)` CI 任务目前不是必需检查，它失败不会挡合并；要不要加入分支保护由维护者决定。
+- [ ] #180 未验 1：Dependency review 的实际扫描一直被跳过：仓库没开 Dependency graph，探测返回 404，升级前的运行也是同样被跳过。已确认的只有运行器能下载固定的提交、它声明 `node24`、`fail-on-severity` 输入还在。
+- [ ] #180 未验 2：`upstream-watch.yml` 升级后还没有在定时或手工触发下实际运行过，包括写 issue 的步骤。
 
 ## 2. 收尾与维护
-
-- [x] **H34** `执行` GitHub Actions 迁移到 Node.js 24（2026-11-15，Codex；[#180](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/180)）
-  - 将 checkout、setup-python 和 dependency-review-action 更新到官方声明使用 Node.js 24 的稳定发布，继续固定完整提交 SHA；核对 Linux、Windows 和两种 LaTeX 容器的实际 CI。
-  - 本项维护现有 CI；权限、触发条件、测试矩阵、凭据不持久化及上游监控只报告的约定保持原样。见[工作记录](worklog/2026-11-15-h34-node24-actions.md)。
 
 - [x] **H1** 合并 PR #3（2026-10-27）
 - [x] **H2** PR #5 改为基于 master（2026-10-27）
@@ -275,6 +282,10 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 - [x] **H33** `执行` 回归测试临时文件清理（2026-11-15，Codex；来自本机全量回归后的实际残留；PR #178）
   - 四个已复现残留的测试基类改用 `TemporaryDirectory.cleanup`，处理 Windows 只读 Git 对象；岗位键审计测试为两个 JSON 临时文件入口注册删除。创建后立即注册清理，无法恢复的清理错误照常上报。
   - **验收**：框架版本、上游更新、上游分流、跨引用、安全守卫和岗位键测试通过，专用临时目录没有残留；测试断言失败、初始化失败或 JSON 序列化失败时也能清理；完整回归及现有守卫通过。见[工作记录](worklog/2026-11-15-h33-test-temp-cleanup.md)。
+
+- [x] **H34** `执行` GitHub Actions 迁移到 Node.js 24（2026-11-15，Codex；[#180](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/180)）
+  - 将 checkout、setup-python 和 dependency-review-action 更新到官方声明使用 Node.js 24 的稳定发布，继续固定完整提交 SHA；核对 Linux、Windows 和两种 LaTeX 容器的实际 CI。
+  - 本项维护现有 CI；权限、触发条件、测试矩阵、凭据不持久化及上游监控只报告的约定保持原样。见[工作记录](worklog/2026-11-15-h34-node24-actions.md)。
 
 ## 2a. 验证者（Codex）任务
 
