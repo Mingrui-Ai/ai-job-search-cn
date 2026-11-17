@@ -18,6 +18,10 @@
 ]
 #show: resume-header.with(
   author: data.name,
+  profile-image: if sys.inputs.at("photo", default: "false") == "true" {
+    let photo = json("photo.json")
+    image("portrait.png", width: photo.width_emu / 36000 * 1mm, height: photo.height_emu / 36000 * 1mm, fit: "contain")
+  } else { none },
   basic-info: ([#data.contact #linebreak() #keep-together(data.intent)],),
 )
 

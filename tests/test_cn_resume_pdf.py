@@ -420,6 +420,27 @@ def page_texts(path: Path) -> list:
 
 @unittest.skipUnless(MISSING is None or REQUIRED, NEEDS_TOOLCHAIN)
 class RealRender(unittest.TestCase):
+    def test_photo_geometric_portrait_landscape_alpha_and_dense_header(self):
+        from tests.test_cn_resume_photo import asset, png
+        from jobsearch_cn import resume_docx, resume_photo
+        for w, h, channels in ((40, 60, 4), (80, 40, 3), (40, 40, 4)):
+            with self.subTest(width=w, height=h):
+                picture = asset(png(w, h, channels=channels))
+                content = resume_pdf.sample()
+                content['name'] = '虚构几何照片验证示例'
+                content['contact'] = 'example@example.test · https://example.test/fictional-geometric-resume-validation'
+                content['intent'] = '后端开发与数据工程实习 · 深圳及广州 · 每周至少四天 · 可连续六个月'
+                result = resume_pdf.render(content, self.output, photo=picture)
+                docx = self.output.with_suffix('.docx')
+                resume_docx.write(content, docx, photo=picture)
+                fields = resume_pdf.fields_of(content)
+                self.assertEqual(resume_pdf.page_count(self.output.read_bytes()), 1)
+                self.assertEqual(resume_pdf.check(self.output, fields), [])
+                self.assertEqual(resume_docx.check(docx, fields), [])
+                self.assertEqual(resume_docx.same_text(self.output, docx, content), [])
+                self.assertEqual(resume_photo.check_docx_photo(docx.read_bytes(), picture), [])
+                self.assertGreaterEqual(result['spaciness'], resume_pdf.TIGHTEST)
+
     @classmethod
     def setUpClass(cls):
         if MISSING:  # reached only where they are required

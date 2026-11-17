@@ -72,7 +72,7 @@ def profile_hash(profile: dict) -> str:
     record holds, without its weights, which only the total uses and the record keeps itself (M2-6d), and
     without its search/screen preferences (search_keywords, max_job_age_days). Profiles without these
     optional keys hash exactly as before they were introduced."""
-    data = {key: value for key, value in profile.items() if key != "contact"}
+    data = {key: value for key, value in profile.items() if key not in ("contact", "photo")}
     if isinstance(data.get("target"), dict):
         data["target"] = {key: value for key, value in data["target"].items()
                           if key not in ("weights", "search_keywords", "max_job_age_days")}

@@ -76,6 +76,7 @@ data/profile/
 | 字段 | 说明 |
 | --- | --- |
 | `contact` | 写简历用。只存在本地；除简历外，任何输出（日志、报告、Agent 汇总）都不应复制它 |
+| `photo` | 可选的登记照片，缺失/null表示未登记；精确结构、只读检查和安全边界见第9节。是否为某份简历放图由Material单独选择 |
 | `graduation` | 毕业年月。与 JD 的 `requirements.graduation.years` 比较 |
 | `education[]` | `level` 取值同 Job Schema：`associate` / `bachelor` / `master` / `phd`。最高学历用于和 JD 的 `requirements.education.min` 比较 |
 | `availability` | 可到岗日期、每周天数、可实习月数、意向城市、是否接受远程、是否愿意去其他城市。分别对应 JD 的 `days_per_week`、`min_months`、`cities`、`remote`，可到岗日期对应 `requirements.start`，意向城市（两档）也用来判断面试要不要出行。意向城市分两档：`cities` 是首选城市，`acceptable_cities` 是可以接受、但不是首选的城市（M2-6b），两者不能重复；硬性条件里两档都算意向城市，评分的地点维度首选记 100、可以接受记 60。`relocate` 指是否愿意去这两档以外的城市。写了意向城市时，`remote_ok`、`relocate` 也要写，留空会影响两档以外的岗位：硬性条件的地点检查可能判"未知"（另一项已经写明能远程或愿意搬家时，仍可能判符合）；评分时，`relocate` 没写，这类岗位的地点分是 0（JD 可远程、你接受远程的除外，这时是 100 分）。`profile validate` 会给出警告。`interview_travel` 是愿不愿意去意向城市以外的地方面试（M2-6f）：`true` 愿意，`false` 暂时不去，`null` 没说；可以不写这个键，不写按 null。写了 `false` 时，JD 只写了到意向城市以外现场面试、没有线上选项的岗位，面试一项判"未知"，提示投之前先问能不能线上面试；`true` 或 null 时照旧判符合，附上路费和时间成本的提示（见 [match.md](match.md#各项条件)）。`remote_unstated_as_conflict` 是"JD 没写能否远程时按不能远程算"的开关（M2-5 第二轮，经理意见书-007）：`true` 打开，`false` 或 `null` 关闭，可以不写，不写按关闭。打开后，岗位城市不在两档意向城市内、`relocate` 为 `false`、JD 又没写能否远程时，地点一项判"冲突"（原因写"JD 未写明可远程，按你的设置视为不符合"），不再判"未知"；关闭时照旧 |
@@ -172,3 +173,13 @@ JD 字段为 `null` 时结论是"未知"，不判为不符合。面试和到岗�
 - `availability.remote_unstated_as_conflict`（M2-5 第二轮，2026-11-05，经理意见书-007 第 1 条选 A）：供硬性条件的地点一项使用。和 `interview_travel` 一样可以不写，不写按关闭，已有的本地档案不用改；要打开就写 `true`。示例档案不打开。
 - `target.search_keywords`（M2-6g，2026-11-09，经理意见书-008 第 3 条）：在招聘网站上搜岗位用的关键词。和 `interview_travel` 一样可以不写，不写和 `[]` 一样，已有的本地档案不用改，`profile validate` 也不提示。档案摘要不含它（同 `target.weights`），没写这个键的档案摘要和以前完全一样，已保存的记录不会因此过期。目前只是记在档案里，采集岗位时读它是之后的事。
 - 偏好怎么改（M2-6d，2026-10-30）：评一批岗位前，Agent 问用户现在看重什么，换算成 `target.weights`，用户确认后写进档案，在 `notes.md` 的"偏好记录"记一条（见 §4 和 match.md 的评分工作流）。权重不算进匹配记录里的档案摘要，所以只改权重时，重新评分不会清空 Agent 补的经历和方向。
+
+## 9. 可选简历照片（M3-2b）
+
+Profile v1 可选 `photo`，缺失/null表示未登记，非空时恰好 `{"file":"portrait.png"}` 一个键。file是最多128字符的安全basename：拒绝空串、路径分隔、绝对/UNC/设备路径、`.`/`..`、冒号/ADS、控制字符、尾随点/空格及Windows设备名；不自动改写大小写。未知键、数组、bool或数字拒绝。不登记照片不补写null，旧档案无需迁移。
+
+普通 `profile validate` 只查photo结构，不打开图；无图材料不会因登记文件不存在而失败。默认 `profile show` 整体隐去非空photo，非法形状/未知子键也不回显；`--private`仍只供用户本机查看。
+
+`profile validate [file] --photo --data-dir D` 沿用位置参数；省略file才用D的 `profile/profile.json`。照片版只接受该D的profile内普通档案与登记图，拒绝子路径链接/junction和可识别硬链接；显式选定的数据根本身可为链接。只读成功返回 `photo` 的binding_hash/source_sha256/embedded_sha256/width_px/height_px/policy/metadata_removed七项，失败退出1并给photo:null；档案输入不可读或不是JSON退出2。不带flag不新增photo输出键。
+
+使用与登记步骤只在 [共用建档流程](profile-setup.md)及[简历工作流第6节](resume-workflow.md#6-可选简历照片m3-2b)。原图与导出是个人数据，不进git、不联网转换；格式/元数据范围见 [已审照片设计](resume-photo-design.md#4-建议的路径格式与元数据边界)。评分摘要排除photo；followup/interview完整Profile摘要的保守失效代价见共用流程。

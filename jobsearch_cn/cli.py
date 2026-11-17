@@ -12,6 +12,7 @@ import argparse
 import json
 import re
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -20,6 +21,7 @@ from jobsearch_cn import (__version__, browser, collect, jd_parser, match, mater
 from jobsearch_cn import application_report, beisen, build_notes, calibration, followups, inbox, personal, robots_policy
 from jobsearch_cn import applications as applications_mod
 from jobsearch_cn import interview, interview_files, interview_review
+from jobsearch_cn import resume_photo
 
 
 class InputError(Exception):
@@ -239,7 +241,17 @@ def _load_profile(path: Path) -> dict:
 
 def cmd_profile_validate(args) -> int:
     path, root = _profile_paths(args)
-    data = _load_profile(path)
+    photo_check = getattr(args, "photo", False)
+    if photo_check:
+        try:
+            data = resume_photo.load_profile(store.data_dir(args.data_dir), path)
+        except resume_photo.ProfileInputError as exc:
+            raise InputError(str(exc)) from None
+        except resume_photo.PhotoError as exc:
+            _emit({"valid": False, "errors": [str(exc)], "warnings": [], "photo": None})
+            return 1
+    else:
+        data = _load_profile(path)
     try:
         groups = set(vocab.load(store.data_dir(args.data_dir)).groups)
     except vocab.VocabularyError as exc:
@@ -256,7 +268,14 @@ def cmd_profile_validate(args) -> int:
             notes.read_bytes().decode("utf-8-sig")
         except UnicodeDecodeError:
             errors.append("notes.md: not UTF-8 text; save it as UTF-8")
-    _emit({"valid": not errors, "errors": errors, "warnings": warnings})
+    description = None
+    if photo_check and not errors:
+        try:
+            description = resume_photo.prepare_photo(store.data_dir(args.data_dir), path, data).description()
+        except resume_photo.PhotoError as exc:
+            errors.append(str(exc))
+    _emit({"valid": not errors, "errors": errors, "warnings": warnings,
+           **({"photo": description} if photo_check else {})})
     return 1 if errors else 0
 
 
@@ -286,10 +305,27 @@ def _stored_job(job_store: store.Store, job_id):
         raise InputError(str(exc)) from None
 
 
-def _match_profile(args):
+def _selected_profile(args):
+    return Path(args.profile) if args.profile else store.data_dir(args.data_dir) / "profile" / "profile.json"
+
+
+def _has_photo(record):
+    return isinstance(record, dict) and record.get("kind") == "resume" and record.get("photo") is not None
+
+
+def _match_profile(args, *, selected_photo=False):
     """The profile a match compares against, or None after reporting why it is unusable."""
-    path = Path(args.profile) if args.profile else store.data_dir(args.data_dir) / "profile" / "profile.json"
-    data = _load_profile(path)
+    path = _selected_profile(args)
+    if selected_photo:
+        try:
+            data = resume_photo.load_profile(store.data_dir(args.data_dir), path)
+        except resume_photo.ProfileInputError as exc:
+            raise InputError(str(exc)) from None
+        except resume_photo.PhotoError as exc:
+            _emit({"error": "photo profile is invalid", "errors": [str(exc)]}, sys.stderr)
+            return None
+    else:
+        data = _load_profile(path)
     # Structure only: whether the source files are still there does not change a match.
     errors = profile.validate(data)
     if errors:
@@ -441,7 +477,7 @@ def _recheck_followup(args, record, inputs, errors):
             errors.append(str(exc))
 
 
-def _check_material(args, record, data, job, vocabulary=None):
+def _check_material(args, record, data, job, vocabulary=None, *, photo_assets=None):
     """(errors, warnings) for a CV, with the notes.md beside the profile that its summary may cite, or for a
     greeting, email or referral against its template (messages.py, which cites no notes.md). material validate,
     material render, resume build and review draft all check through here, so they come to one verdict."""
@@ -456,7 +492,16 @@ def _check_material(args, record, data, job, vocabulary=None):
     if isinstance(record, dict) and isinstance(record.get("kind"), str) and record["kind"] not in material.KINDS:
         # A misspelled kind (greet) is neither a CV nor a message: name the kinds, not the CV fields it lacks.
         return [f"kind: must be one of {', '.join(material.KINDS + messages.KINDS)}"], []
-    return material.validate(record, data, vocabulary, job, _material_notes(args, record))
+    errors, warnings = material.validate(record, data, vocabulary, job, _material_notes(args, record))
+    if _has_photo(record) and not errors:
+        try:
+            asset = resume_photo.prepare_photo(store.data_dir(args.data_dir), _selected_profile(args), data)
+            resume_photo.require_photo_binding(record["photo"], asset)
+            if photo_assets is not None:
+                photo_assets.append(asset)
+        except resume_photo.PhotoError as exc:
+            errors.append(str(exc))
+    return errors, warnings
 
 
 def cmd_material_validate(args) -> int:
@@ -467,7 +512,7 @@ def cmd_material_validate(args) -> int:
         _emit({"valid": not errors, "errors": errors, "warnings": warnings,
                "context_status": "invalid" if errors else "current_at_check"})
         return 1 if errors else 0
-    data = _match_profile(args)
+    data = _match_profile(args, selected_photo=_has_photo(record))
     if data is None:
         return 1
     errors, warnings = _check_material(args, record, data, _material_job(args, record))
@@ -590,7 +635,7 @@ def cmd_review_draft(args) -> int:
         inputs, errors, _ = _checked_followup(args, record)
         data, job, vocabulary = (inputs.profile, inputs.job, inputs.vocabulary) if inputs else (None, None, None)
     else:
-        data = _match_profile(args)
+        data = _match_profile(args, selected_photo=_has_photo(record))
         if data is None:
             return 1
         vocabulary = _vocabulary(args)
@@ -632,7 +677,11 @@ def _checked_review(args):
         errors.extend(context_errors)
         warnings.extend(context_warnings)
     if not errors:
-        errors.extend(build_notes.check_outputs(store.data_dir(args.data_dir), material_path, target, declared))
+        try:
+            kwargs = {"profile_path": _selected_profile(args)} if _has_photo(target) else {}
+            errors.extend(build_notes.check_outputs(store.data_dir(args.data_dir), material_path, target, declared, **kwargs))
+        except resume_photo.ProfileInputError as exc:
+            raise InputError(str(exc)) from None
     _recheck_followup(args, target, inputs, errors)
     return record, errors, warnings
 
@@ -843,7 +892,7 @@ _MATERIAL_NAME = re.compile(r"(resume-[1-9][0-9]{0,5})\.json")
 _MESSAGE_NAME = re.compile(r"((?:greeting|email|referral|followup)-[1-9][0-9]{0,5})\.json")
 
 
-def _write_build_note(directory, stem: str, record: dict, data: dict, outputs, kind="resume-build"):
+def _write_build_note(directory, stem: str, record: dict, data: dict, outputs, kind="resume-build", *, photo=None):
     """<stem>.build.json beside the outputs: which material and files this build made (applications.md §12).
     resume build writes kind resume-build, material render --output kind message-build.
     With no file written it writes nothing and returns None, so an earlier note still matches its files."""
@@ -858,6 +907,12 @@ def _write_build_note(directory, stem: str, record: dict, data: dict, outputs, k
             "files": [{"name": output.name, "sha256": hashlib.sha256(output.read_bytes()).hexdigest()}
                       for output in outputs]}
     path = directory / f"{stem}.build.json"
+    if photo is not None:
+        note["photo"] = photo.note()
+        if store._is_link(path):
+            raise resume_photo.PhotoError("photo: photo.output_unavailable")
+        resume_pdf._replace(path, (json.dumps(note, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+        return path
     if path.is_symlink():
         raise InputError(f"{path} is a link; nothing is written through it")
     path.write_text(json.dumps(note, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -871,13 +926,15 @@ def cmd_resume_build(args) -> int:
                          "(docs/cn/material.md), and names the PDF and Word files after it; "
                          "message materials use material render --output")
     record = _read_material(args.file)
-    data = _match_profile(args)
+    data = _match_profile(args, selected_photo=_has_photo(record))
     if data is None:
         return 1
     if _is_message(record):
         raise InputError("resume build builds a CV; a greeting, email or referral is rendered with material render")
     vocabulary = _vocabulary(args)
-    errors, warnings = _check_material(args, record, data, _material_job(args, record), vocabulary)
+    photo_assets = []
+    errors, warnings = _check_material(args, record, data, _material_job(args, record), vocabulary,
+                                       photo_assets=photo_assets)
     if errors:
         _emit({"error": "the material is invalid; run material validate", "errors": errors}, sys.stderr)
         return 1
@@ -897,6 +954,9 @@ def cmd_resume_build(args) -> int:
         if output.is_symlink():
             raise InputError(f"{output} is a link; nothing is written through it")
     content = material.render(record, data, vocabulary)
+    if photo_assets:
+        return _build_photo_resume(args, record, data, content, photo_assets[0], directory,
+                                   named.group(1), warnings)
     try:
         result = resume_pdf.render(content, pdf, args.typst)
     except resume_pdf.ResumeError as exc:
@@ -920,6 +980,46 @@ def cmd_resume_build(args) -> int:
     result["build_note"] = None if note is None else str(note)
     _emit({**result, "problems": problems, "warnings": warnings})
     return 1 if problems else 0
+
+
+def _build_photo_resume(args, record, data, content, asset, directory, stem, warnings):
+    """Stage/check both outputs, recheck source, replace each file, then atomically publish the note.
+
+    This is not a multi-file transaction: a partial replacement is detected by the old note hashes.
+    """
+    outputs = [directory / f"{stem}.{ext}" for ext in ("pdf", "docx")]
+    note_path = directory / f"{stem}.build.json"
+    try:
+        if any(store._is_link(path) for path in (*outputs, note_path)):
+            raise resume_photo.PhotoError("photo: photo.output_unavailable")
+        with tempfile.TemporaryDirectory(prefix=".photo-build-", dir=directory) as temp:
+            pdf, docx = (Path(temp) / path.name for path in outputs)
+            result = resume_pdf.render(content, pdf, args.typst, photo=asset)
+            result.update(resume_docx.write(content, docx, photo=asset))
+            fields = resume_pdf.fields_of(content)
+            problems = resume_pdf.check(pdf, fields) + resume_docx.check(docx, fields)
+            problems += resume_docx.same_text(pdf, docx, content)
+            with docx.open("rb") as stream:
+                docx_bytes = stream.read(resume_photo.DOCX_LIMIT + 1)
+            problems += resume_photo.check_docx_photo(docx_bytes, asset)
+            if problems:
+                _emit({"valid": False, "problems": problems, "warnings": warnings})
+                return 1
+            resume_photo.recheck_photo(store.data_dir(args.data_dir), _selected_profile(args), asset)
+            resume_pdf._replace(outputs[0], pdf.read_bytes())
+            resume_pdf._replace(outputs[1], docx_bytes)
+            note = _write_build_note(directory, stem, record, data, outputs, photo=asset)
+    except (resume_photo.PhotoError, resume_pdf.ResumeError) as exc:
+        _emit({"error": str(exc)}, sys.stderr)
+        return 1
+    except OSError:
+        _emit({"error": "photo: photo.publish_failed; rebuild before review"}, sys.stderr)
+        return 1
+    if not content["name"]:
+        warnings.append("contact.name: the profile has no name, so the resume has none")
+    _emit({**result, "pdf": str(outputs[0]), "docx": str(outputs[1]), "build_note": str(note),
+           "problems": [], "warnings": warnings, "photo": asset.description()})
+    return 0
 
 
 # ---------------------------------------------------------------- application (M4-1a, docs/cn/applications.md)
@@ -1506,6 +1606,8 @@ def build_parser(adapters=None) -> argparse.ArgumentParser:
                     "输出 {\"valid\": ..., \"errors\": [...], \"warnings\": [...]}。",
     )
     prof_validate.add_argument("file", nargs="?", help="档案文件；默认为 <数据目录>/profile/profile.json")
+    prof_validate.add_argument("--photo", action="store_true", help="只读检查登记的简历照片并输出安全绑定描述；"
+                               "档案沿用位置参数，照片与档案须位于本次数据目录的 profile/ 下；不写文件")
     prof_validate.set_defaults(handler=cmd_profile_validate)
 
     prof_show = prof_commands.add_parser("show", parents=[stored], help="输出个人档案（默认隐去联系方式）",
@@ -1658,7 +1760,8 @@ def build_parser(adapters=None) -> argparse.ArgumentParser:
                                         description=summary + "，并核对当前生成说明和产物。通过时退出码 0，不通过时退出码 1。")
         sub.add_argument("file", help="审核结果文件（data/materials/<岗位id>/review-<n>-r<轮次>.json）")
         sub.add_argument("--material", help="审核的材料文件；默认为审核结果同目录下 material 字段写的文件")
-        sub.add_argument("--profile", help="仅 followup 核对当前档案；默认使用本次 --data-dir 中的档案")
+        sub.add_argument("--profile", help="followup 或含照片简历核对当前档案；省略用本次数据目录的 "
+                         "profile/profile.json；生成与审核须传同一档案，含照片时限于该目录")
         sub.set_defaults(handler=handler)
     _add_application_parser(commands, stored)
     _add_interview_parser(commands, stored)

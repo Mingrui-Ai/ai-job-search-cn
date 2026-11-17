@@ -71,8 +71,8 @@
 
 ```
 python -m jobsearch_cn review draft <材料文件> [--profile <档案>] [--data-dir <目录>]
-python -m jobsearch_cn review validate <审核结果> [--material <材料文件>] [--data-dir <目录>]
-python -m jobsearch_cn review show <审核结果> [--material <材料文件>] [--data-dir <目录>]
+python -m jobsearch_cn review validate <审核结果> [--material <材料文件>] [--profile <档案>] [--data-dir <目录>]
+python -m jobsearch_cn review show <审核结果> [--material <材料文件>] [--profile <档案>] [--data-dir <目录>]
 ```
 
 **`review draft`**：材料要先通过 `material validate`，否则退出码 1。只打印，不写文件。它只用材料检查的错误，不输出那里的警告（例如档案改过、`profile_hash` 和现在的不同），这些看 `material validate` 的输出。输出：
@@ -97,7 +97,7 @@ python -m jobsearch_cn review show <审核结果> [--material <材料文件>] [-
 
 生成说明和产物只在所选数据目录的 `resumes/<岗位id>/` 或 `messages/<岗位id>/` 中查找。目录选择沿用显式 `--data-dir` > `JOBSEARCH_CN_DATA_DIR` > 仓库默认 `data/`，不会按审核文件位置猜测，也没有跳过生成物检查的开关。简历要求同名 PDF 和 Word 完整存在，沟通草稿要求同名 txt；说明须符合现有 v1 格式、材料和种类相符、材料摘要当前、文件名逐项对应且字节摘要一致。缺失、空文件、损坏、摘要不符或不安全路径都是错误、退出码 1；审核／材料输入本身读不了仍为退出码 2。
 
-所选数据根本身可为链接；根以下的链接或 junction 均拒绝。不会按说明里声明的任意路径读取文件。仅核对文件与材料的版本和字节一致性，不重新生成、不读取当前档案、不检查版面，也不打印产物正文；`profile_hash` 只校验格式，不要求与材料保存的旧档案摘要相同。当前档案检查仍由 `material validate` 完成。旧命令写法可继续用，但没有说明或完整产物的旧审核现在会失败；需按[共享审核工作流](resume-workflow.md)重新生成，并指定与生成命令相同的数据目录。审核 JSON 和生成说明版本不变。
+所选数据根本身可为链接；根以下的链接或 junction 均拒绝。不会按说明里声明的任意路径读取文件。无照片普通简历仅核对文件与材料的版本和字节一致性，不重新生成、不读取当前档案、不检查版面，也不打印产物正文；`profile_hash` 只校验格式，不要求与材料保存的旧档案摘要相同。当前文字事实检查仍由 `material validate` 完成；照片例外见下面专节。旧命令写法可继续用，但没有说明或完整产物的旧审核现在会失败；需按[共享审核工作流](resume-workflow.md)重新生成，并指定与生成命令相同的数据目录。审核 JSON 和生成说明版本不变。
 
 **`review show`**：先做同样的检查，`pass` 和 `revise` 均要求当前生成物；不通过就输出与 validate 相同的 JSON 错误，退出码 1，不显示通过结论。通过就把审核结果显示成 Markdown，包括结论、审核方式、问题（必改在前）和覆盖表。审核者写的文字（覆盖表的要求和说明，问题的理由和建议改法，以及标题里的材料文件名和岗位 id）原样显示，里面的换行一律写成 `<br>`，所以不会拆断所在的列表项、标题或表格行；表格单元格里的竖线和反斜杠还会转义。不另存文件。
 
@@ -105,9 +105,15 @@ python -m jobsearch_cn review show <审核结果> [--material <材料文件>] [-
 
 `followup-<n>.json` 对应 `review-followup-<n>-r<轮次>.json`，kind 为 `followup-review`，coverage 为空。material_hash 自然包含材料内 context，审核/生成说明不再复制一套 application 字段。
 
-对 followup，`review draft/validate/show` 还调用与材料相同的只读上下文校验：有效投出与开放资格、事件投影、完整岗位/档案/实际模板与禁用规则。`validate/show` 直接调用也能发现来源过期，在产物检查后再复查来源；错误不展示陈旧 pass 或来源正文。使用生成时相同的 `--data-dir` 和可选 `--profile`，不按材料位置猜根目录。旧 resume/greeting/email/referral 保留上面的 #156 行为，不因新增参数开始读取当前档案或投递库。
+对 followup，`review draft/validate/show` 还调用与材料相同的只读上下文校验：有效投出与开放资格、事件投影、完整岗位/档案/实际模板与禁用规则。`validate/show` 直接调用也能发现来源过期，在产物检查后再复查来源；错误不展示陈旧 pass 或来源正文。使用生成时相同的 `--data-dir` 和可选 `--profile`，不按材料位置猜根目录。无照片resume/greeting/email/referral保留上面的 #156 行为，不因新增参数开始读取当前档案或投递库。
 
 结论截至本次本地核验；来源随后仍可能变化。不要手抄新摘要或修生成说明来复用旧审核，按 [共享跟进流程](applications.md#17-本地跟进提醒与草稿m4-2)重取来源、起草、生成并独立审核。
+
+### 照片简历的当前来源检查（M3-2b）
+
+有非空Material.photo时，`review validate/show` 的 `--profile` 必须和生成使用同一档案；省略才用本次D的 `profile/profile.json`。照片版档案限于D/profile，显式不存在/不是JSON退出2，越界/来源/预算/绑定错误退出1，不退回默认。check_outputs库接口通过keyword-only profile_path显式收档案，无图分支不读它。
+
+照片说明必须有恰好六项photo值，与当前只读准备值逐项一致。DOCX守卫后只打开一次 `read(8MiB+1)`，超限先失败，同一不可变bytes先算完整摘要，再核对固定六部件、五个受限UTF-8 XML、唯一内部图片关系、实际r:embed及两处统一EMU。核验不读取外部关系、不解压到磁盘、不修复文件；结束后再重查原图与档案。来源不可用、缺photo说明或任一产物被替换均拒绝；show不展示通过结论。精确预算/结构见 [契约第3–4节](resume-photo-contract.md#3-p3-2docx-图片结构与统一尺寸)。这些机器检查不等于D5页面已看；独立操作只在 [共用工作流第6节](resume-workflow.md#6-可选简历照片m3-2b)。
 
 ## 4. 不通过的情况
 

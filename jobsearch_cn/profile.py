@@ -70,7 +70,9 @@ def validate(profile, sources=None, groups=None) -> list[str]:
     if not isinstance(profile, dict):
         return ["profile: must be a JSON object"]
     errors: list[str] = []
-    _keys(profile, TOP_LEVEL_KEYS, "", errors)
+    _keys(profile, TOP_LEVEL_KEYS, "", errors, optional=("photo",))
+    from . import resume_photo
+    errors.extend(resume_photo.profile_errors(profile.get("photo")))
     check = _Checker(errors, sources)
 
     if "schema_version" in profile and not (_is_int(profile["schema_version"])
@@ -276,6 +278,8 @@ def redacted(profile: dict) -> dict:
         copy["contact"] = masked
     elif contact is not None:
         copy["contact"] = "***"
+    if profile.get("photo") is not None:
+        copy["photo"] = "***"
     return copy
 
 
