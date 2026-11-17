@@ -67,6 +67,10 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 
 ## 2. 收尾与维护
 
+- [x] **H34** `执行` GitHub Actions 迁移到 Node.js 24（2026-11-15，Codex；[#180](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/180)）
+  - 将 checkout、setup-python 和 dependency-review-action 更新到官方声明使用 Node.js 24 的稳定发布，继续固定完整提交 SHA；核对 Linux、Windows 和两种 LaTeX 容器的实际 CI。
+  - 本项维护现有 CI；权限、触发条件、测试矩阵、凭据不持久化及上游监控只报告的约定保持原样。见[工作记录](worklog/2026-11-15-h34-node24-actions.md)。
+
 - [x] **H1** 合并 PR #3（2026-10-27）
 - [x] **H2** PR #5 改为基于 master（2026-10-27）
 - [x] **H3** 合并 PR #5、#8（2026-10-27）
