@@ -126,8 +126,9 @@ class FetchPageFixture(unittest.TestCase):
         cls.server.server_close()
 
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.tmp = Path(directory.name)
         self.out = self.tmp / "page.html"
         self.gate_calls = []
         self._orig_gate = fetch_page.gate

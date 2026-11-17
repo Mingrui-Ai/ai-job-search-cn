@@ -39,8 +39,9 @@ DANISH = (
 
 class GuardFixture(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.tmp = Path(directory.name)
 
     def run_main(self, *argv, stdin_text=None, stdin_bytes=None):
         stdout, stderr = io.StringIO(), io.StringIO()

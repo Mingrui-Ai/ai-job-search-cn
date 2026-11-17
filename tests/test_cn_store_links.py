@@ -107,10 +107,11 @@ class OlderPython(LinkCase):
         _winapi.CreateJunction(str(target), str(path))
 
     def without_is_junction(self):
-        import pathlib
         # Python 3.13 also defines this on PathBase: deleting only Path's method
         # exposes the inherited one, so it no longer models Python before 3.12.
-        for owner in pathlib.Path.__mro__:
+        # #177 review (P3-1): _is_link asks the instance, so walk the instance's own
+        # class chain (WindowsPath and PureWindowsPath come before Path), not Path's.
+        for owner in type(self.root).__mro__:
             if "is_junction" in vars(owner):
                 saved = vars(owner)["is_junction"]
                 delattr(owner, "is_junction")
@@ -119,7 +120,7 @@ class OlderPython(LinkCase):
     def test_the_reparse_attribute_finds_a_junction(self):
         self.junction(self.root / "matches", self.outside)
         self.without_is_junction()
-        self.assertFalse(hasattr(Path, "is_junction"))
+        self.assertFalse(hasattr(self.root, "is_junction"))
         with self.assertRaisesRegex(store.StoreError, "link or junction"):
             store.MatchStore(self.root).write_draft(self.match)
         self.assert_nothing_outside()
