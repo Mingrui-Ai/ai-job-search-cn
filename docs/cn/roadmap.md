@@ -236,6 +236,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
   - 写入前核对真实路径仍在数据根内，数据目录里的链接（junction、symlink）越界时拒绝。
   - 读 DOCX 设大小、节点数、嵌套深度的上限，超限时报提取错误，不抛 traceback。
   - 读 PDF 的超时能回收整个进程树（包括 `pdftotext`）。
+  - 2026-11-15 后续（PR #176）：修复 Windows venv 启动器使实际解释器错过 Job Object 分配的问题，保留虚拟环境中的 PDF 后端；新增真实 CLI 与 venv 的后代回收回归，见[工作记录](worklog/2026-11-15-h25b-pdf-venv-timeout.md)。
   - `tools/security_guards.py` 把 `/data/` 列为必需的忽略规则（用户 2026-10-30 本人同意）。
   - **验收**：每项有测试；Codex B 用 V18 的反例复查。
 - [x] **H26** `执行` 技能词表补"统计分析"（来自 V10 #81；Codex A，PR #83，2026-10-30 合并）

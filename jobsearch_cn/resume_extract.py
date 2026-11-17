@@ -234,7 +234,18 @@ def _run_tree(command: list, timeout: float) -> subprocess.CompletedProcess:
     the child is in its Job Object (Windows) - on POSIX the new session exists from the start.
     Without a job, the go-ahead still comes; then only the child itself can be ended.
     """
-    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    spawn_command, child_env = command, None
+    base_python = getattr(sys, "_base_executable", None)
+    if (os.name == "nt" and base_python
+            and os.path.normcase(command[0]) == os.path.normcase(sys.executable)
+            and os.path.normcase(base_python) != os.path.normcase(sys.executable)):
+        # The venv redirector can start Python before job assignment, outside the job.
+        # Follow multiprocessing.popen_spawn_win32: launch Python directly but keep
+        # the venv's path configuration and packages (CPython bpo-35797).
+        spawn_command = [base_python, *command[1:]]
+        child_env = dict(os.environ, __PYVENV_LAUNCHER__=sys.executable)
+    process = subprocess.Popen(spawn_command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, env=child_env,
                                start_new_session=os.name == "posix")
     job = None
     try:
