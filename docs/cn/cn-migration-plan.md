@@ -63,7 +63,7 @@ Codex 能读取这些 Markdown 并按步骤执行，但上述机制不会自动�
 
 **ADR-4　Python 核心保持离线、仅用标准库。** 需要联网的合规来源（第 3 周）一律走 `.agents/skills/` 门户适配器，并沿用 `/add-portal` 的 robots/ToS 检查。`tests/test_cn_package.py` 守护两条约束：禁止第三方导入，禁止 `socket`、`urllib.request`、`http.client` 等网络模块。以后确实需要放宽时，改测试本身就是一次显式、可审查的决定。
 
-2026-11-09 的限定例外：`jobsearch_cn/browser.py` 仅在用户运行 `collect` 时可选导入 Playwright，驱动本机 Chrome 读取已核实来源的公开页面；其他模块和命令仍仅用标准库、离线。`tests/test_cn_package.py` 单独列出这个文件级例外。来源政策和本地个人模块按 ADR-9 执行。
+2026-11-09 的限定例外：`jobsearch_cn/browser.py` 可在用户运行 `collect` 时导入 Playwright，驱动本机 Chrome 读取已核实来源的公开页面。2026-11-18 起，用户点名北森租户和频道时，`beisen-search` 的 Python 入口 `beisen-portal` 也复用这个模块的单页读取。其他模块的依赖和网络导入约束见 `tests/test_cn_package.py`。来源政策和本地个人模块按 ADR-9 执行。
 
 **ADR-5　事实与推断分离。** Job Schema 每个结构化字段要能追溯到原文：字段值、原文证据片段、来源类型（原文抽取 / 规则推导 / 模型推断）。未知用 `null`，并保留原始 JD 全文。
 

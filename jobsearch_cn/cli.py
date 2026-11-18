@@ -18,7 +18,7 @@ from pathlib import Path
 
 from jobsearch_cn import (__version__, browser, collect, jd_parser, match, material, messages, profile, report,
                           resume_docx, resume_extract, resume_pdf, review, schema, score, screen, store, vocab)
-from jobsearch_cn import application_report, beisen, build_notes, calibration, followups, inbox, personal, robots_policy
+from jobsearch_cn import application_report, beisen, beisen_portal, build_notes, calibration, followups, inbox, personal
 from jobsearch_cn import applications as applications_mod
 from jobsearch_cn import interview, interview_files, interview_review
 from jobsearch_cn import resume_photo
@@ -1378,27 +1378,15 @@ def cmd_collect_beisen_detail(args) -> int:
 
 def _collect_single_read(run):
     try:
-        tab = browser.open_single_tab()
+        snapshot, policy, reason = browser.read_public_page(
+            run.options.url, run.site.DETAIL_READY, getattr(run.site, "CAPTURE", ()))
     except browser.BrowserUnavailable as exc:
         raise InputError(str(exc)) from None
-    reason = None
-    try:
-        if run.capture:
-            tab.capture(run.site.CAPTURE)
-        body, status, error = tab.read_robots(run.options.url)
-        policy = robots_policy.decide(run.options.url, body, status,
-                                      checked_at=collect._now().isoformat(timespec="seconds"), error=error)
+    if policy is not None:
         run.summary["robots"] = policy
-        if policy["status"] == "allowed":
-            collect.time.sleep(max(collect.random.uniform(*collect.DELAY_RANGE), policy["delay_seconds"]))
-            tab.open_single(run.options.url, run.site.DETAIL_READY)
-    except collect.BrowserError:
-        reason = "浏览器无法完成单个详情读取"
-    finally:
-        snapshot, closing_reason = tab.freeze_and_close()
     if run.summary["robots"]["status"] != "allowed":
-        return run.fail(run.summary["robots"]["reason"] or reason or closing_reason or "robots 访问许可未确认")
-    return run.finish(snapshot, fetched_at=collect._now().isoformat(timespec="seconds"), stop_reason=closing_reason or reason)
+        return run.fail(run.summary["robots"]["reason"] or reason or "robots 访问许可未确认")
+    return run.finish(snapshot, fetched_at=collect._now().isoformat(timespec="seconds"), stop_reason=reason)
 
 
 COLLECT_EXIT_CODES = ("退出码：0 读完（到了上限或没有更多结果）；2 没能开始（参数不对、没装 Playwright、启动或连不上浏览器）；"
@@ -1508,10 +1496,12 @@ def _add_interview_parser(commands, stored):
 def build_parser(adapters=None) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m jobsearch_cn",
-        description="AI Job Search CN 本地工具（离线处理用户提供的岗位数据；只有 collect 会用浏览器读取招聘网站）",
+        description="AI Job Search CN 本地工具（离线处理岗位数据；collect 和 beisen-portal 可按需读取招聘网站）",
     )
     parser.add_argument("--version", action="version", version=f"jobsearch_cn {__version__}")
     commands = parser.add_subparsers(dest="command", metavar="<command>")
+    portal = commands.add_parser("beisen-portal", help="只读北森门户的搜索和详情入口")
+    beisen_portal.add_commands(portal)
 
     stored = argparse.ArgumentParser(add_help=False)
     stored.add_argument("--data-dir", help=f"数据目录（默认为仓库下的 data/，或环境变量 {store.DATA_DIR_ENV}）")
@@ -1784,6 +1774,8 @@ def main(argv: list[str] | None = None) -> int:
         _emit({"error": str(exc)}, sys.stderr)
         return 2
     parser = build_parser(adapters)
+    if argv[:1] == ["beisen-portal"]:
+        parser.error = beisen_portal.bad_args  # argparse reports leftover options at the root
     interview_args = argv[:1] == ["interview"]
     if single or interview_args:
         def invalid_arguments(message):
@@ -1803,6 +1795,9 @@ def main(argv: list[str] | None = None) -> int:
     except interview_files.Error as exc:
         _emit({"error": {"code": exc.code, "message": exc.message}}, sys.stderr)
         return exc.exit_code
+    except beisen_portal.PortalError as exc:
+        _emit({"error": str(exc), "code": exc.code}, sys.stderr)
+        return 1
     except InputError as exc:
         _emit({"error": str(exc)}, sys.stderr)
         return 2
@@ -1812,6 +1807,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     try:
         return handler(args)
+    except beisen_portal.PortalError as exc:
+        _emit({"error": str(exc), "code": exc.code}, sys.stderr)
+        return 1
     except InputError as exc:
         _emit({"error": str(exc)}, sys.stderr)
         return 2

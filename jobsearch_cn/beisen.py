@@ -27,6 +27,7 @@ which both generations use: 4401 is 广州. Standard library only.
 import json
 import re
 import unicodedata
+from collections import Counter
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -319,6 +320,17 @@ def _day(text: str):
         return None
 
 
+def _publication_day(text):
+    """Date with an explicit publication label, in either order on the new portal."""
+    stamp = r"(20[0-9]{2}\s*[-/.年]\s*[0-9]{1,2}\s*[-/.月]\s*[0-9]{1,2}日?)"
+    label = r"(?:发布(?:时间|日期|于)?)"
+    for pattern in (label + r"\s*[:：]?\s*" + stamp, stamp + r"\s*" + label):
+        match = re.fullmatch(pattern, text.strip())
+        if match:
+            return _day(match[1])
+    return None
+
+
 def _get(mapping, *names):
     """mapping's value under the first of names present, the key's case ignored; None when absent."""
     if not isinstance(mapping, dict):
@@ -516,7 +528,10 @@ class NewPortal(_Portal):
         return self._scoped(ids[0].lower())
 
     def canonical_url(self, job_id: str) -> str:
-        return f"{self.origin}/{self.channel}/detail?{urlencode({'jobAdId': self._native(job_id)})}"
+        native = self._native(job_id)
+        if not _UUID.fullmatch(native):
+            raise ValueError("not a Beisen UUID")
+        return f"{self.origin}/{self.channel}/detail?{urlencode({'jobAdId': native})}"
 
     # The list response, as recorded: {"Code": 200, "Message": ..., "Count": <jobs in the whole
     # result>, "Data": [<job ad>, ...], "Total": 0, ...}, 20 job ads a page (PageIndex from 0).
@@ -584,7 +599,7 @@ class NewPortal(_Portal):
                                    "这个门户上用 --all 读全部岗位")
         return None
 
-    def parse_cards(self, root, page_url: str, responses=()):
+    def parse_cards(self, root, page_url: str, responses=(), *, visible_only=False):
         items, unreadable, _, _ = self._list(responses)
         cards = []
         for item in items:
@@ -595,7 +610,33 @@ class NewPortal(_Portal):
                 extra["job_code"] = code
             cards.append({"id": job_id, "href": self.canonical_url(job_id), "title": title,
                           "salary": item["salary"], "location": item["location"], "extra": extra})
+        if visible_only:
+            matched = self._visible_cards(root, cards)
+            return matched, unreadable + len(cards) - len(matched)
         return cards, unreadable
+
+    def _visible_cards(self, root, cards):
+        """Join visible result cards to their response IDs. No response-only text reaches /scrape."""
+        visible = {}
+        for node in _nodes(root, self.SELECTORS["card"]):
+            name = split_job_code(_text(node, ["[class*=STJobTitle-editor]"]))
+            if name[0]:
+                visible.setdefault(name, []).append(node)
+        results = []
+        keys = [(card["title"], card["extra"].get("job_code")) for card in cards]
+        counts = Counter(keys)
+        for key, card in zip(keys, cards):
+            nodes = visible.get(key, [])
+            if counts[key] != 1 or len(nodes) != 1:
+                continue  # ambiguous or absent from the visible page
+            node = nodes[0]
+            labels = [_text(label, ["[class*=STLabelText-editor]"]) or htmltext.text(label)
+                      for label in _nodes(node, ["[class*=STJobLabel-editor]"])]
+            places, _ = self._sort_tags(labels)
+            published = _publication_day(_text(node, ["[class*=STJobTime-editor]"]))
+            results.append(dict(card, location="/".join(places),
+                                extra=dict(card["extra"], list_published=published)))
+        return results
 
     def list_is_empty(self, root, responses=()) -> bool:
         """Only the portal's own "no results": a list response with no job ads and a Count of 0, and
@@ -612,7 +653,7 @@ class NewPortal(_Portal):
         items, _, total, recognised = self._list(responses)
         return len(items) < total if recognised else None
 
-    def parse_detail(self, root, responses=()) -> dict:
+    def parse_detail(self, root, responses=(), *, publication_only=False) -> dict:
         title, code = split_job_code(_text(root, self.SELECTORS["detail_title"]))
         tags = [htmltext.text(node) for node in _nodes(root, self.SELECTORS["detail_tags"]) if htmltext.text(node)]
         places, kinds = self._sort_tags(tags)
@@ -626,8 +667,9 @@ class NewPortal(_Portal):
                 complete = False  # a section still loading: not a complete JD
                 continue
             sections.append(f"{heading}\n{content}")
+        date_text = _text(root, self.SELECTORS["detail_date"])
         return {"title": title, "job_code": code, "salary": _text(root, self.SELECTORS["detail_salary"]),
-                "places": places, "kinds": kinds, "published": _day(_text(root, self.SELECTORS["detail_date"])),
+                "places": places, "kinds": kinds, "published": (_publication_day if publication_only else _day)(date_text),
                 "description": "\n".join(sections) if sections and complete else ""}
 
 
@@ -687,7 +729,7 @@ class LegacyPortal(_Portal):
             return "changed", "页面同时包含多种职位列表模板，无法确认搜索结果"
         return None
 
-    def parse_cards(self, root, page_url: str):
+    def parse_cards(self, root, page_url: str, *, visible_only=False):
         cards, unreadable = [], 0
         for row in _nodes(root, self.SELECTORS["rows"]):
             links = [node for node in htmltext.select(row, "a[href*=zpdetail]") if _visible(node)]
@@ -695,20 +737,30 @@ class LegacyPortal(_Portal):
                 continue
             cells = [node for node in row.children if isinstance(node, htmltext.Node) and node.tag == "td"]
             job_id = self.job_id_from_url(urljoin(page_url, links[0].get("href", "")))
-            name = (links[0].get("title") or htmltext.text(links[0])).strip()
+            name = (htmltext.text(links[0]) if visible_only else links[0].get("title") or htmltext.text(links[0])).strip()
             if job_id is None or not name:
                 unreadable += 1
                 continue
             title, code = split_job_code(name)
-            texts = [htmltext.text(cell) for cell in cells]
+            texts = [htmltext.text(cell) if not visible_only or _visible(cell) else "" for cell in cells]
             extra = {"tenant": self.tenant.subdomain, "channel": self.channel}
             if code:
                 extra["job_code"] = code
-            if len(texts) >= 4 and _day(texts[3]):
+            if len(texts) >= 4 and _day(texts[3]) and (not visible_only or self._publication_column(row)):
                 extra["list_published"] = _day(texts[3])
             cards.append({"id": job_id, "href": self.canonical_url(job_id), "title": title, "salary": "",
                           "location": texts[2] if len(texts) >= 3 else "", "extra": extra})
         return cards, unreadable
+
+    @staticmethod
+    def _publication_column(row):
+        table = row.parent
+        while table is not None and table.tag != "table":
+            table = table.parent
+        if table is None:
+            return False
+        headings = htmltext.select(table, "thead th")
+        return len(headings) >= 4 and _visible(headings[3]) and htmltext.text(headings[3]) in ("发布时间", "发布日期")
 
     def list_is_empty(self, root) -> bool:
         """Only the portal's own "no results": no job link, and 共0条 or its no-results box; never a
@@ -758,7 +810,7 @@ class LegacyPortal(_Portal):
             return int(match.group(1)) < int(match.group(2))
         return any(htmltext.text(node) == "下一页" and node.get("href") for node in htmltext.select(root, "a"))
 
-    def parse_detail(self, root) -> dict:
+    def parse_detail(self, root, *, publication_only=False) -> dict:
         found = _nodes(root, self.SELECTORS["detail_block"])
         if not found:
             return {"title": "", "job_code": None, "salary": "", "places": [], "kinds": [], "published": None,
@@ -775,7 +827,7 @@ class LegacyPortal(_Portal):
                 complete = False
                 continue
             sections.append(f"{heading}\n{content}")
-        facts = self._facts(block)
+        facts = self._facts(block, publication_only=publication_only)
         return {"title": title, "job_code": code, "salary": facts["salary"], "places": facts["places"],
                 "kinds": facts["kinds"], "published": _day(facts["published"]),
                 "description": "\n".join(sections) if sections and complete else ""}
@@ -825,11 +877,13 @@ class LegacyPortal(_Portal):
             node = node.parent
         return ""
 
-    def _facts(self, block) -> dict:
+    def _facts(self, block, *, publication_only=False) -> dict:
         """The first value of each fact in the job's block: a "label：" element followed by its
         value's element (li.ntitle / li.nvalue, or two p), or "label：value" in one element."""
         facts = {"places": [], "salary": "", "published": "", "kinds": []}
         wanted = {label: key for key, labels in self._LABELS.items() for label in labels}
+        if publication_only:
+            del wanted["更新时间"]
         for node in block.iter():
             if not isinstance(node, htmltext.Node) or not _visible(node):
                 continue
