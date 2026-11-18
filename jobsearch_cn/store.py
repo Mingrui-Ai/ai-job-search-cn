@@ -27,7 +27,7 @@ import tempfile
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from jobsearch_cn import schema
+from jobsearch_cn import himalayas, schema
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 DATA_DIR_ENV = "JOBSEARCH_CN_DATA_DIR"
@@ -74,9 +74,15 @@ def normalize_url(url):
 
 def portal_key(source):
     """(site, site_job_id) when a record names its job board's own id, else None (M6-4)."""
-    if not isinstance(source, dict) or not source.get("site") or not source.get("site_job_id"):
+    if not isinstance(source, dict):
         return None
-    return source["site"], source["site_job_id"]
+    if source.get("site") == "other" and source.get("type") == "portal":
+        identifier = himalayas.guid(source.get("url"))
+        if identifier:
+            return "himalayas", himalayas.site_id(identifier)
+    if source.get("site") and source.get("site_job_id"):
+        return source["site"], source["site_job_id"]
+    return None
 
 
 class Index:
@@ -226,14 +232,27 @@ class Store:
         if errors:
             raise StoreError("invalid record: " + "; ".join(errors))
         existing, same_text = self.find_existing(record, index)
+        original = existing
+        incoming_source = record["source"]
+        api_detail = incoming_source["site"] == "himalayas" and incoming_source["type"] == "portal"
+        if api_detail and existing:
+            if himalayas.older_snapshot(incoming_source, existing["source"]):
+                if existing["source"]["site"] == "other":
+                    raise StoreError("Himalayas 旧记录比本次收件更新，请重放最新详情收件以校正发布日期和职称")
+                return "unchanged", existing
+            if existing["source"]["site"] == "other":
+                existing = himalayas.upgrade_legacy(existing, incoming_source)
+                same_text = schema.normalize_for_match(existing["raw_text"]) == schema.normalize_for_match(record["raw_text"])
         if existing is None:
             merged = record
         elif same_text:
             merged = merge_same_text(existing, record)
         else:
             merged = replace_edited(existing, record)
-        if existing is not None and merged == existing:
-            return "unchanged", existing
+        if api_detail:
+            merged["source"].update({key: incoming_source.get(key) for key in ("url", "expires_at", "fetched_at")})
+        if original is not None and merged == original:
+            return "unchanged", original
         errors = schema.validate(merged)
         if errors:
             raise StoreError("merged record is invalid: " + "; ".join(errors))

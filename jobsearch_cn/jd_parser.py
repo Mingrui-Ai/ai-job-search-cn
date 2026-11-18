@@ -183,7 +183,7 @@ _PREFERENCE = re.compile(r"优先|为佳")
 _NO_RETURN_OFFER = re.compile(r"(?:不可|不能|无|不提供|没有)\s*转正")
 _RETURN_OFFER = re.compile(r"(?:表现(?:优秀|优异|突出)者?\s*)?(?:可|能|有机会|有|提供)\s*转正|转正机会|留用机会")
 
-_INTERNSHIP = re.compile(r"实习生|日常实习|暑期实习|寒假实习|实习岗位|实习期|实习时间")
+_INTERNSHIP = re.compile(r"实习生|日常实习|暑期实习|寒假实习|实习岗位|实习期|实习时间|(?m:^[ \t]*工作性质[：:][ \t]*实习(?=[（( \t\r\n]|$))")
 _CAMPUS = re.compile(r"校园招聘|校招|应届(?:毕业)?生|管培生")
 _EXPERIENCED = re.compile(r"社会招聘|社招")
 
@@ -281,6 +281,7 @@ _START_OTHER_DATE = re.compile(r"\d{1,2}\s*月(?:\s*\d{1,2}\s*[日号])?\s*(?:�
 
 _YMD = r"(?P<y>20\d{2})\s*[-/.年]\s*(?P<m>\d{1,2})\s*[-/.月]\s*(?P<d>\d{1,2})\s*日?"
 _PUBLISHED = re.compile(rf"(?:发布时间|发布日期|发布于|更新时间|更新于)\s*[:：]?\s*{_YMD}")
+_PUBLICATION_ONLY = re.compile(rf"(?:发布时间|发布日期|发布于)\s*[:：]?\s*{_YMD}")
 _DEADLINE_AFTER = re.compile(rf"(?:截止日期|截止时间|报名截止|投递截止|网申截止|截止)\s*(?:日期|时间)?\s*[:：为至]?\s*{_YMD}")
 _DEADLINE_BEFORE = re.compile(rf"{_YMD}\s*前?\s*截止")
 
@@ -301,6 +302,9 @@ _BRACKETED = re.compile(r"（[^（）]*）|\([^()]*\)|【[^【】]*】|\[[^\[\]]
 _LABEL_LINE = re.compile(r"^[^:：，,。；;！!？?\s][^:：，,。；;！!？?]{0,9}[:：]")
 # A collected header supplies title context even for occupations outside the word list.
 _COLLECTED_HEADER = re.compile(r"^(招聘频道|工作地点|工作性质|公司名称|职位编号)\s*[:：]\s*\S")
+# English ATS headings can include a team name after a comma. Only use the
+# longer form for a collected header, whose metadata is checked below.
+_ENGLISH_ROLE = re.compile(r"[A-Za-z][A-Za-z0-9 &'’(),+./–—-]{1,199}")
 _NAVIGATION_TITLE = re.compile(r"^(?:欢迎.*|加入我们|(?:招聘)?首页|(?:招聘|职位|岗位)(?:列表|搜索|查询)|关于我们|联系我们)$")
 # How far into a copy to look for an unlabelled title: a whole-page copy puts
 # navigation first, and the title beside its salary ("java开发实习生 130-150元/天").
@@ -609,18 +613,28 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
         return value
 
     lines = [line.strip() for line in text.splitlines() if line.strip()]
-    found_title, title_span = _title(text, lines)
+    himalayas = source_type == "portal" and site == "himalayas" and site_job_id
+    structured = himalayas and len(lines) >= 2 and lines[1].startswith("公司名称：")
+    if structured:
+        company_name = lines[1].removeprefix("公司名称：").strip()
+        title_span = (0, len(lines[0]))
+        found_title = (lines[0], [lines[0]]) if len(lines[0]) <= schema.MAX_NAME else _NOTHING
+    else:
+        found_title, title_span = _title(text, lines)
     title = cite("title", found_title)
     headline = _line_at(text, title_span[0]) if title_span else (lines[0] if lines else "")
     tag, piped = _tag_cells(lines, headline if title_span else None)
-    company = _company(text, lines, tag if piped else [])
+    if structured:
+        company = (company_name, [company_name]) if 0 < len(company_name) <= schema.MAX_NAME else _NOTHING
+    else:
+        company = _company(text, lines, tag if piped else [])
     hits = _skill_hits(text, skill_patterns or _builtin_patterns(), skip=title_span, company=company[0])
-    published = _dated(text, (_PUBLISHED,))
+    published = _dated(text.partition("\n\n")[2], (_PUBLICATION_ONLY,)) if structured else _dated(text, (_PUBLISHED,))
     # A start date without a year is dated from the JD's own publication date, else the import date.
     reference = date.fromisoformat(published[0] or imported_at[:10])
     record = {
         "schema_version": schema.SCHEMA_VERSION,
-        "id": job_id(text),
+        "id": job_id("himalayas/" + site_job_id) if himalayas else job_id(text),
         "source": {"type": source_type, "site": site, "url": url, "imported_at": imported_at,
                    "site_job_id": site_job_id, "fetched_at": fetched_at},
         "title": title,
@@ -747,6 +761,10 @@ def _title(text: str, lines: list):
                     headers.add(header.group(1))
                 elif not _LABEL_LINE.match(following):
                     break
+        if ({"公司名称", "工作性质"} <= headers and _ENGLISH_ROLE.fullmatch(headline)
+                and _JOB_WORD.search(headline) and not re.search(r"[.!?]$", headline)):
+            start = _offset(text, lines, index)
+            return (headline, [headline]), (start, start + len(headline))
         if (2 <= len(headline) <= 40 and (_JOB_WORD.search(headline) or len(headers) >= 2)
                 and not _NOT_TITLE.search(headline)
                 and not _NAVIGATION_TITLE.search(headline)

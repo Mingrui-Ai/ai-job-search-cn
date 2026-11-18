@@ -119,3 +119,33 @@ python -m jobsearch_cn jd screen '<batch_dir>' --check --data-dir 'D:\local-jobs
 结果仍有 `site/batch/batch_dir/status/finished/message/stopped_at/saved/skipped_known/closed/failed/files/warnings`，列表计数为 0；单链接新增 `mode=single_link`、`url`、`known`、`reread_known`、`robots`。robots 包含状态、固定地址、HTTP 状态、检查时间、原因、SHA256、检查身份和等待要求；未检查时值为 null。成功收件保留 requested_url/final_url、robots 和 guard 摘要于 extra；注入告警附原文摘录，但不执行指令，也不改写收件原文。
 
 退出 0 表示保存完成、默认跳过已知或明确关闭；2 表示开始前参数/配置/浏览器不具备条件；3 表示 robots 不确认/禁止、导航或访问受限、浏览器错误、原件写入保护；4 表示当次详情结构无法识别，包括不完整/占位/超长正文。只有真正的 `page_changed` 可按上面的 `--diagnostics` 保存当次快照；robots 失败、登录/验证/HTTP 限制、导航停止和正常结果不保存诊断 HTML。停止后不自动重试，也可改用用户提供 JD 文本的导入路径。
+
+## Himalayas
+
+Himalayas 提供免登录的远程岗位 API。按居住国搜索，详情接口返回当前开放状态。来源标出的国家和时区仍须结合雇主正文核对。岗位链接保留 API 的 `applicationLink`，展示时注明 Himalayas。重新展示旧候选时先查详情，已过期或关闭的岗位从当前候选中移出。授权依据和接口变更位置见[来源核查](../../.agents/skills/himalayas-search/url-reference.md)。
+
+```powershell
+$cli = '.agents/skills/himalayas-search/cli/src/cli.ts'
+bun run $cli search --query 'software engineer' --location CN --employment-type Intern --limit 5 --format table
+bun run $cli detail '<搜索结果的公司/岗位标识>' --format plain
+```
+
+详情支持 `--format inbox`。下面的 PowerShell 示例把一份成功返回的 JSON 写入新的本地批次，使用 UTF-8，避免重写同名文件。多份收件放在同一批次后运行一次初筛。
+
+```powershell
+$jobId = '<搜索结果的公司/岗位标识>'
+[Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
+$row = bun run $cli detail $jobId --format inbox
+if ($LASTEXITCODE -ne 0) { throw '详情读取失败' }
+$record = ($row -join [Environment]::NewLine) | ConvertFrom-Json
+if ($record.format -ne 'jobsearch_cn.inbox/1') { throw '收件格式有误' }
+$batch = Join-Path 'data/inbox/himalayas' ('himalayas-' + [Guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $batch -ErrorAction Stop | Out-Null
+[IO.File]::WriteAllText((Join-Path (Resolve-Path $batch) 'job.json'), ($row -join [Environment]::NewLine), (New-Object Text.UTF8Encoding($false)))
+python -m jobsearch_cn jd screen $batch --check
+if ($LASTEXITCODE -eq 0) { python -m jobsearch_cn jd screen $batch }
+```
+
+收件以 `himalayas` 为来源，`extra.guid` 保存公司及岗位 slug，`site_job_id` 保存该标识的 SHA-256。一个岗位更新时沿用已有岗位编号。旧的 `other` 批次可以原地执行同一条 `jd screen`，按官方岗位地址识别旧记录，同时纠正旧表头把更新时间写成发布日期的问题。每个岗位保留最近一次详情核验的申请链接和有效期。库中仍是旧格式、收件观测时间又早于库记录时，此次初筛跳过该岗位，并提示重放最新详情收件。
+
+API 的 `pubDate` 是最后更新时间（`updated_at`）。门户搜索只有明确发布日期才能通过 `--jobage`，此 API 的发布字段为空，查候选时可省略该参数。CN 初筛另按档案的 `max_job_age_days` 处理 JD 中的发布日期，只有更新时间的候选列为「发布时间待确认」。`extra.expires_at` 到时，离线初筛将其计入已过期，保留岗位历史。同日比较实际运行时刻，显式指定其他参考日时比较该地当日结束时刻。提前下架需通过详情 API 核验。搜索只取第一页，损坏行数单列，HTTP 429 或服务器异常后停止本次访问。
