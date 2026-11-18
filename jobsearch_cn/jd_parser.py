@@ -183,7 +183,7 @@ _PREFERENCE = re.compile(r"优先|为佳")
 _NO_RETURN_OFFER = re.compile(r"(?:不可|不能|无|不提供|没有)\s*转正")
 _RETURN_OFFER = re.compile(r"(?:表现(?:优秀|优异|突出)者?\s*)?(?:可|能|有机会|有|提供)\s*转正|转正机会|留用机会")
 
-_INTERNSHIP = re.compile(r"实习生|日常实习|暑期实习|寒假实习|实习岗位|实习期|实习时间")
+_INTERNSHIP = re.compile(r"实习生|日常实习|暑期实习|寒假实习|实习岗位|实习期|实习时间|(?m:^[ \t]*工作性质[：:][ \t]*实习(?=[（( \t\r\n]|$))")
 _CAMPUS = re.compile(r"校园招聘|校招|应届(?:毕业)?生|管培生")
 _EXPERIENCED = re.compile(r"社会招聘|社招")
 
@@ -301,6 +301,9 @@ _BRACKETED = re.compile(r"（[^（）]*）|\([^()]*\)|【[^【】]*】|\[[^\[\]]
 _LABEL_LINE = re.compile(r"^[^:：，,。；;！!？?\s][^:：，,。；;！!？?]{0,9}[:：]")
 # A collected header supplies title context even for occupations outside the word list.
 _COLLECTED_HEADER = re.compile(r"^(招聘频道|工作地点|工作性质|公司名称|职位编号)\s*[:：]\s*\S")
+# English ATS headings can include a team name after a comma. Only use the
+# longer form for a collected header, whose metadata is checked below.
+_ENGLISH_ROLE = re.compile(r"[A-Za-z][A-Za-z0-9 &'’(),+./–—-]{1,199}")
 _NAVIGATION_TITLE = re.compile(r"^(?:欢迎.*|加入我们|(?:招聘)?首页|(?:招聘|职位|岗位)(?:列表|搜索|查询)|关于我们|联系我们)$")
 # How far into a copy to look for an unlabelled title: a whole-page copy puts
 # navigation first, and the title beside its salary ("java开发实习生 130-150元/天").
@@ -747,6 +750,10 @@ def _title(text: str, lines: list):
                     headers.add(header.group(1))
                 elif not _LABEL_LINE.match(following):
                     break
+        if ({"公司名称", "工作性质"} <= headers and _ENGLISH_ROLE.fullmatch(headline)
+                and _JOB_WORD.search(headline) and not re.search(r"[.!?]$", headline)):
+            start = _offset(text, lines, index)
+            return (headline, [headline]), (start, start + len(headline))
         if (2 <= len(headline) <= 40 and (_JOB_WORD.search(headline) or len(headers) >= 2)
                 and not _NOT_TITLE.search(headline)
                 and not _NAVIGATION_TITLE.search(headline)

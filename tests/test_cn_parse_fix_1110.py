@@ -20,6 +20,14 @@ def reviewer_candidate():
 class ReviewRegressions(unittest.TestCase):
     """Codex B's five synthetic counterexamples, including both explicit cohort forms."""
 
+    def test_english_ats_title_with_team_and_comma(self):
+        title = "Summer Engineering Program - Software Engineer, Data Systems"
+        job = parse(title + "\n公司名称：Example\n工作性质：实习（Intern）\n职责：开发软件。")
+        self.assertEqual(job["title"], title)
+        self.assertEqual(job["employment_type"], "internship")
+        self.assertEqual(job["evidence"]["title"]["text"], title)
+        self.assertIsNone(parse(title + "\n申请请查看网站。")["title"])
+
     def test_p2_salary_suffixes_preserve_explicit_rates(self):
         for text, expected in (("180/天起", (180, "CNY/day")),
                                ("180/天包午餐", (180, "CNY/day")),
