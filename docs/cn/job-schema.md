@@ -83,10 +83,11 @@ python -m jobsearch_cn jd validate job.json
 | `id` | 字符串 | `job_` 加 12 位小写十六进制，导入时生成 |
 | `source` | 对象 | 记录从哪里来 |
 | `source.type` | 枚举 | 怎么进来的：`paste` 粘贴、`file` 本地文件、`url` 单个链接、`portal` 门户适配器 |
-| `source.site` | 枚举或 null | 原发布平台：`boss` BOSS直聘、`shixiseng` 实习僧、`nowcoder` 牛客、`liepin` 猎聘、`zhaopin` 智联招聘、`51job` 前程无忧、`lagou` 拉勾、`official` 公司官网、`ats` 招聘系统托管页（Moka、飞书招聘等）、`referral` 内推、`other` 其他 |
+| `source.site` | 枚举或 null | 原发布平台：`boss` BOSS直聘、`shixiseng` 实习僧、`nowcoder` 牛客、`liepin` 猎聘、`zhaopin` 智联招聘、`51job` 前程无忧、`lagou` 拉勾、`himalayas` 远程岗位、`official` 公司官网、`ats` 招聘系统托管页（Moka、飞书招聘等）、`referral` 内推、`other` 其他 |
 | `source.url` | 字符串或 null | 原链接，http(s)，端口要读得出；`source.type` 为 `url` 时必填 |
 | `source.imported_at` | 时间 | 导入时间，ISO 8601，必须带时区，例如 `2026-10-27T10:00:00+08:00` |
-| `source.site_job_id` | 字符串或 null | 招聘平台自己的岗位 ID（M6-4），去重的第一依据：1–128 个英文字母、数字和 `. _ ~ -`；`source.site` 是 `boss`、`shixiseng`、`nowcoder`、`liepin`、`zhaopin`、`51job`、`lagou` 时直接写平台的 ID；是 `ats`（招聘系统托管页）时要按平台和公司租户加前缀，写成 `<平台>.<租户>.<平台的岗位 ID>`，三段用点隔开、最后一段不含点，例如北森的 `beisen.example.151000001`（M6-3；各家公司的 ID 各自编号，不加前缀会撞）；`official` 等其他来源不能写（官网各家的 ID 会撞）。收件夹批次导入时由采集文件给出（[screen.md](screen.md)），`jd parse` 写 null |
+| `source.expires_at` | 可选时间戳或 null | Himalayas 详情提供的有效期，带时区。该来源的 `source.fetched_at` 表示最近采用的一次详情核验 |
+| `source.site_job_id` | 字符串或 null | 招聘平台自己的岗位 ID（M6-4），去重的第一依据：1–128 个英文字母、数字和 `. _ ~ -`；`source.site` 是 `boss`、`shixiseng`、`nowcoder`、`liepin`、`zhaopin`、`51job`、`lagou` 时直接写平台的 ID；`himalayas` 写官方 GUID 中 `company/slug` 的 SHA-256 十六进制值；是 `ats`（招聘系统托管页）时要按平台和公司租户加前缀，写成 `<平台>.<租户>.<平台的岗位 ID>`，三段用点隔开、最后一段不含点，例如北森的 `beisen.example.151000001`（M6-3；各家公司的 ID 各自编号，不加前缀会撞）；`official` 等其他来源不能写（官网各家的 ID 会撞）。收件夹批次导入时由采集文件给出（[screen.md](screen.md)），`jd parse` 写 null |
 | `source.fetched_at` | 时间或 null | 采集程序抓到当前这份原文的时间（M6-4），格式同 `imported_at`；粘贴和本地文件导入时为 null |
 | `title` | 字符串或 null | 岗位名 |
 | `company` | 字符串或 null | 公司名 |

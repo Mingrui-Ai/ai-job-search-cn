@@ -139,11 +139,13 @@ $row = bun run $cli detail $jobId --format inbox
 if ($LASTEXITCODE -ne 0) { throw '详情读取失败' }
 $record = ($row -join [Environment]::NewLine) | ConvertFrom-Json
 if ($record.format -ne 'jobsearch_cn.inbox/1') { throw '收件格式有误' }
-$batch = Join-Path 'data/inbox/other' ('himalayas-' + [Guid]::NewGuid().ToString('N'))
+$batch = Join-Path 'data/inbox/himalayas' ('himalayas-' + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $batch -ErrorAction Stop | Out-Null
 [IO.File]::WriteAllText((Join-Path (Resolve-Path $batch) 'job.json'), ($row -join [Environment]::NewLine), (New-Object Text.UTF8Encoding($false)))
 python -m jobsearch_cn jd screen $batch --check
 if ($LASTEXITCODE -eq 0) { python -m jobsearch_cn jd screen $batch }
 ```
 
-本地岗位库沿用 `other` 来源，通过规范化后的岗位链接去重。原始收件的 `extra.guid` 对应来源 GUID 中的公司和岗位标识，`extra.timezones` 记录时区。搜索只取首个响应，按用户要求的天数和数量在当页筛选，API 的总数可大于返回数量。
+收件以 `himalayas` 为来源，`extra.guid` 保存公司及岗位 slug，`site_job_id` 保存该标识的 SHA-256。一个岗位更新时沿用已有岗位编号。旧的 `other` 批次可以原地执行同一条 `jd screen`，按官方岗位地址识别旧记录，同时纠正旧表头把更新时间写成发布日期的问题。每个岗位保留最近一次详情核验的申请链接和有效期。库中仍是旧格式、收件观测时间又早于库记录时，此次初筛跳过该岗位，并提示重放最新详情收件。
+
+API 的 `pubDate` 是最后更新时间（`updated_at`）。门户搜索只有明确发布日期才能通过 `--jobage`，此 API 的发布字段为空，查候选时可省略该参数。CN 初筛另按档案的 `max_job_age_days` 处理 JD 中的发布日期，只有更新时间的候选列为「发布时间待确认」。`extra.expires_at` 到时，离线初筛将其计入已过期，保留岗位历史。同日比较实际运行时刻，显式指定其他参考日时比较该地当日结束时刻。提前下架需通过详情 API 核验。搜索只取第一页，损坏行数单列，HTTP 429 或服务器异常后停止本次访问。

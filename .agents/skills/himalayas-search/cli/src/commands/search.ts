@@ -38,22 +38,26 @@ export async function search(args: string[]) {
   if (!Array.isArray(data?.jobs) || !Number.isSafeInteger(data.totalCount) || data.totalCount < 0)
     throw new PortalError("BAD_DATA", "Unrecognized search response.")
   const results: Posting[] = []
-  const today = new Date().toISOString().slice(0, 10)
+  let invalid = 0
   for (const raw of data.jobs) {
-    const job = posting(raw)
-    if (!job) continue
-    if (
-      age !== null &&
-      (!job.date || job.date > today || Date.parse(today) - Date.parse(job.date) > age * 86400000)
-    )
+    let job
+    try {
+      job = posting(raw)
+    } catch (error) {
+      if (!(error instanceof PortalError)) throw error
+      invalid++
       continue
+    }
+    if (!job) continue
+    if (age !== null && job.date === null) continue // Publication age cannot be established.
     results.push(job)
     if (results.length === cap) break
   }
   if (values.format !== "json") {
-    if (values.format === "table") console.log("Title\tCompany\tPosted (UTC)\tSource\tURL")
+    if (values.format === "table") console.log("Title\tCompany\tLast updated (UTC)\tSource\tURL")
     console.log("Himalayas " + origin)
     for (const job of results) console.log(line(job))
+    if (invalid) console.log("Invalid listings skipped: " + invalid)
   } else
     console.log(
       JSON.stringify(
@@ -62,6 +66,7 @@ export async function search(args: string[]) {
             count: results.length,
             page: 1,
             total: data.totalCount,
+            invalid,
             source: "Himalayas",
             source_url: origin,
           },

@@ -12,10 +12,10 @@ condition. No parsing or scoring rule lives here, and nothing reads the network.
 
 import json
 from collections import Counter
-from datetime import date
+from datetime import date, datetime, time
 from pathlib import Path
 
-from jobsearch_cn import jd_parser, match, report, schema, score, store
+from jobsearch_cn import himalayas, jd_parser, match, report, schema, score, store
 
 FORMAT = "jobsearch_cn.inbox/1"
 ITEM_KEYS = ("format", "text", "fetched_at", "url", "site_job_id", "site", "extra")
@@ -106,6 +106,22 @@ def read_item(data: bytes, site: str) -> dict:
     problems += [error.removeprefix("source.") for error in errors]
     if problems:
         raise ItemError("; ".join(problems))
+    extra = item.get("extra", {})
+    if site == "himalayas" or (site == "other" and extra.get("source") == "Himalayas"):
+        identifier = himalayas.guid(item.get("url"))
+        if not identifier or extra.get("guid") != identifier:
+            raise ItemError("Himalayas GUID must match the official application URL")
+        posting_id = himalayas.site_id(identifier)
+        if site == "himalayas" and item.get("site_job_id") != posting_id:
+            raise ItemError("Himalayas site_job_id must match its GUID")
+        if extra.get("expires_at") is not None:
+            errors = []
+            schema._check_timestamp(extra["expires_at"], "extra.expires_at", errors)
+            if errors:
+                raise ItemError("; ".join(errors))
+        if site == "other":
+            item["text"] = himalayas.corrected_text(item["text"].replace("\r\n", "\n"))
+        item.update(site="himalayas", site_job_id=posting_id)
     return item
 
 
@@ -125,8 +141,10 @@ def _read_file(path: Path, site: str, vocabulary, now=None):
         item = read_item(data, site)
         summary = item.get("extra", {}).get("page") == LIST_PAGE
         records, warnings = jd_parser.parse_text(
-            item["text"], source_type="portal", site=site, url=item.get("url"), now=now, vocabulary=vocabulary,
+            item["text"], source_type="portal", site=item.get("site", site), url=item.get("url"), now=now, vocabulary=vocabulary,
             single=True, site_job_id=item.get("site_job_id"), fetched_at=item["fetched_at"])
+        if item.get("site") == "himalayas" and records:
+            records[0]["source"]["expires_at"] = item.get("extra", {}).get("expires_at")
         if records and not item.get("url") and not item.get("site_job_id"):
             warnings.append({"segment": None, "kind": "no_key",
                              "message": "no url and no site_job_id: only the same JD text finds this job again"})
@@ -229,6 +247,8 @@ def run(path, site: str, profile: dict, vocabulary, job_store: store.Store, matc
         top: int = DEFAULT_TOP, now=None, as_of=None) -> dict:
     """jd screen: import the batch, score what needs it, and the shortlist (docs/cn/screen.md)."""
     day = reference_date(as_of)
+    clock = now or datetime.now().astimezone()
+    at = clock if day == clock.date() else datetime.combine(day, time.max, tzinfo=clock.tzinfo)
     maximum = profile["target"].get("max_job_age_days")
     if maximum is not None and not (schema._is_int(maximum) and maximum > 0):
         raise BatchError("target.max_job_age_days: must be null or a positive integer")
@@ -273,6 +293,10 @@ def run(path, site: str, profile: dict, vocabulary, job_store: store.Store, matc
         job = job_store.get(job_id)
         if job.get("status") in NOT_LISTED:
             not_listed[job["status"]] += 1
+            continue
+        expires = job["source"].get("expires_at")
+        if expires and datetime.fromisoformat(expires.replace("Z", "+00:00")) <= at:
+            not_listed["expired"] += 1
             continue
         saved = _saved(matches, job_id)
         if saved is None or score.stale_reasons(saved, job, digest, weights):

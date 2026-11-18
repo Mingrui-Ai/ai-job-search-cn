@@ -26,6 +26,7 @@ async function main() {
     const job = posting(payload?.job)
     if (!job) throw new PortalError("CLOSED", "Posting expired.")
     if (job.id !== id) throw new PortalError("BAD_DATA", "Detail ID differs from the requested posting.")
+    if (!job.description) throw new PortalError("NO_DESCRIPTION", "Missing full job description.")
     if (values.format === "plain" || values.format === "table")
       console.log(line(job) + "\n" + (job.description ?? ""))
     else console.log(JSON.stringify(values.format === "inbox" ? inbox(job) : job, null, 2))

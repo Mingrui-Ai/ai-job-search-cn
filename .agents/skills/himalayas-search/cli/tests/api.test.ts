@@ -16,10 +16,12 @@ const raw = {
   timezoneRestrictions: [8],
 }
 
-test("keeps attribution, UTC publication, and the supplied application link in the inbox", () => {
+test("keeps attribution, UTC last update, and the supplied application link in the inbox", () => {
   const job = posting(raw, 1800000000000)!
   expect(job.description).toBe("Build tools.\nTest tools.")
-  expect(job.date).toBe("2023-11-14")
+  expect(job.date).toBeNull()
+  expect(job.updated_at).toBe("2023-11-14T22:13:20.000Z")
+  expect(inbox(job).text).not.toContain("发布日期")
   expect(job.location).toBe("China")
   expect(inbox(job).url).toBe(raw.applicationLink)
   expect(inbox(job).text).toContain("来源：Himalayas")
@@ -58,6 +60,32 @@ test("invalid flags and restricted pagination fail before making a request", asy
     expect(JSON.parse(result.stderr).code).toMatch(/BAD_/)
   }
 })
+test("a recent update has unknown publication age and a malformed card leaves valid rows usable", async () => {
+  const recent = { ...raw, pubDate: Math.floor(Date.now() / 1000), expiryDate: null }
+  const page = { jobs: [recent, {}, recent], totalCount: 3 }
+  const result = parseJSON<{ meta: { invalid: number }; results: { date: string | null }[] }>(
+    await runCLI(["search"], page),
+  )
+  expect(result.meta.invalid).toBe(1)
+  expect(result.results.map((row) => row.date)).toEqual([null, null])
+  const age = parseJSON<{ results: unknown[] }>(await runCLI(["search", "--jobage", "60"], page))
+  expect(age.results).toEqual([])
+})
+
+test("all detail formats require a full posting and HTTP failures stop the command", async () => {
+  const row = { ...raw, expiryDate: null, description: null }
+  for (const format of ["json", "table", "plain", "inbox"]) {
+    const result = await runCLI(["detail", "example/engineer", "--format", format], { job: row })
+    expect(result.exitCode).toBe(1)
+    expect(JSON.parse(result.stderr).code).toBe("NO_DESCRIPTION")
+  }
+  for (const status of [429, 503]) {
+    const result = await runCLI(["search"], {}, status)
+    expect(result.exitCode).toBe(1)
+    expect(JSON.parse(result.stderr).code).toBe("HTTP_ERROR")
+  }
+})
+
 test.skipIf(process.env.HIMALAYAS_LIVE_TEST !== "1")(
   "official search returns attributable jobs",
   async () => {

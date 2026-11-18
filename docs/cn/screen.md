@@ -42,7 +42,7 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--as-
     <文件>.txt      手工收集的，一个文件可以放几份 JD，用一行 === 分隔
 ```
 
-- `<来源>` 是 Job Schema 的 `source.site` 取值之一：`boss`、`shixiseng`、`nowcoder`、`liepin`、`zhaopin`、`51job`、`lagou`、`official`、`ats`、`referral`、`other`。文件夹名不是其中之一、又没给 `--site` 时，退出码 2。
+- `<来源>` 是 Job Schema 的 `source.site` 取值之一：`boss`、`shixiseng`、`nowcoder`、`liepin`、`zhaopin`、`51job`、`lagou`、`himalayas`、`official`、`ats`、`referral`、`other`。文件夹名不是其中之一、又没给 `--site` 时，退出码 2。
 - `<批次>` 建议用采集开始的本地时间 `YYYYMMDD-HHMMSS`，一次采集一个批次，一个批次只放一个来源的岗位。命令不解析批次名。
 - 例子：[tests/fixtures/cn/inbox/boss/20261105-103000/](../../tests/fixtures/cn/inbox/boss/20261105-103000/)（虚构的三个岗位）。
 
@@ -56,7 +56,7 @@ python -m jobsearch_cn jd screen <批次目录> [--site 来源] [--top N] [--as-
 | `text` | 是 | 岗位详情页上的文字，规则见 2.3。非空字符串。整个当成**一份** JD，里面有 `===` 这样的行也不拆 |
 | `fetched_at` | 是 | 抓取这一页的时间，ISO 8601，带时区，例如 `2026-11-05T10:31:20+08:00` |
 | `url` | 建议 | 岗位详情页的链接，只能是 http(s)，端口读不出（如 `:abc`）的算格式错误，去重的依据之一（第 3 节） |
-| `site_job_id` | 建议 | 平台自己的岗位 ID，去重的第一依据。1–128 个字符，只能是英文字母、数字和 `. _ ~ -`（遇到别的字符先告诉我们）。来源 `boss`、`shixiseng`、`nowcoder`、`liepin`、`zhaopin`、`51job`、`lagou` 可写原平台 ID；`ats` 必须带平台和租户范围，格式为 `<平台>.<租户>.<ID>`，例如 `beisen.example.123`。`official` 不写，避免不同公司 ID 冲突 |
+| `site_job_id` | 建议 | 平台自己的岗位 ID，去重的第一依据。1–128 个字符，只能是英文字母、数字和 `. _ ~ -`（遇到别的字符先告诉我们）。来源 `boss`、`shixiseng`、`nowcoder`、`liepin`、`zhaopin`、`51job`、`lagou` 可写原平台 ID；`himalayas` 使用 GUID 的 SHA-256；`ats` 必须带平台和租户范围，格式为 `<平台>.<租户>.<ID>`，例如 `beisen.example.123`。`official` 不写，避免不同公司 ID 冲突 |
 | `site` | 否 | 写了就必须和批次的来源相同，用来发现放错文件夹 |
 | `extra` | 否 | 任意 JSON 对象，例如搜索词、城市、第几页、列表页上的职位名和薪资。导入时忽略、不保存 |
 

@@ -281,6 +281,7 @@ _START_OTHER_DATE = re.compile(r"\d{1,2}\s*月(?:\s*\d{1,2}\s*[日号])?\s*(?:�
 
 _YMD = r"(?P<y>20\d{2})\s*[-/.年]\s*(?P<m>\d{1,2})\s*[-/.月]\s*(?P<d>\d{1,2})\s*日?"
 _PUBLISHED = re.compile(rf"(?:发布时间|发布日期|发布于|更新时间|更新于)\s*[:：]?\s*{_YMD}")
+_PUBLICATION_ONLY = re.compile(rf"(?:发布时间|发布日期|发布于)\s*[:：]?\s*{_YMD}")
 _DEADLINE_AFTER = re.compile(rf"(?:截止日期|截止时间|报名截止|投递截止|网申截止|截止)\s*(?:日期|时间)?\s*[:：为至]?\s*{_YMD}")
 _DEADLINE_BEFORE = re.compile(rf"{_YMD}\s*前?\s*截止")
 
@@ -612,18 +613,28 @@ def build_record(text: str, findings: dict, *, source_type: str, site, url, impo
         return value
 
     lines = [line.strip() for line in text.splitlines() if line.strip()]
-    found_title, title_span = _title(text, lines)
+    himalayas = source_type == "portal" and site == "himalayas" and site_job_id
+    structured = himalayas and len(lines) >= 2 and lines[1].startswith("公司名称：")
+    if structured:
+        company_name = lines[1].removeprefix("公司名称：").strip()
+        title_span = (0, len(lines[0]))
+        found_title = (lines[0], [lines[0]]) if len(lines[0]) <= schema.MAX_NAME else _NOTHING
+    else:
+        found_title, title_span = _title(text, lines)
     title = cite("title", found_title)
     headline = _line_at(text, title_span[0]) if title_span else (lines[0] if lines else "")
     tag, piped = _tag_cells(lines, headline if title_span else None)
-    company = _company(text, lines, tag if piped else [])
+    if structured:
+        company = (company_name, [company_name]) if 0 < len(company_name) <= schema.MAX_NAME else _NOTHING
+    else:
+        company = _company(text, lines, tag if piped else [])
     hits = _skill_hits(text, skill_patterns or _builtin_patterns(), skip=title_span, company=company[0])
-    published = _dated(text, (_PUBLISHED,))
+    published = _dated(text.partition("\n\n")[2], (_PUBLICATION_ONLY,)) if structured else _dated(text, (_PUBLISHED,))
     # A start date without a year is dated from the JD's own publication date, else the import date.
     reference = date.fromisoformat(published[0] or imported_at[:10])
     record = {
         "schema_version": schema.SCHEMA_VERSION,
-        "id": job_id(text),
+        "id": job_id("himalayas/" + site_job_id) if himalayas else job_id(text),
         "source": {"type": source_type, "site": site, "url": url, "imported_at": imported_at,
                    "site_job_id": site_job_id, "fetched_at": fetched_at},
         "title": title,

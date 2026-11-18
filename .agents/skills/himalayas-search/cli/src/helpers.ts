@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { cleanHtml, stripInvisible } from "./text"
 
 export const origin = "https://himalayas.app"
@@ -76,11 +77,12 @@ export function posting(raw: Record<string, unknown>, now = Date.now()) {
     throw new PortalError("BAD_DATA", "Job and application link disagree.")
   const expires = timestamp(raw.expiryDate)
   if (expires !== null && expires <= now) return null
-  const title = field(raw.title)
-  const company = field(raw.companyName)
+  // Title and employer each occupy a single labelled line in the inbox.
+  const title = field(raw.title)?.replace(/\s+/g, " ")
+  const company = field(raw.companyName)?.replace(/\s+/g, " ")
   const countries = list(raw.locationRestrictions)
   if (!title || !company) throw new PortalError("BAD_DATA", "Missing job title or employer.")
-  const published = timestamp(raw.pubDate)
+  const updated = timestamp(raw.pubDate)
   const salary =
     raw.minSalary == null && raw.maxSalary == null
       ? null
@@ -96,7 +98,8 @@ export function posting(raw: Record<string, unknown>, now = Date.now()) {
     company: company,
     location: countries.length ? countries.join(", ") : "Worldwide",
     countries,
-    date: published === null ? null : new Date(published).toISOString().slice(0, 10),
+    date: null, // The API documents pubDate as the last update.
+    updated_at: updated === null ? null : new Date(updated).toISOString(),
     expires_at: expires === null ? null : new Date(expires).toISOString(),
     url: raw.applicationLink,
     source: "Himalayas",
@@ -121,7 +124,7 @@ export function inbox(job: Posting, fetched = new Date().toISOString()) {
     lines.push(
       "工作性质：" + (job.employment_type === "Intern" ? "实习（Intern）" : job.employment_type),
     )
-  if (job.date) lines.push("发布日期：" + job.date)
+  if (job.updated_at) lines.push("来源最后更新（UTC）：" + job.updated_at.slice(0, 10))
   if (job.salary) {
     const { min, max, currency, period } = job.salary
     lines.push("薪资（来源数据）：" + [currency, min, "–", max, period].map((v) => v ?? "?").join(" "))
@@ -129,7 +132,8 @@ export function inbox(job: Posting, fetched = new Date().toISOString()) {
   lines.push("来源：Himalayas", "来源列出的可申请地区：" + job.location, "", job.description)
   return {
     format: "jobsearch_cn.inbox/1",
-    site: "other",
+    site: "himalayas",
+    site_job_id: createHash("sha256").update(job.id).digest("hex"),
     text: lines.join("\n"),
     url: job.url,
     fetched_at: fetched,
@@ -138,6 +142,7 @@ export function inbox(job: Posting, fetched = new Date().toISOString()) {
       guid: job.id,
       countries: job.countries,
       timezones: job.timezones,
+      updated_at: job.updated_at,
       expires_at: job.expires_at,
       title: job.title,
     },
@@ -145,5 +150,5 @@ export function inbox(job: Posting, fetched = new Date().toISOString()) {
 }
 
 export function line(job: Posting) {
-  return [job.title, job.company, job.date ?? "?", "Himalayas", job.url].join("\t")
+  return [job.title, job.company, job.updated_at ?? "?", "Himalayas", job.url].join("\t")
 }

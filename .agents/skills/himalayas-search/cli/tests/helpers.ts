@@ -8,8 +8,10 @@ export interface CLIResult {
   exitCode: number;
 }
 
-export async function runCLI(args: string[]): Promise<CLIResult> {
-  const proc = Bun.spawn(["bun", "run", CLI_PATH, ...args], {
+export async function runCLI(args: string[], response?: unknown, status = 200): Promise<CLIResult> {
+  const fixture = response === undefined ? [] : ["--preload", join(import.meta.dir, "mock-api.ts")]
+  const proc = Bun.spawn(["bun", "run", ...fixture, CLI_PATH, ...args], {
+    env: { ...process.env, TEST_RESPONSE: JSON.stringify(response), TEST_HTTP_STATUS: String(status) },
     stdout: "pipe",
     stderr: "pipe",
   });

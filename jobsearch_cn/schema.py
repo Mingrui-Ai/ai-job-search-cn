@@ -40,7 +40,7 @@ SCHEMA_VERSION = 1
 SOURCE_TYPES = ("paste", "file", "url", "portal")
 SITES = (
     "boss", "shixiseng", "nowcoder", "liepin", "zhaopin", "51job", "lagou",
-    "official", "ats", "referral", "other",
+    "official", "ats", "referral", "other", "himalayas",
 )
 EMPLOYMENT_TYPES = ("internship", "campus", "experienced")
 SALARY_UNITS = ("CNY/hour", "CNY/day", "CNY/month", "CNY/year")
@@ -65,7 +65,7 @@ TOP_LEVEL_KEYS = (
 )
 SOURCE_KEYS = ("type", "site", "url", "imported_at", "site_job_id", "fetched_at")
 # Job boards whose own job id names one posting (M6-4); company sites and hosted ATS pages reuse ids.
-PORTAL_SITES = ("boss", "shixiseng", "nowcoder", "liepin", "zhaopin", "51job", "lagou")
+PORTAL_SITES = ("boss", "shixiseng", "nowcoder", "liepin", "zhaopin", "51job", "lagou", "himalayas")
 # A hosted recruitment system (ats) numbers each company's postings on its own, so its id is written
 # with the platform and the company's tenant in front (M6-3): beisen.example.0f8e2c3a-... or
 # beisen.example.151000001. Dots separate the three parts; the id itself has none.
@@ -307,7 +307,10 @@ def _check_source(source, errors: list) -> None:
     if not isinstance(source, dict):
         errors.append("source: must be an object")
         return
-    _check_keys(source, SOURCE_KEYS, "source", errors)
+    himalayas = source.get("site") == "himalayas"
+    _check_keys(source, SOURCE_KEYS, "source", errors, optional=("expires_at",) if himalayas else ())
+    if himalayas and source.get("expires_at") is not None:
+        _check_timestamp(source["expires_at"], "source.expires_at", errors)
     if "type" in source:
         _check_enum(source["type"], SOURCE_TYPES, "source.type", errors, nullable=False)
     if "site" in source:
