@@ -1,6 +1,6 @@
 """Drive a browser for `collect` with Playwright (docs/cn/collect.md).
 
-Used only by `collect`. The rest of the package is standard library only and offline (ADR-4);
+Used by `collect` and the read-only Beisen portal CLI (ADR-4);
 tests/test_cn_package.py names this file as the one exception. Playwright is imported when a
 collection starts, so every other command works without it, and this module can be imported
 (and its address check tested) without it too.
@@ -37,7 +37,7 @@ import time
 from urllib.parse import urlsplit
 
 from jobsearch_cn.collect import DENIED_STATUSES, BrowserError, Response, Snapshot
-from jobsearch_cn import robots_policy
+from jobsearch_cn import collect, robots_policy
 
 DEFAULT_CDP = "http://127.0.0.1:9222"
 # The whole address, nothing more: scheme, a loopback host, a port, an optional final slash.
@@ -443,3 +443,23 @@ def open_single_tab():
         finally:
             playwright.stop()
         raise BrowserUnavailable("无法启动支持单链接隔离和导航保护的本机 Chrome；未读取岗位") from None
+
+
+def read_public_page(url, ready, capture=()):
+    """Check robots, then freeze one exact document and close its isolated browser."""
+    tab = open_single_tab()
+    reason = policy = None
+    try:
+        if capture:
+            tab.capture(capture)
+        body, status, error = tab.read_robots(url)
+        policy = robots_policy.decide(url, body, status, checked_at=collect._now().isoformat(timespec="seconds"),
+                                      error=error)
+        if policy["status"] == "allowed":
+            time.sleep(max(collect.random.uniform(*collect.DELAY_RANGE), policy["delay_seconds"]))
+            tab.open_single(url, ready)
+    except BrowserError:
+        reason = "浏览器无法完成单页读取"
+    finally:
+        snapshot, closing_reason = tab.freeze_and_close()
+    return snapshot, policy, closing_reason or reason
