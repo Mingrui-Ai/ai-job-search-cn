@@ -781,6 +781,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 - [ ] M8-2 至少 3 个方向的示例配置和脱敏示例档案
 - [ ] M8-3 隐私审查：仓库和要公开的 git 历史里没有个人数据。转为公开前已提前做过一次（#45，Claude B 审查，Codex 独立抽查）；发布 `v1.0.0` 前，按同样的范围和方法再完整做一次
 - [ ] M8-4 使用指南、架构说明、贡献指南；致谢上游，遵守 MIT 许可
+  - 2026-11-15（[#179](https://github.com/Mingrui-Ai/ai-job-search-cn/pull/179)）：README、Agent 指引和中文文档入口对齐已合并能力；补充[当前架构索引](architecture.md)与[CN 贡献指南](contributing.md)，统一开发入口、可选依赖、本地存储和来源边界，沿用既有 ADR 与共用流程。文档待独立审核，M8-4 整体及新用户跨平台验收未完成。见[工作记录](worklog/2026-11-15-m8-4-readme-current.md)。
 - [ ] M8-5 请一位没参与开发的同学按文档从零走一遍，修完卡住的地方
 - [ ] M8-6 发布 `v1.0.0`
 
@@ -798,7 +799,7 @@ P3 不挡合并，写在这里，免得只留在 PR 评论里。
 
 - **每个 PR**：一个 `feat/cn-*` 分支（文档用 `docs/cn-*`，维护用 `chore/*`）；本地全量测试、`security_guards`、`lint_skills` 通过；在 `docs/cn/worklog/` 新建一条工作记录（格式见 [worklog.md](worklog.md) 开头）；按"更新规则"更新本文；PR 描述引用任务编号。
 - **每个里程碑结束**：打 tag（推送前用户确认）；更新 CHANGELOG 和 README 的进度表；规划者写复盘，细化下一个里程碑。
-- **边界**：`jobsearch_cn` 只用标准库、不联网（`tests/test_cn_package.py` 守护）；允许导入的上游工具用白名单显式列出；上游文件尽量不动（ADR-1）。
+- **边界**：`jobsearch_cn` 默认只用标准库、离线；`browser.py` 的可选采集例外见 [ADR-4](cn-migration-plan.md#2-架构决策)，由 `tests/test_cn_package.py` 守护。允许导入的上游工具用白名单显式列出；上游文件尽量不动（ADR-1）。
 - **上游同步**：关注每周的 "Upstream sync watch" issue；上游发布新 tag 时，由执行者开 `chore/upstream-sync` 分支合并（[迁移方案 §6](cn-migration-plan.md#6-上游同步流程)），规划者先评估影响。
 - **本地测试**：`conda activate ai-job-search-cn`，然后 `python -m unittest discover -s tests -t .`。
 - **并行工作**：每个 Agent 用自己的 `git worktree`（见 [docs/cn/README.md](README.md#多个-agent-并行工作)），不在别人的目录里切分支、改文件。

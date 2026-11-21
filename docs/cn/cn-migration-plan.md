@@ -122,7 +122,7 @@ Codex 能读取这些 Markdown 并按步骤执行，但上述机制不会自动�
 
 ```text
 ai-job-search-cn/
-├── jobsearch_cn/            # CN 核心包：仅标准库、离线
+├── jobsearch_cn/            # CN 核心：本地确定性处理，可选采集见 ADR-4
 │   ├── __init__.py          #   边界约定 + 版本号
 │   ├── __main__.py          #   python -m jobsearch_cn 的入口
 │   ├── cli.py               #   命令行：输出 JSON，强制 UTF-8（已有 jd validate）
