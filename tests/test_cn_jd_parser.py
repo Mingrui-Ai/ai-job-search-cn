@@ -806,6 +806,31 @@ class SeedCases(unittest.TestCase):
                         self.assertEqual(schema.validate(record), [])
 
 
+class AnnualYuanSalary(unittest.TestCase):
+    def test_explicit_annual_yuan_amounts_keep_the_yearly_unit_and_evidence(self):
+        for text, low, high in (
+                ("年薪180000元", 180000, 180000),
+                ("年薪：180000-240000元", 180000, 240000),
+                ("年薪: 180000 元至 240000 元", 180000, 240000),
+                ("年薪为180000元", 180000, 180000)):
+            with self.subTest(text=text):
+                record = parse_one(text + "，全年13薪。")
+                self.assertEqual(record["salary"], salary(low, high, "CNY/year"))
+                self.assertEqual(record["evidence"]["salary"]["text"], text)
+                self.assertEqual(schema.validate(record), [])
+
+    def test_annual_salary_is_not_replaced_by_an_earlier_allowance(self):
+        record = parse_one("交通补贴420元/月；年薪：180000-240000元。")
+        self.assertEqual(record["salary"], salary(180000, 240000, "CNY/year"))
+        self.assertEqual(record["evidence"]["salary"]["text"], "年薪：180000-240000元")
+
+    def test_annual_label_still_requires_a_valid_amount_and_currency(self):
+        for text in ("年薪180000", "年薪0元", "年薪240000-180000元",
+                     "培训费180000元", "注册资本180000元"):
+            with self.subTest(text=text):
+                self.assertIsNone(parse_one(text)["salary"])
+
+
 class ScaledSalary(unittest.TestCase):
     """H28: original examples of amounts, periods, evidence and non-pay uses."""
 
@@ -1290,6 +1315,17 @@ class ParseCommand(unittest.TestCase):
     def test_stdin_input_is_a_paste(self):
         out = self.parse_ok(run_cli("jd", "parse", input_bytes=self.jd.encode("utf-8")))
         self.assertEqual(out["jobs"][0]["source"]["type"], "paste")
+
+    def test_file_input_reads_annual_yuan_salary(self):
+        text = ("岗位名称：软件工程师\n公司名称：示例公司\n工作地点：北京\n"
+                "任职要求：熟悉 Python，负责后端服务开发。\n年薪：180000-240000元。")
+        path = self.write("annual.txt", text.encode("utf-8"))
+        out = self.parse_ok(run_cli("jd", "parse", path))
+        [job] = out["jobs"]
+        self.assertEqual(job["salary"], salary(180000, 240000, "CNY/year"))
+        self.assertEqual(job["evidence"]["salary"]["text"], "年薪：180000-240000元")
+        self.assertEqual(job["raw_text"], text)
+        self.assertEqual(schema.validate(job), [])
 
     def test_parsed_records_pass_jd_validate(self):
         out = self.parse_ok(run_cli("jd", "parse", input_bytes=self.jd.encode("utf-8")))
