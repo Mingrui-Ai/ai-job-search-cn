@@ -744,6 +744,30 @@ SEED_CASES = (
 )
 
 
+class RemoteWork(unittest.TestCase):
+    def test_explicit_work_restrictions_keep_the_negative_evidence(self):
+        for wording in ("不提供远程办公", "不允许远程工作", "不可以远程实习",
+                        "不支持居家办公", "不接受居家办公", "不能居家办公"):
+            with self.subTest(wording=wording):
+                record = parse_one(f"岗位名称：软件工程师\n工作地点：北京\n{wording}，需要到公司坐班。")
+                self.assertIs(record["remote"], False)
+                self.assertEqual(record["evidence"]["remote"], {"text": wording, "method": "rule"})
+                self.assertEqual(schema.validate(record), [])
+
+    def test_interview_restrictions_do_not_set_the_work_location(self):
+        for wording in ("不提供远程面试", "不允许远程面试", "不可以远程面试"):
+            with self.subTest(wording=wording):
+                record = parse_one(f"岗位名称：软件工程师\n{wording}。")
+                self.assertIsNone(record["remote"])
+                self.assertNotIn("remote", record["evidence"])
+                self.assertIs(parse_one(f"{wording}，支持远程办公。")["remote"], True)
+
+    def test_affirmative_work_arrangements_remain_remote(self):
+        for wording in ("提供远程办公", "允许远程工作", "可以远程实习", "支持居家办公"):
+            with self.subTest(wording=wording):
+                self.assertIs(parse_one(f"岗位名称：软件工程师\n{wording}。")["remote"], True)
+
+
 class SeedCases(unittest.TestCase):
     def test_each_rule_reads_what_it_should_and_nothing_else(self):
         for text, path, expected in SEED_CASES:
@@ -1290,6 +1314,15 @@ class ParseCommand(unittest.TestCase):
     def test_stdin_input_is_a_paste(self):
         out = self.parse_ok(run_cli("jd", "parse", input_bytes=self.jd.encode("utf-8")))
         self.assertEqual(out["jobs"][0]["source"]["type"], "paste")
+
+    def test_file_input_does_not_turn_no_remote_work_into_permission(self):
+        text = "岗位名称：软件工程师\n公司名称：示例公司\n工作地点：北京\n不提供远程办公，需要到公司坐班。"
+        out = self.parse_ok(run_cli("jd", "parse", self.write("onsite.txt", text.encode("utf-8"))))
+        [job] = out["jobs"]
+        self.assertIs(job["remote"], False)
+        self.assertEqual(job["evidence"]["remote"], {"text": "不提供远程办公", "method": "rule"})
+        self.assertEqual(job["raw_text"], text)
+        self.assertEqual(out["warnings"], [])
 
     def test_parsed_records_pass_jd_validate(self):
         out = self.parse_ok(run_cli("jd", "parse", input_bytes=self.jd.encode("utf-8")))
