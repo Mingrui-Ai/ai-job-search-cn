@@ -197,7 +197,8 @@ _LOCATION_LABEL = re.compile(
 _INTERVIEW = re.compile(r"面试|笔试")
 _CITY_HEADLINE = re.compile(rf"^(?P<city>{_CITY.pattern})(?:[·・\-|丨/\s]|$)")
 # "支持远程面试" is about the interview, not the work.
-_NO_REMOTE = re.compile(r"不(?:支持|可|能|接受)\s*远程(?!\s*面)")
+_NO_REMOTE = re.compile(r"不(?:支持|可(?:以)?|能|接受|提供|允许)\s*"
+                        r"(?:远程(?!\s*面)(?:办公|工作|实习)?|居家办公)")
 _REMOTE = re.compile(r"(?:可|支持|接受)\s*远程(?!\s*面)(?:办公|工作|实习)?|远程(?:办公|工作|实习)|居家办公|\bremote\b", re.I)
 
 # The interview (M2-6c): online (线上、视频、电话面试), in person (现场、线下面试, "到公司面试"), or at a
