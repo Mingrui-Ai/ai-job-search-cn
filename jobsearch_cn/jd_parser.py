@@ -1208,6 +1208,11 @@ def _days_per_week(text: str):
 def _min_months(text: str, tag: list):
     found = []
     for match in sorted((m for p in _MONTHS for m in p.finditer(text)), key=lambda m: m.start()):
+        left, right = _clause_bounds(text, match.start(), match.end())
+        prefix = re.split(r"但是?|不过|然而", text[left:match.start()])[-1]
+        suffix = re.split(r"但是?|不过|然而", text[match.end():right])[0]
+        if _NEGATION.search(prefix) or _PREFERENCE.search(prefix) or _PREFERENCE.search(suffix):
+            continue
         if "试用" in text[max(0, match.start() - 5):match.start()]:
             continue
         if re.search("经验|经历", _clause(text, match.start(), match.end())):
