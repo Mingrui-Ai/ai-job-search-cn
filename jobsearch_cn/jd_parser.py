@@ -256,7 +256,7 @@ _MEAL_ALLOWANCES = (
     re.compile(rf"{_MEAL_ALLOWANCE_WORD}\s*(?P<per>每天|每日|每月)\s*(?P<amount>{_N})\s*元"),
 )
 # What the JD does not give: "不包吃住", "不提供午餐", "无餐补".
-_MEAL_REFUSED = re.compile(r"(?:不|无|没有?|未)\s*$")
+_MEAL_REFUSED = re.compile(r"(?:不再?|无|没有?|未)(?:\s*(?:提供|发放|享有))?\s*$")
 # Most meals first; 包吃 with no count reads as two or more (planner, 2026-10-30).
 _MEAL_RANK = {3: 3, 2: 2, None: 1.5, 1: 1}
 
