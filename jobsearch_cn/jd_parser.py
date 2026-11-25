@@ -54,9 +54,9 @@ CITIES = (
 # optional (SpringBoot finds "Spring Boot"); the schema's evidence check folds
 # case and whitespace the same way.
 
-_N = r"\d+(?:\.\d+)?"
+_N = r"(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?"
 _TO = r"\s*(?:-|~|～|－|—|–|至|到)\s*"
-_SCALED_START = r"(?<![\d.A-Za-z_])"
+_SCALED_START = r"(?<![\d.A-Za-z_])(?<!\d,)"
 # Token edges only: whether this is a wage, a count or a video format is
 # decided from its clause. Preserve both Kx14薪 and the existing K+14薪.
 _SCALED_END = r"(?:(?![A-Za-z\d+])|(?=[xX+]\s*\d{2}\s*薪))"
@@ -83,14 +83,14 @@ _SALARY = (
     (re.compile(rf"{_SCALED_START}{_K_AMOUNT}\s*元?\s*(?:/\s*年|每\s*年(?![{_HAN}]))"), "CNY/year", 1000),
     # Unscaled monthly/yearly amounts need an explicit 元 and period; bare
     # numbers also occur in dates, phone numbers and company headcounts.
-    (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*月"), "CNY/month", 1),
-    (re.compile(rf"(?<![\d.])(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*年"), "CNY/year", 1),
-    (re.compile(rf"(?<![\d.A-Za-z_])(?P<lo>{_N})[ \t]*元?(?:{_TO}(?P<hi>{_N}))?[ \t]*"
+    (re.compile(rf"(?<![\d.])(?<!\d,)(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*月"), "CNY/month", 1),
+    (re.compile(rf"(?<![\d.])(?<!\d,)(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元\s*(?:/|每)\s*年"), "CNY/year", 1),
+    (re.compile(rf"(?<![\d.A-Za-z_])(?<!\d,)(?P<lo>{_N})[ \t]*元?(?:{_TO}(?P<hi>{_N}))?[ \t]*"
                 rf"(?:元[ \t]*(?:/|每)[ \t]*(?:天|日)|(?:/|每)[ \t]*{_DAY_RATE})"), "CNY/day", 1),
     # A label may be followed by a colon or 为 ("日薪：180-240 元"); both
     # ends of a range may carry 元 ("日薪：180元-240元").
     (re.compile(rf"(?:日薪|每天|每日)\s*[:：为]?\s*(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/day", 1),
-    (re.compile(rf"(?<![\d.A-Za-z_])(?P<lo>{_N})[ \t]*元?(?:{_TO}(?P<hi>{_N}))?[ \t]*"
+    (re.compile(rf"(?<![\d.A-Za-z_])(?<!\d,)(?P<lo>{_N})[ \t]*元?(?:{_TO}(?P<hi>{_N}))?[ \t]*"
                 rf"(?:元[ \t]*(?:/|每)[ \t]*(?:小时|时)|(?:/|每)[ \t]*{_HOUR_RATE})"), "CNY/hour", 1),
     (re.compile(rf"时薪\s*[:：为]?\s*(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/hour", 1),
     (re.compile(rf"月薪\s*[:：为]?\s*(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
@@ -927,7 +927,7 @@ def _meals(text: str):
             if not _MEAL_REFUSED.search(text, _clause_bounds(text, match.start(), match.end())[0], match.start())]
     if paid:
         first = min(paid, key=lambda match: match.start())
-        allowance = {"amount": _amount(float(first["amount"])),
+        allowance = {"amount": _amount(float(first["amount"].replace(",", ""))),
                      "unit": "CNY/month" if first["per"].endswith("月") else "CNY/day"}
         cited.append(first)
     if not counts and allowance is None:
@@ -1112,8 +1112,8 @@ def _salary(text: str):
                         candidate_unit, period_quote = "CNY/year", "年薪"
                     elif periods and periods[-1].group() in ("日薪", "时薪"):
                         continue  # unsupported K rate, never fall back to a monthly wage
-            low = float(match["lo"])
-            high = float(match["hi"]) if match["hi"] else low
+            low = float(match["lo"].replace(",", ""))
+            high = float(match["hi"].replace(",", "")) if match["hi"] else low
             if 0 < low <= high:
                 if best is None or match.start() < best[0].start():
                     best = (match, candidate_unit, scale, low, high, period_quote)
