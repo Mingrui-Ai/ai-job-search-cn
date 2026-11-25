@@ -96,6 +96,17 @@ _SALARY = (
     (re.compile(rf"月薪\s*[:：为]?\s*(?P<lo>{_N})\s*元?(?:{_TO}(?P<hi>{_N}))?\s*元"), "CNY/month", 1),
 )
 _NEGOTIABLE = re.compile(r"(?:薪资|薪酬|待遇|工资)?\s*面议")
+# The schema currently supports CNY only. Explicit currency markers next to
+# a quote must not silently become a CNY wage; unrelated prose stays local.
+_FOREIGN_CURRENCY = (
+    r"(?<![A-Za-z])(?:USD|HKD|EUR|JPY|GBP|SGD|AUD|CAD|CHF|NZD|MOP|TWD|KRW)(?![A-Za-z])"
+    r"|美元|美金|港元|港币|欧元|英镑|日元|日圆|新加坡元|新币|澳元|加元|澳门元|台币|韩元|[$€£₩]"
+)
+_FOREIGN_PAY_BEFORE = re.compile(
+    rf"(?:{_FOREIGN_CURRENCY})[\s()（）:：]*"
+    r"(?:(?:税前|税后|约|月薪|年薪|日薪|时薪|薪资|薪酬|工资)[\s()（）:：为]*)*$", re.I
+)
+_FOREIGN_PAY_AFTER = re.compile(rf"[ \t（(]*(?:{_FOREIGN_CURRENCY})", re.I)
 # Pay/non-pay labels can precede or follow their amount. A later explicit pay
 # label starts a new salary context.
 _SALARY_CONTEXT = re.compile(
@@ -1096,6 +1107,9 @@ def _salary(text: str):
     best = None
     for pattern, unit, scale in _SALARY:
         for match in pattern.finditer(text):
+            if (_FOREIGN_PAY_BEFORE.search(text[:match.start("lo")])
+                    or _FOREIGN_PAY_AFTER.match(text, match.end())):
+                continue
             if scale != 1 and (_SCALED_RANGE_BEFORE.search(text[:match.start("lo")])
                                or _SCALED_RANGE_AFTER.match(text[match.end():])):
                 continue
