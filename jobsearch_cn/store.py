@@ -68,8 +68,11 @@ def normalize_url(url):
         (key, value) for key, value in parse_qsl(parts.query, keep_blank_values=True)
         if key.lower() not in TRACKING_PARAMS and not key.lower().startswith("utm_")
     )
+    # Hash routes can identify different postings on the same HTML page.
+    # Ordinary page anchors, such as #top, still do not identify a posting.
+    fragment = parts.fragment if parts.fragment.startswith(("/", "!/")) else ""
     # http and https name the same posting.
-    return urlunsplit(("https", host, parts.path.rstrip("/"), urlencode(query), ""))
+    return urlunsplit(("https", host, parts.path.rstrip("/"), urlencode(query), fragment))
 
 
 def portal_key(source):
