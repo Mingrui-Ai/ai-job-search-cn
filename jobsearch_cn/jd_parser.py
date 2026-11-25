@@ -188,6 +188,8 @@ _CAMPUS = re.compile(r"校园招聘|校招|应届(?:毕业)?生|管培生")
 _EXPERIENCED = re.compile(r"社会招聘|社招")
 
 _CITY = re.compile("|".join(sorted(CITIES, key=len, reverse=True)))
+# A street can be named after another city: 南京东路 is not a job in 南京.
+_STREET_SUFFIX = re.compile(r"[东西南北中]?(?:大街|大道|路|街|道)")
 _LOCATION_LABEL = re.compile(
     r"(?<!面试)(?<!笔试)(?:(?:工作地点|工作城市|办公地点|工作地址|上班地点|地点|城市)\s*[:：]|base\s*[:：]?)"
     r"\s*(?P<rest>[^\n]{1,60})",
@@ -850,7 +852,9 @@ def _cities(text: str, lines: list, tag: list):
             snippet = text[match.start():match.start("rest") + interview.start()].strip().rstrip("，,；;、/（( ")
         # An address can repeat its city (district, then full postal address).
         # Deduplicate this match as well as cities from earlier location labels.
-        found = [city for city in dict.fromkeys(_CITY.findall(rest)) if city not in cities]
+        named = (city.group(0) for city in _CITY.finditer(rest)
+                 if not _STREET_SUFFIX.match(rest, city.end()))
+        found = [city for city in dict.fromkeys(named) if city not in cities]
         if found:
             cities += found
             snippets.append(snippet)
