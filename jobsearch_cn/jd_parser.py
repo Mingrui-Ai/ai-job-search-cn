@@ -127,7 +127,7 @@ _YEAR = r"(?:20)?\d{2}"
 _GRADUATION = re.compile(
     rf"(?<!第)(?<!\d)(?P<years>{_YEAR}(?:\s*届)?(?:\s*(?:/|、|,|，|和|与|及|或|-|~|～|至|到)\s*{_YEAR}(?:\s*届)?)*)\s*届"
 )
-_YEAR_RANGE = re.compile(rf"^\s*{_YEAR}\s*(?:-|~|～|至|到)\s*{_YEAR}\s*$")
+_YEAR_RANGE = re.compile(rf"^\s*{_YEAR}(?:\s*届)?\s*(?:-|~|～|至|到)\s*{_YEAR}(?:\s*届)?\s*$")
 # Explicit graduation windows name calendar years, not a single inferred cohort.
 _GRADUATION_WINDOW = re.compile(
     rf"(?<!\d)(?P<y1>20\d{{2}})\s*年\s*(?P<m1>\d{{1,2}})\s*月{_TO}"
