@@ -186,6 +186,10 @@ _RETURN_OFFER = re.compile(r"(?:表现(?:优秀|优异|突出)者?\s*)?(?:可|�
 _INTERNSHIP = re.compile(r"实习生|日常实习|暑期实习|寒假实习|实习岗位|实习期|实习时间|(?m:^[ \t]*工作性质[：:][ \t]*实习(?=[（( \t\r\n]|$))")
 _CAMPUS = re.compile(r"校园招聘|校招|应届(?:毕业)?生|管培生")
 _EXPERIENCED = re.compile(r"社会招聘|社招")
+_WORK_NATURE = re.compile(
+    r"(?m)^[ \t]*工作性质[ \t]*[:：][ \t]*(?P<v>[^\r\n，,。；;（(]{1,40})"
+    r"(?:[（(](?:全职|兼职)[）)])?[ \t]*[，,。；;]?[ \t]*$"
+)
 
 _CITY = re.compile("|".join(sorted(CITIES, key=len, reverse=True)))
 _LOCATION_LABEL = re.compile(
@@ -986,10 +990,15 @@ def _start_by(match, reference: date):
 
 
 def _employment_type(text: str, headline: str):
-    """From the title's own line first ("…实习生", "【校招】…"), then anywhere in the JD."""
+    """From the title first, then an explicit work-nature field, then the JD body."""
     for pattern, kind in ((re.compile("实习"), "internship"), (_CAMPUS, "campus"), (_EXPERIENCED, "experienced")):
         if pattern.search(headline):
             return kind, [headline if len(headline) <= _MAX_SNIPPET else pattern.search(headline).group(0)]
+    for field in _WORK_NATURE.finditer(text):
+        value = field["v"].strip()
+        for pattern, kind in ((_INTERNSHIP, "internship"), (_CAMPUS, "campus"), (_EXPERIENCED, "experienced")):
+            if pattern.fullmatch(value) or (kind == "internship" and value == "实习"):
+                return kind, [field.group(0).strip()]
     for pattern, kind in ((_INTERNSHIP, "internship"), (_CAMPUS, "campus"), (_EXPERIENCED, "experienced")):
         match = pattern.search(text)
         if match:
