@@ -278,6 +278,11 @@ _START_EARLIEST = re.compile(r"最早|最快|不早于")
 # Another date sharing the same 到岗 just before a match: "11月1日或12月1日到岗" names two dates.
 _START_OTHER_DATE = re.compile(r"\d{1,2}\s*月(?:\s*\d{1,2}\s*[日号])?\s*(?:底|末)?\s*(?:之前|以前|前)?"
                                r"\s*(?:或者?|、|/|／|和|至|到|-|－|~|～)\s*$")
+# A label can precede both dates: "入职时间：11月1日至15日" or "入职日期：11月或12月".
+_START_NEXT_DATE = re.compile(
+    r"[^\S\r\n]*(?:或者?|、|/|／|和|至|到|-|－|—|–|~|～)[^\S\r\n]*"
+    r"(?:(?:20\d{2}[^\S\r\n]*年[^\S\r\n]*)?\d{1,2}[^\S\r\n]*月|\d{1,2}[^\S\r\n]*[日号])"
+)
 
 _YMD = r"(?P<y>20\d{2})\s*[-/.年]\s*(?P<m>\d{1,2})\s*[-/.月]\s*(?P<d>\d{1,2})\s*日?"
 _PUBLISHED = re.compile(rf"(?:发布时间|发布日期|发布于|更新时间|更新于)\s*[:：]?\s*{_YMD}")
@@ -950,7 +955,10 @@ def _start(text: str, reference: date):
             if (_NEGATION.search(text, left, match.start()) or _PREFERENCE.search(text, left, right)
                     or _START_EARLIEST.search(text, left, match.start())):
                 continue
-            if _START_OTHER_DATE.search(text[left:match.start()]):
+            # Do not let trailing whitespace in the date match hide a line boundary.
+            end = match.start() + len(match[0].rstrip())
+            if (_START_OTHER_DATE.search(text[left:match.start()])
+                    or (pattern is _START_BY[1] and _START_NEXT_DATE.match(text, end, right))):
                 shared = True  # two dates for one 到岗: neither
                 continue
             by = _start_by(match, reference)
