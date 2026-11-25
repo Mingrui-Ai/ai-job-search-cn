@@ -180,7 +180,7 @@ _NO_MINIMUM_EDUCATION = re.compile(
 )
 _PREFERENCE = re.compile(r"优先|为佳")
 
-_NO_RETURN_OFFER = re.compile(r"(?:不可|不能|无|不提供|没有)\s*转正")
+_NO_RETURN_OFFER = re.compile(r"(?:不可|不能|暂无|无|不提供|没有)\s*(?:转正|留用)(?:机会)?")
 _RETURN_OFFER = re.compile(r"(?:表现(?:优秀|优异|突出)者?\s*)?(?:可|能|有机会|有|提供)\s*转正|转正机会|留用机会")
 
 _INTERNSHIP = re.compile(r"实习生|日常实习|暑期实习|寒假实习|实习岗位|实习期|实习时间|(?m:^[ \t]*工作性质[：:][ \t]*实习(?=[（( \t\r\n]|$))")
