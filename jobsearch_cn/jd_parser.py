@@ -1228,6 +1228,14 @@ def _min_months(text: str, tag: list):
     return count, [snippet]
 
 
+def _education_negated(text: str, start: int, end: int) -> bool:
+    left, _ = _clause_bounds(text, start, end)
+    # A contrast starts a new requirement even without punctuation:
+    # "无需工作经验但要求本科及以上学历" still asks for a degree.
+    prefix = re.split(r"但是?|不过|然而", text[left:start])[-1]
+    return bool(_NEGATION.search(prefix))
+
+
 def _education(text: str, tag: list):
     lowest = preferred = None
     snippets = []
@@ -1241,6 +1249,8 @@ def _education(text: str, tag: list):
                            (_STUDENT_MIN, _requirement_spans(text))):
         for start, end in spans:
             for found in pattern.finditer(text, start, end):
+                if _education_negated(text, found.start(), found.end()):
+                    continue
                 if any(a <= found.start() < b for a, b, _, _ in candidates):
                     continue
                 level = min((_LEVELS[o.group(1) or o.group(0)] for o in _LEVEL_OPTION.finditer(found.group())),
@@ -1249,6 +1259,8 @@ def _education(text: str, tag: list):
                 candidates.append(row)
                 choices.append(row)
     for match in _EDUCATION_CHOICE.finditer(text):
+        if _education_negated(text, match.start(), match.end()):
+            continue
         if any(start <= match.start() < end for start, end, _, _ in candidates):
             continue
         level = min((_LEVELS[option.group(1) or option.group(0)] for option in _LEVEL_OPTION.finditer(match.group(0))),
@@ -1257,6 +1269,8 @@ def _education(text: str, tag: list):
         if match["label"] or match["tail"]:
             candidates.append(choices[-1])
     for match in _EDUCATION_MIN.finditer(text):
+        if _education_negated(text, match.start(), match.end()):
+            continue
         if not any(start <= match.start() < end for start, end, _, _ in candidates):
             candidates.append((match.start(), match.end(), _LEVELS[match.group(1) or match.group(2)],
                                match.group(0).strip()))
@@ -1281,7 +1295,8 @@ def _education(text: str, tag: list):
               for after in [_PREFERRED_AFTER.match(text, end)] if after]
     wanted += [(match.start(), _LEVELS[match.group(1)], match.group(0).strip())
                for match in _EDUCATION_PREFERRED.finditer(text)
-               if not any(start <= match.start() < end for start, end, _, _ in choices)]
+               if not _education_negated(text, match.start(), match.end())
+               and not any(start <= match.start() < end for start, end, _, _ in choices)]
     if wanted:
         _, level, snippet = min(wanted)
         if lowest in (None, schema.NO_MINIMUM) or order.index(level) >= order.index(lowest):
